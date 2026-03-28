@@ -299,7 +299,6 @@ mixin _$ExploreState {
   bool get hasMore => throw _privateConstructorUsedError;
   int get page => throw _privateConstructorUsedError;
   bool get isSearching => throw _privateConstructorUsedError;
-  Set<String> get favoriteIds => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ExploreStateCopyWith<ExploreState> get copyWith =>
@@ -322,8 +321,7 @@ abstract class $ExploreStateCopyWith<$Res> {
       bool isLoadingMore,
       bool hasMore,
       int page,
-      bool isSearching,
-      Set<String> favoriteIds});
+      bool isSearching});
 
   $FilterStateCopyWith<$Res> get filters;
 }
@@ -351,7 +349,6 @@ class _$ExploreStateCopyWithImpl<$Res, $Val extends ExploreState>
     Object? hasMore = null,
     Object? page = null,
     Object? isSearching = null,
-    Object? favoriteIds = null,
   }) {
     return _then(_value.copyWith(
       query: null == query
@@ -394,10 +391,6 @@ class _$ExploreStateCopyWithImpl<$Res, $Val extends ExploreState>
           ? _value.isSearching
           : isSearching // ignore: cast_nullable_to_non_nullable
               as bool,
-      favoriteIds: null == favoriteIds
-          ? _value.favoriteIds
-          : favoriteIds // ignore: cast_nullable_to_non_nullable
-              as Set<String>,
     ) as $Val);
   }
 
@@ -428,8 +421,7 @@ abstract class _$$ExploreStateImplCopyWith<$Res>
       bool isLoadingMore,
       bool hasMore,
       int page,
-      bool isSearching,
-      Set<String> favoriteIds});
+      bool isSearching});
 
   @override
   $FilterStateCopyWith<$Res> get filters;
@@ -456,7 +448,6 @@ class __$$ExploreStateImplCopyWithImpl<$Res>
     Object? hasMore = null,
     Object? page = null,
     Object? isSearching = null,
-    Object? favoriteIds = null,
   }) {
     return _then(_$ExploreStateImpl(
       query: null == query
@@ -499,10 +490,6 @@ class __$$ExploreStateImplCopyWithImpl<$Res>
           ? _value.isSearching
           : isSearching // ignore: cast_nullable_to_non_nullable
               as bool,
-      favoriteIds: null == favoriteIds
-          ? _value._favoriteIds
-          : favoriteIds // ignore: cast_nullable_to_non_nullable
-              as Set<String>,
     ));
   }
 }
@@ -520,11 +507,9 @@ class _$ExploreStateImpl implements _ExploreState {
       this.isLoadingMore = false,
       this.hasMore = true,
       this.page = 1,
-      this.isSearching = false,
-      final Set<String> favoriteIds = const <String>{}})
+      this.isSearching = false})
       : _results = results,
-        _suggestions = suggestions,
-        _favoriteIds = favoriteIds;
+        _suggestions = suggestions;
 
   @override
   @JsonKey()
@@ -568,18 +553,10 @@ class _$ExploreStateImpl implements _ExploreState {
   @override
   @JsonKey()
   final bool isSearching;
-  final Set<String> _favoriteIds;
-  @override
-  @JsonKey()
-  Set<String> get favoriteIds {
-    if (_favoriteIds is EqualUnmodifiableSetView) return _favoriteIds;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableSetView(_favoriteIds);
-  }
 
   @override
   String toString() {
-    return 'ExploreState(query: $query, results: $results, suggestions: $suggestions, filters: $filters, sortOption: $sortOption, viewMode: $viewMode, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, isSearching: $isSearching, favoriteIds: $favoriteIds)';
+    return 'ExploreState(query: $query, results: $results, suggestions: $suggestions, filters: $filters, sortOption: $sortOption, viewMode: $viewMode, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, isSearching: $isSearching)';
   }
 
   @override
@@ -601,9 +578,7 @@ class _$ExploreStateImpl implements _ExploreState {
             (identical(other.hasMore, hasMore) || other.hasMore == hasMore) &&
             (identical(other.page, page) || other.page == page) &&
             (identical(other.isSearching, isSearching) ||
-                other.isSearching == isSearching) &&
-            const DeepCollectionEquality()
-                .equals(other._favoriteIds, _favoriteIds));
+                other.isSearching == isSearching));
   }
 
   @override
@@ -618,8 +593,7 @@ class _$ExploreStateImpl implements _ExploreState {
       isLoadingMore,
       hasMore,
       page,
-      isSearching,
-      const DeepCollectionEquality().hash(_favoriteIds));
+      isSearching);
 
   @JsonKey(ignore: true)
   @override
@@ -639,8 +613,7 @@ abstract class _ExploreState implements ExploreState {
       final bool isLoadingMore,
       final bool hasMore,
       final int page,
-      final bool isSearching,
-      final Set<String> favoriteIds}) = _$ExploreStateImpl;
+      final bool isSearching}) = _$ExploreStateImpl;
 
   @override
   String get query;
@@ -662,8 +635,6 @@ abstract class _ExploreState implements ExploreState {
   int get page;
   @override
   bool get isSearching;
-  @override
-  Set<String> get favoriteIds;
   @override
   @JsonKey(ignore: true)
   _$$ExploreStateImplCopyWith<_$ExploreStateImpl> get copyWith =>

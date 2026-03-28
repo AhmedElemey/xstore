@@ -9,6 +9,7 @@ import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_typography.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/cart/presentation/providers/cart_provider.dart';
 
 class XstoreBottomNav extends ConsumerWidget {
   const XstoreBottomNav({
@@ -81,6 +82,9 @@ class XstoreBottomNav extends ConsumerWidget {
                 color: color,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
               );
+              final cartCount = !isVendor && i == 1
+                  ? ref.watch(cartProvider.select((s) => s.itemCount))
+                  : 0;
               return Expanded(
                 child: InkWell(
                   onTap: () => _onTap(i),
@@ -89,10 +93,22 @@ class XstoreBottomNav extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          icons[i],
-                          color: color,
-                          size: AppSpacing.x2l,
+                        Badge(
+                          isLabelVisible: cartCount > 0,
+                          label: Text(
+                            '$cartCount',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          backgroundColor: AppColors.accent,
+                          child: Icon(
+                            icons[i],
+                            color: color,
+                            size: AppSpacing.x2l,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(

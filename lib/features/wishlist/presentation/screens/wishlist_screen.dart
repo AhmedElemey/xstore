@@ -1,35 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../../cart/presentation/providers/cart_state.dart';
+import '../providers/wishlist_provider.dart';
+import '../widgets/wishlist_consumer_body.dart';
+import '../widgets/wishlist_vendor_guard.dart';
 
 class WishlistScreen extends ConsumerWidget {
   const WishlistScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.navWishlist)),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () async {
-          await Future<void>.delayed(const Duration(milliseconds: 400));
-        },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            const Gap(AppSpacing.x2l),
-            EmptyStateWidget(
-              title: AppStrings.wishlistEmptyTitle,
-              subtitle: AppStrings.wishlistEmptySubtitle,
-            ),
-          ],
+    final role = ref.watch(authProvider).valueOrNull?.role ?? UserRole.consumer;
+
+    ref.listen<CartState>(cartProvider, (prev, next) {
+      Future.microtask(
+        () => ref.read(wishlistProvider.notifier).syncWithCart(next.items),
+      );
+    });
+
+    if (role == UserRole.vendor) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.cardBg,
+          surfaceTintColor: AppColors.transparent,
+          elevation: 0,
         ),
+        body: const WishlistVendorGuard(),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        bottom: false,
+        child: const WishlistConsumerBody(),
       ),
     );
   }

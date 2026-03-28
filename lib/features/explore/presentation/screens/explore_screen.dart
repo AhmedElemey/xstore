@@ -271,8 +271,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         final item = state.results[i];
                         return ProductGridCard(
                           item: item,
-                          isFavorite: state.favoriteIds.contains(item.id),
-                          onToggleFavorite: () => notifier.toggleFavorite(item.id),
                           onAddToCart: () {},
                           showAddToCart: !isVendor,
                           onTap: () => context.push('${AppRoutes.product}/${item.id}'),
@@ -293,8 +291,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: ProductListCard(
                             item: item,
-                            isFavorite: state.favoriteIds.contains(item.id),
-                            onToggleFavorite: () => notifier.toggleFavorite(item.id),
                             onAddToCart: () {},
                             showAddToCart: !isVendor,
                             onTap: () => context.push('${AppRoutes.product}/${item.id}'),

@@ -12,10 +12,14 @@ class HomeHeader extends StatelessWidget {
     super.key,
     required this.onSearchTap,
     this.onNotificationsTap,
+    this.onCartTap,
+    this.cartItemCount = 0,
   });
 
   final VoidCallback onSearchTap;
   final VoidCallback? onNotificationsTap;
+  final VoidCallback? onCartTap;
+  final int cartItemCount;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,26 @@ class HomeHeader extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
+                if (onCartTap != null)
+                  IconButton(
+                    onPressed: onCartTap,
+                    icon: Badge(
+                      isLabelVisible: cartItemCount > 0,
+                      label: Text(
+                        cartItemCount > 99 ? '99+' : '$cartItemCount',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.white,
+                        ),
+                      ),
+                      backgroundColor: AppColors.accent,
+                      child: Icon(
+                        LucideIcons.shoppingCart,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
                 IconButton(
                   onPressed: onNotificationsTap,
                   icon: Icon(

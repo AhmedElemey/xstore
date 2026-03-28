@@ -10,10 +10,12 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/listing/presentation/screens/add_listing_screen.dart';
 import '../../features/listing/presentation/screens/my_listings_screen.dart';
+import '../../features/orders/presentation/screens/order_detail_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/product/presentation/screens/product_reviews_screen.dart';
@@ -158,6 +160,21 @@ GoRouter goRouter(GoRouterRef ref) {
       GoRoute(
         path: AppRoutes.cart,
         builder: (context, state) => const CartScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.checkout,
+        builder: (context, state) => const CheckoutScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.incomingOrders,
+        builder: (context, state) => const OrdersScreen(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.orderDetail}/:orderId',
+        builder: (context, state) {
+          final id = state.pathParameters['orderId'] ?? '';
+          return OrderDetailScreen(orderId: id);
+        },
       ),
       GoRoute(
         path: '${AppRoutes.product}/:id/reviews',

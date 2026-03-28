@@ -18,7 +18,6 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$ProductDetailState {
   ListingEntity? get listing => throw _privateConstructorUsedError;
   int get quantity => throw _privateConstructorUsedError;
-  bool get isFavorite => throw _privateConstructorUsedError;
   int get selectedImageIndex => throw _privateConstructorUsedError;
   bool get isDescriptionExpanded => throw _privateConstructorUsedError;
   bool get isAddingToCart => throw _privateConstructorUsedError;
@@ -45,7 +44,6 @@ abstract class $ProductDetailStateCopyWith<$Res> {
   $Res call(
       {ListingEntity? listing,
       int quantity,
-      bool isFavorite,
       int selectedImageIndex,
       bool isDescriptionExpanded,
       bool isAddingToCart,
@@ -78,7 +76,6 @@ class _$ProductDetailStateCopyWithImpl<$Res, $Val extends ProductDetailState>
   $Res call({
     Object? listing = freezed,
     Object? quantity = null,
-    Object? isFavorite = null,
     Object? selectedImageIndex = null,
     Object? isDescriptionExpanded = null,
     Object? isAddingToCart = null,
@@ -100,10 +97,6 @@ class _$ProductDetailStateCopyWithImpl<$Res, $Val extends ProductDetailState>
           ? _value.quantity
           : quantity // ignore: cast_nullable_to_non_nullable
               as int,
-      isFavorite: null == isFavorite
-          ? _value.isFavorite
-          : isFavorite // ignore: cast_nullable_to_non_nullable
-              as bool,
       selectedImageIndex: null == selectedImageIndex
           ? _value.selectedImageIndex
           : selectedImageIndex // ignore: cast_nullable_to_non_nullable
@@ -199,7 +192,6 @@ abstract class _$$ProductDetailStateImplCopyWith<$Res>
   $Res call(
       {ListingEntity? listing,
       int quantity,
-      bool isFavorite,
       int selectedImageIndex,
       bool isDescriptionExpanded,
       bool isAddingToCart,
@@ -233,7 +225,6 @@ class __$$ProductDetailStateImplCopyWithImpl<$Res>
   $Res call({
     Object? listing = freezed,
     Object? quantity = null,
-    Object? isFavorite = null,
     Object? selectedImageIndex = null,
     Object? isDescriptionExpanded = null,
     Object? isAddingToCart = null,
@@ -255,10 +246,6 @@ class __$$ProductDetailStateImplCopyWithImpl<$Res>
           ? _value.quantity
           : quantity // ignore: cast_nullable_to_non_nullable
               as int,
-      isFavorite: null == isFavorite
-          ? _value.isFavorite
-          : isFavorite // ignore: cast_nullable_to_non_nullable
-              as bool,
       selectedImageIndex: null == selectedImageIndex
           ? _value.selectedImageIndex
           : selectedImageIndex // ignore: cast_nullable_to_non_nullable
@@ -313,7 +300,6 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
   const _$ProductDetailStateImpl(
       {this.listing,
       this.quantity = 1,
-      this.isFavorite = false,
       this.selectedImageIndex = 0,
       this.isDescriptionExpanded = false,
       this.isAddingToCart = false,
@@ -334,9 +320,6 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
   @override
   @JsonKey()
   final int quantity;
-  @override
-  @JsonKey()
-  final bool isFavorite;
   @override
   @JsonKey()
   final int selectedImageIndex;
@@ -387,7 +370,7 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
 
   @override
   String toString() {
-    return 'ProductDetailState(listing: $listing, quantity: $quantity, isFavorite: $isFavorite, selectedImageIndex: $selectedImageIndex, isDescriptionExpanded: $isDescriptionExpanded, isAddingToCart: $isAddingToCart, compareAtPrice: $compareAtPrice, stockQuantity: $stockQuantity, locationLine: $locationLine, seller: $seller, specifications: $specifications, reviewSummary: $reviewSummary, reviews: $reviews, similarProducts: $similarProducts)';
+    return 'ProductDetailState(listing: $listing, quantity: $quantity, selectedImageIndex: $selectedImageIndex, isDescriptionExpanded: $isDescriptionExpanded, isAddingToCart: $isAddingToCart, compareAtPrice: $compareAtPrice, stockQuantity: $stockQuantity, locationLine: $locationLine, seller: $seller, specifications: $specifications, reviewSummary: $reviewSummary, reviews: $reviews, similarProducts: $similarProducts)';
   }
 
   @override
@@ -398,8 +381,6 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
             (identical(other.listing, listing) || other.listing == listing) &&
             (identical(other.quantity, quantity) ||
                 other.quantity == quantity) &&
-            (identical(other.isFavorite, isFavorite) ||
-                other.isFavorite == isFavorite) &&
             (identical(other.selectedImageIndex, selectedImageIndex) ||
                 other.selectedImageIndex == selectedImageIndex) &&
             (identical(other.isDescriptionExpanded, isDescriptionExpanded) ||
@@ -427,7 +408,6 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
       runtimeType,
       listing,
       quantity,
-      isFavorite,
       selectedImageIndex,
       isDescriptionExpanded,
       isAddingToCart,
@@ -452,7 +432,6 @@ abstract class _ProductDetailState implements ProductDetailState {
   const factory _ProductDetailState(
       {final ListingEntity? listing,
       final int quantity,
-      final bool isFavorite,
       final int selectedImageIndex,
       final bool isDescriptionExpanded,
       final bool isAddingToCart,
@@ -469,8 +448,6 @@ abstract class _ProductDetailState implements ProductDetailState {
   ListingEntity? get listing;
   @override
   int get quantity;
-  @override
-  bool get isFavorite;
   @override
   int get selectedImageIndex;
   @override

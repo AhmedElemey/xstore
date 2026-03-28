@@ -42,6 +42,5 @@ class ExploreState with _$ExploreState {
     @Default(true) bool hasMore,
     @Default(1) int page,
     @Default(false) bool isSearching,
-    @Default(<String>{}) Set<String> favoriteIds,
   }) = _ExploreState;
 }

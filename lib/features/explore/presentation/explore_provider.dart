@@ -110,16 +110,6 @@ class Explore extends _$Explore {
     unawaited(search(state.query));
   }
 
-  void toggleFavorite(String id) {
-    final next = Set<String>.from(state.favoriteIds);
-    if (next.contains(id)) {
-      next.remove(id);
-    } else {
-      next.add(id);
-    }
-    state = state.copyWith(favoriteIds: next);
-  }
-
   void setSort(ExploreSortOption o) {
     state = state.copyWith(sortOption: o);
     state = state.copyWith(results: _sort(state.results));

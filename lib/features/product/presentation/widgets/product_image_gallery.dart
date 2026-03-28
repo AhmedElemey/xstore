@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../shared/widgets/wish_heart_button.dart';
 
 class ProductImageGallery extends StatefulWidget {
   const ProductImageGallery({
@@ -12,16 +13,14 @@ class ProductImageGallery extends StatefulWidget {
     required this.imageUrls,
     required this.selectedIndex,
     required this.onPageChanged,
-    required this.isFavorite,
-    required this.onToggleFavorite,
+    required this.listingId,
     this.bottomInset = 0,
   });
 
   final List<String> imageUrls;
   final int selectedIndex;
   final ValueChanged<int> onPageChanged;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
+  final String listingId;
   final double bottomInset;
 
   @override
@@ -106,21 +105,10 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
         Positioned(
           top: MediaQuery.paddingOf(context).top + AppSpacing.sm,
           right: AppSpacing.x3l + AppSpacing.x2l,
-          child: Material(
-            color: AppColors.textPrimary.withValues(alpha: 0.38),
-            shape: const CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: IconButton(
-              iconSize: 22,
-              color: AppColors.cardBg,
-              onPressed: widget.onToggleFavorite,
-              icon: Icon(
-                LucideIcons.heart,
-                color: widget.isFavorite
-                    ? AppColors.error
-                    : AppColors.cardBg.withValues(alpha: 0.9),
-              ),
-            ),
+          child: WishHeartButton(
+            listingId: widget.listingId,
+            size: 22,
+            onDarkBackground: true,
           ),
         ),
         Positioned(

@@ -50,6 +50,7 @@ class SimilarProductsSection extends StatelessWidget {
                   price: d.price,
                   imageUrl: d.imageUrl,
                   discountPercent: d.discountPercent,
+                  listingId: d.id,
                   onTap: () => onOpenProduct(d),
                 ),
               );

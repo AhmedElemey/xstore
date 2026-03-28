@@ -9,6 +9,9 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/async_value_extensions.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
 import '../../domain/entities/deal_entity.dart';
@@ -43,6 +46,11 @@ class HomeScreen extends ConsumerWidget {
     final deals = ref.watch(hotDealsProvider);
     final categories = ref.watch(categoriesProvider);
     final newArrivals = ref.watch(newArrivalsProvider);
+    final isConsumer =
+        ref.watch(authProvider).valueOrNull?.role != UserRole.vendor;
+    final cartCount = isConsumer
+        ? ref.watch(cartProvider.select((s) => s.itemCount))
+        : 0;
 
     return Scaffold(
       body: RefreshIndicator(
@@ -76,6 +84,10 @@ class HomeScreen extends ConsumerWidget {
                 background: HomeHeader(
                   onSearchTap: () => context.go(AppRoutes.explore),
                   onNotificationsTap: () {},
+                  onCartTap: isConsumer
+                      ? () => context.push(AppRoutes.cart)
+                      : null,
+                  cartItemCount: cartCount,
                 ),
               ),
             ),

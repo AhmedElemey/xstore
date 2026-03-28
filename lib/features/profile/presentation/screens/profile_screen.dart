@@ -114,7 +114,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onSalesTap: () => context.push(AppRoutes.listingMy),
                     onRatingTap: () => context.push(AppRoutes.analytics),
                     onResponseTap: () => context.push(AppRoutes.earnings),
-                    onOrdersTap: () => context.push(AppRoutes.orders),
+                    onOrdersTap: () => context.push(
+                      isVendor ? AppRoutes.incomingOrders : AppRoutes.orders,
+                    ),
                     onWishlistTap: () => context.push(AppRoutes.wishlist),
                     onSavedTap: () => context.push(AppRoutes.earnings),
                   ),

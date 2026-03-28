@@ -373,6 +373,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                           title: item.title,
                           price: item.price,
                           imageUrl: img,
+                          listingId: item.id,
                           onTap: () => context.push('${AppRoutes.product}/${item.id}'),
                         );
                       },

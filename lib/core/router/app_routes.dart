@@ -8,10 +8,15 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const explore = '/explore';
   static const cart = '/cart';
+  static const checkout = '/checkout';
   static const wishlist = '/wishlist';
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
   static const orders = '/orders';
+  /// Vendor stack route (same [OrdersScreen] as consumer tab).
+  static const incomingOrders = '/incoming-orders';
+  static const orderDetail = '/order';
+  static String orderPath(String orderId) => '$orderDetail/$orderId';
   static const settings = '/settings';
   static const analytics = '/analytics';
   static const earnings = '/earnings';

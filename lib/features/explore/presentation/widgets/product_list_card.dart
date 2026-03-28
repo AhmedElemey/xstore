@@ -8,22 +8,19 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 
 class ProductListCard extends StatelessWidget {
   const ProductListCard({
     super.key,
     required this.item,
-    required this.isFavorite,
-    required this.onToggleFavorite,
     required this.onAddToCart,
     required this.showAddToCart,
     required this.onTap,
   });
 
   final SearchResultEntity item;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
   final VoidCallback onAddToCart;
   final bool showAddToCart;
   final VoidCallback onTap;
@@ -69,12 +66,9 @@ class ProductListCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        IconButton(
-                          onPressed: onToggleFavorite,
-                          icon: Icon(
-                            LucideIcons.heart,
-                            color: isFavorite ? AppColors.error : AppColors.textSecondary,
-                          ),
+                        WishHeartButton(
+                          listingId: item.id,
+                          size: AppSpacing.x2l,
                         ),
                       ],
                     ),
@@ -103,25 +97,36 @@ class ProductListCard extends StatelessWidget {
                     const Gap(AppSpacing.xs),
                     Row(
                       children: [
+                        Icon(LucideIcons.star, size: AppSpacing.md, color: AppColors.warning),
                         Text(
-                          '${AppStrings.starChar} ${item.rating.toStringAsFixed(1)} · ${item.sellerName}',
+                          ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
                           style: AppTypography.bodySmall,
                         ),
-                        if (item.isSellerVerified) ...[
-                          const Gap(AppSpacing.xs),
-                          Icon(
-                            LucideIcons.badgeCheck,
-                            size: AppSpacing.md,
-                            color: AppColors.primary,
+                      ],
+                    ),
+                    const Gap(AppSpacing.xs),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.sellerName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall,
                           ),
-                        ],
+                        ),
+                        if (item.isSellerVerified)
+                          Icon(LucideIcons.badgeCheck, size: AppSpacing.lg, color: AppColors.primary),
                       ],
                     ),
                     if (showAddToCart) ...[
                       const Gap(AppSpacing.md),
-                      FilledButton(
-                        onPressed: onAddToCart,
-                        child: Text(AppStrings.addToCart),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: onAddToCart,
+                          child: Text(AppStrings.addToCart),
+                        ),
                       ),
                     ],
                   ],

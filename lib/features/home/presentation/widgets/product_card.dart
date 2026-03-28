@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/wish_heart_button.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -14,6 +15,7 @@ class ProductCard extends StatelessWidget {
     required this.price,
     this.imageUrl,
     this.discountPercent = 0,
+    this.listingId,
     this.onTap,
   });
 
@@ -21,6 +23,7 @@ class ProductCard extends StatelessWidget {
   final double price;
   final String? imageUrl;
   final double discountPercent;
+  final String? listingId;
   final VoidCallback? onTap;
 
   @override
@@ -44,6 +47,7 @@ class ProductCard extends StatelessWidget {
                     child: _ProductImage(
                       theme: theme,
                       imageUrl: imageUrl,
+                      listingId: listingId,
                     ),
                   ),
                   _Footer(
@@ -64,6 +68,7 @@ class ProductCard extends StatelessWidget {
                   child: _ProductImage(
                     theme: theme,
                     imageUrl: imageUrl,
+                    listingId: listingId,
                   ),
                 ),
                 _Footer(
@@ -85,15 +90,18 @@ class _ProductImage extends StatelessWidget {
   const _ProductImage({
     required this.theme,
     this.imageUrl,
+    this.listingId,
   });
 
   final ThemeData theme;
   final String? imageUrl;
+  final String? listingId;
 
   @override
   Widget build(BuildContext context) {
+    Widget image;
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return CachedNetworkImage(
+      image = CachedNetworkImage(
         imageUrl: imageUrl!,
         fit: BoxFit.cover,
         alignment: Alignment.center,
@@ -103,10 +111,30 @@ class _ProductImage extends StatelessWidget {
         ),
         errorWidget: (_, __, ___) => const Icon(LucideIcons.imageOff),
       );
+    } else {
+      image = ColoredBox(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: const Center(child: Icon(LucideIcons.image)),
+      );
     }
-    return ColoredBox(
-      color: theme.colorScheme.surfaceContainerHighest,
-      child: const Center(child: Icon(LucideIcons.image)),
+
+    if (listingId == null) {
+      return image;
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        image,
+        Positioned(
+          top: AppSpacing.sm,
+          right: AppSpacing.sm,
+          child: WishHeartButton(
+            listingId: listingId!,
+            size: AppSpacing.x2l,
+          ),
+        ),
+      ],
     );
   }
 }

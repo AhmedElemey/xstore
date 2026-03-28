@@ -1,24 +1,24 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'cart_notifier.dart';
+part of 'wishlist_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$cartHash() => r'fa4c69f37802fc391a15351a54e855d3e4de9979';
+String _$wishlistHash() => r'791da3d0c7ef5c5fa133c1832e5d48426118b6c0';
 
-/// See also [Cart].
-@ProviderFor(Cart)
-final cartProvider = NotifierProvider<Cart, List<CartLineEntity>>.internal(
-  Cart.new,
-  name: r'cartProvider',
+/// See also [Wishlist].
+@ProviderFor(Wishlist)
+final wishlistProvider = NotifierProvider<Wishlist, WishlistState>.internal(
+  Wishlist.new,
+  name: r'wishlistProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$cartHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$wishlistHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$Cart = Notifier<List<CartLineEntity>>;
+typedef _$Wishlist = Notifier<WishlistState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

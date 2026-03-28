@@ -12,7 +12,6 @@ class ProductDetailState with _$ProductDetailState {
   const factory ProductDetailState({
     ListingEntity? listing,
     @Default(1) int quantity,
-    @Default(false) bool isFavorite,
     @Default(0) int selectedImageIndex,
     @Default(false) bool isDescriptionExpanded,
     @Default(false) bool isAddingToCart,

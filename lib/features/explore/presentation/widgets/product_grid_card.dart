@@ -8,22 +8,19 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 
 class ProductGridCard extends StatelessWidget {
   const ProductGridCard({
     super.key,
     required this.item,
-    required this.isFavorite,
-    required this.onToggleFavorite,
     required this.onAddToCart,
     required this.showAddToCart,
     required this.onTap,
   });
 
   final SearchResultEntity item;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
   final VoidCallback onAddToCart;
   final bool showAddToCart;
   final VoidCallback onTap;
@@ -75,22 +72,9 @@ class ProductGridCard extends StatelessWidget {
                   Positioned(
                     right: AppSpacing.sm,
                     top: AppSpacing.sm,
-                    child: Material(
-                      color: AppColors.cardBg.withValues(alpha: 0.9),
-                      shape: const CircleBorder(),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: AppSpacing.x3l,
-                          minHeight: AppSpacing.x3l,
-                        ),
-                        iconSize: AppSpacing.x2l,
-                        onPressed: onToggleFavorite,
-                        icon: Icon(
-                          isFavorite ? LucideIcons.heart : LucideIcons.heart,
-                          color: isFavorite ? AppColors.error : AppColors.textSecondary,
-                        ),
-                      ),
+                    child: WishHeartButton(
+                      listingId: item.id,
+                      size: AppSpacing.x2l,
                     ),
                   ),
                 ],

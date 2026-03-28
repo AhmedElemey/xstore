@@ -95,6 +95,7 @@ class _RecommendedList extends StatelessWidget {
               imageUrl:
                   listing.imageUrls.isNotEmpty ? listing.imageUrls.first : null,
               discountPercent: 0,
+              listingId: listing.id,
               onTap: () => context.push('${AppRoutes.product}/${listing.id}'),
             ),
           );

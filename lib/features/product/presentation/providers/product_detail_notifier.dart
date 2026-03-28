@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../cart/presentation/providers/cart_notifier.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/product_review_entity.dart';
@@ -36,7 +36,6 @@ class ProductDetail extends _$ProductDetail {
     final maxIdx = len > 0 ? len - 1 : 0;
     return base.copyWith(
       quantity: previous.quantity.clamp(1, base.stockQuantity),
-      isFavorite: previous.isFavorite,
       selectedImageIndex: previous.selectedImageIndex.clamp(0, maxIdx),
       isDescriptionExpanded: previous.isDescriptionExpanded,
       isAddingToCart: false,
@@ -122,19 +121,13 @@ class ProductDetail extends _$ProductDetail {
     state = AsyncData(v.copyWith(quantity: v.quantity - 1));
   }
 
-  void toggleFavorite() {
-    final v = state.valueOrNull;
-    if (v == null) return;
-    state = AsyncData(v.copyWith(isFavorite: !v.isFavorite));
-  }
-
   Future<void> addToCart() async {
     final v = state.valueOrNull;
     final listing = v?.listing;
     if (listing == null) return;
     state = AsyncData(v!.copyWith(isAddingToCart: true));
     await Future<void>.delayed(const Duration(milliseconds: 100));
-    ref.read(cartProvider.notifier).addItem(listing, v.quantity);
+    await ref.read(cartProvider.notifier).addListingEntity(listing, v.quantity);
     state = AsyncData(v.copyWith(isAddingToCart: false));
   }
 

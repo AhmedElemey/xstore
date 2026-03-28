@@ -15,4 +15,13 @@ abstract final class AppColors {
   static const textDisabled = Color(0xFFD1D5DB);
   static const white = Color(0xFFFFFFFF);
   static const transparent = Color(0x00000000);
+
+  /// Order status badges (aligned with design spec).
+  static const orderStatusPending = Color(0xFFF59E0B);
+  static const orderStatusConfirmed = Color(0xFF3B82F6);
+  static const orderStatusProcessing = Color(0xFF6366F1);
+  static const orderStatusShipped = Color(0xFF8B5CF6);
+  static const orderStatusDelivered = Color(0xFF22C55E);
+  static const orderStatusCancelled = Color(0xFFEF4444);
+  static const orderStatusRefunded = Color(0xFF6B7280);
 }
