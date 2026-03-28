@@ -15,6 +15,7 @@ class XstoreApp extends ConsumerWidget {
     final themeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
