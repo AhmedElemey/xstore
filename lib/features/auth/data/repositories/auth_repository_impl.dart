@@ -5,6 +5,8 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../domain/entities/login_params.dart';
+import '../../domain/entities/register_params.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -26,11 +28,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity?>> restoreSession() async {
     try {
-      final json = await _secureStorage.read(key: _userKey);
-      if (json == null || json.isEmpty) {
+      final jsonStr = await _secureStorage.read(key: _userKey);
+      if (jsonStr == null || jsonStr.isEmpty) {
         return const Right(null);
       }
-      final map = jsonDecode(json) as Map<String, dynamic>;
+      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
       final model = UserModel.fromJson(map);
       return Right(model.toEntity());
     } catch (e) {
@@ -39,14 +41,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<Either<Failure, UserEntity>> login(LoginParams params) async {
     try {
-      final model = await _remote.login(email: email, password: password);
+      final model = await _remote.login(params);
       await _persistUser(model);
       return Right(model.toEntity());
+    } on AuthException catch (e) {
+      return Left(Failure.unauthorized(e.message));
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
     } on UnauthorizedException catch (e) {
@@ -59,12 +60,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> register({
-    required String email,
-    required String password,
-  }) async {
+  Future<Either<Failure, UserEntity>> register(RegisterParams params) async {
     try {
-      final model = await _remote.register(email: email, password: password);
+      final model = await _remote.register(params);
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -90,15 +88,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<void> _persistUser(UserModel model) async {
-    final json = jsonEncode({
-      'id': model.id,
-      'email': model.email,
-      'isVendor': model.isVendor,
-      'token': model.token,
-    });
+    final map = model.toJson();
     if (model.token != null) {
       await _secureStorage.write(key: _tokenKey, value: model.token);
     }
-    await _secureStorage.write(key: _userKey, value: json);
+    await _secureStorage.write(key: _userKey, value: jsonEncode(map));
   }
 }

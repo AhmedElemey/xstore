@@ -23,3 +23,8 @@ class CacheException extends AppException {
 class UnauthorizedException extends AppException {
   const UnauthorizedException([super.message]);
 }
+
+/// Invalid credentials or auth-specific business errors (mock / API).
+class AuthException extends UnauthorizedException {
+  const AuthException([super.message]);
+}

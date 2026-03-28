@@ -9,4 +9,11 @@ class MockConfig {
     await Future.delayed(mockDelay);
     return data;
   }
+
+  static Future<T> simulateScaled<T>(T data, {int multiplier = 1}) async {
+    await Future.delayed(
+      Duration(milliseconds: mockDelay.inMilliseconds * multiplier),
+    );
+    return data;
+  }
 }

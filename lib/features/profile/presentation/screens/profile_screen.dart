@@ -31,9 +31,16 @@ class ProfileScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.email,
+                    user.name.isNotEmpty ? user.name : user.email,
                     style: AppTypography.titleMedium,
                   ),
+                  if (user.name.isNotEmpty) ...[
+                    const Gap(AppSpacing.xs),
+                    Text(
+                      user.email,
+                      style: AppTypography.bodySmall,
+                    ),
+                  ],
                   const Gap(AppSpacing.sm),
                   Text(
                     user.isVendor ? AppStrings.vendorAccount : AppStrings.customerAccount,

@@ -4,18 +4,14 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../domain/entities/login_params.dart';
+import '../../domain/entities/register_params.dart';
 import '../models/user_model.dart';
 
 abstract interface class AuthRemoteDataSource {
-  Future<UserModel> login({
-    required String email,
-    required String password,
-  });
+  Future<UserModel> login(LoginParams params);
 
-  Future<UserModel> register({
-    required String email,
-    required String password,
-  });
+  Future<UserModel> register(RegisterParams params);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -24,20 +20,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio _dio;
 
   @override
-  Future<UserModel> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<UserModel> login(LoginParams params) async {
+    final identifier = params.emailOrPhone.trim();
+    final password = params.password;
+
     if (MockConfig.useMock) {
-      final model = mockLoginIsVendor(email)
-          ? mockVendorUserModel(email: email)
-          : mockConsumerUserModel(email: email);
+      if (password == 'wrong123') {
+        throw const AuthException('Invalid credentials');
+      }
+      final model = mockLoginIsVendor(identifier)
+          ? mockVendorUserModel(email: identifier.contains('@') ? identifier : 'vendor@xstore.com')
+          : mockConsumerUserModel(email: identifier.contains('@') ? identifier : 'user@xstore.com');
       return MockConfig.simulate(model);
     }
+
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.login,
-        data: {'email': email, 'password': password},
+        data: {
+          'emailOrPhone': identifier,
+          'password': password,
+          'rememberMe': params.rememberMe,
+        },
       );
       final data = response.data;
       if (data == null) {
@@ -46,27 +50,38 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return UserModel.fromJson(data);
     } on DioException catch (e) {
       if (_isOffline(e)) {
-        return _demoUser(email: email);
+        return _demoUser(email: identifier);
       }
       throw _mapDio(e);
     }
   }
 
   @override
-  Future<UserModel> register({
-    required String email,
-    required String password,
-  }) async {
+  Future<UserModel> register(RegisterParams params) async {
     if (MockConfig.useMock) {
-      final model = mockLoginIsVendor(email)
-          ? mockVendorUserModel(email: email)
-          : mockConsumerUserModel(email: email);
-      return MockConfig.simulate(model);
+      final model = userModelFromRegisterParams(params);
+      return MockConfig.simulateScaled(model, multiplier: 2);
     }
+
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.register,
-        data: {'email': email, 'password': password},
+        data: {
+          'role': params.role.name,
+          'fullName': params.fullName,
+          'email': params.email,
+          'phoneNumber': params.phoneNumber,
+          'countryCode': params.countryCode,
+          'dateOfBirth': params.dateOfBirth?.toIso8601String(),
+          'location': params.location,
+          'password': params.password,
+          'storeName': params.storeName,
+          'storeCategory': params.storeCategory,
+          'storeDescription': params.storeDescription,
+          'storeCity': params.storeCity,
+          'storeWilaya': params.storeWilaya,
+          'whatsappNumber': params.whatsappNumber,
+        },
       );
       final data = response.data;
       if (data == null) {
@@ -75,7 +90,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return UserModel.fromJson(data);
     } on DioException catch (e) {
       if (_isOffline(e)) {
-        return _demoUser(email: email);
+        return userModelFromRegisterParams(params);
       }
       throw _mapDio(e);
     }
@@ -87,12 +102,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   UserModel _demoUser({required String email}) {
-    return UserModel(
-      id: 'demo-${email.hashCode}',
-      email: email,
-      isVendor: email.toLowerCase().contains('vendor'),
-      token: 'demo-token',
-    );
+    return mockLoginIsVendor(email)
+        ? mockVendorUserModel(email: email)
+        : mockConsumerUserModel(email: email);
   }
 
   AppException _mapDio(DioException e) {

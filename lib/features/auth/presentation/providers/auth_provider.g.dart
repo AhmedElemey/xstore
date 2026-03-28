@@ -96,7 +96,7 @@ final logoutUseCaseProvider = AutoDisposeProvider<LogoutUseCase>.internal(
 );
 
 typedef LogoutUseCaseRef = AutoDisposeProviderRef<LogoutUseCase>;
-String _$authHash() => r'906a1e0c14e377ae9824b02d6b7f8c9fb4676a89';
+String _$authHash() => r'4c50343cfcd31eec1c8a2bce6dcf5c77ce25e648';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -110,5 +110,37 @@ final authProvider = AsyncNotifierProvider<Auth, UserEntity?>.internal(
 );
 
 typedef _$Auth = AsyncNotifier<UserEntity?>;
+String _$loginNotifierHash() => r'd1fb6e63f84f52a3f12bd22d88b9cf5755468966';
+
+/// See also [LoginNotifier].
+@ProviderFor(LoginNotifier)
+final loginNotifierProvider =
+    AutoDisposeNotifierProvider<LoginNotifier, LoginState>.internal(
+  LoginNotifier.new,
+  name: r'loginNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$loginNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
+String _$registerNotifierHash() => r'9c3ae60a59640825ade66f2903dc7fd533fbdc31';
+
+/// See also [RegisterNotifier].
+@ProviderFor(RegisterNotifier)
+final registerNotifierProvider =
+    AutoDisposeNotifierProvider<RegisterNotifier, RegisterState>.internal(
+  RegisterNotifier.new,
+  name: r'registerNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$registerNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$RegisterNotifier = AutoDisposeNotifier<RegisterState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

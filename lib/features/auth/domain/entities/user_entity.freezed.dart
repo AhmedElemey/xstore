@@ -17,8 +17,24 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$UserEntity {
   String get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
-  bool get isVendor => throw _privateConstructorUsedError;
+  String get phoneNumber => throw _privateConstructorUsedError;
+  String? get avatarUrl => throw _privateConstructorUsedError;
+  UserRole get role => throw _privateConstructorUsedError;
+  bool get isVerified => throw _privateConstructorUsedError;
+  double? get rating => throw _privateConstructorUsedError;
+  int? get totalSales => throw _privateConstructorUsedError;
+  DateTime? get joinedAt => throw _privateConstructorUsedError;
+  String? get location => throw _privateConstructorUsedError; // Vendor profile
+  String? get storeName => throw _privateConstructorUsedError;
+  String? get storeSlug => throw _privateConstructorUsedError;
+  String? get storeCategory => throw _privateConstructorUsedError;
+  String? get storeDescription => throw _privateConstructorUsedError;
+  String? get storeLogoUrl => throw _privateConstructorUsedError;
+  String? get storeCity => throw _privateConstructorUsedError;
+  String? get storeWilaya => throw _privateConstructorUsedError;
+  String? get whatsappNumber => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserEntityCopyWith<UserEntity> get copyWith =>
@@ -31,7 +47,26 @@ abstract class $UserEntityCopyWith<$Res> {
           UserEntity value, $Res Function(UserEntity) then) =
       _$UserEntityCopyWithImpl<$Res, UserEntity>;
   @useResult
-  $Res call({String id, String email, bool isVendor});
+  $Res call(
+      {String id,
+      String name,
+      String email,
+      String phoneNumber,
+      String? avatarUrl,
+      UserRole role,
+      bool isVerified,
+      double? rating,
+      int? totalSales,
+      DateTime? joinedAt,
+      String? location,
+      String? storeName,
+      String? storeSlug,
+      String? storeCategory,
+      String? storeDescription,
+      String? storeLogoUrl,
+      String? storeCity,
+      String? storeWilaya,
+      String? whatsappNumber});
 }
 
 /// @nodoc
@@ -48,22 +83,102 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
   @override
   $Res call({
     Object? id = null,
+    Object? name = null,
     Object? email = null,
-    Object? isVendor = null,
+    Object? phoneNumber = null,
+    Object? avatarUrl = freezed,
+    Object? role = null,
+    Object? isVerified = null,
+    Object? rating = freezed,
+    Object? totalSales = freezed,
+    Object? joinedAt = freezed,
+    Object? location = freezed,
+    Object? storeName = freezed,
+    Object? storeSlug = freezed,
+    Object? storeCategory = freezed,
+    Object? storeDescription = freezed,
+    Object? storeLogoUrl = freezed,
+    Object? storeCity = freezed,
+    Object? storeWilaya = freezed,
+    Object? whatsappNumber = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
-      isVendor: null == isVendor
-          ? _value.isVendor
-          : isVendor // ignore: cast_nullable_to_non_nullable
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      avatarUrl: freezed == avatarUrl
+          ? _value.avatarUrl
+          : avatarUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      role: null == role
+          ? _value.role
+          : role // ignore: cast_nullable_to_non_nullable
+              as UserRole,
+      isVerified: null == isVerified
+          ? _value.isVerified
+          : isVerified // ignore: cast_nullable_to_non_nullable
               as bool,
+      rating: freezed == rating
+          ? _value.rating
+          : rating // ignore: cast_nullable_to_non_nullable
+              as double?,
+      totalSales: freezed == totalSales
+          ? _value.totalSales
+          : totalSales // ignore: cast_nullable_to_non_nullable
+              as int?,
+      joinedAt: freezed == joinedAt
+          ? _value.joinedAt
+          : joinedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      location: freezed == location
+          ? _value.location
+          : location // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeName: freezed == storeName
+          ? _value.storeName
+          : storeName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeSlug: freezed == storeSlug
+          ? _value.storeSlug
+          : storeSlug // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCategory: freezed == storeCategory
+          ? _value.storeCategory
+          : storeCategory // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescription: freezed == storeDescription
+          ? _value.storeDescription
+          : storeDescription // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeLogoUrl: freezed == storeLogoUrl
+          ? _value.storeLogoUrl
+          : storeLogoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCity: freezed == storeCity
+          ? _value.storeCity
+          : storeCity // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeWilaya: freezed == storeWilaya
+          ? _value.storeWilaya
+          : storeWilaya // ignore: cast_nullable_to_non_nullable
+              as String?,
+      whatsappNumber: freezed == whatsappNumber
+          ? _value.whatsappNumber
+          : whatsappNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -76,7 +191,26 @@ abstract class _$$UserEntityImplCopyWith<$Res>
       __$$UserEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String email, bool isVendor});
+  $Res call(
+      {String id,
+      String name,
+      String email,
+      String phoneNumber,
+      String? avatarUrl,
+      UserRole role,
+      bool isVerified,
+      double? rating,
+      int? totalSales,
+      DateTime? joinedAt,
+      String? location,
+      String? storeName,
+      String? storeSlug,
+      String? storeCategory,
+      String? storeDescription,
+      String? storeLogoUrl,
+      String? storeCity,
+      String? storeWilaya,
+      String? whatsappNumber});
 }
 
 /// @nodoc
@@ -91,43 +225,176 @@ class __$$UserEntityImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? name = null,
     Object? email = null,
-    Object? isVendor = null,
+    Object? phoneNumber = null,
+    Object? avatarUrl = freezed,
+    Object? role = null,
+    Object? isVerified = null,
+    Object? rating = freezed,
+    Object? totalSales = freezed,
+    Object? joinedAt = freezed,
+    Object? location = freezed,
+    Object? storeName = freezed,
+    Object? storeSlug = freezed,
+    Object? storeCategory = freezed,
+    Object? storeDescription = freezed,
+    Object? storeLogoUrl = freezed,
+    Object? storeCity = freezed,
+    Object? storeWilaya = freezed,
+    Object? whatsappNumber = freezed,
   }) {
     return _then(_$UserEntityImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
-      isVendor: null == isVendor
-          ? _value.isVendor
-          : isVendor // ignore: cast_nullable_to_non_nullable
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      avatarUrl: freezed == avatarUrl
+          ? _value.avatarUrl
+          : avatarUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      role: null == role
+          ? _value.role
+          : role // ignore: cast_nullable_to_non_nullable
+              as UserRole,
+      isVerified: null == isVerified
+          ? _value.isVerified
+          : isVerified // ignore: cast_nullable_to_non_nullable
               as bool,
+      rating: freezed == rating
+          ? _value.rating
+          : rating // ignore: cast_nullable_to_non_nullable
+              as double?,
+      totalSales: freezed == totalSales
+          ? _value.totalSales
+          : totalSales // ignore: cast_nullable_to_non_nullable
+              as int?,
+      joinedAt: freezed == joinedAt
+          ? _value.joinedAt
+          : joinedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      location: freezed == location
+          ? _value.location
+          : location // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeName: freezed == storeName
+          ? _value.storeName
+          : storeName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeSlug: freezed == storeSlug
+          ? _value.storeSlug
+          : storeSlug // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCategory: freezed == storeCategory
+          ? _value.storeCategory
+          : storeCategory // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescription: freezed == storeDescription
+          ? _value.storeDescription
+          : storeDescription // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeLogoUrl: freezed == storeLogoUrl
+          ? _value.storeLogoUrl
+          : storeLogoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCity: freezed == storeCity
+          ? _value.storeCity
+          : storeCity // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeWilaya: freezed == storeWilaya
+          ? _value.storeWilaya
+          : storeWilaya // ignore: cast_nullable_to_non_nullable
+              as String?,
+      whatsappNumber: freezed == whatsappNumber
+          ? _value.whatsappNumber
+          : whatsappNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
 
 /// @nodoc
 
-class _$UserEntityImpl implements _UserEntity {
+class _$UserEntityImpl extends _UserEntity {
   const _$UserEntityImpl(
-      {required this.id, required this.email, this.isVendor = false});
+      {required this.id,
+      required this.name,
+      required this.email,
+      required this.phoneNumber,
+      this.avatarUrl,
+      this.role = UserRole.consumer,
+      this.isVerified = false,
+      this.rating,
+      this.totalSales,
+      this.joinedAt,
+      this.location,
+      this.storeName,
+      this.storeSlug,
+      this.storeCategory,
+      this.storeDescription,
+      this.storeLogoUrl,
+      this.storeCity,
+      this.storeWilaya,
+      this.whatsappNumber})
+      : super._();
 
   @override
   final String id;
   @override
+  final String name;
+  @override
   final String email;
   @override
+  final String phoneNumber;
+  @override
+  final String? avatarUrl;
+  @override
   @JsonKey()
-  final bool isVendor;
+  final UserRole role;
+  @override
+  @JsonKey()
+  final bool isVerified;
+  @override
+  final double? rating;
+  @override
+  final int? totalSales;
+  @override
+  final DateTime? joinedAt;
+  @override
+  final String? location;
+// Vendor profile
+  @override
+  final String? storeName;
+  @override
+  final String? storeSlug;
+  @override
+  final String? storeCategory;
+  @override
+  final String? storeDescription;
+  @override
+  final String? storeLogoUrl;
+  @override
+  final String? storeCity;
+  @override
+  final String? storeWilaya;
+  @override
+  final String? whatsappNumber;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, isVendor: $isVendor)';
+    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber)';
   }
 
   @override
@@ -136,13 +403,63 @@ class _$UserEntityImpl implements _UserEntity {
         (other.runtimeType == runtimeType &&
             other is _$UserEntityImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
-            (identical(other.isVendor, isVendor) ||
-                other.isVendor == isVendor));
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.avatarUrl, avatarUrl) ||
+                other.avatarUrl == avatarUrl) &&
+            (identical(other.role, role) || other.role == role) &&
+            (identical(other.isVerified, isVerified) ||
+                other.isVerified == isVerified) &&
+            (identical(other.rating, rating) || other.rating == rating) &&
+            (identical(other.totalSales, totalSales) ||
+                other.totalSales == totalSales) &&
+            (identical(other.joinedAt, joinedAt) ||
+                other.joinedAt == joinedAt) &&
+            (identical(other.location, location) ||
+                other.location == location) &&
+            (identical(other.storeName, storeName) ||
+                other.storeName == storeName) &&
+            (identical(other.storeSlug, storeSlug) ||
+                other.storeSlug == storeSlug) &&
+            (identical(other.storeCategory, storeCategory) ||
+                other.storeCategory == storeCategory) &&
+            (identical(other.storeDescription, storeDescription) ||
+                other.storeDescription == storeDescription) &&
+            (identical(other.storeLogoUrl, storeLogoUrl) ||
+                other.storeLogoUrl == storeLogoUrl) &&
+            (identical(other.storeCity, storeCity) ||
+                other.storeCity == storeCity) &&
+            (identical(other.storeWilaya, storeWilaya) ||
+                other.storeWilaya == storeWilaya) &&
+            (identical(other.whatsappNumber, whatsappNumber) ||
+                other.whatsappNumber == whatsappNumber));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, email, isVendor);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        name,
+        email,
+        phoneNumber,
+        avatarUrl,
+        role,
+        isVerified,
+        rating,
+        totalSales,
+        joinedAt,
+        location,
+        storeName,
+        storeSlug,
+        storeCategory,
+        storeDescription,
+        storeLogoUrl,
+        storeCity,
+        storeWilaya,
+        whatsappNumber
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -151,18 +468,67 @@ class _$UserEntityImpl implements _UserEntity {
       __$$UserEntityImplCopyWithImpl<_$UserEntityImpl>(this, _$identity);
 }
 
-abstract class _UserEntity implements UserEntity {
+abstract class _UserEntity extends UserEntity {
   const factory _UserEntity(
       {required final String id,
+      required final String name,
       required final String email,
-      final bool isVendor}) = _$UserEntityImpl;
+      required final String phoneNumber,
+      final String? avatarUrl,
+      final UserRole role,
+      final bool isVerified,
+      final double? rating,
+      final int? totalSales,
+      final DateTime? joinedAt,
+      final String? location,
+      final String? storeName,
+      final String? storeSlug,
+      final String? storeCategory,
+      final String? storeDescription,
+      final String? storeLogoUrl,
+      final String? storeCity,
+      final String? storeWilaya,
+      final String? whatsappNumber}) = _$UserEntityImpl;
+  const _UserEntity._() : super._();
 
   @override
   String get id;
   @override
+  String get name;
+  @override
   String get email;
   @override
-  bool get isVendor;
+  String get phoneNumber;
+  @override
+  String? get avatarUrl;
+  @override
+  UserRole get role;
+  @override
+  bool get isVerified;
+  @override
+  double? get rating;
+  @override
+  int? get totalSales;
+  @override
+  DateTime? get joinedAt;
+  @override
+  String? get location;
+  @override // Vendor profile
+  String? get storeName;
+  @override
+  String? get storeSlug;
+  @override
+  String? get storeCategory;
+  @override
+  String? get storeDescription;
+  @override
+  String? get storeLogoUrl;
+  @override
+  String? get storeCity;
+  @override
+  String? get storeWilaya;
+  @override
+  String? get whatsappNumber;
   @override
   @JsonKey(ignore: true)
   _$$UserEntityImplCopyWith<_$UserEntityImpl> get copyWith =>

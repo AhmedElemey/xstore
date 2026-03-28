@@ -24,10 +24,14 @@ RouterNotifier routerNotifier(RouterNotifierRef ref) {
 String? computeXStoreAuthRedirect({
   required AsyncValue<UserEntity?> auth,
   required String matchedLocation,
+  bool holdRegisterForVendorSuccess = false,
 }) {
   final loc = matchedLocation;
-  final isAuthRoute =
-      loc == AppRoutes.login || loc == AppRoutes.register;
+  final isAuthRoute = loc == AppRoutes.splash ||
+      loc == AppRoutes.onboarding ||
+      loc == AppRoutes.login ||
+      loc == AppRoutes.register ||
+      loc == AppRoutes.forgotPassword;
 
   return auth.when(
     data: (user) {
@@ -36,6 +40,9 @@ String? computeXStoreAuthRedirect({
         return isAuthRoute ? null : AppRoutes.login;
       }
       if (isAuthRoute) {
+        if (loc == AppRoutes.register && holdRegisterForVendorSuccess) {
+          return null;
+        }
         return AppRoutes.home;
       }
       if (isVendorRestrictedRoute(loc) && !user.isVendor) {
@@ -50,9 +57,12 @@ String? computeXStoreAuthRedirect({
 
 /// Typed wrapper for [GoRouter.redirect] using the active [Ref].
 String? xStoreGoRouterRedirect(Ref ref, GoRouterState state) {
+  final holdVendorSuccess =
+      ref.read(registerNotifierProvider).showVendorSuccessOverlay;
   return computeXStoreAuthRedirect(
     auth: ref.read(authProvider),
     matchedLocation: state.matchedLocation,
+    holdRegisterForVendorSuccess: holdVendorSuccess,
   );
 }
 
