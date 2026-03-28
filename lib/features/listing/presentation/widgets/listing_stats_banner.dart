@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 
 class ListingStatsBanner extends StatelessWidget {
   const ListingStatsBanner({
@@ -25,41 +27,41 @@ class ListingStatsBanner extends StatelessWidget {
           end: Alignment.centerRight,
           colors: [
             AppColors.primary.withValues(alpha: 0.10),
-            AppColors.secondary.withValues(alpha: 0.08),
-            AppColors.surface,
+            AppColors.accent.withValues(alpha: 0.08),
+            AppColors.background,
           ],
         ),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        borderRadius: BorderRadius.circular(AppSpacing.lg),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.md,
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.lg,
         ),
         child: Row(
           children: [
             Expanded(
               child: _MiniStat(
-                icon: Icons.inventory_2_outlined,
+                icon: LucideIcons.boxes,
                 value: totalCount,
-                label: 'Total Listings',
+                label: AppStrings.listingTotalListings,
                 valueColor: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Expanded(
               child: _MiniStat(
-                icon: Icons.check_circle_outline,
+                icon: LucideIcons.checkCircle,
                 value: activeCount,
-                label: 'Active',
-                valueColor: const Color(0xFF16A34A),
+                label: AppStrings.active,
+                valueColor: AppColors.success,
               ),
             ),
             Expanded(
               child: _MiniStat(
-                icon: Icons.local_shipping_outlined,
+                icon: LucideIcons.truck,
                 value: soldCount,
-                label: 'Sold',
-                valueColor: const Color(0xFF2563EB),
+                label: AppStrings.listingSoldStat,
+                valueColor: AppColors.primary,
               ),
             ),
           ],
@@ -89,7 +91,7 @@ class _MiniStat extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 22, color: grey.withValues(alpha: 0.85)),
-        const Gap(AppSpacing.xs),
+        const Gap(AppSpacing.sm),
         Text(
           '$value',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(

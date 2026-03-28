@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
@@ -13,11 +15,16 @@ import '../../domain/entities/deal_entity.dart';
 import '../providers/banners_provider.dart';
 import '../providers/categories_provider.dart';
 import '../providers/hot_deals_provider.dart';
+import '../providers/new_arrivals_provider.dart';
+import '../providers/recommended_provider.dart';
 import '../widgets/category_chip_row.dart';
+import '../widgets/featured_categories_banner.dart';
 import '../widgets/flash_sale_banner.dart';
 import '../widgets/hero_banner_carousel.dart';
+import '../widgets/home_header.dart';
 import '../widgets/hot_deals_section.dart';
 import '../widgets/new_arrivals_grid.dart';
+import '../widgets/recommended_section.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -26,71 +33,139 @@ class HomeScreen extends ConsumerWidget {
     context.push('${AppRoutes.product}/${deal.id}');
   }
 
+  void _openListing(BuildContext context, String id) {
+    context.push('${AppRoutes.product}/$id');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final banners = ref.watch(bannersProvider);
     final deals = ref.watch(hotDealsProvider);
     final categories = ref.watch(categoriesProvider);
+    final newArrivals = ref.watch(newArrivalsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.homeTitle)),
       body: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () async {
           ref.invalidate(bannersProvider);
           ref.invalidate(hotDealsProvider);
           ref.invalidate(categoriesProvider);
+          ref.invalidate(newArrivalsProvider);
+          ref.invalidate(recommendedProvider);
           await Future.wait([
             ref.read(bannersProvider.future),
             ref.read(hotDealsProvider.future),
             ref.read(categoriesProvider.future),
+            ref.read(newArrivalsProvider.future),
+            ref.read(recommendedProvider.future),
           ]);
         },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-            banners.toWidget(
-              data: (data) => HeroBannerCarousel(banners: data),
-              loading: () => const SizedBox(
-                height: 180,
-                child: Center(child: CircularProgressIndicator.adaptive()),
-              ),
-              errorBuilder: (e) => ErrorStateWidget(
-                message: e.toString(),
-                onRetry: () => ref.invalidate(bannersProvider),
-              ),
-            ),
-            const Gap(AppSpacing.md),
-            const FlashSaleBanner(),
-            const Gap(AppSpacing.md),
-            categories.toWidget(
-              data: (data) => CategoryChipRow(categories: data),
-              loading: () => const SizedBox(
-                height: 40,
-                child: Center(child: CircularProgressIndicator.adaptive()),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              backgroundColor: AppColors.background,
+              automaticallyImplyLeading: false,
+              toolbarHeight: 0,
+              expandedHeight: AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.lg,
+              flexibleSpace: FlexibleSpaceBar(
+                background: HomeHeader(
+                  onSearchTap: () => context.go(AppRoutes.explore),
+                  onNotificationsTap: () {},
+                ),
               ),
             ),
-            const Gap(AppSpacing.md),
-            deals.toWidget(
-              data: (data) => HotDealsSection(
-                deals: data,
-                onOpenProduct: (d) => _openDeal(context, d),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    banners.toWidget(
+                      data: (data) => HeroBannerCarousel(banners: data),
+                      loading: () => _BannerShimmer(),
+                      errorBuilder: (e) => ErrorStateWidget(
+                        message: e.toString(),
+                        onRetry: () => ref.invalidate(bannersProvider),
+                      ),
+                    ),
+                    const Gap(AppSpacing.lg),
+                    const FlashSaleBanner(),
+                    const Gap(AppSpacing.lg),
+                    Text(
+                      AppStrings.shopByCategory,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const Gap(AppSpacing.md),
+                    categories.toWidget(
+                      data: (data) => CategoryChipRow(categories: data),
+                      loading: () => SizedBox(
+                        height: AppSpacing.x3l + AppSpacing.sm,
+                        child: _BannerShimmer(),
+                      ),
+                      errorBuilder: (e) => ErrorStateWidget(
+                        message: e.toString(),
+                        onRetry: () => ref.invalidate(categoriesProvider),
+                      ),
+                    ),
+                    const Gap(AppSpacing.lg),
+                    deals.toWidget(
+                      data: (data) => HotDealsSection(
+                        deals: data,
+                        onOpenProduct: (d) => _openDeal(context, d),
+                      ),
+                      loading: () => const _DealsSkeleton(),
+                      errorBuilder: (e) => ErrorStateWidget(
+                        message: e.toString(),
+                        onRetry: () => ref.invalidate(hotDealsProvider),
+                      ),
+                    ),
+                    const Gap(AppSpacing.lg),
+                    const FeaturedCategoriesBanner(),
+                    const Gap(AppSpacing.lg),
+                    newArrivals.toWidget(
+                      data: (data) => NewArrivalsGrid(
+                        items: data,
+                        onOpenProduct: (listing) =>
+                            _openListing(context, listing.id),
+                      ),
+                      loading: () => const _DealsSkeleton(),
+                      errorBuilder: (e) => ErrorStateWidget(
+                        message: e.toString(),
+                        onRetry: () => ref.invalidate(newArrivalsProvider),
+                      ),
+                    ),
+                    const Gap(AppSpacing.lg),
+                    const RecommendedSection(),
+                    const Gap(AppSpacing.x3l),
+                  ],
+                ),
               ),
-              loading: () => const _DealsSkeleton(),
-              errorBuilder: (e) => ErrorStateWidget(
-                message: e.toString(),
-                onRetry: () => ref.invalidate(hotDealsProvider),
-              ),
-            ),
-            const Gap(AppSpacing.lg),
-            deals.toWidget(
-              data: (data) => NewArrivalsGrid(
-                items: data,
-                onOpenProduct: (d) => _openDeal(context, d),
-              ),
-              loading: () => const SizedBox.shrink(),
-              errorBuilder: (_) => const SizedBox.shrink(),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BannerShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final base = AppColors.textDisabled.withValues(alpha: 0.35);
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: AppColors.cardBg,
+      child: Container(
+        height: AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.sm,
+        decoration: BoxDecoration(
+          color: base,
+          borderRadius: BorderRadius.circular(AppSpacing.lg),
         ),
       ),
     );
@@ -102,12 +177,13 @@ class _DealsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
+    final w = AppSpacing.x4l * 3 + AppSpacing.lg;
+    return Wrap(
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.md,
       children: [
-        SizedBox(width: 160, child: ProductSkeletonCard()),
-        SizedBox(width: 160, child: ProductSkeletonCard()),
+        SizedBox(width: w, child: const ProductSkeletonCard()),
+        SizedBox(width: w, child: const ProductSkeletonCard()),
       ],
     );
   }

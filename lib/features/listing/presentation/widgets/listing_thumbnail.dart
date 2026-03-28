@@ -2,6 +2,10 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
 
 /// Rounded listing image — network URL or local file path.
 class ListingThumbnail extends StatelessWidget {
@@ -11,11 +15,10 @@ class ListingThumbnail extends StatelessWidget {
     this.size = 80,
     this.width,
     this.height,
-    this.borderRadius = 10,
+    this.borderRadius = AppSpacing.md,
   });
 
   final String imageUrl;
-  /// Square dimension when [width] / [height] are null.
   final double size;
   final double? width;
   final double? height;
@@ -41,8 +44,8 @@ class ListingThumbnail extends StatelessWidget {
       return ColoredBox(
         color: placeholderBg,
         child: Icon(
-          Icons.image_not_supported_outlined,
-          color: Colors.grey.shade400,
+          LucideIcons.imageOff,
+          color: AppColors.textDisabled,
         ),
       );
     }
@@ -55,7 +58,7 @@ class ListingThumbnail extends StatelessWidget {
         placeholder: (_, __) => ColoredBox(color: placeholderBg),
         errorWidget: (_, __, ___) => ColoredBox(
           color: placeholderBg,
-          child: const Icon(Icons.broken_image_outlined),
+          child: const Icon(LucideIcons.imageOff),
         ),
       );
     }
@@ -64,7 +67,7 @@ class ListingThumbnail extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => ColoredBox(
         color: placeholderBg,
-        child: const Icon(Icons.broken_image_outlined),
+        child: const Icon(LucideIcons.imageOff),
       ),
     );
   }

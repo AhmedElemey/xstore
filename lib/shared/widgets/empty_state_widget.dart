@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_spacing.dart';
 
@@ -20,23 +21,23 @@ class EmptyStateWidget extends StatelessWidget {
     final theme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.x2l),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.inbox_outlined,
-              size: 48,
+              LucideIcons.inbox,
+              size: AppSpacing.x4l,
               color: theme.colorScheme.outline,
             ),
-            const Gap(AppSpacing.md),
+            const Gap(AppSpacing.lg),
             Text(
               title,
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
-              const Gap(AppSpacing.xs),
+              const Gap(AppSpacing.sm),
               Text(
                 subtitle!,
                 style: theme.textTheme.bodyMedium,
@@ -44,7 +45,7 @@ class EmptyStateWidget extends StatelessWidget {
               ),
             ],
             if (action != null) ...[
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.lg),
               action!,
             ],
           ],

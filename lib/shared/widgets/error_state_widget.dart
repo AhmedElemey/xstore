@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_spacing.dart';
+import '../../core/constants/app_strings.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   const ErrorStateWidget({
@@ -18,26 +20,26 @@ class ErrorStateWidget extends StatelessWidget {
     final theme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.x2l),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.error_outline,
-              size: 48,
+              LucideIcons.alertCircle,
+              size: AppSpacing.x4l,
               color: theme.colorScheme.error,
             ),
-            const Gap(AppSpacing.md),
+            const Gap(AppSpacing.lg),
             Text(
               message,
               style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.lg),
               FilledButton(
                 onPressed: onRetry,
-                child: const Text('Retry'),
+                child: const Text(AppStrings.retry),
               ),
             ],
           ],

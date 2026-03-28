@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 
 class QuantitySelector extends StatelessWidget {
   const QuantitySelector({
@@ -23,14 +26,14 @@ class QuantitySelector extends StatelessWidget {
     final lowStock = maxQuantity <= 5 && maxQuantity > 0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Text(
-                'Quantity',
+                AppStrings.quantity,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -39,12 +42,12 @@ class QuantitySelector extends StatelessWidget {
               Row(
                 children: [
                   _StepperIcon(
-                    icon: Icons.remove_rounded,
+                    icon: LucideIcons.minus,
                     onTap: quantity > 1 ? onDecrement : null,
                   ),
                   Container(
                     alignment: Alignment.center,
-                    width: 40,
+                    width: AppSpacing.x3l + AppSpacing.sm,
                     child: Text(
                       '$quantity',
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -53,7 +56,7 @@ class QuantitySelector extends StatelessWidget {
                     ),
                   ),
                   _StepperIcon(
-                    icon: Icons.add_rounded,
+                    icon: LucideIcons.plus,
                     onTap: quantity < maxQuantity ? onIncrement : null,
                   ),
                 ],
@@ -61,11 +64,11 @@ class QuantitySelector extends StatelessWidget {
             ],
           ),
           if (lowStock) ...[
-            const Gap(AppSpacing.xs),
+            const Gap(AppSpacing.sm),
             Text(
-              'Only $maxQuantity left!',
+              '${AppStrings.onlyLeftPrefix}$maxQuantity${AppStrings.onlyLeftSuffix}',
               style: theme.textTheme.labelLarge?.copyWith(
-                color: const Color(0xFFD97706),
+                color: AppColors.warning,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -94,10 +97,10 @@ class _StepperIcon extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xs),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           child: Icon(
             icon,
-            size: 22,
+            size: AppSpacing.xl + AppSpacing.xs,
             color: disabled
                 ? Theme.of(context).disabledColor
                 : Theme.of(context).colorScheme.onPrimaryContainer,

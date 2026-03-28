@@ -19,7 +19,7 @@ class ProductDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -29,7 +29,7 @@ class ProductDescription extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           AnimatedSize(
             duration: const Duration(milliseconds: 280),
             curve: Curves.easeOutCubic,
@@ -45,7 +45,7 @@ class ProductDescription extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(AppSpacing.xs),
+          const Gap(AppSpacing.sm),
           GestureDetector(
             onTap: onToggle,
             child: Text(

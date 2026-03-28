@@ -38,7 +38,7 @@ class ListingEmptyState extends StatelessWidget {
     return Center(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: const EdgeInsets.all(AppSpacing.x3l),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -47,7 +47,7 @@ class ListingEmptyState extends StatelessWidget {
                 width: 168,
                 height: 140,
               ),
-              const Gap(AppSpacing.lg),
+              const Gap(AppSpacing.x2l),
               Text(
                 _title,
                 textAlign: TextAlign.center,
@@ -55,7 +55,7 @@ class ListingEmptyState extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const Gap(AppSpacing.sm),
+              const Gap(AppSpacing.md),
               Text(
                 'Start selling by adding your first listing',
                 textAlign: TextAlign.center,
@@ -63,15 +63,15 @@ class ListingEmptyState extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              const Gap(AppSpacing.lg),
+              const Gap(AppSpacing.x2l),
               FilledButton(
                 onPressed: onAddListing,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
+                  foregroundColor: AppColors.cardBg,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.sm + 2,
+                    horizontal: AppSpacing.x2l,
+                    vertical: AppSpacing.lg,
                   ),
                 ),
                 child: const Text('Add Your First Listing'),

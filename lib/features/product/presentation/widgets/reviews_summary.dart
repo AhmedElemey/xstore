@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/product_review_entity.dart';
 
@@ -54,17 +57,17 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
         : counts.reduce((a, b) => a > b ? a : b).clamp(1, 999999);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Customer Reviews',
+            AppStrings.customerReviews,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,27 +79,30 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const Icon(Icons.star_rounded,
-                      color: Color(0xFFFBBF24), size: 28),
+                  Icon(
+                    LucideIcons.star,
+                    color: AppColors.warning,
+                    size: AppSpacing.x3l - AppSpacing.xs,
+                  ),
                   Text(
-                    '${widget.summary.totalCount} ratings',
+                    '${widget.summary.totalCount} ${AppStrings.ratingsWord}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
-              const Gap(AppSpacing.lg),
+              const Gap(AppSpacing.x2l),
               Expanded(
                 child: Column(
                   children: [
                     for (var star = 5; star >= 1; star--)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                         child: Row(
                           children: [
                             SizedBox(
-                              width: 28,
+                              width: AppSpacing.x3l - AppSpacing.xs,
                               child: Text(
                                 '$star★',
                                 style: theme.textTheme.labelSmall,
@@ -125,7 +131,7 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
               ),
             ],
           ),
-          const Gap(AppSpacing.lg),
+          const Gap(AppSpacing.x2l),
           for (var i = 0; i < widget.reviews.length && i < 3; i++)
             _ReviewTile(
               review: widget.reviews[i],
@@ -134,12 +140,12 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
                 if (i < _expanded.length) _expanded[i] = !_expanded[i];
               }),
             ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               onPressed: widget.onSeeAll,
-              child: const Text('See All Reviews'),
+              child: const Text(AppStrings.seeAllReviews),
             ),
           ),
         ],
@@ -163,7 +169,7 @@ class _ReviewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -184,7 +190,7 @@ class _ReviewTile extends StatelessWidget {
                       )
                     : null,
               ),
-              const Gap(AppSpacing.sm),
+              const Gap(AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,16 +214,16 @@ class _ReviewTile extends StatelessWidget {
                 children: List.generate(5, (i) {
                   return Icon(
                     i < review.stars.round()
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    size: 18,
-                    color: const Color(0xFFFBBF24),
+                        ? LucideIcons.star
+                        : LucideIcons.starOff,
+                    size: AppSpacing.xl,
+                    color: AppColors.warning,
                   );
                 }),
               ),
             ],
           ),
-          const Gap(AppSpacing.xs),
+          const Gap(AppSpacing.sm),
           AnimatedSize(
             duration: const Duration(milliseconds: 240),
             curve: Curves.easeOutCubic,
@@ -233,16 +239,16 @@ class _ReviewTile extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: onToggle,
-              child: Text(expanded ? 'Show less' : 'Read more'),
+              child: Text(expanded ? AppStrings.readLess : AppStrings.readMore),
             ),
           ),
           Text(
-            'Helpful? 👍 ${review.helpfulCount}',
+            '${AppStrings.helpfulPrompt}${review.helpfulCount}',
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const Divider(height: AppSpacing.lg),
+          const Divider(height: AppSpacing.x2l),
         ],
       ),
     );

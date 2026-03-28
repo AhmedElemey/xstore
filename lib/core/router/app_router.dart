@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -14,15 +15,105 @@ import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/product/presentation/screens/product_reviews_screen.dart';
 import '../../features/product/presentation/screens/seller_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
 import 'app_routes.dart';
 import 'router_notifier.dart';
 
 part 'app_router.g.dart';
 
+List<StatefulShellBranch> _consumerShellBranches() => [
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (context, state) => const HomeScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.explore,
+            builder: (context, state) => const ExploreScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.wishlist,
+            builder: (context, state) => const WishlistScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.orders,
+            builder: (context, state) => const OrdersScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
+      ),
+    ];
+
+List<StatefulShellBranch> _vendorShellBranches() => [
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (context, state) => const HomeScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.explore,
+            builder: (context, state) => const ExploreScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.listingAdd,
+            builder: (context, state) => const AddListingScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.listingMy,
+            builder: (context, state) => const MyListingsScreen(),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
+      ),
+    ];
+
 @Riverpod(keepAlive: true)
 GoRouter goRouter(GoRouterRef ref) {
   final refresh = ref.watch(routerNotifierProvider);
+  final auth = ref.watch(authProvider);
+  final isVendor = auth.valueOrNull?.isVendor == true;
+  final shellBranches = isVendor ? _vendorShellBranches() : _consumerShellBranches();
 
   return GoRouter(
     initialLocation: AppRoutes.login,
@@ -44,44 +135,11 @@ GoRouter goRouter(GoRouterRef ref) {
             bottomNavigationBar: XstoreBottomNav(shell: navigationShell),
           );
         },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.home,
-                builder: (context, state) => const HomeScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.explore,
-                builder: (context, state) => const ExploreScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.cart,
-                builder: (context, state) => const CartScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.profile,
-                builder: (context, state) => const ProfileScreen(),
-              ),
-            ],
-          ),
-        ],
+        branches: shellBranches,
       ),
       GoRoute(
-        path: AppRoutes.orders,
-        builder: (context, state) => const OrdersScreen(),
+        path: AppRoutes.cart,
+        builder: (context, state) => const CartScreen(),
       ),
       GoRoute(
         path: '${AppRoutes.product}/:id/reviews',
@@ -103,14 +161,6 @@ GoRouter goRouter(GoRouterRef ref) {
           final id = state.pathParameters['id'] ?? '';
           return ProductDetailScreen(productId: id);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.listingAdd,
-        builder: (context, state) => const AddListingScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.listingMy,
-        builder: (context, state) => const MyListingsScreen(),
       ),
     ],
   );

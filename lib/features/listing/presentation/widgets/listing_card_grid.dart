@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -47,18 +48,18 @@ class ListingCardGrid extends StatelessWidget {
                 borderRadius: 0,
               ),
               Positioned(
-                top: AppSpacing.sm,
-                right: AppSpacing.sm,
+                top: AppSpacing.md,
+                right: AppSpacing.md,
                 child: StatusBadge(status: listing.status, compact: true),
               ),
             ],
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.sm,
-              AppSpacing.sm,
-              AppSpacing.xxs,
-              AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.xs,
+              AppSpacing.md,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +76,7 @@ class ListingCardGrid extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const Gap(AppSpacing.xs),
+                      const Gap(AppSpacing.sm),
                       Text(
                         Formatters.currency(listing.price),
                         style: theme.textTheme.titleSmall?.copyWith(
@@ -87,7 +88,7 @@ class ListingCardGrid extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.more_vert, size: 22),
+                  icon: const Icon(LucideIcons.moreVertical, size: 22),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
                     minWidth: 40,

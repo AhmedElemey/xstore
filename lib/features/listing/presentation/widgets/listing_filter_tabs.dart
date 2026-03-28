@@ -29,7 +29,7 @@ class ListingFilterTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           for (final c in _chips) ...[
@@ -38,7 +38,7 @@ class ListingFilterTabs extends StatelessWidget {
               selected: selected == c.status,
               onTap: () => onFilterSelected(c.status),
             ),
-            const Gap(AppSpacing.xs),
+            const Gap(AppSpacing.sm),
           ],
         ],
       ),
@@ -68,8 +68,8 @@ class _FilterChipPill extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs + 2,
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.transparent,
@@ -82,7 +82,7 @@ class _FilterChipPill extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: selected ? AppColors.onPrimary : Theme.of(context).colorScheme.onSurface,
+                  color: selected ? AppColors.cardBg : Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
           ),

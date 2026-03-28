@@ -3,8 +3,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/listing_entity.dart';
@@ -17,8 +19,6 @@ import '../widgets/listing_filter_tabs.dart';
 import '../widgets/listing_options_sheet.dart';
 import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
-
-const _bg = Color(0xFFFAFAFA);
 
 class MyListingsScreen extends ConsumerStatefulWidget {
   const MyListingsScreen({super.key});
@@ -181,16 +181,16 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     final soldCount = listings.where((e) => e.status == ListingStatus.sold).length;
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        backgroundColor: _bg,
+        backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: const Text('My Listings'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(LucideIcons.search),
             onPressed: _openSearch,
           ),
         ],
@@ -204,7 +204,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           opacity: _fabVisible ? 1 : 0,
           child: FloatingActionButton.extended(
             onPressed: () => context.push(AppRoutes.listingAdd),
-            icon: const Icon(Icons.add),
+            icon: const Icon(LucideIcons.plus),
             label: const Text('New Listing'),
           ),
         ),
@@ -214,10 +214,10 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
+              AppSpacing.lg,
               0,
+              AppSpacing.lg,
               AppSpacing.md,
-              AppSpacing.sm,
             ),
             child: ListingStatsBanner(
               totalCount: listings.length,
@@ -229,7 +229,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             selected: state.selectedFilter,
             onFilterSelected: ref.read(myListingsNotifierProvider.notifier).applyFilter,
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           ListingSortBar(
             sort: state.selectedSort,
             viewMode: state.viewMode,
@@ -262,12 +262,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         onRefresh: () => ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           children: const [
             _ListingListSkeleton(),
-            Gap(AppSpacing.sm),
+            Gap(AppSpacing.md),
             _ListingListSkeleton(),
-            Gap(AppSpacing.sm),
+            Gap(AppSpacing.md),
             _ListingListSkeleton(),
           ],
         ),
@@ -277,12 +277,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     if (state.listings.isEmpty && state.error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(state.error!, textAlign: TextAlign.center),
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.lg),
               FilledButton(
                 onPressed: () => ref.read(myListingsNotifierProvider.notifier).fetchListings(),
                 child: const Text('Retry'),
@@ -317,13 +317,13 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
             AppSpacing.md,
-            AppSpacing.sm,
-            AppSpacing.md,
+            AppSpacing.lg,
             88,
           ),
           itemCount: filtered.length,
-          separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
+          separatorBuilder: (_, __) => const Gap(AppSpacing.md),
           itemBuilder: (context, i) {
             final item = filtered[i];
             return ListingCardList(
@@ -340,15 +340,15 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
           AppSpacing.md,
-          AppSpacing.sm,
-          AppSpacing.md,
+          AppSpacing.lg,
           88,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.sm,
-          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.md,
+          crossAxisSpacing: AppSpacing.md,
           childAspectRatio: 0.72,
         ),
         itemCount: filtered.length,

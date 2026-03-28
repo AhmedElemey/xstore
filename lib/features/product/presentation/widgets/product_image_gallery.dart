@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 
 class ProductImageGallery extends StatefulWidget {
@@ -58,9 +60,15 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
   Widget build(BuildContext context) {
     final urls = widget.imageUrls;
     if (urls.isEmpty) {
-      return const ColoredBox(
-        color: Color(0xFFE2E8F0),
-        child: Center(child: Icon(Icons.image_not_supported_outlined, size: 48)),
+      return ColoredBox(
+        color: AppColors.textDisabled,
+        child: Center(
+          child: Icon(
+            LucideIcons.imageOff,
+            size: AppSpacing.x4l,
+            color: AppColors.textSecondary,
+          ),
+        ),
       );
     }
 
@@ -84,27 +92,33 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                 placeholder: (_, __) => const Center(
                   child: CircularProgressIndicator.adaptive(),
                 ),
-                errorWidget: (_, __, ___) => const ColoredBox(
-                  color: Color(0xFFE2E8F0),
-                  child: Icon(Icons.broken_image_outlined),
+                errorWidget: (_, __, ___) => ColoredBox(
+                  color: AppColors.textDisabled,
+                  child: Icon(
+                    LucideIcons.imageOff,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             );
           },
         ),
         Positioned(
-          top: MediaQuery.paddingOf(context).top + 8,
-          right: 56,
+          top: MediaQuery.paddingOf(context).top + AppSpacing.sm,
+          right: AppSpacing.x3l + AppSpacing.x2l,
           child: Material(
-            color: Colors.black38,
+            color: AppColors.textPrimary.withValues(alpha: 0.38),
             shape: const CircleBorder(),
             clipBehavior: Clip.antiAlias,
             child: IconButton(
               iconSize: 22,
-              color: Colors.white,
+              color: AppColors.cardBg,
               onPressed: widget.onToggleFavorite,
               icon: Icon(
-                widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                LucideIcons.heart,
+                color: widget.isFavorite
+                    ? AppColors.error
+                    : AppColors.cardBg.withValues(alpha: 0.9),
               ),
             ),
           ),
@@ -112,7 +126,7 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
         Positioned(
           left: 0,
           right: 0,
-          bottom: widget.bottomInset + 8,
+          bottom: widget.bottomInset + AppSpacing.sm,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -122,43 +136,48 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   final active = i == widget.selectedIndex;
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: active ? 18 : 6,
-                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    width: active ? AppSpacing.xl : AppSpacing.sm,
+                    height: AppSpacing.sm,
                     decoration: BoxDecoration(
-                      color: active ? Colors.white : Colors.white54,
-                      borderRadius: BorderRadius.circular(4),
+                      color: active
+                          ? AppColors.cardBg
+                          : AppColors.cardBg.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(AppSpacing.xs),
                     ),
                   );
                 }),
               ),
-              const Gap(AppSpacing.xs),
+              const Gap(AppSpacing.sm),
               SizedBox(
-                height: 52,
+                height: AppSpacing.x4l + AppSpacing.xs,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   itemCount: urls.length,
-                  separatorBuilder: (_, __) => const Gap(AppSpacing.xs),
+                  separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
                   itemBuilder: (context, i) {
                     final sel = i == widget.selectedIndex;
                     return GestureDetector(
                       onTap: () => widget.onPageChanged(i),
                       child: Container(
-                        width: 48,
-                        height: 48,
+                        width: AppSpacing.x4l,
+                        height: AppSpacing.x4l,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppSpacing.sm),
                           border: Border.all(
-                            color: sel ? Colors.white : Colors.white24,
-                            width: sel ? 2 : 1,
+                            color: sel
+                                ? AppColors.cardBg
+                                : AppColors.cardBg.withValues(alpha: 0.35),
+                            width: sel ? AppSpacing.xs / 2 : AppSpacing.xs / 4,
                           ),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: CachedNetworkImage(
                           imageUrl: urls[i],
                           fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => const Icon(Icons.image),
+                          errorWidget: (_, __, ___) =>
+                              const Icon(LucideIcons.imageOff),
                         ),
                       ),
                     );

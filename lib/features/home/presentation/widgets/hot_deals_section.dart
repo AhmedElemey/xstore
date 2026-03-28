@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/deal_entity.dart';
 import 'product_card.dart';
 
@@ -24,14 +25,14 @@ class HotDealsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hot deals',
+          AppStrings.hotDeals,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const Gap(AppSpacing.sm),
+        const Gap(AppSpacing.md),
         LayoutBuilder(
           builder: (context, constraints) {
             const crossAxisCount = 2;
-            const spacing = AppSpacing.sm;
+            const spacing = AppSpacing.md;
             final tileWidth =
                 (constraints.maxWidth - spacing) / crossAxisCount;
             return Wrap(

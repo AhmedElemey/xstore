@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 
@@ -35,10 +38,10 @@ class ProductHeader extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
         AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +54,7 @@ class ProductHeader extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -63,7 +66,7 @@ class ProductHeader extends StatelessWidget {
                 ),
               ),
               if (hasCompare) ...[
-                const Gap(AppSpacing.sm),
+                const Gap(AppSpacing.md),
                 Text(
                   Formatters.currency(compareAtPrice!),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -71,20 +74,20 @@ class ProductHeader extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Gap(AppSpacing.sm),
+                const Gap(AppSpacing.md),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xxs,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFEDD5),
-                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppSpacing.xl),
                   ),
                   child: Text(
                     '-$discount%',
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: const Color(0xFFEA580C),
+                      color: AppColors.accent,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -92,27 +95,30 @@ class ProductHeader extends StatelessWidget {
               ],
             ],
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: onTapReviews,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 child: Row(
                   children: [
-                    const Icon(Icons.star_rounded,
-                        color: Color(0xFFFBBF24), size: 22),
-                    const Gap(AppSpacing.xxs),
+                    Icon(
+                      LucideIcons.star,
+                      color: AppColors.warning,
+                      size: AppSpacing.xl + AppSpacing.xs,
+                    ),
+                    const Gap(AppSpacing.xs),
                     Text(
-                      '$ratingLabel · $reviewCountLabel reviews',
+                      '$ratingLabel${AppStrings.reviewsDotSeparator}$reviewCountLabel${AppStrings.reviewsSuffix}',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Icon(
-                      Icons.chevron_right_rounded,
+                      LucideIcons.chevronRight,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ],
@@ -120,10 +126,10 @@ class ProductHeader extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               if (listing.conditionLabel.isNotEmpty)
                 Chip(
@@ -144,7 +150,7 @@ class ProductHeader extends StatelessWidget {
             ],
           ),
           if (locationLine.isNotEmpty) ...[
-            const Gap(AppSpacing.sm),
+            const Gap(AppSpacing.md),
             Text(
               locationLine,
               style: theme.textTheme.bodySmall?.copyWith(

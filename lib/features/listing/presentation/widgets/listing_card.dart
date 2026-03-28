@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
@@ -21,7 +22,7 @@ class ListingCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -36,19 +37,19 @@ class ListingCard extends StatelessWidget {
                 StatusBadge(status: listing.status),
                 if (onDelete != null)
                   IconButton(
-                    icon: const Icon(Icons.delete_outline),
+                    icon: const Icon(LucideIcons.trash2),
                     onPressed: onDelete,
                   ),
               ],
             ),
-            const Gap(AppSpacing.xs),
+            const Gap(AppSpacing.sm),
             Text(
               listing.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium,
             ),
-            const Gap(AppSpacing.sm),
+            const Gap(AppSpacing.md),
             Text(
               Formatters.currency(listing.price),
               style: theme.textTheme.labelLarge?.copyWith(

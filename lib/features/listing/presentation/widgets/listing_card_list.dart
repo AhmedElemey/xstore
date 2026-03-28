@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -50,12 +51,12 @@ class ListingCardList extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm + 2),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListingThumbnail(imageUrl: thumb, size: 80, borderRadius: 10),
-            const Gap(AppSpacing.md),
+            const Gap(AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +69,7 @@ class ListingCardList extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const Gap(AppSpacing.xs),
+                  const Gap(AppSpacing.sm),
                   Text(
                     Formatters.currency(listing.price),
                     style: theme.textTheme.titleSmall?.copyWith(
@@ -85,7 +86,7 @@ class ListingCardList extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const Gap(AppSpacing.xs),
+                  const Gap(AppSpacing.sm),
                   StatusBadge(status: listing.status),
                   if (listing.postedAt != null) ...[
                     const Gap(4),
@@ -101,7 +102,7 @@ class ListingCardList extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.more_vert),
+              icon: const Icon(LucideIcons.moreVertical),
               onPressed: onOpenMenu,
             ),
           ],

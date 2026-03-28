@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/banner_entity.dart';
 
@@ -20,7 +22,7 @@ class HeroBannerCarousel extends StatelessWidget {
     }
     return CarouselSlider(
       options: CarouselOptions(
-        height: 180,
+        height: AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.sm,
         viewportFraction: 0.9,
         enlargeCenterPage: true,
         autoPlay: true,
@@ -28,9 +30,9 @@ class HeroBannerCarousel extends StatelessWidget {
       items: banners
           .map(
             (b) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppSpacing.lg),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -38,24 +40,24 @@ class HeroBannerCarousel extends StatelessWidget {
                       imageUrl: b.imageUrl,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => const ColoredBox(
-                        color: Color(0xFFE2E8F0),
+                        color: AppColors.textDisabled,
                       ),
                       errorWidget: (_, __, ___) => const ColoredBox(
-                        color: Color(0xFFE2E8F0),
-                        child: Icon(Icons.broken_image_outlined),
+                        color: AppColors.textDisabled,
+                        child: Icon(LucideIcons.imageOff),
                       ),
                     ),
                     Positioned(
-                      left: AppSpacing.md,
-                      bottom: AppSpacing.md,
+                      left: AppSpacing.lg,
+                      bottom: AppSpacing.lg,
                       child: Text(
                         b.title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              shadows: const [
+                              color: AppColors.cardBg,
+                              shadows: [
                                 Shadow(
-                                  blurRadius: 8,
-                                  color: Colors.black54,
+                                  blurRadius: AppSpacing.sm,
+                                  color: AppColors.textPrimary.withValues(alpha: 0.45),
                                 ),
                               ],
                             ),

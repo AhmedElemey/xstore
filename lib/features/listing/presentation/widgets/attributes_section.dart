@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -33,7 +34,7 @@ class AttributesSection extends StatelessWidget {
       children: [
         for (var i = 0; i < keyControllers.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -50,7 +51,7 @@ class AttributesSection extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Gap(AppSpacing.sm),
+                const Gap(AppSpacing.md),
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: Text(
@@ -58,7 +59,7 @@ class AttributesSection extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                const Gap(AppSpacing.sm),
+                const Gap(AppSpacing.md),
                 Expanded(
                   child: TextField(
                     controller: valueControllers[i],
@@ -74,7 +75,7 @@ class AttributesSection extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () => onRemove(i),
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const Icon(LucideIcons.trash2),
                   color: AppColors.error,
                 ),
               ],
@@ -82,7 +83,7 @@ class AttributesSection extends StatelessWidget {
           ),
         TextButton.icon(
           onPressed: onAdd,
-          icon: const Icon(Icons.add),
+          icon: const Icon(LucideIcons.plus),
           label: const Text('Add attribute'),
         ),
       ],

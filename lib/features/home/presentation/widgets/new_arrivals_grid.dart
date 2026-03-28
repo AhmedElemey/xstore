@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../domain/entities/deal_entity.dart';
+import '../../../../core/constants/app_strings.dart';
+import '../../../listing/domain/entities/listing_entity.dart';
 import 'product_card.dart';
 
 class NewArrivalsGrid extends StatelessWidget {
@@ -12,8 +13,8 @@ class NewArrivalsGrid extends StatelessWidget {
     this.onOpenProduct,
   });
 
-  final List<DealEntity> items;
-  final void Function(DealEntity deal)? onOpenProduct;
+  final List<ListingEntity> items;
+  final void Function(ListingEntity listing)? onOpenProduct;
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +26,14 @@ class NewArrivalsGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'New arrivals',
+          AppStrings.newArrivals,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const Gap(AppSpacing.sm),
+        const Gap(AppSpacing.md),
         LayoutBuilder(
           builder: (context, constraints) {
             const crossAxisCount = 2;
-            const spacing = AppSpacing.sm;
+            const spacing = AppSpacing.md;
             final tileWidth =
                 (constraints.maxWidth - spacing) / crossAxisCount;
             return Wrap(
@@ -40,14 +41,15 @@ class NewArrivalsGrid extends StatelessWidget {
               runSpacing: spacing,
               children: display
                   .map(
-                    (d) => SizedBox(
+                    (listing) => SizedBox(
                       width: tileWidth,
                       child: ProductCard(
-                        title: d.title,
-                        price: d.price,
-                        imageUrl: d.imageUrl,
+                        title: listing.title,
+                        price: listing.price,
+                        imageUrl:
+                            listing.imageUrls.isNotEmpty ? listing.imageUrls.first : null,
                         discountPercent: 0,
-                        onTap: () => onOpenProduct?.call(d),
+                        onTap: () => onOpenProduct?.call(listing),
                       ),
                     ),
                   )

@@ -71,7 +71,7 @@ class _ListingFormFieldState extends State<ListingFormField> {
 
     final normalBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.outline),
+      borderSide: const BorderSide(color: AppColors.textDisabled),
     );
     final focusedNormal = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),

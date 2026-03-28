@@ -87,5 +87,41 @@ final getCategoriesUseCaseProvider =
 );
 
 typedef GetCategoriesUseCaseRef = AutoDisposeProviderRef<GetCategoriesUseCase>;
+String _$getNewArrivalsUseCaseHash() =>
+    r'a4d0c85ccab931bc12787ffb4b2b93f02019f227';
+
+/// See also [getNewArrivalsUseCase].
+@ProviderFor(getNewArrivalsUseCase)
+final getNewArrivalsUseCaseProvider =
+    AutoDisposeProvider<GetNewArrivalsUseCase>.internal(
+  getNewArrivalsUseCase,
+  name: r'getNewArrivalsUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getNewArrivalsUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetNewArrivalsUseCaseRef
+    = AutoDisposeProviderRef<GetNewArrivalsUseCase>;
+String _$getRecommendedUseCaseHash() =>
+    r'ab4df9ccddd0db956ec3992cd590002f4a58dcfc';
+
+/// See also [getRecommendedUseCase].
+@ProviderFor(getRecommendedUseCase)
+final getRecommendedUseCaseProvider =
+    AutoDisposeProvider<GetRecommendedUseCase>.internal(
+  getRecommendedUseCase,
+  name: r'getRecommendedUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getRecommendedUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetRecommendedUseCaseRef
+    = AutoDisposeProviderRef<GetRecommendedUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

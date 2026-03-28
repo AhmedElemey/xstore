@@ -55,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -63,19 +63,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 AppStrings.loginTitle,
                 style: context.textTheme.headlineSmall,
               ),
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.lg),
               LoginForm(
                 formKey: _formKey,
                 emailController: _email,
                 passwordController: _password,
               ),
-              const Gap(AppSpacing.lg),
+              const Gap(AppSpacing.x2l),
               AuthButton(
                 label: 'Continue',
                 isLoading: loading,
                 onPressed: loading ? null : _onSubmit,
               ),
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.lg),
               TextButton(
                 onPressed: () => context.push(AppRoutes.register),
                 child: const Text('Create an account'),

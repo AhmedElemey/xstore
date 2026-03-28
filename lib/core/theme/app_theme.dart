@@ -8,7 +8,7 @@ abstract final class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
-      surface: AppColors.surface,
+      surface: AppColors.background,
     );
     return ThemeData(
       useMaterial3: true,

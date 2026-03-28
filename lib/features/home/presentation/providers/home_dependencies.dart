@@ -7,6 +7,8 @@ import '../../domain/repositories/home_repository.dart';
 import '../../domain/usecases/get_banners_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
 import '../../domain/usecases/get_hot_deals_usecase.dart';
+import '../../domain/usecases/get_new_arrivals_usecase.dart';
+import '../../domain/usecases/get_recommended_usecase.dart';
 
 part 'home_dependencies.g.dart';
 
@@ -35,4 +37,14 @@ GetHotDealsUseCase getHotDealsUseCase(GetHotDealsUseCaseRef ref) {
 @riverpod
 GetCategoriesUseCase getCategoriesUseCase(GetCategoriesUseCaseRef ref) {
   return GetCategoriesUseCase(ref.watch(homeRepositoryProvider));
+}
+
+@riverpod
+GetNewArrivalsUseCase getNewArrivalsUseCase(GetNewArrivalsUseCaseRef ref) {
+  return GetNewArrivalsUseCase(ref.watch(homeRepositoryProvider));
+}
+
+@riverpod
+GetRecommendedUseCase getRecommendedUseCase(GetRecommendedUseCaseRef ref) {
+  return GetRecommendedUseCase(ref.watch(homeRepositoryProvider));
 }

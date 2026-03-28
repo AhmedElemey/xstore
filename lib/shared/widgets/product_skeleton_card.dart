@@ -23,7 +23,7 @@ class ProductSkeletonCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           Container(
             height: 14,
             width: 120,
@@ -32,7 +32,7 @@ class ProductSkeletonCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
           ),
-          const Gap(AppSpacing.xs),
+          const Gap(AppSpacing.sm),
           Container(
             height: 12,
             width: 72,

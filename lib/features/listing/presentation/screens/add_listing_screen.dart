@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -15,8 +16,6 @@ import '../widgets/condition_selector.dart';
 import '../widgets/listing_form_field.dart';
 import '../widgets/photo_upload_section.dart';
 import '../widgets/quantity_stepper.dart';
-
-const _bg = Color(0xFFFAFAFA);
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key});
@@ -98,7 +97,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
+              leading: const Icon(LucideIcons.camera),
               title: const Text('📷 Take a Photo'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -106,7 +105,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
+              leading: const Icon(LucideIcons.imagePlus),
               title: const Text('🖼️ Choose from Gallery'),
               onTap: () {
                 Navigator.pop(ctx);
@@ -176,16 +175,16 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     final err = form.errors;
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
         title: const Text('Add Listing'),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF64748B),
+              foregroundColor: AppColors.textSecondary,
             ),
             onPressed: form.isSubmitting
                 ? null
@@ -218,10 +217,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
                 AppSpacing.md,
-                AppSpacing.sm,
-                AppSpacing.md,
-                AppSpacing.xl,
+                AppSpacing.lg,
+                AppSpacing.x3l,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -233,9 +232,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     onRemove: notifier.removePhoto,
                     onReorder: notifier.reorderPhotos,
                   ),
-                  const Gap(AppSpacing.xl),
+                  const Gap(AppSpacing.x3l),
                   const _AccentSectionTitle('Basic Information'),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   ListingFormField(
                     label: 'Product name *',
                     controller: _name,
@@ -244,7 +243,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     errorText: err['name'],
                     onChanged: (v) => notifier.updateField('name', v),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   ListingFormField(
                     label: 'Price *',
                     controller: _price,
@@ -256,7 +255,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     errorText: err['price'],
                     onChanged: (v) => notifier.updateField('priceInput', v),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   Text(
                     'Compare-at price (optional)',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -291,7 +290,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                             ),
                       ),
                     ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   ListingFormField(
                     label: 'Description *',
                     controller: _description,
@@ -303,9 +302,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     errorText: err['description'],
                     onChanged: (v) => notifier.updateField('description', v),
                   ),
-                  const Gap(AppSpacing.xl),
+                  const Gap(AppSpacing.x3l),
                   const _AccentSectionTitle('Category & Details'),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   _PickerField(
                     label: 'Category *',
                     value: _categoryLabel(form.categoryId),
@@ -320,7 +319,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                           notifier.updateField('categoryId', id),
                     ),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   if (form.categoryId.isNotEmpty) ...[
                     _PickerField(
                       label: 'Subcategory *',
@@ -347,7 +346,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                         );
                       },
                     ),
-                    const Gap(AppSpacing.md),
+                    const Gap(AppSpacing.lg),
                   ],
                   ConditionSelector(
                     options: ListingCategoriesData.conditions,
@@ -355,7 +354,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     errorText: err['condition'],
                     onChanged: (v) => notifier.updateField('condition', v),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   RawAutocomplete<String>(
                     textEditingController: _brand,
                     focusNode: _brandFocus,
@@ -421,24 +420,24 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       );
                     },
                   ),
-                  const Gap(AppSpacing.xl),
+                  const Gap(AppSpacing.x3l),
                   const _AccentSectionTitle('Stock & Shipping'),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   QuantityStepper(
                     quantity: form.quantity,
                     errorText: err['quantity'],
                     onChanged: (q) => notifier.updateField('quantity', q),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   ListingFormField(
                     label: 'Location *',
                     controller: _location,
                     hint: 'City, Region',
-                    prefix: const Icon(Icons.location_on_outlined, size: 22),
+                    prefix: const Icon(LucideIcons.mapPin, size: 22),
                     errorText: err['location'],
                     onChanged: (v) => notifier.updateField('location', v),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Shipping available?'),
@@ -447,7 +446,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                         notifier.updateField('shippingAvailable', v),
                   ),
                   if (form.shippingAvailable) ...[
-                    const Gap(AppSpacing.sm),
+                    const Gap(AppSpacing.md),
                     ListingFormField(
                       label: 'Shipping cost *',
                       controller: _shippingCost,
@@ -461,7 +460,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                           notifier.updateField('shippingCostInput', v),
                     ),
                   ],
-                  const Gap(AppSpacing.xl),
+                  const Gap(AppSpacing.x3l),
                   const _AccentSectionTitle('Product Attributes'),
                   Text(
                     'Add specs like size, color, weight…',
@@ -469,7 +468,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
-                  const Gap(AppSpacing.md),
+                  const Gap(AppSpacing.lg),
                   AttributesSection(
                     keyControllers: _attrKeys,
                     valueControllers: _attrVals,
@@ -489,10 +488,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
                 AppSpacing.md,
-                AppSpacing.sm,
-                AppSpacing.md,
-                AppSpacing.md,
+                AppSpacing.lg,
+                AppSpacing.lg,
               ),
               child: _PublishBar(
                 enabled: canSubmit && !form.isSubmitting,
@@ -593,20 +592,20 @@ class _PickerField extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: hasError ? AppColors.error : AppColors.outline,
+                    color: hasError ? AppColors.error : AppColors.textDisabled,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: hasError ? AppColors.error : AppColors.outline,
+                    color: hasError ? AppColors.error : AppColors.textDisabled,
                   ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 14,
                 ),
-                suffixIcon: const Icon(Icons.keyboard_arrow_down),
+                suffixIcon: const Icon(LucideIcons.chevronDown),
               ),
               child: Text(
                 value,
@@ -649,7 +648,7 @@ class _PublishBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final gradient = LinearGradient(
       colors: enabled
-          ? [AppColors.primary, AppColors.secondary]
+          ? [AppColors.primary, AppColors.accent]
           : [Colors.grey.shade400, Colors.grey.shade500],
     );
     return DecoratedBox(

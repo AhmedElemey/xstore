@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 /// Static taxonomy for listing form (presentation layer).
 abstract final class ListingCategoriesData {
@@ -6,7 +7,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'electronics',
       name: 'Electronics',
-      icon: Icons.devices_outlined,
+      icon: LucideIcons.smartphone,
       subcategories: [
         ListingSubcategoryOption(id: 'phones', name: 'Phones & tablets'),
         ListingSubcategoryOption(id: 'laptops', name: 'Laptops & PCs'),
@@ -18,7 +19,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'fashion',
       name: 'Fashion',
-      icon: Icons.checkroom_outlined,
+      icon: LucideIcons.shirt,
       subcategories: [
         ListingSubcategoryOption(id: 'mens', name: "Men's"),
         ListingSubcategoryOption(id: 'womens', name: "Women's"),
@@ -30,7 +31,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'home',
       name: 'Home & Garden',
-      icon: Icons.home_outlined,
+      icon: LucideIcons.sofa,
       subcategories: [
         ListingSubcategoryOption(id: 'furniture', name: 'Furniture'),
         ListingSubcategoryOption(id: 'decor', name: 'Decor'),
@@ -42,7 +43,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'beauty',
       name: 'Beauty',
-      icon: Icons.spa_outlined,
+      icon: LucideIcons.sparkles,
       subcategories: [
         ListingSubcategoryOption(id: 'skincare', name: 'Skincare'),
         ListingSubcategoryOption(id: 'makeup', name: 'Makeup'),
@@ -53,7 +54,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'sports',
       name: 'Sports',
-      icon: Icons.sports_outlined,
+      icon: LucideIcons.dumbbell,
       subcategories: [
         ListingSubcategoryOption(id: 'fitness', name: 'Fitness'),
         ListingSubcategoryOption(id: 'outdoor', name: 'Outdoor'),
@@ -64,7 +65,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'toys',
       name: 'Toys',
-      icon: Icons.toys_outlined,
+      icon: LucideIcons.baby,
       subcategories: [
         ListingSubcategoryOption(id: 'games', name: 'Games'),
         ListingSubcategoryOption(id: 'dolls', name: 'Dolls & figures'),
@@ -75,7 +76,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'automotive',
       name: 'Automotive',
-      icon: Icons.directions_car_outlined,
+      icon: LucideIcons.car,
       subcategories: [
         ListingSubcategoryOption(id: 'parts', name: 'Parts'),
         ListingSubcategoryOption(id: 'accessories', name: 'Accessories'),
@@ -86,7 +87,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'food',
       name: 'Food & Drinks',
-      icon: Icons.restaurant_outlined,
+      icon: LucideIcons.utensils,
       subcategories: [
         ListingSubcategoryOption(id: 'beverages', name: 'Beverages'),
         ListingSubcategoryOption(id: 'snacks', name: 'Snacks'),
@@ -97,7 +98,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'books',
       name: 'Books',
-      icon: Icons.menu_book_outlined,
+      icon: LucideIcons.bookOpen,
       subcategories: [
         ListingSubcategoryOption(id: 'fiction', name: 'Fiction'),
         ListingSubcategoryOption(id: 'nonfiction', name: 'Non-fiction'),
@@ -108,7 +109,7 @@ abstract final class ListingCategoriesData {
     ListingCategoryOption(
       id: 'other',
       name: 'Other',
-      icon: Icons.category_outlined,
+      icon: LucideIcons.shapes,
       subcategories: [
         ListingSubcategoryOption(id: 'misc', name: 'Miscellaneous'),
       ],

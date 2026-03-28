@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -39,14 +40,14 @@ class PhotoUploadSection extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const Gap(AppSpacing.xs),
+        const Gap(AppSpacing.sm),
         Text(
           'Add 1–5 photos (first = cover)',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
         ),
-        const Gap(AppSpacing.md),
+        const Gap(AppSpacing.lg),
         SizedBox(
           height: tile + 8,
           child: SingleChildScrollView(
@@ -56,7 +57,7 @@ class PhotoUploadSection extends StatelessWidget {
               children: [
                 for (var i = 0; i < paths.length; i++)
                   Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.sm),
+                    padding: const EdgeInsets.only(right: AppSpacing.md),
                     child: _PhotoTile(
                       path: paths[i],
                       index: i,
@@ -107,7 +108,7 @@ class _AddPhotoTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: CustomPaint(
           foregroundPainter: _DashedBorderPainter(
-            color: AppColors.outline,
+            color: AppColors.textDisabled,
             radius: 12,
           ),
           child: SizedBox(
@@ -116,7 +117,7 @@ class _AddPhotoTile extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add, color: Colors.grey.shade600, size: 28),
+                Icon(LucideIcons.plus, color: AppColors.textSecondary, size: 28),
                 const SizedBox(height: 4),
                 Text(
                   'Add Photo',
@@ -226,17 +227,17 @@ class _PhotoTile extends StatelessWidget {
               ),
             ),
           Positioned(
-            top: 4,
-            right: 4,
+            top: AppSpacing.xs,
+            right: AppSpacing.xs,
             child: Material(
               color: AppColors.error,
               shape: const CircleBorder(),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: onRemove,
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.close, color: Colors.white, size: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xs),
+                  child: Icon(LucideIcons.x, color: AppColors.cardBg, size: AppSpacing.lg),
                 ),
               ),
             ),

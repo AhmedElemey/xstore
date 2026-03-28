@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 
 class ProductStickyBar extends StatelessWidget {
   const ProductStickyBar({
@@ -17,35 +20,33 @@ class ProductStickyBar extends StatelessWidget {
   final VoidCallback onBuyNow;
   final bool isAddingToCart;
 
-  static const _accentOrange = Color(0xFFF97316);
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
       elevation: 12,
-      shadowColor: Colors.black26,
+      shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
       color: theme.colorScheme.surface,
       child: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
             AppSpacing.md,
-            AppSpacing.sm,
-            AppSpacing.md,
-            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
           ),
           child: Row(
             children: [
               OutlinedButton(
                 onPressed: onChat,
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                  minimumSize: const Size(48, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  minimumSize: const Size(AppSpacing.x3l + AppSpacing.md, AppSpacing.x3l + AppSpacing.md),
                 ),
-                child: const Icon(Icons.chat_bubble_outline_rounded, size: 22),
+                child: const Icon(LucideIcons.messageCircle, size: 22),
               ),
-              const Gap(AppSpacing.sm),
+              const Gap(AppSpacing.md),
               Expanded(
                 child: FilledButton(
                   onPressed: isAddingToCart ? null : onAddToCart,
@@ -55,17 +56,17 @@ class ProductStickyBar extends StatelessWidget {
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.cardBg,
                           ),
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.shopping_cart_outlined, size: 20),
-                            const Gap(AppSpacing.xs),
+                            const Icon(LucideIcons.shoppingCart, size: 20),
+                            const Gap(AppSpacing.sm),
                             Flexible(
                               child: Text(
-                                'Add to Cart',
+                                AppStrings.addToCart,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
@@ -75,22 +76,22 @@ class ProductStickyBar extends StatelessWidget {
                         ),
                 ),
               ),
-              const Gap(AppSpacing.sm),
+              const Gap(AppSpacing.md),
               Expanded(
                 child: FilledButton(
                   onPressed: onBuyNow,
                   style: FilledButton.styleFrom(
-                    backgroundColor: _accentOrange,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.cardBg,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.bolt_rounded, size: 20),
-                      const Gap(AppSpacing.xs),
+                      const Icon(LucideIcons.zap, size: 20),
+                      const Gap(AppSpacing.sm),
                       Flexible(
                         child: Text(
-                          'Buy Now',
+                          AppStrings.buyNow,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,

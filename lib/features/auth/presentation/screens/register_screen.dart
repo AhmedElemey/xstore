@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -55,13 +56,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Form(
             key: _formKey,
             child: Column(
@@ -71,7 +72,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   AppStrings.registerTitle,
                   style: context.textTheme.headlineSmall,
                 ),
-                const Gap(AppSpacing.md),
+                const Gap(AppSpacing.lg),
                 XstoreTextField(
                   controller: _email,
                   label: 'Email',
@@ -79,7 +80,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   validator: Validators.email,
                 ),
-                const Gap(AppSpacing.sm),
+                const Gap(AppSpacing.md),
                 XstoreTextField(
                   controller: _password,
                   label: 'Password',
@@ -87,7 +88,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.done,
                   validator: Validators.password,
                 ),
-                const Gap(AppSpacing.lg),
+                const Gap(AppSpacing.x2l),
                 AuthButton(
                   label: 'Register',
                   isLoading: loading,

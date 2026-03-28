@@ -6,6 +6,7 @@ import '../../../home/domain/repositories/home_repository.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/product_review_entity.dart';
+import '../../domain/entities/review_entity.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../domain/repositories/product_repository.dart';
 
@@ -181,5 +182,48 @@ class ProductRepositoryImpl implements ProductRepository {
         'This description is intentionally long so the product page can demonstrate '
         'a collapsible “Read more” area before expanding the full text for buyers '
         'who want every detail before they purchase.';
+  }
+
+  @override
+  Future<Either<Failure, List<ProductDetailEntity>>> getSimilarProducts({
+    required String productId,
+    required String category,
+  }) async {
+    final dealsResult = await _homeRepository.getHotDeals();
+    return dealsResult.fold(Left.new, (deals) {
+      final filtered = deals.where((d) => d.id != productId).take(5);
+      return Right(
+        filtered
+            .map(
+              (d) => _fromDeal(d, deals).copyWith(
+                similarProducts: const [],
+                reviews: const [],
+                reviewSummary: null,
+              ),
+            )
+            .toList(),
+      );
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<ReviewEntity>>> getProductReviews(String productId) async {
+    final reviews = _reviewsFor(productId);
+    return Right(
+      reviews
+          .map(
+            (r) => ReviewEntity(
+              id: r.id,
+              userId: 'user_${r.id}',
+              userName: r.userName,
+              userAvatar: r.userAvatarUrl,
+              rating: r.stars,
+              comment: r.text,
+              helpfulCount: r.helpfulCount,
+              createdAt: r.date,
+            ),
+          )
+          .toList(),
+    );
   }
 }

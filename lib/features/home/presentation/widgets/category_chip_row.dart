@@ -24,7 +24,7 @@ class CategoryChipRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
-        separatorBuilder: (_, __) => const Gap(AppSpacing.xs),
+        separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
         itemBuilder: (context, index) {
           final c = categories[index];
           return ActionChip(

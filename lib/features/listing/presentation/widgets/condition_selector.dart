@@ -30,10 +30,10 @@ class ConditionSelector extends StatelessWidget {
           'Condition *',
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const Gap(AppSpacing.sm),
+        const Gap(AppSpacing.md),
         Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: options.map((o) {
             final isSel = o == selected;
             return ChoiceChip(
@@ -49,7 +49,7 @@ class ConditionSelector extends StatelessWidget {
               selectedColor: AppColors.primary,
               backgroundColor: Colors.transparent,
               side: BorderSide(
-                color: hasError && !isSel ? AppColors.error : AppColors.outline,
+                color: hasError && !isSel ? AppColors.error : AppColors.textDisabled,
               ),
               showCheckmark: false,
             );

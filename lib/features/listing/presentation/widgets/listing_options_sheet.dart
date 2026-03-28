@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/listing_entity.dart';
 
 /// Bottom sheet: listing actions (edit, pause/resume, stats, delete).
@@ -30,25 +33,25 @@ class ListingOptionsSheet extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Gap(AppSpacing.xs),
+            const Gap(AppSpacing.sm),
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: AppSpacing.x3l + AppSpacing.sm,
+                height: AppSpacing.xs,
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(AppSpacing.xs),
                 ),
               ),
             ),
-            const Gap(AppSpacing.md),
+            const Gap(AppSpacing.lg),
             ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('Edit Listing'),
+              leading: const Icon(LucideIcons.pencil),
+              title: const Text(AppStrings.editListingMenu),
               onTap: () {
                 Navigator.of(context).pop();
                 onEdit();
@@ -56,8 +59,8 @@ class ListingOptionsSheet extends StatelessWidget {
             ),
             if (showPause)
               ListTile(
-                leading: const Icon(Icons.pause_circle_outline),
-                title: const Text('Pause'),
+                leading: const Icon(LucideIcons.pauseCircle),
+                title: const Text(AppStrings.pauseListing),
                 onTap: () {
                   Navigator.of(context).pop();
                   onPause();
@@ -65,25 +68,25 @@ class ListingOptionsSheet extends StatelessWidget {
               ),
             if (showResume)
               ListTile(
-                leading: const Icon(Icons.play_circle_outline),
-                title: const Text('Resume'),
+                leading: const Icon(LucideIcons.playCircle),
+                title: const Text(AppStrings.resumeListing),
                 onTap: () {
                   Navigator.of(context).pop();
                   onResume();
                 },
               ),
             ListTile(
-              leading: const Icon(Icons.bar_chart_outlined),
-              title: const Text('View Stats'),
+              leading: const Icon(LucideIcons.barChart2),
+              title: const Text(AppStrings.viewStatsMenu),
               onTap: () {
                 Navigator.of(context).pop();
                 onViewStats();
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+              leading: Icon(LucideIcons.trash2, color: Theme.of(context).colorScheme.error),
               title: Text(
-                'Delete',
+                AppStrings.deleteListing,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               onTap: () {
@@ -91,7 +94,7 @@ class ListingOptionsSheet extends StatelessWidget {
                 onDelete();
               },
             ),
-            const Gap(AppSpacing.sm),
+            const Gap(AppSpacing.md),
           ],
         ),
       ),
@@ -110,22 +113,34 @@ class ListingStatsSheet extends StatelessWidget {
     final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.x2l),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Listing stats',
+              AppStrings.listingStatsHeading,
               style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
+            const Gap(AppSpacing.x2l),
+            _StatRow(
+              icon: LucideIcons.eye,
+              label: AppStrings.listingViews,
+              value: '${listing.viewCount}',
+            ),
             const Gap(AppSpacing.lg),
-            _StatRow(icon: Icons.visibility_outlined, label: 'Views', value: '${listing.viewCount}'),
-            const Gap(AppSpacing.md),
-            _StatRow(icon: Icons.bookmark_border, label: 'Saves', value: '${listing.saveCount}'),
-            const Gap(AppSpacing.md),
-            _StatRow(icon: Icons.chat_bubble_outline, label: 'Inquiries', value: '${listing.inquiryCount}'),
-            const Gap(AppSpacing.md),
+            _StatRow(
+              icon: LucideIcons.bookmark,
+              label: AppStrings.listingSaves,
+              value: '${listing.saveCount}',
+            ),
+            const Gap(AppSpacing.lg),
+            _StatRow(
+              icon: LucideIcons.messageCircle,
+              label: AppStrings.listingInquiries,
+              value: '${listing.inquiryCount}',
+            ),
+            const Gap(AppSpacing.lg),
           ],
         ),
       ),
@@ -148,8 +163,8 @@ class _StatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 22, color: Theme.of(context).colorScheme.primary),
-        const Gap(AppSpacing.md),
+        Icon(icon, size: 22, color: AppColors.primary),
+        const Gap(AppSpacing.lg),
         Expanded(
           child: Text(
             label,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/listing_entity.dart';
 
 class StatusBadge extends StatelessWidget {
@@ -9,24 +12,23 @@ class StatusBadge extends StatelessWidget {
     this.compact = false,
   });
 
-  /// Smaller padding for dense layouts (e.g. grid overlay).
   final ListingStatus status;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final label = switch (status) {
-      ListingStatus.draft => 'Draft',
-      ListingStatus.pending => 'Pending',
-      ListingStatus.active => 'Active',
-      ListingStatus.paused => 'Paused',
-      ListingStatus.sold => 'Sold',
-      ListingStatus.rejected => 'Rejected',
+      ListingStatus.draft => AppStrings.draft,
+      ListingStatus.pending => AppStrings.pending,
+      ListingStatus.active => AppStrings.active,
+      ListingStatus.paused => AppStrings.paused,
+      ListingStatus.sold => AppStrings.sold,
+      ListingStatus.rejected => AppStrings.rejected,
     };
     final (bg, fg) = _colors(status);
     final pad = compact
-        ? const EdgeInsets.symmetric(horizontal: 8, vertical: 3)
-        : const EdgeInsets.symmetric(horizontal: 10, vertical: 5);
+        ? const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs)
+        : const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm);
     final fontSize = compact ? 11.0 : 12.0;
     return Container(
       padding: pad,
@@ -45,21 +47,38 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Background and foreground for status pills (per product spec).
   (Color bg, Color fg) _colors(ListingStatus s) {
     switch (s) {
       case ListingStatus.active:
-        return (const Color(0xFFDCFCE7), const Color(0xFF166534));
+        return (
+          AppColors.success.withValues(alpha: 0.15),
+          AppColors.success,
+        );
       case ListingStatus.pending:
-        return (const Color(0xFFFEF3C7), const Color(0xFFB45309));
+        return (
+          AppColors.warning.withValues(alpha: 0.18),
+          AppColors.warning,
+        );
       case ListingStatus.paused:
-        return (const Color(0xFFF1F5F9), const Color(0xFF64748B));
+        return (
+          AppColors.textDisabled.withValues(alpha: 0.35),
+          AppColors.textSecondary,
+        );
       case ListingStatus.sold:
-        return (const Color(0xFFDBEAFE), const Color(0xFF1D4ED8));
+        return (
+          AppColors.primary.withValues(alpha: 0.12),
+          AppColors.primary,
+        );
       case ListingStatus.rejected:
-        return (const Color(0xFFFEE2E2), const Color(0xFFB91C1C));
+        return (
+          AppColors.error.withValues(alpha: 0.12),
+          AppColors.error,
+        );
       case ListingStatus.draft:
-        return (const Color(0xFFE2E8F0), const Color(0xFF475569));
+        return (
+          AppColors.textDisabled.withValues(alpha: 0.45),
+          AppColors.textSecondary,
+        );
     }
   }
 }

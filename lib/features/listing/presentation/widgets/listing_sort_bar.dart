@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../providers/my_listings_state.dart';
 
 class ListingSortBar extends StatelessWidget {
@@ -21,11 +23,11 @@ class ListingSortBar extends StatelessWidget {
 
   static String labelFor(SortOption s) {
     return switch (s) {
-      SortOption.newest => 'Newest',
-      SortOption.oldest => 'Oldest',
-      SortOption.priceAsc => 'Price ↑',
-      SortOption.priceDesc => 'Price ↓',
-      SortOption.mostViewed => 'Most Viewed',
+      SortOption.newest => AppStrings.sortNewest,
+      SortOption.oldest => AppStrings.sortOldest,
+      SortOption.priceAsc => AppStrings.sortPriceAsc,
+      SortOption.priceDesc => AppStrings.sortPriceDesc,
+      SortOption.mostViewed => AppStrings.sortMostViewed,
     };
   }
 
@@ -34,38 +36,38 @@ class ListingSortBar extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
         AppSpacing.md,
+        AppSpacing.lg,
         AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.xs,
       ),
       child: Row(
         children: [
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               decoration: BoxDecoration(
                 color: scheme.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
+                borderRadius: BorderRadius.circular(AppSpacing.md),
                 border: Border.all(color: scheme.outline.withValues(alpha: 0.25)),
               ),
               child: DropdownButtonHideUnderline(
                 child: Row(
                   children: [
                     Text(
-                      'Sort by',
+                      AppStrings.sortBy,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
-                    const Gap(AppSpacing.sm),
+                    const Gap(AppSpacing.md),
                     Expanded(
                       child: DropdownButton<SortOption>(
                         value: sort,
                         isExpanded: true,
-                        borderRadius: BorderRadius.circular(AppSpacing.sm),
-                        icon: Icon(Icons.expand_more, color: scheme.onSurfaceVariant),
+                        borderRadius: BorderRadius.circular(AppSpacing.md),
+                        icon: Icon(LucideIcons.chevronDown, color: scheme.onSurfaceVariant),
                         items: SortOption.values
                             .map(
                               (o) => DropdownMenuItem(
@@ -86,15 +88,15 @@ class ListingSortBar extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
           _ViewToggleIcon(
-            icon: Icons.view_list_rounded,
+            icon: LucideIcons.list,
             selected: viewMode == ViewMode.list,
             onTap: () => onViewModeChanged(ViewMode.list),
           ),
-          const Gap(AppSpacing.xs),
+          const Gap(AppSpacing.sm),
           _ViewToggleIcon(
-            icon: Icons.grid_view_rounded,
+            icon: LucideIcons.layoutGrid,
             selected: viewMode == ViewMode.grid,
             onTap: () => onViewModeChanged(ViewMode.grid),
           ),
@@ -120,12 +122,12 @@ class _ViewToggleIcon extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Material(
       color: selected ? AppColors.primary.withValues(alpha: 0.12) : scheme.surface,
-      borderRadius: BorderRadius.circular(AppSpacing.sm),
+      borderRadius: BorderRadius.circular(AppSpacing.md),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        borderRadius: BorderRadius.circular(AppSpacing.md),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Icon(
             icon,
             color: selected ? AppColors.primary : scheme.onSurfaceVariant,

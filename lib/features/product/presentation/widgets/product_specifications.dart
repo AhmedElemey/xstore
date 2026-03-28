@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 
 class ProductSpecifications extends StatelessWidget {
   const ProductSpecifications({
@@ -18,27 +20,27 @@ class ProductSpecifications extends StatelessWidget {
     if (entries.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Specifications',
+            AppStrings.specifications,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Gap(AppSpacing.sm),
+          const Gap(AppSpacing.md),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSpacing.md),
             child: Column(
               children: [
                 for (var i = 0; i < entries.length; i++)
                   Container(
-                    color: i.isEven ? Colors.white : const Color(0xFFF5F5F5),
+                    color: i.isEven ? AppColors.cardBg : AppColors.background,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
                     ),
                     child: Row(
                       children: [

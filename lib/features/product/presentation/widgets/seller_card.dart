@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/product_seller_entity.dart';
 
 class SellerCard extends StatelessWidget {
@@ -21,17 +24,17 @@ class SellerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Material(
         elevation: 3,
-        shadowColor: Colors.black26,
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
+        shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.lg),
+        color: AppColors.cardBg,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onCardTap,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -39,16 +42,16 @@ class SellerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
-                      radius: 24,
+                      radius: AppSpacing.x2l,
                       backgroundColor: theme.colorScheme.surfaceContainerHighest,
                       backgroundImage: seller.avatarUrl.isNotEmpty
                           ? CachedNetworkImageProvider(seller.avatarUrl)
                           : null,
                       child: seller.avatarUrl.isEmpty
-                          ? const Icon(Icons.storefront_outlined)
+                          ? const Icon(LucideIcons.store)
                           : null,
                     ),
-                    const Gap(AppSpacing.sm),
+                    const Gap(AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,9 +62,9 @@ class SellerCard extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const Gap(AppSpacing.xxs),
+                          const Gap(AppSpacing.xs),
                           Text(
-                            '⭐ ${seller.rating.toStringAsFixed(1)} Seller · ${seller.salesCount} sales',
+                            '⭐ ${seller.rating.toStringAsFixed(1)}${AppStrings.sellerRatingMid}${seller.salesCount}${AppStrings.sellerSalesSuffix}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -69,28 +72,28 @@ class SellerCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Gap(AppSpacing.xs),
+                    const Gap(AppSpacing.sm),
                     OutlinedButton(
                       onPressed: onVisitStore,
-                      child: const Text('Visit Store'),
+                      child: const Text(AppStrings.visitStore),
                     ),
                   ],
                 ),
                 if (seller.verified) ...[
-                  const Gap(AppSpacing.sm),
+                  const Gap(AppSpacing.md),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xxs,
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.success.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppSpacing.sm),
                     ),
                     child: Text(
-                      '✅ Verified Seller',
+                      AppStrings.verifiedSeller,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: const Color(0xFF166534),
+                        color: AppColors.success,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

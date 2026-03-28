@@ -1,8 +1,10 @@
 abstract final class AppSpacing {
-  static const double xxs = 4;
-  static const double xs = 8;
-  static const double sm = 12;
-  static const double md = 16;
-  static const double lg = 24;
-  static const double xl = 32;
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 12.0;
+  static const lg = 16.0;
+  static const xl = 20.0;
+  static const x2l = 24.0;
+  static const x3l = 32.0;
+  static const x4l = 48.0;
 }

@@ -15,16 +15,16 @@ class QuickActionsRow extends StatelessWidget {
       ('↩️', 'Easy Returns'),
     ];
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const Gap(AppSpacing.sm),
+            if (i > 0) const Gap(AppSpacing.md),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.sm,
-                  horizontal: AppSpacing.xs,
+                  vertical: AppSpacing.md,
+                  horizontal: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest.withValues(
@@ -35,7 +35,7 @@ class QuickActionsRow extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(items[i].$1, style: const TextStyle(fontSize: 20)),
-                    const Gap(AppSpacing.xxs),
+                    const Gap(AppSpacing.xs),
                     Text(
                       items[i].$2,
                       textAlign: TextAlign.center,

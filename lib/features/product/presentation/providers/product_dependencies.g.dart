@@ -39,5 +39,41 @@ final getProductDetailUseCaseProvider =
 
 typedef GetProductDetailUseCaseRef
     = AutoDisposeProviderRef<GetProductDetailUseCase>;
+String _$getSimilarProductsUseCaseHash() =>
+    r'8c2d484f75684280fac5bd50dba0cd1f16102d68';
+
+/// See also [getSimilarProductsUseCase].
+@ProviderFor(getSimilarProductsUseCase)
+final getSimilarProductsUseCaseProvider =
+    AutoDisposeProvider<GetSimilarProductsUseCase>.internal(
+  getSimilarProductsUseCase,
+  name: r'getSimilarProductsUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getSimilarProductsUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetSimilarProductsUseCaseRef
+    = AutoDisposeProviderRef<GetSimilarProductsUseCase>;
+String _$getProductReviewsUseCaseHash() =>
+    r'1450874fb12a56572c8568445945efe15da44e0c';
+
+/// See also [getProductReviewsUseCase].
+@ProviderFor(getProductReviewsUseCase)
+final getProductReviewsUseCaseProvider =
+    AutoDisposeProvider<GetProductReviewsUseCase>.internal(
+  getProductReviewsUseCase,
+  name: r'getProductReviewsUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getProductReviewsUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetProductReviewsUseCaseRef
+    = AutoDisposeProviderRef<GetProductReviewsUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

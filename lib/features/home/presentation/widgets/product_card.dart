@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 
@@ -25,8 +27,8 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: theme.colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: AppColors.cardBg,
+      borderRadius: BorderRadius.circular(AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -99,12 +101,12 @@ class _ProductImage extends StatelessWidget {
         placeholder: (_, __) => const Center(
           child: CircularProgressIndicator.adaptive(),
         ),
-        errorWidget: (_, __, ___) => const Icon(Icons.image),
+        errorWidget: (_, __, ___) => const Icon(LucideIcons.imageOff),
       );
     }
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerHighest,
-      child: const Center(child: Icon(Icons.image_outlined)),
+      child: const Center(child: Icon(LucideIcons.image)),
     );
   }
 }
@@ -125,7 +127,7 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -136,24 +138,24 @@ class _Footer extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleSmall,
           ),
-          const Gap(AppSpacing.xxs),
+          const Gap(AppSpacing.xs),
           Row(
             children: [
               Flexible(
                 child: Text(
                   Formatters.currency(price),
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.primary,
+                    color: AppColors.primary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (discountPercent > 0) ...[
-                const Gap(AppSpacing.xs),
+                const Gap(AppSpacing.sm),
                 Text(
                   '-${discountPercent.toStringAsFixed(0)}%',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.error,
+                    color: AppColors.error,
                   ),
                 ),
               ],

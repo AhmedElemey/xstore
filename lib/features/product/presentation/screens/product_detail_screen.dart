@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../providers/product_detail_notifier.dart';
@@ -42,7 +45,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   void _onScroll() {
-    const threshold = 110;
+    final threshold = AppSpacing.x4l * 2 + AppSpacing.x3l + AppSpacing.md;
     final next =
         (_scrollController.offset / threshold).clamp(0.0, 1.0).toDouble();
     if ((next - _appBarFill).abs() > 0.02) {
@@ -57,7 +60,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Future<void> _shareListing(String title, String id) async {
-    await Share.share('$title — xStore · ${AppRoutes.product}/$id');
+    await Share.share('$title — ${AppStrings.appName} · ${AppRoutes.product}/$id');
   }
 
   void _scrollToReviews() {
@@ -85,20 +88,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         body: Center(child: CircularProgressIndicator.adaptive()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Product')),
+        appBar: AppBar(title: const Text(AppStrings.productScreenTitle)),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.x2l),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(e.toString(), textAlign: TextAlign.center),
-                const Gap(AppSpacing.md),
+                const Gap(AppSpacing.lg),
                 FilledButton(
                   onPressed: () => ref
                       .read(productDetailProvider(widget.productId).notifier)
                       .fetchProduct(widget.productId),
-                  child: const Text('Retry'),
+                  child: const Text(AppStrings.retry),
                 ),
               ],
             ),
@@ -109,13 +112,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         final listing = data.listing;
         if (listing == null) {
           return const Scaffold(
-            body: Center(child: Text('Product not found')),
+            body: Center(child: Text(AppStrings.productNotFound)),
           );
         }
         final notifier =
             ref.read(productDetailProvider(widget.productId).notifier);
         final iconColor =
-            Color.lerp(Colors.white, Colors.black87, _appBarFill)!;
+            Color.lerp(AppColors.cardBg, AppColors.textPrimary, _appBarFill)!;
         final reviewSummary = data.reviewSummary;
 
         return Scaffold(
@@ -130,11 +133,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   SliverAppBar(
                     pinned: true,
                     stretch: true,
-                    expandedHeight: 380,
+                    expandedHeight: AppSpacing.x4l * 8 - AppSpacing.x3l,
                     elevation: _appBarFill > 0.9 ? 2 : 0,
-                    shadowColor: Colors.black26,
+                    shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
                     backgroundColor:
-                        Colors.white.withValues(alpha: _appBarFill),
+                        AppColors.cardBg.withValues(alpha: _appBarFill),
                     surfaceTintColor: Colors.transparent,
                     systemOverlayStyle: _appBarFill > 0.55
                         ? SystemUiOverlayStyle.dark
@@ -142,14 +145,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     iconTheme: IconThemeData(color: iconColor),
                     actionsIconTheme: IconThemeData(color: iconColor),
                     leading: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new_rounded,
-                          color: iconColor),
+                      icon: Icon(LucideIcons.chevronLeft, color: iconColor),
                       onPressed: () => context.pop(),
                     ),
                     actions: [
                       IconButton(
-                        icon:
-                            Icon(Icons.share_outlined, color: iconColor),
+                        icon: Icon(LucideIcons.share2, color: iconColor),
                         onPressed: () =>
                             _shareListing(listing.title, listing.id),
                       ),
@@ -183,9 +184,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           : '1,230',
                     ),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.md)),
-                  const SliverToBoxAdapter(child: QuickActionsRow()),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  const SliverToBoxAdapter(child: QuickActionsRow()),
+                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   if (data.seller != null)
                     SliverToBoxAdapter(
                       child: SellerCard(
@@ -198,7 +199,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                       ),
                     ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   SliverToBoxAdapter(
                     child: ProductDescription(
                       text: listing.description,
@@ -206,13 +207,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       onToggle: notifier.toggleDescription,
                     ),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   SliverToBoxAdapter(
                     child: ProductSpecifications(
                       specifications: data.specifications,
                     ),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   SliverToBoxAdapter(
                     child: QuantitySelector(
                       quantity: data.quantity,
@@ -221,14 +222,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       onIncrement: notifier.incrementQuantity,
                     ),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   SliverToBoxAdapter(
                     child: SimilarProductsSection(
                       products: data.similarProducts,
                       onOpenProduct: _openSimilar,
                     ),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   if (reviewSummary != null && data.reviews.isNotEmpty)
                     SliverToBoxAdapter(
                       child: KeyedSubtree(
@@ -244,7 +245,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 120 +
+                      height: AppSpacing.x4l * 2 +
+                          AppSpacing.x3l +
                           MediaQuery.paddingOf(context).bottom +
                           MediaQuery.viewInsetsOf(context).bottom,
                     ),
@@ -263,22 +265,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               isAddingToCart: data.isAddingToCart,
               onChat: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chat with seller — coming soon')),
+                  SnackBar(content: Text(AppStrings.chatSellerSoon)),
                 );
               },
               onAddToCart: () async {
                 await notifier.addToCart();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Added to cart!')),
+                    SnackBar(content: Text(AppStrings.addedToCart)),
                   );
                 }
               },
               onBuyNow: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Express checkout — coming soon'),
-                  ),
+                  SnackBar(content: Text(AppStrings.expressCheckoutSoon)),
                 );
               },
             ),

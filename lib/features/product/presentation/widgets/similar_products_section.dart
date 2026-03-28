@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 
@@ -24,22 +25,22 @@ class SimilarProductsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            'You May Also Like',
+            AppStrings.youMayAlsoLike,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
-        const Gap(AppSpacing.sm),
+        const Gap(AppSpacing.md),
         SizedBox(
           height: 232,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             itemCount: products.length,
-            separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
+            separatorBuilder: (_, __) => const Gap(AppSpacing.md),
             itemBuilder: (context, i) {
               final d = products[i];
               return SizedBox(

@@ -1,7 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../cart/presentation/providers/cart_notifier.dart';
+import '../../../home/domain/entities/deal_entity.dart';
 import '../../domain/entities/product_detail_entity.dart';
+import '../../domain/entities/product_review_entity.dart';
+import '../../domain/entities/review_entity.dart';
 import 'product_dependencies.dart';
 import 'product_detail_state.dart';
 
@@ -40,14 +43,58 @@ class ProductDetail extends _$ProductDetail {
     );
   }
 
+  Future<ProductDetailEntity> _fetchEntity(String id) async {
+    final r = await ref.read(getProductDetailUseCaseProvider).call(id);
+    return r.fold((f) => throw f, (e) => e);
+  }
+
+  Future<ProductDetailEntity> _enriched(String listingId, ProductDetailEntity entity) async {
+    final similarResult = await ref.read(getSimilarProductsUseCaseProvider).call(
+          productId: listingId,
+          category: entity.listing.categoryLabel,
+        );
+    final reviewsResult = await ref.read(getProductReviewsUseCaseProvider).call(listingId);
+
+    final simList = similarResult.fold((_) => <ProductDetailEntity>[], (l) => l);
+    final deals = simList.map((p) {
+      final discount = p.compareAtPrice != null && p.compareAtPrice! > p.listing.price
+          ? (((p.compareAtPrice! - p.listing.price) / p.compareAtPrice!) * 100).round()
+          : 0;
+      return DealEntity(
+        id: p.listing.id,
+        title: p.listing.title,
+        price: p.listing.price,
+        imageUrl: p.listing.imageUrls.isNotEmpty ? p.listing.imageUrls.first : null,
+        discountPercent: discount.toDouble(),
+      );
+    }).toList();
+
+    final revList = reviewsResult.fold((_) => <ReviewEntity>[], (l) => l);
+    final uiReviews = revList
+        .map(
+          (r) => ProductReviewEntity(
+            id: r.id,
+            userName: r.userName,
+            userAvatarUrl: r.userAvatar,
+            date: r.createdAt,
+            stars: r.rating,
+            text: r.comment,
+            helpfulCount: r.helpfulCount,
+          ),
+        )
+        .toList();
+
+    return entity.copyWith(
+      similarProducts: deals,
+      reviews: uiReviews,
+    );
+  }
+
   @override
   Future<ProductDetailState> build(String listingId) async {
-    final useCase = ref.read(getProductDetailUseCaseProvider);
-    final result = await useCase(listingId);
-    return result.fold(
-      (f) => throw f,
-      _fromEntity,
-    );
+    final entity = await _fetchEntity(listingId);
+    final merged = await _enriched(listingId, entity);
+    return _fromEntity(merged);
   }
 
   Future<void> fetchProduct(String id) async {
@@ -55,12 +102,9 @@ class ProductDetail extends _$ProductDetail {
     final previous = state.valueOrNull;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final useCase = ref.read(getProductDetailUseCaseProvider);
-      final result = await useCase(id);
-      return result.fold(
-        (f) => throw f,
-        (e) => _mergeWithPrevious(e, previous),
-      );
+      final entity = await _fetchEntity(id);
+      final merged = await _enriched(id, entity);
+      return _mergeWithPrevious(merged, previous);
     });
   }
 

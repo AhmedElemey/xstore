@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
 
 class QuantityStepper extends StatelessWidget {
   const QuantityStepper({
@@ -24,17 +26,17 @@ class QuantityStepper extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Stock quantity *',
+          AppStrings.stockQuantityRequired,
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const Gap(AppSpacing.sm),
+        const Gap(AppSpacing.md),
         Row(
           children: [
             _StepperIcon(
-              icon: Icons.remove,
+              icon: LucideIcons.minus,
               onTap: quantity > 1 ? () => onChanged(quantity - 1) : null,
             ),
-            const Gap(AppSpacing.sm),
+            const Gap(AppSpacing.md),
             SizedBox(
               width: 56,
               child: Text(
@@ -43,16 +45,16 @@ class QuantityStepper extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            const Gap(AppSpacing.sm),
+            const Gap(AppSpacing.md),
             _StepperIcon(
-              icon: Icons.add,
+              icon: LucideIcons.plus,
               onTap: () => onChanged(quantity + 1),
             ),
           ],
         ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
+            padding: const EdgeInsets.only(top: AppSpacing.md, left: AppSpacing.xs),
             child: Text(
               errorText!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -75,17 +77,19 @@ class _StepperIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onTap != null;
     return Material(
-      color: enabled ? AppColors.primary.withValues(alpha: 0.1) : Colors.grey.shade200,
-      borderRadius: BorderRadius.circular(12),
+      color: enabled
+          ? AppColors.primary.withValues(alpha: 0.1)
+          : AppColors.textDisabled.withValues(alpha: 0.25),
+      borderRadius: BorderRadius.circular(AppSpacing.md),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSpacing.md),
         child: SizedBox(
-          width: 44,
-          height: 44,
+          width: AppSpacing.x3l + AppSpacing.md,
+          height: AppSpacing.x3l + AppSpacing.md,
           child: Icon(
             icon,
-            color: enabled ? AppColors.primary : Colors.grey,
+            color: enabled ? AppColors.primary : AppColors.textDisabled,
           ),
         ),
       ),
