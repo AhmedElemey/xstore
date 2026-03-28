@@ -10,7 +10,9 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/listing/presentation/screens/add_listing_screen.dart';
 import '../../features/listing/presentation/screens/my_listings_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
-import '../../features/product/presentation/screens/product_screen.dart';
+import '../../features/product/presentation/screens/product_detail_screen.dart';
+import '../../features/product/presentation/screens/product_reviews_screen.dart';
+import '../../features/product/presentation/screens/seller_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
 import 'app_routes.dart';
@@ -82,10 +84,24 @@ GoRouter goRouter(GoRouterRef ref) {
         builder: (context, state) => const OrdersScreen(),
       ),
       GoRoute(
+        path: '${AppRoutes.product}/:id/reviews',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return ProductReviewsScreen(listingId: id);
+        },
+      ),
+      GoRoute(
+        path: '${AppRoutes.sellerProfile}/:sellerId',
+        builder: (context, state) {
+          final id = state.pathParameters['sellerId'] ?? '';
+          return SellerProfileScreen(sellerId: id);
+        },
+      ),
+      GoRoute(
         path: '${AppRoutes.product}/:id',
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return ProductScreen(productId: id);
+          return ProductDetailScreen(productId: id);
         },
       ),
       GoRoute(

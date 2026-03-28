@@ -1,0 +1,57 @@
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+import '../../../../core/constants/app_spacing.dart';
+
+class QuickActionsRow extends StatelessWidget {
+  const QuickActionsRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final items = [
+      ('🚚', 'Fast Shipping'),
+      ('🔒', 'Secure Payment'),
+      ('↩️', 'Easy Returns'),
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Row(
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const Gap(AppSpacing.sm),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.sm,
+                  horizontal: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.35,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Text(items[i].$1, style: const TextStyle(fontSize: 20)),
+                    const Gap(AppSpacing.xxs),
+                    Text(
+                      items[i].$2,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
