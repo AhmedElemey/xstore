@@ -10,6 +10,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../providers/product_detail_notifier.dart';
 import '../widgets/product_description.dart';
@@ -117,6 +118,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
         final notifier =
             ref.read(productDetailProvider(widget.productId).notifier);
+        final isVendor = ref.watch(authProvider).valueOrNull?.isVendor == true;
         final iconColor =
             Color.lerp(AppColors.cardBg, AppColors.textPrimary, _appBarFill)!;
         final reviewSummary = data.reviewSummary;
@@ -261,6 +263,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               bottom: MediaQuery.viewInsetsOf(context).bottom,
             ),
             child: ProductStickyBar(
+              showAddToCart: !isVendor,
               isAddingToCart: data.isAddingToCart,
               onChat: () {
                 ScaffoldMessenger.of(context).showSnackBar(

@@ -10,6 +10,7 @@ import '../../core/constants/app_typography.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
+import 'notification_icon_badge.dart';
 
 class XstoreBottomNav extends ConsumerWidget {
   const XstoreBottomNav({
@@ -93,17 +94,8 @@ class XstoreBottomNav extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Badge(
-                          isLabelVisible: cartCount > 0,
-                          label: Text(
-                            '$cartCount',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.white,
-                            ),
-                          ),
-                          backgroundColor: AppColors.accent,
+                        NotificationIconBadge(
+                          count: cartCount,
                           child: Icon(
                             icons[i],
                             color: color,

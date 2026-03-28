@@ -33,6 +33,67 @@ abstract final class AppStrings {
   static const categoryQueryMens = 'mens_fashion';
   static const categoryQueryWomens = 'womens_fashion';
   static const notifications = 'Notifications';
+  static const notificationsMarkAllRead = 'Mark all read';
+  static const notificationsNoMore = 'No more notifications';
+  static String notificationsUnreadBannerLine(int n) =>
+      '🔔 You have $n unread notifications';
+  static const notificationsEmptyAllTitle = "You're all caught up! 🎉";
+  static const notificationsEmptyAllSubtitle =
+      "No notifications yet. We'll notify you about orders, deals, and important updates.";
+  static String notificationsEmptyFilterTitle(String filter) =>
+      'No $filter notifications';
+  static String notificationsEmptyFilterSubtitle(String scope) =>
+      'Your $scope notifications will appear here';
+  static const notificationsShowAll = 'Show All';
+  static const notificationsFilterAll = 'All';
+  static const notificationsFilterOrders = 'Orders';
+  static const notificationsFilterDeals = 'Deals';
+  static const notificationsFilterListings = 'Listings';
+  static const notificationsFilterMessages = 'Messages';
+  static const notificationsFilterSystem = 'System';
+  static const notificationsSwipeDelete = 'Delete';
+  static const notificationsSwipeMarkRead = 'Mark Read';
+  static const notificationsMenuMarkRead = 'Mark as Read';
+  static const notificationsMenuMarkUnread = 'Mark as Unread';
+  static const notificationsMenuDelete = 'Delete';
+  static const notificationsMenuCopy = 'Copy text';
+  static const notificationsCopied = 'Copied to clipboard';
+  static const notificationsUndo = 'Undo';
+  static String notificationsDeletedSnack(String title) =>
+      '"$title" removed';
+  static const notificationsGroupToday = 'TODAY';
+  static const notificationsGroupYesterday = 'YESTERDAY';
+  static const notificationsGroupThisWeek = 'THIS WEEK';
+  static const notificationsGroupEarlier = 'EARLIER';
+  static const notificationsTimeJustNow = 'Just now';
+  static String notificationsTimeMinutesAgo(int m) => '${m}m ago';
+  static String notificationsTimeHoursAgo(int h) => '${h}h ago';
+  static const notificationsTimeYesterday = 'Yesterday';
+  static const notificationSettingsTitle = 'Notification settings';
+  static const notificationSettingsSave = 'Save Preferences';
+  static const notificationSettingsSaved = 'Preferences saved';
+  static const notificationSettingsSectionOrders = 'Order updates';
+  static const notificationSettingsSectionDeals = 'Deals & offers';
+  static const notificationSettingsSectionStore = 'Store updates';
+  static const notificationSettingsSectionMessages = 'Messages';
+  static const notificationSettingsSectionDelivery = 'Delivery';
+  static const notificationSettingsOrderConfirmed = 'Order confirmed';
+  static const notificationSettingsOrderShipped = 'Order shipped';
+  static const notificationSettingsOrderDelivered = 'Order delivered';
+  static const notificationSettingsOrderCancelled = 'Order cancelled';
+  static const notificationSettingsFlashSales = 'Flash sales';
+  static const notificationSettingsPriceDrops = 'Price drops';
+  static const notificationSettingsBackInStock = 'Back in stock';
+  static const notificationSettingsPromotional = 'Promotional offers';
+  static const notificationSettingsNewOrders = 'New orders';
+  static const notificationSettingsListingApproved = 'Listing approved';
+  static const notificationSettingsListingRejected = 'Listing rejected';
+  static const notificationSettingsLowStock = 'Low stock alerts';
+  static const notificationSettingsPaymentReceived = 'Payment received';
+  static const notificationSettingsNewMessages = 'New messages';
+  static const notificationSettingsPush = 'Push notifications';
+  static const notificationSettingsEmail = 'Email notifications';
+  static const notificationSettingsSms = 'SMS notifications';
 
   // Listing
   static const addListing = 'Add Listing';

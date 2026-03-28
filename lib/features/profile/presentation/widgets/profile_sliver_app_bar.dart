@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../shared/widgets/notification_bell_button.dart';
 
 /// Collapsible gradient header; title fades in when scrolled past expanded region.
 class ProfileSliverAppBar extends StatelessWidget {
@@ -65,9 +66,9 @@ class ProfileSliverAppBar extends StatelessWidget {
           onPressed: () => context.push(AppRoutes.settings),
           tooltip: AppStrings.settings,
         ),
-        IconButton(
-          icon: const Icon(LucideIcons.bell),
-          onPressed: () => context.push(AppRoutes.notificationSettings),
+        const NotificationBellButton(
+          icon: LucideIcons.bell,
+          color: AppColors.white,
           tooltip: AppStrings.notifications,
         ),
         const SizedBox(width: AppSpacing.xs),

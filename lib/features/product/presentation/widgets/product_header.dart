@@ -55,8 +55,10 @@ class ProductHeader extends StatelessWidget {
             ),
           ),
           const Gap(AppSpacing.md),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.end,
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.xs,
             children: [
               Text(
                 Formatters.currency(price),
@@ -66,7 +68,6 @@ class ProductHeader extends StatelessWidget {
                 ),
               ),
               if (hasCompare) ...[
-                const Gap(AppSpacing.md),
                 Text(
                   Formatters.currency(compareAtPrice!),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -74,7 +75,6 @@ class ProductHeader extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Gap(AppSpacing.md),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,

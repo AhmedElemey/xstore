@@ -88,23 +88,13 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
     final filtered = state.filteredItems;
 
     if (items.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          WishlistEmptyState(),
-        ],
-      );
+      return const WishlistEmptyState();
     }
 
     if (filtered.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          WishlistEmptyState(
-            filterEmptyTitle: _filterEmptyTitle(state.selectedFilter),
-            onShowAll: () => notifier.applyFilter(WishlistFilter.all),
-          ),
-        ],
+      return WishlistEmptyState(
+        filterEmptyTitle: _filterEmptyTitle(state.selectedFilter),
+        onShowAll: () => notifier.applyFilter(WishlistFilter.all),
       );
     }
 

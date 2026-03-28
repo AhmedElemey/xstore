@@ -21,6 +21,8 @@ import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/product/presentation/screens/product_reviews_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
 import '../../shared/screens/coming_soon_screen.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
@@ -220,9 +222,17 @@ GoRouter goRouter(GoRouterRef ref) {
             const ComingSoonScreen(title: AppStrings.menuChangePassword),
       ),
       GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.notificationSettings,
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/chat/:threadId',
         builder: (context, state) =>
-            const ComingSoonScreen(title: AppStrings.menuNotificationsSettings),
+            const ComingSoonScreen(title: AppStrings.chatSeller),
       ),
       GoRoute(
         path: AppRoutes.paymentMethods,

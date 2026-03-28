@@ -24,4 +24,14 @@ abstract final class AppColors {
   static const orderStatusDelivered = Color(0xFF22C55E);
   static const orderStatusCancelled = Color(0xFFEF4444);
   static const orderStatusRefunded = Color(0xFF6B7280);
+
+  /// Unread notification row (tint + banner accents).
+  static const notificationUnreadBackground = Color(0xFFEEF2FF);
+  static const notificationBannerBackground = Color(0xFFE0E7FF);
+  static const notificationIconTintGreen = Color(0xFFDCFCE7);
+  static const notificationIconTintBlue = Color(0xFFDBEAFE);
+  static const notificationIconTintPurple = Color(0xFFEDE9FE);
+  static const notificationIconTintRed = Color(0xFFFEE2E2);
+  static const notificationIconTintOrange = Color(0xFFFFEDD5);
+  static const notificationIconTintAmber = Color(0xFFFEF3C7);
 }

@@ -23,7 +23,10 @@ abstract final class AppRoutes {
   static const recentlyViewed = '/recently-viewed';
   static const myReviews = '/my-reviews';
   static const changePassword = '/change-password';
-  static const notificationSettings = '/notifications';
+  /// Inbox / activity feed.
+  static const notifications = '/notifications';
+  /// Push & email preference toggles.
+  static const notificationSettings = '/notification-settings';
   static const paymentMethods = '/payment-methods';
   static const addresses = '/addresses';
   static const help = '/help';
@@ -33,6 +36,8 @@ abstract final class AppRoutes {
   static const sellerProfile = '/seller';
   static const listingAdd = '/listing/add';
   static const listingMy = '/listing/my';
+
+  static String chatThread(String threadId) => '/chat/$threadId';
 }
 
 /// Vendor-only areas (Add / My listings).

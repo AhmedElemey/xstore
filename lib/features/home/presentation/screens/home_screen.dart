@@ -83,7 +83,6 @@ class HomeScreen extends ConsumerWidget {
               flexibleSpace: FlexibleSpaceBar(
                 background: HomeHeader(
                   onSearchTap: () => context.go(AppRoutes.explore),
-                  onNotificationsTap: () {},
                   onCartTap: isConsumer
                       ? () => context.push(AppRoutes.cart)
                       : null,

@@ -1,0 +1,242 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
+import '../../domain/entities/notification_entity.dart';
+import 'notification_type_visual.dart';
+
+export 'notification_type_visual.dart' show notificationTypeVisual;
+
+class NotificationTile extends StatelessWidget {
+  const NotificationTile({
+    super.key,
+    required this.entity,
+    required this.onTap,
+    required this.onDeleteConfirmed,
+    required this.onSwipeMarkRead,
+    required this.onMarkUnread,
+    this.markAllReadAnimating = false,
+  });
+
+  final NotificationEntity entity;
+  final VoidCallback onTap;
+  final VoidCallback onDeleteConfirmed;
+  final VoidCallback onSwipeMarkRead;
+  final VoidCallback onMarkUnread;
+  final bool markAllReadAnimating;
+
+  Future<void> _menu(BuildContext context) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final box = context.findRenderObject() as RenderBox?;
+    final overlay = Navigator.of(context).overlay?.context.findRenderObject() as RenderBox?;
+    if (box == null || overlay == null) return;
+    final o = box.localToGlobal(Offset.zero, ancestor: overlay);
+    final v = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(o.dx, o.dy, o.dx + 1, o.dy + 1),
+      items: [
+        PopupMenuItem(
+          value: 't',
+          child: Text(entity.isRead ? AppStrings.notificationsMenuMarkUnread : AppStrings.notificationsMenuMarkRead),
+        ),
+        const PopupMenuItem(value: 'd', child: Text(AppStrings.notificationsMenuDelete)),
+        const PopupMenuItem(value: 'c', child: Text(AppStrings.notificationsMenuCopy)),
+      ],
+    );
+    if (!context.mounted) return;
+    if (v == 't') {
+      if (entity.isRead) {
+        onMarkUnread();
+      } else {
+        onSwipeMarkRead();
+      }
+    }
+    if (v == 'd') onDeleteConfirmed();
+    if (v == 'c') {
+      await Clipboard.setData(ClipboardData(text: '${entity.title}\n${entity.body}'));
+      messenger?.showSnackBar(const SnackBar(content: Text(AppStrings.notificationsCopied)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final nv = notificationTypeVisual(entity.type);
+    final u = !entity.isRead;
+    final dur = markAllReadAnimating ? const Duration(milliseconds: 320) : Duration.zero;
+    final img = entity.imageUrl;
+    final thumb = img != null && img.isNotEmpty;
+    return Dismissible(
+      key: ValueKey<String>(entity.id),
+      direction: u ? DismissDirection.horizontal : DismissDirection.endToStart,
+      confirmDismiss: (d) async {
+        if (d == DismissDirection.startToEnd) {
+          if (u) onSwipeMarkRead();
+          return false;
+        }
+        return true;
+      },
+      onDismissed: (_) => onDeleteConfirmed(),
+      background: ExcludeSemantics(
+        child: ColoredBox(
+          color: AppColors.primary,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.lg),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(LucideIcons.check, color: AppColors.white),
+                  SizedBox(width: AppSpacing.sm),
+                  Text(
+                    AppStrings.notificationsSwipeMarkRead,
+                    style: AppTypography.labelLarge.copyWith(color: AppColors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      secondaryBackground: ExcludeSemantics(
+        child: ColoredBox(
+          color: AppColors.error,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppStrings.notificationsSwipeDelete,
+                    style: AppTypography.labelLarge.copyWith(color: AppColors.white),
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  const Icon(LucideIcons.trash2, color: AppColors.white),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      child: RepaintBoundary(
+        child: AnimatedContainer(
+          duration: dur,
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: u ? AppColors.notificationUnreadBackground : AppColors.cardBg,
+            border: Border(
+              left: BorderSide(
+                color: u ? AppColors.primary : AppColors.transparent,
+                width: AppSpacing.xs - 1,
+              ),
+            ),
+          ),
+          child: Material(
+            color: AppColors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              onLongPress: () => _menu(context),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: AppSpacing.x4l,
+                      height: AppSpacing.x4l,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          CircleAvatar(
+                            radius: AppSpacing.x4l / 2,
+                            backgroundColor: nv.bg,
+                            child: Icon(nv.ic, color: nv.fg, size: AppSpacing.x2l - AppSpacing.xs),
+                          ),
+                          if (u)
+                            const Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                child: SizedBox(width: AppSpacing.sm, height: AppSpacing.sm),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  entity.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: (u ? AppTypography.titleMedium : AppTypography.bodyLarge).copyWith(
+                                    fontSize: 14,
+                                    fontWeight: u ? FontWeight.w700 : FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: AppSpacing.sm),
+                              Text(
+                                Formatters.formatNotificationTime(entity.createdAt),
+                                style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: AppSpacing.xs),
+                          Text(
+                            entity.body,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (thumb) SizedBox(width: AppSpacing.sm),
+                    if (thumb)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(AppSpacing.sm),
+                        child: CachedNetworkImage(
+                          imageUrl: img,
+                          width: AppSpacing.x4l,
+                          height: AppSpacing.x4l,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    if (thumb) SizedBox(width: AppSpacing.xs),
+                    Padding(
+                      padding: const EdgeInsets.only(left: AppSpacing.xs),
+                      child: Icon(
+                        LucideIcons.chevronRight,
+                        size: AppSpacing.x2l - AppSpacing.xs,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

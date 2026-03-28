@@ -13,12 +13,14 @@ class ProductStickyBar extends StatelessWidget {
     required this.onAddToCart,
     required this.onBuyNow,
     required this.isAddingToCart,
+    this.showAddToCart = true,
   });
 
   final VoidCallback onChat;
   final VoidCallback onAddToCart;
   final VoidCallback onBuyNow;
   final bool isAddingToCart;
+  final bool showAddToCart;
 
   @override
   Widget build(BuildContext context) {
@@ -47,36 +49,38 @@ class ProductStickyBar extends StatelessWidget {
                 child: const Icon(LucideIcons.messageCircle, size: 22),
               ),
               const Gap(AppSpacing.md),
-              Expanded(
-                child: FilledButton(
-                  onPressed: isAddingToCart ? null : onAddToCart,
-                  child: isAddingToCart
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.cardBg,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(LucideIcons.shoppingCart, size: 20),
-                            const Gap(AppSpacing.sm),
-                            Flexible(
-                              child: Text(
-                                AppStrings.addToCart,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
+              if (showAddToCart) ...[
+                Expanded(
+                  child: FilledButton(
+                    onPressed: isAddingToCart ? null : onAddToCart,
+                    child: isAddingToCart
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.cardBg,
                             ),
-                          ],
-                        ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(LucideIcons.shoppingCart, size: 20),
+                              const Gap(AppSpacing.sm),
+                              Flexible(
+                                child: Text(
+                                  AppStrings.addToCart,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
-              ),
-              const Gap(AppSpacing.md),
+                const Gap(AppSpacing.md),
+              ],
               Expanded(
                 child: FilledButton(
                   onPressed: onBuyNow,

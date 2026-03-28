@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -6,23 +7,23 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/notification_bell_button.dart';
+import '../../../../shared/widgets/notification_icon_badge.dart';
 
-class HomeHeader extends StatelessWidget {
+class HomeHeader extends ConsumerWidget {
   const HomeHeader({
     super.key,
     required this.onSearchTap,
-    this.onNotificationsTap,
     this.onCartTap,
     this.cartItemCount = 0,
   });
 
   final VoidCallback onSearchTap;
-  final VoidCallback? onNotificationsTap;
   final VoidCallback? onCartTap;
   final int cartItemCount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -49,29 +50,17 @@ class HomeHeader extends StatelessWidget {
                 if (onCartTap != null)
                   IconButton(
                     onPressed: onCartTap,
-                    icon: Badge(
-                      isLabelVisible: cartItemCount > 0,
-                      label: Text(
-                        cartItemCount > 99 ? '99+' : '$cartItemCount',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.white,
-                        ),
-                      ),
-                      backgroundColor: AppColors.accent,
+                    icon: NotificationIconBadge(
+                      count: cartItemCount,
                       child: Icon(
                         LucideIcons.shoppingCart,
                         color: AppColors.textPrimary,
                       ),
                     ),
                   ),
-                IconButton(
-                  onPressed: onNotificationsTap,
-                  icon: Icon(
-                    LucideIcons.bellDot,
-                    color: AppColors.textPrimary,
-                  ),
+                const NotificationBellButton(
+                  icon: LucideIcons.bellDot,
+                  tooltip: AppStrings.notifications,
                 ),
               ],
             ),
