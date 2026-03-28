@@ -60,10 +60,17 @@ class ProductStickyBar extends StatelessWidget {
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.shopping_cart_outlined, size: 20),
-                            Gap(AppSpacing.xs),
-                            Text('Add to Cart'),
+                          children: [
+                            const Icon(Icons.shopping_cart_outlined, size: 20),
+                            const Gap(AppSpacing.xs),
+                            Flexible(
+                              child: Text(
+                                'Add to Cart',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           ],
                         ),
                 ),
@@ -78,10 +85,17 @@ class ProductStickyBar extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.bolt_rounded, size: 20),
-                      Gap(AppSpacing.xs),
-                      Text('Buy Now'),
+                    children: [
+                      const Icon(Icons.bolt_rounded, size: 20),
+                      const Gap(AppSpacing.xs),
+                      Flexible(
+                        child: Text(
+                          'Buy Now',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
                   ),
                 ),

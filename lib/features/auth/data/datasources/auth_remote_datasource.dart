@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/mock/mock_config.dart';
+import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/user_model.dart';
 
@@ -26,6 +28,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
+    if (MockConfig.useMock) {
+      final model = mockLoginIsVendor(email)
+          ? mockVendorUserModel(email: email)
+          : mockConsumerUserModel(email: email);
+      return MockConfig.simulate(model);
+    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.login,
@@ -49,6 +57,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
+    if (MockConfig.useMock) {
+      final model = mockLoginIsVendor(email)
+          ? mockVendorUserModel(email: email)
+          : mockConsumerUserModel(email: email);
+      return MockConfig.simulate(model);
+    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.register,

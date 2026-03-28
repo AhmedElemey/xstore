@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/mock/mock_config.dart';
+import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/listing_model.dart';
 
@@ -33,6 +35,12 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   /// Local scaffold cache when API is unavailable.
   final List<ListingModel> _localMine = [];
 
+  /// Mutable mock catalog when [MockConfig.useMock] is true.
+  List<ListingModel>? _mockMine;
+
+  List<ListingModel> get _mockList =>
+      _mockMine ??= List<ListingModel>.from(mockListingModels);
+
   @override
   Future<ListingModel> createListing({
     required String title,
@@ -40,6 +48,18 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required double price,
     required List<String> imagePaths,
   }) async {
+    if (MockConfig.useMock) {
+      final model = ListingModel(
+        id: 'listing_${DateTime.now().microsecondsSinceEpoch}',
+        title: title,
+        description: description,
+        price: price,
+        status: 'pending',
+        imageUrls: List<String>.from(imagePaths),
+      );
+      _mockList.insert(0, model);
+      return MockConfig.simulate(model);
+    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.listings,
@@ -76,6 +96,9 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   @override
   Future<List<ListingModel>> fetchMyListings() async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(List<ListingModel>.from(_mockList));
+    }
     try {
       final response = await _dio.get<List<dynamic>>(ApiEndpoints.myListings);
       final list = response.data ?? [];
@@ -104,6 +127,20 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required double price,
     required String status,
   }) async {
+    if (MockConfig.useMock) {
+      final idx = _mockList.indexWhere((e) => e.id == id);
+      if (idx == -1) {
+        throw const ServerException('Listing not found');
+      }
+      final updated = _mockList[idx].copyWith(
+        title: title,
+        description: description,
+        price: price,
+        status: status,
+      );
+      _mockList[idx] = updated;
+      return MockConfig.simulate(updated);
+    }
     try {
       final response = await _dio.patch<Map<String, dynamic>>(
         '${ApiEndpoints.listings}/$id',
@@ -140,6 +177,11 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   @override
   Future<void> deleteListing(String id) async {
+    if (MockConfig.useMock) {
+      _mockList.removeWhere((e) => e.id == id);
+      await MockConfig.simulate(0);
+      return;
+    }
     try {
       await _dio.delete<void>('${ApiEndpoints.listings}/$id');
       _localMine.removeWhere((e) => e.id == id);

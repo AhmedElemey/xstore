@@ -1,6 +1,10 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/mock/mock_banners.dart';
+import '../../../../core/mock/mock_categories.dart';
+import '../../../../core/mock/mock_config.dart';
+import '../../../../core/mock/mock_deals.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
@@ -21,6 +25,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<BannerModel>> fetchBanners() async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(List<BannerModel>.from(mockBannerModels));
+    }
     try {
       final response = await _dio.get<List<dynamic>>(ApiEndpoints.banners);
       final list = response.data ?? [];
@@ -37,6 +44,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<DealModel>> fetchHotDeals() async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(List<DealModel>.from(mockHotDealModels));
+    }
     try {
       final response = await _dio.get<List<dynamic>>(ApiEndpoints.hotDeals);
       final list = response.data ?? [];
@@ -53,6 +63,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<List<CategoryModel>> fetchCategories() async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(List<CategoryModel>.from(mockCategoryModels));
+    }
     try {
       final response = await _dio.get<List<dynamic>>(ApiEndpoints.categories);
       final list = response.data ?? [];
