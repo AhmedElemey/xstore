@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../domain/entities/listing_entity.dart';
+
+class ListingFilterTabs extends StatelessWidget {
+  const ListingFilterTabs({
+    super.key,
+    required this.selected,
+    required this.onFilterSelected,
+  });
+
+  /// `null` selects “All”.
+  final ListingStatus? selected;
+  final ValueChanged<ListingStatus?> onFilterSelected;
+
+  static const _chips = <({String label, ListingStatus? status})>[
+    (label: 'All', status: null),
+    (label: 'Active', status: ListingStatus.active),
+    (label: 'Pending', status: ListingStatus.pending),
+    (label: 'Paused', status: ListingStatus.paused),
+    (label: 'Sold', status: ListingStatus.sold),
+    (label: 'Rejected', status: ListingStatus.rejected),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Row(
+        children: [
+          for (final c in _chips) ...[
+            _FilterChipPill(
+              label: c.label,
+              selected: selected == c.status,
+              onTap: () => onFilterSelected(c.status),
+            ),
+            const Gap(AppSpacing.xs),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChipPill extends StatelessWidget {
+  const _FilterChipPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final outline = Theme.of(context).colorScheme.outline.withValues(alpha: 0.45);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs + 2,
+          ),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: selected ? AppColors.primary : outline,
+              width: 1.2,
+            ),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: selected ? AppColors.onPrimary : Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+}

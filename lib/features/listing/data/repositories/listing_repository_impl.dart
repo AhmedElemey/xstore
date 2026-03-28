@@ -98,6 +98,12 @@ class ListingRepositoryImpl implements ListingRepository {
         return 'active';
       case ListingStatus.draft:
         return 'draft';
+      case ListingStatus.paused:
+        return 'paused';
+      case ListingStatus.sold:
+        return 'sold';
+      case ListingStatus.rejected:
+        return 'rejected';
     }
   }
 }

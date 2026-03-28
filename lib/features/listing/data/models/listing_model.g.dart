@@ -17,6 +17,14 @@ _$ListingModelImpl _$$ListingModelImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const <String>[],
+      categoryLabel: json['categoryLabel'] as String? ?? '',
+      conditionLabel: json['conditionLabel'] as String? ?? '',
+      postedAt: json['postedAt'] == null
+          ? null
+          : DateTime.parse(json['postedAt'] as String),
+      viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
+      saveCount: (json['saveCount'] as num?)?.toInt() ?? 0,
+      inquiryCount: (json['inquiryCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$ListingModelImplToJson(_$ListingModelImpl instance) =>
@@ -27,4 +35,10 @@ Map<String, dynamic> _$$ListingModelImplToJson(_$ListingModelImpl instance) =>
       'price': instance.price,
       'status': instance.status,
       'imageUrls': instance.imageUrls,
+      'categoryLabel': instance.categoryLabel,
+      'conditionLabel': instance.conditionLabel,
+      'postedAt': instance.postedAt?.toIso8601String(),
+      'viewCount': instance.viewCount,
+      'saveCount': instance.saveCount,
+      'inquiryCount': instance.inquiryCount,
     };

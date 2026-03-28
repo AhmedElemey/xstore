@@ -22,6 +22,12 @@ mixin _$ListingEntity {
   double get price => throw _privateConstructorUsedError;
   ListingStatus get status => throw _privateConstructorUsedError;
   List<String> get imageUrls => throw _privateConstructorUsedError;
+  String get categoryLabel => throw _privateConstructorUsedError;
+  String get conditionLabel => throw _privateConstructorUsedError;
+  DateTime? get postedAt => throw _privateConstructorUsedError;
+  int get viewCount => throw _privateConstructorUsedError;
+  int get saveCount => throw _privateConstructorUsedError;
+  int get inquiryCount => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ListingEntityCopyWith<ListingEntity> get copyWith =>
@@ -40,7 +46,13 @@ abstract class $ListingEntityCopyWith<$Res> {
       String description,
       double price,
       ListingStatus status,
-      List<String> imageUrls});
+      List<String> imageUrls,
+      String categoryLabel,
+      String conditionLabel,
+      DateTime? postedAt,
+      int viewCount,
+      int saveCount,
+      int inquiryCount});
 }
 
 /// @nodoc
@@ -62,6 +74,12 @@ class _$ListingEntityCopyWithImpl<$Res, $Val extends ListingEntity>
     Object? price = null,
     Object? status = null,
     Object? imageUrls = null,
+    Object? categoryLabel = null,
+    Object? conditionLabel = null,
+    Object? postedAt = freezed,
+    Object? viewCount = null,
+    Object? saveCount = null,
+    Object? inquiryCount = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -88,6 +106,30 @@ class _$ListingEntityCopyWithImpl<$Res, $Val extends ListingEntity>
           ? _value.imageUrls
           : imageUrls // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      categoryLabel: null == categoryLabel
+          ? _value.categoryLabel
+          : categoryLabel // ignore: cast_nullable_to_non_nullable
+              as String,
+      conditionLabel: null == conditionLabel
+          ? _value.conditionLabel
+          : conditionLabel // ignore: cast_nullable_to_non_nullable
+              as String,
+      postedAt: freezed == postedAt
+          ? _value.postedAt
+          : postedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      viewCount: null == viewCount
+          ? _value.viewCount
+          : viewCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      saveCount: null == saveCount
+          ? _value.saveCount
+          : saveCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      inquiryCount: null == inquiryCount
+          ? _value.inquiryCount
+          : inquiryCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -106,7 +148,13 @@ abstract class _$$ListingEntityImplCopyWith<$Res>
       String description,
       double price,
       ListingStatus status,
-      List<String> imageUrls});
+      List<String> imageUrls,
+      String categoryLabel,
+      String conditionLabel,
+      DateTime? postedAt,
+      int viewCount,
+      int saveCount,
+      int inquiryCount});
 }
 
 /// @nodoc
@@ -126,6 +174,12 @@ class __$$ListingEntityImplCopyWithImpl<$Res>
     Object? price = null,
     Object? status = null,
     Object? imageUrls = null,
+    Object? categoryLabel = null,
+    Object? conditionLabel = null,
+    Object? postedAt = freezed,
+    Object? viewCount = null,
+    Object? saveCount = null,
+    Object? inquiryCount = null,
   }) {
     return _then(_$ListingEntityImpl(
       id: null == id
@@ -152,6 +206,30 @@ class __$$ListingEntityImplCopyWithImpl<$Res>
           ? _value._imageUrls
           : imageUrls // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      categoryLabel: null == categoryLabel
+          ? _value.categoryLabel
+          : categoryLabel // ignore: cast_nullable_to_non_nullable
+              as String,
+      conditionLabel: null == conditionLabel
+          ? _value.conditionLabel
+          : conditionLabel // ignore: cast_nullable_to_non_nullable
+              as String,
+      postedAt: freezed == postedAt
+          ? _value.postedAt
+          : postedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      viewCount: null == viewCount
+          ? _value.viewCount
+          : viewCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      saveCount: null == saveCount
+          ? _value.saveCount
+          : saveCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      inquiryCount: null == inquiryCount
+          ? _value.inquiryCount
+          : inquiryCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -165,7 +243,13 @@ class _$ListingEntityImpl implements _ListingEntity {
       required this.description,
       required this.price,
       required this.status,
-      final List<String> imageUrls = const <String>[]})
+      final List<String> imageUrls = const <String>[],
+      this.categoryLabel = '',
+      this.conditionLabel = '',
+      this.postedAt,
+      this.viewCount = 0,
+      this.saveCount = 0,
+      this.inquiryCount = 0})
       : _imageUrls = imageUrls;
 
   @override
@@ -188,8 +272,26 @@ class _$ListingEntityImpl implements _ListingEntity {
   }
 
   @override
+  @JsonKey()
+  final String categoryLabel;
+  @override
+  @JsonKey()
+  final String conditionLabel;
+  @override
+  final DateTime? postedAt;
+  @override
+  @JsonKey()
+  final int viewCount;
+  @override
+  @JsonKey()
+  final int saveCount;
+  @override
+  @JsonKey()
+  final int inquiryCount;
+
+  @override
   String toString() {
-    return 'ListingEntity(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls)';
+    return 'ListingEntity(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount)';
   }
 
   @override
@@ -204,12 +306,36 @@ class _$ListingEntityImpl implements _ListingEntity {
             (identical(other.price, price) || other.price == price) &&
             (identical(other.status, status) || other.status == status) &&
             const DeepCollectionEquality()
-                .equals(other._imageUrls, _imageUrls));
+                .equals(other._imageUrls, _imageUrls) &&
+            (identical(other.categoryLabel, categoryLabel) ||
+                other.categoryLabel == categoryLabel) &&
+            (identical(other.conditionLabel, conditionLabel) ||
+                other.conditionLabel == conditionLabel) &&
+            (identical(other.postedAt, postedAt) ||
+                other.postedAt == postedAt) &&
+            (identical(other.viewCount, viewCount) ||
+                other.viewCount == viewCount) &&
+            (identical(other.saveCount, saveCount) ||
+                other.saveCount == saveCount) &&
+            (identical(other.inquiryCount, inquiryCount) ||
+                other.inquiryCount == inquiryCount));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, description, price,
-      status, const DeepCollectionEquality().hash(_imageUrls));
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      title,
+      description,
+      price,
+      status,
+      const DeepCollectionEquality().hash(_imageUrls),
+      categoryLabel,
+      conditionLabel,
+      postedAt,
+      viewCount,
+      saveCount,
+      inquiryCount);
 
   @JsonKey(ignore: true)
   @override
@@ -225,7 +351,13 @@ abstract class _ListingEntity implements ListingEntity {
       required final String description,
       required final double price,
       required final ListingStatus status,
-      final List<String> imageUrls}) = _$ListingEntityImpl;
+      final List<String> imageUrls,
+      final String categoryLabel,
+      final String conditionLabel,
+      final DateTime? postedAt,
+      final int viewCount,
+      final int saveCount,
+      final int inquiryCount}) = _$ListingEntityImpl;
 
   @override
   String get id;
@@ -239,6 +371,18 @@ abstract class _ListingEntity implements ListingEntity {
   ListingStatus get status;
   @override
   List<String> get imageUrls;
+  @override
+  String get categoryLabel;
+  @override
+  String get conditionLabel;
+  @override
+  DateTime? get postedAt;
+  @override
+  int get viewCount;
+  @override
+  int get saveCount;
+  @override
+  int get inquiryCount;
   @override
   @JsonKey(ignore: true)
   _$$ListingEntityImplCopyWith<_$ListingEntityImpl> get copyWith =>

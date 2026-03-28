@@ -10,7 +10,7 @@ import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
 import 'listing_form_state.dart';
 import 'listing_form_state_extensions.dart';
-import 'my_listings_provider.dart';
+import 'my_listings_notifier.dart';
 
 part 'listing_form_notifier.g.dart';
 
@@ -466,6 +466,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.remove(_draftKey);
     state = const ListingFormState();
-    ref.invalidate(myListingsProvider);
+    ref.invalidate(myListingsNotifierProvider);
   }
 }

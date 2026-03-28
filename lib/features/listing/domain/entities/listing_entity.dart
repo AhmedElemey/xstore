@@ -6,6 +6,9 @@ enum ListingStatus {
   draft,
   pending,
   active,
+  paused,
+  sold,
+  rejected,
 }
 
 @freezed
@@ -17,5 +20,11 @@ class ListingEntity with _$ListingEntity {
     required double price,
     required ListingStatus status,
     @Default(<String>[]) List<String> imageUrls,
+    @Default('') String categoryLabel,
+    @Default('') String conditionLabel,
+    DateTime? postedAt,
+    @Default(0) int viewCount,
+    @Default(0) int saveCount,
+    @Default(0) int inquiryCount,
   }) = _ListingEntity;
 }

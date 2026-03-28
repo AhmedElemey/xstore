@@ -153,7 +153,7 @@ abstract class _AttributeEntry implements AttributeEntry {
 
 /// @nodoc
 mixin _$ListingFormState {
-  /// Local file paths for picked images (max 5).
+  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
   List<String> get photoPaths => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get priceInput => throw _privateConstructorUsedError;
@@ -464,10 +464,10 @@ class _$ListingFormStateImpl implements _ListingFormState {
         _attributes = attributes,
         _errors = errors;
 
-  /// Local file paths for picked images (max 5).
+  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
   final List<String> _photoPaths;
 
-  /// Local file paths for picked images (max 5).
+  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
   @override
   @JsonKey()
   List<String> get photoPaths {
@@ -632,7 +632,7 @@ abstract class _ListingFormState implements ListingFormState {
 
   @override
 
-  /// Local file paths for picked images (max 5).
+  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
   List<String> get photoPaths;
   @override
   String get name;
