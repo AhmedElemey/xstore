@@ -9,10 +9,7 @@ part of 'home_dependencies.dart';
 String _$homeRemoteDataSourceHash() =>
     r'bcf5f8482ea0830f596d56c5b751fecd98312f70';
 
-/// Shared [HomeRepository] / use-case wiring for home feature providers
-/// (keeps `banners` / `hot_deals` / `categories` files focused on notifiers).
-///
-/// Copied from [homeRemoteDataSource].
+/// See also [homeRemoteDataSource].
 @ProviderFor(homeRemoteDataSource)
 final homeRemoteDataSourceProvider = Provider<HomeRemoteDataSource>.internal(
   homeRemoteDataSource,

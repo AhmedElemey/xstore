@@ -3,13 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/widgets/xstore_button.dart';
-import '../providers/listing_form_provider.dart';
+import '../data/listing_categories_data.dart';
+import '../providers/listing_form_notifier.dart';
+import '../providers/listing_form_state.dart';
+import '../widgets/attributes_section.dart';
+import '../widgets/category_picker_sheet.dart';
+import '../widgets/condition_selector.dart';
 import '../widgets/listing_form_field.dart';
-import '../widgets/photo_upload_grid.dart';
+import '../widgets/photo_upload_section.dart';
+import '../widgets/quantity_stepper.dart';
+
+const _bg = Color(0xFFFAFAFA);
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key});
@@ -19,81 +26,675 @@ class AddListingScreen extends ConsumerStatefulWidget {
 }
 
 class _AddListingScreenState extends ConsumerState<AddListingScreen> {
-  final _title = TextEditingController();
-  final _description = TextEditingController();
+  final _name = TextEditingController();
   final _price = TextEditingController();
+  final _compare = TextEditingController();
+  final _description = TextEditingController();
+  final _brand = TextEditingController();
+  final _location = TextEditingController();
+  final _shippingCost = TextEditingController();
+  final _attrKeys = <TextEditingController>[];
+  final _attrVals = <TextEditingController>[];
+  late final FocusNode _brandFocus = FocusNode();
 
   @override
   void dispose() {
-    _title.dispose();
-    _description.dispose();
+    _brandFocus.dispose();
+    _name.dispose();
     _price.dispose();
+    _compare.dispose();
+    _description.dispose();
+    _brand.dispose();
+    _location.dispose();
+    _shippingCost.dispose();
+    for (final c in _attrKeys) {
+      c.dispose();
+    }
+    for (final c in _attrVals) {
+      c.dispose();
+    }
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    final notifier = ref.read(listingFormProvider.notifier);
-    notifier.setTitle(_title.text);
-    notifier.setDescription(_description.text);
-    final price = double.tryParse(_price.text) ?? 0;
-    notifier.setPrice(price);
+  void _applyStateToControllers(ListingFormState s) {
+    _name.text = s.name;
+    _price.text = s.priceInput;
+    _compare.text = s.compareAtPriceInput;
+    _description.text = s.description;
+    _brand.text = s.brand;
+    _location.text = s.location;
+    _shippingCost.text = s.shippingCostInput;
+    _syncAttributeControllers(s.attributes);
+  }
+
+  void _syncAttributeControllers(List<AttributeEntry> attrs) {
+    while (_attrKeys.length < attrs.length) {
+      _attrKeys.add(TextEditingController());
+      _attrVals.add(TextEditingController());
+    }
+    while (_attrKeys.length > attrs.length) {
+      _attrKeys.removeLast().dispose();
+      _attrVals.removeLast().dispose();
+    }
+    for (var i = 0; i < attrs.length; i++) {
+      if (_attrKeys[i].text != attrs[i].key) {
+        _attrKeys[i].text = attrs[i].key;
+      }
+      if (_attrVals[i].text != attrs[i].value) {
+        _attrVals[i].text = attrs[i].value;
+      }
+    }
+  }
+
+  Future<void> _openPhotoSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('📷 Take a Photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                ref.read(listingFormNotifierProvider.notifier).pickFromCamera();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('🖼️ Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                ref.read(listingFormNotifierProvider.notifier).pickFromGallery();
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _publish() async {
+    final notifier = ref.read(listingFormNotifierProvider.notifier);
+    notifier.updateField('name', _name.text);
+    notifier.updateField('priceInput', _price.text);
+    notifier.updateField('compareAtPriceInput', _compare.text);
+    notifier.updateField('description', _description.text);
+    notifier.updateField('brand', _brand.text);
+    notifier.updateField('location', _location.text);
+    notifier.updateField('shippingCostInput', _shippingCost.text);
 
     final ok = await notifier.submit();
-    if (!mounted) {
+    if (!context.mounted) {
       return;
     }
     if (ok) {
-      context.go(AppRoutes.listingMy);
+      // ignore: use_build_context_synchronously
+      context.go('${AppRoutes.listingMy}?msg=published');
       return;
     }
-    final message = ref.read(listingFormProvider).errorMessage;
-    if (message != null) {
-      context.showSnack(message);
+    final err = ref.read(listingFormNotifierProvider).errors['submit'];
+    if (err != null) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(err),
+          backgroundColor: AppColors.error,
+          action: SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: () => _publish(),
+          ),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final form = ref.watch(listingFormProvider);
-    final notifier = ref.read(listingFormProvider.notifier);
+    final form = ref.watch(listingFormNotifierProvider);
+    final notifier = ref.read(listingFormNotifierProvider.notifier);
+    final canSubmit = notifier.canSubmit;
+    final showCompareWarn = notifier.showCompareAtWarning;
+
+    ref.listen<ListingFormState>(listingFormNotifierProvider, (prev, next) {
+      if (prev?.draftRevision != next.draftRevision) {
+        _applyStateToControllers(next);
+      }
+      final pl = prev?.attributes.length ?? 0;
+      if (pl != next.attributes.length || prev?.categoryId != next.categoryId) {
+        _syncAttributeControllers(next.attributes);
+      }
+    });
+
+    final err = form.errors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add listing')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          ListingFormField(
-            label: 'Title',
-            controller: _title,
-            onChanged: notifier.setTitle,
-          ),
-          const Gap(AppSpacing.sm),
-          ListingFormField(
-            label: 'Description',
-            controller: _description,
-            maxLines: 4,
-            onChanged: notifier.setDescription,
-          ),
-          const Gap(AppSpacing.sm),
-          ListingFormField(
-            label: 'Price',
-            controller: _price,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (v) => notifier.setPrice(double.tryParse(v) ?? 0),
-          ),
-          const Gap(AppSpacing.md),
-          PhotoUploadGrid(
-            paths: form.photoPaths,
-            onAdd: () => notifier.pickPhotos(),
-            onRemove: notifier.removePhotoAt,
-          ),
-          const Gap(AppSpacing.lg),
-          XstoreButton(
-            label: 'Publish',
-            isLoading: form.isSubmitting,
-            onPressed: form.isSubmitting ? null : _submit,
+      backgroundColor: _bg,
+      appBar: AppBar(
+        backgroundColor: _bg,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        title: const Text('Add Listing'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF64748B),
+            ),
+            onPressed: form.isSubmitting
+                ? null
+                : () async {
+                    notifier.updateField('name', _name.text);
+                    notifier.updateField('priceInput', _price.text);
+                    notifier.updateField('compareAtPriceInput', _compare.text);
+                    notifier.updateField('description', _description.text);
+                    notifier.updateField('brand', _brand.text);
+                    notifier.updateField('location', _location.text);
+                    notifier.updateField('shippingCostInput', _shippingCost.text);
+                    await notifier.saveDraft();
+                    if (!context.mounted) {
+                      return;
+                    }
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Draft saved'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+            child: const Text('Save draft'),
           ),
         ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.xl,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PhotoUploadSection(
+                    paths: form.photoPaths,
+                    errorText: err['photos'],
+                    onOpenPicker: _openPhotoSheet,
+                    onRemove: notifier.removePhoto,
+                    onReorder: notifier.reorderPhotos,
+                  ),
+                  const Gap(AppSpacing.xl),
+                  const _AccentSectionTitle('Basic Information'),
+                  const Gap(AppSpacing.md),
+                  ListingFormField(
+                    label: 'Product name *',
+                    controller: _name,
+                    hint: 'e.g. iPhone 15 Pro Max 256GB',
+                    maxLength: 100,
+                    errorText: err['name'],
+                    onChanged: (v) => notifier.updateField('name', v),
+                  ),
+                  const Gap(AppSpacing.md),
+                  ListingFormField(
+                    label: 'Price *',
+                    controller: _price,
+                    hint: '0.00',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    prefixText: '${notifier.currencyCode} ',
+                    errorText: err['price'],
+                    onChanged: (v) => notifier.updateField('priceInput', v),
+                  ),
+                  const Gap(AppSpacing.md),
+                  Text(
+                    'Compare-at price (optional)',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  ListingFormField(
+                    label: '',
+                    controller: _compare,
+                    hint: '0.00',
+                    prefixText: '${notifier.currencyCode} ',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (v) =>
+                        notifier.updateField('compareAtPriceInput', v),
+                  ),
+                  Text(
+                    'Original price for discount display',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey.shade500,
+                        ),
+                  ),
+                  if (showCompareWarn)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        'Compare-at price is lower than your selling price.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.orange.shade800,
+                            ),
+                      ),
+                    ),
+                  const Gap(AppSpacing.md),
+                  ListingFormField(
+                    label: 'Description *',
+                    controller: _description,
+                    hint:
+                        'Describe your product — condition, features, what\'s included...',
+                    minLines: 4,
+                    maxLines: null,
+                    maxLength: 1000,
+                    errorText: err['description'],
+                    onChanged: (v) => notifier.updateField('description', v),
+                  ),
+                  const Gap(AppSpacing.xl),
+                  const _AccentSectionTitle('Category & Details'),
+                  const Gap(AppSpacing.md),
+                  _PickerField(
+                    label: 'Category *',
+                    value: _categoryLabel(form.categoryId),
+                    errorText: err['category'],
+                    onTap: () => showListingCategoryPicker(
+                      context: context,
+                      title: 'Category',
+                      categories: ListingCategoriesData.categories,
+                      selectedId:
+                          form.categoryId.isEmpty ? null : form.categoryId,
+                      onSelected: (id) =>
+                          notifier.updateField('categoryId', id),
+                    ),
+                  ),
+                  const Gap(AppSpacing.md),
+                  if (form.categoryId.isNotEmpty) ...[
+                    _PickerField(
+                      label: 'Subcategory *',
+                      value: _subcategoryLabel(
+                        form.categoryId,
+                        form.subcategoryId,
+                      ),
+                      errorText: err['subcategory'],
+                      onTap: () {
+                        final cat = ListingCategoriesData.categoryById(
+                          form.categoryId,
+                        );
+                        if (cat == null) {
+                          return;
+                        }
+                        showListingSubcategoryPicker(
+                          context: context,
+                          category: cat,
+                          selectedId: form.subcategoryId.isEmpty
+                              ? null
+                              : form.subcategoryId,
+                          onSelected: (id) =>
+                              notifier.updateField('subcategoryId', id),
+                        );
+                      },
+                    ),
+                    const Gap(AppSpacing.md),
+                  ],
+                  ConditionSelector(
+                    options: ListingCategoriesData.conditions,
+                    selected: form.condition,
+                    errorText: err['condition'],
+                    onChanged: (v) => notifier.updateField('condition', v),
+                  ),
+                  const Gap(AppSpacing.md),
+                  RawAutocomplete<String>(
+                    textEditingController: _brand,
+                    focusNode: _brandFocus,
+                    optionsBuilder: (tv) {
+                      return notifier.brandSuggestionsFor(tv.text);
+                    },
+                    onSelected: (s) {
+                      _brand.text = s;
+                      notifier.updateField('brand', s);
+                    },
+                    fieldViewBuilder: (context, c, fn, onFieldSubmitted) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Brand (optional)',
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: c,
+                            focusNode: fn,
+                            onChanged: (v) => notifier.updateField('brand', v),
+                            decoration: InputDecoration(
+                              hintText: 'Start typing…',
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, opts) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(12),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: opts.length,
+                              itemBuilder: (context, i) {
+                                final o = opts.elementAt(i);
+                                return ListTile(
+                                  dense: true,
+                                  title: Text(o),
+                                  onTap: () => onSelected(o),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const Gap(AppSpacing.xl),
+                  const _AccentSectionTitle('Stock & Shipping'),
+                  const Gap(AppSpacing.md),
+                  QuantityStepper(
+                    quantity: form.quantity,
+                    errorText: err['quantity'],
+                    onChanged: (q) => notifier.updateField('quantity', q),
+                  ),
+                  const Gap(AppSpacing.md),
+                  ListingFormField(
+                    label: 'Location *',
+                    controller: _location,
+                    hint: 'City, Region',
+                    prefix: const Icon(Icons.location_on_outlined, size: 22),
+                    errorText: err['location'],
+                    onChanged: (v) => notifier.updateField('location', v),
+                  ),
+                  const Gap(AppSpacing.md),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Shipping available?'),
+                    value: form.shippingAvailable,
+                    onChanged: (v) =>
+                        notifier.updateField('shippingAvailable', v),
+                  ),
+                  if (form.shippingAvailable) ...[
+                    const Gap(AppSpacing.sm),
+                    ListingFormField(
+                      label: 'Shipping cost *',
+                      controller: _shippingCost,
+                      hint: '0.00',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      prefixText: '${notifier.currencyCode} ',
+                      errorText: err['shippingCost'],
+                      onChanged: (v) =>
+                          notifier.updateField('shippingCostInput', v),
+                    ),
+                  ],
+                  const Gap(AppSpacing.xl),
+                  const _AccentSectionTitle('Product Attributes'),
+                  Text(
+                    'Add specs like size, color, weight…',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const Gap(AppSpacing.md),
+                  AttributesSection(
+                    keyControllers: _attrKeys,
+                    valueControllers: _attrVals,
+                    onAdd: notifier.addAttribute,
+                    onRemove: notifier.removeAttribute,
+                    onKeyChanged: (i, v) =>
+                        notifier.updateAttribute(i, key: v),
+                    onValueChanged: (i, v) =>
+                        notifier.updateAttribute(i, value: v),
+                  ),
+                  const Gap(48),
+                ],
+              ),
+            ),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.md,
+              ),
+              child: _PublishBar(
+                enabled: canSubmit && !form.isSubmitting,
+                loading: form.isSubmitting,
+                onPressed: _publish,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _categoryLabel(String id) {
+    if (id.isEmpty) {
+      return 'Select category';
+    }
+    return ListingCategoriesData.categoryById(id)?.name ?? id;
+  }
+
+  String _subcategoryLabel(String catId, String subId) {
+    if (subId.isEmpty) {
+      return 'Select subcategory';
+    }
+    final cat = ListingCategoriesData.categoryById(catId);
+    if (cat == null) {
+      return subId;
+    }
+    for (final s in cat.subcategories) {
+      if (s.id == subId) {
+        return s.name;
+      }
+    }
+    return subId;
+  }
+}
+
+class _AccentSectionTitle extends StatelessWidget {
+  const _AccentSectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 22,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PickerField extends StatelessWidget {
+  const _PickerField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+    this.errorText,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError = errorText != null && errorText!.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 6),
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: InputDecorator(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: hasError ? AppColors.error : AppColors.outline,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: hasError ? AppColors.error : AppColors.outline,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                suffixIcon: const Icon(Icons.keyboard_arrow_down),
+              ),
+              child: Text(
+                value,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: value.startsWith('Select')
+                          ? Colors.grey.shade600
+                          : null,
+                    ),
+              ),
+            ),
+          ),
+        ),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 4),
+            child: Text(
+              errorText!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.error,
+                  ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _PublishBar extends StatelessWidget {
+  const _PublishBar({
+    required this.enabled,
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final bool enabled;
+  final bool loading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final gradient = LinearGradient(
+      colors: enabled
+          ? [AppColors.primary, AppColors.secondary]
+          : [Colors.grey.shade400, Colors.grey.shade500],
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: enabled && !loading ? onPressed : null,
+            child: Center(
+              child: loading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      '🚀 Publish Listing',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          ),
+        ),
       ),
     );
   }
