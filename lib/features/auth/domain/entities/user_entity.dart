@@ -33,6 +33,10 @@ class UserEntity with _$UserEntity {
     String? storeCity,
     String? storeWilaya,
     String? whatsappNumber,
+    String? bio,
+    DateTime? dateOfBirth,
+    String? instagramHandle,
+    String? facebookPage,
   }) = _UserEntity;
 
   bool get isVendor => role == UserRole.vendor;

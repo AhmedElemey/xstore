@@ -13,4 +13,7 @@ abstract interface class AuthRepository {
   Future<Either<Failure, UserEntity>> register(RegisterParams params);
 
   Future<Either<Failure, Unit>> logout();
+
+  /// Writes the current session user JSON (keeps existing auth token if set).
+  Future<Either<Failure, Unit>> persistSessionUser(UserEntity user);
 }

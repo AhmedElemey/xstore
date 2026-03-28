@@ -27,7 +27,7 @@ class AppThemeMode extends _$AppThemeMode {
     );
   }
 
-  static const _themeModeKey = 'xstore_theme_mode';
+  static const _themeModeKey = 'theme_mode';
 
   Future<void> setTheme(ThemeMode mode) async {
     final prefs = await ref.read(sharedPreferencesProvider.future);

@@ -1,6 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/mock/mock_config.dart';
+import '../../../../core/mock/mock_users.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../home/domain/repositories/home_repository.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
@@ -104,6 +106,16 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   ProductSellerEntity _sellerFor(String id) {
+    if (MockConfig.useMock) {
+      return ProductSellerEntity(
+        id: mockVendorUser.id,
+        name: mockVendorUser.storeName ?? mockVendorUser.name,
+        avatarUrl: mockVendorUserModel().avatarUrl ?? '',
+        rating: mockVendorUser.rating ?? 4.8,
+        salesCount: mockVendorUser.totalSales ?? 142,
+        verified: mockVendorUser.isVerified,
+      );
+    }
     return ProductSellerEntity(
       id: 'seller_${id.hashCode}',
       name: 'TechCorner Store',

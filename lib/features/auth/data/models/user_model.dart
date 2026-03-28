@@ -27,6 +27,10 @@ class UserModel with _$UserModel {
     String? storeCity,
     String? storeWilaya,
     String? whatsappNumber,
+    String? bio,
+    DateTime? dateOfBirth,
+    String? instagramHandle,
+    String? facebookPage,
     String? token,
   }) = _UserModel;
 
@@ -66,6 +70,10 @@ class UserModel with _$UserModel {
       storeCity: json['storeCity'] as String?,
       storeWilaya: json['storeWilaya'] as String?,
       whatsappNumber: json['whatsappNumber'] as String?,
+      bio: json['bio'] as String?,
+      dateOfBirth: parseDate('dateOfBirth'),
+      instagramHandle: json['instagramHandle'] as String?,
+      facebookPage: json['facebookPage'] as String?,
       token: json['token'] as String?,
     );
   }
@@ -92,6 +100,10 @@ extension UserModelX on UserModel {
         storeCity: storeCity,
         storeWilaya: storeWilaya,
         whatsappNumber: whatsappNumber,
+        bio: bio,
+        dateOfBirth: dateOfBirth,
+        instagramHandle: instagramHandle,
+        facebookPage: facebookPage,
       );
 
   Map<String, dynamic> toJson() => {
@@ -115,6 +127,11 @@ extension UserModelX on UserModel {
         if (storeCity != null) 'storeCity': storeCity,
         if (storeWilaya != null) 'storeWilaya': storeWilaya,
         if (whatsappNumber != null) 'whatsappNumber': whatsappNumber,
+        if (bio != null) 'bio': bio,
+        if (dateOfBirth != null)
+          'dateOfBirth': dateOfBirth!.toIso8601String(),
+        if (instagramHandle != null) 'instagramHandle': instagramHandle,
+        if (facebookPage != null) 'facebookPage': facebookPage,
         if (token != null) 'token': token,
       };
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../core/constants/app_strings.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
@@ -16,8 +17,10 @@ import '../../features/listing/presentation/screens/my_listings_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/product/presentation/screens/product_reviews_screen.dart';
-import '../../features/product/presentation/screens/seller_profile_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/vendor_store_screen.dart';
+import '../../shared/screens/coming_soon_screen.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
 import 'app_routes.dart';
@@ -167,8 +170,63 @@ GoRouter goRouter(GoRouterRef ref) {
         path: '${AppRoutes.sellerProfile}/:sellerId',
         builder: (context, state) {
           final id = state.pathParameters['sellerId'] ?? '';
-          return SellerProfileScreen(sellerId: id);
+          return VendorStoreScreen(sellerId: id);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.profileEdit,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.settings),
+      ),
+      GoRoute(
+        path: AppRoutes.analytics,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuAnalytics),
+      ),
+      GoRoute(
+        path: AppRoutes.earnings,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuEarnings),
+      ),
+      GoRoute(
+        path: AppRoutes.recentlyViewed,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuRecentlyViewed),
+      ),
+      GoRoute(
+        path: AppRoutes.myReviews,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuMyReviews),
+      ),
+      GoRoute(
+        path: AppRoutes.changePassword,
+        builder: (context, state) =>
+            const ComingSoonScreen(title: AppStrings.menuChangePassword),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        builder: (context, state) =>
+            const ComingSoonScreen(title: AppStrings.menuNotificationsSettings),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentMethods,
+        builder: (context, state) =>
+            const ComingSoonScreen(title: AppStrings.menuPaymentMethods),
+      ),
+      GoRoute(
+        path: AppRoutes.addresses,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuAddresses),
+      ),
+      GoRoute(
+        path: AppRoutes.help,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuHelpCenter),
+      ),
+      GoRoute(
+        path: AppRoutes.terms,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuTerms),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuPrivacy),
       ),
       GoRoute(
         path: '${AppRoutes.product}/:id',

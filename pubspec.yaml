@@ -41,6 +41,7 @@ dependencies:
 
   # Share sheet
   share_plus: ^10.1.4
+  url_launcher: ^6.3.1
 
   # UI Utilities
   flutter_svg: ^2.0.10+1

@@ -49,6 +49,116 @@ abstract final class AppStrings {
   static const themeLight = 'Light';
   static const themeDark = 'Dark';
 
+  // Profile (screens & menus)
+  static const editProfile = 'Edit Profile';
+  static const save = 'Save';
+  static const saveChanges = 'Save Changes';
+  static const settings = 'Settings';
+  static const sectionMyActivity = 'MY ACTIVITY';
+  static const sectionAccountSettings = 'ACCOUNT SETTINGS';
+  static const sectionPreferences = 'PREFERENCES';
+  static const sectionSupport = 'SUPPORT';
+  static const sectionDangerZone = 'DANGER ZONE';
+  static const menuMyListings = 'My Listings';
+  static const menuMyOrders = 'My Orders';
+  static const menuAnalytics = 'Analytics';
+  static const menuEarnings = 'Earnings';
+  static const menuWishlist = 'Wishlist';
+  static const menuRecentlyViewed = 'Recently Viewed';
+  static const menuMyReviews = 'My Reviews';
+  static const menuPersonalInfo = 'Personal Info';
+  static const socialLinks = 'Social links';
+  static const menuChangePassword = 'Change Password';
+  static const menuNotificationsSettings = 'Notifications';
+  static const menuLanguage = 'Language';
+  static const menuPaymentMethods = 'Payment Methods';
+  static const menuAddresses = 'My Addresses';
+  static const menuDarkMode = 'Dark Mode';
+  static const menuPushNotifications = 'Push Notifications';
+  static const menuEmailUpdates = 'Email Updates';
+  static const menuHelpCenter = 'Help Center';
+  static const menuTerms = 'Terms of Service';
+  static const menuPrivacy = 'Privacy Policy';
+  static const menuRateApp = 'Rate xStore';
+  static const menuShareApp = 'Share xStore';
+  static const manageStore = 'Manage Store';
+  static const statSales = 'Sales';
+  static const statSalesShort = 'sales';
+  static const statRating = 'Rating';
+  static const statResponse = 'Response';
+  static const statOrders = 'Orders';
+  static const statWishlist = 'Wishlist';
+  static const statDzdSaved = 'DZD Saved';
+  static const currencyDzd = 'DZD';
+  static const storeInformation = 'Store Information';
+  static const fullNameLabel = 'Full Name';
+  static const emailAddressLabel = 'Email Address';
+  static const phoneNumberLabel = 'Phone Number';
+  static const dateOfBirthLabel = 'Date of Birth';
+  static const locationCityLabel = 'Location / City';
+  static const bioLabel = 'Bio / About';
+  static const bioHint = 'Tell buyers a bit about yourself';
+  static const storeNameLabel = 'Store Name';
+  static const storeCategoryLabel = 'Store Category';
+  static const storeDescriptionLabel = 'Store Description';
+  static const storeCityLabel = 'Store City';
+  static const storeWilayaLabel = 'Store Wilaya';
+  static const whatsappLabel = 'WhatsApp Number';
+  static const instagramLabel = 'Instagram handle';
+  static const facebookLabel = 'Facebook page';
+  static const logoutConfirmTitle = 'Log out of xStore?';
+  static const logoutConfirmSubtitle =
+      "You'll need to login again to access your account";
+  static const cancel = 'Cancel';
+  static const logOut = 'Log Out';
+  static const deleteAccount = 'Delete Account';
+  static const deleteAccountDialogTitle = 'Delete account permanently';
+  static const deleteAccountPermanentWarning = 'This action is permanent';
+  static const deleteAccountTypeHint = 'Type DELETE to confirm';
+  static const deleteMyAccount = 'Delete My Account';
+  static const deleteConfirmKeyword = 'DELETE';
+  static const choosePhotoSource = 'Profile photo';
+  static const takePhoto = 'Camera';
+  static const chooseFromGallery = 'Gallery';
+  static const removePhoto = 'Remove Photo';
+  static const profileUpdatedSuccess = 'Profile updated';
+  static const languageTitle = 'Language';
+  static const languageEnglish = 'English';
+  static const languageFrench = 'French';
+  static const languageArabic = 'Arabic';
+  static const profileFooterLine = 'xStore v1.0.0 · Made with ❤️ in Algeria';
+  static const statStoreViews = 'Views';
+  static const statStoreSaves = 'Saves';
+  static const statStoreActive = 'Active';
+  static const storeMetaLinePrefix = 'Since ';
+  /// Buyer-facing vendor store header (profile card still uses [storeMetaLinePrefix]).
+  static const storeJoinedPrefix = 'Joined ';
+  static const followStore = 'Follow Store';
+  static const share = 'Share';
+  static const storeDescriptionHeading = 'About the store';
+  static const allCategoriesChip = 'All';
+  static const vendorStoreStatListings = 'Active Listings';
+  static const vendorStoreStatSales = 'Total Sales';
+  static const vendorStoreStatResponse = 'Response Rate';
+  static const placeholderScreenSubtitle = 'This screen is coming soon.';
+  static const shareXStoreMessage =
+      'Shop and sell on xStore — Algeria\'s modern marketplace.';
+  /// Placeholder listing URLs for “Rate xStore”.
+  static const iosAppStoreUrl = 'https://apps.apple.com';
+  static const androidPlayStoreUrl = 'https://play.google.com/store';
+  static const verified = 'Verified';
+  static const requiredField = 'Required';
+
+  /// Vendor store category picker (edit profile).
+  static List<String> get storeCategoryPickerOptions => const [
+        'Electronics',
+        'Fashion',
+        'Home',
+        'Sports',
+        'Beauty',
+        'Other',
+      ];
+
   // Nav
   static const navHome = 'Home';
   static const navExplore = 'Explore';

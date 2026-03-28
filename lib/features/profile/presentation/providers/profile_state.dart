@@ -1,0 +1,110 @@
+import 'dart:io';
+
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../domain/entities/profile_entity.dart';
+
+part 'profile_state.freezed.dart';
+
+@freezed
+class ProfileState with _$ProfileState {
+  const factory ProfileState({
+    ProfileEntity? profile,
+    @Default(false) bool isLoading,
+    @Default(false) bool isUpdating,
+    String? error,
+    // Edit form
+    @Default('') String editName,
+    @Default('') String editEmail,
+    @Default('') String editPhone,
+    @Default('') String editLocation,
+    @Default('') String editBio,
+    File? editAvatarFile,
+    @Default(false) bool avatarRemoved,
+    @Default('') String editStoreName,
+    @Default('') String editStoreCategory,
+    @Default('') String editStoreDescription,
+    @Default('') String editStoreCity,
+    @Default('') String editStoreWilaya,
+    @Default('') String editWhatsapp,
+    DateTime? editDateOfBirth,
+    @Default('') String editInstagram,
+    @Default('') String editFacebook,
+    // Preferences
+    @Default(false) bool isDarkMode,
+    @Default(true) bool pushNotificationsEnabled,
+    @Default(true) bool emailUpdatesEnabled,
+    @Default(false) bool hasChanges,
+    @Default(<String, String>{}) Map<String, String> fieldErrors,
+  }) = _ProfileState;
+}
+
+extension ProfileStateX on ProfileState {
+  UserEntity? get user => profile?.user;
+
+  ProfileState applyFromProfile(
+    ProfileEntity p, {
+    required bool isDarkMode,
+    required bool pushNotificationsEnabled,
+    required bool emailUpdatesEnabled,
+  }) {
+    final u = p.user;
+    return copyWith(
+      profile: p,
+      error: null,
+      editName: u.name,
+      editEmail: u.email,
+      editPhone: u.phoneNumber,
+      editLocation: u.location ?? '',
+      editBio: u.bio ?? '',
+      editStoreName: u.storeName ?? '',
+      editStoreCategory: u.storeCategory ?? '',
+      editStoreDescription: u.storeDescription ?? '',
+      editStoreCity: u.storeCity ?? '',
+      editStoreWilaya: u.storeWilaya ?? '',
+      editWhatsapp: u.whatsappNumber ?? '',
+      editDateOfBirth: u.dateOfBirth,
+      editInstagram: u.instagramHandle ?? '',
+      editFacebook: u.facebookPage ?? '',
+      editAvatarFile: null,
+      avatarRemoved: false,
+      isDarkMode: isDarkMode,
+      pushNotificationsEnabled: pushNotificationsEnabled,
+      emailUpdatesEnabled: emailUpdatesEnabled,
+      hasChanges: false,
+      fieldErrors: {},
+    );
+  }
+
+  UserEntity toEditedUser() {
+    final u = user;
+    if (u == null) {
+      throw StateError('No profile loaded');
+    }
+    return u.copyWith(
+      name: editName.trim(),
+      email: editEmail.trim(),
+      phoneNumber: editPhone.trim(),
+      avatarUrl: avatarRemoved ? null : u.avatarUrl,
+      location: editLocation.trim().isEmpty ? null : editLocation.trim(),
+      bio: editBio.trim().isEmpty ? null : editBio.trim(),
+      storeName: editStoreName.trim().isEmpty ? null : editStoreName.trim(),
+      storeCategory:
+          editStoreCategory.trim().isEmpty ? null : editStoreCategory.trim(),
+      storeDescription: editStoreDescription.trim().isEmpty
+          ? null
+          : editStoreDescription.trim(),
+      storeCity: editStoreCity.trim().isEmpty ? null : editStoreCity.trim(),
+      storeWilaya:
+          editStoreWilaya.trim().isEmpty ? null : editStoreWilaya.trim(),
+      whatsappNumber:
+          editWhatsapp.trim().isEmpty ? null : editWhatsapp.trim(),
+      dateOfBirth: editDateOfBirth,
+      instagramHandle:
+          editInstagram.trim().isEmpty ? null : editInstagram.trim(),
+      facebookPage:
+          editFacebook.trim().isEmpty ? null : editFacebook.trim(),
+    );
+  }
+}

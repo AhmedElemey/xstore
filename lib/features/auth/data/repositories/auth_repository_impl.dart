@@ -87,6 +87,43 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Unit>> persistSessionUser(UserEntity user) async {
+    try {
+      final token = await _secureStorage.read(key: _tokenKey);
+      final model = UserModel(
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        isVerified: user.isVerified,
+        rating: user.rating,
+        totalSales: user.totalSales,
+        joinedAt: user.joinedAt,
+        location: user.location,
+        storeName: user.storeName,
+        storeSlug: user.storeSlug,
+        storeCategory: user.storeCategory,
+        storeDescription: user.storeDescription,
+        storeLogoUrl: user.storeLogoUrl,
+        storeCity: user.storeCity,
+        storeWilaya: user.storeWilaya,
+        whatsappNumber: user.whatsappNumber,
+        bio: user.bio,
+        dateOfBirth: user.dateOfBirth,
+        instagramHandle: user.instagramHandle,
+        facebookPage: user.facebookPage,
+        token: token,
+      );
+      await _persistUser(model);
+      return const Right(unit);
+    } catch (e) {
+      return Left(Failure.cache(e.toString()));
+    }
+  }
+
   Future<void> _persistUser(UserModel model) async {
     final map = model.toJson();
     if (model.token != null) {

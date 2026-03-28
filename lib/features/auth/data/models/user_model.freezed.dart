@@ -35,6 +35,10 @@ mixin _$UserModel {
   String? get storeCity => throw _privateConstructorUsedError;
   String? get storeWilaya => throw _privateConstructorUsedError;
   String? get whatsappNumber => throw _privateConstructorUsedError;
+  String? get bio => throw _privateConstructorUsedError;
+  DateTime? get dateOfBirth => throw _privateConstructorUsedError;
+  String? get instagramHandle => throw _privateConstructorUsedError;
+  String? get facebookPage => throw _privateConstructorUsedError;
   String? get token => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -67,6 +71,10 @@ abstract class $UserModelCopyWith<$Res> {
       String? storeCity,
       String? storeWilaya,
       String? whatsappNumber,
+      String? bio,
+      DateTime? dateOfBirth,
+      String? instagramHandle,
+      String? facebookPage,
       String? token});
 }
 
@@ -102,6 +110,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? storeCity = freezed,
     Object? storeWilaya = freezed,
     Object? whatsappNumber = freezed,
+    Object? bio = freezed,
+    Object? dateOfBirth = freezed,
+    Object? instagramHandle = freezed,
+    Object? facebookPage = freezed,
     Object? token = freezed,
   }) {
     return _then(_value.copyWith(
@@ -181,6 +193,22 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      bio: freezed == bio
+          ? _value.bio
+          : bio // ignore: cast_nullable_to_non_nullable
+              as String?,
+      dateOfBirth: freezed == dateOfBirth
+          ? _value.dateOfBirth
+          : dateOfBirth // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      instagramHandle: freezed == instagramHandle
+          ? _value.instagramHandle
+          : instagramHandle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      facebookPage: freezed == facebookPage
+          ? _value.facebookPage
+          : facebookPage // ignore: cast_nullable_to_non_nullable
+              as String?,
       token: freezed == token
           ? _value.token
           : token // ignore: cast_nullable_to_non_nullable
@@ -217,6 +245,10 @@ abstract class _$$UserModelImplCopyWith<$Res>
       String? storeCity,
       String? storeWilaya,
       String? whatsappNumber,
+      String? bio,
+      DateTime? dateOfBirth,
+      String? instagramHandle,
+      String? facebookPage,
       String? token});
 }
 
@@ -250,6 +282,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? storeCity = freezed,
     Object? storeWilaya = freezed,
     Object? whatsappNumber = freezed,
+    Object? bio = freezed,
+    Object? dateOfBirth = freezed,
+    Object? instagramHandle = freezed,
+    Object? facebookPage = freezed,
     Object? token = freezed,
   }) {
     return _then(_$UserModelImpl(
@@ -329,6 +365,22 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      bio: freezed == bio
+          ? _value.bio
+          : bio // ignore: cast_nullable_to_non_nullable
+              as String?,
+      dateOfBirth: freezed == dateOfBirth
+          ? _value.dateOfBirth
+          : dateOfBirth // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      instagramHandle: freezed == instagramHandle
+          ? _value.instagramHandle
+          : instagramHandle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      facebookPage: freezed == facebookPage
+          ? _value.facebookPage
+          : facebookPage // ignore: cast_nullable_to_non_nullable
+              as String?,
       token: freezed == token
           ? _value.token
           : token // ignore: cast_nullable_to_non_nullable
@@ -360,6 +412,10 @@ class _$UserModelImpl implements _UserModel {
       this.storeCity,
       this.storeWilaya,
       this.whatsappNumber,
+      this.bio,
+      this.dateOfBirth,
+      this.instagramHandle,
+      this.facebookPage,
       this.token});
 
   @override
@@ -405,11 +461,19 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String? whatsappNumber;
   @override
+  final String? bio;
+  @override
+  final DateTime? dateOfBirth;
+  @override
+  final String? instagramHandle;
+  @override
+  final String? facebookPage;
+  @override
   final String? token;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, token: $token)';
+    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token)';
   }
 
   @override
@@ -450,6 +514,13 @@ class _$UserModelImpl implements _UserModel {
                 other.storeWilaya == storeWilaya) &&
             (identical(other.whatsappNumber, whatsappNumber) ||
                 other.whatsappNumber == whatsappNumber) &&
+            (identical(other.bio, bio) || other.bio == bio) &&
+            (identical(other.dateOfBirth, dateOfBirth) ||
+                other.dateOfBirth == dateOfBirth) &&
+            (identical(other.instagramHandle, instagramHandle) ||
+                other.instagramHandle == instagramHandle) &&
+            (identical(other.facebookPage, facebookPage) ||
+                other.facebookPage == facebookPage) &&
             (identical(other.token, token) || other.token == token));
   }
 
@@ -475,6 +546,10 @@ class _$UserModelImpl implements _UserModel {
         storeCity,
         storeWilaya,
         whatsappNumber,
+        bio,
+        dateOfBirth,
+        instagramHandle,
+        facebookPage,
         token
       ]);
 
@@ -506,6 +581,10 @@ abstract class _UserModel implements UserModel {
       final String? storeCity,
       final String? storeWilaya,
       final String? whatsappNumber,
+      final String? bio,
+      final DateTime? dateOfBirth,
+      final String? instagramHandle,
+      final String? facebookPage,
       final String? token}) = _$UserModelImpl;
 
   @override
@@ -546,6 +625,14 @@ abstract class _UserModel implements UserModel {
   String? get storeWilaya;
   @override
   String? get whatsappNumber;
+  @override
+  String? get bio;
+  @override
+  DateTime? get dateOfBirth;
+  @override
+  String? get instagramHandle;
+  @override
+  String? get facebookPage;
   @override
   String? get token;
   @override

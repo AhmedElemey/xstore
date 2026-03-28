@@ -18,6 +18,11 @@ const mockVendorUser = UserEntity(
   storeName: "Ahmed's Electronics",
   storeSlug: 'ahmeds-electronics',
   storeCategory: 'Electronics',
+  storeDescription:
+      'Premium electronics at the best prices in Algeria. All products are genuine and come with full warranty.',
+  storeCity: 'Algiers',
+  storeWilaya: 'Alger',
+  whatsappNumber: '+213 555 123 456',
 );
 
 const mockConsumerUser = UserEntity(
@@ -51,6 +56,10 @@ UserModel mockVendorUserModel({
       storeName: mockVendorUser.storeName,
       storeSlug: mockVendorUser.storeSlug,
       storeCategory: mockVendorUser.storeCategory,
+      storeDescription: mockVendorUser.storeDescription,
+      storeCity: mockVendorUser.storeCity,
+      storeWilaya: mockVendorUser.storeWilaya,
+      whatsappNumber: mockVendorUser.whatsappNumber,
       token: 'mock-token-vendor',
     );
 

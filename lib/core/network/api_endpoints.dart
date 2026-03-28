@@ -14,4 +14,6 @@ abstract final class ApiEndpoints {
 
   static const String listings = '/listings';
   static const String myListings = '/listings/mine';
+
+  static const String users = '/users';
 }
