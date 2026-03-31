@@ -9,7 +9,7 @@ class AuthHeader extends StatelessWidget {
     required this.heightFraction,
     required this.title,
     this.subtitle,
-    this.showWave = true,
+    this.showWave = false,
     this.logoSize = 32,
   });
 
@@ -39,9 +39,9 @@ class AuthHeader extends StatelessWidget {
               ],
             ),
           ),
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
+          child: 
+            
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -85,7 +85,7 @@ class AuthHeader extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+          
         );
         return SizedBox(
           height: h,
@@ -105,7 +105,7 @@ class _WaveClipper extends CustomClipper<Path> {
     final path = Path();
     path.lineTo(0, size.height - 28);
     path.quadraticBezierTo(
-      size.width * 0.25,
+      size.width * 0.1,
       size.height,
       size.width * 0.5,
       size.height - 18,

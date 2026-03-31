@@ -93,7 +93,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       body: Column(
         children: [
           Expanded(
-            flex: 40,
+            flex: 50,
             child: AuthHeader(
               heightFraction: 1,
               title: 'Welcome back 👋',
@@ -102,7 +102,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
           ),
           Expanded(
-            flex: 60,
+            flex: 90,
             child: Transform.translate(
               offset: const Offset(0, -24),
               child: AnimatedBuilder(
@@ -129,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     ],
                   ),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(24, 15, 24, 24),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -256,11 +256,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   }
                                 },
                         ),
-                        const Gap(22),
-                        const AuthDivider(),
-                        const Gap(22),
-                        const SocialLoginRow(),
                         const Gap(20),
+                        const AuthDivider(),
+                        const Gap(20),
+                        const SocialLoginRow(),
+                        const Gap(12),
                         Center(
                           child: TextButton(
                             onPressed: () =>
