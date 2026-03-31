@@ -9,6 +9,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/notification_bell_button.dart';
 import '../../../../shared/widgets/notification_icon_badge.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class HomeHeader extends ConsumerWidget {
   const HomeHeader({
@@ -54,7 +55,7 @@ class HomeHeader extends ConsumerWidget {
                       count: cartItemCount,
                       child: Icon(
                         LucideIcons.shoppingCart,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                   ),
@@ -66,7 +67,7 @@ class HomeHeader extends ConsumerWidget {
             ),
             const Gap(AppSpacing.md),
             Material(
-              color: AppColors.cardBg,
+              color: context.surfaceColor,
               borderRadius: BorderRadius.circular(AppSpacing.md),
               child: InkWell(
                 onTap: onSearchTap,
@@ -78,13 +79,13 @@ class HomeHeader extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppSpacing.md),
-                    border: Border.all(color: AppColors.textDisabled),
+                    border: Border.all(color: context.textDisabled),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         LucideIcons.search,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         size: AppSpacing.x2l,
                       ),
                       const Gap(AppSpacing.md),
@@ -92,7 +93,7 @@ class HomeHeader extends ConsumerWidget {
                         child: Text(
                           AppStrings.searchHint,
                           style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ),
@@ -140,13 +141,13 @@ class _TrustChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.x3l),
-        border: Border.all(color: AppColors.textDisabled),
+        border: Border.all(color: context.textDisabled),
       ),
       child: Text(
         label,
-        style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+        style: AppTypography.labelSmall.copyWith(color: context.textSecondary),
       ),
     );
   }

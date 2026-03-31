@@ -16,6 +16,7 @@ import '../widgets/condition_selector.dart';
 import '../widgets/listing_form_field.dart';
 import '../widgets/photo_upload_section.dart';
 import '../widgets/quantity_stepper.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key});
@@ -98,7 +99,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.camera),
-              title: const Text('📷 Take a Photo'),
+              title: Text('📷 Take a Photo'),
               onTap: () {
                 Navigator.pop(ctx);
                 ref.read(listingFormNotifierProvider.notifier).pickFromCamera();
@@ -106,7 +107,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.imagePlus),
-              title: const Text('🖼️ Choose from Gallery'),
+              title: Text('🖼️ Choose from Gallery'),
               onTap: () {
                 Navigator.pop(ctx);
                 ref.read(listingFormNotifierProvider.notifier).pickFromGallery();
@@ -175,16 +176,16 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     final err = form.errors;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.backgroundColor,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: const Text('Add Listing'),
+        title: Text('Add Listing'),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
+              foregroundColor: context.textSecondary,
             ),
             onPressed: form.isSubmitting
                 ? null
@@ -208,7 +209,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       ),
                     );
                   },
-            child: const Text('Save draft'),
+            child: Text('Save draft'),
           ),
         ],
       ),
@@ -440,7 +441,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   const Gap(AppSpacing.lg),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Shipping available?'),
+                    title: Text('Shipping available?'),
                     value: form.shippingAvailable,
                     onChanged: (v) =>
                         notifier.updateField('shippingAvailable', v),
@@ -592,13 +593,13 @@ class _PickerField extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: hasError ? AppColors.error : AppColors.textDisabled,
+                    color: hasError ? AppColors.error : context.textDisabled,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: hasError ? AppColors.error : AppColors.textDisabled,
+                    color: hasError ? AppColors.error : context.textDisabled,
                   ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
@@ -683,7 +684,7 @@ class _PublishBar extends StatelessWidget {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
+                  : Text(
                       '🚀 Publish Listing',
                       style: TextStyle(
                         color: Colors.white,

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -14,10 +17,16 @@ class ProfileSliverAppBar extends StatelessWidget {
   const ProfileSliverAppBar({
     super.key,
     required this.scrollController,
-    this.expandedHeight = 220,
+    required this.userName,
+    this.avatarUrl,
+    this.avatarFile,
+    this.expandedHeight = 200,
   });
 
   final ScrollController scrollController;
+  final String userName;
+  final String? avatarUrl;
+  final File? avatarFile;
   final double expandedHeight;
 
   @override
@@ -47,17 +56,23 @@ class ProfileSliverAppBar extends StatelessWidget {
           StretchMode.zoomBackground,
           StretchMode.blurBackground,
         ],
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primary,
-                AppColors.profileHeaderGradientEnd,
-              ],
-            ),
-          ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildBackgroundImage(),
+            // const DecoratedBox(
+            //   decoration: BoxDecoration(
+            //     gradient: LinearGradient(
+            //       begin: Alignment.topCenter,
+            //       end: Alignment.bottomCenter,
+            //       colors: [
+            //         Color(0x2D000000),
+            //         Color(0x8F000000),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+          ],
         ),
       ),
       actions: [
@@ -73,6 +88,53 @@ class ProfileSliverAppBar extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.xs),
       ],
+    );
+  }
+
+  Widget _buildBackgroundImage() {
+    if (avatarFile != null) {
+      return Image.file(avatarFile!, fit: BoxFit.cover);
+    }
+
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: avatarUrl!,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => _buildFallback(),
+        errorWidget: (_, __, ___) => _buildFallback(),
+      );
+    }
+
+    return _buildFallback();
+  }
+
+  Widget _buildFallback() {
+    final parts = userName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty)
+        .toList();
+    final initials = parts.take(2).map((e) => e[0].toUpperCase()).join();
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary,
+            AppColors.profileHeaderGradientEnd,
+          ],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initials.isEmpty ? '?' : initials,
+        style: AppTypography.titleLarge.copyWith(
+          color: AppColors.white.withValues(alpha: 0.9),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }

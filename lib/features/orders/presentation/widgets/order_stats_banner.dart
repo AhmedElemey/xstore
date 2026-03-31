@@ -7,13 +7,14 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/orders_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderStatsBanner extends ConsumerWidget {
   const OrderStatsBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(ordersNotifierProvider).stats;
+    final stats = ref.watch(ordersNotifierProvider.select((s) => s.stats));
     if (stats == null) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.fromLTRB(
@@ -33,7 +34,7 @@ class OrderStatsBanner extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.lg),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.04),
+            color: context.textPrimary.withValues(alpha: 0.04),
             blurRadius: AppSpacing.md,
             offset: const Offset(0, AppSpacing.xs),
           ),
@@ -62,7 +63,7 @@ class OrderStatsBanner extends ConsumerWidget {
               icon: LucideIcons.calendar,
               value: '${stats.monthCount}',
               label: AppStrings.ordersStatMonthLabel,
-              background: AppColors.cardBg,
+              background: context.surfaceColor,
             ),
           ),
           Expanded(
@@ -70,7 +71,7 @@ class OrderStatsBanner extends ConsumerWidget {
               icon: LucideIcons.hash,
               value: '${stats.totalCount}',
               label: AppStrings.ordersStatTotalLabel,
-              background: AppColors.cardBg,
+              background: context.surfaceColor,
             ),
           ),
         ],
@@ -105,10 +106,7 @@ class _MiniStat extends StatelessWidget {
         children: [
           Icon(icon, size: AppSpacing.x2l, color: AppColors.primary),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: AppTypography.titleMedium.copyWith(fontSize: 18),
-          ),
+          Text(value, style: AppTypography.titleMedium.copyWith(fontSize: 18)),
           Text(
             label,
             style: AppTypography.labelSmall,

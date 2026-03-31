@@ -17,6 +17,8 @@ import '../../features/listing/presentation/screens/add_listing_screen.dart';
 import '../../features/listing/presentation/screens/my_listings_screen.dart';
 import '../../features/orders/presentation/screens/order_detail_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
+import '../../features/orders/presentation/screens/vendor_order_detail_screen.dart';
+import '../../features/orders/presentation/screens/vendor_orders_screen.dart';
 import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/product/presentation/screens/product_reviews_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
@@ -103,8 +105,8 @@ List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.listingMy,
-            builder: (context, state) => const MyListingsScreen(),
+            path: AppRoutes.vendorOrders,
+            builder: (context, state) => const VendorOrdersScreen(),
           ),
         ],
       ),
@@ -168,8 +170,18 @@ GoRouter goRouter(GoRouterRef ref) {
         builder: (context, state) => const CheckoutScreen(),
       ),
       GoRoute(
+        path: AppRoutes.listingMy,
+        builder: (context, state) => const MyListingsScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.incomingOrders,
         builder: (context, state) => const OrdersScreen(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.vendorOrders}/:orderId',
+        builder: (context, state) => VendorOrderDetailScreen(
+          orderId: state.pathParameters['orderId'] ?? '',
+        ),
       ),
       GoRoute(
         path: '${AppRoutes.orderDetail}/:orderId',
@@ -203,6 +215,11 @@ GoRouter goRouter(GoRouterRef ref) {
       GoRoute(
         path: AppRoutes.analytics,
         builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuAnalytics),
+      ),
+      GoRoute(
+        path: AppRoutes.myOrdersPlaceholder,
+        builder: (context, state) =>
+            const ComingSoonScreen(title: AppStrings.menuMyOrders),
       ),
       GoRoute(
         path: AppRoutes.earnings,

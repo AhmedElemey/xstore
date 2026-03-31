@@ -8,14 +8,17 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/order_item_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderItemTile extends StatelessWidget {
   const OrderItemTile({
     super.key,
     required this.item,
+    this.showStockHint = false,
   });
 
   final OrderItemEntity item;
+  final bool showStockHint;
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +37,15 @@ class OrderItemTile extends StatelessWidget {
                       imageUrl: item.listingImage,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(
-                        color: AppColors.textDisabled.withValues(alpha: 0.25),
+                        color: context.textDisabled.withValues(alpha: 0.25),
                       ),
                       errorWidget: (_, __, ___) => Container(
-                        color: AppColors.textDisabled.withValues(alpha: 0.25),
+                        color: context.textDisabled.withValues(alpha: 0.25),
                         child: const Icon(Icons.image_not_supported_outlined),
                       ),
                     )
                   : Container(
-                      color: AppColors.textDisabled.withValues(alpha: 0.25),
+                      color: context.textDisabled.withValues(alpha: 0.25),
                     ),
             ),
           ),
@@ -67,14 +70,14 @@ class OrderItemTile extends StatelessWidget {
                       label: Text(item.category),
                       visualDensity: VisualDensity.compact,
                       backgroundColor:
-                          AppColors.background,
+                          context.backgroundColor,
                       side: BorderSide.none,
                     ),
                     Chip(
                       label: Text(item.condition),
                       visualDensity: VisualDensity.compact,
                       backgroundColor:
-                          AppColors.background,
+                          context.backgroundColor,
                       side: BorderSide.none,
                     ),
                   ],
@@ -83,7 +86,7 @@ class OrderItemTile extends StatelessWidget {
                 Text(
                   '${_fmt(item.price)} × ${item.quantity} = ${_fmt(item.total)} ${AppStrings.currencyDzd}',
                   style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
                 TextButton(
@@ -95,6 +98,13 @@ class OrderItemTile extends StatelessWidget {
                   ),
                   child: Text(AppStrings.ordersViewProduct),
                 ),
+                if (showStockHint)
+                  Text(
+                    AppStrings.vendorLowStockHint(item.quantity),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.warning,
+                    ),
+                  ),
               ],
             ),
           ),

@@ -8,8 +8,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import 'profile_avatar_picker.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
@@ -38,11 +38,11 @@ class ProfileHeader extends StatelessWidget {
         AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.lg),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.08),
+            color: context.cardShadowColor,
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -50,24 +50,25 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Transform.translate(
-            offset: const Offset(0, -AppSpacing.x4l - AppSpacing.sm),
-            child: ProfileAvatarPicker(
-              name: user.name,
-              imageUrl: user.avatarUrl,
-              imageFile: avatarFile,
-              onTap: onAvatarTap,
-            ),
-          ),
+          // Transform.translate(
+          //   offset: const Offset(0, -AppSpacing.x4l - AppSpacing.sm),
+          //   child: ProfileAvatarPicker(
+          //     name: user.name,
+          //     imageUrl: user.avatarUrl,
+          //     imageFile: avatarFile,
+          //     onTap: onAvatarTap,
+          //   ),
+          // ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Flexible(
@@ -101,12 +102,12 @@ class ProfileHeader extends StatelessWidget {
                     if (cityLine.isNotEmpty) ...[
                       const Gap(AppSpacing.xs),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Icon(
                             LucideIcons.mapPin,
                             size: AppSpacing.md,
-                            color: AppColors.textSecondary,
+                            color: context.iconSecondary,
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Flexible(

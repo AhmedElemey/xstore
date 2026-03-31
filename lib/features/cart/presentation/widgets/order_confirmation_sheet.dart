@@ -8,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 Future<void> showOrderConfirmationSheet(
   BuildContext context, {
@@ -56,7 +57,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
     final h = MediaQuery.sizeOf(context).height;
     return Container(
       height: h,
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.x2l + MediaQuery.paddingOf(context).top,
@@ -98,7 +99,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
             AppStrings.orderPlacedSubtitle,
             textAlign: TextAlign.center,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
               height: 1.45,
             ),
           ),

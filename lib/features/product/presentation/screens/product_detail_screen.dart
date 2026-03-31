@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../providers/product_detail_notifier.dart';
@@ -89,7 +89,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         body: Center(child: CircularProgressIndicator.adaptive()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text(AppStrings.productScreenTitle)),
+        appBar: AppBar(title: Text(AppStrings.productScreenTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.x2l),
@@ -102,7 +102,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   onPressed: () => ref
                       .read(productDetailProvider(widget.productId).notifier)
                       .fetchProduct(widget.productId),
-                  child: const Text(AppStrings.retry),
+                  child: Text(AppStrings.retry),
                 ),
               ],
             ),
@@ -120,7 +120,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ref.read(productDetailProvider(widget.productId).notifier);
         final isVendor = ref.watch(authProvider).valueOrNull?.isVendor == true;
         final iconColor =
-            Color.lerp(AppColors.cardBg, AppColors.textPrimary, _appBarFill)!;
+            Color.lerp(context.surfaceColor, context.iconPrimary, _appBarFill)!;
         final reviewSummary = data.reviewSummary;
 
         return Scaffold(
@@ -137,9 +137,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     stretch: true,
                     expandedHeight: AppSpacing.x4l * 8 - AppSpacing.x3l,
                     elevation: _appBarFill > 0.9 ? 2 : 0,
-                    shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
+                    shadowColor: context.cardShadowColor,
                     backgroundColor:
-                        AppColors.cardBg.withValues(alpha: _appBarFill),
+                        context.surfaceColor.withValues(alpha: _appBarFill),
                     surfaceTintColor: Colors.transparent,
                     systemOverlayStyle: _appBarFill > 0.55
                         ? SystemUiOverlayStyle.dark

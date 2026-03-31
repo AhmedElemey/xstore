@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Centered illustration + CTA when no listings match the current filter.
 class ListingEmptyState extends StatelessWidget {
@@ -68,13 +69,13 @@ class ListingEmptyState extends StatelessWidget {
                 onPressed: onAddListing,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.cardBg,
+                  foregroundColor: context.surfaceColor,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.x2l,
                     vertical: AppSpacing.lg,
                   ),
                 ),
-                child: const Text('Add Your First Listing'),
+                child: Text('Add Your First Listing'),
               ),
             ],
           ),

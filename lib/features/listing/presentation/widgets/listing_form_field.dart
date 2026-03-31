@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Outlined field (12px radius), optional counter, focus shadow; errors use red underline + helper text.
 class ListingFormField extends StatefulWidget {
@@ -71,7 +72,7 @@ class _ListingFormFieldState extends State<ListingFormField> {
 
     final normalBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.textDisabled),
+      borderSide: BorderSide(color: context.textDisabled),
     );
     final focusedNormal = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),

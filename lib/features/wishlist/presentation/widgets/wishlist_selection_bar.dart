@@ -2,33 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistSelectionBar extends ConsumerWidget {
   const WishlistSelectionBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(wishlistProvider);
-    if (!state.isSelectionMode || state.items.isEmpty) {
+    final state = ref.watch(
+      wishlistProvider.select(
+        (s) => (
+          isSelectionMode: s.isSelectionMode,
+          hasItems: s.items.isNotEmpty,
+          selectedIds: s.selectedItemIds,
+          filteredItems: s.filteredItems,
+        ),
+      ),
+    );
+    if (!state.isSelectionMode || !state.hasItems) {
       return const SizedBox.shrink();
     }
 
-    final sel = state.selectedItemIds.length;
+    final sel = state.selectedIds.length;
     final addable = state.filteredItems
         .where(
-          (e) => state.selectedItemIds.contains(e.id) && e.isAvailable,
+          (e) => state.selectedIds.contains(e.id) && e.isAvailable,
         )
         .length;
 
     return Material(
       elevation: 10,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
-      color: AppColors.cardBg,
+      shadowColor: context.textPrimary.withValues(alpha: 0.12),
+      color: context.surfaceColor,
       child: SafeArea(
         top: false,
         child: Padding(

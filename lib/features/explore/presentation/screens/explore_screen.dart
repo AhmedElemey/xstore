@@ -10,6 +10,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../explore_provider.dart';
@@ -67,13 +68,32 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(exploreProvider);
+    final state = ref.watch(
+      exploreProvider.select(
+        (s) => (
+          query: s.query,
+          suggestions: s.suggestions,
+          filters: s.filters,
+          results: s.results,
+          sortOption: s.sortOption,
+          viewMode: s.viewMode,
+          isSearching: s.isSearching,
+          isLoadingMore: s.isLoadingMore,
+        ),
+      ),
+    );
     final notifier = ref.read(exploreProvider.notifier);
-    final isVendor = ref.watch(authProvider).valueOrNull?.isVendor == true;
+    final isVendor = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.isVendor == true),
+    );
     final recentAsync = ref.watch(sharedPreferencesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.exploreTitle)),
+      backgroundColor: context.backgroundColor,
+      appBar: AppBar(
+        title: Text(AppStrings.exploreTitle),
+        backgroundColor: context.backgroundColor,
+      ),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -87,6 +107,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             return false;
           },
           child: CustomScrollView(
+            cacheExtent: 1000,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
@@ -177,13 +198,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             child: Text.rich(
                               TextSpan(
                                 style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                 ),
                                 children: [
                                   TextSpan(
                                     text: '${state.results.length}',
                                     style: AppTypography.bodyMedium.copyWith(
-                                      color: AppColors.textPrimary,
+                                      color: context.textPrimary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -193,7 +214,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                         ? AppStrings.allListingsLabel
                                         : state.query,
                                     style: AppTypography.bodyMedium.copyWith(
-                                      color: AppColors.textPrimary,
+                                      color: context.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -269,11 +290,15 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     delegate: SliverChildBuilderDelegate(
                       (context, i) {
                         final item = state.results[i];
-                        return ProductGridCard(
-                          item: item,
-                          onAddToCart: () {},
-                          showAddToCart: !isVendor,
-                          onTap: () => context.push('${AppRoutes.product}/${item.id}'),
+                        return RepaintBoundary(
+                          child: ProductGridCard(
+                            key: ValueKey<String>('explore-grid-${item.id}'),
+                            item: item,
+                            onAddToCart: () {},
+                            showAddToCart: !isVendor,
+                            onTap: () =>
+                                context.push('${AppRoutes.product}/${item.id}'),
+                          ),
                         );
                       },
                       childCount: state.results.length,
@@ -289,11 +314,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         final item = state.results[i];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: ProductListCard(
-                            item: item,
-                            onAddToCart: () {},
-                            showAddToCart: !isVendor,
-                            onTap: () => context.push('${AppRoutes.product}/${item.id}'),
+                          child: RepaintBoundary(
+                            child: ProductListCard(
+                              key: ValueKey<String>('explore-list-${item.id}'),
+                              item: item,
+                              onAddToCart: () {},
+                              showAddToCart: !isVendor,
+                              onTap: () => context.push(
+                                '${AppRoutes.product}/${item.id}',
+                              ),
+                            ),
                           ),
                         );
                       },

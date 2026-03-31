@@ -84,7 +84,7 @@ class AttributesSection extends StatelessWidget {
         TextButton.icon(
           onPressed: onAdd,
           icon: const Icon(LucideIcons.plus),
-          label: const Text('Add attribute'),
+          label: Text('Add attribute'),
         ),
       ],
     );

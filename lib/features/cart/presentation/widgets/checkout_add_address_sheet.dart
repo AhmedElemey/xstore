@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/algeria_wilayas.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/checkout_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 Future<void> showCheckoutAddAddressSheet(
   BuildContext context,
@@ -24,7 +24,7 @@ Future<void> showCheckoutAddAddressSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.cardBg,
+    backgroundColor: context.surfaceColor,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppSpacing.lg),

@@ -7,9 +7,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductListCard extends StatelessWidget {
   const ProductListCard({
@@ -28,7 +30,7 @@ class ProductListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -46,9 +48,14 @@ class ProductListCard extends StatelessWidget {
                   child: item.imageUrl != null
                       ? CachedNetworkImage(
                           imageUrl: item.imageUrl!,
+                          cacheManager: AppImageCacheManager.instance,
                           fit: BoxFit.cover,
+                          placeholder: (_, __) =>
+                              ColoredBox(color: context.textDisabled),
+                          errorWidget: (_, __, ___) =>
+                              ColoredBox(color: context.textDisabled),
                         )
-                      : const ColoredBox(color: AppColors.textDisabled),
+                      : ColoredBox(color: context.textDisabled),
                 ),
               ),
               const Gap(AppSpacing.md),

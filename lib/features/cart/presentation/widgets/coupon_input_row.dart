@@ -6,6 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/cart_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CouponInputRow extends ConsumerWidget {
   const CouponInputRow({super.key});
@@ -38,10 +39,10 @@ class CouponInputRow extends ConsumerWidget {
     }
 
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       elevation: 1,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.05),
+      shadowColor: context.textPrimary.withValues(alpha: 0.05),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -175,7 +176,7 @@ class _CouponEntryState extends State<_CouponEntry> {
                 style: FilledButton.styleFrom(
                   backgroundColor: canApply
                       ? AppColors.primary
-                      : AppColors.textDisabled,
+                      : context.textDisabled,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.md),
                   ),

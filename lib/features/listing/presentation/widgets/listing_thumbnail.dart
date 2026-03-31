@@ -4,8 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Rounded listing image — network URL or local file path.
 class ListingThumbnail extends StatelessWidget {
@@ -34,18 +34,18 @@ class ListingThumbnail extends StatelessWidget {
       child: SizedBox(
         width: w,
         height: h,
-        child: _imageChild(bg),
+        child: _imageChild(context, bg),
       ),
     );
   }
 
-  Widget _imageChild(Color placeholderBg) {
+  Widget _imageChild(BuildContext context, Color placeholderBg) {
     if (imageUrl.isEmpty) {
       return ColoredBox(
         color: placeholderBg,
         child: Icon(
           LucideIcons.imageOff,
-          color: AppColors.textDisabled,
+          color: context.textDisabled,
         ),
       );
     }

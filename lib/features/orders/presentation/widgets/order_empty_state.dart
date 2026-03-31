@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderEmptyState extends StatelessWidget {
   const OrderEmptyState({
@@ -42,7 +43,7 @@ class OrderEmptyState extends StatelessWidget {
                   child: Icon(
                     LucideIcons.helpCircle,
                     size: AppSpacing.x2l,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
               ],
@@ -57,7 +58,7 @@ class OrderEmptyState extends StatelessWidget {
             Text(
               subtitle,
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

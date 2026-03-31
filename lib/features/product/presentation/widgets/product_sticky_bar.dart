@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductStickyBar extends StatelessWidget {
   const ProductStickyBar({
@@ -27,7 +28,7 @@ class ProductStickyBar extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       elevation: 12,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
+      shadowColor: context.textPrimary.withValues(alpha: 0.12),
       color: theme.colorScheme.surface,
       child: SafeArea(
         top: false,
@@ -54,12 +55,12 @@ class ProductStickyBar extends StatelessWidget {
                   child: FilledButton(
                     onPressed: isAddingToCart ? null : onAddToCart,
                     child: isAddingToCart
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 22,
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.cardBg,
+                              color: context.surfaceColor,
                             ),
                           )
                         : Row(
@@ -86,7 +87,7 @@ class ProductStickyBar extends StatelessWidget {
                   onPressed: onBuyNow,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
-                    foregroundColor: AppColors.cardBg,
+                    foregroundColor: context.surfaceColor,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

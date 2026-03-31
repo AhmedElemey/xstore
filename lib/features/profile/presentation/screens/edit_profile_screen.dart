@@ -26,8 +26,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _location = TextEditingController();
+  final _dobText = TextEditingController();
   final _bio = TextEditingController();
   final _storeName = TextEditingController();
+  final _storeCategory = TextEditingController();
   final _storeDescription = TextEditingController();
   final _storeCity = TextEditingController();
   final _storeWilaya = TextEditingController();
@@ -53,8 +55,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _email.dispose();
     _phone.dispose();
     _location.dispose();
+    _dobText.dispose();
     _bio.dispose();
     _storeName.dispose();
+    _storeCategory.dispose();
     _storeDescription.dispose();
     _storeCity.dispose();
     _storeWilaya.dispose();
@@ -69,9 +73,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _email.text = s.editEmail;
     _phone.text = s.editPhone;
     _location.text = s.editLocation;
+    _dobText.text = s.editDateOfBirth != null
+        ? DateFormat.yMMMd().format(s.editDateOfBirth!)
+        : '';
     _bio.text = s.editBio;
     _storeName.text = s.editStoreName;
     _category = s.editStoreCategory;
+    _storeCategory.text =
+        _category.isEmpty ? AppStrings.requiredField : _category;
     _storeDescription.text = s.editStoreDescription;
     _storeCity.text = s.editStoreCity;
     _storeWilaya.text = s.editStoreWilaya;
@@ -116,7 +125,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 title: Text(c),
                 trailing: _category == c ? const Icon(Icons.check) : null,
                 onTap: () {
-                  setState(() => _category = c);
+                  setState(() {
+                    _category = c;
+                    _storeCategory.text = c;
+                  });
                   ref.read(profileNotifierProvider.notifier).updateField('storeCategory', c);
                   Navigator.pop(ctx);
                 },
@@ -136,7 +148,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       lastDate: now,
     );
     if (picked == null) return;
-    setState(() => _dob = picked);
+    setState(() {
+      _dob = picked;
+      _dobText.text = DateFormat.yMMMd().format(picked);
+    });
     ref.read(profileNotifierProvider.notifier).updateField('dateOfBirth', picked);
   }
 
@@ -208,8 +223,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     final canSave = s.hasChanges && !s.isUpdating;
-    final dobLabel = _dob != null ? DateFormat.yMMMd().format(_dob!) : AppStrings.dateOfBirthLabel;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppStrings.editProfile),
@@ -250,7 +263,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           TextField(
             controller: _name,
             decoration: InputDecoration(
-              labelText: '${AppStrings.fullNameLabel} *',
+              prefixIcon: const Icon(LucideIcons.user),
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('name', v),
@@ -260,7 +273,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
-              labelText: '${AppStrings.emailAddressLabel} *',
+              prefixIcon: const Icon(LucideIcons.mail),
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('email', v),
@@ -270,20 +283,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             controller: _phone,
             keyboardType: TextInputType.phone,
             decoration: InputDecoration(
-              labelText: '${AppStrings.phoneNumberLabel} *',
+              prefixIcon: const Icon(LucideIcons.phone),
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('phone', v),
           ),
           const Gap(AppSpacing.md),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(AppStrings.dateOfBirthLabel, style: AppTypography.bodySmall),
-            subtitle: Text(dobLabel),
-            trailing: const Icon(LucideIcons.calendar),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-              side: const BorderSide(color: AppColors.textDisabled),
+          TextField(
+            controller: _dobText,
+            readOnly: true,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(LucideIcons.calendar),
+              suffixIcon: const Icon(LucideIcons.chevronDown),
+              border: const OutlineInputBorder(),
             ),
             onTap: _pickDob,
           ),
@@ -291,7 +303,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           TextField(
             controller: _location,
             decoration: InputDecoration(
-              labelText: '${AppStrings.locationCityLabel} *',
+              prefixIcon: const Icon(LucideIcons.mapPin),
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
@@ -302,8 +314,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             maxLines: 3,
             maxLength: 150,
             decoration: InputDecoration(
-              labelText: AppStrings.bioLabel,
               hintText: AppStrings.bioHint,
+              prefixIcon: const Icon(LucideIcons.alignLeft),
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('bio', v),
@@ -315,20 +327,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             TextField(
               controller: _storeName,
               decoration: InputDecoration(
-                labelText: '${AppStrings.storeNameLabel} *',
+                prefixIcon: const Icon(LucideIcons.store),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('storeName', v),
             ),
             const Gap(AppSpacing.md),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text('${AppStrings.storeCategoryLabel} *', style: AppTypography.bodyMedium),
-              subtitle: Text(_category.isEmpty ? AppStrings.requiredField : _category),
-              trailing: const Icon(LucideIcons.chevronDown),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-                side: const BorderSide(color: AppColors.textDisabled),
+            TextField(
+              readOnly: true,
+              controller: _storeCategory,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(LucideIcons.tags),
+                suffixIcon: const Icon(LucideIcons.chevronDown),
+                border: const OutlineInputBorder(),
               ),
               onTap: _pickCategory,
             ),
@@ -337,7 +348,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               controller: _storeDescription,
               maxLines: 4,
               decoration: InputDecoration(
-                labelText: '${AppStrings.storeDescriptionLabel} *',
+                prefixIcon: const Icon(LucideIcons.fileText),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (v) =>
@@ -347,7 +358,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             TextField(
               controller: _storeCity,
               decoration: InputDecoration(
-                labelText: '${AppStrings.storeCityLabel} *',
+                prefixIcon: const Icon(LucideIcons.mapPin),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('storeCity', v),
@@ -356,7 +367,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             TextField(
               controller: _storeWilaya,
               decoration: InputDecoration(
-                labelText: '${AppStrings.storeWilayaLabel} *',
+                prefixIcon: const Icon(LucideIcons.map),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (v) =>
@@ -366,7 +377,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             TextField(
               controller: _whatsapp,
               decoration: InputDecoration(
-                labelText: AppStrings.whatsappLabel,
+                prefixIcon: const Icon(LucideIcons.messageCircle),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('whatsapp', v),
@@ -378,7 +389,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           TextField(
             controller: _instagram,
             decoration: InputDecoration(
-              labelText: AppStrings.instagramLabel,
+              prefixIcon: const Icon(LucideIcons.instagram),
               prefixText: '@',
               border: const OutlineInputBorder(),
             ),
@@ -388,7 +399,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           TextField(
             controller: _facebook,
             decoration: InputDecoration(
-              labelText: AppStrings.facebookLabel,
+              prefixIcon: const Icon(LucideIcons.facebook),
               prefixText: 'fb.com/',
               border: const OutlineInputBorder(),
             ),

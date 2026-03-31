@@ -35,15 +35,14 @@ class RecommendedSection extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.explore),
               child: Text(
                 AppStrings.seeAll,
-                style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
+                style: AppTypography.labelLarge.copyWith(
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ],
         ),
-        Text(
-          AppStrings.recommendedSubtitle,
-          style: AppTypography.bodySmall,
-        ),
+        Text(AppStrings.recommendedSubtitle, style: AppTypography.bodySmall),
         const Gap(AppSpacing.md),
         async.when(
           data: (items) => _RecommendedList(items: items),
@@ -88,15 +87,20 @@ class _RecommendedList extends StatelessWidget {
         itemBuilder: (context, i) {
           final listing = items[i];
           return SizedBox(
+            key: ValueKey<String>(listing.id),
             width: AppSpacing.x4l * 3 + AppSpacing.lg,
-            child: ProductCard(
-              title: listing.title,
-              price: listing.price,
-              imageUrl:
-                  listing.imageUrls.isNotEmpty ? listing.imageUrls.first : null,
-              discountPercent: 0,
-              listingId: listing.id,
-              onTap: () => context.push('${AppRoutes.product}/${listing.id}'),
+            child: RepaintBoundary(
+              child: ProductCard(
+                key: ValueKey<String>('recommended-${listing.id}'),
+                title: listing.title,
+                price: listing.price,
+                imageUrl: listing.imageUrls.isNotEmpty
+                    ? listing.imageUrls.first
+                    : null,
+                discountPercent: 0,
+                listingId: listing.id,
+                onTap: () => context.push('${AppRoutes.product}/${listing.id}'),
+              ),
             ),
           );
         },

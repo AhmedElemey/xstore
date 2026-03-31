@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 String wishlistSortLabel(WishlistSortOption o) {
   switch (o) {
@@ -29,7 +30,7 @@ Future<void> showWishlistSortSheet(BuildContext context, WidgetRef ref) async {
   final current = ref.read(wishlistProvider).sortOption;
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.cardBg,
+    backgroundColor: context.surfaceColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppSpacing.lg),

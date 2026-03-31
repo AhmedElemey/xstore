@@ -6,15 +6,23 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistPriceDropBanner extends ConsumerWidget {
   const WishlistPriceDropBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(wishlistProvider);
-    final dropCount = state.priceDropCount;
-    if (dropCount <= 0 || !state.isPriceDropBannerVisible) {
+    final bannerState = ref.watch(
+      wishlistProvider.select(
+        (s) => (
+          dropCount: s.priceDropCount,
+          visible: s.isPriceDropBannerVisible,
+        ),
+      ),
+    );
+    final dropCount = bannerState.dropCount;
+    if (dropCount <= 0 || !bannerState.visible) {
       return const SizedBox.shrink();
     }
 
@@ -31,7 +39,7 @@ class WishlistPriceDropBanner extends ConsumerWidget {
           child: Material(
             borderRadius: BorderRadius.circular(AppSpacing.md),
             elevation: 2,
-            shadowColor: AppColors.textPrimary.withValues(alpha: 0.08),
+            shadowColor: context.textPrimary.withValues(alpha: 0.08),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppSpacing.md),

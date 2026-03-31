@@ -51,7 +51,7 @@ class ListingOptionsSheet extends StatelessWidget {
             const Gap(AppSpacing.lg),
             ListTile(
               leading: const Icon(LucideIcons.pencil),
-              title: const Text(AppStrings.editListingMenu),
+              title: Text(AppStrings.editListingMenu),
               onTap: () {
                 Navigator.of(context).pop();
                 onEdit();
@@ -60,7 +60,7 @@ class ListingOptionsSheet extends StatelessWidget {
             if (showPause)
               ListTile(
                 leading: const Icon(LucideIcons.pauseCircle),
-                title: const Text(AppStrings.pauseListing),
+                title: Text(AppStrings.pauseListing),
                 onTap: () {
                   Navigator.of(context).pop();
                   onPause();
@@ -69,7 +69,7 @@ class ListingOptionsSheet extends StatelessWidget {
             if (showResume)
               ListTile(
                 leading: const Icon(LucideIcons.playCircle),
-                title: const Text(AppStrings.resumeListing),
+                title: Text(AppStrings.resumeListing),
                 onTap: () {
                   Navigator.of(context).pop();
                   onResume();
@@ -77,7 +77,7 @@ class ListingOptionsSheet extends StatelessWidget {
               ),
             ListTile(
               leading: const Icon(LucideIcons.barChart2),
-              title: const Text(AppStrings.viewStatsMenu),
+              title: Text(AppStrings.viewStatsMenu),
               onTap: () {
                 Navigator.of(context).pop();
                 onViewStats();

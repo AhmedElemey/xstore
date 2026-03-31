@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CartEmptyState extends StatelessWidget {
   const CartEmptyState({super.key});
@@ -14,7 +15,7 @@ class CartEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppColors.background,
+      color: context.backgroundColor,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
@@ -46,7 +47,7 @@ class CartEmptyState extends StatelessWidget {
                 AppStrings.cartEmptySubtitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   height: 1.45,
                 ),
               ),

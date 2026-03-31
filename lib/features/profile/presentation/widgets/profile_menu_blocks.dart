@@ -12,12 +12,14 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../orders/presentation/providers/vendor_orders_provider.dart';
 import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
 import 'profile_menu_tile.dart';
 import 'profile_switch_tile.dart';
 import 'theme_toggle_tile.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProfileMenuBlocks extends ConsumerWidget {
   const ProfileMenuBlocks({
@@ -108,6 +110,13 @@ class ProfileMenuBlocks extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final push = ref.watch(profileNotifierProvider).pushNotificationsEnabled;
     final email = ref.watch(profileNotifierProvider).emailUpdatesEnabled;
+    final vendorOrdersState = ref.watch(vendorOrdersProvider);
+    final pendingVendorOrders = vendorOrdersState.pendingCount;
+    if (isVendor && !vendorOrdersState.isLoading && vendorOrdersState.totalCount == 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(vendorOrdersProvider.notifier).fetchOrders();
+      });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,10 +134,12 @@ class ProfileMenuBlocks extends ConsumerWidget {
                   ProfileMenuTile(
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.accent,
-                    label: AppStrings.menuMyOrders,
-                    onTap: () => context.push(AppRoutes.incomingOrders),
+                    label: AppStrings.incomingOrders,
+                    trailingBadgeCount: pendingVendorOrders,
+                    onTap: () => context.push(AppRoutes.vendorOrders),
                   ),
                   ProfileMenuTile(
+                    
                     icon: LucideIcons.barChart2,
                     iconBackground: AppColors.primary,
                     label: AppStrings.menuAnalytics,
@@ -146,7 +157,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.primary,
                     label: AppStrings.menuMyOrders,
-                    onTap: () => context.push(AppRoutes.orders),
+                    onTap: () => context.push(AppRoutes.myOrdersPlaceholder),
                   ),
                   ProfileMenuTile(
                     icon: LucideIcons.heart,
@@ -180,7 +191,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
             ),
             ProfileMenuTile(
               icon: LucideIcons.lock,
-              iconBackground: AppColors.textSecondary,
+              iconBackground: context.textSecondary,
               label: AppStrings.menuChangePassword,
               onTap: () => context.push(AppRoutes.changePassword),
             ),
@@ -217,7 +228,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
             const ThemeToggleTile(),
             ProfileSwitchTile(
               icon: LucideIcons.bellOff,
-              iconBackground: AppColors.textSecondary,
+              iconBackground: context.textSecondary,
               label: AppStrings.menuPushNotifications,
               value: push,
               onChanged: ref.read(profileNotifierProvider.notifier).togglePushNotifications,
@@ -243,7 +254,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
             ),
             ProfileMenuTile(
               icon: LucideIcons.fileText,
-              iconBackground: AppColors.textSecondary,
+              iconBackground: context.textSecondary,
               label: AppStrings.menuTerms,
               onTap: () => context.push(AppRoutes.terms),
             ),
@@ -271,7 +282,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
         Text(
           AppStrings.sectionDangerZone,
           style: AppTypography.labelSmall.copyWith(
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
             letterSpacing: 1.1,
             fontWeight: FontWeight.w600,
           ),
@@ -300,7 +311,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
         Center(
           child: Text(
             AppStrings.profileFooterLine,
-            style: AppTypography.labelSmall.copyWith(color: AppColors.textDisabled),
+            style: AppTypography.labelSmall.copyWith(color: context.textDisabled),
           ),
         ),
         const SizedBox(height: AppSpacing.x3l),

@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'listing_thumbnail.dart';
@@ -25,11 +26,12 @@ class ListingCardGrid extends StatelessWidget {
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: context.cardShadowColor,
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -73,7 +75,8 @@ class ListingCardGrid extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
                       ),
                       const Gap(AppSpacing.sm),
@@ -81,18 +84,19 @@ class ListingCardGrid extends StatelessWidget {
                         Formatters.currency(listing.price),
                         style: theme.textTheme.titleSmall?.copyWith(
                           color: AppColors.primary,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(LucideIcons.moreVertical, size: 22),
+                  icon: const Icon(LucideIcons.moreVertical, size: 18),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
+                    minWidth: 20,
+                    minHeight: 20,
                   ),
                   onPressed: onOpenMenu,
                 ),

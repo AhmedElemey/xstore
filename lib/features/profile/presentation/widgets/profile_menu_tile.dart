@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProfileMenuTile extends StatelessWidget {
   const ProfileMenuTile({
@@ -14,6 +15,7 @@ class ProfileMenuTile extends StatelessWidget {
     this.onTap,
     this.showChevron = true,
     this.trailing,
+    this.trailingBadgeCount,
   });
 
   final IconData icon;
@@ -22,6 +24,7 @@ class ProfileMenuTile extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showChevron;
   final Widget? trailing;
+  final int? trailingBadgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +57,33 @@ class ProfileMenuTile extends StatelessWidget {
           ),
           if (trailing != null)
             trailing!
-          else if (showChevron)
-            Icon(
-              LucideIcons.chevronRight,
-              size: AppSpacing.x2l,
-              color: AppColors.textSecondary,
-            ),
+          else ...[
+            if ((trailingBadgeCount ?? 0) > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.error,
+                  borderRadius: BorderRadius.circular(AppSpacing.x4l),
+                ),
+                child: Text(
+                  '${trailingBadgeCount!}',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            if ((trailingBadgeCount ?? 0) > 0) const SizedBox(width: AppSpacing.sm),
+            if (showChevron)
+              Icon(
+                LucideIcons.chevronRight,
+                size: AppSpacing.x2l,
+                color: context.textSecondary,
+              ),
+          ],
         ],
       ),
     );

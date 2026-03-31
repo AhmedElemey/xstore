@@ -6,13 +6,14 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/cart_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) async {
   final cart = ref.read(cartProvider);
   final n = cart.items.length;
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.cardBg,
+    backgroundColor: context.surfaceColor,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppSpacing.lg),
@@ -34,7 +35,7 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
           Text(
             AppStrings.cartClearBody(n),
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.x2l),

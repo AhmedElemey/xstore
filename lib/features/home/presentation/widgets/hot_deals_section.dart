@@ -7,11 +7,7 @@ import '../../domain/entities/deal_entity.dart';
 import 'product_card.dart';
 
 class HotDealsSection extends StatelessWidget {
-  const HotDealsSection({
-    super.key,
-    required this.deals,
-    this.onOpenProduct,
-  });
+  const HotDealsSection({super.key, required this.deals, this.onOpenProduct});
 
   final List<DealEntity> deals;
   final void Function(DealEntity deal)? onOpenProduct;
@@ -33,22 +29,25 @@ class HotDealsSection extends StatelessWidget {
           builder: (context, constraints) {
             const crossAxisCount = 2;
             const spacing = AppSpacing.md;
-            final tileWidth =
-                (constraints.maxWidth - spacing) / crossAxisCount;
+            final tileWidth = (constraints.maxWidth - spacing) / crossAxisCount;
             return Wrap(
               spacing: spacing,
               runSpacing: spacing,
               children: deals
                   .map(
                     (d) => SizedBox(
+                      key: ValueKey<String>(d.id),
                       width: tileWidth,
-                      child: ProductCard(
-                        title: d.title,
-                        price: d.price,
-                        imageUrl: d.imageUrl,
-                        discountPercent: d.discountPercent,
-                        listingId: d.id,
-                        onTap: () => onOpenProduct?.call(d),
+                      child: RepaintBoundary(
+                        child: ProductCard(
+                          key: ValueKey<String>('hot-deal-${d.id}'),
+                          title: d.title,
+                          price: d.price,
+                          imageUrl: d.imageUrl,
+                          discountPercent: d.discountPercent,
+                          listingId: d.id,
+                          onTap: () => onOpenProduct?.call(d),
+                        ),
                       ),
                     ),
                   )

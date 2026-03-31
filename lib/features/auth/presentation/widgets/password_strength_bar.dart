@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../providers/auth_states.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class PasswordStrengthBar extends StatelessWidget {
   const PasswordStrengthBar({
@@ -135,7 +136,7 @@ class PasswordStrengthBar extends StatelessWidget {
               fontWeight: FontWeight.w600,
               color: strength == PasswordStrength.strong
                   ? AppColors.success
-                  : AppColors.textSecondary,
+                  : context.textSecondary,
             ),
           ),
         ],
@@ -180,7 +181,7 @@ class _RequirementRow extends StatelessWidget {
           Icon(
             met ? Icons.check_circle : Icons.circle_outlined,
             size: 18,
-            color: met ? AppColors.success : AppColors.textDisabled,
+            color: met ? AppColors.success : context.textDisabled,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -188,7 +189,7 @@ class _RequirementRow extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: 13,
-                color: met ? AppColors.success : AppColors.textSecondary,
+                color: met ? AppColors.success : context.textSecondary,
               ),
             ),
           ),

@@ -19,31 +19,46 @@ abstract final class NotificationsFeedSlivers {
     required WidgetRef ref,
     required void Function(BuildContext context, NotificationEntity e) onDelete,
   }) {
-    final s = ref.watch(notificationsProvider);
+    final isLoading = ref.watch(
+      notificationsProvider.select((s) => s.isLoading),
+    );
+    final error = ref.watch(notificationsProvider.select((s) => s.error));
+    final selectedFilter = ref.watch(
+      notificationsProvider.select((s) => s.selectedFilter),
+    );
+    final groups = ref.watch(notificationsProvider.select((s) => s.groups));
+    final filteredNotifications = ref.watch(
+      notificationsProvider.select((s) => s.filteredNotifications),
+    );
+    final markAllReadAnimating = ref.watch(
+      notificationsProvider.select((s) => s.markAllReadAnimating),
+    );
     final n = ref.read(notificationsProvider.notifier);
-    if (s.isLoading) {
+    if (isLoading) {
       return const [
         SliverFillRemaining(child: Center(child: CircularProgressIndicator.adaptive())),
       ];
     }
-    if (s.error != null) {
+    if (error != null) {
       return [
         SliverFillRemaining(
           child: Center(
-            child: Text(s.error!, style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+            child: Text(error, style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
           ),
         ),
       ];
     }
-    if (s.filteredNotifications.isEmpty) {
+    if (filteredNotifications.isEmpty) {
       return [
         SliverFillRemaining(
-          child: NotificationEmptyState(isAllFilter: s.selectedFilter == NotificationFilter.all),
+          child: NotificationEmptyState(
+            isAllFilter: selectedFilter == NotificationFilter.all,
+          ),
         ),
       ];
     }
     return [
-      for (final g in s.groups)
+      for (final g in groups)
         SliverMainAxisGroup(
           slivers: [
             SliverPersistentHeader(
@@ -54,17 +69,20 @@ abstract final class NotificationsFeedSlivers {
               delegate: SliverChildBuilderDelegate(
                 (context, i) {
                   final e = g.notifications[i];
-                  return NotificationTile(
-                    entity: e,
-                    markAllReadAnimating: s.markAllReadAnimating,
-                    onTap: () {
-                      n.markAsRead(e.id);
-                      final r = e.actionRoute;
-                      if (r != null && r.isNotEmpty) context.push(r);
-                    },
-                    onDeleteConfirmed: () => onDelete(context, e),
-                    onSwipeMarkRead: () => n.markAsRead(e.id),
-                    onMarkUnread: () => n.markAsUnread(e.id),
+                  return RepaintBoundary(
+                    child: NotificationTile(
+                      key: ValueKey<String>('notification-tile-${e.id}'),
+                      entity: e,
+                      markAllReadAnimating: markAllReadAnimating,
+                      onTap: () {
+                        n.markAsRead(e.id);
+                        final r = e.actionRoute;
+                        if (r != null && r.isNotEmpty) context.push(r);
+                      },
+                      onDeleteConfirmed: () => onDelete(context, e),
+                      onSwipeMarkRead: () => n.markAsRead(e.id),
+                      onMarkUnread: () => n.markAsUnread(e.id),
+                    ),
                   );
                 },
                 childCount: g.notifications.length,

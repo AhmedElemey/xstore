@@ -7,9 +7,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductGridCard extends StatelessWidget {
   const ProductGridCard({
@@ -28,7 +30,7 @@ class ProductGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -44,12 +46,16 @@ class ProductGridCard extends StatelessWidget {
                     child: item.imageUrl != null
                         ? CachedNetworkImage(
                             imageUrl: item.imageUrl!,
+                            cacheManager: AppImageCacheManager.instance,
                             fit: BoxFit.cover,
-                            placeholder: (_, __) => const ColoredBox(
-                              color: AppColors.textDisabled,
+                            placeholder: (_, __) => ColoredBox(
+                              color: context.textDisabled,
+                            ),
+                            errorWidget: (_, __, ___) => ColoredBox(
+                              color: context.textDisabled,
                             ),
                           )
-                        : const ColoredBox(color: AppColors.textDisabled),
+                        : ColoredBox(color: context.textDisabled),
                   ),
                   Positioned(
                     left: AppSpacing.sm,
@@ -60,12 +66,12 @@ class ProductGridCard extends StatelessWidget {
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withValues(alpha: 0.65),
+                        color: context.textPrimary.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(AppSpacing.xs),
                       ),
                       child: Text(
                         item.condition,
-                        style: AppTypography.labelSmall.copyWith(color: AppColors.cardBg),
+                        style: AppTypography.labelSmall.copyWith(color: context.surfaceColor),
                       ),
                     ),
                   ),

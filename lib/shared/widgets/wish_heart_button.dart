@@ -7,6 +7,7 @@ import '../../core/router/app_routes.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/wishlist/presentation/providers/wishlist_provider.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 /// Single entry point for wishlist heart UI: state, toggle, and snackbars.
 class WishHeartButton extends ConsumerWidget {
@@ -23,8 +24,10 @@ class WishHeartButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).valueOrNull;
-    if (user?.role == UserRole.vendor) {
+    final role = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
+    );
+    if (role == UserRole.vendor) {
       return SizedBox(width: size, height: size);
     }
 
@@ -36,12 +39,12 @@ class WishHeartButton extends ConsumerWidget {
 
     final outlineColor = onDarkBackground
         ? AppColors.white.withValues(alpha: 0.92)
-        : AppColors.textSecondary;
+        : context.textSecondary;
 
     return Material(
       color: onDarkBackground
-          ? AppColors.textPrimary.withValues(alpha: 0.38)
-          : AppColors.cardBg.withValues(alpha: 0.92),
+          ? context.textPrimary.withValues(alpha: 0.38)
+          : context.surfaceColor.withValues(alpha: 0.92),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: IconButton(

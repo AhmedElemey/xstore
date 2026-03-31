@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -64,7 +64,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final u = profile?.user ?? user;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: CustomScrollView(
@@ -72,7 +72,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           clipBehavior: Clip.none,
           slivers: [
-            ProfileSliverAppBar(scrollController: _scroll),
+            ProfileSliverAppBar(
+              scrollController: _scroll,
+              userName: u.name,
+              avatarUrl: u.avatarUrl,
+              avatarFile: profileState.editAvatarFile,
+            ),
             if (profileState.isLoading && profile == null)
               const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator.adaptive()),
@@ -82,7 +87,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Transform.translate(
                   offset: const Offset(0, -AppSpacing.profileAvatarHalfOut),
                   child: Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.md),
+                    padding: const EdgeInsets.only(top: AppSpacing.sm),
                     child: ProfileHeader(
                       user: u,
                       avatarFile: profileState.editAvatarFile,
@@ -99,7 +104,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg,
-                    AppSpacing.x2l,
+                    AppSpacing.xs,
                     AppSpacing.lg,
                     AppSpacing.md,
                   ),
@@ -115,7 +120,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onRatingTap: () => context.push(AppRoutes.analytics),
                     onResponseTap: () => context.push(AppRoutes.earnings),
                     onOrdersTap: () => context.push(
-                      isVendor ? AppRoutes.incomingOrders : AppRoutes.orders,
+                      isVendor ? AppRoutes.vendorOrders : AppRoutes.orders,
                     ),
                     onWishlistTap: () => context.push(AppRoutes.wishlist),
                     onSavedTap: () => context.push(AppRoutes.earnings),

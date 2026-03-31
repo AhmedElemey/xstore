@@ -15,6 +15,7 @@ import '../widgets/checkout_primary_footer.dart';
 import '../widgets/checkout_progress.dart';
 import '../widgets/checkout_review_section.dart';
 import '../widgets/order_confirmation_sheet.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutScreen extends ConsumerWidget {
   const CheckoutScreen({super.key});
@@ -53,10 +54,10 @@ class CheckoutScreen extends ConsumerWidget {
           );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
         title: Text(AppStrings.checkoutTitle),
-        backgroundColor: AppColors.cardBg,
+        backgroundColor: context.surfaceColor,
         surfaceTintColor: AppColors.transparent,
         elevation: 0,
         leading: IconButton(

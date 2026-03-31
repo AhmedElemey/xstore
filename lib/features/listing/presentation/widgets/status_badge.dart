@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class StatusBadge extends StatelessWidget {
   const StatusBadge({
@@ -25,7 +26,7 @@ class StatusBadge extends StatelessWidget {
       ListingStatus.sold => AppStrings.sold,
       ListingStatus.rejected => AppStrings.rejected,
     };
-    final (bg, fg) = _colors(status);
+    final (bg, fg) = _colors(context, status);
     final pad = compact
         ? const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs)
         : const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm);
@@ -47,7 +48,7 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  (Color bg, Color fg) _colors(ListingStatus s) {
+  (Color bg, Color fg) _colors(BuildContext context, ListingStatus s) {
     switch (s) {
       case ListingStatus.active:
         return (
@@ -61,8 +62,8 @@ class StatusBadge extends StatelessWidget {
         );
       case ListingStatus.paused:
         return (
-          AppColors.textDisabled.withValues(alpha: 0.35),
-          AppColors.textSecondary,
+          context.textDisabled.withValues(alpha: 0.35),
+          context.textSecondary,
         );
       case ListingStatus.sold:
         return (
@@ -76,8 +77,8 @@ class StatusBadge extends StatelessWidget {
         );
       case ListingStatus.draft:
         return (
-          AppColors.textDisabled.withValues(alpha: 0.45),
-          AppColors.textSecondary,
+          context.textDisabled.withValues(alpha: 0.45),
+          context.textSecondary,
         );
     }
   }

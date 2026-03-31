@@ -12,14 +12,14 @@ class XstoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
-    final themeMode = ref.watch(appThemeModeProvider);
+    final currentThemeMode = ref.watch(appThemeModeProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: themeMode,
+      themeMode: currentThemeMode,
       routerConfig: router,
     );
   }

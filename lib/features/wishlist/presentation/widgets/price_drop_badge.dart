@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class PriceDropBadge extends StatelessWidget {
   const PriceDropBadge({super.key, required this.percent});
@@ -23,7 +24,7 @@ class PriceDropBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.xl),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.08),
+            color: context.textPrimary.withValues(alpha: 0.08),
             blurRadius: AppSpacing.xs,
             offset: const Offset(0, 1),
           ),

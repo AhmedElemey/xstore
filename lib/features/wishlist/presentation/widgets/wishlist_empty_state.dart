@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistEmptyState extends StatelessWidget {
   const WishlistEmptyState({
@@ -47,7 +48,7 @@ class WishlistEmptyState extends StatelessWidget {
                   child: Icon(
                     LucideIcons.heart,
                     size: AppSpacing.x4l * 2 + AppSpacing.md,
-                    color: AppColors.textSecondary.withValues(alpha: 0.4),
+                    color: context.textSecondary.withValues(alpha: 0.4),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.x2l),
@@ -55,7 +56,7 @@ class WishlistEmptyState extends StatelessWidget {
                   titleText,
                   style: AppTypography.titleLarge.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -64,7 +65,7 @@ class WishlistEmptyState extends StatelessWidget {
                   Text(
                     AppStrings.wishlistEmptySubtitle,
                     style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                       height: 1.45,
                     ),
                     textAlign: TextAlign.center,

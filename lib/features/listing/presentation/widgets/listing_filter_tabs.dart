@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ListingFilterTabs extends StatelessWidget {
   const ListingFilterTabs({
@@ -59,7 +60,7 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.outline.withValues(alpha: 0.45);
+    final outline = context.borderColor.withValues(alpha: 0.8);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -72,7 +73,7 @@ class _FilterChipPill extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : Colors.transparent,
+            color: selected ? AppColors.primary : context.surfaceColor,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: selected ? AppColors.primary : outline,
@@ -82,7 +83,9 @@ class _FilterChipPill extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: selected ? AppColors.cardBg : Theme.of(context).colorScheme.onSurface,
+                  color: selected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : context.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
           ),

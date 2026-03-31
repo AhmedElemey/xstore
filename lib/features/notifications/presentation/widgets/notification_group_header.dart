@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class NotificationGroupHeaderDelegate extends SliverPersistentHeaderDelegate {
   NotificationGroupHeaderDelegate(this.label);
@@ -38,7 +38,7 @@ class NotificationGroupHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: AppColors.background,
+      color: context.backgroundColor,
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -49,7 +49,7 @@ class NotificationGroupHeaderBar extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: AppTypography.labelSmall.copyWith(
-          color: AppColors.textSecondary,
+          color: context.textSecondary,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.1,
         ),

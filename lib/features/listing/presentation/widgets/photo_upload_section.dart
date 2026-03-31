@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Horizontal photo strip: add tile, previews, reorder via long-press drag.
 class PhotoUploadSection extends StatelessWidget {
@@ -108,7 +109,7 @@ class _AddPhotoTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: CustomPaint(
           foregroundPainter: _DashedBorderPainter(
-            color: AppColors.textDisabled,
+            color: context.textDisabled,
             radius: 12,
           ),
           child: SizedBox(
@@ -117,7 +118,7 @@ class _AddPhotoTile extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(LucideIcons.plus, color: AppColors.textSecondary, size: 28),
+                Icon(LucideIcons.plus, color: context.textSecondary, size: 28),
                 const SizedBox(height: 4),
                 Text(
                   'Add Photo',
@@ -216,7 +217,7 @@ class _PhotoTile extends StatelessWidget {
                   color: Colors.green.shade600,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
+                child: Text(
                   'Cover',
                   style: TextStyle(
                     color: Colors.white,
@@ -237,7 +238,7 @@ class _PhotoTile extends StatelessWidget {
                 onTap: onRemove,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(LucideIcons.x, color: AppColors.cardBg, size: AppSpacing.lg),
+                  child: Icon(LucideIcons.x, color: context.surfaceColor, size: AppSpacing.lg),
                 ),
               ),
             ),

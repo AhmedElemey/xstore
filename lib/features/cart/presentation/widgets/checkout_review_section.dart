@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -11,6 +10,7 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import 'cart_summary_card.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutReviewSection extends ConsumerWidget {
   const CheckoutReviewSection({super.key});
@@ -49,7 +49,7 @@ class CheckoutReviewSection extends ConsumerWidget {
         Text(
           AppStrings.checkoutItemsFromSellers(items.length, vendors),
           style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -82,7 +82,7 @@ class CheckoutReviewSection extends ConsumerWidget {
               ],
             ),
           ),
-        const Divider(height: AppSpacing.x2l),
+        Divider(height: AppSpacing.x2l),
         if (addr != null) ...[
           Text(
             '📍 ${addr.street}, ${addr.city}, ${addr.wilaya}',
@@ -99,7 +99,7 @@ class CheckoutReviewSection extends ConsumerWidget {
         Text(
           AppStrings.checkoutEstimatedDelivery,
           style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -108,7 +108,7 @@ class CheckoutReviewSection extends ConsumerWidget {
         Text(
           AppStrings.checkoutTermsBefore,
           style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
             height: 1.45,
           ),
         ),
@@ -122,7 +122,7 @@ class CheckoutReviewSection extends ConsumerWidget {
             Text(
               AppStrings.checkoutTermsAnd,
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
             ),
             TextButton(

@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../domain/entities/wishlist_item_entity.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
 import 'move_all_to_cart_bar.dart';
@@ -40,12 +41,27 @@ class WishlistConsumerBody extends ConsumerStatefulWidget {
 class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(wishlistProvider);
     final notifier = ref.read(wishlistProvider.notifier);
+    final state = ref.watch(
+      wishlistProvider.select(
+        (s) => (
+          items: s.items,
+          filteredItems: s.filteredItems,
+          isLoading: s.isLoading,
+          isSelectionMode: s.isSelectionMode,
+          selectedItemIds: s.selectedItemIds,
+          selectedFilter: s.selectedFilter,
+          viewMode: s.viewMode,
+          error: s.error,
+        ),
+      ),
+    );
 
-    ref.listen(wishlistProvider, (prev, next) {
-      final err = next.error;
-      if (err != null && err != prev?.error && context.mounted) {
+    ref.listen<String?>(
+      wishlistProvider.select((s) => s.error),
+      (prev, next) {
+      final err = next;
+      if (err != null && err != prev && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(err)),
         );
@@ -81,7 +97,16 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
 
   Widget _buildScrollable(
     BuildContext context,
-    WishlistState state,
+    ({
+      List<WishlistItemEntity> items,
+      List<WishlistItemEntity> filteredItems,
+      bool isLoading,
+      bool isSelectionMode,
+      Set<String> selectedItemIds,
+      WishlistFilter selectedFilter,
+      WishlistViewMode viewMode,
+      String? error,
+    }) state,
     Wishlist notifier,
   ) {
     final items = state.items;
@@ -101,6 +126,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
     if (state.viewMode == WishlistViewMode.list) {
       return ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
+        cacheExtent: 1000,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.md,
           AppSpacing.md,
@@ -111,11 +137,14 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
         separatorBuilder: (_, __) => const Gap(AppSpacing.md),
         itemBuilder: (context, i) {
           final item = filtered[i];
-          return WishlistItemCard(
-            item: item,
-            selectionMode: state.isSelectionMode,
-            selected: state.selectedItemIds.contains(item.id),
-            onToggleSelect: () => notifier.toggleItemSelection(item.id),
+          return RepaintBoundary(
+            child: WishlistItemCard(
+              key: ValueKey<String>('wishlist-list-item-${item.id}'),
+              item: item,
+              selectionMode: state.isSelectionMode,
+              selected: state.selectedItemIds.contains(item.id),
+              onToggleSelect: () => notifier.toggleItemSelection(item.id),
+            ),
           );
         },
       );
@@ -123,6 +152,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
 
     return GridView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
+      cacheExtent: 1000,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
         AppSpacing.md,
@@ -138,11 +168,14 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       itemCount: filtered.length,
       itemBuilder: (context, i) {
         final item = filtered[i];
-        return WishlistGridCard(
-          item: item,
-          selectionMode: state.isSelectionMode,
-          selected: state.selectedItemIds.contains(item.id),
-          onToggleSelect: () => notifier.toggleItemSelection(item.id),
+        return RepaintBoundary(
+          child: WishlistGridCard(
+            key: ValueKey<String>('wishlist-grid-item-${item.id}'),
+            item: item,
+            selectionMode: state.isSelectionMode,
+            selected: state.selectedItemIds.contains(item.id),
+            onToggleSelect: () => notifier.toggleItemSelection(item.id),
+          ),
         );
       },
     );

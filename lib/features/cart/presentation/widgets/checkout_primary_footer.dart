@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutPrimaryFooter extends StatelessWidget {
   const CheckoutPrimaryFooter({
@@ -27,10 +28,10 @@ class CheckoutPrimaryFooter extends StatelessWidget {
         AppSpacing.md + MediaQuery.paddingOf(context).bottom,
       ),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.08),
+            color: context.textPrimary.withValues(alpha: 0.08),
             blurRadius: AppSpacing.md,
             offset: const Offset(0, -AppSpacing.xs),
           ),
@@ -49,7 +50,7 @@ class CheckoutPrimaryFooter extends StatelessWidget {
                       AppColors.profileHeaderGradientEnd,
                     ],
                   ),
-            color: busy ? AppColors.textDisabled : null,
+            color: busy ? context.textDisabled : null,
             borderRadius: BorderRadius.circular(AppSpacing.lg),
           ),
           child: Material(

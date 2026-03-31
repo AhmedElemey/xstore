@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AuthDivider extends StatelessWidget {
   const AuthDivider({super.key, this.label = 'or continue with'});
@@ -13,7 +13,7 @@ class AuthDivider extends StatelessWidget {
       children: [
         Expanded(
           child: Divider(
-            color: AppColors.textDisabled.withValues(alpha: 0.6),
+            color: context.textDisabled.withValues(alpha: 0.6),
             thickness: 1,
           ),
         ),
@@ -21,15 +21,15 @@ class AuthDivider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
             ),
           ),
         ),
         Expanded(
           child: Divider(
-            color: AppColors.textDisabled.withValues(alpha: 0.6),
+            color: context.textDisabled.withValues(alpha: 0.6),
             thickness: 1,
           ),
         ),

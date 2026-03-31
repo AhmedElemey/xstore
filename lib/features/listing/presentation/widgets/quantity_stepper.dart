@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuantityStepper extends StatelessWidget {
   const QuantityStepper({
@@ -79,7 +80,7 @@ class _StepperIcon extends StatelessWidget {
     return Material(
       color: enabled
           ? AppColors.primary.withValues(alpha: 0.1)
-          : AppColors.textDisabled.withValues(alpha: 0.25),
+          : context.textDisabled.withValues(alpha: 0.25),
       borderRadius: BorderRadius.circular(AppSpacing.md),
       child: InkWell(
         onTap: onTap,
@@ -89,7 +90,7 @@ class _StepperIcon extends StatelessWidget {
           height: AppSpacing.x3l + AppSpacing.md,
           child: Icon(
             icon,
-            color: enabled ? AppColors.primary : AppColors.textDisabled,
+            color: enabled ? AppColors.primary : context.textDisabled,
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../widgets/notification_filter_tabs.dart';
@@ -58,17 +59,25 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final s = ref.watch(notificationsProvider);
     final n = ref.read(notificationsProvider.notifier);
+    final unreadCount = ref.watch(
+      notificationsProvider.select((s) => s.unreadCount),
+    );
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.backgroundColor,
         surfaceTintColor: AppColors.transparent,
         centerTitle: true,
-        title: Text(AppStrings.notifications, style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w700)),
+        title: Text(
+          AppStrings.notifications,
+          style: AppTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.w700,
+            color: context.textPrimary,
+          ),
+        ),
         actions: [
-          if (s.unreadCount > 0)
+          if (unreadCount > 0)
             TextButton(
               onPressed: n.markAllRead,
               child: Text(AppStrings.notificationsMarkAllRead, style: AppTypography.labelLarge.copyWith(color: AppColors.primary)),
@@ -85,6 +94,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         onRefresh: n.refreshNotifications,
         child: CustomScrollView(
           controller: _scroll,
+          cacheExtent: 800,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             const SliverToBoxAdapter(child: NotificationFilterTabs()),

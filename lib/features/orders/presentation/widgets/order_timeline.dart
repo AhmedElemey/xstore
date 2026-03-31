@@ -8,11 +8,17 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderTimeline extends StatefulWidget {
-  const OrderTimeline({super.key, required this.order});
+  const OrderTimeline({
+    super.key,
+    required this.order,
+    this.showTitle = true,
+  });
 
   final OrderEntity order;
+  final bool showTitle;
 
   @override
   State<OrderTimeline> createState() => _OrderTimelineState();
@@ -48,11 +54,13 @@ class _OrderTimelineState extends State<OrderTimeline>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppStrings.ordersTimelineHeading,
-          style: AppTypography.titleMedium,
-        ),
-        const SizedBox(height: AppSpacing.lg),
+        if (widget.showTitle) ...[
+          Text(
+            AppStrings.ordersTimelineHeading,
+            style: AppTypography.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         ...List.generate(steps.length, (i) {
           final s = steps[i];
           final isCancelNode =
@@ -159,7 +167,7 @@ class _TimelineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final dotColor = isCancelNode
         ? AppColors.error
-        : (nodeFilled ? AppColors.success : AppColors.textDisabled);
+        : (nodeFilled ? AppColors.success : context.textDisabled);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -205,7 +213,7 @@ class _TimelineRow extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color:
-                            nodeFilled || isCancelNode ? dotColor : AppColors.textDisabled,
+                            nodeFilled || isCancelNode ? dotColor : context.textDisabled,
                         width: 2,
                       ),
                     ),
@@ -219,6 +227,7 @@ class _TimelineRow extends StatelessWidget {
                       painter: _LinePainter(
                         dashed: !nodeFilled && !isCancelNode,
                         solid: nodeFilled || isCancelNode,
+                        pendingColor: context.textDisabled,
                       ),
                     ),
                   ),
@@ -263,15 +272,20 @@ class _TimelineRow extends StatelessWidget {
 }
 
 class _LinePainter extends CustomPainter {
-  _LinePainter({required this.dashed, required this.solid});
+  _LinePainter({
+    required this.dashed,
+    required this.solid,
+    required this.pendingColor,
+  });
 
   final bool dashed;
   final bool solid;
+  final Color pendingColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = solid ? AppColors.success : AppColors.textDisabled
+      ..color = solid ? AppColors.success : pendingColor
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     final mid = size.width / 2;

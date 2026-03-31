@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/checkout_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutPaymentSection extends ConsumerStatefulWidget {
   const CheckoutPaymentSection({super.key});
@@ -83,7 +84,7 @@ class _CheckoutPaymentSectionState
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Material(
-              color: AppColors.cardBg,
+              color: context.surfaceColor,
               borderRadius: BorderRadius.circular(AppSpacing.md),
               child: InkWell(
                 onTap: () => notifier.selectPayment(m),
@@ -95,7 +96,7 @@ class _CheckoutPaymentSectionState
                     border: Border.all(
                       color: st.selectedPayment == m
                           ? AppColors.primary
-                          : AppColors.textDisabled,
+                          : context.textDisabled,
                       width: st.selectedPayment == m ? 2 : 1,
                     ),
                   ),
@@ -121,7 +122,7 @@ class _CheckoutPaymentSectionState
                             Text(
                               _sub(m),
                               style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],

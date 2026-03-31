@@ -5,8 +5,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -30,7 +32,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -87,11 +89,7 @@ class ProductCard extends StatelessWidget {
 }
 
 class _ProductImage extends StatelessWidget {
-  const _ProductImage({
-    required this.theme,
-    this.imageUrl,
-    this.listingId,
-  });
+  const _ProductImage({required this.theme, this.imageUrl, this.listingId});
 
   final ThemeData theme;
   final String? imageUrl;
@@ -102,14 +100,19 @@ class _ProductImage extends StatelessWidget {
     Widget image;
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       image = CachedNetworkImage(
+        cacheManager: AppImageCacheManager.instance,
         imageUrl: imageUrl!,
         fit: BoxFit.cover,
         alignment: Alignment.center,
         width: double.infinity,
-        placeholder: (_, __) => const Center(
-          child: CircularProgressIndicator.adaptive(),
+        placeholder: (_, __) => ColoredBox(
+          color: theme.colorScheme.surfaceContainerHighest,
+          child: const Center(child: CircularProgressIndicator.adaptive()),
         ),
-        errorWidget: (_, __, ___) => const Icon(LucideIcons.imageOff),
+        errorWidget: (_, __, ___) => ColoredBox(
+          color: theme.colorScheme.surfaceContainerHighest,
+          child: const Icon(LucideIcons.imageOff),
+        ),
       );
     } else {
       image = ColoredBox(
@@ -129,10 +132,7 @@ class _ProductImage extends StatelessWidget {
         Positioned(
           top: AppSpacing.sm,
           right: AppSpacing.sm,
-          child: WishHeartButton(
-            listingId: listingId!,
-            size: AppSpacing.x2l,
-          ),
+          child: WishHeartButton(listingId: listingId!, size: AppSpacing.x2l),
         ),
       ],
     );

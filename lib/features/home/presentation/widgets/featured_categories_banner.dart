@@ -2,12 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class FeaturedCategoriesBanner extends StatelessWidget {
   const FeaturedCategoriesBanner({super.key});
@@ -32,7 +34,9 @@ class FeaturedCategoriesBanner extends StatelessWidget {
             onTap: () => context.go(
               Uri(
                 path: AppRoutes.explore,
-                queryParameters: const {'category': AppStrings.categoryQueryMens},
+                queryParameters: const {
+                  'category': AppStrings.categoryQueryMens,
+                },
               ).toString(),
             ),
           ),
@@ -46,7 +50,9 @@ class FeaturedCategoriesBanner extends StatelessWidget {
             onTap: () => context.go(
               Uri(
                 path: AppRoutes.explore,
-                queryParameters: const {'category': AppStrings.categoryQueryWomens},
+                queryParameters: const {
+                  'category': AppStrings.categoryQueryWomens,
+                },
               ).toString(),
             ),
           ),
@@ -72,7 +78,7 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -83,11 +89,14 @@ class _CategoryCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               CachedNetworkImage(
+                cacheManager: AppImageCacheManager.instance,
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => const ColoredBox(color: AppColors.textDisabled),
-                errorWidget: (_, __, ___) =>
-                    const ColoredBox(color: AppColors.textDisabled),
+                placeholder: (_, __) => ColoredBox(color: context.textDisabled),
+                errorWidget: (_, __, ___) => ColoredBox(
+                  color: context.textDisabled,
+                  child: Icon(LucideIcons.imageOff, color: context.textPrimary),
+                ),
               ),
               DecoratedBox(
                 decoration: BoxDecoration(
@@ -95,8 +104,8 @@ class _CategoryCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.cardBg.withValues(alpha: 0),
-                      AppColors.textPrimary.withValues(alpha: 0.85),
+                      context.surfaceColor.withValues(alpha: 0),
+                      context.textPrimary.withValues(alpha: 0.85),
                     ],
                   ),
                 ),
@@ -110,7 +119,7 @@ class _CategoryCard extends StatelessWidget {
                     Text(
                       title,
                       style: AppTypography.titleMedium.copyWith(
-                        color: AppColors.cardBg,
+                        color: context.surfaceColor,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -118,8 +127,8 @@ class _CategoryCard extends StatelessWidget {
                     OutlinedButton(
                       onPressed: onTap,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.cardBg,
-                        side: const BorderSide(color: AppColors.cardBg),
+                        foregroundColor: context.surfaceColor,
+                        side: BorderSide(color: context.surfaceColor),
                       ),
                       child: Text(AppStrings.shopNow),
                     ),

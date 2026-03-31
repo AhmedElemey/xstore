@@ -8,6 +8,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class NotificationEmptyState extends ConsumerStatefulWidget {
   const NotificationEmptyState({super.key, required this.isAllFilter});
@@ -87,12 +88,12 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
                 child: Icon(LucideIcons.bell, size: AppSpacing.x3l * 2, color: AppColors.primary.withValues(alpha: 0.35)),
               )
             else
-              Icon(LucideIcons.bellOff, size: AppSpacing.x3l * 2, color: AppColors.textDisabled),
+              Icon(LucideIcons.bellOff, size: AppSpacing.x3l * 2, color: context.textDisabled),
             SizedBox(height: AppSpacing.x2l),
             Text(
               all ? AppStrings.notificationsEmptyAllTitle : AppStrings.notificationsEmptyFilterTitle(_filterName(filter)),
               textAlign: TextAlign.center,
-              style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w700, color: context.textPrimary),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
@@ -100,13 +101,13 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
                   ? AppStrings.notificationsEmptyAllSubtitle
                   : AppStrings.notificationsEmptyFilterSubtitle(_scope(filter)),
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
             ),
             if (!all) ...[
               SizedBox(height: AppSpacing.x2l),
               FilledButton(
                 onPressed: () => n.applyFilter(NotificationFilter.all),
-                child: const Text(AppStrings.notificationsShowAll),
+                child: Text(AppStrings.notificationsShowAll),
               ),
             ],
           ],

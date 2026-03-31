@@ -12,6 +12,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'order_status_badge.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderCard extends ConsumerWidget {
   const OrderCard({
@@ -30,10 +31,10 @@ class OrderCard extends ConsumerWidget {
     final more = order.items.length - 1;
 
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       elevation: 0,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.06),
+      shadowColor: context.textPrimary.withValues(alpha: 0.06),
       child: InkWell(
         onTap: () => context.push(AppRoutes.orderPath(order.id)),
         borderRadius: BorderRadius.circular(AppSpacing.lg),
@@ -42,7 +43,7 @@ class OrderCard extends ConsumerWidget {
             borderRadius: BorderRadius.circular(AppSpacing.lg),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: 0.06),
+                color: context.textPrimary.withValues(alpha: 0.06),
                 blurRadius: AppSpacing.md,
                 offset: const Offset(0, AppSpacing.xs),
               ),
@@ -63,7 +64,7 @@ class OrderCard extends ConsumerWidget {
                   OrderStatusBadge(status: order.status, compact: true),
                 ],
               ),
-              const Divider(height: AppSpacing.lg),
+              Divider(height: AppSpacing.lg),
               if (first != null) ...[
                 if (isVendor) ...[
                   Row(
@@ -105,7 +106,7 @@ class OrderCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const Divider(height: AppSpacing.lg),
+                  Divider(height: AppSpacing.lg),
                 ],
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +122,7 @@ class OrderCard extends ConsumerWidget {
                                 fit: BoxFit.cover,
                               )
                             : Container(
-                                color: AppColors.textDisabled
+                                color: context.textDisabled
                                     .withValues(alpha: 0.2),
                               ),
                       ),
@@ -158,7 +159,7 @@ class OrderCard extends ConsumerWidget {
                   ],
                 ),
               ],
-              const Divider(height: AppSpacing.lg),
+              Divider(height: AppSpacing.lg),
               if (!isVendor)
                 Text(
                   '📦 ${order.vendorStoreName} · ${_shortDate(order.createdAt)}',

@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/product_seller_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class SellerCard extends StatelessWidget {
   const SellerCard({
@@ -27,9 +28,9 @@ class SellerCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Material(
         elevation: 3,
-        shadowColor: AppColors.textPrimary.withValues(alpha: 0.12),
+        shadowColor: context.textPrimary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.lg),
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onCardTap,
@@ -75,7 +76,7 @@ class SellerCard extends StatelessWidget {
                     const Gap(AppSpacing.sm),
                     OutlinedButton(
                       onPressed: onVisitStore,
-                      child: const Text(AppStrings.visitStore),
+                      child: Text(AppStrings.visitStore),
                     ),
                   ],
                 ),

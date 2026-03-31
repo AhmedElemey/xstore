@@ -18,6 +18,7 @@ import 'order_item_tile.dart';
 import 'order_price_breakdown.dart';
 import 'order_status_badge.dart';
 import 'order_timeline.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderDetailScrollContent extends ConsumerWidget {
   const OrderDetailScrollContent({super.key, required this.order});
@@ -26,10 +27,12 @@ class OrderDetailScrollContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isVendor =
-        ref.watch(authProvider).valueOrNull?.role == UserRole.vendor;
-    final profile = ref.watch(profileNotifierProvider).profile;
-    final vendorWhatsApp = profile?.user.whatsappNumber;
+    final isVendor = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.role == UserRole.vendor),
+    );
+    final vendorWhatsApp = ref.watch(
+      profileNotifierProvider.select((s) => s.profile?.user.whatsappNumber),
+    );
 
     return SliverList(
       delegate: SliverChildListDelegate([
@@ -51,9 +54,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Column(
-            children: order.items
-                .map((i) => OrderItemTile(item: i))
-                .toList(),
+            children: order.items.map((i) => OrderItemTile(item: i)).toList(),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -101,9 +102,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: _WhiteCard(
-            child: OrderPriceBreakdown(order: order),
-          ),
+          child: _WhiteCard(child: OrderPriceBreakdown(order: order)),
         ),
         if (order.notes != null && order.notes!.trim().isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
@@ -121,7 +120,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.textDisabled.withValues(alpha: 0.12),
+                color: context.textDisabled.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSpacing.md),
               ),
               child: Text(
@@ -201,24 +200,24 @@ class _StatusBanner extends StatelessWidget {
   }
 
   IconData _iconFor(OrderStatus s) => switch (s) {
-        OrderStatus.pending => Icons.hourglass_top_rounded,
-        OrderStatus.confirmed => Icons.check_circle_outline,
-        OrderStatus.processing => Icons.inventory_2_outlined,
-        OrderStatus.shipped => Icons.local_shipping_outlined,
-        OrderStatus.delivered => Icons.verified_rounded,
-        OrderStatus.cancelled => Icons.cancel_outlined,
-        OrderStatus.refunded => Icons.replay_rounded,
-      };
+    OrderStatus.pending => Icons.hourglass_top_rounded,
+    OrderStatus.confirmed => Icons.check_circle_outline,
+    OrderStatus.processing => Icons.inventory_2_outlined,
+    OrderStatus.shipped => Icons.local_shipping_outlined,
+    OrderStatus.delivered => Icons.verified_rounded,
+    OrderStatus.cancelled => Icons.cancel_outlined,
+    OrderStatus.refunded => Icons.replay_rounded,
+  };
 
   String _subtitle(OrderStatus s) => switch (s) {
-        OrderStatus.pending => AppStrings.statusSubtitlePending,
-        OrderStatus.confirmed => AppStrings.statusSubtitleConfirmed,
-        OrderStatus.processing => AppStrings.statusSubtitleProcessing,
-        OrderStatus.shipped => AppStrings.statusSubtitleShipped,
-        OrderStatus.delivered => AppStrings.statusSubtitleDelivered,
-        OrderStatus.cancelled => AppStrings.statusSubtitleCancelled,
-        OrderStatus.refunded => AppStrings.statusSubtitleRefunded,
-      };
+    OrderStatus.pending => AppStrings.statusSubtitlePending,
+    OrderStatus.confirmed => AppStrings.statusSubtitleConfirmed,
+    OrderStatus.processing => AppStrings.statusSubtitleProcessing,
+    OrderStatus.shipped => AppStrings.statusSubtitleShipped,
+    OrderStatus.delivered => AppStrings.statusSubtitleDelivered,
+    OrderStatus.cancelled => AppStrings.statusSubtitleCancelled,
+    OrderStatus.refunded => AppStrings.statusSubtitleRefunded,
+  };
 }
 
 class _WhiteCard extends StatelessWidget {
@@ -232,11 +231,11 @@ class _WhiteCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.lg),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.05),
+            color: context.textPrimary.withValues(alpha: 0.05),
             blurRadius: AppSpacing.md,
             offset: const Offset(0, AppSpacing.xs),
           ),
@@ -260,7 +259,9 @@ class _AddressCard extends StatelessWidget {
         children: [
           Text(
             '📍 ${address.fullName}',
-            style: AppTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700),
+            style: AppTypography.bodyLarge.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(address.street, style: AppTypography.bodyMedium),
@@ -322,7 +323,9 @@ class _SellerSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
               onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text(AppStrings.ordersMessageSellerSoon)),
+                const SnackBar(
+                  content: Text(AppStrings.ordersMessageSellerSoon),
+                ),
               ),
               child: Text(AppStrings.ordersMessageSeller),
             ),
@@ -383,7 +386,10 @@ class _BuyerSection extends StatelessWidget {
                       ),
                       InkWell(
                         onTap: () async {
-                          final uri = Uri(scheme: 'tel', path: order.consumerPhone);
+                          final uri = Uri(
+                            scheme: 'tel',
+                            path: order.consumerPhone,
+                          );
                           if (await canLaunchUrl(uri)) {
                             await launchUrl(uri);
                           }
@@ -476,7 +482,9 @@ class _TrackingCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           OutlinedButton(
             onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text(AppStrings.ordersCourierWebsiteSoon)),
+              const SnackBar(
+                content: Text(AppStrings.ordersCourierWebsiteSoon),
+              ),
             ),
             child: Text(AppStrings.ordersTrackOnCourier),
           ),

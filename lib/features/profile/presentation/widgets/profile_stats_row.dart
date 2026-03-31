@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProfileStatsRow extends StatelessWidget {
   const ProfileStatsRow({
@@ -116,11 +117,11 @@ class _Card extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.lg),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.06),
+            color: context.textPrimary.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -139,7 +140,7 @@ class _VertDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: AppColors.textDisabled.withValues(alpha: 0.5),
+      color: context.textDisabled.withValues(alpha: 0.5),
     );
   }
 }

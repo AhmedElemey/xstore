@@ -9,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../listing/presentation/data/listing_categories_data.dart';
 import '../explore_state.dart';
 import 'price_range_slider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 Future<void> showExploreFilterBottomSheet({
   required BuildContext context,
@@ -19,7 +20,7 @@ Future<void> showExploreFilterBottomSheet({
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.cardBg,
+    backgroundColor: context.surfaceColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
     ),
@@ -127,7 +128,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: Icon(LucideIcons.x, color: AppColors.textSecondary),
+                    icon: Icon(LucideIcons.x, color: context.textSecondary),
                   ),
                 ],
               ),

@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutProgress extends StatelessWidget {
   const CheckoutProgress({
@@ -23,29 +24,29 @@ class CheckoutProgress extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _stepColumn(1, AppStrings.checkoutStepAddress),
-          Expanded(child: _line(step > 1)),
-          _stepColumn(2, AppStrings.checkoutStepPayment),
-          Expanded(child: _line(step > 2)),
-          _stepColumn(3, AppStrings.checkoutStepConfirm),
+          _stepColumn(context, 1, AppStrings.checkoutStepAddress),
+          Expanded(child: _line(context, step > 1)),
+          _stepColumn(context, 2, AppStrings.checkoutStepPayment),
+          Expanded(child: _line(context, step > 2)),
+          _stepColumn(context, 3, AppStrings.checkoutStepConfirm),
         ],
       ),
     );
   }
 
-  Widget _line(bool done) {
+  Widget _line(BuildContext context, bool done) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.lg),
       child: Container(
         height: 2,
         color: done
             ? AppColors.success
-            : AppColors.textDisabled.withValues(alpha: 0.35),
+            : context.textDisabled.withValues(alpha: 0.35),
       ),
     );
   }
 
-  Widget _stepColumn(int n, String label) {
+  Widget _stepColumn(BuildContext context, int n, String label) {
     final done = step > n;
     final active = step == n;
     return Column(
@@ -57,11 +58,11 @@ class CheckoutProgress extends StatelessWidget {
             shape: BoxShape.circle,
             color: done
                 ? AppColors.success
-                : (active ? AppColors.primary : AppColors.background),
+                : (active ? AppColors.primary : context.backgroundColor),
             border: Border.all(
               color: active || done
                   ? AppColors.transparent
-                  : AppColors.textDisabled,
+                  : context.textDisabled,
               width: 2,
             ),
           ),
@@ -71,7 +72,7 @@ class CheckoutProgress extends StatelessWidget {
                 : Text(
                     '$n',
                     style: AppTypography.labelLarge.copyWith(
-                      color: active ? AppColors.white : AppColors.textSecondary,
+                      color: active ? AppColors.white : context.textSecondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -86,7 +87,7 @@ class CheckoutProgress extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.labelSmall.copyWith(
-              color: active ? AppColors.primary : AppColors.textSecondary,
+              color: active ? AppColors.primary : context.textSecondary,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

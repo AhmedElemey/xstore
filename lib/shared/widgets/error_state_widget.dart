@@ -39,7 +39,7 @@ class ErrorStateWidget extends StatelessWidget {
               const Gap(AppSpacing.lg),
               FilledButton(
                 onPressed: onRetry,
-                child: const Text(AppStrings.retry),
+                child: Text(AppStrings.retry),
               ),
             ],
           ],

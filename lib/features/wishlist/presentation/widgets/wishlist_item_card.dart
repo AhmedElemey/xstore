@@ -9,11 +9,13 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../providers/wishlist_provider.dart';
 import 'price_drop_badge.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistItemCard extends ConsumerWidget {
   const WishlistItemCard({
@@ -71,9 +73,9 @@ class WishlistItemCard extends ConsumerWidget {
             : null);
 
     Widget card = Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       elevation: 1,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.06),
+      shadowColor: context.textPrimary.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -109,12 +111,16 @@ class WishlistItemCard extends ConsumerWidget {
                           child: img != null
                               ? CachedNetworkImage(
                                   imageUrl: img,
+                                  cacheManager: AppImageCacheManager.instance,
                                   fit: BoxFit.cover,
-                                  placeholder: (_, __) => const ColoredBox(
-                                    color: AppColors.textDisabled,
+                                  placeholder: (_, __) => ColoredBox(
+                                    color: context.textDisabled,
+                                  ),
+                                  errorWidget: (_, __, ___) => ColoredBox(
+                                    color: context.textDisabled,
                                   ),
                                 )
-                              : const ColoredBox(color: AppColors.textDisabled),
+                              : ColoredBox(color: context.textDisabled),
                         ),
                       ),
                       if (drop > 0)
@@ -128,7 +134,7 @@ class WishlistItemCard extends ConsumerWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(AppSpacing.md),
                             child: ColoredBox(
-                              color: AppColors.textPrimary.withValues(
+                              color: context.textPrimary.withValues(
                                 alpha: 0.45,
                               ),
                               child: Center(
@@ -138,7 +144,7 @@ class WishlistItemCard extends ConsumerWidget {
                                     vertical: AppSpacing.xs,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.cardBg,
+                                    color: context.surfaceColor,
                                     borderRadius: BorderRadius.circular(
                                       AppSpacing.xs,
                                     ),
@@ -146,7 +152,7 @@ class WishlistItemCard extends ConsumerWidget {
                                   child: Text(
                                     AppStrings.wishlistOutOfStock,
                                     style: AppTypography.labelSmall.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: context.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -192,7 +198,7 @@ class WishlistItemCard extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.titleMedium.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                             fontSize: 16,
                           ),
                         ),
@@ -201,8 +207,8 @@ class WishlistItemCard extends ConsumerWidget {
                           spacing: AppSpacing.xs,
                           runSpacing: AppSpacing.xs,
                           children: [
-                            _chip(item.condition),
-                            _chip(item.category),
+                            _chip(context, item.condition),
+                            _chip(context, item.category),
                           ],
                         ),
                         if (drop > 0) ...[
@@ -232,7 +238,7 @@ class WishlistItemCard extends ConsumerWidget {
                               Text(
                                 Formatters.dzdWhole(strike),
                                 style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
@@ -250,7 +256,7 @@ class WishlistItemCard extends ConsumerWidget {
                             Text(
                               ' ${item.rating.toStringAsFixed(1)} · ${item.reviewCount} ${AppStrings.wishlistReviewsWord}',
                               style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],
@@ -280,7 +286,7 @@ class WishlistItemCard extends ConsumerWidget {
                         Text(
                           _shippingLine(item),
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ],
@@ -290,7 +296,7 @@ class WishlistItemCard extends ConsumerWidget {
               ),
               if (!selectionMode) ...[
                 const Gap(AppSpacing.md),
-                const Divider(height: 1),
+                Divider(height: 1),
                 const Gap(AppSpacing.sm),
                 Row(
                   children: [
@@ -393,20 +399,20 @@ class WishlistItemCard extends ConsumerWidget {
   }
 }
 
-Widget _chip(String text) {
+Widget _chip(BuildContext context, String text) {
   return Container(
     padding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.sm,
       vertical: AppSpacing.xs,
     ),
     decoration: BoxDecoration(
-      color: AppColors.textDisabled.withValues(alpha: 0.35),
+      color: context.textDisabled.withValues(alpha: 0.35),
       borderRadius: BorderRadius.circular(AppSpacing.xs),
     ),
     child: Text(
       text,
       style: AppTypography.labelSmall.copyWith(
-        color: AppColors.textSecondary,
+        color: context.textSecondary,
       ),
     ),
   );

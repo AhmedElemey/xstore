@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 class ComingSoonScreen extends StatelessWidget {
   const ComingSoonScreen({super.key, required this.title});
@@ -24,7 +24,7 @@ class ComingSoonScreen extends StatelessWidget {
               Icon(
                 Icons.construction_rounded,
                 size: AppSpacing.x4l,
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
               const Gap(AppSpacing.lg),
               Text(

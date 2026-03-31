@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Chip row for product condition (segmented-style).
 class ConditionSelector extends StatelessWidget {
@@ -49,7 +50,7 @@ class ConditionSelector extends StatelessWidget {
               selectedColor: AppColors.primary,
               backgroundColor: Colors.transparent,
               side: BorderSide(
-                color: hasError && !isSel ? AppColors.error : AppColors.textDisabled,
+                color: hasError && !isSel ? AppColors.error : context.textDisabled,
               ),
               showCheckmark: false,
             );

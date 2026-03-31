@@ -9,6 +9,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../providers/my_listings_notifier.dart';
 import '../providers/my_listings_state.dart';
@@ -29,7 +30,7 @@ class MyListingsScreen extends ConsumerStatefulWidget {
 
 class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   var _handledPublishToast = false;
-  var _fabVisible = true;
+  final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
 
   @override
   void didChangeDependencies() {
@@ -46,8 +47,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Listing published successfully'),
-            backgroundColor: Colors.green.shade700,
+            content: Text('Listing published successfully'),
+            backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -63,22 +64,30 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
     final dir = n.direction;
     if (dir == ScrollDirection.forward) {
-      if (_fabVisible) {
-        setState(() => _fabVisible = false);
+      if (_fabVisible.value) {
+        _fabVisible.value = false;
       }
     } else if (dir == ScrollDirection.reverse) {
-      if (!_fabVisible) {
-        setState(() => _fabVisible = true);
+      if (!_fabVisible.value) {
+        _fabVisible.value = true;
       }
     }
   }
 
+  @override
+  void dispose() {
+    _fabVisible.dispose();
+    super.dispose();
+  }
+
   void _openSearch() {
-    final controller = TextEditingController(text: ref.read(myListingsNotifierProvider).searchQuery);
+    final controller = TextEditingController(
+      text: ref.read(myListingsNotifierProvider).searchQuery,
+    );
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Search listings'),
+        title: Text('Search listings'),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -94,14 +103,16 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               ref.read(myListingsNotifierProvider.notifier).setSearchQuery('');
               Navigator.of(ctx).pop();
             },
-            child: const Text('Clear'),
+            child: Text('Clear'),
           ),
           FilledButton(
             onPressed: () {
-              ref.read(myListingsNotifierProvider.notifier).setSearchQuery(controller.text);
+              ref
+                  .read(myListingsNotifierProvider.notifier)
+                  .setSearchQuery(controller.text);
               Navigator.of(ctx).pop();
             },
-            child: const Text('Search'),
+            child: Text('Search'),
           ),
         ],
       ),
@@ -112,23 +123,27 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete listing?'),
+        title: Text('Delete listing?'),
         content: Text('“${listing.title}” will be removed permanently.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text('Delete'),
           ),
         ],
       ),
     );
     if (ok == true && mounted) {
-      await ref.read(myListingsNotifierProvider.notifier).deleteListing(listing.id);
+      await ref
+          .read(myListingsNotifierProvider.notifier)
+          .deleteListing(listing.id);
     }
   }
 
@@ -146,8 +161,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         onEdit: () {
           context.push(AppRoutes.listingAdd);
         },
-        onPause: () => ref.read(myListingsNotifierProvider.notifier).pauseListing(listing.id),
-        onResume: () => ref.read(myListingsNotifierProvider.notifier).resumeListing(listing.id),
+        onPause: () => ref
+            .read(myListingsNotifierProvider.notifier)
+            .pauseListing(listing.id),
+        onResume: () => ref
+            .read(myListingsNotifierProvider.notifier)
+            .resumeListing(listing.id),
         onViewStats: () {
           showModalBottomSheet<void>(
             context: context,
@@ -164,30 +183,55 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(myListingsNotifierProvider);
+    final listings = ref.watch(
+      myListingsNotifierProvider.select((s) => s.listings),
+    );
+    final filtered = ref.watch(
+      myListingsNotifierProvider.select((s) => s.filteredListings),
+    );
+    final selectedFilter = ref.watch(
+      myListingsNotifierProvider.select((s) => s.selectedFilter),
+    );
+    final selectedSort = ref.watch(
+      myListingsNotifierProvider.select((s) => s.selectedSort),
+    );
+    final viewMode = ref.watch(
+      myListingsNotifierProvider.select((s) => s.viewMode),
+    );
+    final isLoading = ref.watch(
+      myListingsNotifierProvider.select((s) => s.isLoading),
+    );
+    final error = ref.watch(myListingsNotifierProvider.select((s) => s.error));
+    final stats = ref.watch(
+      myListingsNotifierProvider.select((s) {
+        final all = s.listings;
+        final active = all
+            .where((e) => e.status == ListingStatus.active)
+            .length;
+        final sold = all.where((e) => e.status == ListingStatus.sold).length;
+        return (totalCount: all.length, activeCount: active, soldCount: sold);
+      }),
+    );
 
-    ref.listen<MyListingsState>(myListingsNotifierProvider, (prev, next) {
-      final msg = next.error;
-      if (msg != null && msg.isNotEmpty && msg != prev?.error) {
+    ref.listen<String?>(myListingsNotifierProvider.select((s) => s.error), (
+      prev,
+      next,
+    ) {
+      if (next != null && next.isNotEmpty && next != prev) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(next), behavior: SnackBarBehavior.floating),
         );
       }
     });
 
-    final listings = state.listings;
-    final filtered = state.filteredListings;
-    final activeCount = listings.where((e) => e.status == ListingStatus.active).length;
-    final soldCount = listings.where((e) => e.status == ListingStatus.sold).length;
-
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
-        backgroundColor: AppColors.background,
+        backgroundColor: context.surfaceColor,
         surfaceTintColor: Colors.transparent,
-        title: const Text('My Listings'),
+        title: Text('My Listings'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.search),
@@ -196,18 +240,23 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: AnimatedSlide(
-        duration: const Duration(milliseconds: 220),
-        offset: _fabVisible ? Offset.zero : const Offset(0, 2),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
-          opacity: _fabVisible ? 1 : 0,
-          child: FloatingActionButton.extended(
-            onPressed: () => context.push(AppRoutes.listingAdd),
-            icon: const Icon(LucideIcons.plus),
-            label: const Text('New Listing'),
-          ),
-        ),
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _fabVisible,
+        builder: (context, fabVisible, _) {
+          return AnimatedSlide(
+            duration: const Duration(milliseconds: 220),
+            offset: fabVisible ? Offset.zero : const Offset(0, 2),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: fabVisible ? 1 : 0,
+              child: FloatingActionButton.extended(
+                onPressed: () => context.push(AppRoutes.listingAdd),
+                icon: const Icon(LucideIcons.plus),
+                label: Text('New Listing'),
+              ),
+            ),
+          );
+        },
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -220,21 +269,27 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               AppSpacing.md,
             ),
             child: ListingStatsBanner(
-              totalCount: listings.length,
-              activeCount: activeCount,
-              soldCount: soldCount,
+              totalCount: stats.totalCount,
+              activeCount: stats.activeCount,
+              soldCount: stats.soldCount,
             ),
           ),
           ListingFilterTabs(
-            selected: state.selectedFilter,
-            onFilterSelected: ref.read(myListingsNotifierProvider.notifier).applyFilter,
+            selected: selectedFilter,
+            onFilterSelected: ref
+                .read(myListingsNotifierProvider.notifier)
+                .applyFilter,
           ),
           const Gap(AppSpacing.md),
           ListingSortBar(
-            sort: state.selectedSort,
-            viewMode: state.viewMode,
-            onSortChanged: ref.read(myListingsNotifierProvider.notifier).applySort,
-            onViewModeChanged: ref.read(myListingsNotifierProvider.notifier).setViewMode,
+            sort: selectedSort,
+            viewMode: viewMode,
+            onSortChanged: ref
+                .read(myListingsNotifierProvider.notifier)
+                .applySort,
+            onViewModeChanged: ref
+                .read(myListingsNotifierProvider.notifier)
+                .setViewMode,
           ),
           Expanded(
             child: NotificationListener<ScrollNotification>(
@@ -243,8 +298,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 return false;
               },
               child: _buildBody(
-                state: state,
+                isLoading: isLoading,
+                listings: listings,
                 filtered: filtered,
+                selectedFilter: selectedFilter,
+                viewMode: viewMode,
+                error: error,
               ),
             ),
           ),
@@ -254,12 +313,17 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }
 
   Widget _buildBody({
-    required MyListingsState state,
+    required bool isLoading,
+    required List<ListingEntity> listings,
     required List<ListingEntity> filtered,
+    required ListingStatus? selectedFilter,
+    required ViewMode viewMode,
+    required String? error,
   }) {
-    if (state.isLoading && state.listings.isEmpty) {
+    if (isLoading && listings.isEmpty) {
       return RefreshIndicator(
-        onRefresh: () => ref.read(myListingsNotifierProvider.notifier).refreshListings(),
+        onRefresh: () =>
+            ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -274,18 +338,20 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       );
     }
 
-    if (state.listings.isEmpty && state.error != null) {
+    if (listings.isEmpty && error != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(state.error!, textAlign: TextAlign.center),
+              Text(error, textAlign: TextAlign.center),
               const Gap(AppSpacing.lg),
               FilledButton(
-                onPressed: () => ref.read(myListingsNotifierProvider.notifier).fetchListings(),
-                child: const Text('Retry'),
+                onPressed: () => ref
+                    .read(myListingsNotifierProvider.notifier)
+                    .fetchListings(),
+                child: Text('Retry'),
               ),
             ],
           ),
@@ -295,14 +361,15 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
 
     if (filtered.isEmpty) {
       return RefreshIndicator(
-        onRefresh: () => ref.read(myListingsNotifierProvider.notifier).refreshListings(),
+        onRefresh: () =>
+            ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.55,
               child: ListingEmptyState(
-                selectedFilter: state.selectedFilter,
+                selectedFilter: selectedFilter,
                 onAddListing: () => context.push(AppRoutes.listingAdd),
               ),
             ),
@@ -311,11 +378,13 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       );
     }
 
-    if (state.viewMode == ViewMode.list) {
+    if (viewMode == ViewMode.list) {
       return RefreshIndicator(
-        onRefresh: () => ref.read(myListingsNotifierProvider.notifier).refreshListings(),
+        onRefresh: () =>
+            ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
+          cacheExtent: 700,
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
             AppSpacing.md,
@@ -326,9 +395,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           separatorBuilder: (_, __) => const Gap(AppSpacing.md),
           itemBuilder: (context, i) {
             final item = filtered[i];
-            return ListingCardList(
-              listing: item,
-              onOpenMenu: () => _showOptions(item),
+            return RepaintBoundary(
+              child: ListingCardList(
+                key: ValueKey(item.id),
+                listing: item,
+                onOpenMenu: () => _showOptions(item),
+              ),
             );
           },
         ),
@@ -336,9 +408,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(myListingsNotifierProvider.notifier).refreshListings(),
+      onRefresh: () =>
+          ref.read(myListingsNotifierProvider.notifier).refreshListings(),
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        cacheExtent: 700,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
           AppSpacing.md,
@@ -354,9 +428,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         itemCount: filtered.length,
         itemBuilder: (context, i) {
           final item = filtered[i];
-          return ListingCardGrid(
-            listing: item,
-            onOpenMenu: () => _showOptions(item),
+          return RepaintBoundary(
+            child: ListingCardGrid(
+              key: ValueKey(item.id),
+              listing: item,
+              onOpenMenu: () => _showOptions(item),
+            ),
           );
         },
       ),
@@ -369,14 +446,18 @@ class _ListingListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = Theme.of(context).colorScheme.surfaceContainerHighest;
+    final base = context.surfaceVariantColor;
     return Shimmer.fromColors(
-      baseColor: base.withValues(alpha: 0.45),
-      highlightColor: base.withValues(alpha: 0.9),
+      baseColor: context.isDark
+          ? base.withValues(alpha: 0.55)
+          : base.withValues(alpha: 0.45),
+      highlightColor: context.isDark
+          ? context.surfaceColor.withValues(alpha: 0.9)
+          : base.withValues(alpha: 0.9),
       child: Container(
         height: 112,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(16),
         ),
       ),

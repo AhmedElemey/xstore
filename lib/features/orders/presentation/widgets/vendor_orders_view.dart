@@ -11,6 +11,7 @@ import 'order_empty_state.dart';
 import 'order_filter_tabs.dart';
 import 'order_stats_banner.dart';
 import 'orders_list_shimmer.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class VendorOrdersView extends ConsumerStatefulWidget {
   const VendorOrdersView({super.key});
@@ -48,26 +49,44 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
 
   @override
   Widget build(BuildContext context) {
-    final ordersState = ref.watch(ordersNotifierProvider);
+    final searching = ref.watch(
+      ordersNotifierProvider.select((s) => s.isSearching),
+    );
+    final list = ref.watch(
+      ordersNotifierProvider.select((s) => s.filteredOrders),
+    );
+    final emptyAll = ref.watch(
+      ordersNotifierProvider.select((s) => s.orders.isEmpty),
+    );
+    final selectedFilter = ref.watch(
+      ordersNotifierProvider.select((s) => s.selectedFilter),
+    );
+    final sortOption = ref.watch(
+      ordersNotifierProvider.select((s) => s.sortOption),
+    );
+    final isLoading = ref.watch(
+      ordersNotifierProvider.select((s) => s.isLoading),
+    );
+    final isLoadingMore = ref.watch(
+      ordersNotifierProvider.select((s) => s.isLoadingMore),
+    );
     final notifier = ref.read(ordersNotifierProvider.notifier);
-    ref.listen(ordersNotifierProvider, (p, n) {
-      final err = n.error;
-      if (err != null && err != p?.error && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+    ref.listen<String?>(ordersNotifierProvider.select((s) => s.error), (p, n) {
+      final err = n;
+      if (err != null && err != p && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(err)));
         notifier.clearError();
       }
     });
 
-    final searching = ordersState.isSearching;
-    final list = ordersState.filteredOrders;
-    final emptyAll = ordersState.orders.isEmpty;
-
     return ColoredBox(
-      color: AppColors.background,
+      color: context.backgroundColor,
       child: Column(
         children: [
           Material(
-            color: AppColors.cardBg,
+            color: context.surfaceColor,
             elevation: 0,
             child: SafeArea(
               bottom: false,
@@ -111,9 +130,12 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.filter_list_rounded),
-                            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text(AppStrings.ordersFiltersMoreSoon),
+                                    content: Text(
+                                      AppStrings.ordersFiltersMoreSoon,
+                                    ),
                                   ),
                                 ),
                           ),
@@ -142,7 +164,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 DropdownButton<OrderSortOption>(
-                  value: ordersState.sortOption,
+                  value: sortOption,
                   underline: const SizedBox.shrink(),
                   items: [
                     DropdownMenuItem(
@@ -178,48 +200,56 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
             child: RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () => notifier.refreshOrders(),
-              child: ordersState.isLoading && emptyAll
+              child: isLoading && emptyAll
                   ? const OrdersListShimmer()
                   : list.isEmpty
-                      ? ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            OrderEmptyState(
-                              title: ordersState.selectedFilter != null
-                                  ? AppStrings.ordersEmptyFilteredTitle
-                                  : AppStrings.ordersEmptyTitle,
-                              subtitle: AppStrings.ordersEmptySubtitle,
-                              filterActive: ordersState.selectedFilter != null,
-                            ),
-                          ],
-                        )
-                      : ListView.builder(
-                          controller: _scroll,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg,
-                            AppSpacing.sm,
-                            AppSpacing.lg,
-                            AppSpacing.lg,
-                          ),
-                          itemCount: list.length +
-                              (ordersState.isLoadingMore ? 1 : 0),
-                          itemBuilder: (context, i) {
-                            if (i >= list.length) {
-                              return const Padding(
-                                padding: EdgeInsets.all(AppSpacing.lg),
-                                child: Center(
-                                  child: CircularProgressIndicator.adaptive(),
-                                ),
-                              );
-                            }
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: AppSpacing.md),
-                              child: OrderCard(order: list[i], isVendor: true),
-                            );
-                          },
+                  ? ListView(
+                      cacheExtent: 300,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        OrderEmptyState(
+                          title: selectedFilter != null
+                              ? AppStrings.ordersEmptyFilteredTitle
+                              : AppStrings.ordersEmptyTitle,
+                          subtitle: AppStrings.ordersEmptySubtitle,
+                          filterActive: selectedFilter != null,
                         ),
+                      ],
+                    )
+                  : ListView.builder(
+                      controller: _scroll,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      cacheExtent: 700,
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.sm,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                      ),
+                      itemCount: list.length + (isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, i) {
+                        if (i >= list.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(AppSpacing.lg),
+                            child: Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            ),
+                          );
+                        }
+                        return RepaintBoundary(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
+                            child: OrderCard(
+                              key: ValueKey(list[i].id),
+                              order: list[i],
+                              isVendor: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ),
         ],

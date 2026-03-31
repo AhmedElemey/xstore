@@ -34,7 +34,7 @@ class QuickActionsRow extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Text(items[i].$1, style: const TextStyle(fontSize: 20)),
+                    Text(items[i].$1, style: TextStyle(fontSize: 20)),
                     const Gap(AppSpacing.xs),
                     Text(
                       items[i].$2,

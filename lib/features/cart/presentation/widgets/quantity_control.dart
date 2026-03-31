@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuantityControl extends StatelessWidget {
   const QuantityControl({
@@ -39,13 +40,13 @@ class QuantityControl extends StatelessWidget {
             _QtyButton(
               enabled: enabled,
               icon: atMin ? LucideIcons.trash2 : LucideIcons.minus,
-              color: atMin ? AppColors.error : AppColors.textPrimary,
+              color: atMin ? AppColors.error : context.textPrimary,
               onTap: onDecrement,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Material(
-                color: AppColors.background,
+                color: context.backgroundColor,
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
                 child: InkWell(
                   onTap: enabled ? onEditQuantity : null,
@@ -60,8 +61,8 @@ class QuantityControl extends StatelessWidget {
                       style: AppTypography.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         color: enabled
-                            ? AppColors.textPrimary
-                            : AppColors.textDisabled,
+                            ? context.textPrimary
+                            : context.textDisabled,
                       ),
                     ),
                   ),
@@ -104,11 +105,11 @@ class _QtyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.sm),
         side: BorderSide(
-          color: enabled ? AppColors.textDisabled : AppColors.textDisabled.withValues(alpha: 0.4),
+          color: enabled ? context.textDisabled : context.textDisabled.withValues(alpha: 0.4),
         ),
       ),
       child: InkWell(
@@ -119,7 +120,7 @@ class _QtyButton extends StatelessWidget {
           child: Icon(
             icon,
             size: AppSpacing.md + AppSpacing.xs,
-            color: enabled ? color : AppColors.textDisabled,
+            color: enabled ? color : context.textDisabled,
           ),
         ),
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class RoleSelectorCard extends StatelessWidget {
   const RoleSelectorCard({
@@ -28,7 +28,7 @@ class RoleSelectorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = isSelected
         ? accentColor.withValues(alpha: 0.08)
-        : AppColors.cardBg;
+        : context.surfaceColor;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -83,19 +83,19 @@ class RoleSelectorCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         height: 1.35,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -114,9 +114,9 @@ class RoleSelectorCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 f,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                 ),
                               ),
                             ),

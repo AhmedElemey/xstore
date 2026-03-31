@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ExploreEmptyState extends StatelessWidget {
   const ExploreEmptyState({
@@ -26,7 +26,7 @@ class ExploreEmptyState extends StatelessWidget {
             Icon(
               LucideIcons.searchX,
               size: AppSpacing.x3l * 2,
-              color: AppColors.textDisabled,
+              color: context.textDisabled,
             ),
             const Gap(AppSpacing.lg),
             Text(
@@ -37,7 +37,7 @@ class ExploreEmptyState extends StatelessWidget {
             const Gap(AppSpacing.sm),
             Text(
               AppStrings.noResultsSubtitle,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
               textAlign: TextAlign.center,
             ),
             const Gap(AppSpacing.x2l),

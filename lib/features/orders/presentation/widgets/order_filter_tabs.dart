@@ -9,21 +9,29 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderFilterTabs extends ConsumerWidget {
-  const OrderFilterTabs({
-    super.key,
-    required this.isVendor,
-  });
+  const OrderFilterTabs({super.key, required this.isVendor});
 
   final bool isVendor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(ordersNotifierProvider);
+    final selected = ref.watch(
+      ordersNotifierProvider.select((s) => s.selectedFilter),
+    );
+    final counts = ref.watch(
+      ordersNotifierProvider.select((s) {
+        final map = <OrderStatus, int>{};
+        for (final order in s.orders) {
+          map.update(order.status, (value) => value + 1, ifAbsent: () => 1);
+        }
+        return (all: s.orders.length, byStatus: map);
+      }),
+    );
     final notifier = ref.read(ordersNotifierProvider.notifier);
     final filters = notifier.filtersForRole(isVendor);
-    final selected = state.selectedFilter;
 
     return SizedBox(
       height: 44,
@@ -34,42 +42,42 @@ class OrderFilterTabs extends ConsumerWidget {
           _chip(
             context,
             label: AppStrings.ordersFilterAll,
-            count: notifier.tabCount(null),
+            count: counts.all,
             selected: selected == null,
             onTap: () => notifier.applyFilter(null),
             showPulse: false,
           ),
-          ...filters.map(
-            (f) {
-              final pendingPulse =
-                  isVendor && f == OrderStatus.pending && notifier.tabCount(f) > 0;
-              return Padding(
-                padding: const EdgeInsets.only(left: AppSpacing.sm),
-                child: _chip(
-                  context,
-                  label: _filterTitle(f),
-                  count: notifier.tabCount(f),
-                  selected: selected == f,
-                  onTap: () => notifier.applyFilter(f),
-                  showPulse: pendingPulse,
-                ),
-              );
-            },
-          ),
+          ...filters.map((f) {
+            final pendingPulse =
+                isVendor &&
+                f == OrderStatus.pending &&
+                (counts.byStatus[f] ?? 0) > 0;
+            return Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.sm),
+              child: _chip(
+                context,
+                label: _filterTitle(f),
+                count: counts.byStatus[f] ?? 0,
+                selected: selected == f,
+                onTap: () => notifier.applyFilter(f),
+                showPulse: pendingPulse,
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
   String _filterTitle(OrderStatus f) => switch (f) {
-        OrderStatus.pending => AppStrings.ordersFilterPending,
-        OrderStatus.confirmed => AppStrings.ordersFilterConfirmed,
-        OrderStatus.processing => AppStrings.ordersFilterProcessing,
-        OrderStatus.shipped => AppStrings.ordersFilterShipped,
-        OrderStatus.delivered => AppStrings.ordersFilterDelivered,
-        OrderStatus.cancelled => AppStrings.ordersFilterCancelled,
-        OrderStatus.refunded => AppStrings.ordersFilterRefunded,
-      };
+    OrderStatus.pending => AppStrings.ordersFilterPending,
+    OrderStatus.confirmed => AppStrings.ordersFilterConfirmed,
+    OrderStatus.processing => AppStrings.ordersFilterProcessing,
+    OrderStatus.shipped => AppStrings.ordersFilterShipped,
+    OrderStatus.delivered => AppStrings.ordersFilterDelivered,
+    OrderStatus.cancelled => AppStrings.ordersFilterCancelled,
+    OrderStatus.refunded => AppStrings.ordersFilterRefunded,
+  };
 
   Widget _chip(
     BuildContext context, {
@@ -80,7 +88,7 @@ class OrderFilterTabs extends ConsumerWidget {
     required bool showPulse,
   }) {
     final child = Material(
-      color: selected ? AppColors.primary : AppColors.cardBg,
+      color: selected ? AppColors.primary : context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.x4l),
       child: InkWell(
         onTap: onTap,
@@ -95,7 +103,7 @@ class OrderFilterTabs extends ConsumerWidget {
             child: Text(
               '$label ($count)',
               style: AppTypography.labelLarge.copyWith(
-                color: selected ? AppColors.white : AppColors.textPrimary,
+                color: selected ? AppColors.white : context.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -111,11 +119,7 @@ class OrderFilterTabs extends ConsumerWidget {
 }
 
 class RowTight extends StatelessWidget {
-  const RowTight({
-    super.key,
-    required this.child,
-    required this.showPulse,
-  });
+  const RowTight({super.key, required this.child, required this.showPulse});
 
   final Widget child;
   final bool showPulse;
@@ -208,7 +212,7 @@ class _PulsingDotState extends State<_PulsingDot>
       child: Container(
         width: AppSpacing.sm,
         height: AppSpacing.sm,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.accent,
           shape: BoxShape.circle,
         ),

@@ -7,7 +7,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/image_cache_manager.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/pulsing_dot.dart';
 import '../../domain/entities/notification_entity.dart';
 import 'notification_type_visual.dart';
 
@@ -131,7 +134,9 @@ class NotificationTile extends StatelessWidget {
           duration: dur,
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: u ? AppColors.notificationUnreadBackground : AppColors.cardBg,
+            color: u
+                ? AppColors.notificationUnreadBackground
+                : context.surfaceColor,
             border: Border(
               left: BorderSide(
                 color: u ? AppColors.primary : AppColors.transparent,
@@ -164,9 +169,9 @@ class NotificationTile extends StatelessWidget {
                             const Positioned(
                               right: 0,
                               bottom: 0,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                                child: SizedBox(width: AppSpacing.sm, height: AppSpacing.sm),
+                              child: PulsingDot(
+                                size: AppSpacing.sm,
+                                color: AppColors.primary,
                               ),
                             ),
                         ],
@@ -189,14 +194,16 @@ class NotificationTile extends StatelessWidget {
                                   style: (u ? AppTypography.titleMedium : AppTypography.bodyLarge).copyWith(
                                     fontSize: 14,
                                     fontWeight: u ? FontWeight.w700 : FontWeight.w500,
-                                    color: AppColors.textPrimary,
+                                    color: context.textPrimary,
                                   ),
                                 ),
                               ),
                               SizedBox(width: AppSpacing.sm),
                               Text(
                                 Formatters.formatNotificationTime(entity.createdAt),
-                                style: AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: context.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -205,7 +212,10 @@ class NotificationTile extends StatelessWidget {
                             entity.body,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary, fontSize: 13),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: context.textSecondary,
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                       ),
@@ -216,9 +226,14 @@ class NotificationTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppSpacing.sm),
                         child: CachedNetworkImage(
                           imageUrl: img,
+                          cacheManager: AppImageCacheManager.instance,
                           width: AppSpacing.x4l,
                           height: AppSpacing.x4l,
                           fit: BoxFit.cover,
+                          placeholder: (_, __) =>
+                              ColoredBox(color: context.textDisabled),
+                          errorWidget: (_, __, ___) =>
+                              ColoredBox(color: context.textDisabled),
                         ),
                       ),
                     if (thumb) SizedBox(width: AppSpacing.xs),
@@ -227,7 +242,7 @@ class NotificationTile extends StatelessWidget {
                       child: Icon(
                         LucideIcons.chevronRight,
                         size: AppSpacing.x2l - AppSpacing.xs,
-                        color: AppColors.textSecondary,
+                        color: context.iconSecondary,
                       ),
                     ),
                   ],

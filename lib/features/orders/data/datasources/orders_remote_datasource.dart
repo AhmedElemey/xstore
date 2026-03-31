@@ -192,6 +192,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     DateTime? estimatedDelivery,
     String? cancelReason,
     DateTime? deliveredAt,
+    DateTime? confirmedAt,
+    DateTime? shippedAt,
+    DateTime? cancelledAt,
+    String? city,
+    String? wilaya,
+    String? street,
+    String? notes,
+    String? courierName,
   }) {
     final subtotal = total >= 500 ? total - 500 : total;
     final shipping = total >= 500 ? 500.0 : 0.0;
@@ -213,35 +221,35 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       deliveryAddress: OrderAddressModel(
         fullName: consumerName,
         phone: consumerPhone,
-        street: '12 Rue Didouche Mourad',
-        city: 'Oran',
-        wilaya: 'Oran',
+        street: street ?? '12 Rue Didouche Mourad',
+        city: city ?? 'Oran',
+        wilaya: wilaya ?? city ?? 'Oran',
       ),
       subtotal: subtotal,
       shippingCost: shipping,
       discount: 0,
       total: total,
       trackingNumber: trackingNumber,
-      courierName: trackingNumber != null ? 'xStore Logistics' : null,
+      courierName: trackingNumber != null ? (courierName ?? 'xStore Logistics') : null,
       trackingLocation: status == OrderStatus.shipped
           ? 'In transit — Algiers hub'
           : null,
       estimatedDelivery: estimatedDelivery,
       cancelReason: cancelReason,
-      notes: null,
+      notes: notes,
       createdAt: createdAt,
       updatedAt: createdAt,
-      confirmedAt: status != OrderStatus.pending &&
-              status != OrderStatus.cancelled
-          ? createdAt.add(const Duration(hours: 1))
-          : null,
-      shippedAt: status == OrderStatus.shipped || status == OrderStatus.delivered
-          ? createdAt.add(const Duration(days: 2))
-          : null,
+      confirmedAt: confirmedAt ??
+          (status != OrderStatus.pending && status != OrderStatus.cancelled
+              ? createdAt.add(const Duration(hours: 1))
+              : null),
+      shippedAt: shippedAt ??
+          (status == OrderStatus.shipped || status == OrderStatus.delivered
+              ? createdAt.add(const Duration(days: 2))
+              : null),
       deliveredAt: deliveredAt,
-      cancelledAt: status == OrderStatus.cancelled
-          ? createdAt.add(const Duration(days: 1))
-          : null,
+      cancelledAt: cancelledAt ??
+          (status == OrderStatus.cancelled ? createdAt.add(const Duration(days: 1)) : null),
     );
   }
 
@@ -249,7 +257,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     final now = DateTime.now();
     return [
       _vendorOrderTemplate(
-        id: 'XS-2024-001',
+        id: 'XS-2024-V001',
         consumerId: 'consumer_001',
         consumerName: 'Sara Khelifi',
         consumerPhone: '+213 555 987 654',
@@ -258,57 +266,120 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           _lineFromListing('listing_001', 1, lineId: 'line_xs_1'),
         ],
         total: 185500,
-        createdAt: now.subtract(const Duration(hours: 2)),
+        createdAt: now.subtract(const Duration(minutes: 30)),
         payment: PaymentMethod.cashOnDelivery,
+        city: 'Oran',
+        wilaya: 'Oran',
+        notes: 'Please wrap it carefully',
       ),
       _vendorOrderTemplate(
-        id: 'XS-2024-002',
+        id: 'XS-2024-V002',
         consumerName: 'Karim Boudiaf',
-        consumerPhone: '+213 555 123 000',
-        status: OrderStatus.confirmed,
+        consumerPhone: '+213 555 123 789',
+        status: OrderStatus.pending,
         items: [
           _lineFromListing('listing_013', 1, lineId: 'line_xs_2'),
         ],
-        total: 32000,
-        createdAt: now.subtract(const Duration(days: 1)),
+        total: 32500,
+        createdAt: now.subtract(const Duration(hours: 2)),
         payment: PaymentMethod.cibCard,
+        city: 'Algiers',
+        wilaya: 'Algiers',
       ),
       _vendorOrderTemplate(
-        id: 'XS-2024-003',
+        id: 'XS-2024-V003',
         consumerName: 'Nadia Mansouri',
         consumerPhone: '+213 555 444 222',
-        status: OrderStatus.shipped,
+        status: OrderStatus.confirmed,
         items: [
-          _lineFromListing('listing_003', 2, lineId: 'line_xs_3a'),
+          _lineFromListing('listing_005', 1, lineId: 'line_xs_3a'),
         ],
-        total: 25000,
-        createdAt: now.subtract(const Duration(days: 3)),
-        trackingNumber: 'XS-TRACK-003',
-        estimatedDelivery: now.add(const Duration(days: 1)),
+        total: 280500,
+        createdAt: now.subtract(const Duration(days: 1)),
+        confirmedAt: now.subtract(const Duration(hours: 20)),
+        payment: PaymentMethod.cibCard,
+        city: 'Constantine',
+        wilaya: 'Constantine',
       ),
       _vendorOrderTemplate(
-        id: 'XS-2024-004',
+        id: 'XS-2024-V004',
         consumerName: 'Youcef Tlemceni',
         consumerPhone: '+213 555 888 111',
-        status: OrderStatus.delivered,
+        status: OrderStatus.processing,
         items: [
           _lineFromListing('listing_009', 1, lineId: 'line_xs_4'),
+          _lineFromListing('listing_003', 2, lineId: 'line_xs_4b'),
         ],
-        total: 95000,
-        createdAt: now.subtract(const Duration(days: 8)),
-        deliveredAt: now.subtract(const Duration(days: 2)),
+        total: 120500,
+        createdAt: now.subtract(const Duration(days: 2)),
+        confirmedAt: now.subtract(const Duration(days: 1, hours: 20)),
+        payment: PaymentMethod.cashOnDelivery,
+        city: 'Annaba',
+        wilaya: 'Annaba',
       ),
       _vendorOrderTemplate(
-        id: 'XS-2024-005',
+        id: 'XS-2024-V005',
         consumerName: 'Amira Setifienne',
         consumerPhone: '+213 555 333 999',
+        status: OrderStatus.shipped,
+        items: [
+          _lineFromListing('listing_008', 1, lineId: 'line_xs_5'),
+        ],
+        total: 98500,
+        payment: PaymentMethod.dahabiCard,
+        trackingNumber: 'YAL-2024-8842',
+        courierName: 'Yalidine Express',
+        estimatedDelivery: now.add(const Duration(days: 1)),
+        city: 'Setif',
+        wilaya: 'Setif',
+        shippedAt: now.subtract(const Duration(days: 4)),
+        createdAt: now.subtract(const Duration(days: 5)),
+      ),
+      _vendorOrderTemplate(
+        id: 'XS-2024-V006',
+        consumerName: 'Riad Kebir',
+        consumerPhone: '+213 555 610 610',
+        status: OrderStatus.delivered,
+        items: [
+          _lineFromListing('listing_002', 1, lineId: 'line_xs_6'),
+        ],
+        total: 145500,
+        payment: PaymentMethod.cashOnDelivery,
+        city: 'Oran',
+        wilaya: 'Oran',
+        deliveredAt: now.subtract(const Duration(days: 2)),
+        createdAt: now.subtract(const Duration(days: 10)),
+      ),
+      _vendorOrderTemplate(
+        id: 'XS-2024-V007',
+        consumerName: 'Meriem Hadj',
+        consumerPhone: '+213 555 700 001',
         status: OrderStatus.cancelled,
         items: [
-          _lineFromListing('listing_005', 1, lineId: 'line_xs_5'),
+          _lineFromListing('listing_006', 1, lineId: 'line_xs_7'),
         ],
-        total: 280000,
+        total: 55500,
+        payment: PaymentMethod.cashOnDelivery,
+        city: 'Algiers',
+        wilaya: 'Algiers',
+        cancelReason: 'Buyer changed their mind',
+        cancelledAt: now.subtract(const Duration(days: 3)),
         createdAt: now.subtract(const Duration(days: 5)),
-        cancelReason: 'Item no longer available',
+      ),
+      _vendorOrderTemplate(
+        id: 'XS-2024-V008',
+        consumerName: 'Sofiane Rahmani',
+        consumerPhone: '+213 555 730 730',
+        status: OrderStatus.confirmed,
+        items: [
+          _lineFromListing('listing_013', 1, lineId: 'line_xs_8a'),
+          _lineFromListing('listing_012', 1, lineId: 'line_xs_8b'),
+        ],
+        total: 35700,
+        payment: PaymentMethod.baridimob,
+        city: 'Bejaia',
+        wilaya: 'Bejaia',
+        createdAt: now.subtract(const Duration(days: 3)),
       ),
     ];
   }

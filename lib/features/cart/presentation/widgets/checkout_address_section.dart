@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/checkout_provider.dart';
 import 'checkout_add_address_sheet.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutAddressSection extends ConsumerWidget {
   const CheckoutAddressSection({super.key});
@@ -30,7 +31,7 @@ class CheckoutAddressSection extends ConsumerWidget {
           Text(
             AppStrings.checkoutErrorNoAddress,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
             ),
           )
         else
@@ -38,7 +39,7 @@ class CheckoutAddressSection extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: Material(
-                color: AppColors.cardBg,
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(AppSpacing.md),
                 child: InkWell(
                   onTap: () => notifier.selectAddress(i),
@@ -50,7 +51,7 @@ class CheckoutAddressSection extends ConsumerWidget {
                       border: Border.all(
                         color: st.selectedAddressIndex == i
                             ? AppColors.primary
-                            : AppColors.textDisabled,
+                            : context.textDisabled,
                         width: st.selectedAddressIndex == i ? 2 : 1,
                       ),
                     ),
@@ -76,7 +77,7 @@ class CheckoutAddressSection extends ConsumerWidget {
                               Text(
                                 '${st.savedAddresses[i].phone}\n${st.savedAddresses[i].street}\n${st.savedAddresses[i].city}, ${st.savedAddresses[i].wilaya} ${st.savedAddresses[i].postalCode ?? ''}',
                                 style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                   height: 1.4,
                                 ),
                               ),

@@ -9,6 +9,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_button.dart';
@@ -88,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: Column(
         children: [
           Expanded(
@@ -116,12 +117,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 },
                 child: Container(
                   width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x12000000),
+                        color: context.cardShadowColor,
                         blurRadius: 20,
                         offset: Offset(0, -4),
                       ),
@@ -167,6 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         const Gap(16),
                         AuthTextField(
                           label: 'Password',
+                          hint: '********',
                           controller: _password,
                           obscureText: !login.isPasswordVisible,
                           textInputAction: TextInputAction.done,
@@ -179,7 +181,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               login.isPasswordVisible
                                   ? LucideIcons.eyeOff
                                   : LucideIcons.eye,
-                              color: AppColors.textSecondary,
+                              color: context.iconSecondary,
                             ),
                           ),
                           errorText: login.error != null &&
@@ -203,7 +205,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           const Gap(8),
                           Text(
                             login.error!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.error,
                               fontSize: 13,
                             ),
@@ -214,7 +216,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           child: TextButton(
                             onPressed: () =>
                                 context.push(AppRoutes.forgotPassword),
-                            child: const Text(
+                            child: Text(
                               'Forgot Password?',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
@@ -232,11 +234,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   .read(loginNotifierProvider.notifier)
                                   .toggleRememberMe(),
                             ),
-                            const Text(
+                            Text(
                               'Remember me',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: AppColors.textPrimary,
+                                color: context.textPrimary,
                               ),
                             ),
                           ],
@@ -264,10 +266,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             onPressed: () =>
                                 context.push(AppRoutes.register),
                             child: RichText(
-                              text: const TextSpan(
+                              text: TextSpan(
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                 ),
                                 children: [
                                   TextSpan(text: "Don't have an account?  "),
@@ -309,7 +311,7 @@ class _LoginRegisterTabs extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              const Text(
+              Text(
                 'Login',
                 style: TextStyle(
                   fontSize: 17,
@@ -338,7 +340,7 @@ class _LoginRegisterTabs extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary.withValues(alpha: 0.85),
+                    color: context.textSecondary.withValues(alpha: 0.85),
                   ),
                 ),
                 const Gap(8),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrdersListShimmer extends StatelessWidget {
   const OrdersListShimmer({super.key});
@@ -15,12 +15,16 @@ class OrdersListShimmer extends StatelessWidget {
       itemBuilder: (_, __) => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.md),
         child: Shimmer.fromColors(
-          baseColor: AppColors.textDisabled.withValues(alpha: 0.25),
-          highlightColor: AppColors.cardBg,
+          baseColor: context.isDark
+              ? context.surfaceVariantColor.withValues(alpha: 0.55)
+              : context.surfaceVariantColor.withValues(alpha: 0.25),
+          highlightColor: context.isDark
+              ? context.surfaceColor.withValues(alpha: 0.9)
+              : context.surfaceColor,
           child: Container(
             height: 140,
             decoration: BoxDecoration(
-              color: AppColors.cardBg,
+              color: context.surfaceColor,
               borderRadius: BorderRadius.circular(AppSpacing.lg),
             ),
           ),

@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 class ProductSkeletonCard extends StatelessWidget {
   const ProductSkeletonCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final base = Theme.of(context).colorScheme.surfaceContainerHighest;
+    final base = context.isDark
+        ? AppColors.darkSurfaceVariant
+        : const Color(0xFFE5E7EB);
+    final highlight = context.isDark
+        ? AppColors.darkSurfaceElevated
+        : const Color(0xFFF9FAFB);
     return Shimmer.fromColors(
       baseColor: base,
-      highlightColor: Color.lerp(base, Colors.white, 0.35)!,
+      highlightColor: highlight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

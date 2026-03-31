@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ListingStatsBanner extends StatelessWidget {
   const ListingStatsBanner({
@@ -20,16 +21,22 @@ class ListingStatsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.isDark
+        ? <Color>[
+            AppColors.darkSurfaceVariant,
+            AppColors.darkSurfaceElevated,
+          ]
+        : <Color>[
+            const Color(0xFFEEF2FF),
+            AppColors.lightSurface,
+          ];
+
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.10),
-            AppColors.accent.withValues(alpha: 0.08),
-            AppColors.background,
-          ],
+          colors: colors,
         ),
         borderRadius: BorderRadius.circular(AppSpacing.lg),
       ),

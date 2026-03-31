@@ -9,6 +9,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -97,10 +98,10 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
       return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
     }
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
         title: Text(AppStrings.notificationSettingsTitle, style: AppTypography.titleMedium),
-        backgroundColor: AppColors.background,
+        backgroundColor: context.backgroundColor,
         surfaceTintColor: AppColors.transparent,
       ),
       body: ListView(
@@ -139,7 +140,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
           const SizedBox(height: AppSpacing.x2l),
           FilledButton(
             onPressed: _savePressed,
-            child: const Text(AppStrings.notificationSettingsSave),
+            child: Text(AppStrings.notificationSettingsSave),
           ),
         ],
       ),
@@ -159,11 +160,11 @@ class _Section extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.x2l),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.cardBg,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(AppSpacing.lg),
           boxShadow: [
             BoxShadow(
-              color: AppColors.textPrimary.withValues(alpha: 0.04),
+              color: context.textPrimary.withValues(alpha: 0.04),
               blurRadius: AppSpacing.sm,
               offset: const Offset(0, 2),
             ),
@@ -174,7 +175,7 @@ class _Section extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs),
-              child: Text(title, style: AppTypography.labelLarge.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w700)),
+              child: Text(title, style: AppTypography.labelLarge.copyWith(color: context.textSecondary, fontWeight: FontWeight.w700)),
             ),
             ...children,
           ],

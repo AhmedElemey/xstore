@@ -8,12 +8,14 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../providers/wishlist_provider.dart';
 import 'price_drop_badge.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistGridCard extends ConsumerWidget {
   const WishlistGridCard({
@@ -65,9 +67,9 @@ class WishlistGridCard extends ConsumerWidget {
             : null);
 
     Widget inner = Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       elevation: 1,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.06),
+      shadowColor: context.textPrimary.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -85,12 +87,15 @@ class WishlistGridCard extends ConsumerWidget {
                   if (img != null)
                     CachedNetworkImage(
                       imageUrl: img,
+                      cacheManager: AppImageCacheManager.instance,
                       fit: BoxFit.cover,
                       placeholder: (_, __) =>
-                          const ColoredBox(color: AppColors.textDisabled),
+                          ColoredBox(color: context.textDisabled),
+                      errorWidget: (_, __, ___) =>
+                          ColoredBox(color: context.textDisabled),
                     )
                   else
-                    const ColoredBox(color: AppColors.textDisabled),
+                    ColoredBox(color: context.textDisabled),
                   if (drop > 0)
                     Positioned(
                       left: AppSpacing.sm,
@@ -102,7 +107,7 @@ class WishlistGridCard extends ConsumerWidget {
                       left: AppSpacing.sm,
                       bottom: AppSpacing.sm,
                       child: Material(
-                        color: AppColors.cardBg.withValues(alpha: 0.95),
+                        color: context.surfaceColor.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(AppSpacing.xs),
                         child: Checkbox(
                           value: selected,
@@ -123,7 +128,7 @@ class WishlistGridCard extends ConsumerWidget {
                     ),
                   if (!item.isAvailable)
                     ColoredBox(
-                      color: AppColors.textPrimary.withValues(alpha: 0.45),
+                      color: context.textPrimary.withValues(alpha: 0.45),
                       child: Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -131,13 +136,13 @@ class WishlistGridCard extends ConsumerWidget {
                             vertical: AppSpacing.xs,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.cardBg,
+                            color: context.surfaceColor,
                             borderRadius: BorderRadius.circular(AppSpacing.xs),
                           ),
                           child: Text(
                             AppStrings.wishlistOutOfStock,
                             style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -202,7 +207,7 @@ class WishlistGridCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(
                               decoration: TextDecoration.lineThrough,
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                             ),
                           ),
                         ),

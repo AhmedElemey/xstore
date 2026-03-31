@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class SocialLoginRow extends StatelessWidget {
@@ -17,7 +16,7 @@ class SocialLoginRow extends StatelessWidget {
         Expanded(
           child: _SocialChip(
             label: 'Google',
-            emoji: '🇬',
+            logoUrl: 'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png',
             onTap: () => _soon(context),
           ),
         ),
@@ -25,7 +24,7 @@ class SocialLoginRow extends StatelessWidget {
         Expanded(
           child: _SocialChip(
             label: 'Apple',
-            emoji: '🍎',
+            logoUrl: 'https://www.freepnglogos.com/uploads/apple-logo-png/apple-logo-png-dallas-shootings-don-add-are-speech-zones-used-4.png',
             onTap: () => _soon(context),
           ),
         ),
@@ -33,7 +32,7 @@ class SocialLoginRow extends StatelessWidget {
         Expanded(
           child: _SocialChip(
             label: 'Facebook',
-            emoji: '📘',
+            logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Facebook_logo_%28square%29.png',
             onTap: () => _soon(context),
           ),
         ),
@@ -45,12 +44,12 @@ class SocialLoginRow extends StatelessWidget {
 class _SocialChip extends StatelessWidget {
   const _SocialChip({
     required this.label,
-    required this.emoji,
+    required this.logoUrl,
     required this.onTap,
   });
 
   final String label;
-  final String emoji;
+  final String logoUrl;
   final VoidCallback onTap;
 
   @override
@@ -72,16 +71,25 @@ class _SocialChip extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 18)),
+              Image.network(
+                logoUrl,
+                width: 20,
+                height: 20,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.public,
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
               ),

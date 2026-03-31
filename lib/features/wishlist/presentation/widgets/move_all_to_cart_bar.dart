@@ -3,29 +3,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class MoveAllToCartBar extends ConsumerWidget {
   const MoveAllToCartBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(wishlistProvider);
-    final total = state.items.length;
-    final avail = state.items.where((e) => e.isAvailable).length;
-    final addable =
-        state.items.where((e) => e.isAvailable && !e.isInCart).length;
+    final counts = ref.watch(
+      wishlistProvider.select(
+        (s) => (
+          total: s.items.length,
+          avail: s.items.where((e) => e.isAvailable).length,
+          addable: s.items.where((e) => e.isAvailable && !e.isInCart).length,
+        ),
+      ),
+    );
+    final total = counts.total;
+    final avail = counts.avail;
+    final addable = counts.addable;
     if (total == 0 || avail == 0) return const SizedBox.shrink();
 
     return Material(
       elevation: 8,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.1),
-      color: AppColors.cardBg,
+      shadowColor: context.textPrimary.withValues(alpha: 0.1),
+      color: context.surfaceColor,
       child: SafeArea(
         top: false,
         child: Padding(
@@ -42,7 +49,7 @@ class MoveAllToCartBar extends ConsumerWidget {
               Text(
                 AppStrings.wishlistItemsAvailableLine(total, avail),
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),

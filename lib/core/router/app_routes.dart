@@ -13,12 +13,14 @@ abstract final class AppRoutes {
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
   static const orders = '/orders';
+  static const vendorOrders = '/vendor-orders';
   /// Vendor stack route (same [OrdersScreen] as consumer tab).
   static const incomingOrders = '/incoming-orders';
   static const orderDetail = '/order';
   static String orderPath(String orderId) => '$orderDetail/$orderId';
   static const settings = '/settings';
   static const analytics = '/analytics';
+  static const myOrdersPlaceholder = '/my-orders-placeholder';
   static const earnings = '/earnings';
   static const recentlyViewed = '/recently-viewed';
   static const myReviews = '/my-reviews';
@@ -42,5 +44,5 @@ abstract final class AppRoutes {
 
 /// Vendor-only areas (Add / My listings).
 bool isVendorRestrictedRoute(String location) {
-  return location.startsWith('/listing');
+  return location.startsWith('/listing') || location.startsWith('/vendor-orders');
 }

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/router/app_routes.dart';
 import '../../features/notifications/presentation/providers/notifications_provider.dart';
 import 'notification_icon_badge.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 /// Bell + unread badge; count comes only from [notificationsProvider].
 class NotificationBellButton extends ConsumerWidget {
@@ -29,7 +29,7 @@ class NotificationBellButton extends ConsumerWidget {
       onPressed: () => context.push(AppRoutes.notifications),
       icon: NotificationIconBadge(
         count: count,
-        child: Icon(icon, color: color ?? AppColors.textPrimary),
+        child: Icon(icon, color: color ?? context.textPrimary),
       ),
     );
   }

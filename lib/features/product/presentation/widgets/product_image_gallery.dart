@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductImageGallery extends StatefulWidget {
   const ProductImageGallery({
@@ -60,12 +60,12 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
     final urls = widget.imageUrls;
     if (urls.isEmpty) {
       return ColoredBox(
-        color: AppColors.textDisabled,
+        color: context.textDisabled,
         child: Center(
           child: Icon(
             LucideIcons.imageOff,
             size: AppSpacing.x4l,
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
           ),
         ),
       );
@@ -92,10 +92,10 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   child: CircularProgressIndicator.adaptive(),
                 ),
                 errorWidget: (_, __, ___) => ColoredBox(
-                  color: AppColors.textDisabled,
+                  color: context.textDisabled,
                   child: Icon(
                     LucideIcons.imageOff,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
               ),
@@ -129,8 +129,8 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                     height: AppSpacing.sm,
                     decoration: BoxDecoration(
                       color: active
-                          ? AppColors.cardBg
-                          : AppColors.cardBg.withValues(alpha: 0.45),
+                          ? context.surfaceColor
+                          : context.surfaceColor.withValues(alpha: 0.45),
                       borderRadius: BorderRadius.circular(AppSpacing.xs),
                     ),
                   );
@@ -155,8 +155,8 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                           borderRadius: BorderRadius.circular(AppSpacing.sm),
                           border: Border.all(
                             color: sel
-                                ? AppColors.cardBg
-                                : AppColors.cardBg.withValues(alpha: 0.35),
+                                ? context.surfaceColor
+                                : context.surfaceColor.withValues(alpha: 0.35),
                             width: sel ? AppSpacing.xs / 2 : AppSpacing.xs / 4,
                           ),
                         ),

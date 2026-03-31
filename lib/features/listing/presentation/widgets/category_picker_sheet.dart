@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../data/listing_categories_data.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 Future<void> showListingCategoryPicker({
   required BuildContext context,
@@ -17,7 +18,7 @@ Future<void> showListingCategoryPicker({
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.cardBg,
+    backgroundColor: context.surfaceColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
     ),
@@ -46,7 +47,7 @@ Future<void> showListingCategoryPicker({
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1),
               SizedBox(
                 height: MediaQuery.of(ctx).size.height * 0.45,
                 child: ListView.builder(
@@ -85,7 +86,7 @@ Future<void> showListingSubcategoryPicker({
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.cardBg,
+    backgroundColor: context.surfaceColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
     ),
@@ -112,7 +113,7 @@ Future<void> showListingSubcategoryPicker({
                 ],
               ),
             ),
-            const Divider(height: 1),
+            Divider(height: 1),
             ...category.subcategories.map(
               (s) {
                 final sel = s.id == selectedId;

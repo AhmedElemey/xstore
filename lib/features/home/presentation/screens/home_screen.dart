@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/extensions/async_value_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -42,12 +43,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final banners = ref.watch(bannersProvider);
-    final deals = ref.watch(hotDealsProvider);
-    final categories = ref.watch(categoriesProvider);
-    final newArrivals = ref.watch(newArrivalsProvider);
-    final isConsumer =
-        ref.watch(authProvider).valueOrNull?.role != UserRole.vendor;
+    final banners = ref.watch(bannersProvider.select((value) => value));
+    final deals = ref.watch(hotDealsProvider.select((value) => value));
+    final categories = ref.watch(categoriesProvider.select((value) => value));
+    final newArrivals = ref.watch(newArrivalsProvider.select((value) => value));
+    final isConsumer = ref.watch(
+      authProvider.select((auth) => auth.valueOrNull?.role != UserRole.vendor),
+    );
     final cartCount = isConsumer
         ? ref.watch(cartProvider.select((s) => s.itemCount))
         : 0;
@@ -76,10 +78,11 @@ class HomeScreen extends ConsumerWidget {
               pinned: true,
               elevation: 0,
               scrolledUnderElevation: 0,
-              backgroundColor: AppColors.background,
+              backgroundColor: context.backgroundColor,
               automaticallyImplyLeading: false,
               toolbarHeight: 0,
-              expandedHeight: AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.lg,
+              expandedHeight:
+                  AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.lg,
               flexibleSpace: FlexibleSpaceBar(
                 background: HomeHeader(
                   onSearchTap: () => context.go(AppRoutes.explore),
@@ -93,69 +96,67 @@ class HomeScreen extends ConsumerWidget {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    banners.toWidget(
-                      data: (data) => HeroBannerCarousel(banners: data),
-                      loading: () => _BannerShimmer(),
-                      errorBuilder: (e) => ErrorStateWidget(
-                        message: e.toString(),
-                        onRetry: () => ref.invalidate(bannersProvider),
-                      ),
+                delegate: SliverChildListDelegate([
+                  banners.toWidget(
+                    data: (data) => HeroBannerCarousel(banners: data),
+                    loading: () => _BannerShimmer(),
+                    errorBuilder: (e) => ErrorStateWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(bannersProvider),
                     ),
-                    const Gap(AppSpacing.lg),
-                    const FlashSaleBanner(),
-                    const Gap(AppSpacing.lg),
-                    Text(
-                      AppStrings.shopByCategory,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                  ),
+                  const Gap(AppSpacing.lg),
+                  const FlashSaleBanner(),
+                  const Gap(AppSpacing.lg),
+                  Text(
+                    AppStrings.shopByCategory,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                    const Gap(AppSpacing.md),
-                    categories.toWidget(
-                      data: (data) => CategoryChipRow(categories: data),
-                      loading: () => SizedBox(
-                        height: AppSpacing.x3l + AppSpacing.sm,
-                        child: _BannerShimmer(),
-                      ),
-                      errorBuilder: (e) => ErrorStateWidget(
-                        message: e.toString(),
-                        onRetry: () => ref.invalidate(categoriesProvider),
-                      ),
+                  ),
+                  const Gap(AppSpacing.md),
+                  categories.toWidget(
+                    data: (data) => CategoryChipRow(categories: data),
+                    loading: () => SizedBox(
+                      height: AppSpacing.x3l + AppSpacing.sm,
+                      child: _BannerShimmer(),
                     ),
-                    const Gap(AppSpacing.lg),
-                    deals.toWidget(
-                      data: (data) => HotDealsSection(
-                        deals: data,
-                        onOpenProduct: (d) => _openDeal(context, d),
-                      ),
-                      loading: () => const _DealsSkeleton(),
-                      errorBuilder: (e) => ErrorStateWidget(
-                        message: e.toString(),
-                        onRetry: () => ref.invalidate(hotDealsProvider),
-                      ),
+                    errorBuilder: (e) => ErrorStateWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(categoriesProvider),
                     ),
-                    const Gap(AppSpacing.lg),
-                    const FeaturedCategoriesBanner(),
-                    const Gap(AppSpacing.lg),
-                    newArrivals.toWidget(
-                      data: (data) => NewArrivalsGrid(
-                        items: data,
-                        onOpenProduct: (listing) =>
-                            _openListing(context, listing.id),
-                      ),
-                      loading: () => const _DealsSkeleton(),
-                      errorBuilder: (e) => ErrorStateWidget(
-                        message: e.toString(),
-                        onRetry: () => ref.invalidate(newArrivalsProvider),
-                      ),
+                  ),
+                  const Gap(AppSpacing.lg),
+                  deals.toWidget(
+                    data: (data) => HotDealsSection(
+                      deals: data,
+                      onOpenProduct: (d) => _openDeal(context, d),
                     ),
-                    const Gap(AppSpacing.lg),
-                    const RecommendedSection(),
-                    const Gap(AppSpacing.x3l),
-                  ],
-                ),
+                    loading: () => const _DealsSkeleton(),
+                    errorBuilder: (e) => ErrorStateWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(hotDealsProvider),
+                    ),
+                  ),
+                  const Gap(AppSpacing.lg),
+                  const FeaturedCategoriesBanner(),
+                  const Gap(AppSpacing.lg),
+                  newArrivals.toWidget(
+                    data: (data) => NewArrivalsGrid(
+                      items: data,
+                      onOpenProduct: (listing) =>
+                          _openListing(context, listing.id),
+                    ),
+                    loading: () => const _DealsSkeleton(),
+                    errorBuilder: (e) => ErrorStateWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(newArrivalsProvider),
+                    ),
+                  ),
+                  const Gap(AppSpacing.lg),
+                  const RecommendedSection(),
+                  const Gap(AppSpacing.x3l),
+                ]),
               ),
             ),
           ],
@@ -168,10 +169,15 @@ class HomeScreen extends ConsumerWidget {
 class _BannerShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final base = AppColors.textDisabled.withValues(alpha: 0.35);
+    final base = context.isDark
+        ? context.surfaceVariantColor.withValues(alpha: 0.55)
+        : context.surfaceVariantColor.withValues(alpha: 0.35);
+    final highlight = context.isDark
+        ? context.surfaceColor.withValues(alpha: 0.9)
+        : context.surfaceColor;
     return Shimmer.fromColors(
       baseColor: base,
-      highlightColor: AppColors.cardBg,
+      highlightColor: highlight,
       child: Container(
         height: AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.sm,
         decoration: BoxDecoration(

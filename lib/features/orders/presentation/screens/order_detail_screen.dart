@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -11,6 +10,7 @@ import '../widgets/order_action_buttons.dart';
 import '../../domain/entities/order_entity.dart';
 import '../widgets/order_detail_scroll_content.dart';
 import '../widgets/order_status_badge.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OrderDetailScreen extends ConsumerStatefulWidget {
   const OrderDetailScreen({super.key, required this.orderId});
@@ -44,7 +44,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: order == null && state.isLoading
           ? const Center(child: CircularProgressIndicator.adaptive())
           : order == null
@@ -57,7 +57,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                           SliverAppBar(
                             pinned: true,
                             elevation: 0,
-                            backgroundColor: AppColors.cardBg,
+                            backgroundColor: context.surfaceColor,
                             title: Text(
                               '${AppStrings.orderHashPrefix}${order.formattedOrderId}',
                               style: AppTypography.titleMedium,
@@ -81,7 +81,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                       top: false,
                       child: Material(
                         elevation: 8,
-                        color: AppColors.cardBg,
+                        color: context.surfaceColor,
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(
                             AppSpacing.lg,

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 String paymentMethodLabel(PaymentMethod m) => switch (m) {
       PaymentMethod.cashOnDelivery => AppStrings.ordersPaymentCashOnDelivery,
@@ -17,9 +18,11 @@ class OrderPriceBreakdown extends StatelessWidget {
   const OrderPriceBreakdown({
     super.key,
     required this.order,
+    this.vendorMode = false,
   });
 
   final OrderEntity order;
+  final bool vendorMode;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,7 @@ class OrderPriceBreakdown extends StatelessWidget {
           children: [
             Icon(
               _payIcon(order.paymentMethod),
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
               size: AppSpacing.x2l,
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -54,21 +57,25 @@ class OrderPriceBreakdown extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSpacing.x4l),
               ),
               child: Text(
-                order.isPaid
-                    ? AppStrings.ordersPaidBadge
-                    : AppStrings.ordersPaymentPendingBadge,
+                order.paymentMethod == PaymentMethod.cashOnDelivery && vendorMode
+                    ? AppStrings.vendorCollectOnDelivery
+                    : (order.isPaid
+                        ? AppStrings.ordersPaidBadge
+                        : AppStrings.ordersPaymentPendingBadge),
                 style: AppTypography.labelLarge.copyWith(
-                  color: order.isPaid ? AppColors.success : AppColors.warning,
+                  color: order.paymentMethod == PaymentMethod.cashOnDelivery && vendorMode
+                      ? AppColors.warning
+                      : (order.isPaid ? AppColors.success : AppColors.warning),
                 ),
               ),
             ),
           ],
         ),
-        const Divider(height: AppSpacing.x2l),
-        _row(AppStrings.ordersSubtotal, order.subtotal),
-        _row(AppStrings.ordersShipping, order.shippingCost),
-        _row(AppStrings.ordersDiscount, order.discount),
-        const Divider(height: AppSpacing.lg),
+        Divider(height: AppSpacing.x2l),
+        _row(context, AppStrings.ordersSubtotal, order.subtotal),
+        _row(context, AppStrings.ordersShipping, order.shippingCost),
+        _row(context, AppStrings.ordersDiscount, order.discount),
+        Divider(height: AppSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -94,7 +101,7 @@ class OrderPriceBreakdown extends StatelessWidget {
         _ => Icons.credit_card_outlined,
       };
 
-  Widget _row(String label, double value) => Padding(
+  Widget _row(BuildContext context, String label, double value) => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,7 +109,7 @@ class OrderPriceBreakdown extends StatelessWidget {
             Text(
               label,
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
             ),
             Text(

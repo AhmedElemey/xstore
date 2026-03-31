@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistVendorGuard extends StatelessWidget {
   const WishlistVendorGuard({super.key});
@@ -14,7 +15,7 @@ class WishlistVendorGuard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: AppColors.background,
+      color: context.backgroundColor,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
@@ -27,7 +28,7 @@ class WishlistVendorGuard extends StatelessWidget {
                   Icon(
                     LucideIcons.heart,
                     size: AppSpacing.x4l * 2,
-                    color: AppColors.textSecondary.withValues(alpha: 0.35),
+                    color: context.textSecondary.withValues(alpha: 0.35),
                   ),
                   Positioned(
                     right: AppSpacing.md,
@@ -35,7 +36,7 @@ class WishlistVendorGuard extends StatelessWidget {
                     child: Icon(
                       LucideIcons.x,
                       size: AppSpacing.x3l,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -45,7 +46,7 @@ class WishlistVendorGuard extends StatelessWidget {
                 AppStrings.wishlistForBuyersTitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.titleLarge.copyWith(
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -54,7 +55,7 @@ class WishlistVendorGuard extends StatelessWidget {
                 AppStrings.wishlistForBuyersSubtitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   height: 1.45,
                 ),
               ),

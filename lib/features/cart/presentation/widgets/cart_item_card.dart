@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import 'quantity_control.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CartItemCard extends StatelessWidget {
   const CartItemCard({
@@ -38,10 +40,10 @@ class CartItemCard extends StatelessWidget {
     final compare = item.compareAtPrice;
 
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       elevation: 1,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.06),
+      shadowColor: context.textPrimary.withValues(alpha: 0.06),
       child: InkWell(
         onTap: available ? onOpenProduct : null,
         borderRadius: BorderRadius.circular(AppSpacing.lg),
@@ -67,19 +69,20 @@ class CartItemCard extends StatelessWidget {
                           height: AppSpacing.x4l + AppSpacing.x2l,
                           child: CachedNetworkImage(
                             imageUrl: item.listingImage,
+                            cacheManager: AppImageCacheManager.instance,
                             fit: BoxFit.cover,
                             placeholder: (_, __) => ColoredBox(
-                              color: AppColors.background,
+                              color: context.backgroundColor,
                               child: Icon(
                                 Icons.image_outlined,
-                                color: AppColors.textDisabled,
+                                color: context.textDisabled,
                               ),
                             ),
                             errorWidget: (_, __, ___) => ColoredBox(
-                              color: AppColors.background,
+                              color: context.backgroundColor,
                               child: Icon(
                                 Icons.broken_image_outlined,
-                                color: AppColors.textDisabled,
+                                color: context.textDisabled,
                               ),
                             ),
                           ),
@@ -91,7 +94,7 @@ class CartItemCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius:
                                   BorderRadius.circular(AppSpacing.md),
-                              color: AppColors.textPrimary.withValues(alpha: 0.45),
+                              color: context.textPrimary.withValues(alpha: 0.45),
                             ),
                           ),
                         ),
@@ -134,8 +137,8 @@ class CartItemCard extends StatelessWidget {
                           style: AppTypography.titleMedium.copyWith(
                             fontWeight: FontWeight.w700,
                             color: available
-                                ? AppColors.textPrimary
-                                : AppColors.textDisabled,
+                                ? context.textPrimary
+                                : context.textDisabled,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -143,8 +146,8 @@ class CartItemCard extends StatelessWidget {
                           spacing: AppSpacing.xs,
                           runSpacing: AppSpacing.xs,
                           children: [
-                            _chip(item.condition),
-                            _chip(item.category),
+                            _chip(context, item.condition),
+                            _chip(context, item.category),
                           ],
                         ),
                         const SizedBox(height: AppSpacing.sm),
@@ -153,7 +156,7 @@ class CartItemCard extends StatelessWidget {
                           style: AppTypography.titleMedium.copyWith(
                             color: available
                                 ? AppColors.primary
-                                : AppColors.textDisabled,
+                                : context.textDisabled,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -161,7 +164,7 @@ class CartItemCard extends StatelessWidget {
                           Text(
                             Formatters.dzdWhole(compare),
                             style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                               decoration: TextDecoration.lineThrough,
                             ),
                           ),
@@ -193,7 +196,7 @@ class CartItemCard extends StatelessWidget {
                   color: item.shippingAvailable
                       ? (item.shippingCost <= 0
                           ? AppColors.success
-                          : AppColors.textSecondary)
+                          : context.textSecondary)
                       : AppColors.error,
                 ),
               ),
@@ -238,20 +241,20 @@ class CartItemCard extends StatelessWidget {
     );
   }
 
-  Widget _chip(String label) {
+  Widget _chip(BuildContext context, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.backgroundColor,
         borderRadius: BorderRadius.circular(AppSpacing.xs),
       ),
       child: Text(
         label,
         style: AppTypography.labelSmall.copyWith(
-          color: AppColors.textSecondary,
+          color: context.textSecondary,
         ),
       ),
     );

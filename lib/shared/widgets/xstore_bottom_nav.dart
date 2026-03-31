@@ -11,6 +11,7 @@ import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
 import 'notification_icon_badge.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 class XstoreBottomNav extends ConsumerWidget {
   const XstoreBottomNav({
@@ -29,15 +30,20 @@ class XstoreBottomNav extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(authProvider).valueOrNull.toUserRole;
+    final role = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
+    );
     final isVendor = role == UserRole.vendor;
+    final cartCount = isVendor
+        ? 0
+        : ref.watch(cartProvider.select((s) => s.itemCount));
 
     final labels = isVendor
         ? [
             AppStrings.navHome,
             AppStrings.navExplore,
             AppStrings.navAddListing,
-            AppStrings.myListings,
+            AppStrings.incomingOrders,
             AppStrings.navProfile,
           ]
         : [
@@ -66,8 +72,8 @@ class XstoreBottomNav extends ConsumerWidget {
 
     return Material(
       elevation: 8,
-      color: AppColors.cardBg,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.08),
+      color: context.surfaceColor,
+      shadowColor: context.textPrimary.withValues(alpha: 0.08),
       child: SafeArea(
         top: false,
         child: Padding(
@@ -78,14 +84,11 @@ class XstoreBottomNav extends ConsumerWidget {
               final accentMid = isVendor && i == 2;
               final color = accentMid
                   ? AppColors.accent
-                  : (selected ? AppColors.primary : AppColors.textSecondary);
+                  : (selected ? AppColors.primary : context.textSecondary);
               final style = AppTypography.labelSmall.copyWith(
                 color: color,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
               );
-              final cartCount = !isVendor && i == 1
-                  ? ref.watch(cartProvider.select((s) => s.itemCount))
-                  : 0;
               return Expanded(
                 child: InkWell(
                   onTap: () => _onTap(i),
@@ -95,7 +98,7 @@ class XstoreBottomNav extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         NotificationIconBadge(
-                          count: cartCount,
+                          count: !isVendor && i == 1 ? cartCount : 0,
                           child: Icon(
                             icons[i],
                             color: color,

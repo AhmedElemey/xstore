@@ -8,17 +8,23 @@ import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
 import 'wishlist_sort_sheet.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistSortRow extends ConsumerWidget {
   const WishlistSortRow({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(wishlistProvider);
+    final sortOption = ref.watch(
+      wishlistProvider.select((s) => s.sortOption),
+    );
+    final selectedFilter = ref.watch(
+      wishlistProvider.select((s) => s.selectedFilter),
+    );
     final notifier = ref.read(wishlistProvider.notifier);
 
     return ColoredBox(
-      color: AppColors.textDisabled.withValues(alpha: 0.25),
+      color: context.textDisabled.withValues(alpha: 0.25),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -36,19 +42,19 @@ class WishlistSortRow extends ConsumerWidget {
                   vertical: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.cardBg,
+                  color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(AppSpacing.xl),
                   border: Border.all(
-                    color: AppColors.textDisabled.withValues(alpha: 0.6),
+                    color: context.textDisabled.withValues(alpha: 0.6),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      wishlistSortLabel(state.sortOption),
+                      wishlistSortLabel(sortOption),
                       style: AppTypography.labelLarge.copyWith(
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -57,7 +63,7 @@ class WishlistSortRow extends ConsumerWidget {
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: AppSpacing.x2l,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                     ),
                   ],
                 ),
@@ -71,24 +77,23 @@ class WishlistSortRow extends ConsumerWidget {
                   children: [
                     _FilterChip(
                       label: AppStrings.wishlistFilterAll,
-                      selected: state.selectedFilter == WishlistFilter.all,
+                      selected: selectedFilter == WishlistFilter.all,
                       onTap: () => notifier.applyFilter(WishlistFilter.all),
                     ),
                     _FilterChip(
                       label: AppStrings.wishlistFilterAvailable,
-                      selected: state.selectedFilter == WishlistFilter.available,
+                      selected: selectedFilter == WishlistFilter.available,
                       onTap: () => notifier.applyFilter(WishlistFilter.available),
                     ),
                     _FilterChip(
                       label: AppStrings.wishlistFilterPriceDropped,
-                      selected:
-                          state.selectedFilter == WishlistFilter.priceDropped,
+                      selected: selectedFilter == WishlistFilter.priceDropped,
                       onTap: () =>
                           notifier.applyFilter(WishlistFilter.priceDropped),
                     ),
                     _FilterChip(
                       label: AppStrings.wishlistFilterInCart,
-                      selected: state.selectedFilter == WishlistFilter.inCart,
+                      selected: selectedFilter == WishlistFilter.inCart,
                       onTap: () => notifier.applyFilter(WishlistFilter.inCart),
                     ),
                   ],
@@ -118,7 +123,7 @@ class _FilterChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.sm),
       child: Material(
-        color: selected ? AppColors.primary : AppColors.cardBg,
+        color: selected ? AppColors.primary : context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.xl),
         child: InkWell(
           onTap: onTap,
@@ -131,7 +136,7 @@ class _FilterChip extends StatelessWidget {
             child: Text(
               label,
               style: AppTypography.labelLarge.copyWith(
-                color: selected ? AppColors.white : AppColors.textPrimary,
+                color: selected ? AppColors.white : context.textPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),

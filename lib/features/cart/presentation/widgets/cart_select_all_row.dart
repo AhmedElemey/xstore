@@ -7,22 +7,31 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../providers/cart_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CartSelectAllRow extends ConsumerWidget {
   const CartSelectAllRow({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
+    final cart = ref.watch(
+      cartProvider.select(
+        (c) => (
+          itemsCount: c.items.length,
+          selectedCount: c.selectedItemIds.length,
+          total: c.total,
+        ),
+      ),
+    );
     final notifier = ref.read(cartProvider.notifier);
-    if (cart.items.isEmpty) return const SizedBox.shrink();
+    if (cart.itemsCount == 0) return const SizedBox.shrink();
 
     bool? boxValue;
-    if (cart.items.isEmpty) {
+    if (cart.itemsCount == 0) {
       boxValue = false;
-    } else if (cart.selectedItemIds.length == cart.items.length) {
+    } else if (cart.selectedCount == cart.itemsCount) {
       boxValue = true;
-    } else if (cart.selectedItemIds.isEmpty) {
+    } else if (cart.selectedCount == 0) {
       boxValue = false;
     } else {
       boxValue = null;
@@ -31,7 +40,7 @@ class CartSelectAllRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Material(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.md),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -48,7 +57,7 @@ class CartSelectAllRow extends ConsumerWidget {
               ),
               Expanded(
                 child: Text(
-                  AppStrings.cartSelectAllCount(cart.items.length),
+                  AppStrings.cartSelectAllCount(cart.itemsCount),
                   style: AppTypography.titleMedium.copyWith(
                     fontWeight: FontWeight.w600,
                   ),

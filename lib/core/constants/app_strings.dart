@@ -109,6 +109,8 @@ abstract final class AppStrings {
   static const themeSystem = 'System';
   static const themeLight = 'Light';
   static const themeDark = 'Dark';
+  static const darkMode = 'Dark Mode';
+  static const lightMode = 'Light Mode';
 
   // Profile (screens & menus)
   static const editProfile = 'Edit Profile';
@@ -618,4 +620,65 @@ abstract final class AppStrings {
   static const ordersTitle = navOrders;
   static const loginTitle = login;
   static const registerTitle = register;
+
+  // Vendor incoming orders
+  static const incomingOrders = 'Incoming Orders';
+  static const vendorSearchHint = 'Search by order ID or buyer name';
+  static const vendorConfirmAllPending = 'Confirm All Pending';
+  static const vendorViewAnalytics = 'View Analytics';
+  static const vendorStatPendingOrders = 'Pending Orders';
+  static const vendorStatActiveOrders = 'Active Orders';
+  static const vendorStatTotalOrders = 'Total Orders';
+  static const vendorStatRevenue = 'Revenue';
+  static const vendorConfirmAllPendingTitle = 'Confirm all pending orders?';
+  static String vendorOrdersConfirmed(int n) => '$n orders confirmed successfully';
+  static const vendorSortNewestFirst = 'Newest First';
+  static const vendorSortOldestFirst = 'Oldest First';
+  static const vendorSortHighestValue = 'Highest Value';
+  static const vendorSortNeedsAction = 'Needs Action';
+  static const vendorSortBuyerName = 'By Buyer Name A–Z';
+  static const vendorNewOrder = 'NEW ORDER';
+  static const vendorRejectOrder = 'Reject Order';
+  static const vendorConfirmOrder = 'Confirm Order';
+  static const vendorConfirmOrderShort = 'Confirm';
+  static const vendorMarkProcessing = 'Mark as Processing';
+  static const vendorMarkShipped = 'Mark as Shipped';
+  static const vendorOrdersEmptyTitle = 'No orders yet';
+  static const vendorOrdersEmptySubtitle =
+      'When buyers place orders on your listings, they will appear here';
+  static const vendorNoStatusOrders = 'No orders for this status';
+  static const vendorNoStatusOrdersSubtitle = 'Try another filter or show all orders';
+  static const vendorShippingInfoTitle = 'Shipping Information';
+  static const vendorViewOnMap = 'View on Map';
+  static const vendorCollectOnDelivery = 'Collect on delivery';
+  static const vendorRejectTitle = 'Reject this order?';
+  static const vendorRejectWarning =
+      'This action cannot be undone. The buyer will be notified.';
+  static const vendorConfirmRejection = 'Confirm Rejection';
+  static const vendorConfirmShipment = 'Confirm Shipment';
+  static String vendorLowStockHint(int qty) => '$qty units remaining after this order';
+  static const vendorExportOrders = 'Export Orders';
+  static const vendorOrderSettings = 'Order Settings';
+  static const vendorPrintOrder = 'Print Order';
+  static const vendorReportIssue = 'Report Issue';
+  static const vendorReasonItemUnavailable = 'Item no longer available';
+  static const vendorReasonOutOfStock = 'Out of stock';
+  static const vendorReasonCannotDeliver = 'Cannot deliver to buyer location';
+  static const vendorReasonSuspicious = 'Suspicious order';
+  static const vendorReasonIncorrectPricing = 'Incorrect pricing';
+  static const vendorReasonOther = 'Other';
+  static const vendorTypeReasonHint = 'Type reason';
+  static const vendorTrackingHint = 'XS-TRACK-2024-001';
+  static const vendorShippingNoteHint = 'Package handed to courier, estimated 3–5 days';
+  static const vendorOrderRejectedSnack = 'Order rejected. Buyer notified.';
+  static const vendorOrderConfirmedSnack = 'Order confirmed';
+  static const vendorOrderProcessingSnack = 'Order marked as processing';
+  static const vendorOrderShippedSnack = 'Order marked as shipped!';
+  static const vendorStatusPending = 'Awaiting your confirmation';
+  static const vendorStatusConfirmed = 'You confirmed this order';
+  static const vendorStatusProcessing = 'Preparing for shipment';
+  static const vendorStatusShipped = 'Order is on the way';
+  static const vendorStatusDelivered = 'Order delivered successfully';
+  static const vendorStatusCancelled = 'This order was cancelled';
+  static const vendorStatusRefunded = 'Refunded';
 }

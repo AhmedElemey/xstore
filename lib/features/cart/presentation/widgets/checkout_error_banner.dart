@@ -27,7 +27,7 @@ class CheckoutErrorBanner extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         title: Text(
           checkoutErrorMessage(messageKey),
-          style: const TextStyle(color: AppColors.error),
+          style: TextStyle(color: AppColors.error),
         ),
       ),
     );

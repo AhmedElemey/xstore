@@ -7,11 +7,7 @@ import '../../../listing/domain/entities/listing_entity.dart';
 import 'product_card.dart';
 
 class NewArrivalsGrid extends StatelessWidget {
-  const NewArrivalsGrid({
-    super.key,
-    required this.items,
-    this.onOpenProduct,
-  });
+  const NewArrivalsGrid({super.key, required this.items, this.onOpenProduct});
 
   final List<ListingEntity> items;
   final void Function(ListingEntity listing)? onOpenProduct;
@@ -34,23 +30,27 @@ class NewArrivalsGrid extends StatelessWidget {
           builder: (context, constraints) {
             const crossAxisCount = 2;
             const spacing = AppSpacing.md;
-            final tileWidth =
-                (constraints.maxWidth - spacing) / crossAxisCount;
+            final tileWidth = (constraints.maxWidth - spacing) / crossAxisCount;
             return Wrap(
               spacing: spacing,
               runSpacing: spacing,
               children: display
                   .map(
                     (listing) => SizedBox(
+                      key: ValueKey<String>(listing.id),
                       width: tileWidth,
-                      child: ProductCard(
-                        title: listing.title,
-                        price: listing.price,
-                        imageUrl:
-                            listing.imageUrls.isNotEmpty ? listing.imageUrls.first : null,
-                        discountPercent: 0,
-                        listingId: listing.id,
-                        onTap: () => onOpenProduct?.call(listing),
+                      child: RepaintBoundary(
+                        child: ProductCard(
+                          key: ValueKey<String>('new-arrival-${listing.id}'),
+                          title: listing.title,
+                          price: listing.price,
+                          imageUrl: listing.imageUrls.isNotEmpty
+                              ? listing.imageUrls.first
+                              : null,
+                          discountPercent: 0,
+                          listingId: listing.id,
+                          onTap: () => onOpenProduct?.call(listing),
+                        ),
                       ),
                     ),
                   )

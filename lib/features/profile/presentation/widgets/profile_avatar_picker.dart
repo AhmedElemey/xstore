@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Circular avatar with optional camera badge; supports network URL, file, or initials fallback.
 class ProfileAvatarPicker extends StatelessWidget {
@@ -45,13 +46,13 @@ class ProfileAvatarPicker extends StatelessWidget {
               bottom: 0,
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.xs),
-                decoration: const BoxDecoration(
-                  color: AppColors.cardBg,
+                decoration: BoxDecoration(
+                  color: context.surfaceColor,
                   shape: BoxShape.circle,
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),

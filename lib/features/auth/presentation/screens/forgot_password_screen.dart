@@ -8,6 +8,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 
@@ -47,12 +48,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.textPrimary),
+          icon: Icon(LucideIcons.arrowLeft, color: context.iconPrimary),
           onPressed: () => context.pop(),
         ),
       ),
@@ -100,21 +101,21 @@ class _StepEmail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        Text(
           'Reset Password',
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
         ),
         const Gap(12),
-        const Text(
+        Text(
           "Enter your email and we'll send you a reset link",
           style: TextStyle(
             fontSize: 15,
             height: 1.4,
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
           ),
         ),
         const Gap(28),
@@ -161,23 +162,23 @@ class _StepCheckEmail extends StatelessWidget {
           ),
         ),
         const Gap(24),
-        const Text(
+        Text(
           'Check your email',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
         ),
         const Gap(12),
         Text(
           'We sent a reset link to\n$email',
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             height: 1.45,
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
           ),
         ),
         const Gap(24),
@@ -185,12 +186,12 @@ class _StepCheckEmail extends StatelessWidget {
           Text(
             'Resend in ${cooldown}s',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: context.textSecondary),
           )
         else
           TextButton(
             onPressed: onResend,
-            child: const Text(
+            child: Text(
               'Resend email',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
@@ -201,7 +202,7 @@ class _StepCheckEmail extends StatelessWidget {
         const Spacer(),
         TextButton(
           onPressed: onBackToLogin,
-          child: const Text(
+          child: Text(
             'Back to Login',
             style: TextStyle(
               fontWeight: FontWeight.w600,

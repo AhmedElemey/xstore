@@ -9,14 +9,19 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class NotificationFilterTabs extends ConsumerWidget {
   const NotificationFilterTabs({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(authProvider).valueOrNull?.role ?? UserRole.consumer;
-    final state = ref.watch(notificationsProvider);
+    final role = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
+    );
+    final selectedFilter = ref.watch(
+      notificationsProvider.select((s) => s.selectedFilter),
+    );
     final n = ref.read(notificationsProvider.notifier);
     final isVendor = role == UserRole.vendor;
     final filters = isVendor
@@ -49,7 +54,7 @@ class NotificationFilterTabs extends ConsumerWidget {
         separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, i) {
           final f = filters[i];
-          final sel = state.selectedFilter == f;
+          final sel = selectedFilter == f;
           final unread = n.unreadInFilter(f);
           final base = label(f);
           return FilterChip(
@@ -59,7 +64,7 @@ class NotificationFilterTabs extends ConsumerWidget {
                 Text(
                   base,
                   style: AppTypography.labelLarge.copyWith(
-                    color: sel ? AppColors.white : AppColors.textPrimary,
+                    color: sel ? AppColors.white : context.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -88,8 +93,8 @@ class NotificationFilterTabs extends ConsumerWidget {
             selected: sel,
             showCheckmark: false,
             selectedColor: AppColors.primary,
-            backgroundColor: AppColors.cardBg,
-            side: BorderSide(color: sel ? AppColors.primary : AppColors.textDisabled),
+            backgroundColor: context.surfaceColor,
+            side: BorderSide(color: sel ? AppColors.primary : context.textDisabled),
             onSelected: (_) => n.applyFilter(f),
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           );

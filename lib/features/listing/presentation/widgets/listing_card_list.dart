@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'listing_thumbnail.dart';
@@ -40,11 +41,12 @@ class ListingCardList extends StatelessWidget {
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: context.cardShadowColor,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -66,7 +68,8 @@ class ListingCardList extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15
                     ),
                   ),
                   const Gap(AppSpacing.sm),
@@ -74,7 +77,8 @@ class ListingCardList extends StatelessWidget {
                     Formatters.currency(listing.price),
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: AppColors.primary,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15
                     ),
                   ),
                   const Gap(4),
@@ -102,7 +106,7 @@ class ListingCardList extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(LucideIcons.moreVertical),
+              icon: const Icon(LucideIcons.moreVertical,size: 18,),
               onPressed: onOpenMenu,
             ),
           ],

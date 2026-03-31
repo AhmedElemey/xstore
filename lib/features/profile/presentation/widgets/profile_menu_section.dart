@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProfileMenuSection extends StatelessWidget {
   const ProfileMenuSection({
@@ -28,7 +28,7 @@ class ProfileMenuSection extends StatelessWidget {
             child: Text(
               title,
               style: AppTypography.labelSmall.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
                 letterSpacing: 1.1,
                 fontWeight: FontWeight.w600,
               ),
@@ -36,11 +36,11 @@ class ProfileMenuSection extends StatelessWidget {
           ),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.cardBg,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(AppSpacing.lg),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: 0.06),
+                color: context.textPrimary.withValues(alpha: 0.06),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -52,9 +52,9 @@ class ProfileMenuSection extends StatelessWidget {
               for (var i = 0; i < children.length; i++) ...[
                 children[i],
                 if (i < children.length - 1)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(left: 64, right: AppSpacing.lg),
-                    child: Divider(height: 1, color: AppColors.textDisabled),
+                    child: Divider(height: 1, color: context.textDisabled),
                   ),
               ],
             ],

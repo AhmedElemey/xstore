@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductSpecifications extends StatelessWidget {
   const ProductSpecifications({
@@ -37,7 +37,7 @@ class ProductSpecifications extends StatelessWidget {
               children: [
                 for (var i = 0; i < entries.length; i++)
                   Container(
-                    color: i.isEven ? AppColors.cardBg : AppColors.background,
+                    color: i.isEven ? context.surfaceColor : context.backgroundColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
                       vertical: AppSpacing.md,

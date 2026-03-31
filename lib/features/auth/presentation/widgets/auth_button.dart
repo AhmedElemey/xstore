@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AuthButton extends StatelessWidget {
   const AuthButton({
@@ -31,8 +32,8 @@ class AuthButton extends StatelessWidget {
             gradient: disabled
                 ? LinearGradient(
                     colors: [
-                      AppColors.textDisabled,
-                      AppColors.textDisabled,
+                      context.textDisabled,
+                      context.textDisabled,
                     ],
                   )
                 : const LinearGradient(
@@ -56,7 +57,7 @@ class AuthButton extends StatelessWidget {
                   )
                 : Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,

@@ -7,21 +7,33 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../providers/cart_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CartSummaryCard extends ConsumerWidget {
   const CartSummaryCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
-    final n = cart.selectedAvailableItems.length;
-    final code = cart.coupon?.code;
+    final summary = ref.watch(
+      cartProvider.select(
+        (c) => (
+          selectedAvailableCount: c.selectedAvailableItems.length,
+          couponCode: c.coupon?.code,
+          subtotal: c.subtotal,
+          shippingTotal: c.shippingTotal,
+          discount: c.discount,
+          total: c.total,
+        ),
+      ),
+    );
+    final n = summary.selectedAvailableCount;
+    final code = summary.couponCode;
 
     return Material(
-      color: AppColors.cardBg,
+      color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.lg),
       elevation: 1,
-      shadowColor: AppColors.textPrimary.withValues(alpha: 0.06),
+      shadowColor: context.textPrimary.withValues(alpha: 0.06),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -33,42 +45,46 @@ class CartSummaryCard extends ConsumerWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const Divider(height: AppSpacing.x2l),
+            Divider(height: AppSpacing.x2l),
             _row(
+              context,
               AppStrings.cartSubtotalLine(n),
-              Formatters.dzdWhole(cart.subtotal),
+              Formatters.dzdWhole(summary.subtotal),
             ),
             const SizedBox(height: AppSpacing.sm),
             _row(
+              context,
               AppStrings.cartShippingLine,
-              Formatters.dzdWhole(cart.shippingTotal),
+              Formatters.dzdWhole(summary.shippingTotal),
             ),
-            if (code != null && cart.discount > 0) ...[
+            if (code != null && summary.discount > 0) ...[
               const SizedBox(height: AppSpacing.sm),
               _row(
+                context,
                 AppStrings.cartCouponLine(code),
-                '-${Formatters.dzdWhole(cart.discount)}',
+                '-${Formatters.dzdWhole(summary.discount)}',
                 valueColor: AppColors.success,
               ),
             ],
-            const Divider(height: AppSpacing.x2l),
+            Divider(height: AppSpacing.x2l),
             _row(
+              context,
               AppStrings.cartTotalLine,
-              Formatters.dzdWhole(cart.total),
+              Formatters.dzdWhole(summary.total),
               emphasize: true,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               AppStrings.cartCashOnDeliveryNote,
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               AppStrings.cartSecureCheckout,
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
             ),
           ],
@@ -78,6 +94,7 @@ class CartSummaryCard extends ConsumerWidget {
   }
 
   Widget _row(
+    BuildContext context,
     String label,
     String value, {
     Color? valueColor,
@@ -92,7 +109,7 @@ class CartSummaryCard extends ConsumerWidget {
             style: emphasize
                 ? AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w700)
                 : AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
           ),
         ),
@@ -101,7 +118,7 @@ class CartSummaryCard extends ConsumerWidget {
           style: (emphasize ? AppTypography.titleMedium : AppTypography.bodyMedium)
               .copyWith(
             color: valueColor ??
-                (emphasize ? AppColors.primary : AppColors.textPrimary),
+                (emphasize ? AppColors.primary : context.textPrimary),
             fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
           ),
         ),

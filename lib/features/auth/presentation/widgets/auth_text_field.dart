@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
@@ -46,10 +47,10 @@ class AuthTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -64,18 +65,18 @@ class AuthTextField extends StatelessWidget {
           maxLines: maxLines,
           inputFormatters: inputFormatters,
           textInputAction: textInputAction,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.surfaceColor,
             prefixIcon: prefixIcon == null
                 ? null
                 : IconTheme(
-                    data: const IconThemeData(color: AppColors.textSecondary),
+                    data: IconThemeData(color: context.iconSecondary),
                     child: prefixIcon!,
                   ),
             suffixIcon: suffixIcon,
@@ -85,11 +86,11 @@ class AuthTextField extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.textDisabled),
+              borderSide: BorderSide(color: context.borderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: BorderSide(color: context.borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

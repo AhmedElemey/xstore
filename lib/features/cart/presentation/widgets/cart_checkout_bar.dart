@@ -9,23 +9,35 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/formatters.dart';
 import '../providers/cart_provider.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CartCheckoutBar extends ConsumerWidget {
   const CartCheckoutBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartProvider);
-    final selected = cart.selectedAvailableItems.toList();
-    final canCheckout = cart.items.isNotEmpty &&
-        selected.isNotEmpty &&
-        !selected.every((e) => !e.isAvailable);
-
-    final disabled = !canCheckout || cart.isUpdating;
-
-    final label = selected.isEmpty
+    final checkout = ref.watch(
+      cartProvider.select(
+        (c) => (
+          hasItems: c.items.isNotEmpty,
+          selectedCount: c.selectedAvailableItems.length,
+          allSelectedUnavailable: c.selectedAvailableItems.every(
+            (e) => !e.isAvailable,
+          ),
+          isUpdating: c.isUpdating,
+          total: c.total,
+        ),
+      ),
+    );
+    final canCheckout = checkout.hasItems &&
+        checkout.selectedCount > 0 &&
+        !checkout.allSelectedUnavailable;
+    final disabled = !canCheckout || checkout.isUpdating;
+    final label = checkout.selectedCount == 0
         ? AppStrings.cartProceedCheckout
-        : AppStrings.cartProceedCheckoutTotal(Formatters.dzdWhole(cart.total));
+        : AppStrings.cartProceedCheckoutTotal(
+            Formatters.dzdWhole(checkout.total),
+          );
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -35,10 +47,10 @@ class CartCheckoutBar extends ConsumerWidget {
         AppSpacing.md + MediaQuery.paddingOf(context).bottom,
       ),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.08),
+            color: context.textPrimary.withValues(alpha: 0.08),
             blurRadius: AppSpacing.md,
             offset: const Offset(0, -AppSpacing.xs),
           ),
@@ -57,7 +69,7 @@ class CartCheckoutBar extends ConsumerWidget {
                       AppColors.profileHeaderGradientEnd,
                     ],
                   ),
-            color: disabled ? AppColors.textDisabled : null,
+            color: disabled ? context.textDisabled : null,
             borderRadius: BorderRadius.circular(AppSpacing.lg),
           ),
           child: Material(

@@ -9,7 +9,7 @@ class ProductReviewsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reviews')),
+      appBar: AppBar(title: Text('Reviews')),
       body: Center(child: Text('All reviews for listing $listingId')),
     );
   }

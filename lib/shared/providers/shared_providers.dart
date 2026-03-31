@@ -11,27 +11,47 @@ Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) {
 
 @Riverpod(keepAlive: true)
 class AppThemeMode extends _$AppThemeMode {
+  static const _key = 'theme_mode';
+
   @override
   ThemeMode build() {
-    final prefsAsync = ref.watch(sharedPreferencesProvider);
-    return prefsAsync.when(
-      data: (prefs) {
-        final name = prefs.getString(_themeModeKey);
-        return ThemeMode.values.firstWhere(
-          (m) => m.name == name,
-          orElse: () => ThemeMode.system,
-        );
-      },
-      loading: () => ThemeMode.system,
-      error: (_, __) => ThemeMode.system,
-    );
+    _loadSavedTheme();
+    return ThemeMode.system;
   }
 
-  static const _themeModeKey = 'theme_mode';
+  Future<void> _loadSavedTheme() async {
+    try {
+      final prefs = await ref.read(sharedPreferencesProvider.future);
+      final name = prefs.getString(_key);
+      if (name == null) return;
+
+      final saved = ThemeMode.values.firstWhere(
+        (mode) => mode.name == name,
+        orElse: () => ThemeMode.system,
+      );
+      if (state != saved) {
+        state = saved;
+      }
+    } catch (_) {
+      // Ignore storage read failures and keep system mode.
+    }
+  }
 
   Future<void> setTheme(ThemeMode mode) async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setString(_themeModeKey, mode.name);
-    ref.invalidateSelf();
+    await prefs.setString(_key, mode.name);
+    state = mode;
+  }
+
+  Future<void> toggleDarkMode() async {
+    final next = isDark ? ThemeMode.light : ThemeMode.dark;
+    await setTheme(next);
+  }
+
+  bool get isDark {
+    if (state == ThemeMode.dark) return true;
+    if (state == ThemeMode.light) return false;
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+        Brightness.dark;
   }
 }

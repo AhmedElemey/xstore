@@ -11,7 +11,9 @@ class OrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(authProvider).valueOrNull?.role ?? UserRole.consumer;
+    final role = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
+    );
     if (role == UserRole.vendor) return const VendorOrdersView();
     return const ConsumerOrdersView();
   }

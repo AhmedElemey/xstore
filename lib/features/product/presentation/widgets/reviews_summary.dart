@@ -145,7 +145,7 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: widget.onSeeAll,
-              child: const Text(AppStrings.seeAllReviews),
+              child: Text(AppStrings.seeAllReviews),
             ),
           ),
         ],
@@ -248,7 +248,7 @@ class _ReviewTile extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const Divider(height: AppSpacing.x2l),
+          Divider(height: AppSpacing.x2l),
         ],
       ),
     );

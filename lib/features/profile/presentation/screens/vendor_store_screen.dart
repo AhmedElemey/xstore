@@ -16,6 +16,7 @@ import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../providers/profile_dependencies.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class VendorStoreScreen extends ConsumerStatefulWidget {
   const VendorStoreScreen({super.key, required this.sellerId});
@@ -172,7 +173,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final desc = u.storeDescription ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: NotificationListener<ScrollNotification>(
         onNotification: (n) {
           _handleScroll(n);
@@ -197,7 +198,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                         banner,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
                                 AppColors.primary,
@@ -213,8 +214,8 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              AppColors.textPrimary.withValues(alpha: 0.05),
-                              AppColors.textPrimary.withValues(alpha: 0.75),
+                              context.textPrimary.withValues(alpha: 0.05),
+                              context.textPrimary.withValues(alpha: 0.75),
                             ],
                           ),
                         ),
@@ -429,11 +430,11 @@ class _VendorStoreStatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.xs),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.lg),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimary.withValues(alpha: 0.06),
+            color: context.textPrimary.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -447,7 +448,7 @@ class _VendorStoreStatsCard extends StatelessWidget {
                 width: 1,
                 height: 36,
                 margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                color: AppColors.textDisabled.withValues(alpha: 0.45),
+                color: context.textDisabled.withValues(alpha: 0.45),
               ),
             Expanded(
               child: Column(

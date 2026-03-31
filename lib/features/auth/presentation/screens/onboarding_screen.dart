@@ -9,6 +9,7 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../widgets/auth_button.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -76,7 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: Column(
         children: [
           Expanded(
@@ -98,7 +99,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             flex: 45,
             child: Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
@@ -118,11 +119,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: _finish,
-                        child: const Text(
+                        child: Text(
                           'Skip',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ),
@@ -142,7 +143,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             borderRadius: BorderRadius.circular(4),
                             color: active
                                 ? AppColors.primary
-                                : AppColors.textDisabled,
+                                : context.textDisabled,
                           ),
                         );
                       }),
@@ -159,20 +160,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           children: [
                             Text(
                               _slides[_page].title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: context.textPrimary,
                               ),
                             ),
                             const Gap(12),
                             Text(
                               _slides[_page].subtitle,
                               maxLines: 3,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 15,
                                 height: 1.45,
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],
@@ -216,7 +217,7 @@ class _IllustrationArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: AppColors.background,
+      color: context.backgroundColor,
       child: Center(
         child: Container(
           width: 200,
