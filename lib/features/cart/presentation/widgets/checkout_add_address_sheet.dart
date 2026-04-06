@@ -6,6 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
+import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -59,12 +60,9 @@ Future<void> showCheckoutAddAddressSheet(
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  TextField(
+                  PhoneInputField(
                     controller: phoneCtrl,
-                    decoration: InputDecoration(
-                      labelText: AppStrings.checkoutPhone,
-                      border: const OutlineInputBorder(),
-                    ),
+                    onChanged: (_) {},
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   TextField(

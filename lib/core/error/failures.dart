@@ -18,6 +18,10 @@ sealed class Failure with _$Failure {
   const factory Failure.unauthorized([String? message]) = UnauthorizedFailure;
 
   const factory Failure.notFound([String? message]) = NotFoundFailure;
+  const factory Failure.socialAuth([String? message]) = SocialAuthFailure;
+  const factory Failure.socialAuthCancelled([String? message]) =
+      SocialAuthCancelledFailure;
+  const factory Failure.phoneAuth([String? message]) = PhoneAuthFailure;
 
   @override
   String toString() => when(
@@ -27,5 +31,8 @@ sealed class Failure with _$Failure {
         validation: (m) => m ?? 'Validation failure',
         unauthorized: (m) => m ?? 'Unauthorized',
         notFound: (m) => m ?? 'Not found',
+        socialAuth: (m) => m ?? 'Social sign-in failed',
+        socialAuthCancelled: (m) => m ?? 'Sign-in cancelled',
+        phoneAuth: (m) => m ?? 'Phone authentication failed',
       );
 }

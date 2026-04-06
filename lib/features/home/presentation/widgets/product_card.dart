@@ -164,7 +164,9 @@ class _Footer extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall,
+            style: theme.textTheme.titleSmall!.copyWith(
+              fontSize: 14
+            ),
           ),
           const Gap(AppSpacing.xs),
           Row(
@@ -174,6 +176,7 @@ class _Footer extends StatelessWidget {
                   Formatters.currency(price),
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: AppColors.primary,
+                    fontSize: 13
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

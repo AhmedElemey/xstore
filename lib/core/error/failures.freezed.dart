@@ -25,6 +25,9 @@ mixin _$Failure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -35,6 +38,9 @@ mixin _$Failure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -45,6 +51,9 @@ mixin _$Failure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -56,6 +65,10 @@ mixin _$Failure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -66,6 +79,9 @@ mixin _$Failure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -76,6 +92,9 @@ mixin _$Failure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -184,6 +203,9 @@ class _$NetworkFailureImpl extends NetworkFailure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) {
     return network(message);
   }
@@ -197,6 +219,9 @@ class _$NetworkFailureImpl extends NetworkFailure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) {
     return network?.call(message);
   }
@@ -210,6 +235,9 @@ class _$NetworkFailureImpl extends NetworkFailure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) {
     if (network != null) {
@@ -227,6 +255,10 @@ class _$NetworkFailureImpl extends NetworkFailure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) {
     return network(this);
   }
@@ -240,6 +272,9 @@ class _$NetworkFailureImpl extends NetworkFailure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) {
     return network?.call(this);
   }
@@ -253,6 +288,9 @@ class _$NetworkFailureImpl extends NetworkFailure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) {
     if (network != null) {
@@ -341,6 +379,9 @@ class _$ServerFailureImpl extends ServerFailure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) {
     return server(message);
   }
@@ -354,6 +395,9 @@ class _$ServerFailureImpl extends ServerFailure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) {
     return server?.call(message);
   }
@@ -367,6 +411,9 @@ class _$ServerFailureImpl extends ServerFailure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) {
     if (server != null) {
@@ -384,6 +431,10 @@ class _$ServerFailureImpl extends ServerFailure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) {
     return server(this);
   }
@@ -397,6 +448,9 @@ class _$ServerFailureImpl extends ServerFailure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) {
     return server?.call(this);
   }
@@ -410,6 +464,9 @@ class _$ServerFailureImpl extends ServerFailure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) {
     if (server != null) {
@@ -498,6 +555,9 @@ class _$CacheFailureImpl extends CacheFailure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) {
     return cache(message);
   }
@@ -511,6 +571,9 @@ class _$CacheFailureImpl extends CacheFailure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) {
     return cache?.call(message);
   }
@@ -524,6 +587,9 @@ class _$CacheFailureImpl extends CacheFailure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) {
     if (cache != null) {
@@ -541,6 +607,10 @@ class _$CacheFailureImpl extends CacheFailure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) {
     return cache(this);
   }
@@ -554,6 +624,9 @@ class _$CacheFailureImpl extends CacheFailure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) {
     return cache?.call(this);
   }
@@ -567,6 +640,9 @@ class _$CacheFailureImpl extends CacheFailure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) {
     if (cache != null) {
@@ -656,6 +732,9 @@ class _$ValidationFailureImpl extends ValidationFailure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) {
     return validation(message);
   }
@@ -669,6 +748,9 @@ class _$ValidationFailureImpl extends ValidationFailure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) {
     return validation?.call(message);
   }
@@ -682,6 +764,9 @@ class _$ValidationFailureImpl extends ValidationFailure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) {
     if (validation != null) {
@@ -699,6 +784,10 @@ class _$ValidationFailureImpl extends ValidationFailure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) {
     return validation(this);
   }
@@ -712,6 +801,9 @@ class _$ValidationFailureImpl extends ValidationFailure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) {
     return validation?.call(this);
   }
@@ -725,6 +817,9 @@ class _$ValidationFailureImpl extends ValidationFailure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) {
     if (validation != null) {
@@ -815,6 +910,9 @@ class _$UnauthorizedFailureImpl extends UnauthorizedFailure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) {
     return unauthorized(message);
   }
@@ -828,6 +926,9 @@ class _$UnauthorizedFailureImpl extends UnauthorizedFailure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) {
     return unauthorized?.call(message);
   }
@@ -841,6 +942,9 @@ class _$UnauthorizedFailureImpl extends UnauthorizedFailure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) {
     if (unauthorized != null) {
@@ -858,6 +962,10 @@ class _$UnauthorizedFailureImpl extends UnauthorizedFailure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) {
     return unauthorized(this);
   }
@@ -871,6 +979,9 @@ class _$UnauthorizedFailureImpl extends UnauthorizedFailure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) {
     return unauthorized?.call(this);
   }
@@ -884,6 +995,9 @@ class _$UnauthorizedFailureImpl extends UnauthorizedFailure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) {
     if (unauthorized != null) {
@@ -974,6 +1088,9 @@ class _$NotFoundFailureImpl extends NotFoundFailure {
     required TResult Function(String? message) validation,
     required TResult Function(String? message) unauthorized,
     required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
   }) {
     return notFound(message);
   }
@@ -987,6 +1104,9 @@ class _$NotFoundFailureImpl extends NotFoundFailure {
     TResult? Function(String? message)? validation,
     TResult? Function(String? message)? unauthorized,
     TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
   }) {
     return notFound?.call(message);
   }
@@ -1000,6 +1120,9 @@ class _$NotFoundFailureImpl extends NotFoundFailure {
     TResult Function(String? message)? validation,
     TResult Function(String? message)? unauthorized,
     TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
     required TResult orElse(),
   }) {
     if (notFound != null) {
@@ -1017,6 +1140,10 @@ class _$NotFoundFailureImpl extends NotFoundFailure {
     required TResult Function(ValidationFailure value) validation,
     required TResult Function(UnauthorizedFailure value) unauthorized,
     required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
   }) {
     return notFound(this);
   }
@@ -1030,6 +1157,9 @@ class _$NotFoundFailureImpl extends NotFoundFailure {
     TResult? Function(ValidationFailure value)? validation,
     TResult? Function(UnauthorizedFailure value)? unauthorized,
     TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
   }) {
     return notFound?.call(this);
   }
@@ -1043,6 +1173,9 @@ class _$NotFoundFailureImpl extends NotFoundFailure {
     TResult Function(ValidationFailure value)? validation,
     TResult Function(UnauthorizedFailure value)? unauthorized,
     TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
     required TResult orElse(),
   }) {
     if (notFound != null) {
@@ -1062,5 +1195,541 @@ abstract class NotFoundFailure extends Failure {
   @override
   @JsonKey(ignore: true)
   _$$NotFoundFailureImplCopyWith<_$NotFoundFailureImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$SocialAuthFailureImplCopyWith<$Res>
+    implements $FailureCopyWith<$Res> {
+  factory _$$SocialAuthFailureImplCopyWith(_$SocialAuthFailureImpl value,
+          $Res Function(_$SocialAuthFailureImpl) then) =
+      __$$SocialAuthFailureImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String? message});
+}
+
+/// @nodoc
+class __$$SocialAuthFailureImplCopyWithImpl<$Res>
+    extends _$FailureCopyWithImpl<$Res, _$SocialAuthFailureImpl>
+    implements _$$SocialAuthFailureImplCopyWith<$Res> {
+  __$$SocialAuthFailureImplCopyWithImpl(_$SocialAuthFailureImpl _value,
+      $Res Function(_$SocialAuthFailureImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? message = freezed,
+  }) {
+    return _then(_$SocialAuthFailureImpl(
+      freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$SocialAuthFailureImpl extends SocialAuthFailure {
+  const _$SocialAuthFailureImpl([this.message]) : super._();
+
+  @override
+  final String? message;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SocialAuthFailureImpl &&
+            (identical(other.message, message) || other.message == message));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SocialAuthFailureImplCopyWith<_$SocialAuthFailureImpl> get copyWith =>
+      __$$SocialAuthFailureImplCopyWithImpl<_$SocialAuthFailureImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String? message) network,
+    required TResult Function(String? message) server,
+    required TResult Function(String? message) cache,
+    required TResult Function(String? message) validation,
+    required TResult Function(String? message) unauthorized,
+    required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
+  }) {
+    return socialAuth(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String? message)? network,
+    TResult? Function(String? message)? server,
+    TResult? Function(String? message)? cache,
+    TResult? Function(String? message)? validation,
+    TResult? Function(String? message)? unauthorized,
+    TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
+  }) {
+    return socialAuth?.call(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String? message)? network,
+    TResult Function(String? message)? server,
+    TResult Function(String? message)? cache,
+    TResult Function(String? message)? validation,
+    TResult Function(String? message)? unauthorized,
+    TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
+    required TResult orElse(),
+  }) {
+    if (socialAuth != null) {
+      return socialAuth(message);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(NetworkFailure value) network,
+    required TResult Function(ServerFailure value) server,
+    required TResult Function(CacheFailure value) cache,
+    required TResult Function(ValidationFailure value) validation,
+    required TResult Function(UnauthorizedFailure value) unauthorized,
+    required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
+  }) {
+    return socialAuth(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(NetworkFailure value)? network,
+    TResult? Function(ServerFailure value)? server,
+    TResult? Function(CacheFailure value)? cache,
+    TResult? Function(ValidationFailure value)? validation,
+    TResult? Function(UnauthorizedFailure value)? unauthorized,
+    TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
+  }) {
+    return socialAuth?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NetworkFailure value)? network,
+    TResult Function(ServerFailure value)? server,
+    TResult Function(CacheFailure value)? cache,
+    TResult Function(ValidationFailure value)? validation,
+    TResult Function(UnauthorizedFailure value)? unauthorized,
+    TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
+    required TResult orElse(),
+  }) {
+    if (socialAuth != null) {
+      return socialAuth(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class SocialAuthFailure extends Failure {
+  const factory SocialAuthFailure([final String? message]) =
+      _$SocialAuthFailureImpl;
+  const SocialAuthFailure._() : super._();
+
+  @override
+  String? get message;
+  @override
+  @JsonKey(ignore: true)
+  _$$SocialAuthFailureImplCopyWith<_$SocialAuthFailureImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$SocialAuthCancelledFailureImplCopyWith<$Res>
+    implements $FailureCopyWith<$Res> {
+  factory _$$SocialAuthCancelledFailureImplCopyWith(
+          _$SocialAuthCancelledFailureImpl value,
+          $Res Function(_$SocialAuthCancelledFailureImpl) then) =
+      __$$SocialAuthCancelledFailureImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String? message});
+}
+
+/// @nodoc
+class __$$SocialAuthCancelledFailureImplCopyWithImpl<$Res>
+    extends _$FailureCopyWithImpl<$Res, _$SocialAuthCancelledFailureImpl>
+    implements _$$SocialAuthCancelledFailureImplCopyWith<$Res> {
+  __$$SocialAuthCancelledFailureImplCopyWithImpl(
+      _$SocialAuthCancelledFailureImpl _value,
+      $Res Function(_$SocialAuthCancelledFailureImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? message = freezed,
+  }) {
+    return _then(_$SocialAuthCancelledFailureImpl(
+      freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$SocialAuthCancelledFailureImpl extends SocialAuthCancelledFailure {
+  const _$SocialAuthCancelledFailureImpl([this.message]) : super._();
+
+  @override
+  final String? message;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SocialAuthCancelledFailureImpl &&
+            (identical(other.message, message) || other.message == message));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SocialAuthCancelledFailureImplCopyWith<_$SocialAuthCancelledFailureImpl>
+      get copyWith => __$$SocialAuthCancelledFailureImplCopyWithImpl<
+          _$SocialAuthCancelledFailureImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String? message) network,
+    required TResult Function(String? message) server,
+    required TResult Function(String? message) cache,
+    required TResult Function(String? message) validation,
+    required TResult Function(String? message) unauthorized,
+    required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
+  }) {
+    return socialAuthCancelled(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String? message)? network,
+    TResult? Function(String? message)? server,
+    TResult? Function(String? message)? cache,
+    TResult? Function(String? message)? validation,
+    TResult? Function(String? message)? unauthorized,
+    TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
+  }) {
+    return socialAuthCancelled?.call(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String? message)? network,
+    TResult Function(String? message)? server,
+    TResult Function(String? message)? cache,
+    TResult Function(String? message)? validation,
+    TResult Function(String? message)? unauthorized,
+    TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
+    required TResult orElse(),
+  }) {
+    if (socialAuthCancelled != null) {
+      return socialAuthCancelled(message);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(NetworkFailure value) network,
+    required TResult Function(ServerFailure value) server,
+    required TResult Function(CacheFailure value) cache,
+    required TResult Function(ValidationFailure value) validation,
+    required TResult Function(UnauthorizedFailure value) unauthorized,
+    required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
+  }) {
+    return socialAuthCancelled(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(NetworkFailure value)? network,
+    TResult? Function(ServerFailure value)? server,
+    TResult? Function(CacheFailure value)? cache,
+    TResult? Function(ValidationFailure value)? validation,
+    TResult? Function(UnauthorizedFailure value)? unauthorized,
+    TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
+  }) {
+    return socialAuthCancelled?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NetworkFailure value)? network,
+    TResult Function(ServerFailure value)? server,
+    TResult Function(CacheFailure value)? cache,
+    TResult Function(ValidationFailure value)? validation,
+    TResult Function(UnauthorizedFailure value)? unauthorized,
+    TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
+    required TResult orElse(),
+  }) {
+    if (socialAuthCancelled != null) {
+      return socialAuthCancelled(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class SocialAuthCancelledFailure extends Failure {
+  const factory SocialAuthCancelledFailure([final String? message]) =
+      _$SocialAuthCancelledFailureImpl;
+  const SocialAuthCancelledFailure._() : super._();
+
+  @override
+  String? get message;
+  @override
+  @JsonKey(ignore: true)
+  _$$SocialAuthCancelledFailureImplCopyWith<_$SocialAuthCancelledFailureImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$PhoneAuthFailureImplCopyWith<$Res>
+    implements $FailureCopyWith<$Res> {
+  factory _$$PhoneAuthFailureImplCopyWith(_$PhoneAuthFailureImpl value,
+          $Res Function(_$PhoneAuthFailureImpl) then) =
+      __$$PhoneAuthFailureImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String? message});
+}
+
+/// @nodoc
+class __$$PhoneAuthFailureImplCopyWithImpl<$Res>
+    extends _$FailureCopyWithImpl<$Res, _$PhoneAuthFailureImpl>
+    implements _$$PhoneAuthFailureImplCopyWith<$Res> {
+  __$$PhoneAuthFailureImplCopyWithImpl(_$PhoneAuthFailureImpl _value,
+      $Res Function(_$PhoneAuthFailureImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? message = freezed,
+  }) {
+    return _then(_$PhoneAuthFailureImpl(
+      freezed == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$PhoneAuthFailureImpl extends PhoneAuthFailure {
+  const _$PhoneAuthFailureImpl([this.message]) : super._();
+
+  @override
+  final String? message;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PhoneAuthFailureImpl &&
+            (identical(other.message, message) || other.message == message));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PhoneAuthFailureImplCopyWith<_$PhoneAuthFailureImpl> get copyWith =>
+      __$$PhoneAuthFailureImplCopyWithImpl<_$PhoneAuthFailureImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String? message) network,
+    required TResult Function(String? message) server,
+    required TResult Function(String? message) cache,
+    required TResult Function(String? message) validation,
+    required TResult Function(String? message) unauthorized,
+    required TResult Function(String? message) notFound,
+    required TResult Function(String? message) socialAuth,
+    required TResult Function(String? message) socialAuthCancelled,
+    required TResult Function(String? message) phoneAuth,
+  }) {
+    return phoneAuth(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String? message)? network,
+    TResult? Function(String? message)? server,
+    TResult? Function(String? message)? cache,
+    TResult? Function(String? message)? validation,
+    TResult? Function(String? message)? unauthorized,
+    TResult? Function(String? message)? notFound,
+    TResult? Function(String? message)? socialAuth,
+    TResult? Function(String? message)? socialAuthCancelled,
+    TResult? Function(String? message)? phoneAuth,
+  }) {
+    return phoneAuth?.call(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String? message)? network,
+    TResult Function(String? message)? server,
+    TResult Function(String? message)? cache,
+    TResult Function(String? message)? validation,
+    TResult Function(String? message)? unauthorized,
+    TResult Function(String? message)? notFound,
+    TResult Function(String? message)? socialAuth,
+    TResult Function(String? message)? socialAuthCancelled,
+    TResult Function(String? message)? phoneAuth,
+    required TResult orElse(),
+  }) {
+    if (phoneAuth != null) {
+      return phoneAuth(message);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(NetworkFailure value) network,
+    required TResult Function(ServerFailure value) server,
+    required TResult Function(CacheFailure value) cache,
+    required TResult Function(ValidationFailure value) validation,
+    required TResult Function(UnauthorizedFailure value) unauthorized,
+    required TResult Function(NotFoundFailure value) notFound,
+    required TResult Function(SocialAuthFailure value) socialAuth,
+    required TResult Function(SocialAuthCancelledFailure value)
+        socialAuthCancelled,
+    required TResult Function(PhoneAuthFailure value) phoneAuth,
+  }) {
+    return phoneAuth(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(NetworkFailure value)? network,
+    TResult? Function(ServerFailure value)? server,
+    TResult? Function(CacheFailure value)? cache,
+    TResult? Function(ValidationFailure value)? validation,
+    TResult? Function(UnauthorizedFailure value)? unauthorized,
+    TResult? Function(NotFoundFailure value)? notFound,
+    TResult? Function(SocialAuthFailure value)? socialAuth,
+    TResult? Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult? Function(PhoneAuthFailure value)? phoneAuth,
+  }) {
+    return phoneAuth?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(NetworkFailure value)? network,
+    TResult Function(ServerFailure value)? server,
+    TResult Function(CacheFailure value)? cache,
+    TResult Function(ValidationFailure value)? validation,
+    TResult Function(UnauthorizedFailure value)? unauthorized,
+    TResult Function(NotFoundFailure value)? notFound,
+    TResult Function(SocialAuthFailure value)? socialAuth,
+    TResult Function(SocialAuthCancelledFailure value)? socialAuthCancelled,
+    TResult Function(PhoneAuthFailure value)? phoneAuth,
+    required TResult orElse(),
+  }) {
+    if (phoneAuth != null) {
+      return phoneAuth(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class PhoneAuthFailure extends Failure {
+  const factory PhoneAuthFailure([final String? message]) =
+      _$PhoneAuthFailureImpl;
+  const PhoneAuthFailure._() : super._();
+
+  @override
+  String? get message;
+  @override
+  @JsonKey(ignore: true)
+  _$$PhoneAuthFailureImplCopyWith<_$PhoneAuthFailureImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

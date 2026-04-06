@@ -53,6 +53,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
                         '🏪 ${group.vendorStoreName}',
                         style: AppTypography.titleMedium.copyWith(
                           fontWeight: FontWeight.w700,
+                          
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),

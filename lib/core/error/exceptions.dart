@@ -28,3 +28,18 @@ class UnauthorizedException extends AppException {
 class AuthException extends UnauthorizedException {
   const AuthException([super.message]);
 }
+
+class SocialAuthException implements Exception {
+  const SocialAuthException(this.message);
+  final String message;
+}
+
+class SocialAuthCancelledException implements Exception {
+  const SocialAuthCancelledException([this.message = 'Sign-in cancelled']);
+  final String message;
+}
+
+class PhoneAuthException implements Exception {
+  const PhoneAuthException(this.message);
+  final String message;
+}

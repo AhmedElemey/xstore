@@ -7,19 +7,31 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/register_params.dart';
+import '../../domain/entities/send_otp_params.dart';
+import '../../domain/entities/send_otp_result.dart';
+import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/verify_otp_params.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
+import '../datasources/phone_auth_datasource.dart';
+import '../datasources/social_auth_datasource.dart';
 import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remote,
+    required SocialAuthDatasource social,
+    required PhoneAuthDatasource phone,
     required FlutterSecureStorage secureStorage,
   })  : _remote = remote,
+        _social = social,
+        _phone = phone,
         _secureStorage = secureStorage;
 
   final AuthRemoteDataSource _remote;
+  final SocialAuthDatasource _social;
+  final PhoneAuthDatasource _phone;
   final FlutterSecureStorage _secureStorage;
 
   static const _tokenKey = 'xstore_auth_token';
@@ -79,11 +91,95 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> logout() async {
     try {
+      await _social.signOutSocial();
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: _userKey);
       return const Right(unit);
     } catch (e) {
       return Left(Failure.cache(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, SocialAuthResult>> signInWithGoogle() async {
+    try {
+      final result = await _social.signInWithGoogle();
+      return Right(result);
+    } on SocialAuthCancelledException catch (e) {
+      return Left(Failure.socialAuthCancelled(e.message));
+    } on SocialAuthException catch (e) {
+      return Left(Failure.socialAuth(e.message));
+    } catch (e) {
+      return Left(Failure.socialAuth(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, SocialAuthResult>> signInWithApple() async {
+    try {
+      final result = await _social.signInWithApple();
+      return Right(result);
+    } on SocialAuthCancelledException catch (e) {
+      return Left(Failure.socialAuthCancelled(e.message));
+    } on SocialAuthException catch (e) {
+      return Left(Failure.socialAuth(e.message));
+    } catch (e) {
+      return Left(Failure.socialAuth(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, SocialAuthResult>> signInWithFacebook() async {
+    try {
+      final result = await _social.signInWithFacebook();
+      return Right(result);
+    } on SocialAuthCancelledException catch (e) {
+      return Left(Failure.socialAuthCancelled(e.message));
+    } on SocialAuthException catch (e) {
+      return Left(Failure.socialAuth(e.message));
+    } catch (e) {
+      return Left(Failure.socialAuth(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> signOutSocial() async {
+    try {
+      await _social.signOutSocial();
+      return const Right(unit);
+    } on SocialAuthException catch (e) {
+      return Left(Failure.socialAuth(e.message));
+    } catch (e) {
+      return Left(Failure.socialAuth(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, SendOtpResult>> sendOtp(SendOtpParams params) async {
+    try {
+      final result = await _phone.sendOtp(e164Number: params.e164Number);
+      return Right(result);
+    } on PhoneAuthException catch (e) {
+      return Left(Failure.phoneAuth(e.message));
+    } catch (e) {
+      return Left(Failure.phoneAuth(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> verifyOtp(VerifyOtpParams params) async {
+    try {
+      final user = await _phone.verifyOtp(
+        verificationId: params.verificationId,
+        otpCode: params.otpCode,
+        phoneNumber: params.phoneNumber,
+      );
+      await persistSessionUser(user);
+      return Right(user);
+    } on PhoneAuthException catch (e) {
+      return Left(Failure.phoneAuth(e.message));
+    } catch (e) {
+      return Left(Failure.phoneAuth(e.toString()));
     }
   }
 

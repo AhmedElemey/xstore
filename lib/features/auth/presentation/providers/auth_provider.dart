@@ -6,6 +6,8 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
+import '../../data/datasources/social_auth_datasource.dart';
+import '../../data/datasources/phone_auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/register_params.dart';
@@ -14,6 +16,11 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../../domain/usecases/apple_sign_in_usecase.dart';
+import '../../domain/usecases/facebook_sign_in_usecase.dart';
+import '../../domain/usecases/google_sign_in_usecase.dart';
+import '../../domain/usecases/send_otp_usecase.dart';
+import '../../domain/usecases/verify_otp_usecase.dart';
 import 'auth_states.dart';
 
 part 'auth_provider.g.dart';
@@ -32,8 +39,20 @@ AuthRemoteDataSource authRemoteDataSource(AuthRemoteDataSourceRef ref) {
 AuthRepository authRepository(AuthRepositoryRef ref) {
   return AuthRepositoryImpl(
     remote: ref.watch(authRemoteDataSourceProvider),
+    social: ref.watch(socialAuthDatasourceProvider),
+    phone: ref.watch(phoneAuthDatasourceProvider),
     secureStorage: ref.watch(secureStorageProvider),
   );
+}
+
+@Riverpod(keepAlive: true)
+SocialAuthDatasource socialAuthDatasource(SocialAuthDatasourceRef ref) {
+  return SocialAuthDatasourceImpl();
+}
+
+@Riverpod(keepAlive: true)
+PhoneAuthDatasource phoneAuthDatasource(PhoneAuthDatasourceRef ref) {
+  return PhoneAuthDatasourceImpl();
 }
 
 @riverpod
@@ -51,6 +70,31 @@ LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
   return LogoutUseCase(ref.watch(authRepositoryProvider));
 }
 
+@riverpod
+GoogleSignInUseCase googleSignInUseCase(GoogleSignInUseCaseRef ref) {
+  return GoogleSignInUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+AppleSignInUseCase appleSignInUseCase(AppleSignInUseCaseRef ref) {
+  return AppleSignInUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+FacebookSignInUseCase facebookSignInUseCase(FacebookSignInUseCaseRef ref) {
+  return FacebookSignInUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+SendOtpUseCase sendOtpUseCase(SendOtpUseCaseRef ref) {
+  return SendOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+VerifyOtpUseCase verifyOtpUseCase(VerifyOtpUseCaseRef ref) {
+  return VerifyOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
 @Riverpod(keepAlive: true)
 class Auth extends _$Auth {
   @override
@@ -63,6 +107,15 @@ class Auth extends _$Auth {
   Future<void> logout() async {
     await ref.read(logoutUseCaseProvider).call();
     ref.invalidateSelf();
+  }
+
+  Future<void> setUser(UserEntity user) async {
+    state = const AsyncLoading();
+    final result = await ref.read(authRepositoryProvider).persistSessionUser(user);
+    state = result.fold(
+      (_) => AsyncData(user),
+      (_) => AsyncData(user),
+    );
   }
 }
 
@@ -359,7 +412,7 @@ class RegisterNotifier extends _$RegisterNotifier {
       fullName: state.fullName.trim(),
       email: state.email.trim(),
       phoneNumber: state.phoneNumber.replaceAll(RegExp(r'\D'), ''),
-      countryCode: state.countryCode,
+      countryCode: '+20',
       dateOfBirth: state.dateOfBirth,
       location: state.location.trim(),
       password: state.password,
@@ -421,5 +474,5 @@ bool _isValidEmail(String v) {
 
 bool _isValidPhone(String v) {
   final digits = v.replaceAll(RegExp(r'\D'), '');
-  return digits.length >= 8 && digits.length <= 15;
+  return RegExp(r'^01[0125]\d{8}$').hasMatch(digits);
 }

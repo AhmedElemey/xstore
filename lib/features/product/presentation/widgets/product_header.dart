@@ -52,6 +52,7 @@ class ProductHeader extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
+              fontSize: 18
             ),
           ),
           const Gap(AppSpacing.md),
@@ -65,6 +66,7 @@ class ProductHeader extends StatelessWidget {
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.primary,
+                  fontSize: 18
                 ),
               ),
               if (hasCompare) ...[
@@ -73,6 +75,7 @@ class ProductHeader extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(
                     decoration: TextDecoration.lineThrough,
                     color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 18
                   ),
                 ),
                 Container(
@@ -89,6 +92,7 @@ class ProductHeader extends StatelessWidget {
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: AppColors.accent,
                       fontWeight: FontWeight.w600,
+                      
                     ),
                   ),
                 ),
@@ -115,6 +119,7 @@ class ProductHeader extends StatelessWidget {
                       '$ratingLabel${AppStrings.reviewsDotSeparator}$reviewCountLabel${AppStrings.reviewsSuffix}',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
+                        fontSize: 18
                       ),
                     ),
                     Icon(

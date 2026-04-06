@@ -11,7 +11,7 @@ class RegisterParams with _$RegisterParams {
     required String fullName,
     required String email,
     required String phoneNumber,
-    @Default('+213') String countryCode,
+    @Default('+20') String countryCode,
     DateTime? dateOfBirth,
     required String location,
     required String password,

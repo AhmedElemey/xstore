@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
@@ -18,6 +18,9 @@ import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
 import '../widgets/role_selector_card.dart';
+import '../widgets/auth_divider.dart';
+import '../widgets/social_login_row.dart';
+import '../widgets/phone_input_field.dart';
 
 const _storeCategories = [
   'Electronics',
@@ -29,18 +32,6 @@ const _storeCategories = [
   'Food',
   'Automotive',
   'Mixed/Other',
-];
-
-const _dialOptions = <({String flag, String name, String code})>[
-  (flag: '🇩🇿', name: 'Algeria', code: '+213'),
-  (flag: '🇫🇷', name: 'France', code: '+33'),
-  (flag: '🇺🇸', name: 'United States', code: '+1'),
-  (flag: '🇬🇧', name: 'United Kingdom', code: '+44'),
-  (flag: '🇩🇪', name: 'Germany', code: '+49'),
-  (flag: '🇪🇸', name: 'Spain', code: '+34'),
-  (flag: '🇮🇹', name: 'Italy', code: '+39'),
-  (flag: '🇲🇦', name: 'Morocco', code: '+212'),
-  (flag: '🇹🇳', name: 'Tunisia', code: '+216'),
 ];
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -278,7 +269,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           phone: _phone,
           location: _location,
           onPickDob: () => _pickDob(n, s),
-          onPickDial: () => _showDialSheet(n, s),
         );
       case 3:
         return _StepSecurity(
@@ -302,28 +292,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
-  void _showDialSheet(RegisterNotifier n, RegisterState s) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) => ListView(
-        shrinkWrap: true,
-        children: _dialOptions
-            .map(
-              (e) => ListTile(
-                leading: Text(e.flag, style: TextStyle(fontSize: 22)),
-                title: Text(e.name),
-                trailing: Text(e.code),
-                onTap: () {
-                  n.updateField(countryCode: e.code);
-                  Navigator.pop(ctx);
-                },
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
 }
 
 class _StepRole extends StatelessWidget {
@@ -393,6 +361,10 @@ class _StepRole extends StatelessWidget {
             'Direct chat with buyers',
           ],
         ),
+        const Gap(20),
+        const AuthDivider(label: AppStrings.socialLoginDivider),
+        const Gap(20),
+        const SocialLoginRow(),
       ],
     );
   }
@@ -407,7 +379,6 @@ class _StepPersonal extends StatelessWidget {
     required this.phone,
     required this.location,
     required this.onPickDob,
-    required this.onPickDial,
   });
 
   final RegisterState s;
@@ -417,7 +388,6 @@ class _StepPersonal extends StatelessWidget {
   final TextEditingController phone;
   final TextEditingController location;
   final VoidCallback onPickDob;
-  final VoidCallback onPickDial;
 
   @override
   Widget build(BuildContext context) {
@@ -467,93 +437,12 @@ class _StepPersonal extends StatelessWidget {
           },
         ),
         const Gap(14),
-        Text(
-          'Phone Number *',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: context.textPrimary,
+        PhoneInputField(
+          controller: phone,
+          errorText: s.stepErrors['phone'],
+          onChanged: (v) => n.updateField(
+            phoneNumber: v.replaceAll(RegExp(r'\D'), ''),
           ),
-        ),
-        const Gap(8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Material(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(14),
-              child: InkWell(
-                onTap: onPickDial,
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: context.borderColor),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        _flagForCode(s.countryCode),
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      const Gap(6),
-                      Text(
-                        s.countryCode,
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const Icon(Icons.arrow_drop_down),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const Gap(10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: phone,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    onChanged: (v) => n.updateField(phoneNumber: v),
-                    decoration: InputDecoration(
-                      hintText: 'Phone number',
-                      filled: true,
-                      fillColor: context.surfaceColor,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: context.borderColor),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (s.stepErrors.containsKey('phone'))
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6, left: 4),
-                      child: Text(
-                        s.stepErrors['phone']!,
-                        style: TextStyle(
-                          color: AppColors.error,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
         ),
         const Gap(14),
         AuthTextField(
@@ -576,13 +465,6 @@ class _StepPersonal extends StatelessWidget {
       ],
     );
   }
-}
-
-String _flagForCode(String code) {
-  for (final o in _dialOptions) {
-    if (o.code == code) return o.flag;
-  }
-  return '🇩🇿';
 }
 
 class _StepSecurity extends StatelessWidget {
@@ -914,13 +796,11 @@ class _StepStore extends StatelessWidget {
           ],
         ),
         const Gap(14),
-        AuthTextField(
-          label: 'WhatsApp Number (optional)',
-          hint: 'Buyers can contact you via WhatsApp',
+        PhoneInputField(
           controller: whatsapp,
-          keyboardType: TextInputType.phone,
-          prefixIcon: const Icon(Icons.chat, color: Color(0xFF25D366)),
-          onChanged: (v) => n.updateField(whatsappNumber: v),
+          onChanged: (v) => n.updateField(
+            whatsappNumber: v.replaceAll(RegExp(r'\D'), ''),
+          ),
         ),
       ],
     );

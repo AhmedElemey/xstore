@@ -118,6 +118,7 @@ class CartItemCard extends StatelessWidget {
                                 style: AppTypography.labelSmall.copyWith(
                                   color: AppColors.white,
                                   fontWeight: FontWeight.w600,
+                                  fontSize: 18
                                 ),
                               ),
                             ),
@@ -139,6 +140,7 @@ class CartItemCard extends StatelessWidget {
                             color: available
                                 ? context.textPrimary
                                 : context.textDisabled,
+                            fontSize: 18
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -158,6 +160,7 @@ class CartItemCard extends StatelessWidget {
                                 ? AppColors.primary
                                 : context.textDisabled,
                             fontWeight: FontWeight.w800,
+                            fontSize: 18
                           ),
                         ),
                         if (compare != null && compare > item.price)
@@ -166,6 +169,7 @@ class CartItemCard extends StatelessWidget {
                             style: AppTypography.bodySmall.copyWith(
                               color: context.textSecondary,
                               decoration: TextDecoration.lineThrough,
+                              
                             ),
                           ),
                       ],

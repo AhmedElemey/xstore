@@ -61,6 +61,7 @@ class SellerCard extends StatelessWidget {
                             seller.name,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
+                              fontSize: 18
                             ),
                           ),
                           const Gap(AppSpacing.xs),

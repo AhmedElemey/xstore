@@ -12,6 +12,34 @@ abstract final class AppStrings {
   static const password = 'Password';
   static const createAccount = 'Create account';
   static const signInPrompt = 'Sign in to continue';
+  static const phoneNumber = 'Phone Number';
+  static const phoneRequired = 'Phone number is required';
+  static const phoneInvalidLength = 'Must be 11 digits';
+  static const phoneInvalidPrefix = 'Must start with 010, 011, 012, or 015';
+  static const phoneInvalidNumber = 'Invalid phone number';
+  static const phoneTooManyRequests = 'Too many attempts. Try again later.';
+  static const sendVerificationCode = 'Send Verification Code';
+  static const verifyAndContinue = 'Verify & Continue';
+  static const verifyYourNumber = 'Verify your number';
+  static const codeSentTo = 'Code sent to';
+  static const changeNumber = 'Change';
+  static const resendCodeIn = 'Resend code in';
+  static const didntReceiveCode = "Didn't receive the code?";
+  static const resendCode = 'Resend Code';
+  static const otpInvalidCode = 'Incorrect code. Please try again.';
+  static const otpSessionExpired = 'Code expired. Request a new one.';
+  static const smsRatesNote = 'Standard SMS rates may apply';
+  static const noInternet = 'No internet connection. Please try again.';
+  static const genericError = 'Something went wrong. Please try again.';
+  static const emailTab = 'Email';
+  static const phoneTab = 'Phone';
+  static const continueWithGoogle = 'Continue with Google';
+  static const continueWithApple = 'Continue with Apple';
+  static const continueWithFacebook = 'Continue with Facebook';
+  static const socialLoginDivider = 'or continue with';
+  static const welcomeBack = 'Welcome back';
+  static const chooseYourRole = 'How will you use xStore?';
+  static const socialRoleSubtitle = 'One last step — choose your account type';
 
   // Home
   static const searchHint = 'Search products...';

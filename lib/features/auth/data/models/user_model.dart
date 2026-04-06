@@ -32,6 +32,7 @@ class UserModel with _$UserModel {
     String? instagramHandle,
     String? facebookPage,
     String? token,
+    @Default(false) bool isNewUser,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -75,6 +76,7 @@ class UserModel with _$UserModel {
       instagramHandle: json['instagramHandle'] as String?,
       facebookPage: json['facebookPage'] as String?,
       token: json['token'] as String?,
+      isNewUser: json['isNewUser'] as bool? ?? false,
     );
   }
 }
@@ -104,6 +106,7 @@ extension UserModelX on UserModel {
         dateOfBirth: dateOfBirth,
         instagramHandle: instagramHandle,
         facebookPage: facebookPage,
+        isNewUser: isNewUser,
       );
 
   Map<String, dynamic> toJson() => {
@@ -133,5 +136,6 @@ extension UserModelX on UserModel {
         if (instagramHandle != null) 'instagramHandle': instagramHandle,
         if (facebookPage != null) 'facebookPage': facebookPage,
         if (token != null) 'token': token,
+        'isNewUser': isNewUser,
       };
 }

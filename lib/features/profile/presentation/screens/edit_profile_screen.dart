@@ -10,6 +10,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../widgets/profile_avatar_picker.dart';
@@ -279,14 +280,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('email', v),
           ),
           const Gap(AppSpacing.md),
-          TextField(
+          PhoneInputField(
             controller: _phone,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.phone),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('phone', v),
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('phone', v.replaceAll(RegExp(r'\D'), '')),
           ),
           const Gap(AppSpacing.md),
           TextField(
@@ -374,13 +372,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ref.read(profileNotifierProvider.notifier).updateField('storeWilaya', v),
             ),
             const Gap(AppSpacing.md),
-            TextField(
+            PhoneInputField(
               controller: _whatsapp,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(LucideIcons.messageCircle),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('whatsapp', v),
+              onChanged: (v) => ref
+                  .read(profileNotifierProvider.notifier)
+                  .updateField('whatsapp', v.replaceAll(RegExp(r'\D'), '')),
             ),
           ],
           const Gap(AppSpacing.x2l),

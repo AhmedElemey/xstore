@@ -260,7 +260,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         id: 'XS-2024-V001',
         consumerId: 'consumer_001',
         consumerName: 'Sara Khelifi',
-        consumerPhone: '+213 555 987 654',
+        consumerPhone: '+20 101 987 6543',
         status: OrderStatus.pending,
         items: [
           _lineFromListing('listing_001', 1, lineId: 'line_xs_1'),
@@ -275,7 +275,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V002',
         consumerName: 'Karim Boudiaf',
-        consumerPhone: '+213 555 123 789',
+        consumerPhone: '+20 112 123 7890',
         status: OrderStatus.pending,
         items: [
           _lineFromListing('listing_013', 1, lineId: 'line_xs_2'),
@@ -289,7 +289,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V003',
         consumerName: 'Nadia Mansouri',
-        consumerPhone: '+213 555 444 222',
+        consumerPhone: '+20 122 444 2223',
         status: OrderStatus.confirmed,
         items: [
           _lineFromListing('listing_005', 1, lineId: 'line_xs_3a'),
@@ -304,7 +304,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V004',
         consumerName: 'Youcef Tlemceni',
-        consumerPhone: '+213 555 888 111',
+        consumerPhone: '+20 155 888 1112',
         status: OrderStatus.processing,
         items: [
           _lineFromListing('listing_009', 1, lineId: 'line_xs_4'),
@@ -320,7 +320,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V005',
         consumerName: 'Amira Setifienne',
-        consumerPhone: '+213 555 333 999',
+        consumerPhone: '+20 101 333 9994',
         status: OrderStatus.shipped,
         items: [
           _lineFromListing('listing_008', 1, lineId: 'line_xs_5'),
@@ -338,7 +338,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V006',
         consumerName: 'Riad Kebir',
-        consumerPhone: '+213 555 610 610',
+        consumerPhone: '+20 122 610 6105',
         status: OrderStatus.delivered,
         items: [
           _lineFromListing('listing_002', 1, lineId: 'line_xs_6'),
@@ -353,7 +353,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V007',
         consumerName: 'Meriem Hadj',
-        consumerPhone: '+213 555 700 001',
+        consumerPhone: '+20 155 700 0016',
         status: OrderStatus.cancelled,
         items: [
           _lineFromListing('listing_006', 1, lineId: 'line_xs_7'),
@@ -369,7 +369,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _vendorOrderTemplate(
         id: 'XS-2024-V008',
         consumerName: 'Sofiane Rahmani',
-        consumerPhone: '+213 555 730 730',
+        consumerPhone: '+20 112 730 7307',
         status: OrderStatus.confirmed,
         items: [
           _lineFromListing('listing_013', 1, lineId: 'line_xs_8a'),

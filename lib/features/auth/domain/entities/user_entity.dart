@@ -37,6 +37,7 @@ class UserEntity with _$UserEntity {
     DateTime? dateOfBirth,
     String? instagramHandle,
     String? facebookPage,
+    @Default(false) bool isNewUser,
   }) = _UserEntity;
 
   bool get isVendor => role == UserRole.vendor;

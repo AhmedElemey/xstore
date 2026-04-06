@@ -12,10 +12,14 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../providers/auth_provider.dart';
+import '../providers/phone_auth_provider.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/phone_input_field.dart';
+import '../widgets/phone_login_button.dart';
+import '../widgets/social_button.dart';
 import '../widgets/social_login_row.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -30,6 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _phone = TextEditingController();
   late AnimationController _shakeController;
 
   @override
@@ -56,6 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _phone.dispose();
     _shakeController.dispose();
     super.dispose();
   }
@@ -77,6 +83,78 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     if (RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(t)) return true;
     final digits = t.replaceAll(RegExp(r'\D'), '');
     return digits.length >= 10;
+  }
+
+  Future<void> _openPhoneLoginSheet() async {
+    _phone.clear();
+    ref.read(phoneAuthProvider.notifier).reset();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            MediaQuery.viewInsetsOf(ctx).bottom + 20,
+          ),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final state = ref.watch(phoneAuthProvider);
+              final notifier = ref.read(phoneAuthProvider.notifier);
+              final hasError = state.phoneError != null && state.phoneError!.isNotEmpty;
+              final isValid = state.phoneError == null && state.phoneNumber.length == 11;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Enter your phone number',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                  const Gap(6),
+                  Text(
+                    "We'll send a verification code to your Egyptian number",
+                    style: TextStyle(color: context.textSecondary),
+                  ),
+                  const Gap(16),
+                  PhoneInputField(
+                    controller: _phone,
+                    errorText: hasError ? state.phoneError : null,
+                    onChanged: notifier.updatePhone,
+                  ),
+                  const Gap(16),
+                  PhoneLoginButton(
+                    isLoading: state.isSendingOtp,
+                    enabled: isValid && !state.isSendingOtp,
+                    onPressed: () async {
+                      final navigator = Navigator.of(context);
+                      final ok = await notifier.sendOtp();
+                      if (!mounted || !ok) return;
+                      navigator.pop();
+                      if (!mounted) return;
+                      this.context.push(AppRoutes.otp);
+                    },
+                  ),
+                  const Gap(10),
+                  Text(
+                    'Standard SMS rates may apply',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: context.textSecondary, fontSize: 12),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -141,7 +219,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const Gap(20),
                         AuthTextField(
-                          label: 'Email or Phone Number',
+                          label: 'Email',
                           hint: 'you@email.com',
                           controller: _email,
                           keyboardType: TextInputType.emailAddress,
@@ -258,7 +336,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const Gap(20),
                         const AuthDivider(),
-                        const Gap(20),
+                        const Gap(12),
+                        SocialButton(
+                          onTap: _openPhoneLoginSheet,
+                          isLoading: false,
+                          icon: Icon(
+                            LucideIcons.smartphone,
+                            size: 22,
+                            color: context.textPrimary,
+                          ),
+                          label: 'Continue with Phone Number',
+                          borderColor: context.borderColor,
+                          bgColor: Colors.transparent,
+                          textColor: context.textPrimary,
+                        ),
+                        const Gap(12),
                         const SocialLoginRow(),
                         const Gap(12),
                         Center(

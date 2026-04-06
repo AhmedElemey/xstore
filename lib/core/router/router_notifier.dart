@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import 'app_routes.dart';
 
 part 'router_notifier.g.dart';
@@ -23,6 +24,7 @@ RouterNotifier routerNotifier(RouterNotifierRef ref) {
 /// non-vendors blocked from `/listing/*`.
 String? computeXStoreAuthRedirect({
   required AsyncValue<UserEntity?> auth,
+  required bool needsRoleSelection,
   required String matchedLocation,
   bool holdRegisterForVendorSuccess = false,
 }) {
@@ -31,11 +33,19 @@ String? computeXStoreAuthRedirect({
       loc == AppRoutes.onboarding ||
       loc == AppRoutes.login ||
       loc == AppRoutes.register ||
+      loc == AppRoutes.socialRoleSelect ||
+      loc == AppRoutes.otp ||
       loc == AppRoutes.forgotPassword;
 
   return auth.when(
     data: (user) {
       final loggedIn = user != null;
+      if (loggedIn && needsRoleSelection && loc != AppRoutes.socialRoleSelect) {
+        return AppRoutes.socialRoleSelect;
+      }
+      if (loggedIn && !needsRoleSelection && loc == AppRoutes.socialRoleSelect) {
+        return AppRoutes.home;
+      }
       if (!loggedIn) {
         return isAuthRoute ? null : AppRoutes.login;
       }
@@ -59,8 +69,11 @@ String? computeXStoreAuthRedirect({
 String? xStoreGoRouterRedirect(Ref ref, GoRouterState state) {
   final holdVendorSuccess =
       ref.read(registerNotifierProvider).showVendorSuccessOverlay;
+  final needsRoleSelection =
+      ref.read(socialAuthProvider.select((s) => s.needsRoleSelection));
   return computeXStoreAuthRedirect(
     auth: ref.read(authProvider),
+    needsRoleSelection: needsRoleSelection,
     matchedLocation: state.matchedLocation,
     holdRegisterForVendorSuccess: holdVendorSuccess,
   );
@@ -69,6 +82,7 @@ String? xStoreGoRouterRedirect(Ref ref, GoRouterState state) {
 final class RouterNotifier extends Listenable {
   RouterNotifier(this._ref) {
     _ref.listen(authProvider, (_, __) => _notify());
+    _ref.listen(socialAuthProvider.select((s) => s.needsRoleSelection), (_, __) => _notify());
   }
 
   final Ref _ref;

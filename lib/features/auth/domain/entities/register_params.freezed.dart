@@ -281,7 +281,7 @@ class _$RegisterParamsImpl implements _RegisterParams {
       required this.fullName,
       required this.email,
       required this.phoneNumber,
-      this.countryCode = '+213',
+      this.countryCode = '+20',
       this.dateOfBirth,
       required this.location,
       required this.password,

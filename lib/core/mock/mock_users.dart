@@ -8,7 +8,7 @@ const mockVendorUser = UserEntity(
   id: 'vendor_001',
   name: 'Ahmed Bensalem',
   email: 'ahmed@xstore.com',
-  phoneNumber: '+213555000001',
+  phoneNumber: '+201055500001',
   role: UserRole.vendor,
   isVerified: true,
   rating: 4.8,
@@ -22,14 +22,14 @@ const mockVendorUser = UserEntity(
       'Premium electronics at the best prices in Algeria. All products are genuine and come with full warranty.',
   storeCity: 'Algiers',
   storeWilaya: 'Alger',
-  whatsappNumber: '+213 555 123 456',
+  whatsappNumber: '+20 105 551 2345',
 );
 
 const mockConsumerUser = UserEntity(
   id: 'consumer_001',
   name: 'Sara Khelifi',
   email: 'sara@gmail.com',
-  phoneNumber: '+213555000002',
+  phoneNumber: '+201255500002',
   role: UserRole.consumer,
   isVerified: false,
   joinedAt: null,

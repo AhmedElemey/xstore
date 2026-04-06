@@ -39,6 +39,7 @@ mixin _$UserEntity {
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   String? get instagramHandle => throw _privateConstructorUsedError;
   String? get facebookPage => throw _privateConstructorUsedError;
+  bool get isNewUser => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserEntityCopyWith<UserEntity> get copyWith =>
@@ -74,7 +75,8 @@ abstract class $UserEntityCopyWith<$Res> {
       String? bio,
       DateTime? dateOfBirth,
       String? instagramHandle,
-      String? facebookPage});
+      String? facebookPage,
+      bool isNewUser});
 }
 
 /// @nodoc
@@ -113,6 +115,7 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
     Object? dateOfBirth = freezed,
     Object? instagramHandle = freezed,
     Object? facebookPage = freezed,
+    Object? isNewUser = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -207,6 +210,10 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
           ? _value.facebookPage
           : facebookPage // ignore: cast_nullable_to_non_nullable
               as String?,
+      isNewUser: null == isNewUser
+          ? _value.isNewUser
+          : isNewUser // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -242,7 +249,8 @@ abstract class _$$UserEntityImplCopyWith<$Res>
       String? bio,
       DateTime? dateOfBirth,
       String? instagramHandle,
-      String? facebookPage});
+      String? facebookPage,
+      bool isNewUser});
 }
 
 /// @nodoc
@@ -279,6 +287,7 @@ class __$$UserEntityImplCopyWithImpl<$Res>
     Object? dateOfBirth = freezed,
     Object? instagramHandle = freezed,
     Object? facebookPage = freezed,
+    Object? isNewUser = null,
   }) {
     return _then(_$UserEntityImpl(
       id: null == id
@@ -373,6 +382,10 @@ class __$$UserEntityImplCopyWithImpl<$Res>
           ? _value.facebookPage
           : facebookPage // ignore: cast_nullable_to_non_nullable
               as String?,
+      isNewUser: null == isNewUser
+          ? _value.isNewUser
+          : isNewUser // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -403,7 +416,8 @@ class _$UserEntityImpl extends _UserEntity {
       this.bio,
       this.dateOfBirth,
       this.instagramHandle,
-      this.facebookPage})
+      this.facebookPage,
+      this.isNewUser = false})
       : super._();
 
   @override
@@ -455,10 +469,13 @@ class _$UserEntityImpl extends _UserEntity {
   final String? instagramHandle;
   @override
   final String? facebookPage;
+  @override
+  @JsonKey()
+  final bool isNewUser;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage)';
+    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, isNewUser: $isNewUser)';
   }
 
   @override
@@ -505,7 +522,9 @@ class _$UserEntityImpl extends _UserEntity {
             (identical(other.instagramHandle, instagramHandle) ||
                 other.instagramHandle == instagramHandle) &&
             (identical(other.facebookPage, facebookPage) ||
-                other.facebookPage == facebookPage));
+                other.facebookPage == facebookPage) &&
+            (identical(other.isNewUser, isNewUser) ||
+                other.isNewUser == isNewUser));
   }
 
   @override
@@ -533,7 +552,8 @@ class _$UserEntityImpl extends _UserEntity {
         bio,
         dateOfBirth,
         instagramHandle,
-        facebookPage
+        facebookPage,
+        isNewUser
       ]);
 
   @JsonKey(ignore: true)
@@ -567,7 +587,8 @@ abstract class _UserEntity extends UserEntity {
       final String? bio,
       final DateTime? dateOfBirth,
       final String? instagramHandle,
-      final String? facebookPage}) = _$UserEntityImpl;
+      final String? facebookPage,
+      final bool isNewUser}) = _$UserEntityImpl;
   const _UserEntity._() : super._();
 
   @override
@@ -616,6 +637,8 @@ abstract class _UserEntity extends UserEntity {
   String? get instagramHandle;
   @override
   String? get facebookPage;
+  @override
+  bool get isNewUser;
   @override
   @JsonKey(ignore: true)
   _$$UserEntityImplCopyWith<_$UserEntityImpl> get copyWith =>

@@ -16,7 +16,7 @@ class Checkout extends _$Checkout {
       savedAddresses: [
         const OrderAddress(
           fullName: 'Sara Khelifi',
-          phone: '+213 555 987 654',
+          phone: '01012345678',
           street: '12 Rue Didouche Mourad',
           city: 'Oran',
           wilaya: 'Oran',

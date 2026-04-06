@@ -33,7 +33,7 @@ class RegisterState with _$RegisterState {
     @Default('') String fullName,
     @Default('') String email,
     @Default('') String phoneNumber,
-    @Default('+213') String countryCode,
+    @Default('+20') String countryCode,
     DateTime? dateOfBirth,
     @Default('') String location,
     @Default('') String password,

@@ -12,7 +12,6 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_orders_provider.dart';
 import '../widgets/order_empty_state.dart';
-import '../widgets/orders_list_shimmer.dart';
 import '../widgets/reject_order_sheet.dart';
 import '../widgets/shipping_info_sheet.dart';
 import '../widgets/vendor_order_card.dart';
@@ -83,14 +82,8 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
     final filteredOrders = ref.watch(
       vendorOrdersProvider.select((s) => s.filteredOrders),
     );
-    final isLoading = ref.watch(
-      vendorOrdersProvider.select((s) => s.isLoading),
-    );
     final isLoadingMore = ref.watch(
       vendorOrdersProvider.select((s) => s.isLoadingMore),
-    );
-    final isEmpty = ref.watch(
-      vendorOrdersProvider.select((s) => s.orders.isEmpty),
     );
     final statusCounts = ref.watch(
       vendorOrdersProvider.select((s) {

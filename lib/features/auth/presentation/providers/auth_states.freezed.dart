@@ -670,7 +670,7 @@ class _$RegisterStateImpl implements _RegisterState {
       this.fullName = '',
       this.email = '',
       this.phoneNumber = '',
-      this.countryCode = '+213',
+      this.countryCode = '+20',
       this.dateOfBirth,
       this.location = '',
       this.password = '',

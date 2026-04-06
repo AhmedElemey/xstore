@@ -37,7 +37,7 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>.internal(
 );
 
 typedef AuthRemoteDataSourceRef = ProviderRef<AuthRemoteDataSource>;
-String _$authRepositoryHash() => r'165768b2fc1f0de90b2d43aea1db540cf2e19cbd';
+String _$authRepositoryHash() => r'9ab3beee89662971f91d8f47f12540c812b6e712';
 
 /// See also [authRepository].
 @ProviderFor(authRepository)
@@ -52,6 +52,38 @@ final authRepositoryProvider = Provider<AuthRepository>.internal(
 );
 
 typedef AuthRepositoryRef = ProviderRef<AuthRepository>;
+String _$socialAuthDatasourceHash() =>
+    r'ed75ce557e3b0053d79fdb84347b641c8c3f7297';
+
+/// See also [socialAuthDatasource].
+@ProviderFor(socialAuthDatasource)
+final socialAuthDatasourceProvider = Provider<SocialAuthDatasource>.internal(
+  socialAuthDatasource,
+  name: r'socialAuthDatasourceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$socialAuthDatasourceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef SocialAuthDatasourceRef = ProviderRef<SocialAuthDatasource>;
+String _$phoneAuthDatasourceHash() =>
+    r'b29af017b466e83a83b6ac2b45e89d913fede96f';
+
+/// See also [phoneAuthDatasource].
+@ProviderFor(phoneAuthDatasource)
+final phoneAuthDatasourceProvider = Provider<PhoneAuthDatasource>.internal(
+  phoneAuthDatasource,
+  name: r'phoneAuthDatasourceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$phoneAuthDatasourceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef PhoneAuthDatasourceRef = ProviderRef<PhoneAuthDatasource>;
 String _$loginUseCaseHash() => r'e5d70fa1e5543d7d6609678d0835d0c67d436c2d';
 
 /// See also [loginUseCase].
@@ -96,7 +128,89 @@ final logoutUseCaseProvider = AutoDisposeProvider<LogoutUseCase>.internal(
 );
 
 typedef LogoutUseCaseRef = AutoDisposeProviderRef<LogoutUseCase>;
-String _$authHash() => r'4c50343cfcd31eec1c8a2bce6dcf5c77ce25e648';
+String _$googleSignInUseCaseHash() =>
+    r'606d57b9d46b1fe416d905794743dd8ea57c3ee0';
+
+/// See also [googleSignInUseCase].
+@ProviderFor(googleSignInUseCase)
+final googleSignInUseCaseProvider =
+    AutoDisposeProvider<GoogleSignInUseCase>.internal(
+  googleSignInUseCase,
+  name: r'googleSignInUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$googleSignInUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GoogleSignInUseCaseRef = AutoDisposeProviderRef<GoogleSignInUseCase>;
+String _$appleSignInUseCaseHash() =>
+    r'a866a853ac9ccfe703cb99160e204e6dd5531ac1';
+
+/// See also [appleSignInUseCase].
+@ProviderFor(appleSignInUseCase)
+final appleSignInUseCaseProvider =
+    AutoDisposeProvider<AppleSignInUseCase>.internal(
+  appleSignInUseCase,
+  name: r'appleSignInUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$appleSignInUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef AppleSignInUseCaseRef = AutoDisposeProviderRef<AppleSignInUseCase>;
+String _$facebookSignInUseCaseHash() =>
+    r'a3685af1393801b5431bc7144460a52a0511e904';
+
+/// See also [facebookSignInUseCase].
+@ProviderFor(facebookSignInUseCase)
+final facebookSignInUseCaseProvider =
+    AutoDisposeProvider<FacebookSignInUseCase>.internal(
+  facebookSignInUseCase,
+  name: r'facebookSignInUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$facebookSignInUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef FacebookSignInUseCaseRef
+    = AutoDisposeProviderRef<FacebookSignInUseCase>;
+String _$sendOtpUseCaseHash() => r'fbd0c87c4dfe6467bb555b44ec7bcff159df4765';
+
+/// See also [sendOtpUseCase].
+@ProviderFor(sendOtpUseCase)
+final sendOtpUseCaseProvider = AutoDisposeProvider<SendOtpUseCase>.internal(
+  sendOtpUseCase,
+  name: r'sendOtpUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$sendOtpUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef SendOtpUseCaseRef = AutoDisposeProviderRef<SendOtpUseCase>;
+String _$verifyOtpUseCaseHash() => r'05aec30c3b50e51ce73ec7db4506db57803a0cf3';
+
+/// See also [verifyOtpUseCase].
+@ProviderFor(verifyOtpUseCase)
+final verifyOtpUseCaseProvider = AutoDisposeProvider<VerifyOtpUseCase>.internal(
+  verifyOtpUseCase,
+  name: r'verifyOtpUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$verifyOtpUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef VerifyOtpUseCaseRef = AutoDisposeProviderRef<VerifyOtpUseCase>;
+String _$authHash() => r'4892af5ed1d75c7adcdccecf7af0c69a7bb33573';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -126,7 +240,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'9c3ae60a59640825ade66f2903dc7fd533fbdc31';
+String _$registerNotifierHash() => r'd23860ef1f90d932e9e1e654d2ecc904a3ffcd38';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

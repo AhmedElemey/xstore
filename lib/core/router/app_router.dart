@@ -8,7 +8,10 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/auth/presentation/screens/social_role_screen.dart';
+import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/phone_auth_provider.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
@@ -149,8 +152,21 @@ GoRouter goRouter(GoRouterRef ref) {
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
+        path: AppRoutes.socialRoleSelect,
+        builder: (context, state) => const SocialRoleScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.otp,
+        builder: (context, state) => const OtpScreen(),
+        redirect: (context, state) {
+          final phoneState = ref.read(phoneAuthProvider);
+          if (phoneState.verificationId == null) return AppRoutes.login;
+          return null;
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
