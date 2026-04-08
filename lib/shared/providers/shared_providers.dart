@@ -16,7 +16,7 @@ class AppThemeMode extends _$AppThemeMode {
   @override
   ThemeMode build() {
     _loadSavedTheme();
-    return ThemeMode.system;
+    return ThemeMode.dark;
   }
 
   Future<void> _loadSavedTheme() async {
@@ -27,13 +27,13 @@ class AppThemeMode extends _$AppThemeMode {
 
       final saved = ThemeMode.values.firstWhere(
         (mode) => mode.name == name,
-        orElse: () => ThemeMode.system,
+        orElse: () => ThemeMode.dark,
       );
       if (state != saved) {
         state = saved;
       }
     } catch (_) {
-      // Ignore storage read failures and keep system mode.
+      // Ignore storage read failures and keep dark mode.
     }
   }
 

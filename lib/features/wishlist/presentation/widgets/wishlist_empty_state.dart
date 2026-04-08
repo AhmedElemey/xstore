@@ -77,7 +77,7 @@ class WishlistEmptyState extends StatelessWidget {
                       : () => context.go(AppRoutes.explore),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md,horizontal: AppSpacing.md),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.md),
                     ),
@@ -86,6 +86,7 @@ class WishlistEmptyState extends StatelessWidget {
                     filtered
                         ? AppStrings.wishlistShowAllItems
                         : AppStrings.wishlistDiscoverProducts,
+                        style: TextStyle( color: AppColors.white,),
                   ),
                 ),
               ],

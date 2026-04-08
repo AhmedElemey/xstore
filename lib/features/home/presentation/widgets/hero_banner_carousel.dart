@@ -129,7 +129,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                             b.title,
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
-                                  color: context.surfaceColor,
+                                  
                                   shadows: [
                                     Shadow(
                                       blurRadius: AppSpacing.sm,

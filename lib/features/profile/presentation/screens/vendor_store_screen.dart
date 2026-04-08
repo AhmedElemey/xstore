@@ -187,6 +187,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
               SliverAppBar(
                 pinned: true,
                 expandedHeight: 200,
+                iconTheme: IconThemeData(color: AppColors.white),
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
                 flexibleSpace: FlexibleSpaceBar(

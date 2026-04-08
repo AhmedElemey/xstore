@@ -75,14 +75,20 @@ class SellerCard extends StatelessWidget {
                       ),
                     ),
                     const Gap(AppSpacing.sm),
-                    OutlinedButton(
-                      onPressed: onVisitStore,
-                      child: Text(AppStrings.visitStore),
-                    ),
+                   
                   ],
                 ),
-                if (seller.verified) ...[
-                  const Gap(AppSpacing.md),
+                 const Gap(AppSpacing.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                   OutlinedButton(
+                      onPressed: onVisitStore,
+                      child: Text(AppStrings.visitStore),
+                    ), 
+                   
+                      if (seller.verified) ...[
+                  
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
@@ -101,6 +107,8 @@ class SellerCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                  ],),
+              
               ],
             ),
           ),

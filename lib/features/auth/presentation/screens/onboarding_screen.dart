@@ -18,46 +18,20 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _Slide {
-  const _Slide({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.colors,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final List<Color> colors;
-}
-
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _pageController = PageController();
   int _page = 0;
 
-  static const _slides = [
-    _Slide(
-      icon: LucideIcons.shoppingBag,
-      title: 'Discover Amazing Deals',
-      subtitle:
-          'Shop from thousands of vendors across Algeria and beyond',
-      colors: [Color(0xFF818CF8), Color(0xFF4F46E5)],
-    ),
-    _Slide(
-      icon: LucideIcons.store,
-      title: 'Start Selling Today',
-      subtitle:
-          'List your products in minutes and reach thousands of buyers',
-      colors: [Color(0xFFFDBA74), Color(0xFFF97316)],
-    ),
-    _Slide(
-      icon: LucideIcons.shieldCheck,
-      title: 'Safe & Trusted',
-      subtitle:
-          'Secure payments, buyer protection, and verified sellers',
-      colors: [Color(0xFF6EE7B7), Color(0xFF22C55E)],
-    ),
+  static const _slideIcons = [
+    LucideIcons.shoppingBag,
+    LucideIcons.store,
+    LucideIcons.shieldCheck,
+  ];
+
+  static const _slideColors = [
+    [Color(0xFF818CF8), Color(0xFF4F46E5)],
+    [Color(0xFFFDBA74), Color(0xFFF97316)],
+    [Color(0xFF6EE7B7), Color(0xFF22C55E)],
   ];
 
   Future<void> _finish() async {
@@ -84,13 +58,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             flex: 55,
             child: PageView.builder(
               controller: _pageController,
-              itemCount: _slides.length,
+              itemCount: _slideIcons.length,
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder: (context, i) {
-                final s = _slides[i];
                 return _IllustrationArea(
-                  icon: s.icon,
-                  gradientColors: s.colors,
+                  icon: _slideIcons[i],
+                  gradientColors: _slideColors[i],
                 );
               },
             ),
@@ -100,11 +73,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x14000000),
+                    color: context.cardShadowColor,
                     blurRadius: 24,
                     offset: Offset(0, -4),
                   ),
@@ -131,7 +104,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const Gap(4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(_slides.length, (i) {
+                      children: List.generate(_slideIcons.length, (i) {
                         final active = i == _page;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 280),
@@ -159,7 +132,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              _slides[_page].title,
+                              [
+                                'Discover Amazing Deals',
+                                'Start Selling Today',
+                                'Safe & Trusted',
+                              ][_page],
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
@@ -168,7 +145,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                             const Gap(12),
                             Text(
-                              _slides[_page].subtitle,
+                              [
+                                'Shop from thousands of vendors across Algeria and beyond',
+                                'List your products in minutes and reach thousands of buyers',
+                                'Secure payments, buyer protection, and verified sellers',
+                              ][_page],
                               maxLines: 3,
                               style: TextStyle(
                                 fontSize: 15,
@@ -181,9 +162,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                     AuthButton(
-                      label: _page == _slides.length - 1 ? 'Get Started' : 'Next',
+                      label: _page == _slideIcons.length - 1
+                          ? 'Get Started'
+                          : 'Next',
                       onPressed: () {
-                        if (_page < _slides.length - 1) {
+                        if (_page < _slideIcons.length - 1) {
                           _pageController.nextPage(
                             duration: const Duration(milliseconds: 380),
                             curve: Curves.easeOutCubic,

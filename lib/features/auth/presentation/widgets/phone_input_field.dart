@@ -23,6 +23,14 @@ class PhoneInputField extends StatelessWidget {
   final String? errorText;
   final bool enabled;
 
+  String _normalizeEgyptInput(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('1')) {
+      return digits.replaceFirst('1', '01');
+    }
+    return digits;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -53,7 +61,18 @@ class PhoneInputField extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: TextFormField(
                 controller: controller,
-                onChanged: (v) => onChanged(v.replaceAll(RegExp(r'\D'), '')),
+                onChanged: (value) {
+                  final normalized = _normalizeEgyptInput(value);
+                  if (controller.text != normalized) {
+                    controller.value = TextEditingValue(
+                      text: normalized,
+                      selection: TextSelection.collapsed(
+                        offset: normalized.length,
+                      ),
+                    );
+                  }
+                  onChanged(normalized);
+                },
                 enabled: enabled,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [

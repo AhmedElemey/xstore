@@ -417,7 +417,7 @@ abstract final class AppStrings {
   static const wishlistEmptyTitle = 'Your wishlist is empty';
   static const wishlistEmptySubtitle =
       'Save items you love by tapping the heart icon on any product';
-  static const wishlistDiscoverProducts = 'Discover Products';
+  static const wishlistDiscoverProducts = 'Discover products';
   static String wishlistAppBarTitle(int n) => 'My Wishlist ($n)';
   static const wishlistForBuyersTitle = 'Wishlist is for Buyers';
   static const wishlistForBuyersSubtitle =

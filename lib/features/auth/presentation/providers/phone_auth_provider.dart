@@ -81,6 +81,7 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
     state = state.copyWith(
       phoneNumber: normalized,
       phoneError: err,
+      clearPhoneError: err == null,
       clearOtpError: true,
     );
   }
