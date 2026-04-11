@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -27,7 +26,7 @@ class CartScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: AppBar(
-          title: Text(AppStrings.cartTitle),
+          title: Text(context.l10n.cartTitle),
           backgroundColor: context.surfaceColor,
           surfaceTintColor: AppColors.transparent,
           elevation: 0,
@@ -39,7 +38,7 @@ class CartScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        title: Text(AppStrings.cartAppBarTitle(itemCount)),
+        title: Text(context.l10n.cartAppBarTitle(itemCount)),
         backgroundColor: context.surfaceColor,
         surfaceTintColor: AppColors.transparent,
         elevation: 0,

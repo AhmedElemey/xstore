@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
@@ -34,10 +33,10 @@ class WishlistGridCard extends ConsumerWidget {
   void _undoSnack(BuildContext context, WidgetRef ref) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.wishlistRemovedSnack),
+        content: Text(context.l10n.wishlistRemovedSnack),
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
-          label: AppStrings.cartUndo,
+          label: context.l10n.cartUndo,
           onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
         ),
       ),
@@ -47,9 +46,9 @@ class WishlistGridCard extends ConsumerWidget {
   void _addedToCartSnack(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.wishlistSingleAddedToCart),
+        content: Text(context.l10n.wishlistSingleAddedToCart),
         action: SnackBarAction(
-          label: AppStrings.wishlistViewCart,
+          label: context.l10n.wishlistViewCart,
           onPressed: () => context.push(AppRoutes.cart),
         ),
       ),
@@ -140,7 +139,7 @@ class WishlistGridCard extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(AppSpacing.xs),
                           ),
                           child: Text(
-                            AppStrings.wishlistOutOfStock,
+                            context.l10n.wishlistOutOfStock,
                             style: AppTypography.labelSmall.copyWith(
                               color: context.textSecondary,
                               fontWeight: FontWeight.w600,
@@ -163,7 +162,7 @@ class WishlistGridCard extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(AppSpacing.xs),
                         ),
                         child: Text(
-                          AppStrings.wishlistInCartBadge,
+                          context.l10n.wishlistInCartBadge,
                           textAlign: TextAlign.center,
                           style: AppTypography.labelSmall.copyWith(
                             color: AppColors.white,
@@ -240,7 +239,7 @@ class WishlistGridCard extends ConsumerWidget {
                               ),
                             ),
                             onPressed: () => context.push(AppRoutes.cart),
-                            child: Text(AppStrings.wishlistInCartCta),
+                            child: Text(context.l10n.wishlistInCartCta),
                           )
                         : FilledButton(
                             style: FilledButton.styleFrom(
@@ -260,8 +259,8 @@ class WishlistGridCard extends ConsumerWidget {
                                 : null,
                             child: Text(
                               item.isAvailable
-                                  ? AppStrings.wishlistAddToCart
-                                  : AppStrings.wishlistOutOfStock,
+                                  ? context.l10n.wishlistAddToCart
+                                  : context.l10n.wishlistOutOfStock,
                             ),
                           ),
                   ),

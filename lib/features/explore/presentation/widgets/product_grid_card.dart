@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/utils/formatters.dart';
@@ -146,7 +145,7 @@ class ProductGridCard extends StatelessWidget {
                       width: double.infinity,
                       child: FilledButton(
                         onPressed: onAddToCart,
-                        child: Text(AppStrings.addToCart),
+                        child: Text(context.l10n.addToCart),
                       ),
                     ),
                   ],

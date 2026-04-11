@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuantityStepper extends StatelessWidget {
@@ -27,7 +26,7 @@ class QuantityStepper extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.stockQuantityRequired,
+          context.l10n.stockQuantityRequired,
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const Gap(AppSpacing.md),

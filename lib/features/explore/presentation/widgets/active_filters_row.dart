@@ -3,8 +3,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../explore_state.dart';
 
 class ActiveFiltersRow extends StatelessWidget {
@@ -42,7 +42,7 @@ class ActiveFiltersRow extends StatelessWidget {
     }
     if (filters.minPrice != null || filters.maxPrice != null) {
       chips.add(_FilterChip(
-        label: AppStrings.priceRange,
+        label: context.l10n.priceRange,
         onRemove: onClearAll,
       ));
     }
@@ -60,7 +60,7 @@ class ActiveFiltersRow extends StatelessWidget {
     }
     if (filters.shippingOnly) {
       chips.add(_FilterChip(
-        label: AppStrings.shippingOnly,
+        label: context.l10n.shippingOnly,
         onRemove: onClearAll,
       ));
     }
@@ -71,7 +71,7 @@ class ActiveFiltersRow extends StatelessWidget {
         runSpacing: AppSpacing.sm,
         children: [
           ActionChip(
-            label: Text(AppStrings.addFilters, style: AppTypography.labelLarge),
+            label: Text(context.l10n.addFilters, style: AppTypography.labelLarge),
             onPressed: onOpenFilters,
           ),
         ],
@@ -87,7 +87,7 @@ class ActiveFiltersRow extends StatelessWidget {
               onPressed: onClearAll,
               icon: Icon(LucideIcons.x, size: AppSpacing.lg, color: AppColors.primary),
               label: Text(
-                AppStrings.clearAllFilters,
+                context.l10n.clearAllFilters,
                 style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
               ),
             ),
@@ -98,7 +98,7 @@ class ActiveFiltersRow extends StatelessWidget {
             ),
           ),
           ActionChip(
-            label: Text(AppStrings.addFilters, style: AppTypography.labelLarge),
+            label: Text(context.l10n.addFilters, style: AppTypography.labelLarge),
             onPressed: onOpenFilters,
           ),
         ],

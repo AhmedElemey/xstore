@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/orders_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -46,7 +45,7 @@ class OrderStatsBanner extends ConsumerWidget {
             child: _MiniStat(
               icon: LucideIcons.clock,
               value: '${stats.pendingCount}',
-              label: AppStrings.ordersStatPendingLabel,
+              label: context.l10n.ordersStatPendingLabel,
               background: AppColors.orderStatusPending.withValues(alpha: 0.18),
             ),
           ),
@@ -54,7 +53,7 @@ class OrderStatsBanner extends ConsumerWidget {
             child: _MiniStat(
               icon: LucideIcons.package,
               value: '${stats.activeCount}',
-              label: AppStrings.ordersStatActiveLabelTitle,
+              label: context.l10n.ordersStatActiveLabelTitle,
               background: AppColors.orderStatusConfirmed.withValues(alpha: 0.1),
             ),
           ),
@@ -62,7 +61,7 @@ class OrderStatsBanner extends ConsumerWidget {
             child: _MiniStat(
               icon: LucideIcons.calendar,
               value: '${stats.monthCount}',
-              label: AppStrings.ordersStatMonthLabel,
+              label: context.l10n.ordersStatMonthLabel,
               background: context.surfaceColor,
             ),
           ),
@@ -70,7 +69,7 @@ class OrderStatsBanner extends ConsumerWidget {
             child: _MiniStat(
               icon: LucideIcons.hash,
               value: '${stats.totalCount}',
-              label: AppStrings.ordersStatTotalLabel,
+              label: context.l10n.ordersStatTotalLabel,
               background: context.surfaceColor,
             ),
           ),

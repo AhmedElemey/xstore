@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ListingStatsBanner extends StatelessWidget {
@@ -51,7 +50,7 @@ class ListingStatsBanner extends StatelessWidget {
               child: _MiniStat(
                 icon: LucideIcons.boxes,
                 value: totalCount,
-                label: AppStrings.listingTotalListings,
+                label: context.l10n.listingTotalListings,
                 valueColor: Theme.of(context).colorScheme.onSurface,
               ),
             ),
@@ -59,7 +58,7 @@ class ListingStatsBanner extends StatelessWidget {
               child: _MiniStat(
                 icon: LucideIcons.checkCircle,
                 value: activeCount,
-                label: AppStrings.active,
+                label: context.l10n.active,
                 valueColor: AppColors.success,
               ),
             ),
@@ -67,7 +66,7 @@ class ListingStatsBanner extends StatelessWidget {
               child: _MiniStat(
                 icon: LucideIcons.truck,
                 value: soldCount,
-                label: AppStrings.listingSoldStat,
+                label: context.l10n.listingSoldStat,
                 valueColor: AppColors.primary,
               ),
             ),

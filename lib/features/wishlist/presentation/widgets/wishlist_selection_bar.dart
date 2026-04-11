@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -56,12 +55,12 @@ class WishlistSelectionBar extends ConsumerWidget {
                   TextButton(
                     onPressed: () =>
                         ref.read(wishlistProvider.notifier).selectAllVisible(),
-                    child: Text(AppStrings.wishlistSelectAll),
+                    child: Text(context.l10n.wishlistSelectAll),
                   ),
                   TextButton(
                     onPressed: () =>
                         ref.read(wishlistProvider.notifier).deselectAll(),
-                    child: Text(AppStrings.wishlistDeselectAll),
+                    child: Text(context.l10n.wishlistDeselectAll),
                   ),
                 ],
               ),
@@ -75,7 +74,7 @@ class WishlistSelectionBar extends ConsumerWidget {
                               .read(wishlistProvider.notifier)
                               .removeSelected(),
                       child: Text(
-                        AppStrings.wishlistRemoveSelectedCount(sel),
+                        context.l10n.wishlistRemoveSelectedCount(sel),
                       ),
                     ),
                   ),
@@ -92,12 +91,12 @@ class WishlistSelectionBar extends ConsumerWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    AppStrings.wishlistAddedToCartCount(
+                                    context.l10n.wishlistAddedToCartCount(
                                       addable,
                                     ),
                                   ),
                                   action: SnackBarAction(
-                                    label: AppStrings.wishlistViewCart,
+                                    label: context.l10n.wishlistViewCart,
                                     onPressed: () =>
                                         context.push(AppRoutes.cart),
                                   ),
@@ -105,7 +104,7 @@ class WishlistSelectionBar extends ConsumerWidget {
                               );
                             },
                       child: Text(
-                        AppStrings.wishlistAddToCartSelected(addable),
+                        context.l10n.wishlistAddToCartSelected(addable),
                       ),
                     ),
                   ),

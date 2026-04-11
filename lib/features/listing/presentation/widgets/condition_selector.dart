@@ -13,12 +13,15 @@ class ConditionSelector extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     this.errorText,
+    this.optionLabel,
   });
 
   final List<String> options;
   final String selected;
   final ValueChanged<String> onChanged;
   final String? errorText;
+  /// Maps stored option value (e.g. English key) to display text.
+  final String Function(String option)? optionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class ConditionSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Condition *',
+          context.l10n.listingConditionFieldLabel,
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const Gap(AppSpacing.md),
@@ -37,9 +40,10 @@ class ConditionSelector extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: options.map((o) {
             final isSel = o == selected;
+            final display = optionLabel?.call(o) ?? o;
             return ChoiceChip(
               label: Text(
-                o,
+                display,
                 style: TextStyle(
                   color: isSel ? Colors.white : Colors.grey.shade600,
                   fontWeight: FontWeight.w500,

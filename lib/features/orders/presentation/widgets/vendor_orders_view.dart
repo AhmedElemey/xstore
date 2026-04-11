@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'order_card.dart';
 import 'order_empty_state.dart';
 import 'order_filter_tabs.dart';
 import 'order_stats_banner.dart';
-import 'orders_list_shimmer.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
 
 class VendorOrdersView extends ConsumerStatefulWidget {
   const VendorOrdersView({super.key});
@@ -106,7 +105,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                               ? TextField(
                                   autofocus: true,
                                   decoration: InputDecoration(
-                                    hintText: AppStrings.ordersSearchHint,
+                                    hintText: context.l10n.ordersSearchHint,
                                     border: InputBorder.none,
                                     suffixIcon: IconButton(
                                       icon: const Icon(Icons.close),
@@ -119,7 +118,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                                   onChanged: notifier.updateSearch,
                                 )
                               : Text(
-                                  AppStrings.ordersIncomingTitle,
+                                  context.l10n.ordersIncomingTitle,
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                         ),
@@ -132,9 +131,9 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                             icon: const Icon(Icons.filter_list_rounded),
                             onPressed: () =>
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
-                                      AppStrings.ordersFiltersMoreSoon,
+                                      context.l10n.ordersFiltersMoreSoon,
                                     ),
                                   ),
                                 ),
@@ -159,7 +158,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
             child: Row(
               children: [
                 Text(
-                  AppStrings.sortBy,
+                  context.l10n.sortBy,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -169,19 +168,19 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                   items: [
                     DropdownMenuItem(
                       value: OrderSortOption.newest,
-                      child: Text(AppStrings.sortNewest),
+                      child: Text(context.l10n.sortNewest),
                     ),
                     DropdownMenuItem(
                       value: OrderSortOption.oldest,
-                      child: Text(AppStrings.sortOldest),
+                      child: Text(context.l10n.sortOldest),
                     ),
                     DropdownMenuItem(
                       value: OrderSortOption.highestValue,
-                      child: Text(AppStrings.ordersSortHighestValue),
+                      child: Text(context.l10n.ordersSortHighestValue),
                     ),
                     DropdownMenuItem(
                       value: OrderSortOption.needsAction,
-                      child: Text(AppStrings.ordersSortNeedsAction),
+                      child: Text(context.l10n.ordersSortNeedsAction),
                     ),
                   ],
                   onChanged: (v) {
@@ -190,7 +189,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                 ),
                 const Spacer(),
                 Text(
-                  AppStrings.ordersCountLine(list.length),
+                  context.l10n.ordersCountLine(list.length),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -201,7 +200,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
               color: AppColors.primary,
               onRefresh: () => notifier.refreshOrders(),
               child: isLoading && emptyAll
-                  ? const OrdersListShimmer()
+                  ? const VendorOrdersSkeleton()
                   : list.isEmpty
                   ? ListView(
                       cacheExtent: 300,
@@ -209,9 +208,9 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                       children: [
                         OrderEmptyState(
                           title: selectedFilter != null
-                              ? AppStrings.ordersEmptyFilteredTitle
-                              : AppStrings.ordersEmptyTitle,
-                          subtitle: AppStrings.ordersEmptySubtitle,
+                              ? context.l10n.ordersEmptyFilteredTitle
+                              : context.l10n.ordersEmptyTitle,
+                          subtitle: context.l10n.vendorOrdersEmptySubtitle,
                           filterActive: selectedFilter != null,
                         ),
                       ],

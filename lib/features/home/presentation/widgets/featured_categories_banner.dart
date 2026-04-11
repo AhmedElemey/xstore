@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -28,14 +27,14 @@ class FeaturedCategoriesBanner extends StatelessWidget {
       children: [
         Expanded(
           child: _CategoryCard(
-            title: AppStrings.mensFashion,
+            title: context.l10n.mensFashion,
             imageUrl: _mensImage,
             height: _cardHeight,
             onTap: () => context.go(
               Uri(
                 path: AppRoutes.explore,
-                queryParameters: const {
-                  'category': AppStrings.categoryQueryMens,
+                queryParameters: {
+                  'category': context.l10n.categoryQueryMens,
                 },
               ).toString(),
             ),
@@ -44,14 +43,14 @@ class FeaturedCategoriesBanner extends StatelessWidget {
         const Gap(AppSpacing.md),
         Expanded(
           child: _CategoryCard(
-            title: AppStrings.womensFashion,
+            title: context.l10n.womensFashion,
             imageUrl: _womensImage,
             height: _cardHeight,
             onTap: () => context.go(
               Uri(
                 path: AppRoutes.explore,
-                queryParameters: const {
-                  'category': AppStrings.categoryQueryWomens,
+                queryParameters: {
+                  'category': context.l10n.categoryQueryWomens,
                 },
               ).toString(),
             ),
@@ -130,7 +129,7 @@ class _CategoryCard extends StatelessWidget {
                         foregroundColor: context.surfaceColor,
                         side: BorderSide(color: context.surfaceColor),
                       ),
-                      child: Text(AppStrings.shopNow),
+                      child: Text(context.l10n.shopNow),
                     ),
                   ],
                 ),

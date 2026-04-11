@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class VendorOrderStatsBanner extends StatelessWidget {
   const VendorOrderStatsBanner({
@@ -29,9 +29,8 @@ class VendorOrderStatsBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-        ),
+             color:  AppColors.primary,
+
         borderRadius: BorderRadius.circular(AppSpacing.xl),
       ),
       child: Column(
@@ -41,20 +40,20 @@ class VendorOrderStatsBanner extends StatelessWidget {
               _item(
                 context,
                 '$pendingCount',
-                AppStrings.vendorStatPendingOrders,
+                context.l10n.vendorStatPendingOrders,
                 valueColor: AppColors.warningLight,
                 labelColor: AppColors.warningLight,
               ),
               _divider(text),
-              _item(context, '$activeCount', AppStrings.vendorStatActiveOrders),
+              _item(context, '$activeCount', context.l10n.vendorStatActiveOrders),
               _divider(text),
-              _item(context, '$totalCount', AppStrings.vendorStatTotalOrders),
+              _item(context, '$totalCount', context.l10n.vendorStatTotalOrders),
               _divider(text),
               _item(
                 context,
                 _fmt(totalRevenue),
-                AppStrings.vendorStatRevenue,
-                suffix: AppStrings.currencyDzd,
+                context.l10n.vendorStatRevenue,
+                suffix: context.l10n.currencyDzd,
               ),
             ],
           ),
@@ -65,13 +64,13 @@ class VendorOrderStatsBanner extends StatelessWidget {
             children: [
               _chip(
                 context,
-                label: AppStrings.vendorConfirmAllPending,
+                label: context.l10n.vendorConfirmAllPending,
                 onTap: onConfirmAllPending,
               ),
               const SizedBox(width: AppSpacing.sm),
               _chip(
                 context,
-                label: AppStrings.vendorViewAnalytics,
+                label: context.l10n.vendorViewAnalytics,
                 onTap: onViewAnalytics,
               ),
             ],

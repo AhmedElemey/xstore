@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/network/image_cache_manager.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -172,13 +171,16 @@ class _Footer extends StatelessWidget {
           Row(
             children: [
               Flexible(
-                child: Text(
-                  Formatters.currency(price),
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: AppColors.primary,
-                    fontSize: 13
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    context.formatCurrency(price),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 13,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (discountPercent > 0) ...[

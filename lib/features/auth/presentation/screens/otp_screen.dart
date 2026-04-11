@@ -9,7 +9,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -102,7 +101,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                 child: Column(
                   children: [
                     Text(
-                      AppStrings.verifyYourNumber,
+                      context.l10n.verifyYourNumber,
                       style: AppTypography.titleLarge.copyWith(color: context.textPrimary),
                     ),
                     const Gap(AppSpacing.sm),
@@ -123,7 +122,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                         ),
                         TextButton(
                           onPressed: () => context.pop(),
-                          child: const Text(AppStrings.changeNumber),
+                          child: Text(context.l10n.changeNumber),
                         ),
                       ],
                     ),
@@ -164,13 +163,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                                 height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text(AppStrings.verifyAndContinue),
+                            : Text(context.l10n.verifyAndContinue),
                       ),
                     ),
                     const Gap(AppSpacing.md),
                     if (!st.canResend)
                       Text(
-                        '${AppStrings.resendCodeIn} 0:${st.resendCooldown.toString().padLeft(2, '0')}',
+                        '${context.l10n.resendCodeIn} 0:${st.resendCooldown.toString().padLeft(2, '0')}',
                         style: AppTypography.bodySmall.copyWith(
                           color: context.textSecondary,
                           fontFeatures: const [FontFeature.tabularFigures()],
@@ -181,12 +180,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            AppStrings.didntReceiveCode,
+                            context.l10n.didntReceiveCode,
                             style: AppTypography.bodySmall.copyWith(color: context.textSecondary),
                           ),
                           TextButton(
                             onPressed: () => ref.read(phoneAuthProvider.notifier).resendOtp(),
-                            child: const Text(AppStrings.resendCode),
+                            child: Text(context.l10n.resendCode),
                           ),
                         ],
                       ),

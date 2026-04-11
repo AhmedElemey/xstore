@@ -111,7 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Enter your phone number',
+                    context.l10n.enterYourPhoneNumber,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -120,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                   const Gap(6),
                   Text(
-                    "We'll send a verification code to your Egyptian number",
+                    context.l10n.sendOtpSubtitle,
                     style: TextStyle(color: context.textSecondary),
                   ),
                   const Gap(16),
@@ -144,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                   const Gap(10),
                   Text(
-                    'Standard SMS rates may apply',
+                    context.l10n.smsRatesNote,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: context.textSecondary, fontSize: 12),
                   ),
@@ -174,8 +174,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             flex: 50,
             child: AuthHeader(
               heightFraction: 1,
-              title: 'Welcome back 👋',
-              subtitle: 'Sign in to continue shopping',
+              title: context.l10n.welcomeBack,
+              subtitle: context.l10n.signInToContinueShopping,
               logoSize: 32,
             ),
           ),
@@ -219,8 +219,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const Gap(20),
                         AuthTextField(
-                          label: 'Email',
-                          hint: 'you@email.com',
+                          label: context.l10n.email,
+                          hint: context.l10n.enterEmailHint,
                           controller: _email,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
@@ -235,18 +235,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               ref.read(loginNotifierProvider.notifier).updateEmail(v),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'Required';
+                              return context.l10n.requiredField;
                             }
                             if (!_isValidEmailOrPhone(v)) {
-                              return 'Valid email or 10+ digit phone';
+                              return context.l10n.validEmailOrPhone;
                             }
                             return null;
                           },
                         ),
                         const Gap(16),
                         AuthTextField(
-                          label: 'Password',
-                          hint: '********',
+                          label: context.l10n.password,
+                          hint: context.l10n.passwordMask,
                           controller: _password,
                           obscureText: !login.isPasswordVisible,
                           textInputAction: TextInputAction.done,
@@ -270,8 +270,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               .read(loginNotifierProvider.notifier)
                               .updatePassword(v),
                           validator: (v) {
-                            if (v == null || v.isEmpty) return 'Required';
-                            if (v.length < 6) return 'Min 6 characters';
+                            if (v == null || v.isEmpty) return context.l10n.requiredField;
+                            if (v.length < 6) return context.l10n.minSixChars;
                             return null;
                           },
                         ),
@@ -295,7 +295,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             onPressed: () =>
                                 context.push(AppRoutes.forgotPassword),
                             child: Text(
-                              'Forgot Password?',
+                              context.l10n.forgotPassword,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.accent,
@@ -313,7 +313,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   .toggleRememberMe(),
                             ),
                             Text(
-                              'Remember me',
+                              context.l10n.rememberMe,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: context.textPrimary,
@@ -323,7 +323,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const Gap(8),
                         AuthButton(
-                          label: 'Login',
+                          label: context.l10n.login,
                           isLoading: login.isLoading,
                           onPressed: login.isLoading
                               ? null
@@ -345,7 +345,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             size: 22,
                             color: context.textPrimary,
                           ),
-                          label: 'Continue with Phone Number',
+                          label: context.l10n.continueWithPhoneNumber,
                           borderColor: context.borderColor,
                           bgColor: Colors.transparent,
                           textColor: context.textPrimary,
@@ -364,9 +364,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   color: context.textSecondary,
                                 ),
                                 children: [
-                                  TextSpan(text: "Don't have an account?  "),
+                                  TextSpan(text: '${context.l10n.dontHaveAccount}  '),
                                   TextSpan(
-                                    text: 'Create one →',
+                                    text: context.l10n.createOneArrow,
                                     style: TextStyle(
                                       color: AppColors.accent,
                                       fontWeight: FontWeight.w700,
@@ -404,7 +404,7 @@ class _LoginRegisterTabs extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'Login',
+                context.l10n.login,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
@@ -428,7 +428,7 @@ class _LoginRegisterTabs extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Register',
+                  context.l10n.register,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,

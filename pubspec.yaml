@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
 
@@ -46,7 +48,7 @@ dependencies:
   # UI Utilities
   flutter_svg: ^2.0.10+1
   lucide_icons: ^0.257.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   shimmer: ^3.0.0
   # Spec lists ^4.2.1; that release conflicts with Flutter Material's
   # CarouselController — use 5.x until upstream aligns.
@@ -60,6 +62,8 @@ dependencies:
   firebase_core: ^3.3.0
   firebase_auth: ^5.1.4
   crypto: ^3.0.3
+  geolocator: ^13.0.0
+  geocoding: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +80,7 @@ dev_dependencies:
   riverpod_lint: ^2.3.10
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/icons/google_logo.svg

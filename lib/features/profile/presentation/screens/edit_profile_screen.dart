@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../widgets/profile_avatar_picker.dart';
+import '../widgets/vendor_location_section.dart';
+import '../../../../shared/widgets/skeletons/edit_profile_skeleton.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -23,6 +26,15 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
+  static const List<String> _storeCategoryOptions = [
+    'Fashion',
+    'Electronics',
+    'Home',
+    'Beauty',
+    'Sports',
+    'Other',
+  ];
+
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
@@ -37,6 +49,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _whatsapp = TextEditingController();
   final _instagram = TextEditingController();
   final _facebook = TextEditingController();
+  final _lat = TextEditingController();
+  final _lng = TextEditingController();
+  final _governorate = TextEditingController();
+  final _town = TextEditingController();
+  final _detailAddress = TextEditingController();
 
   String _category = '';
   DateTime? _dob;
@@ -66,6 +83,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _whatsapp.dispose();
     _instagram.dispose();
     _facebook.dispose();
+    _lat.dispose();
+    _lng.dispose();
+    _governorate.dispose();
+    _town.dispose();
+    _detailAddress.dispose();
     super.dispose();
   }
 
@@ -81,7 +103,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _storeName.text = s.editStoreName;
     _category = s.editStoreCategory;
     _storeCategory.text =
-        _category.isEmpty ? AppStrings.requiredField : _category;
+        _category.isEmpty ? context.l10n.requiredField : _category;
     _storeDescription.text = s.editStoreDescription;
     _storeCity.text = s.editStoreCity;
     _storeWilaya.text = s.editStoreWilaya;
@@ -89,6 +111,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _dob = s.editDateOfBirth;
     _instagram.text = s.editInstagram;
     _facebook.text = s.editFacebook;
+    _lat.text = s.editLatitude;
+    _lng.text = s.editLongitude;
+    _governorate.text = s.editGovernorate;
+    _town.text = s.editTown;
+    _detailAddress.text = s.editDetailAddress;
   }
 
   void _pushFieldsToNotifier() {
@@ -107,6 +134,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     n.updateField('dateOfBirth', _dob);
     n.updateField('instagram', _instagram.text);
     n.updateField('facebook', _facebook.text);
+    n.updateLatitude(_lat.text);
+    n.updateLongitude(_lng.text);
+    n.updateGovernorate(_governorate.text);
+    n.updateTown(_town.text);
+    n.updateDetailAddress(_detailAddress.text);
   }
 
   Future<void> _pickCategory() async {
@@ -119,9 +151,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text(AppStrings.storeCategoryLabel, style: AppTypography.titleMedium),
+              child: Text(context.l10n.storeCategoryLabel, style: AppTypography.titleMedium),
             ),
-            for (final c in AppStrings.storeCategoryPickerOptions)
+            for (final c in _storeCategoryOptions)
               ListTile(
                 title: Text(c),
                 trailing: _category == c ? const Icon(Icons.check) : null,
@@ -166,7 +198,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.camera),
-              title: Text(AppStrings.takePhoto),
+              title: Text(context.l10n.takePhoto),
               onTap: () async {
                 Navigator.pop(ctx);
                 await ref.read(profileNotifierProvider.notifier).pickAvatar(ImageSource.camera);
@@ -174,7 +206,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.image),
-              title: Text(AppStrings.chooseFromGallery),
+              title: Text(context.l10n.chooseFromGallery),
               onTap: () async {
                 Navigator.pop(ctx);
                 await ref.read(profileNotifierProvider.notifier).pickAvatar(ImageSource.gallery);
@@ -182,7 +214,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.trash2),
-              title: Text(AppStrings.removePhoto),
+              title: Text(context.l10n.removePhoto),
               onTap: () {
                 ref.read(profileNotifierProvider.notifier).markAvatarRemoved();
                 Navigator.pop(ctx);
@@ -201,17 +233,78 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!mounted) return;
     final err = ref.read(profileNotifierProvider).error;
     if (err != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_errorText(context, err))),
+      );
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(AppStrings.profileUpdatedSuccess)),
+      SnackBar(content: Text(context.l10n.profileUpdatedSuccess)),
     );
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<ProfileState>(profileNotifierProvider, (prev, next) async {
+      if (prev?.isDetectingLocation == true &&
+          !next.isDetectingLocation &&
+          next.locationError == null &&
+          mounted) {
+        _lat.text = next.editLatitude;
+        _lng.text = next.editLongitude;
+        _governorate.text = next.editGovernorate;
+        _town.text = next.editTown;
+        _detailAddress.text = next.editDetailAddress;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.locationDetected)),
+        );
+      }
+      if (prev?.locationAction != next.locationAction &&
+          next.locationAction != null &&
+          mounted) {
+        if (next.locationAction == 'open_location_settings') {
+          final open = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text(context.l10n.locationServicesOff),
+              content: Text(context.l10n.enableLocationServices),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(context.l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(context.l10n.openSettings),
+                ),
+              ],
+            ),
+          );
+          if (open == true) await Geolocator.openLocationSettings();
+        } else if (next.locationAction == 'open_app_settings') {
+          final open = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text(context.l10n.locationPermissionPermanent),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(context.l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(context.l10n.openAppSettings),
+                ),
+              ],
+            ),
+          );
+          if (open == true) await Geolocator.openAppSettings();
+        }
+        ref.read(profileNotifierProvider.notifier).clearLocationFeedback();
+      }
+    });
+
     final s = ref.watch(profileNotifierProvider);
     final u = s.user;
     final isVendor = u?.role == UserRole.vendor;
@@ -224,9 +317,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     final canSave = s.hasChanges && !s.isUpdating;
+    if (u == null && s.isLoading) {
+      return const Scaffold(body: EditProfileSkeleton());
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppStrings.editProfile),
+        title: Text(context.l10n.editProfile),
         actions: [
           if (s.isUpdating)
             const Center(
@@ -242,7 +338,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           else
             TextButton(
               onPressed: canSave ? _save : null,
-              child: Text(AppStrings.save),
+              child: Text(context.l10n.save),
             ),
         ],
       ),
@@ -259,7 +355,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
           ),
           const Gap(AppSpacing.x2l),
-          Text(AppStrings.menuPersonalInfo, style: AppTypography.titleMedium),
+          Text(context.l10n.menuPersonalInfo, style: AppTypography.titleMedium),
           const Gap(AppSpacing.md),
           TextField(
             controller: _name,
@@ -312,7 +408,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             maxLines: 3,
             maxLength: 150,
             decoration: InputDecoration(
-              hintText: AppStrings.bioHint,
+              hintText: context.l10n.bioHint,
               prefixIcon: const Icon(LucideIcons.alignLeft),
               border: const OutlineInputBorder(),
             ),
@@ -320,7 +416,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
-            Text(AppStrings.storeInformation, style: AppTypography.titleMedium),
+            Text(context.l10n.storeInformation, style: AppTypography.titleMedium),
             const Gap(AppSpacing.md),
             TextField(
               controller: _storeName,
@@ -378,9 +474,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   .read(profileNotifierProvider.notifier)
                   .updateField('whatsapp', v.replaceAll(RegExp(r'\D'), '')),
             ),
+            const Gap(AppSpacing.xl),
+            VendorLocationSection(
+              latController: _lat,
+              lngController: _lng,
+              governorateController: _governorate,
+              townController: _town,
+              detailAddressController: _detailAddress,
+            ),
           ],
           const Gap(AppSpacing.x2l),
-          Text(AppStrings.socialLinks, style: AppTypography.titleMedium),
+          Text(context.l10n.socialLinks, style: AppTypography.titleMedium),
           const Gap(AppSpacing.md),
           TextField(
             controller: _instagram,
@@ -427,7 +531,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             ),
                           )
                         : Text(
-                            AppStrings.saveChanges,
+                            context.l10n.saveChanges,
                             style: AppTypography.labelLarge.copyWith(color: AppColors.white),
                           ),
                   ),
@@ -440,4 +544,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
     );
   }
+}
+
+String _errorText(BuildContext context, String key) {
+  return switch (key) {
+    'invalidLatitude' => context.l10n.invalidLatitude,
+    'invalidLongitude' => context.l10n.invalidLongitude,
+    'locationPermissionDenied' => context.l10n.locationPermissionDenied,
+    'locationPermissionPermanent' => context.l10n.locationPermissionPermanent,
+    'locationServiceDisabled' => context.l10n.locationServiceDisabled,
+    _ => key,
+  };
 }

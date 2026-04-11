@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import 'product_card.dart';
 
@@ -22,7 +22,7 @@ class NewArrivalsGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.newArrivals,
+          context.l10n.newArrivals,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const Gap(AppSpacing.md),

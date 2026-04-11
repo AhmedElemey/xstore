@@ -28,8 +28,8 @@ class ProfileSwitchTile extends StatelessWidget {
       showChevron: false,
       trailing: Switch.adaptive(
         value: value,
-        activeTrackColor: AppColors.primary.withValues(alpha: 0.35),
-        activeThumbColor: AppColors.primary,
+        activeTrackColor: AppColors.primary.withValues(alpha: 0.45),
+        activeThumbColor: AppColors.white,
         onChanged: onChanged,
       ),
     );

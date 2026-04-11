@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/algeria_wilayas.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
@@ -46,7 +45,7 @@ Future<void> showCheckoutAddAddressSheet(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    AppStrings.checkoutAddAddress,
+                    context.l10n.checkoutAddAddress,
                     style: AppTypography.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -55,7 +54,7 @@ Future<void> showCheckoutAddAddressSheet(
                   TextField(
                     controller: nameCtrl,
                     decoration: InputDecoration(
-                      labelText: AppStrings.checkoutFullName,
+                      labelText: context.l10n.checkoutFullName,
                       border: const OutlineInputBorder(),
                     ),
                   ),
@@ -68,7 +67,7 @@ Future<void> showCheckoutAddAddressSheet(
                   TextField(
                     controller: streetCtrl,
                     decoration: InputDecoration(
-                      labelText: AppStrings.checkoutStreet,
+                      labelText: context.l10n.checkoutStreet,
                       border: const OutlineInputBorder(),
                     ),
                   ),
@@ -76,7 +75,7 @@ Future<void> showCheckoutAddAddressSheet(
                   TextField(
                     controller: cityCtrl,
                     decoration: InputDecoration(
-                      labelText: AppStrings.checkoutCity,
+                      labelText: context.l10n.checkoutCity,
                       border: const OutlineInputBorder(),
                     ),
                   ),
@@ -84,7 +83,7 @@ Future<void> showCheckoutAddAddressSheet(
                   DropdownButtonFormField<String>(
                     initialValue: wilaya,
                     decoration: InputDecoration(
-                      labelText: AppStrings.checkoutWilaya,
+                      labelText: context.l10n.checkoutWilaya,
                       border: const OutlineInputBorder(),
                     ),
                     items: AlgeriaWilayas.names
@@ -100,13 +99,13 @@ Future<void> showCheckoutAddAddressSheet(
                   TextField(
                     controller: postalCtrl,
                     decoration: InputDecoration(
-                      labelText: AppStrings.checkoutPostalCode,
+                      labelText: context.l10n.checkoutPostalCode,
                       border: const OutlineInputBorder(),
                     ),
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(AppStrings.checkoutSetDefault),
+                    title: Text(context.l10n.checkoutSetDefault),
                     value: isDefault,
                     onChanged: (v) => setSheetState(() => isDefault = v),
                   ),
@@ -127,7 +126,7 @@ Future<void> showCheckoutAddAddressSheet(
                           );
                       Navigator.pop(ctx);
                     },
-                    child: Text(AppStrings.checkoutSaveAddress),
+                    child: Text(context.l10n.checkoutSaveAddress),
                   ),
                 ],
               ),

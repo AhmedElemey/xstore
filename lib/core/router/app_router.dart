@@ -29,6 +29,7 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
+import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/coming_soon_screen.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
@@ -275,6 +276,10 @@ GoRouter goRouter(GoRouterRef ref) {
       GoRoute(
         path: AppRoutes.addresses,
         builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuAddresses),
+      ),
+      GoRoute(
+        path: AppRoutes.storeHours,
+        builder: (context, state) => const StoreHoursScreen(),
       ),
       GoRoute(
         path: AppRoutes.help,

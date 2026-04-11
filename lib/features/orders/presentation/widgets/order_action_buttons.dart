@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/order_entity.dart'
@@ -60,7 +60,7 @@ class OrderActionButtons extends ConsumerWidget {
                           _err(context, ref, orderId);
                         }
                       },
-                child: Text(AppStrings.ordersRejectOrder),
+                child: Text(context.l10n.ordersRejectOrder),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -69,7 +69,7 @@ class OrderActionButtons extends ConsumerWidget {
                 onPressed: busy
                     ? null
                     : () => _run(context, ref, orderId, notifier.confirmOrderVendor),
-                child: Text(AppStrings.ordersConfirmOrderCta),
+                child: Text(context.l10n.ordersConfirmOrderCta),
               ),
             ),
           ],
@@ -81,7 +81,7 @@ class OrderActionButtons extends ConsumerWidget {
             onPressed: busy
                 ? null
                 : () => _run(context, ref, orderId, notifier.markProcessing),
-            child: Text(AppStrings.ordersMarkProcessing),
+            child: Text(context.l10n.ordersMarkProcessing),
           ),
         );
       case OrderStatus.processing:
@@ -91,7 +91,7 @@ class OrderActionButtons extends ConsumerWidget {
             onPressed: busy
                 ? null
                 : () => _ship(context, ref, orderId, notifier),
-            child: Text(AppStrings.ordersMarkShipped),
+            child: Text(context.l10n.ordersMarkShipped),
           ),
         );
       case OrderStatus.shipped:
@@ -124,7 +124,7 @@ class OrderActionButtons extends ConsumerWidget {
                       _err(context, ref, orderId);
                     }
                   },
-            child: Text(AppStrings.ordersCancelOrder),
+            child: Text(context.l10n.ordersCancelOrder),
           ),
         );
       case OrderStatus.shipped:
@@ -138,11 +138,11 @@ class OrderActionButtons extends ConsumerWidget {
                           SnackBar(
                             content: Text(
                               order.trackingNumber ??
-                                  AppStrings.ordersTrackOnCourier,
+                                  context.l10n.ordersTrackOnCourier,
                             ),
                           ),
                         ),
-                child: Text(AppStrings.ordersTrackOrder),
+                child: Text(context.l10n.ordersTrackOrder),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -158,7 +158,7 @@ class OrderActionButtons extends ConsumerWidget {
                           _err(context, ref, orderId);
                         }
                       },
-                child: Text(AppStrings.ordersConfirmReceipt),
+                child: Text(context.l10n.ordersConfirmReceipt),
               ),
             ),
           ],
@@ -169,7 +169,7 @@ class OrderActionButtons extends ConsumerWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: busy ? null : () => _review(context),
-                child: Text(AppStrings.ordersLeaveReview),
+                child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -181,11 +181,11 @@ class OrderActionButtons extends ConsumerWidget {
                         await notifier.reorder();
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(AppStrings.addedToCart)),
+                            SnackBar(content: Text(context.l10n.addedToCart)),
                           );
                         }
                       },
-                child: Text(AppStrings.ordersReorder),
+                child: Text(context.l10n.ordersReorder),
               ),
             ),
           ],
@@ -195,7 +195,7 @@ class OrderActionButtons extends ConsumerWidget {
           width: double.infinity,
           child: FilledButton(
             onPressed: () => context.go(AppRoutes.explore),
-            child: Text(AppStrings.ordersShopAgain),
+            child: Text(context.l10n.ordersShopAgain),
           ),
         );
       case OrderStatus.processing:
@@ -228,19 +228,19 @@ class OrderActionButtons extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppStrings.ordersRejectDialogTitle),
+        title: Text(context.l10n.ordersRejectDialogTitle),
         content: TextField(
           controller: ctrl,
-          decoration: InputDecoration(hintText: AppStrings.ordersRejectReasonHint),
+          decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppStrings.cancel),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppStrings.ordersConfirm),
+            child: Text(context.l10n.ordersConfirm),
           ),
         ],
       ),
@@ -274,22 +274,22 @@ class OrderActionButtons extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(AppStrings.ordersAddTrackingTitle,
+                Text(context.l10n.ordersAddTrackingTitle,
                     style: AppTypography.titleMedium),
                 TextField(
                   controller: trackCtrl,
                   decoration: InputDecoration(
-                    labelText: AppStrings.ordersTrackingNumberLabel,
+                    labelText: context.l10n.ordersTrackingNumberLabel,
                   ),
                 ),
                 TextField(
                   controller: courierCtrl,
                   decoration: InputDecoration(
-                    labelText: AppStrings.ordersCourierNameLabel,
+                    labelText: context.l10n.ordersCourierNameLabel,
                   ),
                 ),
                 ListTile(
-                  title: Text(AppStrings.ordersEstimatedDeliveryLabel),
+                  title: Text(context.l10n.ordersEstimatedDeliveryLabel),
                   subtitle: Text(eta != null ? '${eta!.toLocal()}' : '—'),
                   onTap: () async {
                     final d = await showDatePicker(
@@ -317,7 +317,7 @@ class OrderActionButtons extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: Text(AppStrings.ordersConfirmShipment),
+                  child: Text(context.l10n.ordersConfirmShipment),
                 ),
               ],
             ),
@@ -329,21 +329,21 @@ class OrderActionButtons extends ConsumerWidget {
   }
 
   Future<String?> _cancelReason(BuildContext context) async {
-    var selected = AppStrings.ordersCancelReasonChangedMind;
+    var selected = context.l10n.ordersCancelReasonChangedMind;
     return showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setS) {
           return AlertDialog(
-            title: Text(AppStrings.ordersCancelDialogTitle),
+            title: Text(context.l10n.ordersCancelDialogTitle),
             content: DropdownButton<String>(
               isExpanded: true,
               value: selected,
               items: [
-                AppStrings.ordersCancelReasonChangedMind,
-                AppStrings.ordersCancelReasonBetterPrice,
-                AppStrings.ordersCancelReasonMistake,
-                AppStrings.ordersCancelReasonOther,
+                context.l10n.ordersCancelReasonChangedMind,
+                context.l10n.ordersCancelReasonBetterPrice,
+                context.l10n.ordersCancelReasonMistake,
+                context.l10n.ordersCancelReasonOther,
               ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: (v) {
                 if (v != null) setS(() => selected = v);
@@ -352,11 +352,11 @@ class OrderActionButtons extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text(AppStrings.cancel),
+                child: Text(context.l10n.cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, selected),
-                child: Text(AppStrings.ordersConfirm),
+                child: Text(context.l10n.ordersConfirm),
               ),
             ],
           );
@@ -369,16 +369,16 @@ class OrderActionButtons extends ConsumerWidget {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppStrings.ordersConfirmReceiptTitle),
-        content: Text(AppStrings.ordersConfirmReceiptBody),
+        title: Text(context.l10n.ordersConfirmReceiptTitle),
+        content: Text(context.l10n.ordersConfirmReceiptTitle),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppStrings.cancel),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppStrings.ordersConfirm),
+            child: Text(context.l10n.ordersConfirm),
           ),
         ],
       ),
@@ -403,7 +403,7 @@ class OrderActionButtons extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(AppStrings.ordersReviewSheetTitle,
+                Text(context.l10n.ordersReviewSheetTitle,
                     style: AppTypography.titleMedium),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -421,16 +421,16 @@ class OrderActionButtons extends ConsumerWidget {
                 TextField(
                   controller: text,
                   maxLines: 3,
-                  decoration: InputDecoration(hintText: AppStrings.ordersReviewHint),
+                  decoration: InputDecoration(hintText: context.l10n.ordersReviewHint),
                 ),
                 FilledButton(
                   onPressed: () {
                     Navigator.pop(ctx);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppStrings.ordersReviewThanks)),
+                      SnackBar(content: Text(context.l10n.ordersReviewThanks)),
                     );
                   },
-                  child: Text(AppStrings.ordersSubmitReview),
+                  child: Text(context.l10n.ordersSubmitReview),
                 ),
               ],
             ),

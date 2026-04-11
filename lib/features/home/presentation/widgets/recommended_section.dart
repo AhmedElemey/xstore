@@ -4,7 +4,6 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
@@ -12,6 +11,7 @@ import '../../../../shared/widgets/product_skeleton_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../providers/recommended_provider.dart';
 import 'product_card.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class RecommendedSection extends ConsumerWidget {
   const RecommendedSection({super.key});
@@ -27,14 +27,14 @@ class RecommendedSection extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                AppStrings.recommended,
+                context.l10n.recommended,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             TextButton(
               onPressed: () => context.go(AppRoutes.explore),
               child: Text(
-                AppStrings.seeAll,
+                context.l10n.seeAll,
                 style: AppTypography.labelLarge.copyWith(
                   color: AppColors.primary,
                 ),
@@ -42,7 +42,7 @@ class RecommendedSection extends ConsumerWidget {
             ),
           ],
         ),
-        Text(AppStrings.recommendedSubtitle, style: AppTypography.bodySmall),
+        Text(context.l10n.recommendedSubtitle, style: AppTypography.bodySmall),
         const Gap(AppSpacing.md),
         async.when(
           data: (items) => _RecommendedList(items: items),

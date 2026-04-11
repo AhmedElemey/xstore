@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
@@ -41,7 +40,7 @@ class OrderFilterTabs extends ConsumerWidget {
         children: [
           _chip(
             context,
-            label: AppStrings.ordersFilterAll,
+            label: context.l10n.ordersFilterAll,
             count: counts.all,
             selected: selected == null,
             onTap: () => notifier.applyFilter(null),
@@ -56,7 +55,7 @@ class OrderFilterTabs extends ConsumerWidget {
               padding: const EdgeInsets.only(left: AppSpacing.sm),
               child: _chip(
                 context,
-                label: _filterTitle(f),
+                label: _filterTitle(context, f),
                 count: counts.byStatus[f] ?? 0,
                 selected: selected == f,
                 onTap: () => notifier.applyFilter(f),
@@ -69,14 +68,14 @@ class OrderFilterTabs extends ConsumerWidget {
     );
   }
 
-  String _filterTitle(OrderStatus f) => switch (f) {
-    OrderStatus.pending => AppStrings.ordersFilterPending,
-    OrderStatus.confirmed => AppStrings.ordersFilterConfirmed,
-    OrderStatus.processing => AppStrings.ordersFilterProcessing,
-    OrderStatus.shipped => AppStrings.ordersFilterShipped,
-    OrderStatus.delivered => AppStrings.ordersFilterDelivered,
-    OrderStatus.cancelled => AppStrings.ordersFilterCancelled,
-    OrderStatus.refunded => AppStrings.ordersFilterRefunded,
+  String _filterTitle(BuildContext context, OrderStatus f) => switch (f) {
+    OrderStatus.pending => context.l10n.ordersFilterPending,
+    OrderStatus.confirmed => context.l10n.ordersFilterConfirmed,
+    OrderStatus.processing => context.l10n.ordersFilterProcessing,
+    OrderStatus.shipped => context.l10n.ordersFilterShipped,
+    OrderStatus.delivered => context.l10n.ordersFilterDelivered,
+    OrderStatus.cancelled => context.l10n.ordersFilterCancelled,
+    OrderStatus.refunded => context.l10n.ordersFilterRefunded,
   };
 
   Widget _chip(

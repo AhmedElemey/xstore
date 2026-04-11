@@ -14,6 +14,8 @@ import '../widgets/profile_sheets.dart';
 import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/vendor_store_card.dart';
+import '../../../store/presentation/providers/store_hours_provider.dart';
+import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -34,6 +36,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(profileNotifierProvider.notifier).fetchProfile();
+      ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
     });
   }
 
@@ -55,9 +58,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = profileState.profile;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const Scaffold(body: ProfileSkeleton());
     }
 
     final isVendor = user.role == UserRole.vendor;
@@ -79,9 +80,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               avatarFile: profileState.editAvatarFile,
             ),
             if (profileState.isLoading && profile == null)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator.adaptive()),
-              )
+              const SliverFillRemaining(child: ProfileSkeleton())
             else ...[
               SliverToBoxAdapter(
                 child: Transform.translate(

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -48,9 +47,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     ref.read(notificationsProvider.notifier).onDeleteConfirmed(e);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.notificationsDeletedSnack(e.title)),
+        content: Text(context.l10n.notificationsDeletedSnack(e.title)),
         action: SnackBarAction(
-          label: AppStrings.notificationsUndo,
+          label: context.l10n.notificationsUndo,
           onPressed: () => ref.read(notificationsProvider.notifier).cancelDeleteUndo(e),
         ),
       ),
@@ -70,7 +69,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         surfaceTintColor: AppColors.transparent,
         centerTitle: true,
         title: Text(
-          AppStrings.notifications,
+          context.l10n.notifications,
           style: AppTypography.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
             color: context.textPrimary,
@@ -80,12 +79,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           if (unreadCount > 0)
             TextButton(
               onPressed: n.markAllRead,
-              child: Text(AppStrings.notificationsMarkAllRead, style: AppTypography.labelLarge.copyWith(color: AppColors.primary)),
+              child: Text(context.l10n.notificationsMarkAllRead, style: AppTypography.labelLarge.copyWith(color: AppColors.primary)),
             ),
           IconButton(
             icon: const Icon(LucideIcons.settings),
             onPressed: () => context.push(AppRoutes.notificationSettings),
-            tooltip: AppStrings.notificationSettingsTitle,
+            tooltip: context.l10n.notificationSettingsTitle,
           ),
         ],
       ),

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/cart_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -26,14 +25,14 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            AppStrings.cartClearTitle,
+            context.l10n.cartClearTitle,
             style: AppTypography.titleMedium.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            AppStrings.cartClearBody(n),
+            context.l10n.cartClearBody(n),
             style: AppTypography.bodyMedium.copyWith(
               color: context.textSecondary,
             ),
@@ -44,7 +43,7 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text(AppStrings.cancel),
+                  child: Text(context.l10n.cancel),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -57,7 +56,7 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
                     Navigator.pop(ctx);
                     ref.read(cartProvider.notifier).clearCart();
                   },
-                  child: Text(AppStrings.cartClearConfirm),
+                  child: Text(context.l10n.cartClearConfirm),
                 ),
               ),
             ],

@@ -5,8 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/product_review_entity.dart';
 
 class ReviewsSummary extends StatefulWidget {
@@ -62,7 +62,7 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            AppStrings.customerReviews,
+            context.l10n.customerReviews,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -85,7 +85,7 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
                     size: AppSpacing.x3l - AppSpacing.xs,
                   ),
                   Text(
-                    '${widget.summary.totalCount} ${AppStrings.ratingsWord}',
+                    '${widget.summary.totalCount} ${context.l10n.ratingsWord}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -145,7 +145,7 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: widget.onSeeAll,
-              child: Text(AppStrings.seeAllReviews),
+              child: Text(context.l10n.seeAllReviews),
             ),
           ),
         ],
@@ -239,11 +239,11 @@ class _ReviewTile extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: onToggle,
-              child: Text(expanded ? AppStrings.readLess : AppStrings.readMore),
+              child: Text(expanded ? context.l10n.readLess : context.l10n.readMore),
             ),
           ),
           Text(
-            '${AppStrings.helpfulPrompt}${review.helpfulCount}',
+            '${context.l10n.helpfulPrompt}${review.helpfulCount}',
             style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

@@ -4,8 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Bottom sheet: listing actions (edit, pause/resume, stats, delete).
 class ListingOptionsSheet extends StatelessWidget {
@@ -51,7 +51,7 @@ class ListingOptionsSheet extends StatelessWidget {
             const Gap(AppSpacing.lg),
             ListTile(
               leading: const Icon(LucideIcons.pencil),
-              title: Text(AppStrings.editListingMenu),
+              title: Text(context.l10n.editListingMenu),
               onTap: () {
                 Navigator.of(context).pop();
                 onEdit();
@@ -60,7 +60,7 @@ class ListingOptionsSheet extends StatelessWidget {
             if (showPause)
               ListTile(
                 leading: const Icon(LucideIcons.pauseCircle),
-                title: Text(AppStrings.pauseListing),
+                title: Text(context.l10n.pauseListing),
                 onTap: () {
                   Navigator.of(context).pop();
                   onPause();
@@ -69,7 +69,7 @@ class ListingOptionsSheet extends StatelessWidget {
             if (showResume)
               ListTile(
                 leading: const Icon(LucideIcons.playCircle),
-                title: Text(AppStrings.resumeListing),
+                title: Text(context.l10n.resumeListing),
                 onTap: () {
                   Navigator.of(context).pop();
                   onResume();
@@ -77,7 +77,7 @@ class ListingOptionsSheet extends StatelessWidget {
               ),
             ListTile(
               leading: const Icon(LucideIcons.barChart2),
-              title: Text(AppStrings.viewStatsMenu),
+              title: Text(context.l10n.viewStatsMenu),
               onTap: () {
                 Navigator.of(context).pop();
                 onViewStats();
@@ -86,7 +86,7 @@ class ListingOptionsSheet extends StatelessWidget {
             ListTile(
               leading: Icon(LucideIcons.trash2, color: Theme.of(context).colorScheme.error),
               title: Text(
-                AppStrings.deleteListing,
+                context.l10n.deleteListing,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               onTap: () {
@@ -119,25 +119,25 @@ class ListingStatsSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.listingStatsHeading,
+              context.l10n.listingStatsHeading,
               style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const Gap(AppSpacing.x2l),
             _StatRow(
               icon: LucideIcons.eye,
-              label: AppStrings.listingViews,
+              label: context.l10n.listingViews,
               value: '${listing.viewCount}',
             ),
             const Gap(AppSpacing.lg),
             _StatRow(
               icon: LucideIcons.bookmark,
-              label: AppStrings.listingSaves,
+              label: context.l10n.listingSaves,
               value: '${listing.saveCount}',
             ),
             const Gap(AppSpacing.lg),
             _StatRow(
               icon: LucideIcons.messageCircle,
-              label: AppStrings.listingInquiries,
+              label: context.l10n.listingInquiries,
               value: '${listing.inquiryCount}',
             ),
             const Gap(AppSpacing.lg),

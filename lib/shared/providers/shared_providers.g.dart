@@ -21,7 +21,7 @@ final sharedPreferencesProvider = FutureProvider<SharedPreferences>.internal(
 );
 
 typedef SharedPreferencesRef = FutureProviderRef<SharedPreferences>;
-String _$appThemeModeHash() => r'f0962c6c452831549d0d47470bd872a797b35b5a';
+String _$appThemeModeHash() => r'72865fd008c8b547881f35a5b27745b53cdf4cdd';
 
 /// See also [AppThemeMode].
 @ProviderFor(AppThemeMode)

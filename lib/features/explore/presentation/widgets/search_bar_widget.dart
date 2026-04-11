@@ -3,7 +3,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -33,7 +32,7 @@ class SearchBarWidget extends StatelessWidget {
           onChanged: onChanged,
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
-            hintText: AppStrings.exploreSearchPlaceholder,
+            hintText: context.l10n.exploreSearchPlaceholder,
             hintStyle:
                 AppTypography.bodyMedium.copyWith(color: context.textSecondary),
             prefixIcon: Icon(LucideIcons.search, color: context.textSecondary),

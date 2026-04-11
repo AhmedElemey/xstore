@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/cart_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -11,16 +10,16 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 class CouponInputRow extends ConsumerWidget {
   const CouponInputRow({super.key});
 
-  static String _detail(String code) {
+  static String _detail(BuildContext context, String code) {
     switch (code.toUpperCase()) {
       case 'SAVE10':
-        return AppStrings.couponDetailSave10;
+        return context.l10n.couponDetailSave10;
       case 'FREE500':
-        return AppStrings.couponDetailFree500;
+        return context.l10n.couponDetailFree500;
       case 'WELCOME':
-        return AppStrings.couponDetailWelcome;
+        return context.l10n.couponDetailWelcome;
       default:
-        return AppStrings.couponDetailSave10;
+        return context.l10n.couponDetailSave10;
     }
   }
 
@@ -33,9 +32,9 @@ class CouponInputRow extends ConsumerWidget {
 
     String? errText;
     if (cart.couponErrorKey == 'minOrder') {
-      errText = AppStrings.cartCouponMinOrder;
+      errText = context.l10n.cartCouponMinOrder;
     } else if (cart.couponErrorKey == 'invalid') {
-      errText = AppStrings.cartCouponInvalid;
+      errText = context.l10n.cartCouponInvalid;
     }
 
     return Material(
@@ -49,7 +48,7 @@ class CouponInputRow extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.cartPromoHeading,
+              context.l10n.cartPromoHeading,
               style: AppTypography.titleMedium.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 18
@@ -69,9 +68,9 @@ class CouponInputRow extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      AppStrings.cartCouponApplied(
+                      context.l10n.cartCouponApplied(
                         cart.coupon!.code,
-                        _detail(cart.coupon!.code),
+                        _detail(context, cart.coupon!.code),
                       ),
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.success,
@@ -82,7 +81,7 @@ class CouponInputRow extends ConsumerWidget {
                   TextButton(
                     onPressed: () => notifier.removeCoupon(),
                     child: Text(
-                      AppStrings.cartCouponRemove,
+                      context.l10n.cartCouponRemove,
                       style: AppTypography.labelLarge.copyWith(
                         color: AppColors.primary,
                       ),
@@ -96,6 +95,8 @@ class CouponInputRow extends ConsumerWidget {
                 errorText: errText,
                 onChanged: notifier.setCouponInput,
                 onApply: notifier.applyCoupon,
+                hintText: context.l10n.cartCouponHint,
+                applyLabel: context.l10n.cartApply,
               ),
           ],
         ),
@@ -110,12 +111,16 @@ class _CouponEntry extends StatefulWidget {
     required this.errorText,
     required this.onChanged,
     required this.onApply,
+    required this.hintText,
+    required this.applyLabel,
   });
 
   final bool loading;
   final String? errorText;
   final ValueChanged<String> onChanged;
   final Future<void> Function() onApply;
+  final String hintText;
+  final String applyLabel;
 
   @override
   State<_CouponEntry> createState() => _CouponEntryState();
@@ -152,7 +157,7 @@ class _CouponEntryState extends State<_CouponEntry> {
                 controller: _ctrl,
                 onChanged: widget.onChanged,
                 decoration: InputDecoration(
-                  hintText: AppStrings.cartCouponHint,
+                  hintText: widget.hintText,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.md),
                   ),
@@ -191,7 +196,7 @@ class _CouponEntryState extends State<_CouponEntry> {
                           color: AppColors.white,
                         ),
                       )
-                    : Text(AppStrings.cartApply),
+                    : Text(widget.applyLabel),
               ),
             ),
           ],

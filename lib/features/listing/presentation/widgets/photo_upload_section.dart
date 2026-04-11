@@ -36,14 +36,14 @@ class PhotoUploadSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Product Photos',
+          context.l10n.listingPhotoSectionTitle,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
         const Gap(AppSpacing.sm),
         Text(
-          'Add 1–5 photos (first = cover)',
+          context.l10n.listingPhotoSectionSubtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -121,7 +121,7 @@ class _AddPhotoTile extends StatelessWidget {
                 Icon(LucideIcons.plus, color: context.textSecondary, size: 28),
                 const SizedBox(height: 4),
                 Text(
-                  'Add Photo',
+                  context.l10n.listingAddPhotoTile,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Colors.grey.shade600,
                       ),
@@ -218,7 +218,7 @@ class _PhotoTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Cover',
+                  context.l10n.listingPhotoCoverBadge,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 11,

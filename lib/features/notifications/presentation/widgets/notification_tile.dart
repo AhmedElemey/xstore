@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -46,10 +45,10 @@ class NotificationTile extends StatelessWidget {
       items: [
         PopupMenuItem(
           value: 't',
-          child: Text(entity.isRead ? AppStrings.notificationsMenuMarkUnread : AppStrings.notificationsMenuMarkRead),
+          child: Text(entity.isRead ? context.l10n.notificationsMenuMarkUnread : context.l10n.notificationsMenuMarkRead),
         ),
-        const PopupMenuItem(value: 'd', child: Text(AppStrings.notificationsMenuDelete)),
-        const PopupMenuItem(value: 'c', child: Text(AppStrings.notificationsMenuCopy)),
+        PopupMenuItem(value: 'd', child: Text(context.l10n.notificationsMenuDelete)),
+        PopupMenuItem(value: 'c', child: Text(context.l10n.notificationsMenuCopy)),
       ],
     );
     if (!context.mounted) return;
@@ -62,8 +61,9 @@ class NotificationTile extends StatelessWidget {
     }
     if (v == 'd') onDeleteConfirmed();
     if (v == 'c') {
+      final copiedMessage = context.l10n.notificationsCopied;
       await Clipboard.setData(ClipboardData(text: '${entity.title}\n${entity.body}'));
-      messenger?.showSnackBar(const SnackBar(content: Text(AppStrings.notificationsCopied)));
+      messenger?.showSnackBar(SnackBar(content: Text(copiedMessage)));
     }
   }
 
@@ -98,7 +98,7 @@ class NotificationTile extends StatelessWidget {
                   const Icon(LucideIcons.check, color: AppColors.white),
                   SizedBox(width: AppSpacing.sm),
                   Text(
-                    AppStrings.notificationsSwipeMarkRead,
+                    context.l10n.notificationsSwipeMarkRead,
                     style: AppTypography.labelLarge.copyWith(color: AppColors.white),
                   ),
                 ],
@@ -118,7 +118,7 @@ class NotificationTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    AppStrings.notificationsSwipeDelete,
+                    context.l10n.notificationsSwipeDelete,
                     style: AppTypography.labelLarge.copyWith(color: AppColors.white),
                   ),
                   SizedBox(width: AppSpacing.sm),
@@ -240,7 +240,7 @@ class NotificationTile extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: AppSpacing.xs),
                       child: Icon(
-                        LucideIcons.chevronRight,
+                        context.chevronForward,
                         size: AppSpacing.x2l - AppSpacing.xs,
                         color: context.iconSecondary,
                       ),

@@ -7,10 +7,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/widgets/notification_bell_button.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Collapsible gradient header; title fades in when scrolled past expanded region.
 class ProfileSliverAppBar extends StatelessWidget {
@@ -46,7 +46,7 @@ class ProfileSliverAppBar extends StatelessWidget {
         opacity: showCollapsedTitle ? 1 : 0,
         duration: const Duration(milliseconds: 120),
         child: Text(
-          AppStrings.profileTitle,
+          context.l10n.navProfile,
           style: AppTypography.titleMedium.copyWith(color: AppColors.white),
         ),
       ),
@@ -77,14 +77,14 @@ class ProfileSliverAppBar extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(LucideIcons.settings),
+          icon:  Icon(LucideIcons.settings,color: AppColors.white,),
           onPressed: () => context.push(AppRoutes.settings),
-          tooltip: AppStrings.settings,
+          tooltip: context.l10n.settings,
         ),
-        const NotificationBellButton(
+        NotificationBellButton(
           icon: LucideIcons.bell,
           color: AppColors.white,
-          tooltip: AppStrings.notifications,
+          tooltip: context.l10n.notifications,
         ),
         const SizedBox(width: AppSpacing.xs),
       ],

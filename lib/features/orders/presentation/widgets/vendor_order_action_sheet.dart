@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
 
 class VendorOrderActionSheet extends StatelessWidget {
@@ -38,12 +38,12 @@ class VendorOrderActionSheet extends StatelessWidget {
           AppSpacing.lg,
           AppSpacing.md,
         ),
-        child: _buildByStatus(),
+        child: _buildByStatus(context),
       ),
     );
   }
 
-  Widget _buildByStatus() {
+  Widget _buildByStatus(BuildContext context) {
     if (order.status == OrderStatus.pending) {
       return Row(
         children: [
@@ -51,7 +51,7 @@ class VendorOrderActionSheet extends StatelessWidget {
             child: OutlinedButton(
               onPressed: onReject,
               style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
-              child: Text(AppStrings.vendorRejectOrder),
+              child: Text(context.l10n.vendorRejectOrder),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -60,7 +60,7 @@ class VendorOrderActionSheet extends StatelessWidget {
             child: FilledButton(
               onPressed: onConfirm,
               style: FilledButton.styleFrom(backgroundColor: AppColors.success),
-              child: Text(AppStrings.vendorConfirmOrderShort),
+              child: Text(context.l10n.vendorConfirmOrderShort),
             ),
           ),
         ],
@@ -69,12 +69,12 @@ class VendorOrderActionSheet extends StatelessWidget {
     if (order.status == OrderStatus.confirmed) {
       return FilledButton(
         onPressed: onProcessing,
-        child: Text(AppStrings.vendorMarkProcessing),
+        child: Text(context.l10n.vendorMarkProcessing),
       );
     }
     return FilledButton(
       onPressed: onShipped,
-      child: Text(AppStrings.vendorMarkShipped),
+      child: Text(context.l10n.vendorMarkShipped),
     );
   }
 }

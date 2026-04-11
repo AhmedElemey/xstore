@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/order_item_entity.dart';
@@ -84,7 +83,7 @@ class OrderItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${_fmt(item.price)} × ${item.quantity} = ${_fmt(item.total)} ${AppStrings.currencyDzd}',
+                  '${_fmt(item.price)} × ${item.quantity} = ${_fmt(item.total)} ${context.l10n.currencyDzd}',
                   style: AppTypography.bodyMedium.copyWith(
                     color: context.textSecondary,
                   ),
@@ -96,11 +95,11 @@ class OrderItemTile extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     foregroundColor: AppColors.primary,
                   ),
-                  child: Text(AppStrings.ordersViewProduct),
+                  child: Text(context.l10n.ordersViewProduct),
                 ),
                 if (showStockHint)
                   Text(
-                    AppStrings.vendorLowStockHint(item.quantity),
+                    context.l10n.vendorLowStockHint(item.quantity),
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.warning,
                     ),

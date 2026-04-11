@@ -1,0 +1,1180 @@
+{
+  "@@locale": "ar",
+  "appName": "xStore",
+  "tagline": "اشتري وبيع أي حاجة",
+  "login": "تسجيل الدخول",
+  "register": "إنشاء حساب",
+  "logout": "تسجيل الخروج",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "createAccount": "إنشاء حساب",
+  "signInPrompt": "سجل دخولك للمتابعة",
+  "phoneNumber": "رقم الموبايل",
+  "phoneRequired": "رقم الموبايل مطلوب",
+  "phoneInvalidLength": "لازم يكون 11 رقم",
+  "phoneInvalidPrefix": "لازم يبدأ بـ 010 أو 011 أو 012 أو 015",
+  "phoneInvalidNumber": "رقم الموبايل غير صحيح",
+  "phoneTooManyRequests": "محاولات كتير. حاول تاني بعد شوية.",
+  "sendVerificationCode": "إبعت كود التحقق",
+  "verifyAndContinue": "تحقق وكمل",
+  "verifyYourNumber": "تحقق من رقمك",
+  "codeSentTo": "الكود اتبعت على",
+  "changeNumber": "غيّر الرقم",
+  "resendCodeIn": "إعادة الإرسال خلال",
+  "resendCode": "إعادة الإرسال",
+  "otpInvalidCode": "الكود غير صحيح. حاول تاني.",
+  "otpSessionExpired": "انتهت صلاحية الكود. اطلب كود جديد.",
+  "smsRatesNote": "قد يتم تطبيق رسوم SMS عادية",
+  "noInternet": "مفيش اتصال بالإنترنت. حاول تاني.",
+  "genericError": "حصلت مشكلة. حاول تاني.",
+  "emailTab": "إيميل",
+  "phoneTab": "موبايل",
+  "continueWithGoogle": "كمل بـ Google",
+  "continueWithApple": "كمل بـ Apple",
+  "continueWithFacebook": "كمل بـ Facebook",
+  "socialLoginDivider": "أو كمل بـ",
+  "welcomeBack": "أهلاً بيك",
+  "chooseYourRole": "هتستخدم xStore إزاي؟",
+  "socialRoleSubtitle": "خطوة أخيرة — اختار نوع حسابك",
+  "searchHint": "ابحث عن منتجات...",
+  "hotDeals": "🔥 أحسن العروض",
+  "newArrivals": "✨ وصل حديثاً",
+  "flashSale": "⚡ فلاش سيل",
+  "flashSaleBannerBody": "فلاش سيل — عروض محدودة الوقت",
+  "shopByCategory": "تسوق حسب الفئة",
+  "recommended": "👤 مقترح ليك",
+  "recommendedSubtitle": "بناءً على تصفحك",
+  "seeAll": "شوف الكل",
+  "seeAllReviews": "شوف كل التقييمات",
+  "freeShippingBadge": "🚚 شحن مجاني",
+  "securePayBadge": "🔒 دفع آمن",
+  "easyReturnsBadge": "↩️ إرجاع سهل",
+  "shopNow": "تسوق دلوقتي",
+  "categoryQueryMens": "mens_fashion",
+  "categoryQueryWomens": "womens_fashion",
+  "notifications": "الإشعارات",
+  "notificationsMarkAllRead": "تحديد الكل كمقروء",
+  "notificationsNoMore": "مفيش إشعارات تانية",
+  "notificationsShowAll": "إظهار الكل",
+  "notificationsFilterAll": "الكل",
+  "notificationsFilterOrders": "الطلبات",
+  "notificationsFilterDeals": "العروض",
+  "notificationsFilterListings": "الإعلانات",
+  "notificationsFilterMessages": "الرسائل",
+  "notificationsFilterSystem": "النظام",
+  "notificationsSwipeDelete": "حذف",
+  "notificationsSwipeMarkRead": "تحديد كمقروء",
+  "notificationsMenuMarkRead": "تحديد كمقروء",
+  "notificationsMenuMarkUnread": "تحديد كغير مقروء",
+  "notificationsMenuDelete": "حذف",
+  "notificationsMenuCopy": "نسخ النص",
+  "notificationsCopied": "تم النسخ",
+  "notificationsUndo": "تراجع",
+  "notificationsGroupToday": "النهارده",
+  "notificationsGroupYesterday": "أمس",
+  "notificationsGroupThisWeek": "الأسبوع ده",
+  "notificationsGroupEarlier": "قبل كده",
+  "notificationsTimeJustNow": "دلوقتي",
+  "notificationsTimeYesterday": "أمس",
+  "notificationSettingsTitle": "إعدادات الإشعارات",
+  "notificationSettingsSave": "حفظ التفضيلات",
+  "notificationSettingsSaved": "تم حفظ التفضيلات",
+  "notificationSettingsSectionOrders": "تحديثات الطلبات",
+  "notificationSettingsSectionDeals": "العروض والخصومات",
+  "notificationSettingsSectionStore": "تحديثات المتجر",
+  "notificationSettingsSectionMessages": "الرسائل",
+  "notificationSettingsSectionDelivery": "التوصيل",
+  "notificationSettingsOrderConfirmed": "تأكيد الطلب",
+  "notificationSettingsOrderShipped": "شحن الطلب",
+  "notificationSettingsOrderDelivered": "تسليم الطلب",
+  "notificationSettingsOrderCancelled": "إلغاء الطلب",
+  "notificationSettingsFlashSales": "فلاش سيل",
+  "notificationSettingsPriceDrops": "تخفيضات الأسعار",
+  "notificationSettingsBackInStock": "عاد للمخزون",
+  "notificationSettingsPromotional": "العروض الترويجية",
+  "notificationSettingsNewOrders": "طلبات جديدة",
+  "notificationSettingsListingApproved": "موافقة على الإعلان",
+  "notificationSettingsListingRejected": "رفض الإعلان",
+  "notificationSettingsLowStock": "تنبيهات المخزون المنخفض",
+  "notificationSettingsPaymentReceived": "استلام الدفع",
+  "notificationSettingsNewMessages": "رسائل جديدة",
+  "notificationSettingsPush": "إشعارات الموبايل",
+  "notificationSettingsEmail": "إشعارات الإيميل",
+  "notificationSettingsSms": "إشعارات SMS",
+  "addListing": "إضافة إعلان",
+  "myListings": "إعلاناتي",
+  "publishListing": "🚀 نشر الإعلان",
+  "saveDraft": "حفظ مسودة",
+  "listingDraftSaved": "تم حفظ المسودة",
+  "newListing": "إعلان جديد",
+  "listingPhotoSectionTitle": "صور المنتج",
+  "listingPhotoSectionSubtitle": "أضف من 1 لـ 5 صور (الأولى = الغلاف)",
+  "listingAddPhotoTile": "إضافة صورة",
+  "listingPhotoCoverBadge": "غلاف",
+  "listingTakePhoto": "📷 التقاط صورة",
+  "listingChooseFromGallery": "🖼️ اختيار من المعرض",
+  "listingSectionBasicInfo": "معلومات أساسية",
+  "listingProductNameLabel": "اسم المنتج *",
+  "listingProductNameHint": "مثال: iPhone 15 Pro Max 256GB",
+  "listingPriceLabel": "السعر *",
+  "listingCompareAtTitle": "سعر قبل الخصم (اختياري)",
+  "listingCompareAtHelper": "السعر الأصلي لعرض الخصم",
+  "listingCompareAtWarning": "سعر قبل الخصم أقل من سعر البيع.",
+  "listingDescriptionLabel": "الوصف *",
+  "listingDescriptionHint": "صف المنتج — الحالة، المميزات، وإيه اللي معاه...",
+  "listingSectionCategoryDetails": "الفئة والتفاصيل",
+  "listingFormCategoryLabel": "الفئة *",
+  "listingFormCategoryPickerTitle": "الفئة",
+  "listingFormSubcategoryLabel": "الفئة الفرعية *",
+  "listingSelectCategory": "اختر الفئة",
+  "listingSelectSubcategory": "اختر الفئة الفرعية",
+  "listingConditionFieldLabel": "الحالة *",
+  "listingBrandOptional": "الماركة (اختياري)",
+  "listingBrandHint": "ابدأ الكتابة…",
+  "listingSectionStockShipping": "المخزون والشحن",
+  "listingFormLocationLabel": "الموقع *",
+  "listingFormLocationHint": "المدينة، المنطقة",
+  "listingShippingAvailable": "الشحن متاح؟",
+  "listingShippingCostLabel": "تكلفة الشحن *",
+  "listingSectionProductAttributes": "مواصفات المنتج",
+  "listingAttributesSubtitle": "أضف مواصفات زي المقاس، اللون، الوزن…",
+  "listingAttributeNameLabel": "الاسم",
+  "listingAttributeValueLabel": "القيمة",
+  "listingAddAttributeButton": "إضافة مواصفة",
+  "listingCondNew": "جديد",
+  "listingCondLikeNew": "شبه جديد",
+  "listingCondGood": "جيد",
+  "listingCondUsed": "مستعمل",
+  "listingCondForParts": "للقطع",
+  "listingCatElectronics": "إلكترونيات",
+  "listingCatFashion": "أزياء",
+  "listingCatHomeGarden": "المنزل والحديقة",
+  "listingCatBeauty": "تجميل",
+  "listingCatSports": "رياضة",
+  "listingCatToys": "ألعاب",
+  "listingCatAutomotive": "سيارات",
+  "listingCatFoodDrinks": "أطعمة ومشروبات",
+  "listingCatBooks": "كتب",
+  "listingCatOther": "أخرى",
+  "listingSubElectronicsPhones": "موبايلات وأجهزة لوحية",
+  "listingSubElectronicsLaptops": "لابتوب وأجهزة كمبيوتر",
+  "listingSubElectronicsAudio": "صوتيات",
+  "listingSubElectronicsAccessories": "إكسسوارات",
+  "listingSubFashionMens": "رجالي",
+  "listingSubFashionWomens": "حريمي",
+  "listingSubFashionKids": "أطفال",
+  "listingSubFashionShoes": "أحذية",
+  "listingSubHomeFurniture": "أثاث",
+  "listingSubHomeDecor": "ديكور",
+  "listingSubHomeKitchen": "مطبخ",
+  "listingSubHomeGarden": "حديقة",
+  "listingSubBeautySkincare": "عناية بالبشرة",
+  "listingSubBeautyMakeup": "مكياج",
+  "listingSubBeautyHair": "عناية بالشعر",
+  "listingSubSportsFitness": "لياقة",
+  "listingSubSportsOutdoor": "أنشطة خارجية",
+  "listingSubSportsTeam": "رياضات جماعية",
+  "listingSubToysGames": "ألعاب",
+  "listingSubToysDolls": "دمى ومجسمات",
+  "listingSubToysEducational": "تعليمية",
+  "listingSubAutoParts": "قطع غيار",
+  "listingSubAutoAccessories": "إكسسوارات",
+  "listingSubAutoCare": "منتجات العناية",
+  "listingSubFoodBeverages": "مشروبات",
+  "listingSubFoodSnacks": "سناكس",
+  "listingSubFoodGrocery": "بقالة",
+  "listingSubBooksFiction": "روايات",
+  "listingSubBooksNonfiction": "غير خيال",
+  "listingSubBooksTextbooks": "كتب دراسية",
+  "listingSubOtherMisc": "متنوع",
+  "vendorAccount": "حساب البائع",
+  "customerAccount": "حساب المشتري",
+  "theme": "المظهر",
+  "themeSystem": "تلقائي",
+  "themeLight": "فاتح",
+  "themeDark": "داكن",
+  "darkMode": "الوضع الداكن",
+  "lightMode": "الوضع الفاتح",
+  "editProfile": "تعديل الملف الشخصي",
+  "save": "حفظ",
+  "saveChanges": "حفظ التغييرات",
+  "settings": "الإعدادات",
+  "sectionMyActivity": "نشاطي",
+  "sectionAccountSettings": "إعدادات الحساب",
+  "sectionPreferences": "التفضيلات",
+  "sectionSupport": "الدعم",
+  "sectionDangerZone": "منطقة الخطر",
+  "menuMyListings": "إعلاناتي",
+  "menuMyOrders": "طلباتي",
+  "menuAnalytics": "التحليلات",
+  "menuEarnings": "الأرباح",
+  "menuWishlist": "المفضلة",
+  "menuRecentlyViewed": "شوفتهم مؤخراً",
+  "menuMyReviews": "تقييماتي",
+  "menuPersonalInfo": "البيانات الشخصية",
+  "socialLinks": "روابط التواصل",
+  "menuChangePassword": "تغيير كلمة المرور",
+  "menuNotificationsSettings": "الإشعارات",
+  "menuLanguage": "اللغة",
+  "menuPaymentMethods": "طرق الدفع",
+  "menuAddresses": "عناويني",
+  "menuDarkMode": "الوضع الداكن",
+  "menuPushNotifications": "إشعارات الموبايل",
+  "menuEmailUpdates": "تحديثات الإيميل",
+  "menuHelpCenter": "مركز المساعدة",
+  "menuTerms": "شروط الخدمة",
+  "menuPrivacy": "سياسة الخصوصية",
+  "menuRateApp": "قيّم xStore",
+  "menuShareApp": "شارك xStore",
+  "manageStore": "إدارة المتجر",
+  "statSales": "المبيعات",
+  "statSalesShort": "مبيعات",
+  "statRating": "التقييم",
+  "statResponse": "الرد",
+  "statOrders": "الطلبات",
+  "statWishlist": "المفضلة",
+  "statDzdSaved": "ج.م موفرة",
+  "currencyDzd": "ج.م",
+  "storeInformation": "بيانات المتجر",
+  "fullNameLabel": "الاسم الكامل",
+  "emailAddressLabel": "البريد الإلكتروني",
+  "phoneNumberLabel": "رقم الموبايل",
+  "dateOfBirthLabel": "تاريخ الميلاد",
+  "locationCityLabel": "المدينة",
+  "bioLabel": "نبذة عنك",
+  "bioHint": "اكتب حاجة عن نفسك للمشترين",
+  "storeNameLabel": "اسم المتجر",
+  "storeCategoryLabel": "فئة المتجر",
+  "storeDescriptionLabel": "وصف المتجر",
+  "storeCityLabel": "مدينة المتجر",
+  "storeWilayaLabel": "محافظة المتجر",
+  "whatsappLabel": "رقم واتساب",
+  "instagramLabel": "حساب إنستجرام",
+  "facebookLabel": "صفحة فيسبوك",
+  "logoutConfirmTitle": "تسجيل الخروج من xStore؟",
+  "cancel": "إلغاء",
+  "logOut": "تسجيل الخروج",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountDialogTitle": "حذف الحساب نهائياً",
+  "deleteAccountPermanentWarning": "الإجراء ده دائم ومش هيتراجع فيه",
+  "deleteAccountTypeHint": "اكتب DELETE للتأكيد",
+  "deleteMyAccount": "حذف حسابي",
+  "deleteConfirmKeyword": "DELETE",
+  "choosePhotoSource": "صورة الملف الشخصي",
+  "takePhoto": "الكاميرا",
+  "chooseFromGallery": "المعرض",
+  "removePhoto": "حذف الصورة",
+  "profileUpdatedSuccess": "تم تحديث الملف",
+  "languageTitle": "اللغة",
+  "languageEnglish": "English",
+  "languageFrench": "Français",
+  "languageArabic": "العربية",
+  "profileFooterLine": "xStore v1.0.0 · صُنع بـ ❤️ في مصر",
+  "statStoreViews": "مشاهدات",
+  "statStoreSaves": "محفوظات",
+  "statStoreActive": "نشط",
+  "storeMetaLinePrefix": "منذ ",
+  "storeJoinedPrefix": "انضم ",
+  "followStore": "تابع المتجر",
+  "share": "مشاركة",
+  "storeDescriptionHeading": "عن المتجر",
+  "allCategoriesChip": "الكل",
+  "vendorStoreStatListings": "إعلانات نشطة",
+  "vendorStoreStatSales": "إجمالي المبيعات",
+  "vendorStoreStatResponse": "نسبة الرد",
+  "placeholderScreenSubtitle": "الشاشة دي جاية قريباً.",
+  "iosAppStoreUrl": "https://apps.apple.com",
+  "androidPlayStoreUrl": "https://play.google.com/store",
+  "verified": "موثق",
+  "requiredField": "مطلوب",
+  "navHome": "الرئيسية",
+  "navExplore": "استكشف",
+  "navWishlist": "المفضلة",
+  "navOrders": "الطلبات",
+  "navProfile": "حسابي",
+  "navCart": "السلة",
+  "navAddListing": "إضافة إعلان",
+  "exploreSearchPlaceholder": "ابحث في الإعلانات…",
+  "clearAllFilters": "مسح الكل",
+  "filters": "فلاتر",
+  "addFilters": "+ فلاتر",
+  "applyFilters": "تطبيق الفلاتر",
+  "resetFilters": "إعادة ضبط",
+  "sortBy": "ترتيب حسب",
+  "sortNewest": "الأحدث",
+  "sortOldest": "الأقدم",
+  "sortPriceAsc": "السعر ↑",
+  "sortPriceDesc": "السعر ↓",
+  "sortMostViewed": "الأكثر مشاهدة",
+  "sortRelevance": "الأكثر صلة",
+  "sortByRating": "التقييم",
+  "resultsFor": "نتائج",
+  "allListingsLabel": "كل الإعلانات",
+  "noResultsTitle": "مفيش إعلانات",
+  "noResultsSubtitle": "جرب كلمات أو فلاتر مختلفة.",
+  "recentSearches": "عمليات البحث الأخيرة",
+  "addToCart": "أضف للسلة",
+  "category": "الفئة",
+  "condition": "الحالة",
+  "priceRange": "نطاق السعر",
+  "minPriceLabel": "الحد الأدنى",
+  "maxPriceLabel": "الحد الأقصى",
+  "minRating": "أقل تقييم",
+  "location": "الموقع",
+  "shippingOnly": "متاح شحن",
+  "gridView": "شبكة",
+  "listView": "قائمة",
+  "ratingStars4Plus": "⭐ 4+",
+  "ratingStars3Plus": "⭐ 3+",
+  "ratingStars2Plus": "⭐ 2+",
+  "starChar": "★",
+  "ordersEmptyTitle": "مفيش طلبات لسه",
+  "ordersIncomingTitle": "الطلبات الواردة",
+  "ordersMyTitle": "طلباتي",
+  "ordersSearchHint": "ابحث بالطلب أو المنتج…",
+  "ordersFilterAll": "الكل",
+  "ordersFilterPending": "في الانتظار",
+  "ordersFilterConfirmed": "مؤكد",
+  "ordersFilterProcessing": "جاري التجهيز",
+  "ordersFilterShipped": "تم الشحن",
+  "ordersFilterDelivered": "تم التسليم",
+  "ordersFilterCancelled": "ملغي",
+  "ordersFilterRefunded": "مسترد",
+  "ordersSortHighestValue": "الأعلى قيمة",
+  "ordersSortNeedsAction": "يحتاج إجراء",
+  "ordersCountLabel": "طلبات",
+  "ordersStatPendingLabel": "في الانتظار",
+  "ordersStatActiveLabelTitle": "نشط",
+  "ordersStatMonthLabel": "الشهر",
+  "ordersStatTotalLabel": "الإجمالي",
+  "ordersMoreItemsSuffix": "عنصر إضافي",
+  "ordersMoreItemsSuffixPlural": "عناصر إضافية",
+  "ordersQtyTotalLinePrefix": "الكمية",
+  "ordersFromStorePrefix": "من",
+  "ordersEstimatedDelivery": "🚚 متوقع",
+  "ordersPaymentLine": "الدفع",
+  "ordersTrackOrder": "تتبع الطلب",
+  "ordersViewDetails": "عرض التفاصيل",
+  "ordersCancelOrder": "إلغاء الطلب",
+  "ordersConfirmReceipt": "✓ تأكيد الاستلام",
+  "ordersLeaveReview": "اترك تقييم",
+  "ordersReorder": "اطلب تاني",
+  "ordersRejectOrder": "رفض",
+  "ordersConfirmOrderCta": "✓ تأكيد الطلب",
+  "ordersMarkProcessing": "جاري التجهيز",
+  "ordersMarkShipped": "تم الشحن",
+  "ordersViewTracking": "عرض التتبع",
+  "ordersShopAgain": "🛒 تسوق تاني",
+  "ordersEmptyFilteredTitle": "مفيش طلبات مطابقة",
+  "ordersBrowseProducts": "تصفح المنتجات",
+  "ordersDetailTitlePrefix": "طلب #",
+  "ordersShareSummary": "مشاركة الطلب",
+  "ordersSoldBy": "البائع",
+  "ordersBuyerInfo": "بيانات المشتري",
+  "ordersMessageSeller": "💬 راسل البائع",
+  "ordersMessageSellerSoon": "الرسائل — جاية قريباً",
+  "ordersWhatsapp": "💬 واتساب",
+  "ordersDeliveryAddressTitle": "عنوان التوصيل",
+  "ordersItemsSectionTitle": "المنتجات المطلوبة",
+  "ordersTrackingSectionTitle": "معلومات التتبع",
+  "ordersPaymentSectionTitle": "تفاصيل الدفع",
+  "ordersNotesSectionTitle": "ملاحظات الطلب",
+  "ordersSubtotal": "الإجمالي الفرعي",
+  "ordersShipping": "الشحن",
+  "ordersDiscount": "الخصم",
+  "ordersTotal": "الإجمالي",
+  "ordersPaidBadge": "مدفوع",
+  "ordersPaymentPendingBadge": "قيد الانتظار",
+  "ordersViewProduct": "عرض المنتج",
+  "ordersCopyTracking": "نسخ",
+  "ordersTrackingCopied": "تم النسخ",
+  "ordersTrackOnCourier": "تتبع على موقع شركة الشحن",
+  "ordersCourierWebsiteSoon": "تتبع الشحن — جاي قريباً",
+  "ordersCurrentLocationMock": "في الطريق — مركز القاهرة",
+  "ordersExpectedPrefix": "📅 متوقع قبل",
+  "ordersAddTrackingTitle": "إضافة معلومات التتبع",
+  "ordersTrackingNumberLabel": "رقم التتبع (اختياري)",
+  "ordersCourierNameLabel": "اسم شركة الشحن (اختياري)",
+  "ordersEstimatedDeliveryLabel": "موعد التسليم المتوقع",
+  "ordersConfirmShipment": "تأكيد الشحن",
+  "ordersCancelDialogTitle": "إلغاء الطلب ده؟",
+  "ordersCancelReasonLabel": "السبب",
+  "ordersCancelReasonChangedMind": "غيرت رأيي",
+  "ordersCancelReasonBetterPrice": "لقيت سعر أحسن",
+  "ordersCancelReasonMistake": "طلبت بالغلط",
+  "ordersCancelReasonOther": "سبب تاني",
+  "ordersConfirmReceiptTitle": "تأكيد الاستلام؟",
+  "ordersConfirm": "تأكيد",
+  "ordersRejectDialogTitle": "رفض الطلب",
+  "ordersRejectReasonHint": "سبب الرفض",
+  "ordersSubmitReview": "إرسال التقييم",
+  "ordersReviewHint": "اكتب رأيك عن الشراء",
+  "ordersReviewThanks": "شكراً على تقييمك!",
+  "ordersReviewSheetTitle": "اترك تقييم",
+  "ordersPaymentCashOnDelivery": "الدفع عند الاستلام",
+  "ordersPaymentCib": "كارت CIB",
+  "ordersPaymentDahabi": "كارت ذهبي",
+  "ordersPaymentBaridimob": "بريدي موب",
+  "ordersTimelinePlaced": "تم تقديم الطلب",
+  "ordersTimelineConfirmed": "تم التأكيد",
+  "ordersTimelineProcessing": "جاري التجهيز",
+  "ordersTimelineShipped": "تم الشحن",
+  "ordersTimelineDelivered": "تم التسليم",
+  "ordersTimelineHeading": "مراحل الطلب",
+  "ordersTimelinePending": "في الانتظار",
+  "ordersCancelReasonSection": "سبب الإلغاء",
+  "statusSubtitlePending": "في انتظار تأكيد البائع",
+  "statusSubtitleConfirmed": "البائع أكد طلبك",
+  "statusSubtitleProcessing": "البائع بيجهز الطلب",
+  "statusSubtitleShipped": "طلبك في الطريق!",
+  "statusSubtitleDelivered": "تم تسليم الطلب بنجاح",
+  "statusSubtitleCancelled": "الطلب ده اتلغى",
+  "statusSubtitleRefunded": "تمت عملية الاسترداد",
+  "ordersFiltersMoreSoon": "فلاتر أكتر — قريباً",
+  "orderHashPrefix": "طلب #",
+  "vendorNeedsAttention": "يحتاج متابعة",
+  "wishlistEmptyTitle": "قائمة المفضلة فاضية",
+  "wishlistDiscoverProducts": "اكتشف منتجات",
+  "wishlistForBuyersTitle": "المفضلة للمشترين فقط",
+  "wishlistExploreAsBuyer": "استكشف كمشتري",
+  "wishlistSelect": "تحديد",
+  "wishlistCancelSelect": "إلغاء",
+  "wishlistSort": "ترتيب",
+  "wishlistSortRecentlyAdded": "المضاف حديثاً",
+  "wishlistSortPriceLow": "السعر: من الأقل للأعلى",
+  "wishlistSortPriceHigh": "السعر: من الأعلى للأقل",
+  "wishlistSortPriceDrop": "انخفاض السعر",
+  "wishlistSortBiggestDiscount": "أكبر خصم",
+  "wishlistSortNameAz": "الاسم أ-ي",
+  "wishlistFilterAll": "الكل",
+  "wishlistFilterAvailable": "متاح",
+  "wishlistFilterPriceDropped": "انخفض السعر",
+  "wishlistFilterInCart": "في السلة",
+  "wishlistViewPriceDrops": "عرض انخفاضات السعر",
+  "wishlistPriceDropBadge": "انخفاض السعر",
+  "wishlistOutOfStock": "غير متاح",
+  "wishlistInCartBadge": "✓ في السلة",
+  "wishlistRemove": "♡ إزالة",
+  "wishlistAddToCart": "🛒 أضف للسلة",
+  "wishlistInCartCta": "✓ في السلة",
+  "wishlistSwipeAddCart": "أضف للسلة",
+  "wishlistMoveAllToCart": "نقل الكل للسلة",
+  "wishlistShareWishlist": "مشاركة المفضلة",
+  "wishlistViewCart": "عرض السلة",
+  "wishlistRemoveSelected": "حذف المحدد",
+  "wishlistSavedSnack": "تم الحفظ في المفضلة ❤️",
+  "wishlistView": "عرض",
+  "wishlistRemovedSnack": "تمت الإزالة من المفضلة",
+  "wishlistShowAllItems": "عرض كل المنتجات",
+  "wishlistReviewsWord": "تقييمات",
+  "wishlistGridContentDesc": "عرض شبكي",
+  "wishlistListContentDesc": "عرض قائمة",
+  "wishlistNoAvailableItems": "لا توجد منتجات متاحة",
+  "wishlistNoPriceDroppedItems": "لا توجد منتجات انخفض سعرها",
+  "wishlistNoInCartItems": "لا توجد منتجات في السلة",
+  "wishlistSingleAddedToCart": "تمت الإضافة للسلة",
+  "wishlistSelectAll": "تحديد الكل",
+  "wishlistDeselectAll": "إلغاء تحديد الكل",
+  "cartForBuyersTitle": "السلة للمشترين فقط",
+  "cartExploreAsBuyer": "استكشف كمشتري",
+  "cartClearTitle": "مسح كل محتويات السلة؟",
+  "cartClearConfirm": "مسح السلة",
+  "cartSelectAll": "تحديد الكل",
+  "cartTotalLabel": "الإجمالي",
+  "cartEmptyTitle": "سلتك فاضية",
+  "cartStartShopping": "ابدأ التسوق",
+  "cartOrWishlist": "أو شوف المفضلة",
+  "cartWishlistArrow": "← المفضلة",
+  "cartRemove": "🗑 إزالة",
+  "cartSaveForLater": "♡ حفظ لوقت لاحق",
+  "cartUnavailableBadge": "غير متاح",
+  "cartSwipeRemove": "إزالة",
+  "cartUndo": "تراجع",
+  "cartShippingFree": "🚚 شحن مجاني",
+  "cartPickupOnly": "🚫 استلام فقط",
+  "cartPromoHeading": "🏷️ عندك كود خصم؟",
+  "cartCouponHint": "اكتب كود الخصم…",
+  "cartApply": "تطبيق",
+  "cartCouponRemove": "إزالة",
+  "cartCouponInvalid": "كود الخصم غير صحيح",
+  "cartCouponMinOrder": "الحد الأدنى للطلب 5,000 ج.م",
+  "cartOrderSummary": "ملخص الطلب",
+  "cartShippingLine": "الشحن",
+  "cartTotalLine": "الإجمالي",
+  "cartCashOnDeliveryNote": "💳 الدفع عند الاستلام متاح",
+  "cartSecureCheckout": "🔒 إتمام شراء آمن",
+  "cartProceedCheckout": "إتمام الشراء",
+  "cartYouMayAlsoLike": "ممكن يعجبك كمان",
+  "checkoutTitle": "إتمام الشراء",
+  "checkoutContinue": "كمل",
+  "checkoutStepAddress": "العنوان",
+  "checkoutStepPayment": "الدفع",
+  "checkoutStepConfirm": "تأكيد",
+  "checkoutDeliveryTitle": "عنوان التوصيل",
+  "checkoutAddAddress": "+ إضافة عنوان جديد",
+  "checkoutSaveAddress": "حفظ العنوان",
+  "checkoutFullName": "الاسم الكامل",
+  "checkoutPhone": "الموبايل",
+  "checkoutStreet": "العنوان",
+  "checkoutCity": "المدينة",
+  "checkoutWilaya": "المحافظة",
+  "checkoutPostalCode": "الرمز البريدي",
+  "checkoutSetDefault": "تعيين كافتراضي",
+  "checkoutEdit": "تعديل",
+  "checkoutPaymentTitle": "طريقة الدفع",
+  "checkoutPayCodTitle": "💵 الدفع عند الاستلام",
+  "checkoutPayCodSubtitle": "ادفع عند استلام الطلب",
+  "checkoutPayCibTitle": "💳 كارت CIB",
+  "checkoutPayCibSubtitle": "دفع ببطاقة ائتمان/خصم",
+  "checkoutPayDahabiTitle": "🟡 كارت ذهبي",
+  "checkoutPayDahabiSubtitle": "بطاقة ذهبية من البريد",
+  "checkoutPayBaridiTitle": "🟢 بريدي موب",
+  "checkoutPayBaridiSubtitle": "دفع موبايل من البريد",
+  "checkoutCardExpiry": "[AR] MM/YY",
+  "checkoutCardCvv": "[AR] CVV",
+  "checkoutCardNumber": "رقم البطاقة",
+  "checkoutDeliveryNoteLabel": "ملاحظة التوصيل (اختياري)",
+  "checkoutReviewTitle": "راجع طلبك",
+  "checkoutEstimatedDelivery": "🚚 المتوقع: 3–5 أيام عمل",
+  "checkoutTermsBefore": "بتأكيد الطلب إنت موافق على",
+  "checkoutTermsAnd": "و",
+  "checkoutReturnPolicy": "سياسة الإرجاع",
+  "checkoutPlaceOrder": "🛒 تأكيد الطلب",
+  "checkoutErrorNoAddress": "اختار أو أضف عنوان توصيل",
+  "checkoutErrorNoPayment": "اختار طريقة الدفع",
+  "checkoutErrorNoItems": "مفيش منتجات محددة للدفع",
+  "checkoutErrorCard": "ادخل رقم بطاقة صحيح",
+  "checkoutErrorGeneric": "مقدرناش نكمل الطلب",
+  "orderPlacedTitle": "تم الطلب! 🎉",
+  "orderTrackCta": "تابع طلبي",
+  "orderContinueShopping": "كمّل التسوق",
+  "couponDetailSave10": "تم تطبيق خصم 10%!",
+  "couponDetailFree500": "تم تطبيق خصم 500 ج.م!",
+  "couponDetailWelcome": "تم تطبيق خصم 15%!",
+  "youMayAlsoLike": "ممكن يعجبك كمان",
+  "productNotFound": "المنتج غير موجود",
+  "productScreenTitle": "المنتج",
+  "reviewsTitle": "التقييمات",
+  "customerReviews": "تقييمات العملاء",
+  "ratingsWord": "تقييمات",
+  "reviewsDotSeparator": "[AR]  · ",
+  "reviewsSuffix": " تقييمات",
+  "helpfulPrompt": "مفيد؟ 👍 ",
+  "specifications": "المواصفات",
+  "description": "الوصف",
+  "readMore": "اقرأ أكتر",
+  "readLess": "اقرأ أقل",
+  "quantity": "الكمية",
+  "stockQuantityRequired": "الكمية المتاحة *",
+  "chatSeller": "محادثة",
+  "chatSellerSoon": "محادثة البائع — قريباً",
+  "addedToCart": "تمت الإضافة للسلة!",
+  "expressCheckoutSoon": "الدفع السريع — قريباً",
+  "buyNow": "اشتري الآن",
+  "visitStore": "زيارة المتجر",
+  "verifiedSeller": "✅ بائع موثّق",
+  "sellerRatingMid": " بائع · ",
+  "sellerSalesSuffix": " مبيعات",
+  "onlyLeftPrefix": "متبقي ",
+  "onlyLeftSuffix": " فقط!",
+  "listingTotalListings": "إجمالي الإعلانات",
+  "listingSoldStat": "مباع",
+  "listingViews": "مشاهدات",
+  "listingSaves": "محفوظات",
+  "listingInquiries": "استفسارات",
+  "editListing": "تعديل",
+  "editListingMenu": "تعديل الإعلان",
+  "viewStatsMenu": "عرض الإحصائيات",
+  "listingStatsHeading": "إحصائيات الإعلان",
+  "subcategoryPickerPrefix": "فئة فرعية — ",
+  "pauseListing": "إيقاف",
+  "resumeListing": "استئناف",
+  "listingStats": "إحصائيات",
+  "deleteListing": "حذف",
+  "draft": "مسودة",
+  "active": "نشط",
+  "paused": "موقوف",
+  "sold": "مباع",
+  "pending": "قيد الانتظار",
+  "rejected": "مرفوض",
+  "retry": "[AR] Retry",
+  "errorGeneric": "حصل خطأ",
+  "emptyInbox": "لا يوجد شيء بعد",
+  "incomingOrders": "الطلبات الواردة",
+  "vendorSearchHint": "ابحث برقم الطلب أو اسم المشتري",
+  "vendorConfirmAllPending": "تأكيد كل الطلبات المعلقة",
+  "vendorViewAnalytics": "عرض التحليلات",
+  "vendorStatPendingOrders": "طلبات معلقة",
+  "vendorStatActiveOrders": "طلبات نشطة",
+  "vendorStatTotalOrders": "إجمالي الطلبات",
+  "vendorStatRevenue": "الإيرادات",
+  "vendorConfirmAllPendingTitle": "تأكيد كل الطلبات المعلقة؟",
+  "vendorSortNewestFirst": "الأحدث أولاً",
+  "vendorSortOldestFirst": "الأقدم أولاً",
+  "vendorSortHighestValue": "الأعلى قيمة",
+  "vendorSortNeedsAction": "يحتاج إجراء",
+  "vendorSortBuyerName": "حسب اسم المشتري أ-ي",
+  "vendorNewOrder": "طلب جديد",
+  "vendorRejectOrder": "رفض الطلب",
+  "vendorConfirmOrder": "تأكيد الطلب",
+  "vendorConfirmOrderShort": "تأكيد",
+  "vendorMarkProcessing": "وضع قيد التجهيز",
+  "vendorMarkShipped": "وضع تم الشحن",
+  "vendorOrdersEmptyTitle": "لا توجد طلبات بعد",
+  "vendorNoStatusOrders": "لا توجد طلبات لهذه الحالة",
+  "vendorNoStatusOrdersSubtitle": "جرّب فلتر مختلف أو اعرض كل الطلبات",
+  "vendorShippingInfoTitle": "معلومات الشحن",
+  "vendorViewOnMap": "عرض على الخريطة",
+  "vendorCollectOnDelivery": "تحصيل عند الاستلام",
+  "vendorRejectTitle": "رفض الطلب ده؟",
+  "vendorConfirmRejection": "تأكيد الرفض",
+  "vendorConfirmShipment": "تأكيد الشحن",
+  "vendorExportOrders": "تصدير الطلبات",
+  "vendorOrderSettings": "إعدادات الطلبات",
+  "vendorPrintOrder": "طباعة الطلب",
+  "vendorReportIssue": "الإبلاغ عن مشكلة",
+  "vendorReasonItemUnavailable": "المنتج لم يعد متاحاً",
+  "vendorReasonOutOfStock": "نفاد المخزون",
+  "vendorReasonCannotDeliver": "تعذر التوصيل لموقع المشتري",
+  "vendorReasonSuspicious": "طلب مشبوه",
+  "vendorReasonIncorrectPricing": "تسعير غير صحيح",
+  "vendorReasonOther": "سبب آخر",
+  "vendorTypeReasonHint": "اكتب السبب",
+  "vendorTrackingHint": "[AR] XS-TRACK-2024-001",
+  "vendorShippingNoteHint": "تم تسليم الشحنة لشركة الشحن، المتوقع 3–5 أيام",
+  "vendorOrderRejectedSnack": "تم رفض الطلب. تم إبلاغ المشتري.",
+  "vendorOrderConfirmedSnack": "تم تأكيد الطلب",
+  "vendorOrderProcessingSnack": "تم وضع الطلب قيد التجهيز",
+  "vendorOrderShippedSnack": "تم وضع الطلب كمشحون!",
+  "vendorStatusPending": "في انتظار تأكيدك",
+  "vendorStatusConfirmed": "أنت أكدت الطلب",
+  "vendorStatusProcessing": "جاري التجهيز للشحن",
+  "vendorStatusShipped": "الطلب في الطريق",
+  "vendorStatusDelivered": "تم تسليم الطلب بنجاح",
+  "vendorStatusCancelled": "تم إلغاء هذا الطلب",
+  "vendorStatusRefunded": "تم الاسترداد",
+  "didntReceiveCode": "موصلكش الكود؟",
+  "mensFashion": "موضة رجالي",
+  "womensFashion": "موضة حريمي",
+  "notificationsEmptyAllTitle": "كل حاجة تمام! 🎉",
+  "notificationsUnreadBannerLine": "🔔 عندك {n} إشعارات غير مقروءة",
+  "notificationsEmptyFilterTitle": "مفيش إشعارات {filter}",
+  "notificationsEmptyFilterSubtitle": "إشعارات {scope} هتظهر هنا",
+  "notificationsDeletedSnack": "تم حذف \"{title}\"",
+  "notificationsTimeMinutesAgo": "من {m} دقيقة",
+  "notificationsTimeHoursAgo": "من {h} ساعة",
+  "applyFiltersCount": "تطبيق الفلاتر ({n})",
+  "ordersCountLine": "{n} طلبات",
+  "ordersMoreItems": "+ {n} عناصر إضافية",
+  "ordersItemsSectionCount": "المنتجات المطلوبة ({n})",
+  "wishlistAppBarTitle": "مفضلتي ({n})",
+  "wishlistSelectedCount": "{n} محدد",
+  "wishlistPriceDropBanner": "🎉 السعر نزل على {n} منتجات في مفضلتك!",
+  "wishlistPriceDropPercent": "↓ {p}% انخفاض",
+  "wishlistMoveAllSummary": "تمت إضافة {n} عناصر للسلة",
+  "wishlistShareText": "شوف مفضلتي على xStore! 🛍️\n{link}",
+  "wishlistItemsAvailableLine": "{total} عناصر · {avail} متاح",
+  "wishlistAddToCartSelected": "أضف للسلة ({n})",
+  "wishlistRemoveSelectedCount": "حذف المحدد ({n})",
+  "wishlistFilterEmptyTitle": "لا توجد عناصر {filterName}",
+  "wishlistAddedToCartCount": "تمت إضافة {n} عناصر للسلة",
+  "cartAppBarTitle": "سلتي ({n} عناصر)",
+  "cartClearBody": "ده هيحذف كل {n} عناصر من سلتك.",
+  "cartSelectAllCount": "تحديد الكل ({n} عناصر)",
+  "cartRemovedSnack": "تم حذف {name} من السلة",
+  "cartShippingPaid": "🚚 +{amount} ج.م شحن",
+  "cartCouponApplied": "✅ \"{code}\" — {detail}",
+  "cartSubtotalLine": "الإجمالي الفرعي ({n} عناصر)",
+  "cartCouponLine": "الكوبون ({code})",
+  "cartProceedCheckoutTotal": "إتمام الشراء ({total})",
+  "cartCheckoutItems": "الدفع ({n} عناصر)",
+  "checkoutItemsFromSellers": "{items} عناصر من {sellers} بائعين",
+  "checkoutPlaceOrderTotal": "🛒 تأكيد الطلب · {total}",
+  "orderPlacedNumber": "طلب #{id}",
+  "vendorOrdersConfirmed": "تم تأكيد {n} طلب بنجاح",
+  "vendorLowStockHint": "متبقي {qty} وحدة بعد الطلب ده",
+  "@notificationsUnreadBannerLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsEmptyFilterTitle": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsEmptyFilterSubtitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsDeletedSnack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsTimeMinutesAgo": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsTimeHoursAgo": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      }
+    }
+  },
+  "@applyFiltersCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ordersCountLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ordersMoreItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ordersItemsSectionCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistAppBarTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistSelectedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistPriceDropBanner": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistPriceDropPercent": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistMoveAllSummary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistShareText": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "@wishlistItemsAvailableLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "avail": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistAddToCartSelected": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistRemoveSelectedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistFilterEmptyTitle": {
+    "placeholders": {
+      "filterName": {
+        "type": "String"
+      }
+    }
+  },
+  "@wishlistAddedToCartCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartAppBarTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartClearBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartSelectAllCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartRemovedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartShippingPaid": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartCouponApplied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartSubtotalLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartCouponLine": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartProceedCheckoutTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartCheckoutItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@checkoutItemsFromSellers": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "sellers": {
+        "type": "int"
+      }
+    }
+  },
+  "@checkoutPlaceOrderTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "@orderPlacedNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "@vendorOrdersConfirmed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@vendorLowStockHint": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "languageToggleTitle": "اللغة",
+  "enterYourPhoneNumber": "ادخل رقم موبايلك",
+  "sendOtpSubtitle": "هنبعت كود تحقق لرقمك المصري",
+  "signInToContinueShopping": "سجل الدخول عشان تكمل التسوق",
+  "enterEmailHint": "[AR] you@email.com",
+  "validEmailOrPhone": "إيميل صحيح أو رقم 10+ أرقام",
+  "passwordMask": "[AR] ********",
+  "minSixChars": "6 أحرف على الأقل",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "rememberMe": "ابقى متسجل",
+  "continueWithPhoneNumber": "كمل برقم الموبايل",
+  "dontHaveAccount": "معندكش حساب؟",
+  "createOneArrow": "إنشاء حساب ←",
+  "skip": "تخطي",
+  "onboardingTitle1": "اكتشف أحسن العروض",
+  "onboardingTitle2": "ابدأ البيع النهارده",
+  "onboardingTitle3": "آمن وموثوق",
+  "onboardingSubtitle1": "تسوق من آلاف البائعين في مصر وأكثر",
+  "onboardingSubtitle2": "اعرض منتجاتك في دقائق ووصل لآلاف المشترين",
+  "onboardingSubtitle3": "دفع آمن وحماية للمشتري وبائعين موثقين",
+  "getStarted": "ابدأ",
+  "next": "التالي",
+  "leaveRegistrationTitle": "تترك التسجيل؟",
+  "leaveRegistrationBody": "هيتم فقدان تقدمك.",
+  "stay": "ابقى",
+  "leave": "غادر",
+  "stepRole": "الدور",
+  "stepInfo": "البيانات",
+  "stepSecurity": "الأمان",
+  "stepStore": "المتجر",
+  "continueLabel": "كمل",
+  "createMyStore": "أنشئ متجري",
+  "joinAs": "انضم إلى xStore كـ...",
+  "chooseHowUse": "اختار طريقة استخدام xStore. تقدر تضيف الدور الآخر لاحقاً.",
+  "iAmBuyer": "أنا مشتري",
+  "buyerSubtitle": "اكتشف واشتري منتجات من بائعين موثوقين",
+  "buyerFeature1": "[AR] Browse thousands of products",
+  "buyerFeature2": "[AR] Secure checkout & payments",
+  "buyerFeature3": "[AR] Track your orders in real time",
+  "buyerFeature4": "[AR] Save favorites to wishlist",
+  "iAmSeller": "أنا بائع",
+  "sellerSubtitle": "اعرض منتجاتك وابدأ تربح اليوم",
+  "sellerFeature1": "[AR] List unlimited products",
+  "sellerFeature2": "[AR] Manage orders & inventory",
+  "sellerFeature3": "[AR] Analytics & sales insights",
+  "sellerFeature4": "[AR] Direct chat with buyers",
+  "dateOfBirthOptional": "تاريخ الميلاد (اختياري)",
+  "tellUsAboutYou": "احكيلنا عنك",
+  "infoOnProfile": "المعلومات دي هتظهر في ملفك الشخصي",
+  "fullNameRequired": "الاسم الكامل *",
+  "emailAddressRequired": "البريد الإلكتروني *",
+  "locationCityRequired": "المدينة *",
+  "locationHintAlgiers": "مثال: القاهرة",
+  "secureYourAccount": "أمّن حسابك",
+  "strongPasswordHint": "اختار كلمة مرور قوية لحماية حسابك",
+  "passwordRequired": "كلمة المرور *",
+  "confirmPasswordRequired": "تأكيد كلمة المرور *",
+  "agreeTo": "أنا موافق على",
+  "termsOfService": "شروط الخدمة",
+  "andWord": "و",
+  "privacyPolicy": "سياسة الخصوصية",
+  "setUpYourStore": "جهّز متجرك",
+  "tellBuyersStore": "عرّف المشترين على متجرك",
+  "storeNameRequired": "اسم المتجر *",
+  "storeNameHint": "[AR] e.g. Ahmed's Electronics",
+  "storeCategoryRequired": "فئة المتجر *",
+  "storeSellHint": "بتبيع إيه بشكل أساسي؟",
+  "storeDescriptionRequired": "وصف المتجر *",
+  "storeDescriptionHint": "اوصف متجرك وإيه اللي يميزه...",
+  "storeLogoOptional": "لوجو المتجر (اختياري)",
+  "cityRequired": "المدينة *",
+  "wilayaRequired": "المحافظة *",
+  "sellerFallbackName": "بائع",
+  "storeReady": "متجرك جاهز. ابدأ بعرض منتجاتك!",
+  "goToMyStore": "اذهب إلى متجري",
+  "vendorOrdersEmptySubtitle": "لما المشترين يطلبوا من إعلاناتك الطلبات هتظهر هنا",
+  "discoverProducts": "اكتشف منتجات",
+  "stepOf": "الخطوة {current} من {total}",
+  "@stepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "vendorWelcome": "أهلاً بيك في xStore يا {name}! 🎉",
+  "@vendorWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pushNotifications": "إشعارات الموبايل",
+  "emailUpdates": "تحديثات الإيميل",
+  "wishlistEmptySubtitle": "احفظ المنتجات اللي بتحبها بالضغط على علامة القلب على أي منتج",
+  "shareXStoreMessage": "تسوق وبيع على xStore — السوق الحديث في مصر.",
+  "cartTitle": "السلة",
+  "cartEmptySubtitle": "شكلك لسه ما ضفتش أي حاجة للسلة",
+  "cartUnavailableHint": "العنصر ده لم يعد متاحاً",
+  "wishlistPriceDropBannerSubtitle": "الأسعار نزلت من وقت ما حفظتهم",
+  "wishlistForBuyersSubtitle": "أنشئ حساب مشتري عشان تحفظ وتتابع منتجاتك المفضلة",
+  "storeHours": "ساعات العمل",
+  "storeOpenNow": "مفتوح دلوقتي",
+  "storeClosedNow": "مغلق",
+  "storeStatusOpen": "المتجر مفتوح دلوقتي",
+  "storeStatusClosed": "المتجر مغلق دلوقتي",
+  "storeOpenDesc": "العملاء يقدروا يطلبوا دلوقتي",
+  "storeClosedDesc": "العملاء مش قادرين يطلبوا دلوقتي",
+  "closeStoreNow": "إغلاق المتجر دلوقتي",
+  "openStoreNow": "فتح المتجر دلوقتي",
+  "closedMessage": "أضف رسالة للعملاء (اختياري)",
+  "closedMessageTitle": "رسالة الإغلاق",
+  "closedMessageHint": "مثلاً: هرجع في ساعة، إجازة العيد",
+  "weeklySchedule": "جدول الأسبوع",
+  "weeklyScheduleSubtitle": "حدد ساعات عملك لكل يوم",
+  "copyHoursToAll": "نسخ الأوقات لكل الأيام",
+  "quickPresets": "قوالب جاهزة",
+  "quickPresetsSubtitle": "طبق جدول جاهز فوراً",
+  "presetStandard": "عادي (9ص–6م)",
+  "presetExtended": "موسع (9ص–11م)",
+  "presetMorning": "صباحي بس (8ص–2م)",
+  "presetFullWeek": "طول الأسبوع",
+  "presetWeekdays": "أيام العمل (سبت–خميس)",
+  "presetWithoutFriday": "بدون جمعة",
+  "saveWorkingHours": "حفظ ساعات العمل",
+  "workingHoursSaved": "تم حفظ ساعات العمل! ✅",
+  "storeNowOpen": "المتجر مفتوح دلوقتي 🟢",
+  "storeNowClosed": "المتجر مغلق دلوقتي 🔴",
+  "open24Hours": "مفتوح 24 ساعة",
+  "from": "من",
+  "to": "إلى",
+  "copyFrom": "نسخ من:",
+  "copyingFrom": "بيتنسخ من:",
+  "applyToSelectedDays": "تطبيق على الأيام المحددة",
+  "selectAllDays": "تحديد الكل",
+  "deselectAllDays": "إلغاء تحديد الكل",
+  "openLabel": "مفتوح",
+  "closedLabel": "مغلق",
+  "opensAt": "يفتح الساعة {time}",
+  "closesAt": "يغلق الساعة {time}",
+  "opensOn": "يفتح {day} الساعة {time}",
+  "storeHoursTitle": "ساعات العمل",
+  "todayLabel": "النهارده",
+  "daySaturday": "السبت",
+  "daySunday": "الأحد",
+  "dayMonday": "الاثنين",
+  "dayTuesday": "الثلاثاء",
+  "dayWednesday": "الأربعاء",
+  "dayThursday": "الخميس",
+  "dayFriday": "الجمعة",
+  "dayShortSat": "سبت",
+  "dayShortSun": "أحد",
+  "dayShortMon": "اثنين",
+  "dayShortTue": "ثلاثاء",
+  "dayShortWed": "أربعاء",
+  "dayShortThu": "خميس",
+  "dayShortFri": "جمعة",
+  "invalidHoursError": "وقت الإغلاق لازم يكون بعد وقت الفتح",
+  "discardChanges": "تجاهل التغييرات",
+  "discardChangesConfirm": "تجاهل التغييرات غير المحفوظة؟",
+  "applyPresetConfirm": "تطبيق أوقات {preset} على كل الأيام؟",
+  "storeClosedWarning": "المتجر ده مغلق دلوقتي. تقدر تطلب برضو — البائع هيرد لما يفتح.",
+  "storeLocation": "موقع المتجر",
+  "storeLocationSubtitle": "خلي المشترين يلاقوا متجرك بسهولة",
+  "detectMyLocation": "تحديد موقعي الحالي",
+  "detectingLocation": "جاري تحديد الموقع...",
+  "orFillManually": "أو ادخل يدوياً",
+  "latitude": "خط العرض",
+  "longitude": "خط الطول",
+  "latitudeHint": "30.044400",
+  "longitudeHint": "31.235700",
+  "governorate": "المحافظة",
+  "governorateHint": "مثلاً القاهرة، الجيزة، الإسكندرية",
+  "townCity": "المدينة / الحي",
+  "townCityHint": "مثلاً مدينة نصر، الدقي، سيدي جابر",
+  "detailAddress": "العنوان التفصيلي",
+  "detailAddressHint": "مثلاً 12 شارع التحرير، الدور 3",
+  "locationDetected": "📍 تم تحديد الموقع!",
+  "locationServiceDisabled": "خدمة الموقع متوقفة. فعّلها من الإعدادات.",
+  "locationPermissionDenied": "تم رفض إذن الموقع. سمح بالوصول للموقع.",
+  "locationPermissionPermanent": "إذن الموقع مرفوض دائماً. افتح إعدادات التطبيق.",
+  "openSettings": "افتح الإعدادات",
+  "openAppSettings": "افتح إعدادات التطبيق",
+  "invalidLatitude": "قيمة خط العرض غلط",
+  "invalidLongitude": "قيمة خط الطول غلط",
+  "egypt": "مصر",
+  "locationServicesOff": "خدمة الموقع متوقفة",
+  "enableLocationServices": "تفعيلها من الإعدادات؟",
+  "@opensAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@closesAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@opensOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@applyPresetConfirm": {
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  }
+}

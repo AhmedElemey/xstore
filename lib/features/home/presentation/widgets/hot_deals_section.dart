@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/deal_entity.dart';
 import 'product_card.dart';
 
@@ -21,7 +21,7 @@ class HotDealsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.hotDeals,
+          context.l10n.hotDeals,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const Gap(AppSpacing.md),

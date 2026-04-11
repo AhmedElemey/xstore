@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../orders/domain/entities/order_entity.dart';
@@ -15,11 +14,11 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 class CheckoutReviewSection extends ConsumerWidget {
   const CheckoutReviewSection({super.key});
 
-  static String _payLabel(PaymentMethod m) => switch (m) {
-        PaymentMethod.cashOnDelivery => AppStrings.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => AppStrings.ordersPaymentCib,
-        PaymentMethod.dahabiCard => AppStrings.ordersPaymentDahabi,
-        PaymentMethod.baridimob => AppStrings.ordersPaymentBaridimob,
+  static String _payLabel(BuildContext context, PaymentMethod m) => switch (m) {
+        PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
+        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
+        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
+        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
       };
 
   @override
@@ -40,14 +39,14 @@ class CheckoutReviewSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          AppStrings.checkoutReviewTitle,
+          context.l10n.checkoutReviewTitle,
           style: AppTypography.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          AppStrings.checkoutItemsFromSellers(items.length, vendors),
+          context.l10n.checkoutItemsFromSellers(items.length, vendors),
           style: AppTypography.bodySmall.copyWith(
             color: context.textSecondary,
             fontWeight: FontWeight.w600,
@@ -73,7 +72,7 @@ class CheckoutReviewSection extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    '${it.listingName} · ${AppStrings.quantity} ${it.quantity} · ${Formatters.dzdWhole(it.price * it.quantity)}',
+                    '${it.listingName} · ${context.l10n.quantity} ${it.quantity} · ${Formatters.dzdWhole(it.price * it.quantity)}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodySmall,
@@ -92,12 +91,12 @@ class CheckoutReviewSection extends ConsumerWidget {
         ],
         if (pay != null)
           Text(
-            '💳 ${_payLabel(pay)}',
+            '💳 ${_payLabel(context, pay)}',
             style: AppTypography.bodySmall,
           ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          AppStrings.checkoutEstimatedDelivery,
+          context.l10n.checkoutEstimatedDelivery,
           style: AppTypography.bodySmall.copyWith(
             color: context.textSecondary,
           ),
@@ -106,7 +105,7 @@ class CheckoutReviewSection extends ConsumerWidget {
         const CartSummaryCard(),
         const SizedBox(height: AppSpacing.lg),
         Text(
-          AppStrings.checkoutTermsBefore,
+          context.l10n.checkoutTermsBefore,
           style: AppTypography.bodySmall.copyWith(
             color: context.textSecondary,
             height: 1.45,
@@ -117,17 +116,17 @@ class CheckoutReviewSection extends ConsumerWidget {
           children: [
             TextButton(
               onPressed: () {},
-              child: Text(AppStrings.menuTerms),
+              child: Text(context.l10n.menuTerms),
             ),
             Text(
-              AppStrings.checkoutTermsAnd,
+              context.l10n.checkoutTermsAnd,
               style: AppTypography.bodySmall.copyWith(
                 color: context.textSecondary,
               ),
             ),
             TextButton(
               onPressed: () {},
-              child: Text(AppStrings.checkoutReturnPolicy),
+              child: Text(context.l10n.checkoutReturnPolicy),
             ),
           ],
         ),

@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -43,7 +42,7 @@ class CartVendorBuyersOnly extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.x2l),
               Text(
-                AppStrings.cartForBuyersTitle,
+                context.l10n.cartForBuyersTitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.titleLarge.copyWith(
                   color: context.textPrimary,
@@ -52,7 +51,7 @@ class CartVendorBuyersOnly extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                AppStrings.cartForBuyersSubtitle,
+                context.l10n.wishlistForBuyersSubtitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.textSecondary,
@@ -73,7 +72,7 @@ class CartVendorBuyersOnly extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppSpacing.md),
                     ),
                   ),
-                  child: Text(AppStrings.cartExploreAsBuyer),
+                  child: Text(context.l10n.cartExploreAsBuyer),
                 ),
               ),
             ],

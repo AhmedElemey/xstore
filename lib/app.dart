@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/constants/app_strings.dart';
+import 'core/localization/app_localizations.dart';
+import 'core/localization/localization_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/providers/shared_providers.dart';
@@ -13,13 +15,32 @@ class XstoreApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     final currentThemeMode = ref.watch(appThemeModeProvider);
+    final language = ref.watch(appLocaleProvider);
+    final locale = ref.read(appLocaleProvider.notifier).locale;
+    final useArabicFont = language == AppLanguage.arabic;
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: AppStrings.appName,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      title: 'xStore',
+      theme: AppTheme.light.copyWith(
+        textTheme: useArabicFont
+            ? AppTheme.light.textTheme.apply(fontFamily: 'Cairo')
+            : AppTheme.light.textTheme,
+      ),
+      darkTheme: AppTheme.dark.copyWith(
+        textTheme: useArabicFont
+            ? AppTheme.dark.textTheme.apply(fontFamily: 'Cairo')
+            : AppTheme.dark.textTheme,
+      ),
       themeMode: currentThemeMode,
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
     );
   }

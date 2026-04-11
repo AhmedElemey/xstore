@@ -1,15 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../store/presentation/providers/store_hours_provider.dart';
 
-class SellerCard extends StatelessWidget {
+class SellerCard extends ConsumerWidget {
   const SellerCard({
     super.key,
     required this.seller,
@@ -22,8 +23,10 @@ class SellerCard extends StatelessWidget {
   final VoidCallback onCardTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isOpen = ref.watch(storeHoursNotifierProvider.select((s) => s.isStoreOpen));
+    final message = ref.watch(storeHoursNotifierProvider.select((s) => s.current?.temporaryMessage));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Material(
@@ -65,8 +68,37 @@ class SellerCard extends StatelessWidget {
                             ),
                           ),
                           const Gap(AppSpacing.xs),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: isOpen ? AppColors.success : AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const Gap(AppSpacing.xs),
+                              Text(
+                                isOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: isOpen ? AppColors.success : AppColors.error,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (!isOpen && message != null && message.isNotEmpty)
+                            Text(
+                              message,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          const Gap(AppSpacing.xs),
                           Text(
-                            '⭐ ${seller.rating.toStringAsFixed(1)}${AppStrings.sellerRatingMid}${seller.salesCount}${AppStrings.sellerSalesSuffix}',
+                            '⭐ ${seller.rating.toStringAsFixed(1)}${context.l10n.sellerRatingMid}${seller.salesCount}${context.l10n.sellerSalesSuffix}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -84,7 +116,7 @@ class SellerCard extends StatelessWidget {
                     children: [
                    OutlinedButton(
                       onPressed: onVisitStore,
-                      child: Text(AppStrings.visitStore),
+                      child: Text(context.l10n.visitStore),
                     ), 
                    
                       if (seller.verified) ...[
@@ -99,7 +131,7 @@ class SellerCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppSpacing.sm),
                     ),
                     child: Text(
-                      AppStrings.verifiedSeller,
+                      context.l10n.verifiedSeller,
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: AppColors.success,
                         fontWeight: FontWeight.w600,
@@ -109,6 +141,21 @@ class SellerCard extends StatelessWidget {
                 ],
                   ],),
               
+                if (!isOpen) ...[
+                  const Gap(AppSpacing.sm),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppSpacing.sm),
+                    ),
+                    child: Text(
+                      context.l10n.storeClosedWarning,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

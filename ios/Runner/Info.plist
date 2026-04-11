@@ -73,5 +73,9 @@
 	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>xStore needs your location to help buyers find products near them.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>xStore needs your location to show your store location to buyers.</string>
 </dict>
 </plist>

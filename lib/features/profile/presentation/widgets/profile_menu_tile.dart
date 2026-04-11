@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -12,6 +11,8 @@ class ProfileMenuTile extends StatelessWidget {
     required this.icon,
     required this.iconBackground,
     required this.label,
+    this.subtitle,
+    this.subtitleColor,
     this.onTap,
     this.showChevron = true,
     this.trailing,
@@ -21,6 +22,8 @@ class ProfileMenuTile extends StatelessWidget {
   final IconData icon;
   final Color iconBackground;
   final String label;
+  final String? subtitle;
+  final Color? subtitleColor;
   final VoidCallback? onTap;
   final bool showChevron;
   final Widget? trailing;
@@ -50,10 +53,25 @@ class ProfileMenuTile extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(
-              label,
-              style: AppTypography.bodyLarge,
-            ),
+            child: subtitle == null
+                ? Text(
+                    label,
+                    style: AppTypography.bodyLarge,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label, style: AppTypography.bodyLarge),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: subtitleColor ?? context.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
           if (trailing != null)
             trailing!
@@ -79,7 +97,7 @@ class ProfileMenuTile extends StatelessWidget {
             if ((trailingBadgeCount ?? 0) > 0) const SizedBox(width: AppSpacing.sm),
             if (showChevron)
               Icon(
-                LucideIcons.chevronRight,
+                context.chevronForward,
                 size: AppSpacing.x2l,
                 color: context.textSecondary,
               ),

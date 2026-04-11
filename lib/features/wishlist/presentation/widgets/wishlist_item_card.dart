@@ -7,7 +7,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
@@ -34,10 +33,10 @@ class WishlistItemCard extends ConsumerWidget {
   void _undoSnack(BuildContext context, WidgetRef ref) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.wishlistRemovedSnack),
+        content: Text(context.l10n.wishlistRemovedSnack),
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
-          label: AppStrings.cartUndo,
+          label: context.l10n.cartUndo,
           onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
         ),
       ),
@@ -47,19 +46,19 @@ class WishlistItemCard extends ConsumerWidget {
   void _addedToCartSnack(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.wishlistSingleAddedToCart),
+        content: Text(context.l10n.wishlistSingleAddedToCart),
         action: SnackBarAction(
-          label: AppStrings.wishlistViewCart,
+          label: context.l10n.wishlistViewCart,
           onPressed: () => context.push(AppRoutes.cart),
         ),
       ),
     );
   }
 
-  String _shippingLine(WishlistItemEntity e) {
-    if (!e.shippingAvailable) return AppStrings.cartPickupOnly;
-    if (e.shippingCost <= 0) return AppStrings.cartShippingFree;
-    return AppStrings.cartShippingPaid(e.shippingCost);
+  String _shippingLine(BuildContext context, WishlistItemEntity e) {
+    if (!e.shippingAvailable) return context.l10n.cartPickupOnly;
+    if (e.shippingCost <= 0) return context.l10n.cartShippingFree;
+    return context.l10n.cartShippingPaid(e.shippingCost.round());
   }
 
   @override
@@ -150,7 +149,7 @@ class WishlistItemCard extends ConsumerWidget {
                                     ),
                                   ),
                                   child: Text(
-                                    AppStrings.wishlistOutOfStock,
+                                    context.l10n.wishlistOutOfStock,
                                     style: AppTypography.labelSmall.copyWith(
                                       color: context.textSecondary,
                                       fontWeight: FontWeight.w600,
@@ -174,7 +173,7 @@ class WishlistItemCard extends ConsumerWidget {
                                 ),
                                 color: AppColors.success.withValues(alpha: 0.92),
                                 child: Text(
-                                  AppStrings.wishlistInCartBadge,
+                                  context.l10n.wishlistInCartBadge,
                                   textAlign: TextAlign.center,
                                   style: AppTypography.labelSmall.copyWith(
                                     color: AppColors.white,
@@ -214,7 +213,7 @@ class WishlistItemCard extends ConsumerWidget {
                         if (drop > 0) ...[
                           const Gap(AppSpacing.xs),
                           Text(
-                            '↓ ${AppStrings.wishlistPriceDropBadge} $drop%',
+                            '↓ ${context.l10n.wishlistPriceDropBadge} $drop%',
                             style: AppTypography.labelSmall.copyWith(
                               color: AppColors.success,
                               fontWeight: FontWeight.w600,
@@ -254,7 +253,7 @@ class WishlistItemCard extends ConsumerWidget {
                               color: AppColors.warning,
                             ),
                             Text(
-                              ' ${item.rating.toStringAsFixed(1)} · ${item.reviewCount} ${AppStrings.wishlistReviewsWord}',
+                              ' ${item.rating.toStringAsFixed(1)} · ${item.reviewCount} ${context.l10n.wishlistReviewsWord}',
                               style: AppTypography.bodySmall.copyWith(
                                 color: context.textSecondary,
                               ),
@@ -284,7 +283,7 @@ class WishlistItemCard extends ConsumerWidget {
                         ),
                         const Gap(AppSpacing.xs),
                         Text(
-                          _shippingLine(item),
+                          _shippingLine(context, item),
                           style: AppTypography.bodySmall.copyWith(
                             color: context.textSecondary,
                           ),
@@ -311,7 +310,7 @@ class WishlistItemCard extends ConsumerWidget {
                         if (context.mounted) _undoSnack(context, ref);
                       },
                       child: Text(
-                        AppStrings.wishlistRemove,
+                        context.l10n.wishlistRemove,
                         style: AppTypography.labelLarge.copyWith(
                           color: AppColors.error,
                         ),
@@ -324,7 +323,7 @@ class WishlistItemCard extends ConsumerWidget {
                           backgroundColor: AppColors.success,
                         ),
                         onPressed: () => context.push(AppRoutes.cart),
-                        child: Text(AppStrings.wishlistInCartCta),
+                        child: Text(context.l10n.wishlistInCartCta),
                       )
                     else
                       FilledButton(
@@ -340,8 +339,8 @@ class WishlistItemCard extends ConsumerWidget {
                             : null,
                         child: Text(
                           item.isAvailable
-                              ? AppStrings.wishlistAddToCart
-                              : AppStrings.wishlistOutOfStock,
+                              ? context.l10n.wishlistAddToCart
+                              : context.l10n.wishlistOutOfStock,
                         ),
                       ),
                   ],

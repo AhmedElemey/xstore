@@ -93,7 +93,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       child: TextButton(
                         onPressed: _finish,
                         child: Text(
-                          'Skip',
+                          context.l10n.skip,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: context.textSecondary,
@@ -133,9 +133,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           children: [
                             Text(
                               [
-                                'Discover Amazing Deals',
-                                'Start Selling Today',
-                                'Safe & Trusted',
+                                context.l10n.onboardingTitle1,
+                                context.l10n.onboardingTitle2,
+                                context.l10n.onboardingTitle3,
                               ][_page],
                               style: TextStyle(
                                 fontSize: 24,
@@ -146,9 +146,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             const Gap(12),
                             Text(
                               [
-                                'Shop from thousands of vendors across Algeria and beyond',
-                                'List your products in minutes and reach thousands of buyers',
-                                'Secure payments, buyer protection, and verified sellers',
+                                context.l10n.onboardingSubtitle1,
+                                context.l10n.onboardingSubtitle2,
+                                context.l10n.onboardingSubtitle3,
                               ][_page],
                               maxLines: 3,
                               style: TextStyle(
@@ -163,8 +163,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     AuthButton(
                       label: _page == _slideIcons.length - 1
-                          ? 'Get Started'
-                          : 'Next',
+                          ? context.l10n.getStarted
+                          : context.l10n.next,
                       onPressed: () {
                         if (_page < _slideIcons.length - 1) {
                           _pageController.nextPage(

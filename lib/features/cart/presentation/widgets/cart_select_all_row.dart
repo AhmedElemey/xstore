@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../providers/cart_provider.dart';
@@ -57,14 +56,14 @@ class CartSelectAllRow extends ConsumerWidget {
               ),
               Expanded(
                 child: Text(
-                  AppStrings.cartSelectAllCount(cart.itemsCount),
+                  context.l10n.cartSelectAllCount(cart.itemsCount),
                   style: AppTypography.titleMedium.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Text(
-                '${AppStrings.cartTotalLabel}: ${Formatters.dzdWhole(cart.total)}',
+                '${context.l10n.cartTotalLabel}: ${Formatters.dzdWhole(cart.total)}',
                 style: AppTypography.labelLarge.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,

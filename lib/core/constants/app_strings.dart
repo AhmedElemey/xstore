@@ -128,6 +128,7 @@ abstract final class AppStrings {
   static const myListings = 'My Listings';
   static const publishListing = '🚀 Publish Listing';
   static const saveDraft = 'Save Draft';
+  static const listingDraftSaved = 'Draft saved';
   static const newListing = 'New Listing';
 
   // Profile
@@ -709,4 +710,101 @@ abstract final class AppStrings {
   static const vendorStatusDelivered = 'Order delivered successfully';
   static const vendorStatusCancelled = 'This order was cancelled';
   static const vendorStatusRefunded = 'Refunded';
+
+  // Store hours
+  static const storeHours = 'Store Hours';
+  static const storeOpenNow = 'Open Now';
+  static const storeClosedNow = 'Closed';
+  static const storeStatusOpen = 'Your store is currently OPEN';
+  static const storeStatusClosed = 'Your store is currently CLOSED';
+  static const storeOpenDesc = 'Customers can place orders now';
+  static const storeClosedDesc = 'Customers cannot place orders now';
+  static const closeStoreNow = 'Close Store Now';
+  static const openStoreNow = 'Open Store Now';
+  static const closedMessage = 'Add a message for customers (optional)';
+  static const closedMessageTitle = 'Closed message';
+  static const closedMessageHint = 'e.g. Back in 1 hour, Closed for holiday';
+  static const weeklySchedule = 'Weekly Schedule';
+  static const weeklyScheduleSubtitle = 'Set your working hours for each day';
+  static const copyHoursToAll = 'Copy hours to all days';
+  static const quickPresets = 'Quick Presets';
+  static const quickPresetsSubtitle = 'Apply a schedule template instantly';
+  static const presetStandard = 'Standard (9AM–6PM)';
+  static const presetExtended = 'Extended (9AM–11PM)';
+  static const presetMorning = 'Morning Only (8AM–2PM)';
+  static const presetFullWeek = 'Full Week';
+  static const presetWeekdays = 'Weekdays Only (Sat–Thu)';
+  static const presetWithoutFriday = 'Without Friday';
+  static const saveWorkingHours = 'Save Working Hours';
+  static const workingHoursSaved = 'Working hours saved! ✅';
+  static const storeNowOpen = 'Store is now Open 🟢';
+  static const storeNowClosed = 'Store is now Closed 🔴';
+  static const open24Hours = 'Open 24 Hours';
+  static const from = 'From';
+  static const to = 'To';
+  static const copyFrom = 'Copy from:';
+  static const copyingFrom = 'Copying from:';
+  static const applyToSelectedDays = 'Apply to Selected Days';
+  static const selectAllDays = 'Select All';
+  static const deselectAllDays = 'Deselect All';
+  static const openLabel = 'Open';
+  static const closedLabel = 'Closed';
+  static String opensAt(String time) => 'Opens at $time';
+  static String closesAt(String time) => 'Closes at $time';
+  static String opensOn(String day, String time) => 'Opens $day at $time';
+  static const storeHoursTitle = 'Store Hours';
+  static const todayLabel = 'Today';
+  static const daySaturday = 'Saturday';
+  static const daySunday = 'Sunday';
+  static const dayMonday = 'Monday';
+  static const dayTuesday = 'Tuesday';
+  static const dayWednesday = 'Wednesday';
+  static const dayThursday = 'Thursday';
+  static const dayFriday = 'Friday';
+  static const dayShortSat = 'Sat';
+  static const dayShortSun = 'Sun';
+  static const dayShortMon = 'Mon';
+  static const dayShortTue = 'Tue';
+  static const dayShortWed = 'Wed';
+  static const dayShortThu = 'Thu';
+  static const dayShortFri = 'Fri';
+  static const invalidHoursError = 'Closing time must be after opening time';
+  static const discardChanges = 'Discard Changes';
+  static const discardChangesConfirm = 'Discard unsaved changes?';
+  static String applyPresetConfirm(String preset) =>
+      'Apply $preset hours to all days?';
+  static const storeClosedWarning =
+      'This store is currently closed. You can still order — seller will respond when they reopen.';
+
+  // Vendor location
+  static const storeLocation = 'Store Location';
+  static const storeLocationSubtitle = 'Help buyers find your store';
+  static const detectMyLocation = 'Detect My Current Location';
+  static const detectingLocation = 'Detecting location...';
+  static const orFillManually = 'or fill manually';
+  static const latitude = 'Latitude';
+  static const longitude = 'Longitude';
+  static const latitudeHint = '30.044400';
+  static const longitudeHint = '31.235700';
+  static const governorate = 'Governorate';
+  static const governorateHint = 'e.g. Cairo, Giza, Alexandria';
+  static const townCity = 'Town / City';
+  static const townCityHint = 'e.g. Nasr City, Dokki, Sidi Gaber';
+  static const detailAddress = 'Detailed Address';
+  static const detailAddressHint =
+      'e.g. 12 Tahrir St, Floor 3, near City Stars';
+  static const locationDetected = '📍 Location detected!';
+  static const locationServiceDisabled =
+      'Location services are disabled. Enable them in Settings.';
+  static const locationPermissionDenied =
+      'Location permission denied. Please allow location access.';
+  static const locationPermissionPermanent =
+      'Location permission permanently denied. Open app settings to enable.';
+  static const openSettings = 'Open Settings';
+  static const openAppSettings = 'Open App Settings';
+  static const invalidLatitude = 'Invalid latitude value';
+  static const invalidLongitude = 'Invalid longitude value';
+  static const egypt = 'Egypt';
+  static const locationServicesOff = 'Location services are off';
+  static const enableLocationServices = 'Enable them in Settings?';
 }

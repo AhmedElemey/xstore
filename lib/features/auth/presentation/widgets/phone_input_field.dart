@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -37,7 +36,7 @@ class PhoneInputField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.phoneNumber,
+          context.l10n.phoneNumber,
           style: AppTypography.bodyMedium.copyWith(
             color: context.textSecondary,
             fontWeight: FontWeight.w500,

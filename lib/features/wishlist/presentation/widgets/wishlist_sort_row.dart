@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
@@ -52,7 +51,7 @@ class WishlistSortRow extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      wishlistSortLabel(sortOption),
+                      wishlistSortLabel(context, sortOption),
                       style: AppTypography.labelLarge.copyWith(
                         color: context.textPrimary,
                         fontWeight: FontWeight.w600,
@@ -76,23 +75,23 @@ class WishlistSortRow extends ConsumerWidget {
                 child: Row(
                   children: [
                     _FilterChip(
-                      label: AppStrings.wishlistFilterAll,
+                      label: context.l10n.wishlistFilterAll,
                       selected: selectedFilter == WishlistFilter.all,
                       onTap: () => notifier.applyFilter(WishlistFilter.all),
                     ),
                     _FilterChip(
-                      label: AppStrings.wishlistFilterAvailable,
+                      label: context.l10n.wishlistFilterAvailable,
                       selected: selectedFilter == WishlistFilter.available,
                       onTap: () => notifier.applyFilter(WishlistFilter.available),
                     ),
                     _FilterChip(
-                      label: AppStrings.wishlistFilterPriceDropped,
+                      label: context.l10n.wishlistFilterPriceDropped,
                       selected: selectedFilter == WishlistFilter.priceDropped,
                       onTap: () =>
                           notifier.applyFilter(WishlistFilter.priceDropped),
                     ),
                     _FilterChip(
-                      label: AppStrings.wishlistFilterInCart,
+                      label: context.l10n.wishlistFilterInCart,
                       selected: selectedFilter == WishlistFilter.inCart,
                       onTap: () => notifier.applyFilter(WishlistFilter.inCart),
                     ),

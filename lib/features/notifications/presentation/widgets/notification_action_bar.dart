@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -35,7 +34,7 @@ class NotificationActionBar extends ConsumerWidget {
             )
           else if (!hasMore && hasNotifications)
             Text(
-              AppStrings.notificationsNoMore,
+              context.l10n.notificationsNoMore,
               style: AppTypography.bodySmall.copyWith(color: context.textSecondary),
             ),
         ],

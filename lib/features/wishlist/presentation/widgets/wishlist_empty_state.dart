@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -24,7 +23,7 @@ class WishlistEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final filtered = filterEmptyTitle != null;
     final titleText =
-        filtered ? filterEmptyTitle! : AppStrings.wishlistEmptyTitle;
+        filtered ? filterEmptyTitle! : context.l10n.wishlistEmptyTitle;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -63,7 +62,7 @@ class WishlistEmptyState extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 if (!filtered)
                   Text(
-                    AppStrings.wishlistEmptySubtitle,
+                    context.l10n.wishlistEmptySubtitle,
                     style: AppTypography.bodyMedium.copyWith(
                       color: context.textSecondary,
                       height: 1.45,
@@ -84,8 +83,8 @@ class WishlistEmptyState extends StatelessWidget {
                   ),
                   child: Text(
                     filtered
-                        ? AppStrings.wishlistShowAllItems
-                        : AppStrings.wishlistDiscoverProducts,
+                        ? context.l10n.wishlistShowAllItems
+                        : context.l10n.discoverProducts,
                         style: TextStyle( color: AppColors.white,),
                   ),
                 ),

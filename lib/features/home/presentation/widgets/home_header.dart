@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/notification_bell_button.dart';
 import '../../../../shared/widgets/notification_icon_badge.dart';
@@ -41,7 +40,7 @@ class HomeHeader extends ConsumerWidget {
             Row(
               children: [
                 Text(
-                  AppStrings.appName,
+                  context.l10n.appName,
                   style: AppTypography.titleLarge.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w800,
@@ -59,9 +58,9 @@ class HomeHeader extends ConsumerWidget {
                       ),
                     ),
                   ),
-                const NotificationBellButton(
+                NotificationBellButton(
                   icon: LucideIcons.bellDot,
-                  tooltip: AppStrings.notifications,
+                  tooltip: context.l10n.notifications,
                 ),
               ],
             ),
@@ -91,7 +90,7 @@ class HomeHeader extends ConsumerWidget {
                       const Gap(AppSpacing.md),
                       Expanded(
                         child: Text(
-                          AppStrings.searchHint,
+                          context.l10n.searchHint,
                           style: AppTypography.bodyMedium.copyWith(
                             color: context.textSecondary,
                           ),
@@ -108,15 +107,15 @@ class HomeHeader extends ConsumerWidget {
               child: Row(
                 children: [
                   _TrustChip(
-                    label: AppStrings.freeShippingBadge,
+                    label: context.l10n.freeShippingBadge,
                   ),
                   const Gap(AppSpacing.sm),
                   _TrustChip(
-                    label: AppStrings.securePayBadge,
+                    label: context.l10n.securePayBadge,
                   ),
                   const Gap(AppSpacing.sm),
                   _TrustChip(
-                    label: AppStrings.easyReturnsBadge,
+                    label: context.l10n.easyReturnsBadge,
                   ),
                 ],
               ),

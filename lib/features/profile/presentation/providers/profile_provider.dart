@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,6 +14,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import 'profile_dependencies.dart';
 import 'profile_state.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../core/utils/location_service.dart';
 
 part 'profile_provider.g.dart';
 
@@ -36,6 +38,11 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editStoreCity.trim() == (u.storeCity ?? '').trim() &&
       s.editStoreWilaya.trim() == (u.storeWilaya ?? '').trim() &&
       s.editWhatsapp.trim() == (u.whatsappNumber ?? '').trim() &&
+      s.editLatitude.trim() == ((u.latitude == null) ? '' : u.latitude!.toStringAsFixed(6)) &&
+      s.editLongitude.trim() == ((u.longitude == null) ? '' : u.longitude!.toStringAsFixed(6)) &&
+      s.editGovernorate.trim() == (u.governorate ?? '').trim() &&
+      s.editTown.trim() == (u.town ?? '').trim() &&
+      s.editDetailAddress.trim() == (u.detailAddress ?? '').trim() &&
       s.editDateOfBirth == u.dateOfBirth &&
       s.editInstagram.trim() == (u.instagramHandle ?? '').trim() &&
       s.editFacebook.trim() == (u.facebookPage ?? '').trim() &&
@@ -118,6 +125,21 @@ class ProfileNotifier extends _$ProfileNotifier {
       case 'dateOfBirth':
         next = next.copyWith(editDateOfBirth: value as DateTime?);
         break;
+      case 'latitude':
+        next = next.copyWith(editLatitude: value as String);
+        break;
+      case 'longitude':
+        next = next.copyWith(editLongitude: value as String);
+        break;
+      case 'governorate':
+        next = next.copyWith(editGovernorate: value as String);
+        break;
+      case 'town':
+        next = next.copyWith(editTown: value as String);
+        break;
+      case 'detailAddress':
+        next = next.copyWith(editDetailAddress: value as String);
+        break;
       case 'instagram':
         next = next.copyWith(editInstagram: value as String);
         break;
@@ -130,8 +152,64 @@ class ProfileNotifier extends _$ProfileNotifier {
     final u = next.user;
     final changed =
         u != null ? !_profileEditEqualsUser(next, u) : next.hasChanges;
-    state = next.copyWith(hasChanges: changed, fieldErrors: {});
+    state = next.copyWith(hasChanges: changed, fieldErrors: {}, locationError: null, locationAction: null);
   }
+
+  Future<void> detectCurrentLocation() async {
+    state = state.copyWith(isDetectingLocation: true, locationError: null, locationAction: null);
+    try {
+      final result = await LocationService().getCurrentLocation();
+      final next = state.copyWith(
+        editLatitude: LocationService.formatCoordinate(result.latitude),
+        editLongitude: LocationService.formatCoordinate(result.longitude),
+        editGovernorate: result.governorate ?? '',
+        editTown: result.town ?? '',
+        editDetailAddress: result.detailAddress ?? '',
+        isDetectingLocation: false,
+        locationError: null,
+        locationAction: null,
+      );
+      final u = next.user;
+      state = next.copyWith(hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true);
+    } on XStoreLocationServiceDisabledException {
+      state = state.copyWith(
+        isDetectingLocation: false,
+        locationError: 'locationServiceDisabled',
+        locationAction: 'open_location_settings',
+      );
+    } on XStoreLocationPermissionDeniedException {
+      state = state.copyWith(
+        isDetectingLocation: false,
+        locationError: 'locationPermissionDenied',
+        locationAction: null,
+      );
+    } on XStoreLocationPermissionPermanentlyDeniedException {
+      state = state.copyWith(
+        isDetectingLocation: false,
+        locationError: 'locationPermissionPermanent',
+        locationAction: 'open_app_settings',
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isDetectingLocation: false,
+        locationError: 'locationPermissionDenied',
+        locationAction: null,
+      );
+    }
+  }
+
+  void updateLatitude(String value) => updateField('latitude', value);
+  void updateLongitude(String value) => updateField('longitude', value);
+  void updateGovernorate(String value) => updateField('governorate', value);
+  void updateTown(String value) => updateField('town', value);
+  void updateDetailAddress(String value) => updateField('detailAddress', value);
+
+  void clearLocationFeedback() {
+    state = state.copyWith(locationError: null, locationAction: null);
+  }
+
+  Future<void> openLocationSettings() => Geolocator.openLocationSettings();
+  Future<void> openAppSettings() => Geolocator.openAppSettings();
 
   Future<bool> pickAvatar(ImageSource source) async {
     final picker = ImagePicker();
@@ -172,6 +250,24 @@ class ProfileNotifier extends _$ProfileNotifier {
   Future<void> saveProfile() async {
     final u0 = state.user;
     if (u0 == null) return;
+
+    final lat = state.editLatitude.trim();
+    final lng = state.editLongitude.trim();
+    if ((lat.isNotEmpty && lng.isEmpty) || (lat.isEmpty && lng.isNotEmpty)) {
+      state = state.copyWith(
+        isUpdating: false,
+        error: lat.isEmpty ? 'invalidLatitude' : 'invalidLongitude',
+      );
+      return;
+    }
+    if (lat.isNotEmpty && !LocationService.isValidLatitude(lat)) {
+      state = state.copyWith(isUpdating: false, error: 'invalidLatitude');
+      return;
+    }
+    if (lng.isNotEmpty && !LocationService.isValidLongitude(lng)) {
+      state = state.copyWith(isUpdating: false, error: 'invalidLongitude');
+      return;
+    }
 
     state = state.copyWith(isUpdating: true, error: null, fieldErrors: {});
     var nextUser = state.toEditedUser();

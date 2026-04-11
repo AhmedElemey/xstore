@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/order_entity.dart';
@@ -57,7 +56,7 @@ class OrderCard extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      '${AppStrings.orderHashPrefix}${order.formattedOrderId}',
+                      '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
                       style: AppTypography.titleMedium.copyWith(fontSize: 16),
                     ),
                   ),
@@ -142,12 +141,12 @@ class OrderCard extends ConsumerWidget {
                           ),
                           if (more > 0)
                             Text(
-                              AppStrings.ordersMoreItems(more),
+                              context.l10n.ordersMoreItems(more),
                               style: AppTypography.bodySmall,
                             ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(
-                            '${AppStrings.ordersQtyTotalLinePrefix}: ${first.quantity} · ${_fmt(first.total)} ${AppStrings.currencyDzd}',
+                            '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${_fmt(first.total)} ${context.l10n.currencyDzd}',
                             style: AppTypography.bodyLarge.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w700,
@@ -167,7 +166,7 @@ class OrderCard extends ConsumerWidget {
                 )
               else
                 Text(
-                  '💳 ${paymentShort(order)} · ${_shortDate(order.createdAt)}',
+                  '💳 ${paymentShort(context, order)} · ${_shortDate(order.createdAt)}',
                   style: AppTypography.bodySmall,
                 ),
               if (!isVendor &&
@@ -176,7 +175,7 @@ class OrderCard extends ConsumerWidget {
                   order.estimatedDelivery != null) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${AppStrings.ordersEstimatedDelivery}: ${_eta(order.estimatedDelivery!)}',
+                  '${context.l10n.ordersEstimatedDelivery}: ${_eta(order.estimatedDelivery!)}',
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -205,14 +204,14 @@ class OrderCard extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => _rejectFlow(context, ref, notifier),
-                  child: Text(AppStrings.ordersRejectOrder),
+                  child: Text(context.l10n.ordersRejectOrder),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: FilledButton(
                   onPressed: () => notifier.confirmOrderVendor(order.id),
-                  child: Text(AppStrings.ordersConfirmOrderCta),
+                  child: Text(context.l10n.ordersConfirmOrderCta),
                 ),
               ),
             ],
@@ -222,7 +221,7 @@ class OrderCard extends ConsumerWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => notifier.markProcessing(order.id),
-              child: Text(AppStrings.ordersMarkProcessing),
+              child: Text(context.l10n.ordersMarkProcessing),
             ),
           );
         case OrderStatus.processing:
@@ -230,7 +229,7 @@ class OrderCard extends ConsumerWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => _shipSheet(context, ref, notifier),
-              child: Text(AppStrings.ordersMarkShipped),
+              child: Text(context.l10n.ordersMarkShipped),
             ),
           );
         case OrderStatus.shipped:
@@ -238,7 +237,7 @@ class OrderCard extends ConsumerWidget {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => _trackingSnack(context),
-              child: Text(AppStrings.ordersViewTracking),
+              child: Text(context.l10n.ordersViewTracking),
             ),
           );
         case OrderStatus.delivered:
@@ -248,7 +247,7 @@ class OrderCard extends ConsumerWidget {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => context.push(AppRoutes.orderPath(order.id)),
-              child: Text(AppStrings.ordersViewDetails),
+              child: Text(context.l10n.ordersViewDetails),
             ),
           );
       }
@@ -261,7 +260,7 @@ class OrderCard extends ConsumerWidget {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () => _cancelConsumer(context, ref, notifier),
-            child: Text(AppStrings.ordersCancelOrder),
+            child: Text(context.l10n.ordersCancelOrder),
           ),
         );
       case OrderStatus.shipped:
@@ -270,14 +269,14 @@ class OrderCard extends ConsumerWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _trackingSnack(context),
-                child: Text(AppStrings.ordersTrackOrder),
+                child: Text(context.l10n.ordersTrackOrder),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: FilledButton(
                 onPressed: () => _confirmReceipt(context, ref, notifier),
-                child: Text(AppStrings.ordersConfirmReceipt),
+                child: Text(context.l10n.ordersConfirmReceipt),
               ),
             ),
           ],
@@ -288,7 +287,7 @@ class OrderCard extends ConsumerWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _reviewSheet(context),
-                child: Text(AppStrings.ordersLeaveReview),
+                child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -298,11 +297,11 @@ class OrderCard extends ConsumerWidget {
                   await notifier.reorder(order.id);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppStrings.addedToCart)),
+                      SnackBar(content: Text(context.l10n.addedToCart)),
                     );
                   }
                 },
-                child: Text(AppStrings.ordersReorder),
+                child: Text(context.l10n.ordersReorder),
               ),
             ),
           ],
@@ -312,7 +311,7 @@ class OrderCard extends ConsumerWidget {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () => context.push(AppRoutes.orderPath(order.id)),
-            child: Text(AppStrings.ordersViewDetails),
+            child: Text(context.l10n.ordersViewDetails),
           ),
         );
       case OrderStatus.processing:
@@ -321,17 +320,17 @@ class OrderCard extends ConsumerWidget {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () => context.push(AppRoutes.orderPath(order.id)),
-            child: Text(AppStrings.ordersViewDetails),
+            child: Text(context.l10n.ordersViewDetails),
           ),
         );
     }
   }
 
-  String paymentShort(OrderEntity o) => switch (o.paymentMethod) {
-        PaymentMethod.cashOnDelivery => AppStrings.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => AppStrings.ordersPaymentCib,
-        PaymentMethod.dahabiCard => AppStrings.ordersPaymentDahabi,
-        PaymentMethod.baridimob => AppStrings.ordersPaymentBaridimob,
+  String paymentShort(BuildContext context, OrderEntity o) => switch (o.paymentMethod) {
+        PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
+        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
+        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
+        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
       };
 
   String _fmt(double v) =>
@@ -361,16 +360,16 @@ class OrderCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppStrings.ordersConfirmReceiptTitle),
-        content: Text(AppStrings.ordersConfirmReceiptBody),
+        title: Text(context.l10n.ordersConfirmReceiptTitle),
+        content: Text(context.l10n.ordersConfirmReceiptTitle),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppStrings.cancel),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppStrings.ordersConfirm),
+            child: Text(context.l10n.ordersConfirm),
           ),
         ],
       ),
@@ -391,19 +390,19 @@ class OrderCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppStrings.ordersRejectDialogTitle),
+        title: Text(context.l10n.ordersRejectDialogTitle),
         content: TextField(
           controller: ctrl,
-          decoration: InputDecoration(hintText: AppStrings.ordersRejectReasonHint),
+          decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppStrings.cancel),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppStrings.ordersConfirm),
+            child: Text(context.l10n.ordersConfirm),
           ),
         ],
       ),
@@ -444,23 +443,23 @@ class OrderCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(AppStrings.ordersAddTrackingTitle,
+                  Text(context.l10n.ordersAddTrackingTitle,
                       style: AppTypography.titleMedium),
                   const SizedBox(height: AppSpacing.md),
                   TextField(
                     controller: trackCtrl,
                     decoration: InputDecoration(
-                      labelText: AppStrings.ordersTrackingNumberLabel,
+                      labelText: context.l10n.ordersTrackingNumberLabel,
                     ),
                   ),
                   TextField(
                     controller: courierCtrl,
                     decoration: InputDecoration(
-                      labelText: AppStrings.ordersCourierNameLabel,
+                      labelText: context.l10n.ordersCourierNameLabel,
                     ),
                   ),
                   ListTile(
-                    title: Text(AppStrings.ordersEstimatedDeliveryLabel),
+                    title: Text(context.l10n.ordersEstimatedDeliveryLabel),
                     subtitle: Text(
                       eta != null ? _shortDate(eta!) : '—',
                     ),
@@ -493,7 +492,7 @@ class OrderCard extends ConsumerWidget {
                         ),
                       );
                     },
-                    child: Text(AppStrings.ordersConfirmShipment),
+                    child: Text(context.l10n.ordersConfirmShipment),
                   ),
                 ],
               );
@@ -509,7 +508,7 @@ class OrderCard extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          order.trackingNumber ?? AppStrings.ordersTrackOnCourier,
+          order.trackingNumber ?? context.l10n.ordersTrackOnCourier,
         ),
       ),
     );
@@ -535,7 +534,7 @@ class OrderCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(AppStrings.ordersReviewSheetTitle,
+                  Text(context.l10n.ordersReviewSheetTitle,
                       style: AppTypography.titleMedium),
                   const SizedBox(height: AppSpacing.md),
                   Row(
@@ -556,7 +555,7 @@ class OrderCard extends ConsumerWidget {
                     controller: text,
                     maxLines: 4,
                     decoration: InputDecoration(
-                      hintText: AppStrings.ordersReviewHint,
+                      hintText: context.l10n.ordersReviewHint,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -564,10 +563,10 @@ class OrderCard extends ConsumerWidget {
                     onPressed: () {
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppStrings.ordersReviewThanks)),
+                        SnackBar(content: Text(context.l10n.ordersReviewThanks)),
                       );
                     },
-                    child: Text(AppStrings.ordersSubmitReview),
+                    child: Text(context.l10n.ordersSubmitReview),
                   ),
                 ],
               ),
@@ -579,19 +578,19 @@ class OrderCard extends ConsumerWidget {
   }
 
   Future<String?> _cancelReasonDialog(BuildContext context) async {
-    var selected = AppStrings.ordersCancelReasonChangedMind;
+    var selected = context.l10n.ordersCancelReasonChangedMind;
     return showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setS) {
           return AlertDialog(
-            title: Text(AppStrings.ordersCancelDialogTitle),
+            title: Text(context.l10n.ordersCancelDialogTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  AppStrings.ordersCancelReasonLabel,
+                  context.l10n.ordersCancelReasonLabel,
                   style: AppTypography.labelLarge,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -599,10 +598,10 @@ class OrderCard extends ConsumerWidget {
                   isExpanded: true,
                   value: selected,
                   items: [
-                    AppStrings.ordersCancelReasonChangedMind,
-                    AppStrings.ordersCancelReasonBetterPrice,
-                    AppStrings.ordersCancelReasonMistake,
-                    AppStrings.ordersCancelReasonOther,
+                    context.l10n.ordersCancelReasonChangedMind,
+                    context.l10n.ordersCancelReasonBetterPrice,
+                    context.l10n.ordersCancelReasonMistake,
+                    context.l10n.ordersCancelReasonOther,
                   ]
                       .map(
                         (e) => DropdownMenuItem(value: e, child: Text(e)),
@@ -617,11 +616,11 @@ class OrderCard extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text(AppStrings.cancel),
+                child: Text(context.l10n.cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, selected),
-                child: Text(AppStrings.ordersConfirm),
+                child: Text(context.l10n.ordersConfirm),
               ),
             ],
           );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class RejectOrderSheet extends StatefulWidget {
@@ -15,14 +14,6 @@ class RejectOrderSheet extends StatefulWidget {
 }
 
 class _RejectOrderSheetState extends State<RejectOrderSheet> {
-  static const _reasons = <String>[
-    AppStrings.vendorReasonItemUnavailable,
-    AppStrings.vendorReasonOutOfStock,
-    AppStrings.vendorReasonCannotDeliver,
-    AppStrings.vendorReasonSuspicious,
-    AppStrings.vendorReasonIncorrectPricing,
-    AppStrings.vendorReasonOther,
-  ];
   String? _selected;
   final _otherCtrl = TextEditingController();
   var _loading = false;
@@ -35,8 +26,16 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final reasons = <String>[
+      context.l10n.vendorReasonItemUnavailable,
+      context.l10n.vendorReasonOutOfStock,
+      context.l10n.vendorReasonCannotDeliver,
+      context.l10n.vendorReasonSuspicious,
+      context.l10n.vendorReasonIncorrectPricing,
+      context.l10n.vendorReasonOther,
+    ];
     final canSubmit = _selected != null &&
-        (_selected != AppStrings.vendorReasonOther || _otherCtrl.text.trim().isNotEmpty);
+        (_selected != context.l10n.vendorReasonOther || _otherCtrl.text.trim().isNotEmpty);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -44,9 +43,9 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppStrings.vendorRejectTitle, style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.vendorRejectTitle, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
-            ..._reasons.map(
+            ...reasons.map(
               (r) => RadioListTile<String>(
                 // ignore: deprecated_member_use
                 value: r,
@@ -58,15 +57,15 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
                 onChanged: _loading ? null : (v) => setState(() => _selected = v),
               ),
             ),
-            if (_selected == AppStrings.vendorReasonOther)
+            if (_selected == context.l10n.vendorReasonOther)
               TextField(
                 controller: _otherCtrl,
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(hintText: AppStrings.vendorTypeReasonHint),
+                decoration: InputDecoration(hintText: context.l10n.vendorTypeReasonHint),
               ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              AppStrings.vendorRejectWarning,
+              context.l10n.vendorRejectTitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.warning,
                   ),
@@ -77,7 +76,7 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _loading ? null : () => Navigator.pop(context),
-                    child: Text(AppStrings.cancel),
+                    child: Text(context.l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -88,7 +87,7 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
                         : () async {
                             final navigator = Navigator.of(context);
                             setState(() => _loading = true);
-                            final reason = _selected == AppStrings.vendorReasonOther
+                            final reason = _selected == context.l10n.vendorReasonOther
                                 ? _otherCtrl.text.trim()
                                 : _selected!;
                             await widget.onConfirm(reason);
@@ -105,7 +104,7 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
                               color: context.surfaceColor,
                             ),
                           )
-                        : Text(AppStrings.vendorConfirmRejection),
+                        : Text(context.l10n.vendorConfirmRejection),
                   ),
                 ),
               ],

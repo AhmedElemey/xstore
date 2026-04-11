@@ -7,12 +7,12 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/widgets/skeletons/explore_skeleton.dart';
 import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
@@ -91,7 +91,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        title: Text(AppStrings.exploreTitle),
+        title: Text(context.l10n.navExplore),
         backgroundColor: context.backgroundColor,
       ),
       body: RefreshIndicator(
@@ -208,10 +208,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  TextSpan(text: ' · ${AppStrings.resultsFor} '),
+                                  TextSpan(text: ' · ${context.l10n.resultsFor} '),
                                   TextSpan(
                                     text: state.query.isEmpty
-                                        ? AppStrings.allListingsLabel
+                                        ? context.l10n.allListingsLabel
                                         : state.query,
                                     style: AppTypography.bodyMedium.copyWith(
                                       color: context.textPrimary,
@@ -229,19 +229,19 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             items: [
                               DropdownMenuItem(
                                 value: ExploreSortOption.relevance,
-                                child: Text(AppStrings.sortRelevance),
+                                child: Text(context.l10n.sortRelevance),
                               ),
                               DropdownMenuItem(
                                 value: ExploreSortOption.priceAsc,
-                                child: Text(AppStrings.sortPriceAsc),
+                                child: Text(context.l10n.sortPriceAsc),
                               ),
                               DropdownMenuItem(
                                 value: ExploreSortOption.priceDesc,
-                                child: Text(AppStrings.sortPriceDesc),
+                                child: Text(context.l10n.sortPriceDesc),
                               ),
                               DropdownMenuItem(
                                 value: ExploreSortOption.ratingDesc,
-                                child: Text(AppStrings.sortByRating),
+                                child: Text(context.l10n.sortByRating),
                               ),
                             ],
                             onChanged: (v) {
@@ -265,9 +265,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 ),
               ),
               if (state.isSearching)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator.adaptive()),
-                )
+                const SliverFillRemaining(child: ExploreSkeleton())
               else if (state.results.isEmpty)
                 SliverFillRemaining(
                   child: ExploreEmptyState(

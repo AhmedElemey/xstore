@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -48,7 +47,7 @@ class RecentSearchesHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(
-        AppStrings.recentSearches,
+        context.l10n.recentSearches,
         style: AppTypography.labelLarge.copyWith(color: context.textSecondary),
       ),
     );

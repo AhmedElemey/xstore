@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
-String paymentMethodLabel(PaymentMethod m) => switch (m) {
-      PaymentMethod.cashOnDelivery => AppStrings.ordersPaymentCashOnDelivery,
-      PaymentMethod.cibCard => AppStrings.ordersPaymentCib,
-      PaymentMethod.dahabiCard => AppStrings.ordersPaymentDahabi,
-      PaymentMethod.baridimob => AppStrings.ordersPaymentBaridimob,
+String paymentMethodLabel(BuildContext context, PaymentMethod m) => switch (m) {
+      PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
+      PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
+      PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
+      PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
     };
 
 class OrderPriceBreakdown extends StatelessWidget {
@@ -39,7 +38,7 @@ class OrderPriceBreakdown extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                paymentMethodLabel(order.paymentMethod),
+                paymentMethodLabel(context, order.paymentMethod),
                 style: AppTypography.bodyLarge.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -58,10 +57,10 @@ class OrderPriceBreakdown extends StatelessWidget {
               ),
               child: Text(
                 order.paymentMethod == PaymentMethod.cashOnDelivery && vendorMode
-                    ? AppStrings.vendorCollectOnDelivery
+                    ? context.l10n.vendorCollectOnDelivery
                     : (order.isPaid
-                        ? AppStrings.ordersPaidBadge
-                        : AppStrings.ordersPaymentPendingBadge),
+                        ? context.l10n.ordersPaidBadge
+                        : context.l10n.ordersPaymentPendingBadge),
                 style: AppTypography.labelLarge.copyWith(
                   color: order.paymentMethod == PaymentMethod.cashOnDelivery && vendorMode
                       ? AppColors.warning
@@ -72,19 +71,19 @@ class OrderPriceBreakdown extends StatelessWidget {
           ],
         ),
         Divider(height: AppSpacing.x2l),
-        _row(context, AppStrings.ordersSubtotal, order.subtotal),
-        _row(context, AppStrings.ordersShipping, order.shippingCost),
-        _row(context, AppStrings.ordersDiscount, order.discount),
+        _row(context, context.l10n.ordersSubtotal, order.subtotal),
+        _row(context, context.l10n.ordersShipping, order.shippingCost),
+        _row(context, context.l10n.ordersDiscount, order.discount),
         Divider(height: AppSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              AppStrings.ordersTotal,
+              context.l10n.ordersTotal,
               style: AppTypography.titleMedium,
             ),
             Text(
-              '${_fmt(order.total)} ${AppStrings.currencyDzd}',
+              '${_fmt(order.total)} ${context.l10n.currencyDzd}',
               style: AppTypography.titleMedium.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w700,
@@ -113,7 +112,7 @@ class OrderPriceBreakdown extends StatelessWidget {
               ),
             ),
             Text(
-              '${_fmt(value)} ${AppStrings.currencyDzd}',
+              '${_fmt(value)} ${context.l10n.currencyDzd}',
               style: AppTypography.bodyLarge,
             ),
           ],

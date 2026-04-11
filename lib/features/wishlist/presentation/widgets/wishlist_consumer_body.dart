@@ -4,7 +4,6 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
@@ -16,17 +15,19 @@ import 'wishlist_item_card.dart';
 import 'wishlist_price_drop_banner.dart';
 import 'wishlist_selection_bar.dart';
 import 'wishlist_sort_row.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/skeletons/wishlist_skeleton.dart';
 
-String _filterEmptyTitle(WishlistFilter f) {
+String _filterEmptyTitle(BuildContext context, WishlistFilter f) {
   switch (f) {
     case WishlistFilter.all:
       return '';
     case WishlistFilter.available:
-      return AppStrings.wishlistNoAvailableItems;
+      return context.l10n.wishlistNoAvailableItems;
     case WishlistFilter.priceDropped:
-      return AppStrings.wishlistNoPriceDroppedItems;
+      return context.l10n.wishlistNoPriceDroppedItems;
     case WishlistFilter.inCart:
-      return AppStrings.wishlistNoInCartItems;
+      return context.l10n.wishlistNoInCartItems;
   }
 }
 
@@ -80,7 +81,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
         const WishlistSortRow(),
         Expanded(
           child: loading
-              ? const Center(child: CircularProgressIndicator.adaptive())
+              ? const WishlistSkeleton()
               : RefreshIndicator(
                   color: AppColors.primary,
                   onRefresh: () => notifier.fetchWishlist(),
@@ -118,7 +119,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
 
     if (filtered.isEmpty) {
       return WishlistEmptyState(
-        filterEmptyTitle: _filterEmptyTitle(state.selectedFilter),
+        filterEmptyTitle: _filterEmptyTitle(context, state.selectedFilter),
         onShowAll: () => notifier.applyFilter(WishlistFilter.all),
       );
     }

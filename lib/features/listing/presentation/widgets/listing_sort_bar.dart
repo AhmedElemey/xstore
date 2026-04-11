@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/my_listings_state.dart';
 
 class ListingSortBar extends StatelessWidget {
@@ -21,13 +21,13 @@ class ListingSortBar extends StatelessWidget {
   final ValueChanged<SortOption> onSortChanged;
   final ValueChanged<ViewMode> onViewModeChanged;
 
-  static String labelFor(SortOption s) {
+  static String labelFor(BuildContext context, SortOption s) {
     return switch (s) {
-      SortOption.newest => AppStrings.sortNewest,
-      SortOption.oldest => AppStrings.sortOldest,
-      SortOption.priceAsc => AppStrings.sortPriceAsc,
-      SortOption.priceDesc => AppStrings.sortPriceDesc,
-      SortOption.mostViewed => AppStrings.sortMostViewed,
+      SortOption.newest => context.l10n.sortNewest,
+      SortOption.oldest => context.l10n.sortOldest,
+      SortOption.priceAsc => context.l10n.sortPriceAsc,
+      SortOption.priceDesc => context.l10n.sortPriceDesc,
+      SortOption.mostViewed => context.l10n.sortMostViewed,
     };
   }
 
@@ -55,7 +55,7 @@ class ListingSortBar extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      AppStrings.sortBy,
+                      context.l10n.sortBy,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
@@ -72,7 +72,7 @@ class ListingSortBar extends StatelessWidget {
                             .map(
                               (o) => DropdownMenuItem(
                                 value: o,
-                                child: Text(ListingSortBar.labelFor(o)),
+                                child: Text(ListingSortBar.labelFor(context, o)),
                               ),
                             )
                             .toList(),

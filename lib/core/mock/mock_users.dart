@@ -23,6 +23,11 @@ const mockVendorUser = UserEntity(
   storeCity: 'Algiers',
   storeWilaya: 'Alger',
   whatsappNumber: '+20 105 551 2345',
+  latitude: 30.044400,
+  longitude: 31.235700,
+  governorate: 'Cairo',
+  town: 'Nasr City',
+  detailAddress: '12 Tahrir Street, Floor 3',
 );
 
 const mockConsumerUser = UserEntity(
@@ -60,6 +65,11 @@ UserModel mockVendorUserModel({
       storeCity: mockVendorUser.storeCity,
       storeWilaya: mockVendorUser.storeWilaya,
       whatsappNumber: mockVendorUser.whatsappNumber,
+      latitude: mockVendorUser.latitude,
+      longitude: mockVendorUser.longitude,
+      governorate: mockVendorUser.governorate,
+      town: mockVendorUser.town,
+      detailAddress: mockVendorUser.detailAddress,
       token: 'mock-token-vendor',
     );
 

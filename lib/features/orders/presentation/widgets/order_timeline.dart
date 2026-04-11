@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -56,7 +55,7 @@ class _OrderTimelineState extends State<OrderTimeline>
       children: [
         if (widget.showTitle) ...[
           Text(
-            AppStrings.ordersTimelineHeading,
+            context.l10n.ordersTimelineHeading,
             style: AppTypography.titleMedium,
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -78,12 +77,12 @@ class _OrderTimelineState extends State<OrderTimeline>
                 !lineDone && !filled && !isCancelNode && i != activeIdx + 1,
             isCancelNode: isCancelNode,
             isLast: i == steps.length - 1,
-            label: isCancelNode ? AppStrings.ordersFilterCancelled : s.label,
+            label: isCancelNode ? context.l10n.ordersFilterCancelled : s.label(context),
             subtitle: isCancelNode
-                ? (o.cancelReason ?? AppStrings.statusSubtitleCancelled)
+                ? (o.cancelReason ?? context.l10n.statusSubtitleCancelled)
                 : (date != null
                     ? timeFmt.format(date)
-                    : AppStrings.ordersTimelinePending),
+                    : context.l10n.ordersTimelinePending),
             cancelReason: isCancelNode ? o.cancelReason : null,
           );
         }),
@@ -131,12 +130,12 @@ enum _Step {
   shipped,
   delivered;
 
-  String get label => switch (this) {
-        _Step.placed => AppStrings.ordersTimelinePlaced,
-        _Step.confirmed => AppStrings.ordersTimelineConfirmed,
-        _Step.processing => AppStrings.ordersTimelineProcessing,
-        _Step.shipped => AppStrings.ordersTimelineShipped,
-        _Step.delivered => AppStrings.ordersTimelineDelivered,
+  String label(BuildContext context) => switch (this) {
+        _Step.placed => context.l10n.ordersTimelinePlaced,
+        _Step.confirmed => context.l10n.ordersTimelineConfirmed,
+        _Step.processing => context.l10n.ordersTimelineProcessing,
+        _Step.shipped => context.l10n.ordersTimelineShipped,
+        _Step.delivered => context.l10n.ordersTimelineDelivered,
       };
 }
 
@@ -254,7 +253,7 @@ class _TimelineRow extends StatelessWidget {
                   if (isCancelNode && cancelReason != null) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '${AppStrings.ordersCancelReasonSection}: $cancelReason',
+                      '${context.l10n.ordersCancelReasonSection}: $cancelReason',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.error,
                         fontStyle: FontStyle.italic,

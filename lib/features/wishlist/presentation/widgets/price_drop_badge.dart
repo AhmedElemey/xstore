@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -31,7 +30,7 @@ class PriceDropBadge extends StatelessWidget {
         ],
       ),
       child: Text(
-        AppStrings.wishlistPriceDropPercent(percent),
+        context.l10n.wishlistPriceDropPercent(percent),
         style: AppTypography.labelSmall.copyWith(
           color: AppColors.white,
           fontWeight: FontWeight.w600,

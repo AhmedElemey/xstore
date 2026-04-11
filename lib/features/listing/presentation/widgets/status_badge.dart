@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -19,12 +18,12 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = switch (status) {
-      ListingStatus.draft => AppStrings.draft,
-      ListingStatus.pending => AppStrings.pending,
-      ListingStatus.active => AppStrings.active,
-      ListingStatus.paused => AppStrings.paused,
-      ListingStatus.sold => AppStrings.sold,
-      ListingStatus.rejected => AppStrings.rejected,
+      ListingStatus.draft => context.l10n.draft,
+      ListingStatus.pending => context.l10n.pending,
+      ListingStatus.active => context.l10n.active,
+      ListingStatus.paused => context.l10n.paused,
+      ListingStatus.sold => context.l10n.sold,
+      ListingStatus.rejected => context.l10n.rejected,
     };
     final (bg, fg) = _colors(context, status);
     final pad = compact

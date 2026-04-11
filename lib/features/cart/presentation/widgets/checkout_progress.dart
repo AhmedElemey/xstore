@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -24,11 +23,16 @@ class CheckoutProgress extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _stepColumn(context, 1, AppStrings.checkoutStepAddress),
+          _stepColumn(context, 1, context.l10n.checkoutStepAddress),
           Expanded(child: _line(context, step > 1)),
-          _stepColumn(context, 2, AppStrings.checkoutStepPayment),
+          Icon(context.arrowForwardIcon, size: 16, color: context.textSecondary),
+          const SizedBox(width: AppSpacing.xs),
+          _stepColumn(context, 2, context.l10n.checkoutStepPayment),
+          const SizedBox(width: AppSpacing.xs),
           Expanded(child: _line(context, step > 2)),
-          _stepColumn(context, 3, AppStrings.checkoutStepConfirm),
+          Icon(context.arrowForwardIcon, size: 16, color: context.textSecondary),
+          const SizedBox(width: AppSpacing.xs),
+          _stepColumn(context, 3, context.l10n.checkoutStepConfirm),
         ],
       ),
     );

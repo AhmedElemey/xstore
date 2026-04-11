@@ -33,6 +33,14 @@ mixin _$ProfileState {
   String get editStoreCity => throw _privateConstructorUsedError;
   String get editStoreWilaya => throw _privateConstructorUsedError;
   String get editWhatsapp => throw _privateConstructorUsedError;
+  String get editLatitude => throw _privateConstructorUsedError;
+  String get editLongitude => throw _privateConstructorUsedError;
+  String get editGovernorate => throw _privateConstructorUsedError;
+  String get editTown => throw _privateConstructorUsedError;
+  String get editDetailAddress => throw _privateConstructorUsedError;
+  bool get isDetectingLocation => throw _privateConstructorUsedError;
+  String? get locationError => throw _privateConstructorUsedError;
+  String? get locationAction => throw _privateConstructorUsedError;
   DateTime? get editDateOfBirth => throw _privateConstructorUsedError;
   String get editInstagram => throw _privateConstructorUsedError;
   String get editFacebook => throw _privateConstructorUsedError; // Preferences
@@ -71,6 +79,14 @@ abstract class $ProfileStateCopyWith<$Res> {
       String editStoreCity,
       String editStoreWilaya,
       String editWhatsapp,
+      String editLatitude,
+      String editLongitude,
+      String editGovernorate,
+      String editTown,
+      String editDetailAddress,
+      bool isDetectingLocation,
+      String? locationError,
+      String? locationAction,
       DateTime? editDateOfBirth,
       String editInstagram,
       String editFacebook,
@@ -113,6 +129,14 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? editStoreCity = null,
     Object? editStoreWilaya = null,
     Object? editWhatsapp = null,
+    Object? editLatitude = null,
+    Object? editLongitude = null,
+    Object? editGovernorate = null,
+    Object? editTown = null,
+    Object? editDetailAddress = null,
+    Object? isDetectingLocation = null,
+    Object? locationError = freezed,
+    Object? locationAction = freezed,
     Object? editDateOfBirth = freezed,
     Object? editInstagram = null,
     Object? editFacebook = null,
@@ -191,6 +215,38 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
           ? _value.editWhatsapp
           : editWhatsapp // ignore: cast_nullable_to_non_nullable
               as String,
+      editLatitude: null == editLatitude
+          ? _value.editLatitude
+          : editLatitude // ignore: cast_nullable_to_non_nullable
+              as String,
+      editLongitude: null == editLongitude
+          ? _value.editLongitude
+          : editLongitude // ignore: cast_nullable_to_non_nullable
+              as String,
+      editGovernorate: null == editGovernorate
+          ? _value.editGovernorate
+          : editGovernorate // ignore: cast_nullable_to_non_nullable
+              as String,
+      editTown: null == editTown
+          ? _value.editTown
+          : editTown // ignore: cast_nullable_to_non_nullable
+              as String,
+      editDetailAddress: null == editDetailAddress
+          ? _value.editDetailAddress
+          : editDetailAddress // ignore: cast_nullable_to_non_nullable
+              as String,
+      isDetectingLocation: null == isDetectingLocation
+          ? _value.isDetectingLocation
+          : isDetectingLocation // ignore: cast_nullable_to_non_nullable
+              as bool,
+      locationError: freezed == locationError
+          ? _value.locationError
+          : locationError // ignore: cast_nullable_to_non_nullable
+              as String?,
+      locationAction: freezed == locationAction
+          ? _value.locationAction
+          : locationAction // ignore: cast_nullable_to_non_nullable
+              as String?,
       editDateOfBirth: freezed == editDateOfBirth
           ? _value.editDateOfBirth
           : editDateOfBirth // ignore: cast_nullable_to_non_nullable
@@ -265,6 +321,14 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       String editStoreCity,
       String editStoreWilaya,
       String editWhatsapp,
+      String editLatitude,
+      String editLongitude,
+      String editGovernorate,
+      String editTown,
+      String editDetailAddress,
+      bool isDetectingLocation,
+      String? locationError,
+      String? locationAction,
       DateTime? editDateOfBirth,
       String editInstagram,
       String editFacebook,
@@ -306,6 +370,14 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? editStoreCity = null,
     Object? editStoreWilaya = null,
     Object? editWhatsapp = null,
+    Object? editLatitude = null,
+    Object? editLongitude = null,
+    Object? editGovernorate = null,
+    Object? editTown = null,
+    Object? editDetailAddress = null,
+    Object? isDetectingLocation = null,
+    Object? locationError = freezed,
+    Object? locationAction = freezed,
     Object? editDateOfBirth = freezed,
     Object? editInstagram = null,
     Object? editFacebook = null,
@@ -384,6 +456,38 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
           ? _value.editWhatsapp
           : editWhatsapp // ignore: cast_nullable_to_non_nullable
               as String,
+      editLatitude: null == editLatitude
+          ? _value.editLatitude
+          : editLatitude // ignore: cast_nullable_to_non_nullable
+              as String,
+      editLongitude: null == editLongitude
+          ? _value.editLongitude
+          : editLongitude // ignore: cast_nullable_to_non_nullable
+              as String,
+      editGovernorate: null == editGovernorate
+          ? _value.editGovernorate
+          : editGovernorate // ignore: cast_nullable_to_non_nullable
+              as String,
+      editTown: null == editTown
+          ? _value.editTown
+          : editTown // ignore: cast_nullable_to_non_nullable
+              as String,
+      editDetailAddress: null == editDetailAddress
+          ? _value.editDetailAddress
+          : editDetailAddress // ignore: cast_nullable_to_non_nullable
+              as String,
+      isDetectingLocation: null == isDetectingLocation
+          ? _value.isDetectingLocation
+          : isDetectingLocation // ignore: cast_nullable_to_non_nullable
+              as bool,
+      locationError: freezed == locationError
+          ? _value.locationError
+          : locationError // ignore: cast_nullable_to_non_nullable
+              as String?,
+      locationAction: freezed == locationAction
+          ? _value.locationAction
+          : locationAction // ignore: cast_nullable_to_non_nullable
+              as String?,
       editDateOfBirth: freezed == editDateOfBirth
           ? _value.editDateOfBirth
           : editDateOfBirth // ignore: cast_nullable_to_non_nullable
@@ -441,6 +545,14 @@ class _$ProfileStateImpl implements _ProfileState {
       this.editStoreCity = '',
       this.editStoreWilaya = '',
       this.editWhatsapp = '',
+      this.editLatitude = '',
+      this.editLongitude = '',
+      this.editGovernorate = '',
+      this.editTown = '',
+      this.editDetailAddress = '',
+      this.isDetectingLocation = false,
+      this.locationError,
+      this.locationAction,
       this.editDateOfBirth,
       this.editInstagram = '',
       this.editFacebook = '',
@@ -501,6 +613,28 @@ class _$ProfileStateImpl implements _ProfileState {
   @JsonKey()
   final String editWhatsapp;
   @override
+  @JsonKey()
+  final String editLatitude;
+  @override
+  @JsonKey()
+  final String editLongitude;
+  @override
+  @JsonKey()
+  final String editGovernorate;
+  @override
+  @JsonKey()
+  final String editTown;
+  @override
+  @JsonKey()
+  final String editDetailAddress;
+  @override
+  @JsonKey()
+  final bool isDetectingLocation;
+  @override
+  final String? locationError;
+  @override
+  final String? locationAction;
+  @override
   final DateTime? editDateOfBirth;
   @override
   @JsonKey()
@@ -532,7 +666,7 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   String toString() {
-    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editBio: $editBio, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreName: $editStoreName, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
+    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editBio: $editBio, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreName: $editStoreName, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
   }
 
   @override
@@ -571,6 +705,22 @@ class _$ProfileStateImpl implements _ProfileState {
                 other.editStoreWilaya == editStoreWilaya) &&
             (identical(other.editWhatsapp, editWhatsapp) ||
                 other.editWhatsapp == editWhatsapp) &&
+            (identical(other.editLatitude, editLatitude) ||
+                other.editLatitude == editLatitude) &&
+            (identical(other.editLongitude, editLongitude) ||
+                other.editLongitude == editLongitude) &&
+            (identical(other.editGovernorate, editGovernorate) ||
+                other.editGovernorate == editGovernorate) &&
+            (identical(other.editTown, editTown) ||
+                other.editTown == editTown) &&
+            (identical(other.editDetailAddress, editDetailAddress) ||
+                other.editDetailAddress == editDetailAddress) &&
+            (identical(other.isDetectingLocation, isDetectingLocation) ||
+                other.isDetectingLocation == isDetectingLocation) &&
+            (identical(other.locationError, locationError) ||
+                other.locationError == locationError) &&
+            (identical(other.locationAction, locationAction) ||
+                other.locationAction == locationAction) &&
             (identical(other.editDateOfBirth, editDateOfBirth) ||
                 other.editDateOfBirth == editDateOfBirth) &&
             (identical(other.editInstagram, editInstagram) ||
@@ -610,6 +760,14 @@ class _$ProfileStateImpl implements _ProfileState {
         editStoreCity,
         editStoreWilaya,
         editWhatsapp,
+        editLatitude,
+        editLongitude,
+        editGovernorate,
+        editTown,
+        editDetailAddress,
+        isDetectingLocation,
+        locationError,
+        locationAction,
         editDateOfBirth,
         editInstagram,
         editFacebook,
@@ -646,6 +804,14 @@ abstract class _ProfileState implements ProfileState {
       final String editStoreCity,
       final String editStoreWilaya,
       final String editWhatsapp,
+      final String editLatitude,
+      final String editLongitude,
+      final String editGovernorate,
+      final String editTown,
+      final String editDetailAddress,
+      final bool isDetectingLocation,
+      final String? locationError,
+      final String? locationAction,
       final DateTime? editDateOfBirth,
       final String editInstagram,
       final String editFacebook,
@@ -689,6 +855,22 @@ abstract class _ProfileState implements ProfileState {
   String get editStoreWilaya;
   @override
   String get editWhatsapp;
+  @override
+  String get editLatitude;
+  @override
+  String get editLongitude;
+  @override
+  String get editGovernorate;
+  @override
+  String get editTown;
+  @override
+  String get editDetailAddress;
+  @override
+  bool get isDetectingLocation;
+  @override
+  String? get locationError;
+  @override
+  String? get locationAction;
   @override
   DateTime? get editDateOfBirth;
   @override

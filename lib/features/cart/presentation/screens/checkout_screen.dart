@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
 import '../providers/cart_provider.dart';
@@ -37,8 +36,8 @@ class CheckoutScreen extends ConsumerWidget {
         final ck = ref.read(checkoutProvider);
         final c = ref.read(cartProvider);
         final msg = ck.error != null
-            ? checkoutErrorMessage(ck.error)
-            : (c.error ?? AppStrings.checkoutErrorGeneric);
+            ? checkoutErrorMessage(context, ck.error)
+            : (c.error ?? context.l10n.checkoutErrorGeneric);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
         return;
       }
@@ -48,15 +47,15 @@ class CheckoutScreen extends ConsumerWidget {
 
     final busy = st.isPlacingOrder;
     final label = st.currentStep < 3
-        ? AppStrings.checkoutContinue
-        : AppStrings.checkoutPlaceOrderTotal(
+        ? context.l10n.checkoutContinue
+        : context.l10n.checkoutPlaceOrderTotal(
             Formatters.dzdWhole(cart.total),
           );
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        title: Text(AppStrings.checkoutTitle),
+        title: Text(context.l10n.checkoutTitle),
         backgroundColor: context.surfaceColor,
         surfaceTintColor: AppColors.transparent,
         elevation: 0,

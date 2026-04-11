@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -36,7 +35,7 @@ class CartEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.x2l),
               Text(
-                AppStrings.cartEmptyTitle,
+                context.l10n.cartEmptyTitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.titleLarge.copyWith(
                   fontWeight: FontWeight.w700,
@@ -44,7 +43,7 @@ class CartEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                AppStrings.cartEmptySubtitle,
+                context.l10n.cartEmptySubtitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.textSecondary,
@@ -65,13 +64,13 @@ class CartEmptyState extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppSpacing.md),
                     ),
                   ),
-                  child: Text(AppStrings.cartStartShopping),
+                  child: Text(context.l10n.cartStartShopping),
                 ),
               ),
               TextButton(
                 onPressed: () => context.go(AppRoutes.wishlist),
                 child: Text(
-                  '${AppStrings.cartOrWishlist} ${AppStrings.cartWishlistArrow}',
+                  '${context.l10n.cartOrWishlist} ${context.l10n.cartWishlistArrow}',
                   style: AppTypography.labelLarge.copyWith(
                     color: AppColors.primary,
                   ),

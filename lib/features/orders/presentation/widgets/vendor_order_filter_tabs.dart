@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
 
@@ -54,37 +53,37 @@ class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
     final items = <({OrderStatus? status, String label, int count})>[
       (
         status: null,
-        label: AppStrings.ordersFilterAll,
+        label: context.l10n.ordersFilterAll,
         count: widget.totalCount,
       ),
       (
         status: OrderStatus.pending,
-        label: AppStrings.ordersFilterPending,
+        label: context.l10n.ordersFilterPending,
         count: widget.pendingCount,
       ),
       (
         status: OrderStatus.confirmed,
-        label: AppStrings.ordersFilterConfirmed,
+        label: context.l10n.ordersFilterConfirmed,
         count: widget.confirmedCount,
       ),
       (
         status: OrderStatus.processing,
-        label: AppStrings.ordersFilterProcessing,
+        label: context.l10n.ordersFilterProcessing,
         count: widget.processingCount,
       ),
       (
         status: OrderStatus.shipped,
-        label: AppStrings.ordersFilterShipped,
+        label: context.l10n.ordersFilterShipped,
         count: widget.shippedCount,
       ),
       (
         status: OrderStatus.delivered,
-        label: AppStrings.ordersFilterDelivered,
+        label: context.l10n.ordersFilterDelivered,
         count: widget.deliveredCount,
       ),
       (
         status: OrderStatus.cancelled,
-        label: AppStrings.ordersFilterCancelled,
+        label: context.l10n.ordersFilterCancelled,
         count: widget.cancelledCount,
       ),
     ];

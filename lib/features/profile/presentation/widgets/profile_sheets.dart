@@ -4,8 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/profile_provider.dart';
 
 Future<void> showProfileAvatarPickerSheet({
@@ -21,7 +21,7 @@ Future<void> showProfileAvatarPickerSheet({
         children: [
           ListTile(
             leading: const Icon(LucideIcons.camera),
-            title: Text(AppStrings.takePhoto),
+            title: Text(context.l10n.takePhoto),
             onTap: () async {
               Navigator.pop(ctx);
               final picked = await ref
@@ -34,7 +34,7 @@ Future<void> showProfileAvatarPickerSheet({
           ),
           ListTile(
             leading: const Icon(LucideIcons.image),
-            title: Text(AppStrings.chooseFromGallery),
+            title: Text(context.l10n.chooseFromGallery),
             onTap: () async {
               Navigator.pop(ctx);
               final picked = await ref
@@ -64,16 +64,14 @@ Future<void> showProfileLogoutSheet({
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(AppStrings.logoutConfirmTitle, style: AppTypography.titleMedium),
-          const SizedBox(height: AppSpacing.sm),
-          Text(AppStrings.logoutConfirmSubtitle, style: AppTypography.bodySmall),
+          Text(context.l10n.logoutConfirmTitle, style: AppTypography.titleMedium),
           const SizedBox(height: AppSpacing.x2l),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: Text(AppStrings.cancel),
+                  child: Text(context.l10n.cancel),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -83,7 +81,7 @@ Future<void> showProfileLogoutSheet({
                     Navigator.pop(ctx);
                     await ref.read(profileNotifierProvider.notifier).logout();
                   },
-                  child: Text(AppStrings.logOut),
+                  child: Text(context.l10n.logOut),
                 ),
               ),
             ],

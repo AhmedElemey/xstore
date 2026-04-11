@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
 
 class ShippingInfoSheet extends StatefulWidget {
@@ -46,11 +46,11 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppStrings.vendorShippingInfoTitle, style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.vendorShippingInfoTitle, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: _trackingCtrl,
-              decoration: const InputDecoration(hintText: AppStrings.vendorTrackingHint),
+              decoration: InputDecoration(hintText: context.l10n.vendorTrackingHint),
             ),
             const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<String>(
@@ -74,7 +74,7 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
               },
               child: Text(
                 _date == null
-                    ? AppStrings.ordersEstimatedDeliveryLabel
+                    ? context.l10n.ordersEstimatedDeliveryLabel
                     : DateFormat('EEEE, MMM d, yyyy').format(_date!),
               ),
             ),
@@ -83,8 +83,8 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
               controller: _noteCtrl,
               maxLines: 3,
               maxLength: 200,
-              decoration: const InputDecoration(
-                hintText: AppStrings.vendorShippingNoteHint,
+              decoration: InputDecoration(
+                hintText: context.l10n.vendorShippingNoteHint,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -93,7 +93,7 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _loading ? null : () => Navigator.pop(context),
-                    child: Text(AppStrings.cancel),
+                    child: Text(context.l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -120,7 +120,7 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(AppStrings.vendorConfirmShipment),
+                        : Text(context.l10n.vendorConfirmShipment),
                   ),
                 ),
               ],

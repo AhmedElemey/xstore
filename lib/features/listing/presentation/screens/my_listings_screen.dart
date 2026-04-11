@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -20,6 +19,7 @@ import '../widgets/listing_filter_tabs.dart';
 import '../widgets/listing_options_sheet.dart';
 import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
+import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
   const MyListingsScreen({super.key});
@@ -252,7 +252,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               child: FloatingActionButton.extended(
                 onPressed: () => context.push(AppRoutes.listingAdd),
                 icon: const Icon(LucideIcons.plus),
-                label: Text('New Listing'),
+                label: Text(context.l10n.newListing),
               ),
             ),
           );
@@ -326,14 +326,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: const [
-            _ListingListSkeleton(),
-            Gap(AppSpacing.md),
-            _ListingListSkeleton(),
-            Gap(AppSpacing.md),
-            _ListingListSkeleton(),
-          ],
+          children: const [SizedBox(height: 900, child: MyListingsSkeleton())],
         ),
       );
     }
@@ -441,26 +434,3 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }
 }
 
-class _ListingListSkeleton extends StatelessWidget {
-  const _ListingListSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final base = context.surfaceVariantColor;
-    return Shimmer.fromColors(
-      baseColor: context.isDark
-          ? base.withValues(alpha: 0.55)
-          : base.withValues(alpha: 0.45),
-      highlightColor: context.isDark
-          ? context.surfaceColor.withValues(alpha: 0.9)
-          : base.withValues(alpha: 0.9),
-      child: Container(
-        height: 112,
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-    );
-  }
-}

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class PhoneLoginButton extends StatelessWidget {
   const PhoneLoginButton({
@@ -46,7 +46,7 @@ class PhoneLoginButton extends StatelessWidget {
                         ),
                       )
                     : Text(
-                        AppStrings.sendVerificationCode,
+                        context.l10n.sendVerificationCode,
                         style: AppTypography.labelLarge.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,

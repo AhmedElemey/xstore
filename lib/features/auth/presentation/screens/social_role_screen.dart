@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/social_auth_provider.dart';
@@ -29,12 +28,12 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
       backgroundColor: context.backgroundColor,
       body: Column(
         children: [
-          const Expanded(
+          Expanded(
             flex: 42,
             child: AuthHeader(
               heightFraction: 1,
-              title: AppStrings.chooseYourRole,
-              subtitle: AppStrings.socialRoleSubtitle,
+              title: context.l10n.chooseYourRole,
+              subtitle: context.l10n.socialRoleSubtitle,
               logoSize: 32,
             ),
           ),

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/extensions/async_value_extensions.dart';
@@ -15,6 +13,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
+import '../../../../shared/widgets/skeletons/home_skeleton.dart';
 import '../../domain/entities/deal_entity.dart';
 import '../providers/banners_provider.dart';
 import '../providers/categories_provider.dart';
@@ -53,6 +52,16 @@ class HomeScreen extends ConsumerWidget {
     final cartCount = isConsumer
         ? ref.watch(cartProvider.select((s) => s.itemCount))
         : 0;
+
+    final initialLoading =
+        (!banners.hasValue && banners.isLoading) ||
+        (!deals.hasValue && deals.isLoading) ||
+        (!categories.hasValue && categories.isLoading) ||
+        (!newArrivals.hasValue && newArrivals.isLoading);
+
+    if (initialLoading) {
+      return const Scaffold(body: HomeSkeleton());
+    }
 
     return Scaffold(
       body: RefreshIndicator(
@@ -109,7 +118,7 @@ class HomeScreen extends ConsumerWidget {
                   const FlashSaleBanner(),
                   const Gap(AppSpacing.lg),
                   Text(
-                    AppStrings.shopByCategory,
+                    context.l10n.shopByCategory,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -168,25 +177,7 @@ class HomeScreen extends ConsumerWidget {
 
 class _BannerShimmer extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    final base = context.isDark
-        ? context.surfaceVariantColor.withValues(alpha: 0.55)
-        : context.surfaceVariantColor.withValues(alpha: 0.35);
-    final highlight = context.isDark
-        ? context.surfaceColor.withValues(alpha: 0.9)
-        : context.surfaceColor;
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
-      child: Container(
-        height: AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.sm,
-        decoration: BoxDecoration(
-          color: base,
-          borderRadius: BorderRadius.circular(AppSpacing.lg),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const ProductSkeletonCard();
 }
 
 class _DealsSkeleton extends StatelessWidget {

@@ -3,26 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
-String wishlistSortLabel(WishlistSortOption o) {
+String wishlistSortLabel(BuildContext context, WishlistSortOption o) {
   switch (o) {
     case WishlistSortOption.recentlyAdded:
-      return AppStrings.wishlistSortRecentlyAdded;
+      return context.l10n.wishlistSortRecentlyAdded;
     case WishlistSortOption.priceLowToHigh:
-      return AppStrings.wishlistSortPriceLow;
+      return context.l10n.wishlistSortPriceLow;
     case WishlistSortOption.priceHighToLow:
-      return AppStrings.wishlistSortPriceHigh;
+      return context.l10n.wishlistSortPriceHigh;
     case WishlistSortOption.priceDrop:
-      return AppStrings.wishlistSortPriceDrop;
+      return context.l10n.wishlistSortPriceDrop;
     case WishlistSortOption.biggestDiscount:
-      return AppStrings.wishlistSortBiggestDiscount;
+      return context.l10n.wishlistSortBiggestDiscount;
     case WishlistSortOption.nameAZ:
-      return AppStrings.wishlistSortNameAz;
+      return context.l10n.wishlistSortNameAz;
   }
 }
 
@@ -45,7 +44,7 @@ Future<void> showWishlistSortSheet(BuildContext context, WidgetRef ref) async {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Text(
-                AppStrings.wishlistSort,
+                context.l10n.wishlistSort,
                 style: AppTypography.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -53,7 +52,7 @@ Future<void> showWishlistSortSheet(BuildContext context, WidgetRef ref) async {
             ),
             for (final o in WishlistSortOption.values)
               ListTile(
-                title: Text(wishlistSortLabel(o)),
+                title: Text(wishlistSortLabel(context, o)),
                 trailing: o == current
                     ? Icon(Icons.check, color: AppColors.primary)
                     : null,

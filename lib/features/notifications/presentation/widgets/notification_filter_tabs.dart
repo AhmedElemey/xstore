@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -31,17 +30,17 @@ class NotificationFilterTabs extends ConsumerWidget {
     String label(NotificationFilter f) {
       switch (f) {
         case NotificationFilter.all:
-          return AppStrings.notificationsFilterAll;
+          return context.l10n.notificationsFilterAll;
         case NotificationFilter.orders:
-          return AppStrings.notificationsFilterOrders;
+          return context.l10n.notificationsFilterOrders;
         case NotificationFilter.deals:
-          return AppStrings.notificationsFilterDeals;
+          return context.l10n.notificationsFilterDeals;
         case NotificationFilter.listings:
-          return AppStrings.notificationsFilterListings;
+          return context.l10n.notificationsFilterListings;
         case NotificationFilter.messages:
-          return AppStrings.notificationsFilterMessages;
+          return context.l10n.notificationsFilterMessages;
         case NotificationFilter.system:
-          return AppStrings.notificationsFilterSystem;
+          return context.l10n.notificationsFilterSystem;
       }
     }
 
@@ -137,7 +136,7 @@ class NotificationUnreadSummaryBanner extends ConsumerWidget {
                       vertical: AppSpacing.md,
                     ),
                     child: Text(
-                      AppStrings.notificationsUnreadBannerLine(unread),
+                      context.l10n.notificationsUnreadBannerLine(unread),
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,

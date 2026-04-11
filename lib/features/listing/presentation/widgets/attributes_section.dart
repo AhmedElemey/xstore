@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Key/value attribute rows; [keyControllers] / [valueControllers] must match
 /// length (managed by the screen / notifier sync).
@@ -43,7 +44,7 @@ class AttributesSection extends StatelessWidget {
                     controller: keyControllers[i],
                     onChanged: (v) => onKeyChanged(i, v),
                     decoration: InputDecoration(
-                      labelText: 'Name',
+                      labelText: context.l10n.listingAttributeNameLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -65,7 +66,7 @@ class AttributesSection extends StatelessWidget {
                     controller: valueControllers[i],
                     onChanged: (v) => onValueChanged(i, v),
                     decoration: InputDecoration(
-                      labelText: 'Value',
+                      labelText: context.l10n.listingAttributeValueLabel,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -84,7 +85,7 @@ class AttributesSection extends StatelessWidget {
         TextButton.icon(
           onPressed: onAdd,
           icon: const Icon(LucideIcons.plus),
-          label: Text('Add attribute'),
+          label: Text(context.l10n.listingAddAttributeButton),
         ),
       ],
     );

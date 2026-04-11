@@ -1,0 +1,1180 @@
+{
+  "@@locale": "en",
+  "appName": "xStore",
+  "tagline": "Buy & Sell Anything",
+  "login": "Login",
+  "register": "Register",
+  "logout": "Sign Out",
+  "email": "Email",
+  "password": "Password",
+  "createAccount": "Create account",
+  "signInPrompt": "Sign in to continue",
+  "phoneNumber": "Phone Number",
+  "phoneRequired": "Phone number is required",
+  "phoneInvalidLength": "Must be 11 digits",
+  "phoneInvalidPrefix": "Must start with 010, 011, 012, or 015",
+  "phoneInvalidNumber": "Invalid phone number",
+  "phoneTooManyRequests": "Too many attempts. Try again later.",
+  "sendVerificationCode": "Send Verification Code",
+  "verifyAndContinue": "Verify & Continue",
+  "verifyYourNumber": "Verify your number",
+  "codeSentTo": "Code sent to",
+  "changeNumber": "Change",
+  "resendCodeIn": "Resend code in",
+  "resendCode": "Resend Code",
+  "otpInvalidCode": "Incorrect code. Please try again.",
+  "otpSessionExpired": "Code expired. Request a new one.",
+  "smsRatesNote": "Standard SMS rates may apply",
+  "noInternet": "No internet connection. Please try again.",
+  "genericError": "Something went wrong. Please try again.",
+  "emailTab": "Email",
+  "phoneTab": "Phone",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithApple": "Continue with Apple",
+  "continueWithFacebook": "Continue with Facebook",
+  "socialLoginDivider": "or continue with",
+  "welcomeBack": "Welcome back",
+  "chooseYourRole": "How will you use xStore?",
+  "socialRoleSubtitle": "One last step — choose your account type",
+  "searchHint": "Search products...",
+  "hotDeals": "🔥 Hot Deals",
+  "newArrivals": "✨ New Arrivals",
+  "flashSale": "⚡ Flash Sale",
+  "flashSaleBannerBody": "Flash sale — limited time offers inside",
+  "shopByCategory": "Shop by Category",
+  "recommended": "👤 Recommended for You",
+  "recommendedSubtitle": "Based on your browsing",
+  "seeAll": "See All",
+  "seeAllReviews": "See All Reviews",
+  "freeShippingBadge": "🚚 Free Shipping",
+  "securePayBadge": "🔒 Secure Pay",
+  "easyReturnsBadge": "↩️ Easy Returns",
+  "shopNow": "Shop Now",
+  "categoryQueryMens": "mens_fashion",
+  "categoryQueryWomens": "womens_fashion",
+  "notifications": "Notifications",
+  "notificationsMarkAllRead": "Mark all read",
+  "notificationsNoMore": "No more notifications",
+  "notificationsShowAll": "Show All",
+  "notificationsFilterAll": "All",
+  "notificationsFilterOrders": "Orders",
+  "notificationsFilterDeals": "Deals",
+  "notificationsFilterListings": "Listings",
+  "notificationsFilterMessages": "Messages",
+  "notificationsFilterSystem": "System",
+  "notificationsSwipeDelete": "Delete",
+  "notificationsSwipeMarkRead": "Mark Read",
+  "notificationsMenuMarkRead": "Mark as Read",
+  "notificationsMenuMarkUnread": "Mark as Unread",
+  "notificationsMenuDelete": "Delete",
+  "notificationsMenuCopy": "Copy text",
+  "notificationsCopied": "Copied to clipboard",
+  "notificationsUndo": "Undo",
+  "notificationsGroupToday": "TODAY",
+  "notificationsGroupYesterday": "YESTERDAY",
+  "notificationsGroupThisWeek": "THIS WEEK",
+  "notificationsGroupEarlier": "EARLIER",
+  "notificationsTimeJustNow": "Just now",
+  "notificationsTimeYesterday": "Yesterday",
+  "notificationSettingsTitle": "Notification settings",
+  "notificationSettingsSave": "Save Preferences",
+  "notificationSettingsSaved": "Preferences saved",
+  "notificationSettingsSectionOrders": "Order updates",
+  "notificationSettingsSectionDeals": "Deals & offers",
+  "notificationSettingsSectionStore": "Store updates",
+  "notificationSettingsSectionMessages": "Messages",
+  "notificationSettingsSectionDelivery": "Delivery",
+  "notificationSettingsOrderConfirmed": "Order confirmed",
+  "notificationSettingsOrderShipped": "Order shipped",
+  "notificationSettingsOrderDelivered": "Order delivered",
+  "notificationSettingsOrderCancelled": "Order cancelled",
+  "notificationSettingsFlashSales": "Flash sales",
+  "notificationSettingsPriceDrops": "Price drops",
+  "notificationSettingsBackInStock": "Back in stock",
+  "notificationSettingsPromotional": "Promotional offers",
+  "notificationSettingsNewOrders": "New orders",
+  "notificationSettingsListingApproved": "Listing approved",
+  "notificationSettingsListingRejected": "Listing rejected",
+  "notificationSettingsLowStock": "Low stock alerts",
+  "notificationSettingsPaymentReceived": "Payment received",
+  "notificationSettingsNewMessages": "New messages",
+  "notificationSettingsPush": "Push notifications",
+  "notificationSettingsEmail": "Email notifications",
+  "notificationSettingsSms": "SMS notifications",
+  "addListing": "Add Listing",
+  "myListings": "My Listings",
+  "publishListing": "🚀 Publish Listing",
+  "saveDraft": "Save Draft",
+  "listingDraftSaved": "Draft saved",
+  "newListing": "New Listing",
+  "listingPhotoSectionTitle": "Product Photos",
+  "listingPhotoSectionSubtitle": "Add 1–5 photos (first = cover)",
+  "listingAddPhotoTile": "Add Photo",
+  "listingPhotoCoverBadge": "Cover",
+  "listingTakePhoto": "📷 Take a Photo",
+  "listingChooseFromGallery": "🖼️ Choose from Gallery",
+  "listingSectionBasicInfo": "Basic Information",
+  "listingProductNameLabel": "Product name *",
+  "listingProductNameHint": "e.g. iPhone 15 Pro Max 256GB",
+  "listingPriceLabel": "Price *",
+  "listingCompareAtTitle": "Compare-at price (optional)",
+  "listingCompareAtHelper": "Original price for discount display",
+  "listingCompareAtWarning": "Compare-at price is lower than your selling price.",
+  "listingDescriptionLabel": "Description *",
+  "listingDescriptionHint": "Describe your product — condition, features, what's included...",
+  "listingSectionCategoryDetails": "Category & Details",
+  "listingFormCategoryLabel": "Category *",
+  "listingFormCategoryPickerTitle": "Category",
+  "listingFormSubcategoryLabel": "Subcategory *",
+  "listingSelectCategory": "Select category",
+  "listingSelectSubcategory": "Select subcategory",
+  "listingConditionFieldLabel": "Condition *",
+  "listingBrandOptional": "Brand (optional)",
+  "listingBrandHint": "Start typing…",
+  "listingSectionStockShipping": "Stock & Shipping",
+  "listingFormLocationLabel": "Location *",
+  "listingFormLocationHint": "City, Region",
+  "listingShippingAvailable": "Shipping available?",
+  "listingShippingCostLabel": "Shipping cost *",
+  "listingSectionProductAttributes": "Product Attributes",
+  "listingAttributesSubtitle": "Add specs like size, color, weight…",
+  "listingAttributeNameLabel": "Name",
+  "listingAttributeValueLabel": "Value",
+  "listingAddAttributeButton": "Add attribute",
+  "listingCondNew": "New",
+  "listingCondLikeNew": "Like New",
+  "listingCondGood": "Good",
+  "listingCondUsed": "Used",
+  "listingCondForParts": "For Parts",
+  "listingCatElectronics": "Electronics",
+  "listingCatFashion": "Fashion",
+  "listingCatHomeGarden": "Home & Garden",
+  "listingCatBeauty": "Beauty",
+  "listingCatSports": "Sports",
+  "listingCatToys": "Toys",
+  "listingCatAutomotive": "Automotive",
+  "listingCatFoodDrinks": "Food & Drinks",
+  "listingCatBooks": "Books",
+  "listingCatOther": "Other",
+  "listingSubElectronicsPhones": "Phones & tablets",
+  "listingSubElectronicsLaptops": "Laptops & PCs",
+  "listingSubElectronicsAudio": "Audio",
+  "listingSubElectronicsAccessories": "Accessories",
+  "listingSubFashionMens": "Men's",
+  "listingSubFashionWomens": "Women's",
+  "listingSubFashionKids": "Kids",
+  "listingSubFashionShoes": "Shoes",
+  "listingSubHomeFurniture": "Furniture",
+  "listingSubHomeDecor": "Decor",
+  "listingSubHomeKitchen": "Kitchen",
+  "listingSubHomeGarden": "Garden",
+  "listingSubBeautySkincare": "Skincare",
+  "listingSubBeautyMakeup": "Makeup",
+  "listingSubBeautyHair": "Hair care",
+  "listingSubSportsFitness": "Fitness",
+  "listingSubSportsOutdoor": "Outdoor",
+  "listingSubSportsTeam": "Team sports",
+  "listingSubToysGames": "Games",
+  "listingSubToysDolls": "Dolls & figures",
+  "listingSubToysEducational": "Educational",
+  "listingSubAutoParts": "Parts",
+  "listingSubAutoAccessories": "Accessories",
+  "listingSubAutoCare": "Care products",
+  "listingSubFoodBeverages": "Beverages",
+  "listingSubFoodSnacks": "Snacks",
+  "listingSubFoodGrocery": "Grocery",
+  "listingSubBooksFiction": "Fiction",
+  "listingSubBooksNonfiction": "Non-fiction",
+  "listingSubBooksTextbooks": "Textbooks",
+  "listingSubOtherMisc": "Miscellaneous",
+  "vendorAccount": "Vendor Account",
+  "customerAccount": "Customer account",
+  "theme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "editProfile": "Edit Profile",
+  "save": "Save",
+  "saveChanges": "Save Changes",
+  "settings": "Settings",
+  "sectionMyActivity": "MY ACTIVITY",
+  "sectionAccountSettings": "ACCOUNT SETTINGS",
+  "sectionPreferences": "PREFERENCES",
+  "sectionSupport": "SUPPORT",
+  "sectionDangerZone": "DANGER ZONE",
+  "menuMyListings": "My Listings",
+  "menuMyOrders": "My Orders",
+  "menuAnalytics": "Analytics",
+  "menuEarnings": "Earnings",
+  "menuWishlist": "Wishlist",
+  "menuRecentlyViewed": "Recently Viewed",
+  "menuMyReviews": "My Reviews",
+  "menuPersonalInfo": "Personal Info",
+  "socialLinks": "Social links",
+  "menuChangePassword": "Change Password",
+  "menuNotificationsSettings": "Notifications",
+  "menuLanguage": "Language",
+  "menuPaymentMethods": "Payment Methods",
+  "menuAddresses": "My Addresses",
+  "menuDarkMode": "Dark Mode",
+  "menuPushNotifications": "Push Notifications",
+  "menuEmailUpdates": "Email Updates",
+  "menuHelpCenter": "Help Center",
+  "menuTerms": "Terms of Service",
+  "menuPrivacy": "Privacy Policy",
+  "menuRateApp": "Rate xStore",
+  "menuShareApp": "Share xStore",
+  "manageStore": "Manage Store",
+  "statSales": "Sales",
+  "statSalesShort": "sales",
+  "statRating": "Rating",
+  "statResponse": "Response",
+  "statOrders": "Orders",
+  "statWishlist": "Wishlist",
+  "statDzdSaved": "DZD Saved",
+  "currencyDzd": "DZD",
+  "storeInformation": "Store Information",
+  "fullNameLabel": "Full Name",
+  "emailAddressLabel": "Email Address",
+  "phoneNumberLabel": "Phone Number",
+  "dateOfBirthLabel": "Date of Birth",
+  "locationCityLabel": "Location / City",
+  "bioLabel": "Bio / About",
+  "bioHint": "Tell buyers a bit about yourself",
+  "storeNameLabel": "Store Name",
+  "storeCategoryLabel": "Store Category",
+  "storeDescriptionLabel": "Store Description",
+  "storeCityLabel": "Store City",
+  "storeWilayaLabel": "Store Wilaya",
+  "whatsappLabel": "WhatsApp Number",
+  "instagramLabel": "Instagram handle",
+  "facebookLabel": "Facebook page",
+  "logoutConfirmTitle": "Log out of xStore?",
+  "cancel": "Cancel",
+  "logOut": "Log Out",
+  "deleteAccount": "Delete Account",
+  "deleteAccountDialogTitle": "Delete account permanently",
+  "deleteAccountPermanentWarning": "This action is permanent",
+  "deleteAccountTypeHint": "Type DELETE to confirm",
+  "deleteMyAccount": "Delete My Account",
+  "deleteConfirmKeyword": "DELETE",
+  "choosePhotoSource": "Profile photo",
+  "takePhoto": "Camera",
+  "chooseFromGallery": "Gallery",
+  "removePhoto": "Remove Photo",
+  "profileUpdatedSuccess": "Profile updated",
+  "languageTitle": "Language",
+  "languageEnglish": "English",
+  "languageFrench": "French",
+  "languageArabic": "Arabic",
+  "profileFooterLine": "xStore v1.0.0 · Made with ❤️ in Algeria",
+  "statStoreViews": "Views",
+  "statStoreSaves": "Saves",
+  "statStoreActive": "Active",
+  "storeMetaLinePrefix": "Since ",
+  "storeJoinedPrefix": "Joined ",
+  "followStore": "Follow Store",
+  "share": "Share",
+  "storeDescriptionHeading": "About the store",
+  "allCategoriesChip": "All",
+  "vendorStoreStatListings": "Active Listings",
+  "vendorStoreStatSales": "Total Sales",
+  "vendorStoreStatResponse": "Response Rate",
+  "placeholderScreenSubtitle": "This screen is coming soon.",
+  "iosAppStoreUrl": "https://apps.apple.com",
+  "androidPlayStoreUrl": "https://play.google.com/store",
+  "verified": "Verified",
+  "requiredField": "Required",
+  "navHome": "Home",
+  "navExplore": "Explore",
+  "navWishlist": "Wishlist",
+  "navOrders": "Orders",
+  "navProfile": "Profile",
+  "navCart": "Cart",
+  "navAddListing": "Add Listing",
+  "exploreSearchPlaceholder": "Search listings…",
+  "clearAllFilters": "Clear All",
+  "filters": "Filters",
+  "addFilters": "+ Filters",
+  "applyFilters": "Apply Filters",
+  "resetFilters": "Reset",
+  "sortBy": "Sort by",
+  "sortNewest": "Newest",
+  "sortOldest": "Oldest",
+  "sortPriceAsc": "Price ↑",
+  "sortPriceDesc": "Price ↓",
+  "sortMostViewed": "Most Viewed",
+  "sortRelevance": "Relevance",
+  "sortByRating": "Rating",
+  "resultsFor": "Results for",
+  "allListingsLabel": "All listings",
+  "noResultsTitle": "No listings found",
+  "noResultsSubtitle": "Try different keywords or filters.",
+  "recentSearches": "Recent searches",
+  "addToCart": "Add to Cart",
+  "category": "Category",
+  "condition": "Condition",
+  "priceRange": "Price range",
+  "minPriceLabel": "Min",
+  "maxPriceLabel": "Max",
+  "minRating": "Minimum rating",
+  "location": "Location",
+  "shippingOnly": "Shipping available",
+  "gridView": "Grid",
+  "listView": "List",
+  "ratingStars4Plus": "⭐ 4+",
+  "ratingStars3Plus": "⭐ 3+",
+  "ratingStars2Plus": "⭐ 2+",
+  "starChar": "★",
+  "ordersEmptyTitle": "No orders yet",
+  "ordersIncomingTitle": "Incoming Orders",
+  "ordersMyTitle": "My Orders",
+  "ordersSearchHint": "Search order or product…",
+  "ordersFilterAll": "All",
+  "ordersFilterPending": "Pending",
+  "ordersFilterConfirmed": "Confirmed",
+  "ordersFilterProcessing": "Processing",
+  "ordersFilterShipped": "Shipped",
+  "ordersFilterDelivered": "Delivered",
+  "ordersFilterCancelled": "Cancelled",
+  "ordersFilterRefunded": "Refunded",
+  "ordersSortHighestValue": "Highest Value",
+  "ordersSortNeedsAction": "Needs Action",
+  "ordersCountLabel": "orders",
+  "ordersStatPendingLabel": "Pending",
+  "ordersStatActiveLabelTitle": "Active",
+  "ordersStatMonthLabel": "Month",
+  "ordersStatTotalLabel": "Total",
+  "ordersMoreItemsSuffix": "more item",
+  "ordersMoreItemsSuffixPlural": "more items",
+  "ordersQtyTotalLinePrefix": "Qty",
+  "ordersFromStorePrefix": "From",
+  "ordersEstimatedDelivery": "🚚 Estimated",
+  "ordersPaymentLine": "Payment",
+  "ordersTrackOrder": "Track Order",
+  "ordersViewDetails": "View Details",
+  "ordersCancelOrder": "Cancel Order",
+  "ordersConfirmReceipt": "✓ Confirm Receipt",
+  "ordersLeaveReview": "Leave Review",
+  "ordersReorder": "Reorder",
+  "ordersRejectOrder": "Reject",
+  "ordersConfirmOrderCta": "✓ Confirm Order",
+  "ordersMarkProcessing": "Mark as Processing",
+  "ordersMarkShipped": "Mark as Shipped",
+  "ordersViewTracking": "View Tracking",
+  "ordersShopAgain": "🛒 Shop Again",
+  "ordersEmptyFilteredTitle": "No matching orders",
+  "ordersBrowseProducts": "Browse Products",
+  "ordersDetailTitlePrefix": "Order #",
+  "ordersShareSummary": "Share order",
+  "ordersSoldBy": "Sold by",
+  "ordersBuyerInfo": "Buyer Info",
+  "ordersMessageSeller": "💬 Message Seller",
+  "ordersMessageSellerSoon": "Messaging — coming soon",
+  "ordersWhatsapp": "💬 WhatsApp",
+  "ordersDeliveryAddressTitle": "Delivery Address",
+  "ordersItemsSectionTitle": "Items Ordered",
+  "ordersTrackingSectionTitle": "Tracking Information",
+  "ordersPaymentSectionTitle": "Payment Details",
+  "ordersNotesSectionTitle": "Order Notes",
+  "ordersSubtotal": "Subtotal",
+  "ordersShipping": "Shipping",
+  "ordersDiscount": "Discount",
+  "ordersTotal": "Total",
+  "ordersPaidBadge": "Paid",
+  "ordersPaymentPendingBadge": "Pending",
+  "ordersViewProduct": "View Product",
+  "ordersCopyTracking": "Copy",
+  "ordersTrackingCopied": "Copied to clipboard",
+  "ordersTrackOnCourier": "Track on Courier Website",
+  "ordersCourierWebsiteSoon": "Courier tracking — coming soon",
+  "ordersCurrentLocationMock": "In transit — Algiers hub",
+  "ordersExpectedPrefix": "📅 Expected by",
+  "ordersAddTrackingTitle": "Add Tracking Info",
+  "ordersTrackingNumberLabel": "Tracking Number (optional)",
+  "ordersCourierNameLabel": "Courier name (optional)",
+  "ordersEstimatedDeliveryLabel": "Estimated delivery",
+  "ordersConfirmShipment": "Confirm Shipment",
+  "ordersCancelDialogTitle": "Cancel this order?",
+  "ordersCancelReasonLabel": "Reason",
+  "ordersCancelReasonChangedMind": "Changed my mind",
+  "ordersCancelReasonBetterPrice": "Found better price",
+  "ordersCancelReasonMistake": "Ordered by mistake",
+  "ordersCancelReasonOther": "Other",
+  "ordersConfirmReceiptTitle": "Confirm receipt?",
+  "ordersConfirm": "Confirm",
+  "ordersRejectDialogTitle": "Reject order",
+  "ordersRejectReasonHint": "Reason for rejection",
+  "ordersSubmitReview": "Submit Review",
+  "ordersReviewHint": "Tell others about your purchase",
+  "ordersReviewThanks": "Thanks for your review!",
+  "ordersReviewSheetTitle": "Leave a review",
+  "ordersPaymentCashOnDelivery": "Cash on Delivery",
+  "ordersPaymentCib": "CIB Card",
+  "ordersPaymentDahabi": "Dahabi Card",
+  "ordersPaymentBaridimob": "BaridiMob",
+  "ordersTimelinePlaced": "Order Placed",
+  "ordersTimelineConfirmed": "Confirmed",
+  "ordersTimelineProcessing": "Processing",
+  "ordersTimelineShipped": "Shipped",
+  "ordersTimelineDelivered": "Delivered",
+  "ordersTimelineHeading": "Order progress",
+  "ordersTimelinePending": "Pending",
+  "ordersCancelReasonSection": "Cancellation reason",
+  "statusSubtitlePending": "Waiting for vendor confirmation",
+  "statusSubtitleConfirmed": "Vendor confirmed your order",
+  "statusSubtitleProcessing": "Seller is preparing your order",
+  "statusSubtitleShipped": "Your order is on the way!",
+  "statusSubtitleDelivered": "Order delivered successfully",
+  "statusSubtitleCancelled": "This order was cancelled",
+  "statusSubtitleRefunded": "Refund processed",
+  "ordersFiltersMoreSoon": "More filters — coming soon",
+  "orderHashPrefix": "Order #",
+  "vendorNeedsAttention": "Needs attention",
+  "wishlistEmptyTitle": "Your wishlist is empty",
+  "wishlistDiscoverProducts": "Discover products",
+  "wishlistForBuyersTitle": "Wishlist is for Buyers",
+  "wishlistExploreAsBuyer": "Explore as Buyer",
+  "wishlistSelect": "Select",
+  "wishlistCancelSelect": "Cancel",
+  "wishlistSort": "Sort",
+  "wishlistSortRecentlyAdded": "Recently Added",
+  "wishlistSortPriceLow": "Price: Low to High",
+  "wishlistSortPriceHigh": "Price: High to Low",
+  "wishlistSortPriceDrop": "Price Drop",
+  "wishlistSortBiggestDiscount": "Biggest Discount",
+  "wishlistSortNameAz": "Name A–Z",
+  "wishlistFilterAll": "All",
+  "wishlistFilterAvailable": "Available",
+  "wishlistFilterPriceDropped": "Price Dropped",
+  "wishlistFilterInCart": "In Cart",
+  "wishlistViewPriceDrops": "View Price Drops",
+  "wishlistPriceDropBadge": "Price Drop",
+  "wishlistOutOfStock": "Out of Stock",
+  "wishlistInCartBadge": "✓ In Cart",
+  "wishlistRemove": "♡ Remove",
+  "wishlistAddToCart": "🛒 Add to Cart",
+  "wishlistInCartCta": "✓ In Cart",
+  "wishlistSwipeAddCart": "Add to Cart",
+  "wishlistMoveAllToCart": "Move All to Cart",
+  "wishlistShareWishlist": "Share Wishlist",
+  "wishlistViewCart": "View Cart",
+  "wishlistRemoveSelected": "Remove Selected",
+  "wishlistSavedSnack": "Saved to Wishlist ❤️",
+  "wishlistView": "View",
+  "wishlistRemovedSnack": "Removed from Wishlist",
+  "wishlistShowAllItems": "Show All Items",
+  "wishlistReviewsWord": "reviews",
+  "wishlistGridContentDesc": "Grid view",
+  "wishlistListContentDesc": "List view",
+  "wishlistNoAvailableItems": "No available items",
+  "wishlistNoPriceDroppedItems": "No price dropped items",
+  "wishlistNoInCartItems": "No in cart items",
+  "wishlistSingleAddedToCart": "Added to cart",
+  "wishlistSelectAll": "Select All",
+  "wishlistDeselectAll": "Deselect All",
+  "cartForBuyersTitle": "Cart is for Buyers",
+  "cartExploreAsBuyer": "Explore as Buyer",
+  "cartClearTitle": "Clear your entire cart?",
+  "cartClearConfirm": "Clear Cart",
+  "cartSelectAll": "Select All",
+  "cartTotalLabel": "Total",
+  "cartEmptyTitle": "Your cart is empty",
+  "cartStartShopping": "Start Shopping",
+  "cartOrWishlist": "Or check your Wishlist",
+  "cartWishlistArrow": "Wishlist →",
+  "cartRemove": "🗑 Remove",
+  "cartSaveForLater": "♡ Save for Later",
+  "cartUnavailableBadge": "Unavailable",
+  "cartSwipeRemove": "Remove",
+  "cartUndo": "Undo",
+  "cartShippingFree": "🚚 Free Shipping",
+  "cartPickupOnly": "🚫 Pickup Only",
+  "cartPromoHeading": "🏷️ Have a promo code?",
+  "cartCouponHint": "Enter coupon code…",
+  "cartApply": "Apply",
+  "cartCouponRemove": "Remove",
+  "cartCouponInvalid": "Invalid coupon code",
+  "cartCouponMinOrder": "Minimum order 5,000 DZD required",
+  "cartOrderSummary": "Order Summary",
+  "cartShippingLine": "Shipping",
+  "cartTotalLine": "Total",
+  "cartCashOnDeliveryNote": "💳 Cash on Delivery available",
+  "cartSecureCheckout": "🔒 Secure checkout guaranteed",
+  "cartProceedCheckout": "Proceed to Checkout",
+  "cartYouMayAlsoLike": "You May Also Like",
+  "checkoutTitle": "Checkout",
+  "checkoutContinue": "Continue",
+  "checkoutStepAddress": "Address",
+  "checkoutStepPayment": "Payment",
+  "checkoutStepConfirm": "Confirm",
+  "checkoutDeliveryTitle": "Delivery Address",
+  "checkoutAddAddress": "+ Add New Address",
+  "checkoutSaveAddress": "Save Address",
+  "checkoutFullName": "Full Name",
+  "checkoutPhone": "Phone",
+  "checkoutStreet": "Street",
+  "checkoutCity": "City",
+  "checkoutWilaya": "Wilaya",
+  "checkoutPostalCode": "Postal Code",
+  "checkoutSetDefault": "Set as Default",
+  "checkoutEdit": "Edit",
+  "checkoutPaymentTitle": "Payment Method",
+  "checkoutPayCodTitle": "💵 Cash on Delivery",
+  "checkoutPayCodSubtitle": "Pay when your order arrives",
+  "checkoutPayCibTitle": "💳 CIB Card",
+  "checkoutPayCibSubtitle": "Debit/Credit card payment",
+  "checkoutPayDahabiTitle": "🟡 Dahabicard",
+  "checkoutPayDahabiSubtitle": "Algeria Post golden card",
+  "checkoutPayBaridiTitle": "🟢 BaridiMob",
+  "checkoutPayBaridiSubtitle": "Algeria Post mobile payment",
+  "checkoutCardExpiry": "MM/YY",
+  "checkoutCardCvv": "CVV",
+  "checkoutCardNumber": "Card number",
+  "checkoutDeliveryNoteLabel": "Delivery note (optional)",
+  "checkoutReviewTitle": "Review Your Order",
+  "checkoutEstimatedDelivery": "🚚 Estimated: 3–5 business days",
+  "checkoutTermsBefore": "By placing this order you agree to our",
+  "checkoutTermsAnd": "and",
+  "checkoutReturnPolicy": "Return Policy",
+  "checkoutPlaceOrder": "🛒 Place Order",
+  "checkoutErrorNoAddress": "Please select or add an address",
+  "checkoutErrorNoPayment": "Please select a payment method",
+  "checkoutErrorNoItems": "No items selected for checkout",
+  "checkoutErrorCard": "Please enter a valid card number",
+  "checkoutErrorGeneric": "Could not place order",
+  "orderPlacedTitle": "Order Placed! 🎉",
+  "orderTrackCta": "Track My Order",
+  "orderContinueShopping": "Continue Shopping",
+  "couponDetailSave10": "10% discount applied!",
+  "couponDetailFree500": "500 DZD discount applied!",
+  "couponDetailWelcome": "15% discount applied!",
+  "youMayAlsoLike": "You May Also Like",
+  "productNotFound": "Product not found",
+  "productScreenTitle": "Product",
+  "reviewsTitle": "Reviews",
+  "customerReviews": "Customer Reviews",
+  "ratingsWord": "ratings",
+  "reviewsDotSeparator": " · ",
+  "reviewsSuffix": " reviews",
+  "helpfulPrompt": "Helpful? 👍 ",
+  "specifications": "Specifications",
+  "description": "Description",
+  "readMore": "Read more",
+  "readLess": "Read less",
+  "quantity": "Quantity",
+  "stockQuantityRequired": "Stock quantity *",
+  "chatSeller": "Chat",
+  "chatSellerSoon": "Chat with seller — coming soon",
+  "addedToCart": "Added to cart!",
+  "expressCheckoutSoon": "Express checkout — coming soon",
+  "buyNow": "Buy now",
+  "visitStore": "Visit Store",
+  "verifiedSeller": "✅ Verified Seller",
+  "sellerRatingMid": " Seller · ",
+  "sellerSalesSuffix": " sales",
+  "onlyLeftPrefix": "Only ",
+  "onlyLeftSuffix": " left!",
+  "listingTotalListings": "Total Listings",
+  "listingSoldStat": "Sold",
+  "listingViews": "Views",
+  "listingSaves": "Saves",
+  "listingInquiries": "Inquiries",
+  "editListing": "Edit",
+  "editListingMenu": "Edit Listing",
+  "viewStatsMenu": "View Stats",
+  "listingStatsHeading": "Listing stats",
+  "subcategoryPickerPrefix": "Subcategory — ",
+  "pauseListing": "Pause",
+  "resumeListing": "Resume",
+  "listingStats": "Statistics",
+  "deleteListing": "Delete",
+  "draft": "Draft",
+  "active": "Active",
+  "paused": "Paused",
+  "sold": "Sold",
+  "pending": "Pending",
+  "rejected": "Rejected",
+  "retry": "Retry",
+  "errorGeneric": "Something went wrong",
+  "emptyInbox": "Nothing here yet",
+  "incomingOrders": "Incoming Orders",
+  "vendorSearchHint": "Search by order ID or buyer name",
+  "vendorConfirmAllPending": "Confirm All Pending",
+  "vendorViewAnalytics": "View Analytics",
+  "vendorStatPendingOrders": "Pending Orders",
+  "vendorStatActiveOrders": "Active Orders",
+  "vendorStatTotalOrders": "Total Orders",
+  "vendorStatRevenue": "Revenue",
+  "vendorConfirmAllPendingTitle": "Confirm all pending orders?",
+  "vendorSortNewestFirst": "Newest First",
+  "vendorSortOldestFirst": "Oldest First",
+  "vendorSortHighestValue": "Highest Value",
+  "vendorSortNeedsAction": "Needs Action",
+  "vendorSortBuyerName": "By Buyer Name A–Z",
+  "vendorNewOrder": "NEW ORDER",
+  "vendorRejectOrder": "Reject Order",
+  "vendorConfirmOrder": "Confirm Order",
+  "vendorConfirmOrderShort": "Confirm",
+  "vendorMarkProcessing": "Mark as Processing",
+  "vendorMarkShipped": "Mark as Shipped",
+  "vendorOrdersEmptyTitle": "No orders yet",
+  "vendorNoStatusOrders": "No orders for this status",
+  "vendorNoStatusOrdersSubtitle": "Try another filter or show all orders",
+  "vendorShippingInfoTitle": "Shipping Information",
+  "vendorViewOnMap": "View on Map",
+  "vendorCollectOnDelivery": "Collect on delivery",
+  "vendorRejectTitle": "Reject this order?",
+  "vendorConfirmRejection": "Confirm Rejection",
+  "vendorConfirmShipment": "Confirm Shipment",
+  "vendorExportOrders": "Export Orders",
+  "vendorOrderSettings": "Order Settings",
+  "vendorPrintOrder": "Print Order",
+  "vendorReportIssue": "Report Issue",
+  "vendorReasonItemUnavailable": "Item no longer available",
+  "vendorReasonOutOfStock": "Out of stock",
+  "vendorReasonCannotDeliver": "Cannot deliver to buyer location",
+  "vendorReasonSuspicious": "Suspicious order",
+  "vendorReasonIncorrectPricing": "Incorrect pricing",
+  "vendorReasonOther": "Other",
+  "vendorTypeReasonHint": "Type reason",
+  "vendorTrackingHint": "XS-TRACK-2024-001",
+  "vendorShippingNoteHint": "Package handed to courier, estimated 3–5 days",
+  "vendorOrderRejectedSnack": "Order rejected. Buyer notified.",
+  "vendorOrderConfirmedSnack": "Order confirmed",
+  "vendorOrderProcessingSnack": "Order marked as processing",
+  "vendorOrderShippedSnack": "Order marked as shipped!",
+  "vendorStatusPending": "Awaiting your confirmation",
+  "vendorStatusConfirmed": "You confirmed this order",
+  "vendorStatusProcessing": "Preparing for shipment",
+  "vendorStatusShipped": "Order is on the way",
+  "vendorStatusDelivered": "Order delivered successfully",
+  "vendorStatusCancelled": "This order was cancelled",
+  "vendorStatusRefunded": "Refunded",
+  "didntReceiveCode": "Didn't receive the code?",
+  "mensFashion": "Men's Fashion",
+  "womensFashion": "Women's Fashion",
+  "notificationsEmptyAllTitle": "You're all caught up! 🎉",
+  "notificationsUnreadBannerLine": "🔔 You have {n} unread notifications",
+  "notificationsEmptyFilterTitle": "No {filter} notifications",
+  "notificationsEmptyFilterSubtitle": "Your {scope} notifications will appear here",
+  "notificationsDeletedSnack": "\"{title}\" removed",
+  "notificationsTimeMinutesAgo": "{m}m ago",
+  "notificationsTimeHoursAgo": "{h}h ago",
+  "applyFiltersCount": "Apply Filters ({n})",
+  "ordersCountLine": "{n} orders",
+  "ordersMoreItems": "+ {n} more items",
+  "ordersItemsSectionCount": "Items Ordered ({n})",
+  "wishlistAppBarTitle": "My Wishlist ({n})",
+  "wishlistSelectedCount": "{n} selected",
+  "wishlistPriceDropBanner": "🎉 Price drop on {n} items in your wishlist!",
+  "wishlistPriceDropPercent": "↓ {p}% Price Drop",
+  "wishlistMoveAllSummary": "{n} items added to cart",
+  "wishlistShareText": "Check out my wishlist on xStore! 🛍️\n{link}",
+  "wishlistItemsAvailableLine": "{total} items · {avail} available",
+  "wishlistAddToCartSelected": "Add to Cart ({n})",
+  "wishlistRemoveSelectedCount": "Remove Selected ({n})",
+  "wishlistFilterEmptyTitle": "No {filterName} items",
+  "wishlistAddedToCartCount": "{n} items added to cart",
+  "cartAppBarTitle": "My Cart ({n} items)",
+  "cartClearBody": "This will remove all {n} items from your cart.",
+  "cartSelectAllCount": "Select All ({n} items)",
+  "cartRemovedSnack": "{name} removed from cart",
+  "cartShippingPaid": "🚚 +{amount} DZD shipping",
+  "cartCouponApplied": "✅ \"{code}\" — {detail}",
+  "cartSubtotalLine": "Subtotal ({n} items)",
+  "cartCouponLine": "Coupon ({code})",
+  "cartProceedCheckoutTotal": "Proceed to Checkout ({total})",
+  "cartCheckoutItems": "Checkout ({n} items)",
+  "checkoutItemsFromSellers": "{items} items from {sellers} sellers",
+  "checkoutPlaceOrderTotal": "🛒 Place Order · {total}",
+  "orderPlacedNumber": "Order #{id}",
+  "vendorOrdersConfirmed": "{n} orders confirmed successfully",
+  "vendorLowStockHint": "{qty} units remaining after this order",
+  "@notificationsUnreadBannerLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsEmptyFilterTitle": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsEmptyFilterSubtitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsDeletedSnack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsTimeMinutesAgo": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsTimeHoursAgo": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      }
+    }
+  },
+  "@applyFiltersCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ordersCountLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ordersMoreItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@ordersItemsSectionCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistAppBarTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistSelectedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistPriceDropBanner": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistPriceDropPercent": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistMoveAllSummary": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistShareText": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "@wishlistItemsAvailableLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "avail": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistAddToCartSelected": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistRemoveSelectedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wishlistFilterEmptyTitle": {
+    "placeholders": {
+      "filterName": {
+        "type": "String"
+      }
+    }
+  },
+  "@wishlistAddedToCartCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartAppBarTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartClearBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartSelectAllCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartRemovedSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartShippingPaid": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartCouponApplied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartSubtotalLine": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@cartCouponLine": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartProceedCheckoutTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "@cartCheckoutItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@checkoutItemsFromSellers": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "sellers": {
+        "type": "int"
+      }
+    }
+  },
+  "@checkoutPlaceOrderTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "@orderPlacedNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "@vendorOrdersConfirmed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@vendorLowStockHint": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "enterYourPhoneNumber": "Enter your phone number",
+  "sendOtpSubtitle": "We'll send a verification code to your Egyptian number",
+  "signInToContinueShopping": "Sign in to continue shopping",
+  "enterEmailHint": "you@email.com",
+  "validEmailOrPhone": "Valid email or 10+ digit phone",
+  "passwordMask": "********",
+  "minSixChars": "Min 6 characters",
+  "forgotPassword": "Forgot Password?",
+  "rememberMe": "Remember me",
+  "continueWithPhoneNumber": "Continue with Phone Number",
+  "dontHaveAccount": "Don't have an account?",
+  "createOneArrow": "Create one →",
+  "skip": "Skip",
+  "onboardingTitle1": "Discover Amazing Deals",
+  "onboardingTitle2": "Start Selling Today",
+  "onboardingTitle3": "Safe & Trusted",
+  "onboardingSubtitle1": "Shop from thousands of vendors across Egypt and beyond",
+  "onboardingSubtitle2": "List your products in minutes and reach thousands of buyers",
+  "onboardingSubtitle3": "Secure payments, buyer protection, and verified sellers",
+  "getStarted": "Get Started",
+  "next": "Next",
+  "leaveRegistrationTitle": "Leave registration?",
+  "leaveRegistrationBody": "Your progress will be lost.",
+  "stay": "Stay",
+  "leave": "Leave",
+  "stepRole": "Role",
+  "stepInfo": "Info",
+  "stepSecurity": "Security",
+  "stepStore": "Store",
+  "continueLabel": "Continue",
+  "createMyStore": "Create My Store",
+  "joinAs": "Join xStore as...",
+  "chooseHowUse": "Choose how you want to use xStore. You can always add the other role later.",
+  "iAmBuyer": "I'm a Buyer",
+  "buyerSubtitle": "Discover and buy products from verified sellers",
+  "buyerFeature1": "Browse thousands of products",
+  "buyerFeature2": "Secure checkout & payments",
+  "buyerFeature3": "Track your orders in real time",
+  "buyerFeature4": "Save favorites to wishlist",
+  "iAmSeller": "I'm a Seller",
+  "sellerSubtitle": "List your products and start earning today",
+  "sellerFeature1": "List unlimited products",
+  "sellerFeature2": "Manage orders & inventory",
+  "sellerFeature3": "Analytics & sales insights",
+  "sellerFeature4": "Direct chat with buyers",
+  "dateOfBirthOptional": "Date of Birth (optional)",
+  "tellUsAboutYou": "Tell us about you",
+  "infoOnProfile": "This information will be on your profile",
+  "fullNameRequired": "Full Name *",
+  "emailAddressRequired": "Email Address *",
+  "locationCityRequired": "Location / City *",
+  "locationHintAlgiers": "e.g. Algiers",
+  "secureYourAccount": "Secure your account",
+  "strongPasswordHint": "Choose a strong password to protect your account",
+  "passwordRequired": "Password *",
+  "confirmPasswordRequired": "Confirm Password *",
+  "agreeTo": "I agree to the",
+  "termsOfService": "Terms of Service",
+  "andWord": "and",
+  "privacyPolicy": "Privacy Policy",
+  "setUpYourStore": "Set up your store",
+  "tellBuyersStore": "Tell buyers about your store",
+  "storeNameRequired": "Store Name *",
+  "storeNameHint": "e.g. Ahmed's Electronics",
+  "storeCategoryRequired": "Store Category *",
+  "storeSellHint": "What do you mainly sell?",
+  "storeDescriptionRequired": "Store Description *",
+  "storeDescriptionHint": "Describe your store and what makes it unique...",
+  "storeLogoOptional": "Store Logo (optional)",
+  "cityRequired": "City *",
+  "wilayaRequired": "Wilaya *",
+  "sellerFallbackName": "Seller",
+  "storeReady": "Your store is ready. Start listing!",
+  "goToMyStore": "Go to My Store",
+  "languageToggleTitle": "Language",
+  "vendorOrdersEmptySubtitle": "When buyers place orders on your listings, they will appear here",
+  "discoverProducts": "Discover products",
+  "stepOf": "Step {current} of {total}",
+  "@stepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "vendorWelcome": "Welcome to xStore, {name}! 🎉",
+  "@vendorWelcome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pushNotifications": "Push Notifications",
+  "emailUpdates": "Email Updates",
+  "wishlistEmptySubtitle": "Save items you love by tapping the heart icon on any product",
+  "shareXStoreMessage": "Shop and sell on xStore — Egypt's modern marketplace.",
+  "cartTitle": "Cart",
+  "cartEmptySubtitle": "Looks like you haven't added anything to your cart yet",
+  "cartUnavailableHint": "This item is no longer available",
+  "wishlistPriceDropBannerSubtitle": "Prices dropped since you saved them",
+  "wishlistForBuyersSubtitle": "Create a consumer account to save and track your favorite products",
+  "storeHours": "Store Hours",
+  "storeOpenNow": "Open Now",
+  "storeClosedNow": "Closed",
+  "storeStatusOpen": "Your store is currently OPEN",
+  "storeStatusClosed": "Your store is currently CLOSED",
+  "storeOpenDesc": "Customers can place orders now",
+  "storeClosedDesc": "Customers cannot place orders now",
+  "closeStoreNow": "Close Store Now",
+  "openStoreNow": "Open Store Now",
+  "closedMessage": "Add a message for customers (optional)",
+  "closedMessageTitle": "Closed message",
+  "closedMessageHint": "e.g. Back in 1 hour, Closed for holiday",
+  "weeklySchedule": "Weekly Schedule",
+  "weeklyScheduleSubtitle": "Set your working hours for each day",
+  "copyHoursToAll": "Copy hours to all days",
+  "quickPresets": "Quick Presets",
+  "quickPresetsSubtitle": "Apply a schedule template instantly",
+  "presetStandard": "Standard (9AM–6PM)",
+  "presetExtended": "Extended (9AM–11PM)",
+  "presetMorning": "Morning Only (8AM–2PM)",
+  "presetFullWeek": "Full Week",
+  "presetWeekdays": "Weekdays Only (Sat–Thu)",
+  "presetWithoutFriday": "Without Friday",
+  "saveWorkingHours": "Save Working Hours",
+  "workingHoursSaved": "Working hours saved! ✅",
+  "storeNowOpen": "Store is now Open 🟢",
+  "storeNowClosed": "Store is now Closed 🔴",
+  "open24Hours": "Open 24 Hours",
+  "from": "From",
+  "to": "To",
+  "copyFrom": "Copy from:",
+  "copyingFrom": "Copying from:",
+  "applyToSelectedDays": "Apply to Selected Days",
+  "selectAllDays": "Select All",
+  "deselectAllDays": "Deselect All",
+  "openLabel": "Open",
+  "closedLabel": "Closed",
+  "opensAt": "Opens at {time}",
+  "closesAt": "Closes at {time}",
+  "opensOn": "Opens {day} at {time}",
+  "storeHoursTitle": "Store Hours",
+  "todayLabel": "Today",
+  "daySaturday": "Saturday",
+  "daySunday": "Sunday",
+  "dayMonday": "Monday",
+  "dayTuesday": "Tuesday",
+  "dayWednesday": "Wednesday",
+  "dayThursday": "Thursday",
+  "dayFriday": "Friday",
+  "dayShortSat": "Sat",
+  "dayShortSun": "Sun",
+  "dayShortMon": "Mon",
+  "dayShortTue": "Tue",
+  "dayShortWed": "Wed",
+  "dayShortThu": "Thu",
+  "dayShortFri": "Fri",
+  "invalidHoursError": "Closing time must be after opening time",
+  "discardChanges": "Discard Changes",
+  "discardChangesConfirm": "Discard unsaved changes?",
+  "applyPresetConfirm": "Apply {preset} hours to all days?",
+  "storeClosedWarning": "This store is currently closed. You can still order — seller will respond when they reopen.",
+  "storeLocation": "Store Location",
+  "storeLocationSubtitle": "Help buyers find your store",
+  "detectMyLocation": "Detect My Current Location",
+  "detectingLocation": "Detecting location...",
+  "orFillManually": "or fill manually",
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+  "latitudeHint": "30.044400",
+  "longitudeHint": "31.235700",
+  "governorate": "Governorate",
+  "governorateHint": "e.g. Cairo, Giza, Alexandria",
+  "townCity": "Town / City",
+  "townCityHint": "e.g. Nasr City, Dokki, Sidi Gaber",
+  "detailAddress": "Detailed Address",
+  "detailAddressHint": "e.g. 12 Tahrir St, Floor 3, near City Stars",
+  "locationDetected": "📍 Location detected!",
+  "locationServiceDisabled": "Location services are disabled. Enable them in Settings.",
+  "locationPermissionDenied": "Location permission denied. Please allow location access.",
+  "locationPermissionPermanent": "Location permission permanently denied. Open app settings to enable.",
+  "openSettings": "Open Settings",
+  "openAppSettings": "Open App Settings",
+  "invalidLatitude": "Invalid latitude value",
+  "invalidLongitude": "Invalid longitude value",
+  "egypt": "Egypt",
+  "locationServicesOff": "Location services are off",
+  "enableLocationServices": "Enable them in Settings?",
+  "@opensAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@closesAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@opensOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@applyPresetConfirm": {
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  }
+}

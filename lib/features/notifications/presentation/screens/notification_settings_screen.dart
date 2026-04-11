@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -85,7 +84,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.notificationSettingsSaved)),
+        SnackBar(content: Text(context.l10n.notificationSettingsSaved)),
       );
     }
   }
@@ -100,7 +99,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        title: Text(AppStrings.notificationSettingsTitle, style: AppTypography.titleMedium),
+        title: Text(context.l10n.notificationSettingsTitle, style: AppTypography.titleMedium),
         backgroundColor: context.backgroundColor,
         surfaceTintColor: AppColors.transparent,
       ),
@@ -108,39 +107,39 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           if (!isVendor) ...[
-            _Section(title: AppStrings.notificationSettingsSectionOrders, children: [
-              _Row(icon: LucideIcons.checkCircle2, label: AppStrings.notificationSettingsOrderConfirmed, value: _vals[_kOrderConfirmed]!, onChanged: (v) => _set(_kOrderConfirmed, v)),
-              _Row(icon: LucideIcons.truck, label: AppStrings.notificationSettingsOrderShipped, value: _vals[_kOrderShipped]!, onChanged: (v) => _set(_kOrderShipped, v)),
-              _Row(icon: LucideIcons.home, label: AppStrings.notificationSettingsOrderDelivered, value: _vals[_kOrderDelivered]!, onChanged: (v) => _set(_kOrderDelivered, v)),
-              _Row(icon: LucideIcons.xCircle, label: AppStrings.notificationSettingsOrderCancelled, value: _vals[_kOrderCancelled]!, onChanged: (v) => _set(_kOrderCancelled, v)),
+            _Section(title: context.l10n.notificationSettingsSectionOrders, children: [
+              _Row(icon: LucideIcons.checkCircle2, label: context.l10n.notificationSettingsOrderConfirmed, value: _vals[_kOrderConfirmed]!, onChanged: (v) => _set(_kOrderConfirmed, v)),
+              _Row(icon: LucideIcons.truck, label: context.l10n.notificationSettingsOrderShipped, value: _vals[_kOrderShipped]!, onChanged: (v) => _set(_kOrderShipped, v)),
+              _Row(icon: LucideIcons.home, label: context.l10n.notificationSettingsOrderDelivered, value: _vals[_kOrderDelivered]!, onChanged: (v) => _set(_kOrderDelivered, v)),
+              _Row(icon: LucideIcons.xCircle, label: context.l10n.notificationSettingsOrderCancelled, value: _vals[_kOrderCancelled]!, onChanged: (v) => _set(_kOrderCancelled, v)),
             ]),
-            _Section(title: AppStrings.notificationSettingsSectionDeals, children: [
-              _Row(icon: LucideIcons.zap, label: AppStrings.notificationSettingsFlashSales, value: _vals[_kFlash]!, onChanged: (v) => _set(_kFlash, v)),
-              _Row(icon: LucideIcons.trendingDown, label: AppStrings.notificationSettingsPriceDrops, value: _vals[_kPriceDrop]!, onChanged: (v) => _set(_kPriceDrop, v)),
-              _Row(icon: LucideIcons.refreshCw, label: AppStrings.notificationSettingsBackInStock, value: _vals[_kBackStock]!, onChanged: (v) => _set(_kBackStock, v)),
-              _Row(icon: LucideIcons.tag, label: AppStrings.notificationSettingsPromotional, value: _vals[_kPromo]!, onChanged: (v) => _set(_kPromo, v)),
+            _Section(title: context.l10n.notificationSettingsSectionDeals, children: [
+              _Row(icon: LucideIcons.zap, label: context.l10n.notificationSettingsFlashSales, value: _vals[_kFlash]!, onChanged: (v) => _set(_kFlash, v)),
+              _Row(icon: LucideIcons.trendingDown, label: context.l10n.notificationSettingsPriceDrops, value: _vals[_kPriceDrop]!, onChanged: (v) => _set(_kPriceDrop, v)),
+              _Row(icon: LucideIcons.refreshCw, label: context.l10n.notificationSettingsBackInStock, value: _vals[_kBackStock]!, onChanged: (v) => _set(_kBackStock, v)),
+              _Row(icon: LucideIcons.tag, label: context.l10n.notificationSettingsPromotional, value: _vals[_kPromo]!, onChanged: (v) => _set(_kPromo, v)),
             ]),
           ],
           if (isVendor)
-            _Section(title: AppStrings.notificationSettingsSectionStore, children: [
-              _Row(icon: LucideIcons.shoppingBag, label: AppStrings.notificationSettingsNewOrders, value: _vals[_kNewOrders]!, onChanged: (v) => _set(_kNewOrders, v)),
-              _Row(icon: LucideIcons.checkCircle2, label: AppStrings.notificationSettingsListingApproved, value: _vals[_kListingOk]!, onChanged: (v) => _set(_kListingOk, v)),
-              _Row(icon: LucideIcons.xCircle, label: AppStrings.notificationSettingsListingRejected, value: _vals[_kListingNo]!, onChanged: (v) => _set(_kListingNo, v)),
-              _Row(icon: LucideIcons.alertTriangle, label: AppStrings.notificationSettingsLowStock, value: _vals[_kLowStock]!, onChanged: (v) => _set(_kLowStock, v)),
-              _Row(icon: LucideIcons.creditCard, label: AppStrings.notificationSettingsPaymentReceived, value: _vals[_kPayment]!, onChanged: (v) => _set(_kPayment, v)),
+            _Section(title: context.l10n.notificationSettingsSectionStore, children: [
+              _Row(icon: LucideIcons.shoppingBag, label: context.l10n.notificationSettingsNewOrders, value: _vals[_kNewOrders]!, onChanged: (v) => _set(_kNewOrders, v)),
+              _Row(icon: LucideIcons.checkCircle2, label: context.l10n.notificationSettingsListingApproved, value: _vals[_kListingOk]!, onChanged: (v) => _set(_kListingOk, v)),
+              _Row(icon: LucideIcons.xCircle, label: context.l10n.notificationSettingsListingRejected, value: _vals[_kListingNo]!, onChanged: (v) => _set(_kListingNo, v)),
+              _Row(icon: LucideIcons.alertTriangle, label: context.l10n.notificationSettingsLowStock, value: _vals[_kLowStock]!, onChanged: (v) => _set(_kLowStock, v)),
+              _Row(icon: LucideIcons.creditCard, label: context.l10n.notificationSettingsPaymentReceived, value: _vals[_kPayment]!, onChanged: (v) => _set(_kPayment, v)),
             ]),
-          _Section(title: AppStrings.notificationSettingsSectionMessages, children: [
-            _Row(icon: LucideIcons.messageCircle, label: AppStrings.notificationSettingsNewMessages, value: _vals[_kMessages]!, onChanged: (v) => _set(_kMessages, v)),
+          _Section(title: context.l10n.notificationSettingsSectionMessages, children: [
+            _Row(icon: LucideIcons.messageCircle, label: context.l10n.notificationSettingsNewMessages, value: _vals[_kMessages]!, onChanged: (v) => _set(_kMessages, v)),
           ]),
-          _Section(title: AppStrings.notificationSettingsSectionDelivery, children: [
-            _Row(icon: LucideIcons.bell, label: AppStrings.notificationSettingsPush, value: _vals[_kPush]!, onChanged: (v) => _set(_kPush, v)),
-            _Row(icon: LucideIcons.mail, label: AppStrings.notificationSettingsEmail, value: _vals[_kEmail]!, onChanged: (v) => _set(_kEmail, v)),
-            _Row(icon: LucideIcons.smartphone, label: AppStrings.notificationSettingsSms, value: _vals[_kSms]!, onChanged: (v) => _set(_kSms, v)),
+          _Section(title: context.l10n.notificationSettingsSectionDelivery, children: [
+            _Row(icon: LucideIcons.bell, label: context.l10n.notificationSettingsPush, value: _vals[_kPush]!, onChanged: (v) => _set(_kPush, v)),
+            _Row(icon: LucideIcons.mail, label: context.l10n.notificationSettingsEmail, value: _vals[_kEmail]!, onChanged: (v) => _set(_kEmail, v)),
+            _Row(icon: LucideIcons.smartphone, label: context.l10n.notificationSettingsSms, value: _vals[_kSms]!, onChanged: (v) => _set(_kSms, v)),
           ]),
           const SizedBox(height: AppSpacing.x2l),
           FilledButton(
             onPressed: _savePressed,
-            child: Text(AppStrings.notificationSettingsSave),
+            child: Text(context.l10n.notificationSettingsSave),
           ),
         ],
       ),

@@ -3,7 +3,6 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -50,7 +49,7 @@ class ProfileStatsRow extends StatelessWidget {
             Expanded(
               child: _StatCell(
                 value: '${sales ?? 0}',
-                label: AppStrings.statSales,
+                label: context.l10n.statSales,
                 onTap: onSalesTap,
               ),
             ),
@@ -58,7 +57,7 @@ class ProfileStatsRow extends StatelessWidget {
             Expanded(
               child: _StatCell(
                 value: '${rating?.toStringAsFixed(1) ?? '0.0'} ★',
-                label: AppStrings.statRating,
+                label: context.l10n.statRating,
                 onTap: onRatingTap,
               ),
             ),
@@ -66,7 +65,7 @@ class ProfileStatsRow extends StatelessWidget {
             Expanded(
               child: _StatCell(
                 value: '${responsePercent ?? 0}%',
-                label: AppStrings.statResponse,
+                label: context.l10n.statResponse,
                 onTap: onResponseTap,
               ),
             ),
@@ -81,7 +80,7 @@ class ProfileStatsRow extends StatelessWidget {
           Expanded(
             child: _StatCell(
               value: '${orders ?? 0}',
-              label: AppStrings.statOrders,
+              label: context.l10n.statOrders,
               onTap: onOrdersTap,
             ),
           ),
@@ -89,7 +88,7 @@ class ProfileStatsRow extends StatelessWidget {
           Expanded(
             child: _StatCell(
               value: '${wishlistCount ?? 0}',
-              label: AppStrings.statWishlist,
+              label: context.l10n.statWishlist,
               onTap: onWishlistTap,
             ),
           ),
@@ -97,7 +96,7 @@ class ProfileStatsRow extends StatelessWidget {
           Expanded(
             child: _StatCell(
               value: Formatters.dzdSavedDisplay(savedDzd ?? 0),
-              label: AppStrings.statDzdSaved,
+              label: context.l10n.statDzdSaved,
               onTap: onSavedTap,
             ),
           ),

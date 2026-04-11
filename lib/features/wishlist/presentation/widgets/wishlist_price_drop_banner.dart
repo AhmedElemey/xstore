@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -65,7 +64,7 @@ class WishlistPriceDropBanner extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          AppStrings.wishlistPriceDropBanner(dropCount),
+                          context.l10n.wishlistPriceDropBanner(dropCount),
                           style: AppTypography.titleMedium.copyWith(
                             color: AppColors.white,
                             fontWeight: FontWeight.w700,
@@ -74,7 +73,7 @@ class WishlistPriceDropBanner extends ConsumerWidget {
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          AppStrings.wishlistPriceDropBannerSubtitle,
+                          context.l10n.wishlistPriceDropBannerSubtitle,
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.white.withValues(alpha: 0.95),
                           ),
@@ -90,7 +89,7 @@ class WishlistPriceDropBanner extends ConsumerWidget {
                               .read(wishlistProvider.notifier)
                               .showPriceDropsFilter(),
                           child: Text(
-                            AppStrings.wishlistViewPriceDrops,
+                            context.l10n.wishlistViewPriceDrops,
                             style: AppTypography.labelLarge.copyWith(
                               decoration: TextDecoration.underline,
                               fontWeight: FontWeight.w600,

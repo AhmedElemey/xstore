@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/formatters.dart';
@@ -34,8 +33,8 @@ class CartCheckoutBar extends ConsumerWidget {
         !checkout.allSelectedUnavailable;
     final disabled = !canCheckout || checkout.isUpdating;
     final label = checkout.selectedCount == 0
-        ? AppStrings.cartProceedCheckout
-        : AppStrings.cartProceedCheckoutTotal(
+        ? context.l10n.cartProceedCheckout
+        : context.l10n.cartProceedCheckoutTotal(
             Formatters.dzdWhole(checkout.total),
           );
 

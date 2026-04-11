@@ -8,7 +8,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/router/app_routes.dart';
@@ -17,6 +16,8 @@ import '../../../listing/domain/entities/listing_entity.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../providers/profile_dependencies.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../store/presentation/providers/store_hours_provider.dart';
+import '../../../store/presentation/widgets/store_hours_summary_card.dart';
 
 class VendorStoreScreen extends ConsumerStatefulWidget {
   const VendorStoreScreen({super.key, required this.sellerId});
@@ -107,6 +108,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   void initState() {
     super.initState();
     _bootstrap();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
+    });
   }
 
   Future<void> _refresh() async {
@@ -171,6 +175,8 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joinedLine = joined != null ? DateFormat('MMM y').format(joined) : '';
     final banner = MockImages.banner(widget.sellerId.hashCode);
     final desc = u.storeDescription ?? '';
+    final storeHoursState = ref.watch(storeHoursNotifierProvider);
+    final isOpen = storeHoursState.isStoreOpen;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -255,9 +261,27 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
+                                  const Gap(AppSpacing.xs),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.sm,
+                                      vertical: AppSpacing.xs,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      isOpen ? '● ${context.l10n.storeOpenNow}' : '● ${context.l10n.storeClosedNow}',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: isOpen ? AppColors.success : AppColors.error,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
                                   Text(
-                                    '⭐ ${(u.rating ?? 0).toStringAsFixed(1)} · ${u.totalSales ?? 0} ${AppStrings.statSalesShort}'
-                                    '${joinedLine.isNotEmpty ? ' · ${AppStrings.storeJoinedPrefix}$joinedLine' : ''}',
+                                    '⭐ ${(u.rating ?? 0).toStringAsFixed(1)} · ${u.totalSales ?? 0} ${context.l10n.statSalesShort}'
+                                    '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
                                     style: AppTypography.bodySmall.copyWith(
                                       color: AppColors.white.withValues(alpha: 0.9),
                                     ),
@@ -271,7 +295,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                           foregroundColor: AppColors.primary,
                                         ),
                                         onPressed: () {},
-                                        child: Text(AppStrings.followStore),
+                                        child: Text(context.l10n.followStore),
                                       ),
                                       const Gap(AppSpacing.sm),
                                       IconButton.filled(
@@ -307,7 +331,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(AppStrings.storeDescriptionHeading, style: AppTypography.titleMedium),
+                        Text(context.l10n.storeDescriptionHeading, style: AppTypography.titleMedium),
                         const Gap(AppSpacing.sm),
                         Text(
                           desc,
@@ -317,8 +341,22 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                         ),
                         TextButton(
                           onPressed: () => setState(() => _descExpanded = !_descExpanded),
-                          child: Text(_descExpanded ? AppStrings.readLess : AppStrings.readMore),
+                          child: Text(_descExpanded ? context.l10n.readLess : context.l10n.readMore),
                         ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (storeHoursState.current != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(context.l10n.storeHours, style: AppTypography.titleMedium),
+                        const Gap(AppSpacing.sm),
+                        StoreHoursSummaryCard(schedule: storeHoursState.current!.schedule),
                       ],
                     ),
                   ),
@@ -331,7 +369,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                     children: [
                       ChoiceChip(
-                        label: Text(AppStrings.allCategoriesChip),
+                        label: Text(context.l10n.allCategoriesChip),
                         selected: _category == 'all',
                         onSelected: (_) => _onCategorySelected('all'),
                       ),
@@ -351,10 +389,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
               ),
               const SliverToBoxAdapter(child: Gap(AppSpacing.md)),
               if (_listings.isEmpty && !_loading)
-                const SliverToBoxAdapter(
+                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(AppSpacing.x3l),
-                    child: Center(child: Text(AppStrings.emptyInbox)),
+                    child: Center(child: Text(context.l10n.emptyInbox)),
                   ),
                 )
               else
@@ -412,19 +450,19 @@ class _VendorStoreStatsCard extends StatelessWidget {
     final cells = [
       (
         '${profile.storeActiveListings}',
-        AppStrings.vendorStoreStatListings,
+        context.l10n.vendorStoreStatListings,
       ),
       (
         '${u.totalSales ?? 0}',
-        AppStrings.vendorStoreStatSales,
+        context.l10n.vendorStoreStatSales,
       ),
       (
         '${profile.responseRatePercent}%',
-        AppStrings.vendorStoreStatResponse,
+        context.l10n.vendorStoreStatResponse,
       ),
       (
         (u.rating ?? 0).toStringAsFixed(1),
-        AppStrings.statRating,
+        context.l10n.statRating,
       ),
     ];
 

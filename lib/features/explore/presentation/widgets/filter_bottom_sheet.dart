@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../listing/presentation/data/listing_categories_data.dart';
 import '../explore_state.dart';
@@ -124,7 +123,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
           children: [
               Row(
                 children: [
-                  Text(AppStrings.filters, style: AppTypography.titleLarge),
+                  Text(context.l10n.filters, style: AppTypography.titleLarge),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -133,7 +132,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                 ],
               ),
               const Gap(AppSpacing.lg),
-              Text(AppStrings.category, style: AppTypography.titleMedium),
+              Text(context.l10n.category, style: AppTypography.titleMedium),
               const Gap(AppSpacing.sm),
               Wrap(
                 spacing: AppSpacing.sm,
@@ -156,7 +155,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                 }).toList(),
               ),
               const Gap(AppSpacing.lg),
-              Text(AppStrings.condition, style: AppTypography.titleMedium),
+              Text(context.l10n.condition, style: AppTypography.titleMedium),
               const Gap(AppSpacing.sm),
               Wrap(
                 spacing: AppSpacing.sm,
@@ -194,23 +193,23 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                 maxController: _maxPrice,
               ),
               const Gap(AppSpacing.lg),
-              Text(AppStrings.minRating, style: AppTypography.titleMedium),
+              Text(context.l10n.minRating, style: AppTypography.titleMedium),
               const Gap(AppSpacing.sm),
               Wrap(
                 spacing: AppSpacing.sm,
                 children: [
                   ChoiceChip(
-                    label: Text(AppStrings.ratingStars4Plus),
+                    label: Text(context.l10n.ratingStars4Plus),
                     selected: _minRating == 4,
                     onSelected: (_) => setState(() => _minRating = 4),
                   ),
                   ChoiceChip(
-                    label: Text(AppStrings.ratingStars3Plus),
+                    label: Text(context.l10n.ratingStars3Plus),
                     selected: _minRating == 3,
                     onSelected: (_) => setState(() => _minRating = 3),
                   ),
                   ChoiceChip(
-                    label: Text(AppStrings.ratingStars2Plus),
+                    label: Text(context.l10n.ratingStars2Plus),
                     selected: _minRating == 2,
                     onSelected: (_) => setState(() => _minRating = 2),
                   ),
@@ -220,7 +219,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
               TextField(
                 controller: _loc,
                 decoration: InputDecoration(
-                  labelText: AppStrings.location,
+                  labelText: context.l10n.location,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.md),
                   ),
@@ -229,7 +228,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
               const Gap(AppSpacing.lg),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(AppStrings.shippingOnly, style: AppTypography.bodyMedium),
+                title: Text(context.l10n.shippingOnly, style: AppTypography.bodyMedium),
                 value: _ship,
                 activeThumbColor: AppColors.primary,
                 onChanged: (v) => setState(() => _ship = v),
@@ -242,7 +241,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                       widget.onReset();
                       Navigator.pop(context);
                     },
-                    child: Text(AppStrings.resetFilters, style: AppTypography.labelLarge),
+                    child: Text(context.l10n.resetFilters, style: AppTypography.labelLarge),
                   ),
                   const Spacer(),
                   FilledButton(
@@ -250,7 +249,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                       widget.onApply(_buildState());
                       Navigator.pop(context);
                     },
-                    child: Text(AppStrings.applyFiltersCount(_countActive())),
+                    child: Text(context.l10n.applyFiltersCount(_countActive())),
                   ),
                 ],
               ),

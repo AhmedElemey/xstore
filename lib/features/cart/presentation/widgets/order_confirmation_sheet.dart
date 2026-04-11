@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -80,7 +79,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            AppStrings.orderPlacedTitle,
+            context.l10n.orderPlacedTitle,
             textAlign: TextAlign.center,
             style: AppTypography.titleLarge.copyWith(
               fontWeight: FontWeight.w800,
@@ -88,7 +87,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            AppStrings.orderPlacedNumber(widget.orderId),
+            context.l10n.orderPlacedNumber(widget.orderId),
             style: AppTypography.titleMedium.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w700,
@@ -96,7 +95,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            AppStrings.orderPlacedSubtitle,
+            context.l10n.orderTrackCta,
             textAlign: TextAlign.center,
             style: AppTypography.bodyMedium.copyWith(
               color: context.textSecondary,
@@ -119,7 +118,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
                   borderRadius: BorderRadius.circular(AppSpacing.md),
                 ),
               ),
-              child: Text(AppStrings.orderTrackCta),
+              child: Text(context.l10n.orderTrackCta),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -131,7 +130,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
                 Navigator.of(context).pop();
                 context.go(AppRoutes.home);
               },
-              child: Text(AppStrings.orderContinueShopping),
+              child: Text(context.l10n.orderContinueShopping),
             ),
           ),
         ],

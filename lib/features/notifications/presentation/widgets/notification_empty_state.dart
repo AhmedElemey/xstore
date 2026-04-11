@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
@@ -35,20 +34,20 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
     super.dispose();
   }
 
-  String _filterName(NotificationFilter f) {
+  String _filterName(BuildContext context, NotificationFilter f) {
     switch (f) {
       case NotificationFilter.all:
-        return AppStrings.notificationsFilterAll.toLowerCase();
+        return context.l10n.notificationsFilterAll.toLowerCase();
       case NotificationFilter.orders:
-        return AppStrings.notificationsFilterOrders.toLowerCase();
+        return context.l10n.notificationsFilterOrders.toLowerCase();
       case NotificationFilter.deals:
-        return AppStrings.notificationsFilterDeals.toLowerCase();
+        return context.l10n.notificationsFilterDeals.toLowerCase();
       case NotificationFilter.listings:
-        return AppStrings.notificationsFilterListings.toLowerCase();
+        return context.l10n.notificationsFilterListings.toLowerCase();
       case NotificationFilter.messages:
-        return AppStrings.notificationsFilterMessages.toLowerCase();
+        return context.l10n.notificationsFilterMessages.toLowerCase();
       case NotificationFilter.system:
-        return AppStrings.notificationsFilterSystem.toLowerCase();
+        return context.l10n.notificationsFilterSystem.toLowerCase();
     }
   }
 
@@ -91,15 +90,19 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
               Icon(LucideIcons.bellOff, size: AppSpacing.x3l * 2, color: context.textDisabled),
             SizedBox(height: AppSpacing.x2l),
             Text(
-              all ? AppStrings.notificationsEmptyAllTitle : AppStrings.notificationsEmptyFilterTitle(_filterName(filter)),
+              all
+                  ? context.l10n.notificationsEmptyAllTitle
+                  : context.l10n.notificationsEmptyFilterTitle(_filterName(context, filter)),
               textAlign: TextAlign.center,
               style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w700, color: context.textPrimary),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
               all
-                  ? AppStrings.notificationsEmptyAllSubtitle
-                  : AppStrings.notificationsEmptyFilterSubtitle(_scope(filter)),
+                  ? context.l10n.notificationsEmptyFilterSubtitle(
+                      context.l10n.notificationsFilterAll.toLowerCase(),
+                    )
+                  : context.l10n.notificationsEmptyFilterSubtitle(_scope(filter)),
               textAlign: TextAlign.center,
               style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
             ),
@@ -107,7 +110,7 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
               SizedBox(height: AppSpacing.x2l),
               FilledButton(
                 onPressed: () => n.applyFilter(NotificationFilter.all),
-                child: Text(AppStrings.notificationsShowAll),
+                child: Text(context.l10n.notificationsShowAll),
               ),
             ],
           ],

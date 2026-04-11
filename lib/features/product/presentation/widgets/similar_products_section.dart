@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 
@@ -27,7 +27,7 @@ class SimilarProductsSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            AppStrings.youMayAlsoLike,
+            context.l10n.youMayAlsoLike,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),

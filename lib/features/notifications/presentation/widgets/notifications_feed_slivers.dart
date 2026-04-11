@@ -11,6 +11,7 @@ import 'notification_action_bar.dart';
 import 'notification_empty_state.dart';
 import 'notification_group_header.dart';
 import 'notification_tile.dart';
+import '../../../../shared/widgets/skeletons/notifications_skeleton.dart';
 
 /// Main feed: grouped sticky headers + tiles + footer (keeps [NotificationsScreen] small).
 abstract final class NotificationsFeedSlivers {
@@ -36,7 +37,7 @@ abstract final class NotificationsFeedSlivers {
     final n = ref.read(notificationsProvider.notifier);
     if (isLoading) {
       return const [
-        SliverFillRemaining(child: Center(child: CircularProgressIndicator.adaptive())),
+        SliverFillRemaining(child: NotificationsSkeleton()),
       ];
     }
     if (error != null) {

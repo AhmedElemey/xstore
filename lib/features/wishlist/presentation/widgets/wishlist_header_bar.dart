@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
@@ -47,8 +46,8 @@ class WishlistHeaderBar extends ConsumerWidget {
                 onPressed: notifier.toggleSelectionMode,
                 child: Text(
                   state.isSelectionMode
-                      ? AppStrings.wishlistCancelSelect
-                      : AppStrings.wishlistSelect,
+                      ? context.l10n.wishlistCancelSelect
+                      : context.l10n.wishlistSelect,
                   style: AppTypography.labelLarge.copyWith(
                     color: AppColors.primary,
                   ),
@@ -57,8 +56,8 @@ class WishlistHeaderBar extends ConsumerWidget {
             Expanded(
               child: Text(
                 state.isSelectionMode
-                    ? AppStrings.wishlistSelectedCount(sel)
-                    : AppStrings.wishlistAppBarTitle(n),
+                    ? context.l10n.wishlistSelectedCount(sel)
+                    : context.l10n.wishlistAppBarTitle(n),
                 style: AppTypography.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: context.textPrimary,
@@ -69,8 +68,8 @@ class WishlistHeaderBar extends ConsumerWidget {
             ),
             IconButton(
               tooltip: state.viewMode == WishlistViewMode.list
-                  ? AppStrings.wishlistGridContentDesc
-                  : AppStrings.wishlistListContentDesc,
+                  ? context.l10n.wishlistGridContentDesc
+                  : context.l10n.wishlistListContentDesc,
               onPressed: notifier.toggleViewMode,
               icon: Icon(
                 state.viewMode == WishlistViewMode.list
@@ -80,7 +79,7 @@ class WishlistHeaderBar extends ConsumerWidget {
               ),
             ),
             IconButton(
-              tooltip: AppStrings.wishlistSort,
+              tooltip: context.l10n.wishlistSort,
               onPressed: () => showWishlistSortSheet(context, ref),
               icon: const Icon(LucideIcons.arrowUpDown),
               color: context.textPrimary,

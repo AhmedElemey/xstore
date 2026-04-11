@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/checkout_provider.dart';
 import 'checkout_add_address_sheet.dart';
@@ -21,7 +20,7 @@ class CheckoutAddressSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          AppStrings.checkoutDeliveryTitle,
+          context.l10n.checkoutDeliveryTitle,
           style: AppTypography.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -29,7 +28,7 @@ class CheckoutAddressSection extends ConsumerWidget {
         const SizedBox(height: AppSpacing.md),
         if (st.savedAddresses.isEmpty)
           Text(
-            AppStrings.checkoutErrorNoAddress,
+            context.l10n.checkoutErrorNoAddress,
             style: AppTypography.bodyMedium.copyWith(
               color: context.textSecondary,
             ),
@@ -86,7 +85,7 @@ class CheckoutAddressSection extends ConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () {},
-                          child: Text(AppStrings.checkoutEdit),
+                          child: Text(context.l10n.checkoutEdit),
                         ),
                       ],
                     ),
@@ -98,7 +97,7 @@ class CheckoutAddressSection extends ConsumerWidget {
         OutlinedButton.icon(
           onPressed: () => showCheckoutAddAddressSheet(context, ref),
           icon: const Icon(Icons.add),
-          label: Text(AppStrings.checkoutAddAddress),
+          label: Text(context.l10n.checkoutAddAddress),
         ),
       ],
     );

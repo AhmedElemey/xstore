@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuantitySelector extends StatelessWidget {
   const QuantitySelector({
@@ -33,7 +33,7 @@ class QuantitySelector extends StatelessWidget {
           Row(
             children: [
               Text(
-                AppStrings.quantity,
+                context.l10n.quantity,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -66,7 +66,7 @@ class QuantitySelector extends StatelessWidget {
           if (lowStock) ...[
             const Gap(AppSpacing.sm),
             Text(
-              '${AppStrings.onlyLeftPrefix}$maxQuantity${AppStrings.onlyLeftSuffix}',
+              '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
               style: theme.textTheme.labelLarge?.copyWith(
                 color: AppColors.warning,
                 fontWeight: FontWeight.w600,

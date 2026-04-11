@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/mock/mock_deals.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/pulsing_dot.dart';
@@ -68,7 +67,7 @@ class _FlashSaleBannerState extends State<FlashSaleBanner> {
           const Gap(AppSpacing.md),
           Expanded(
             child: Text(
-              AppStrings.flashSaleBannerBody,
+              context.l10n.flashSaleBannerBody,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(color: context.surfaceColor),

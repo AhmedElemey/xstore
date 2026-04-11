@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/profile_entity.dart';
+import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
-class VendorStoreCard extends StatelessWidget {
+class VendorStoreCard extends ConsumerWidget {
   const VendorStoreCard({
     super.key,
     required this.profile,
@@ -21,7 +22,8 @@ class VendorStoreCard extends StatelessWidget {
   final VoidCallback? onManageStore;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOpen = ref.watch(storeHoursNotifierProvider.select((s) => s.isStoreOpen));
     final u = profile.user;
     final storeName = u.storeName ?? u.name;
     final category = u.storeCategory ?? '';
@@ -72,8 +74,8 @@ class VendorStoreCard extends StatelessWidget {
                       ),
                     const Gap(AppSpacing.xs),
                     Text(
-                      '⭐ ${rating.toStringAsFixed(1)} · $sales ${AppStrings.statSalesShort}'
-                      '${joinedLine.isNotEmpty ? ' · ${AppStrings.storeMetaLinePrefix}$joinedLine' : ''}',
+                      '⭐ ${rating.toStringAsFixed(1)} · $sales ${context.l10n.statSalesShort}'
+                      '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeMetaLinePrefix}$joinedLine' : ''}',
                       style: AppTypography.labelSmall,
                     ),
                   ],
@@ -90,7 +92,7 @@ class VendorStoreCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  AppStrings.manageStore,
+                  context.l10n.manageStore,
                   style: AppTypography.labelLarge.copyWith(fontSize: 11),
                 ),
               ),
@@ -104,19 +106,51 @@ class VendorStoreCard extends StatelessWidget {
               _StatChip(
                 icon: LucideIcons.eye,
                 label:
-                    '${_compactCount(profile.storeViewCount)} ${AppStrings.statStoreViews}',
+                    '${_compactCount(profile.storeViewCount)} ${context.l10n.statStoreViews}',
               ),
               _StatChip(
                 icon: LucideIcons.heart,
                 label:
-                    '${profile.storeSaveCount} ${AppStrings.statStoreSaves}',
+                    '${profile.storeSaveCount} ${context.l10n.statStoreSaves}',
               ),
               _StatChip(
                 icon: LucideIcons.package,
                 label:
-                    '${profile.storeActiveListings} ${AppStrings.statStoreActive}',
+                    '${profile.storeActiveListings} ${context.l10n.statStoreActive}',
               ),
             ],
+          ),
+          const Gap(AppSpacing.sm),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: isOpen ? AppColors.success : AppColors.error,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const Gap(AppSpacing.xs),
+                Text(
+                  isOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: isOpen ? AppColors.success : AppColors.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

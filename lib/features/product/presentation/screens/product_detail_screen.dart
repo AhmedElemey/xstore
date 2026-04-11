@@ -7,11 +7,11 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/domain/entities/deal_entity.dart';
+import '../../../../shared/widgets/skeletons/product_detail_skeleton.dart';
 import '../providers/product_detail_notifier.dart';
 import '../widgets/product_description.dart';
 import '../widgets/product_header.dart';
@@ -61,7 +61,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Future<void> _shareListing(String title, String id) async {
-    await Share.share('$title — ${AppStrings.appName} · ${AppRoutes.product}/$id');
+    await Share.share('$title — ${context.l10n.appName} · ${AppRoutes.product}/$id');
   }
 
   void _scrollToReviews() {
@@ -85,11 +85,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final asyncState = ref.watch(productDetailProvider(widget.productId));
 
     return asyncState.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      ),
+      loading: () => const Scaffold(body: ProductDetailSkeleton()),
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: true,
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: Text(AppStrings.productScreenTitle)),
+        appBar: AppBar(title: Text(context.l10n.productScreenTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.x2l),
@@ -102,7 +102,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   onPressed: () => ref
                       .read(productDetailProvider(widget.productId).notifier)
                       .fetchProduct(widget.productId),
-                  child: Text(AppStrings.retry),
+                  child: Text(context.l10n.retry),
                 ),
               ],
             ),
@@ -112,8 +112,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       data: (data) {
         final listing = data.listing;
         if (listing == null) {
-          return const Scaffold(
-            body: Center(child: Text(AppStrings.productNotFound)),
+          return Scaffold(
+            body: Center(child: Text(context.l10n.productNotFound)),
           );
         }
         final notifier =
@@ -267,20 +267,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               isAddingToCart: data.isAddingToCart,
               onChat: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppStrings.chatSellerSoon)),
+                  SnackBar(content: Text(context.l10n.chatSellerSoon)),
                 );
               },
               onAddToCart: () async {
                 await notifier.addToCart();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppStrings.addedToCart)),
+                    SnackBar(content: Text(context.l10n.addedToCart)),
                   );
                 }
               },
               onBuyNow: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppStrings.expressCheckoutSoon)),
+                  SnackBar(content: Text(context.l10n.expressCheckoutSoon)),
                 );
               },
             ),

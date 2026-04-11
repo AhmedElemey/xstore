@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
@@ -18,6 +17,7 @@ import '../widgets/vendor_order_card.dart';
 import '../widgets/vendor_order_filter_tabs.dart';
 import '../widgets/vendor_order_sort_row.dart';
 import '../widgets/vendor_order_stats_banner.dart';
+import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
 
 class VendorOrdersScreen extends ConsumerStatefulWidget {
   const VendorOrdersScreen({super.key});
@@ -85,6 +85,9 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
     final isLoadingMore = ref.watch(
       vendorOrdersProvider.select((s) => s.isLoadingMore),
     );
+    final isLoading = ref.watch(
+      vendorOrdersProvider.select((s) => s.isLoading),
+    );
     final statusCounts = ref.watch(
       vendorOrdersProvider.select((s) {
         final orders = s.orders;
@@ -116,7 +119,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                 autofocus: true,
                 onChanged: ref.read(vendorOrdersProvider.notifier).updateSearch,
                 decoration: InputDecoration(
-                  hintText: AppStrings.vendorSearchHint,
+                  hintText: context.l10n.vendorSearchHint,
                   border: InputBorder.none,
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close),
@@ -129,7 +132,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
               )
             : Row(
                 children: [
-                  Text(AppStrings.incomingOrders),
+                  Text(context.l10n.ordersIncomingTitle),
                   if (pendingCount > 0) ...[
                     const SizedBox(width: AppSpacing.xs),
                     AnimatedBuilder(
@@ -160,14 +163,14 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
           ),
           PopupMenuButton<String>(
             onSelected: (v) => context.showSnack(v),
-            itemBuilder: (_) => const [
+            itemBuilder: (_) => [
               PopupMenuItem(
-                value: AppStrings.vendorExportOrders,
-                child: Text(AppStrings.vendorExportOrders),
+                value: context.l10n.vendorExportOrders,
+                child: Text(context.l10n.vendorExportOrders),
               ),
               PopupMenuItem(
-                value: AppStrings.vendorOrderSettings,
-                child: Text(AppStrings.vendorOrderSettings),
+                value: context.l10n.vendorOrderSettings,
+                child: Text(context.l10n.vendorOrderSettings),
               ),
             ],
           ),
@@ -185,15 +188,15 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
               final ok = await showDialog<bool>(
                 context: context,
                 builder: (_) => AlertDialog(
-                  title: Text(AppStrings.vendorConfirmAllPendingTitle),
+                  title: Text(context.l10n.vendorConfirmAllPendingTitle),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text(AppStrings.cancel),
+                      child: Text(context.l10n.cancel),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text(AppStrings.ordersConfirm),
+                      child: Text(context.l10n.ordersConfirm),
                     ),
                   ],
                 ),
@@ -203,7 +206,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                     .read(vendorOrdersProvider.notifier)
                     .confirmAllPending();
                 if (!context.mounted) return;
-                context.showSnack(AppStrings.vendorOrdersConfirmed(count));
+                context.showSnack(context.l10n.vendorOrdersConfirmed(count));
               }
             },
             onViewAnalytics: () => context.push(AppRoutes.analytics),
@@ -241,29 +244,29 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       OrderEmptyState(
-                                        title:
-                                            AppStrings.vendorOrdersEmptyTitle,
-                                        subtitle: AppStrings
+                                        title: context.l10n.vendorOrdersEmptyTitle,
+                                        subtitle: context.l10n
                                             .vendorOrdersEmptySubtitle,
                                       ),
                                       const SizedBox(height: AppSpacing.md),
                                       OutlinedButton(
                                         onPressed: () =>
                                             context.push(AppRoutes.listingMy),
-                                        child: Text(AppStrings.menuMyListings),
+                                        child: Text(context.l10n.menuMyListings),
                                       ),
                                     ],
                                   ),
                                 )
                               : OrderEmptyState(
-                                  title: AppStrings.vendorNoStatusOrders,
-                                  subtitle:
-                                      AppStrings.vendorNoStatusOrdersSubtitle,
+                                  title: context.l10n.vendorNoStatusOrders,
+                                  subtitle: context.l10n.vendorNoStatusOrdersSubtitle,
                                   filterActive: true,
                                 ),
                         ),
                       ],
                     )
+                 : isLoading 
+                  ? const VendorOrdersSkeleton()
                   : ListView.separated(
                       controller: _scroll,
                       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -293,7 +296,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                               if (!context.mounted) return;
                               if (ok) {
                                 context.showSnack(
-                                  AppStrings.vendorOrderConfirmedSnack,
+                                  context.l10n.vendorOrderConfirmedSnack,
                                 );
                               }
                             },
@@ -308,7 +311,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                                   if (!context.mounted) return;
                                   if (ok) {
                                     context.showSnack(
-                                      AppStrings.vendorOrderRejectedSnack,
+                                      context.l10n.vendorOrderRejectedSnack,
                                     );
                                   }
                                 },
@@ -321,7 +324,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                               if (!context.mounted) return;
                               if (ok) {
                                 context.showSnack(
-                                  AppStrings.vendorOrderProcessingSnack,
+                                  context.l10n.vendorOrderProcessingSnack,
                                 );
                               }
                             },
@@ -336,7 +339,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                                   if (!context.mounted) return;
                                   if (ok) {
                                     context.showSnack(
-                                      AppStrings.vendorOrderShippedSnack,
+                                      context.l10n.vendorOrderShippedSnack,
                                     );
                                   }
                                 },

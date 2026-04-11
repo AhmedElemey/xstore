@@ -1,6 +1,11 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../constants/app_colors.dart';
+import '../../localization/app_localizations.dart';
 
 extension BuildContextX on BuildContext {
   ThemeData get theme => Theme.of(this);
@@ -52,5 +57,50 @@ extension BuildContextX on BuildContext {
     ScaffoldMessenger.maybeOf(
       this,
     )?.showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+extension LocalizationContext on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+
+  bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';
+  bool get isEnglish => Localizations.localeOf(this).languageCode == 'en';
+
+  ui.TextDirection get localizedTextDirection =>
+      isArabic ? ui.TextDirection.rtl : ui.TextDirection.ltr;
+
+  String get arrowForward => isArabic ? '←' : '→';
+  String get arrowBack => isArabic ? '→' : '←';
+
+  IconData get chevronForward =>
+      isArabic ? LucideIcons.chevronLeft : LucideIcons.chevronRight;
+  IconData get chevronBack =>
+      isArabic ? LucideIcons.chevronRight : LucideIcons.chevronLeft;
+
+  IconData get arrowForwardIcon =>
+      isArabic ? LucideIcons.arrowLeft : LucideIcons.arrowRight;
+  IconData get arrowBackIcon =>
+      isArabic ? LucideIcons.arrowRight : LucideIcons.arrowLeft;
+
+  String formatCurrency(double amount) {
+    return NumberFormat.currency(
+      locale: isArabic ? 'ar_EG' : 'en_EG',
+      symbol: isArabic ? 'ج.م ' : 'EGP ',
+      decimalDigits: 0,
+    ).format(amount);
+  }
+
+  String formatDate(DateTime date) {
+    return DateFormat(
+      'd MMM yyyy',
+      isArabic ? 'ar' : 'en',
+    ).format(date);
+  }
+
+  String formatShortDate(DateTime date) {
+    return DateFormat(
+      'd/M/yyyy',
+      isArabic ? 'ar' : 'en',
+    ).format(date);
   }
 }

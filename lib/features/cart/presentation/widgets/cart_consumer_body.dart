@@ -13,6 +13,7 @@ import 'cart_summary_card.dart';
 import 'cart_vendor_group.dart';
 import 'coupon_input_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/skeletons/cart_skeleton.dart';
 
 class CartConsumerBody extends ConsumerWidget {
   const CartConsumerBody({super.key});
@@ -25,10 +26,7 @@ class CartConsumerBody extends ConsumerWidget {
     final error = ref.watch(cartProvider.select((c) => c.error));
 
     if (isLoading && items.isEmpty) {
-      return ColoredBox(
-        color: context.backgroundColor,
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const CartSkeleton();
     }
 
     if (items.isEmpty) {

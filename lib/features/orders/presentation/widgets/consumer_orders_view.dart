@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/orders_provider.dart';
 import 'order_card.dart';
 import 'order_empty_state.dart';
 import 'order_filter_tabs.dart';
-import 'orders_list_shimmer.dart';
+import '../../../../shared/widgets/skeletons/consumer_orders_skeleton.dart';
 
 class ConsumerOrdersView extends ConsumerStatefulWidget {
   const ConsumerOrdersView({super.key});
@@ -98,7 +97,7 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                               ? TextField(
                                   autofocus: true,
                                   decoration: InputDecoration(
-                                    hintText: AppStrings.ordersSearchHint,
+                                    hintText: context.l10n.ordersSearchHint,
                                     border: InputBorder.none,
                                     suffixIcon: IconButton(
                                       icon: const Icon(Icons.close),
@@ -111,7 +110,7 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                                   onChanged: notifier.updateSearch,
                                 )
                               : Text(
-                                  AppStrings.ordersMyTitle,
+                                  context.l10n.ordersMyTitle,
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                         ),
@@ -133,7 +132,7 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
               color: AppColors.primary,
               onRefresh: () => notifier.refreshOrders(),
               child: isLoading && emptyAll
-                  ? const OrdersListShimmer()
+                  ? const ConsumerOrdersSkeleton()
                   : list.isEmpty
                   ? ListView(
                       cacheExtent: 300,
@@ -141,11 +140,9 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                       children: [
                         OrderEmptyState(
                           title: selectedFilter != null
-                              ? AppStrings.ordersEmptyFilteredTitle
-                              : AppStrings.ordersEmptyTitle,
-                          subtitle: selectedFilter != null
-                              ? AppStrings.ordersEmptySubtitle
-                              : AppStrings.ordersEmptyConsumerSubtitle,
+                              ? context.l10n.ordersEmptyFilteredTitle
+                              : context.l10n.ordersEmptyTitle,
+                          subtitle: context.l10n.ordersBrowseProducts,
                           filterActive: selectedFilter != null,
                         ),
                       ],

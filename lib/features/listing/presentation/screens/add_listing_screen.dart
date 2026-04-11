@@ -16,6 +16,7 @@ import '../widgets/condition_selector.dart';
 import '../widgets/listing_form_field.dart';
 import '../widgets/photo_upload_section.dart';
 import '../widgets/quantity_stepper.dart';
+import '../utils/listing_localized_labels.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
@@ -99,7 +100,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.camera),
-              title: Text('📷 Take a Photo'),
+              title: Text(ctx.l10n.listingTakePhoto),
               onTap: () {
                 Navigator.pop(ctx);
                 ref.read(listingFormNotifierProvider.notifier).pickFromCamera();
@@ -107,7 +108,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.imagePlus),
-              title: Text('🖼️ Choose from Gallery'),
+              title: Text(ctx.l10n.listingChooseFromGallery),
               onTap: () {
                 Navigator.pop(ctx);
                 ref.read(listingFormNotifierProvider.notifier).pickFromGallery();
@@ -130,6 +131,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
+    final retryLabel = context.l10n.retry;
     final ok = await notifier.submit();
     if (!context.mounted) {
       return;
@@ -147,7 +149,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
           content: Text(err),
           backgroundColor: AppColors.error,
           action: SnackBarAction(
-            label: 'Retry',
+            label: retryLabel,
             textColor: Colors.white,
             onPressed: () => _publish(),
           ),
@@ -181,7 +183,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         backgroundColor: context.backgroundColor,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: Text('Add Listing'),
+        title: Text(context.l10n.addListing),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
@@ -203,13 +205,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     }
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Draft saved'),
+                      SnackBar(
+                        content: Text(context.l10n.listingDraftSaved),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
                   },
-            child: Text('Save draft'),
+            child: Text(context.l10n.saveDraft),
           ),
         ],
       ),
@@ -234,19 +236,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     onReorder: notifier.reorderPhotos,
                   ),
                   const Gap(AppSpacing.x3l),
-                  const _AccentSectionTitle('Basic Information'),
+                  _AccentSectionTitle(context.l10n.listingSectionBasicInfo),
                   const Gap(AppSpacing.lg),
                   ListingFormField(
-                    label: 'Product name *',
+                    label: context.l10n.listingProductNameLabel,
                     controller: _name,
-                    hint: 'e.g. iPhone 15 Pro Max 256GB',
+                    hint: context.l10n.listingProductNameHint,
                     maxLength: 100,
                     errorText: err['name'],
                     onChanged: (v) => notifier.updateField('name', v),
                   ),
                   const Gap(AppSpacing.lg),
                   ListingFormField(
-                    label: 'Price *',
+                    label: context.l10n.listingPriceLabel,
                     controller: _price,
                     hint: '0.00',
                     keyboardType: const TextInputType.numberWithOptions(
@@ -258,7 +260,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   ),
                   const Gap(AppSpacing.lg),
                   Text(
-                    'Compare-at price (optional)',
+                    context.l10n.listingCompareAtTitle,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: Colors.grey.shade600,
                         ),
@@ -276,7 +278,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                         notifier.updateField('compareAtPriceInput', v),
                   ),
                   Text(
-                    'Original price for discount display',
+                    context.l10n.listingCompareAtHelper,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey.shade500,
                         ),
@@ -285,7 +287,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Text(
-                        'Compare-at price is lower than your selling price.',
+                        context.l10n.listingCompareAtWarning,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.orange.shade800,
                             ),
@@ -293,10 +295,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     ),
                   const Gap(AppSpacing.lg),
                   ListingFormField(
-                    label: 'Description *',
+                    label: context.l10n.listingDescriptionLabel,
                     controller: _description,
-                    hint:
-                        'Describe your product — condition, features, what\'s included...',
+                    hint: context.l10n.listingDescriptionHint,
                     minLines: 4,
                     maxLines: null,
                     maxLength: 1000,
@@ -304,15 +305,16 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     onChanged: (v) => notifier.updateField('description', v),
                   ),
                   const Gap(AppSpacing.x3l),
-                  const _AccentSectionTitle('Category & Details'),
+                  _AccentSectionTitle(context.l10n.listingSectionCategoryDetails),
                   const Gap(AppSpacing.lg),
                   _PickerField(
-                    label: 'Category *',
+                    label: context.l10n.listingFormCategoryLabel,
                     value: _categoryLabel(form.categoryId),
+                    valueIsPlaceholder: form.categoryId.isEmpty,
                     errorText: err['category'],
                     onTap: () => showListingCategoryPicker(
                       context: context,
-                      title: 'Category',
+                      title: context.l10n.listingFormCategoryPickerTitle,
                       categories: ListingCategoriesData.categories,
                       selectedId:
                           form.categoryId.isEmpty ? null : form.categoryId,
@@ -323,11 +325,12 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   const Gap(AppSpacing.lg),
                   if (form.categoryId.isNotEmpty) ...[
                     _PickerField(
-                      label: 'Subcategory *',
+                      label: context.l10n.listingFormSubcategoryLabel,
                       value: _subcategoryLabel(
                         form.categoryId,
                         form.subcategoryId,
                       ),
+                      valueIsPlaceholder: form.subcategoryId.isEmpty,
                       errorText: err['subcategory'],
                       onTap: () {
                         final cat = ListingCategoriesData.categoryById(
@@ -353,6 +356,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     options: ListingCategoriesData.conditions,
                     selected: form.condition,
                     errorText: err['condition'],
+                    optionLabel: (o) => listingLocalizedCondition(context, o),
                     onChanged: (v) => notifier.updateField('condition', v),
                   ),
                   const Gap(AppSpacing.lg),
@@ -371,7 +375,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Brand (optional)',
+                            context.l10n.listingBrandOptional,
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           const SizedBox(height: 6),
@@ -380,7 +384,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                             focusNode: fn,
                             onChanged: (v) => notifier.updateField('brand', v),
                             decoration: InputDecoration(
-                              hintText: 'Start typing…',
+                              hintText: context.l10n.listingBrandHint,
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
@@ -422,7 +426,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     },
                   ),
                   const Gap(AppSpacing.x3l),
-                  const _AccentSectionTitle('Stock & Shipping'),
+                  _AccentSectionTitle(context.l10n.listingSectionStockShipping),
                   const Gap(AppSpacing.lg),
                   QuantityStepper(
                     quantity: form.quantity,
@@ -431,9 +435,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   ),
                   const Gap(AppSpacing.lg),
                   ListingFormField(
-                    label: 'Location *',
+                    label: context.l10n.listingFormLocationLabel,
                     controller: _location,
-                    hint: 'City, Region',
+                    hint: context.l10n.listingFormLocationHint,
                     prefix: const Icon(LucideIcons.mapPin, size: 22),
                     errorText: err['location'],
                     onChanged: (v) => notifier.updateField('location', v),
@@ -441,7 +445,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   const Gap(AppSpacing.lg),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: Text('Shipping available?'),
+                    title: Text(context.l10n.listingShippingAvailable),
                     value: form.shippingAvailable,
                     onChanged: (v) =>
                         notifier.updateField('shippingAvailable', v),
@@ -449,7 +453,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   if (form.shippingAvailable) ...[
                     const Gap(AppSpacing.md),
                     ListingFormField(
-                      label: 'Shipping cost *',
+                      label: context.l10n.listingShippingCostLabel,
                       controller: _shippingCost,
                       hint: '0.00',
                       keyboardType: const TextInputType.numberWithOptions(
@@ -462,9 +466,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     ),
                   ],
                   const Gap(AppSpacing.x3l),
-                  const _AccentSectionTitle('Product Attributes'),
+                  _AccentSectionTitle(context.l10n.listingSectionProductAttributes),
                   Text(
-                    'Add specs like size, color, weight…',
+                    context.l10n.listingAttributesSubtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -495,6 +499,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                 AppSpacing.lg,
               ),
               child: _PublishBar(
+                publishLabel: context.l10n.publishListing,
                 enabled: canSubmit && !form.isSubmitting,
                 loading: form.isSubmitting,
                 onPressed: _publish,
@@ -508,30 +513,22 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
 
   String _categoryLabel(String id) {
     if (id.isEmpty) {
-      return 'Select category';
+      return context.l10n.listingSelectCategory;
     }
-    return ListingCategoriesData.categoryById(id)?.name ?? id;
+    return listingLocalizedCategoryName(context, id);
   }
 
   String _subcategoryLabel(String catId, String subId) {
     if (subId.isEmpty) {
-      return 'Select subcategory';
+      return context.l10n.listingSelectSubcategory;
     }
-    final cat = ListingCategoriesData.categoryById(catId);
-    if (cat == null) {
-      return subId;
-    }
-    for (final s in cat.subcategories) {
-      if (s.id == subId) {
-        return s.name;
-      }
-    }
-    return subId;
+    return listingLocalizedSubcategoryName(context, catId, subId);
   }
 }
 
 class _AccentSectionTitle extends StatelessWidget {
-  const _AccentSectionTitle(this.title);
+  // ignore: prefer_const_constructors_in_immutables — title comes from l10n at runtime
+  _AccentSectionTitle(this.title);
 
   final String title;
 
@@ -567,12 +564,14 @@ class _PickerField extends StatelessWidget {
     required this.value,
     required this.onTap,
     this.errorText,
+    this.valueIsPlaceholder = false,
   });
 
   final String label;
   final String value;
   final VoidCallback onTap;
   final String? errorText;
+  final bool valueIsPlaceholder;
 
   @override
   Widget build(BuildContext context) {
@@ -611,9 +610,7 @@ class _PickerField extends StatelessWidget {
               child: Text(
                 value,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: value.startsWith('Select')
-                          ? Colors.grey.shade600
-                          : null,
+                      color: valueIsPlaceholder ? Colors.grey.shade600 : null,
                     ),
               ),
             ),
@@ -636,11 +633,13 @@ class _PickerField extends StatelessWidget {
 
 class _PublishBar extends StatelessWidget {
   const _PublishBar({
+    required this.publishLabel,
     required this.enabled,
     required this.loading,
     required this.onPressed,
   });
 
+  final String publishLabel;
   final bool enabled;
   final bool loading;
   final VoidCallback onPressed;
@@ -685,7 +684,7 @@ class _PublishBar extends StatelessWidget {
                       ),
                     )
                   : Text(
-                      '🚀 Publish Listing',
+                      publishLabel,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,

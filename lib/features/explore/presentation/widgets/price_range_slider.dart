@@ -3,8 +3,8 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class PriceRangeSlider extends StatelessWidget {
   const PriceRangeSlider({
@@ -29,7 +29,7 @@ class PriceRangeSlider extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(AppStrings.priceRange, style: AppTypography.titleMedium),
+        Text(context.l10n.priceRange, style: AppTypography.titleMedium),
         const Gap(AppSpacing.md),
         RangeSlider(
           values: values,
@@ -49,8 +49,8 @@ class PriceRangeSlider extends StatelessWidget {
               child: TextField(
                 controller: minController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.minPriceLabel,
+                decoration: InputDecoration(
+                  labelText: context.l10n.minPriceLabel,
                 ),
               ),
             ),
@@ -59,8 +59,8 @@ class PriceRangeSlider extends StatelessWidget {
               child: TextField(
                 controller: maxController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.maxPriceLabel,
+                decoration: InputDecoration(
+                  labelText: context.l10n.maxPriceLabel,
                 ),
               ),
             ),

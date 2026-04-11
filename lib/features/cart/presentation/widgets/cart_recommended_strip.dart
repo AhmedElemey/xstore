@@ -4,9 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
 import '../../../home/presentation/providers/recommended_provider.dart';
@@ -23,7 +23,7 @@ class CartRecommendedStrip extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.cartYouMayAlsoLike,
+          context.l10n.cartYouMayAlsoLike,
           style: AppTypography.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
           ),

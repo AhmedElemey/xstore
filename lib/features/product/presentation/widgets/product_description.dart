@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductDescription extends StatelessWidget {
   const ProductDescription({
@@ -24,7 +25,7 @@ class ProductDescription extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'About This Product',
+            context.l10n.description,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -49,7 +50,9 @@ class ProductDescription extends StatelessWidget {
           GestureDetector(
             onTap: onToggle,
             child: Text(
-              expanded ? 'Show less' : 'Read more...',
+              expanded
+                  ? '${context.l10n.readLess} ${context.arrowBack}'
+                  : '${context.l10n.readMore} ${context.arrowForward}',
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w600,

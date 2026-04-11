@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -68,7 +67,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '${AppStrings.starChar} ${group.vendorRating.toStringAsFixed(1)}${AppStrings.reviewsDotSeparator}${AppStrings.verifiedSeller}',
+                    '${context.l10n.starChar} ${group.vendorRating.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}',
                     style: AppTypography.labelSmall.copyWith(
                       color: context.textSecondary,
                     ),
@@ -106,7 +105,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
                       children: [
                         const Icon(Icons.delete_outline, color: AppColors.white),
                         Text(
-                          AppStrings.cartSwipeRemove,
+                          context.l10n.cartSwipeRemove,
                           style: AppTypography.labelSmall.copyWith(
                             color: AppColors.white,
                           ),
@@ -166,10 +165,10 @@ class CartVendorGroupBlock extends ConsumerWidget {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppStrings.cartRemovedSnack(name)),
+        content: Text(context.l10n.cartRemovedSnack(name)),
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
-          label: AppStrings.cartUndo,
+          label: context.l10n.cartUndo,
           onPressed: () => ref.read(cartProvider.notifier).undoRemove(),
         ),
       ),
@@ -185,7 +184,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
     final v = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppStrings.quantity),
+        title: Text(context.l10n.quantity),
         content: TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
@@ -194,14 +193,14 @@ class CartVendorGroupBlock extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(AppStrings.cancel),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               final parsed = int.tryParse(ctrl.text.trim());
               Navigator.pop(ctx, parsed);
             },
-            child: Text(AppStrings.save),
+            child: Text(context.l10n.save),
           ),
         ],
       ),

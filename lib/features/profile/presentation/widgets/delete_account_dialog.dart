@@ -3,8 +3,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({super.key, required this.onConfirm});
@@ -26,20 +26,20 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final ok = _controller.text.trim() == AppStrings.deleteConfirmKeyword;
+    final ok = _controller.text.trim() == context.l10n.deleteConfirmKeyword;
     return AlertDialog(
       icon: const Icon(LucideIcons.alertTriangle, color: AppColors.error, size: 40),
-      title: Text(AppStrings.deleteAccountPermanentWarning),
+      title: Text(context.l10n.deleteAccountPermanentWarning),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(AppStrings.deleteAccountDialogTitle, style: AppTypography.bodySmall),
+          Text(context.l10n.deleteAccountDialogTitle, style: AppTypography.bodySmall),
           const SizedBox(height: AppSpacing.lg),
           TextField(
             controller: _controller,
             decoration: InputDecoration(
-              labelText: AppStrings.deleteAccountTypeHint,
+              labelText: context.l10n.deleteAccountTypeHint,
               border: const OutlineInputBorder(),
             ),
             onChanged: (_) => setState(() {}),
@@ -49,7 +49,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppStrings.cancel),
+          child: Text(context.l10n.cancel),
         ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppColors.error),
@@ -59,7 +59,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   await widget.onConfirm();
                 }
               : null,
-          child: Text(AppStrings.deleteMyAccount),
+          child: Text(context.l10n.deleteMyAccount),
         ),
       ],
     );

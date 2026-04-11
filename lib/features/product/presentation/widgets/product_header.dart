@@ -4,8 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 
 class ProductHeader extends StatelessWidget {
@@ -116,7 +116,7 @@ class ProductHeader extends StatelessWidget {
                     ),
                     const Gap(AppSpacing.xs),
                     Text(
-                      '$ratingLabel${AppStrings.reviewsDotSeparator}$reviewCountLabel${AppStrings.reviewsSuffix}',
+                      '$ratingLabel${context.l10n.reviewsDotSeparator}$reviewCountLabel${context.l10n.reviewsSuffix}',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 18

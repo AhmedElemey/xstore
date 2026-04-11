@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/social_auth_provider.dart';
 import 'social_button.dart';
@@ -29,7 +28,7 @@ class AppleSignInButton extends ConsumerWidget {
         color: isDark ? Colors.white : Colors.black,
         size: 22,
       ),
-      label: AppStrings.continueWithApple,
+      label: context.l10n.continueWithApple,
       borderColor: context.borderColor,
       bgColor: isDark ? Colors.black : Colors.white,
       textColor: isDark ? Colors.white : Colors.black,

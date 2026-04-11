@@ -4,8 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../data/listing_categories_data.dart';
+import '../utils/listing_localized_labels.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 Future<void> showListingCategoryPicker({
@@ -57,7 +57,7 @@ Future<void> showListingCategoryPicker({
                     final sel = c.id == selectedId;
                     return ListTile(
                       leading: Icon(c.icon, color: AppColors.primary),
-                      title: Text(c.name),
+                      title: Text(listingLocalizedCategoryName(context, c.id)),
                       trailing:
                           sel ? const Icon(LucideIcons.check, color: AppColors.primary) : null,
                       onTap: () {
@@ -102,7 +102,7 @@ Future<void> showListingSubcategoryPicker({
                 children: [
                   Expanded(
                     child: Text(
-                      '${AppStrings.subcategoryPickerPrefix}${category.name}',
+                      '${ctx.l10n.subcategoryPickerPrefix}${listingLocalizedCategoryName(ctx, category.id)}',
                       style: Theme.of(ctx).textTheme.titleLarge,
                     ),
                   ),
@@ -118,7 +118,9 @@ Future<void> showListingSubcategoryPicker({
               (s) {
                 final sel = s.id == selectedId;
                 return ListTile(
-                  title: Text(s.name),
+                  title: Text(
+                    listingLocalizedSubcategoryName(ctx, category.id, s.id),
+                  ),
                   trailing: sel
                       ? const Icon(LucideIcons.check, color: AppColors.primary)
                       : null,

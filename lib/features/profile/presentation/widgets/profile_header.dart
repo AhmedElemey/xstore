@@ -6,7 +6,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -137,7 +136,7 @@ class ProfileHeader extends StatelessWidget {
                   shape: const StadiumBorder(),
                 ),
                 child: Text(
-                  AppStrings.editProfile,
+                  context.l10n.editProfile,
                   style: AppTypography.labelLarge.copyWith(
                     color: AppColors.primary,
                     fontSize: 12,

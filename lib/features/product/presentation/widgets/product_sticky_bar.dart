@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductStickyBar extends StatelessWidget {
@@ -70,7 +69,7 @@ class ProductStickyBar extends StatelessWidget {
                               const Gap(AppSpacing.sm),
                               Flexible(
                                 child: Text(
-                                  AppStrings.addToCart,
+                                  context.l10n.addToCart,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
@@ -96,7 +95,7 @@ class ProductStickyBar extends StatelessWidget {
                       const Gap(AppSpacing.sm),
                       Flexible(
                         child: Text(
-                          AppStrings.buyNow,
+                          context.l10n.buyNow,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,

@@ -7,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -46,7 +45,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              AppStrings.ordersItemsSectionCount(order.items.length),
+              context.l10n.ordersItemsSectionCount(order.items.length),
               style: AppTypography.titleMedium,
             ),
           ),
@@ -61,7 +60,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            AppStrings.ordersDeliveryAddressTitle,
+            context.l10n.ordersDeliveryAddressTitle,
             style: AppTypography.titleMedium,
           ),
         ),
@@ -81,7 +80,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              AppStrings.ordersTrackingSectionTitle,
+              context.l10n.ordersTrackingSectionTitle,
               style: AppTypography.titleMedium,
             ),
           ),
@@ -95,7 +94,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            AppStrings.ordersPaymentSectionTitle,
+            context.l10n.ordersPaymentSectionTitle,
             style: AppTypography.titleMedium,
           ),
         ),
@@ -109,7 +108,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              AppStrings.ordersNotesSectionTitle,
+              context.l10n.ordersNotesSectionTitle,
               style: AppTypography.titleMedium,
             ),
           ),
@@ -146,7 +145,7 @@ class _StatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = orderStatusColor(order.status);
-    final sub = _subtitle(order.status);
+    final sub = _subtitle(context, order.status);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(AppSpacing.lg),
@@ -168,7 +167,7 @@ class _StatusBanner extends StatelessWidget {
           Icon(_iconFor(order.status), color: AppColors.white, size: 32),
           const SizedBox(height: AppSpacing.md),
           Text(
-            orderStatusLabel(order.status),
+            orderStatusLabel(context, order.status),
             style: AppTypography.titleMedium.copyWith(
               color: AppColors.white,
               fontSize: 22,
@@ -187,7 +186,7 @@ class _StatusBanner extends StatelessWidget {
                   order.status == OrderStatus.confirmed)) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              '${AppStrings.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.white,
                 fontWeight: FontWeight.w600,
@@ -209,14 +208,14 @@ class _StatusBanner extends StatelessWidget {
     OrderStatus.refunded => Icons.replay_rounded,
   };
 
-  String _subtitle(OrderStatus s) => switch (s) {
-    OrderStatus.pending => AppStrings.statusSubtitlePending,
-    OrderStatus.confirmed => AppStrings.statusSubtitleConfirmed,
-    OrderStatus.processing => AppStrings.statusSubtitleProcessing,
-    OrderStatus.shipped => AppStrings.statusSubtitleShipped,
-    OrderStatus.delivered => AppStrings.statusSubtitleDelivered,
-    OrderStatus.cancelled => AppStrings.statusSubtitleCancelled,
-    OrderStatus.refunded => AppStrings.statusSubtitleRefunded,
+  String _subtitle(BuildContext context, OrderStatus s) => switch (s) {
+    OrderStatus.pending => context.l10n.statusSubtitlePending,
+    OrderStatus.confirmed => context.l10n.statusSubtitleConfirmed,
+    OrderStatus.processing => context.l10n.statusSubtitleProcessing,
+    OrderStatus.shipped => context.l10n.statusSubtitleShipped,
+    OrderStatus.delivered => context.l10n.statusSubtitleDelivered,
+    OrderStatus.cancelled => context.l10n.statusSubtitleCancelled,
+    OrderStatus.refunded => context.l10n.statusSubtitleRefunded,
   };
 }
 
@@ -290,7 +289,7 @@ class _SellerSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppStrings.ordersSoldBy, style: AppTypography.titleMedium),
+            Text(context.l10n.ordersSoldBy, style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -323,17 +322,17 @@ class _SellerSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
               onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(AppStrings.ordersMessageSellerSoon),
+                SnackBar(
+                  content: Text(context.l10n.ordersMessageSellerSoon),
                 ),
               ),
-              child: Text(AppStrings.ordersMessageSeller),
+              child: Text(context.l10n.ordersMessageSeller),
             ),
             const SizedBox(height: AppSpacing.sm),
             FilledButton(
               onPressed: () =>
                   context.push('${AppRoutes.sellerProfile}/${order.vendorId}'),
-              child: Text(AppStrings.visitStore),
+              child: Text(context.l10n.visitStore),
             ),
           ],
         ),
@@ -356,7 +355,7 @@ class _BuyerSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppStrings.ordersBuyerInfo, style: AppTypography.titleMedium),
+            Text(context.l10n.ordersBuyerInfo, style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -420,7 +419,7 @@ class _BuyerSection extends StatelessWidget {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
-                child: Text(AppStrings.ordersWhatsapp),
+                child: Text(context.l10n.ordersWhatsapp),
               ),
             ],
           ],
@@ -460,8 +459,8 @@ class _TrackingCard extends StatelessWidget {
                           ClipboardData(text: order.trackingNumber!),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(AppStrings.ordersTrackingCopied),
+                          SnackBar(
+                            content: Text(context.l10n.ordersTrackingCopied),
                           ),
                         );
                       },
@@ -471,22 +470,22 @@ class _TrackingCard extends StatelessWidget {
           if (order.courierName != null)
             Text(order.courierName!, style: AppTypography.bodyMedium),
           Text(
-            AppStrings.ordersCurrentLocationMock,
+            context.l10n.ordersCurrentLocationMock,
             style: AppTypography.bodySmall,
           ),
           if (order.estimatedDelivery != null)
             Text(
-              '${AppStrings.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodySmall,
             ),
           const SizedBox(height: AppSpacing.md),
           OutlinedButton(
             onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(AppStrings.ordersCourierWebsiteSoon),
+              SnackBar(
+                content: Text(context.l10n.ordersCourierWebsiteSoon),
               ),
             ),
-            child: Text(AppStrings.ordersTrackOnCourier),
+            child: Text(context.l10n.ordersTrackOnCourier),
           ),
         ],
       ),

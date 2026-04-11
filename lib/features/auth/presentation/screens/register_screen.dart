@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
@@ -93,16 +92,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final leave = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Leave registration?'),
-        content: Text('Your progress will be lost.'),
+        title: Text(context.l10n.leaveRegistrationTitle),
+        content: Text(context.l10n.leaveRegistrationBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Stay'),
+            child: Text(context.l10n.stay),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Leave'),
+            child: Text(context.l10n.leave),
           ),
         ],
       ),
@@ -144,8 +143,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     final labels = s.totalSteps == 4
-        ? ['Role', 'Info', 'Security', 'Store']
-        : ['Role', 'Info', 'Security'];
+        ? [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity, context.l10n.stepStore]
+        : [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity];
     final progress = s.currentStep / s.totalSteps;
 
     return Scaffold(
@@ -166,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Step ${s.currentStep} of ${s.totalSteps}',
+                  context.l10n.stepOf(s.currentStep, s.totalSteps),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: context.textSecondary,
@@ -239,8 +238,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 padding: const EdgeInsets.all(20),
                 child: AuthButton(
                   label: s.selectedRole == UserRole.vendor && s.currentStep == 4
-                      ? 'Create My Store'
-                      : 'Continue',
+                      ? context.l10n.createMyStore
+                      : context.l10n.continueLabel,
                   isLoading: s.isLoading,
                   onPressed: s.isLoading ||
                           (s.currentStep == 1 && s.selectedRole == null)
@@ -306,7 +305,7 @@ class _StepRole extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         Text(
-          'Join xStore as...',
+          context.l10n.joinAs,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -315,7 +314,7 @@ class _StepRole extends StatelessWidget {
         ),
         const Gap(10),
         Text(
-          'Choose how you want to use xStore. You can always add the other role later.',
+          context.l10n.chooseHowUse,
           style: TextStyle(
             fontSize: 15,
             height: 1.4,
@@ -332,37 +331,37 @@ class _StepRole extends StatelessWidget {
             ),
           ),
         RoleSelectorCard(
-          title: "I'm a Buyer",
-          subtitle: 'Discover and buy products from verified sellers',
+          title: context.l10n.iAmBuyer,
+          subtitle: context.l10n.buyerSubtitle,
           icon: LucideIcons.shoppingBag,
           accentColor: AppColors.primary,
           selectionBorderColor: AppColors.primary,
           isSelected: s.selectedRole == UserRole.consumer,
           onTap: () => n.updateRole(UserRole.consumer),
-          features: const [
-            'Browse thousands of products',
-            'Secure checkout & payments',
-            'Track your orders in real time',
-            'Save favorites to wishlist',
+          features: [
+            context.l10n.buyerFeature1,
+            context.l10n.buyerFeature2,
+            context.l10n.buyerFeature3,
+            context.l10n.buyerFeature4,
           ],
         ),
         RoleSelectorCard(
-          title: "I'm a Seller",
-          subtitle: 'List your products and start earning today',
+          title: context.l10n.iAmSeller,
+          subtitle: context.l10n.sellerSubtitle,
           icon: LucideIcons.store,
           accentColor: AppColors.accent,
           selectionBorderColor: AppColors.accent,
           isSelected: s.selectedRole == UserRole.vendor,
           onTap: () => n.updateRole(UserRole.vendor),
-          features: const [
-            'List unlimited products',
-            'Manage orders & inventory',
-            'Analytics & sales insights',
-            'Direct chat with buyers',
+          features: [
+            context.l10n.sellerFeature1,
+            context.l10n.sellerFeature2,
+            context.l10n.sellerFeature3,
+            context.l10n.sellerFeature4,
           ],
         ),
         const Gap(20),
-        const AuthDivider(label: AppStrings.socialLoginDivider),
+        AuthDivider(label: context.l10n.socialLoginDivider),
         const Gap(20),
         const SocialLoginRow(),
       ],
@@ -392,14 +391,14 @@ class _StepPersonal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dobLabel = s.dateOfBirth == null
-        ? 'Date of Birth (optional)'
+        ? context.l10n.dateOfBirthOptional
         : DateFormat('d MMM yyyy').format(s.dateOfBirth!);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         Text(
-          'Tell us about you',
+          context.l10n.tellUsAboutYou,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -407,12 +406,12 @@ class _StepPersonal extends StatelessWidget {
         ),
         const Gap(8),
         Text(
-          'This information will be on your profile',
+          context.l10n.infoOnProfile,
           style: TextStyle(color: context.textSecondary, fontSize: 15),
         ),
         const Gap(20),
         AuthTextField(
-          label: 'Full Name *',
+          label: context.l10n.fullNameRequired,
           controller: fullName,
           prefixIcon: const Icon(LucideIcons.user),
           errorText: s.stepErrors['fullName'],
@@ -424,7 +423,7 @@ class _StepPersonal extends StatelessWidget {
           builder: (context, val, _) {
             final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val.text.trim());
             return AuthTextField(
-              label: 'Email Address *',
+              label: context.l10n.emailAddressRequired,
               controller: email,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),
@@ -446,7 +445,7 @@ class _StepPersonal extends StatelessWidget {
         ),
         const Gap(14),
         AuthTextField(
-          label: 'Date of Birth (optional)',
+          label: context.l10n.dateOfBirthOptional,
           readOnly: true,
           onTap: onPickDob,
           hint: dobLabel,
@@ -455,8 +454,8 @@ class _StepPersonal extends StatelessWidget {
         ),
         const Gap(14),
         AuthTextField(
-          label: 'Location / City *',
-          hint: 'e.g. Algiers',
+          label: context.l10n.locationCityRequired,
+          hint: context.l10n.locationHintAlgiers,
           controller: location,
           prefixIcon: const Icon(LucideIcons.mapPin),
           errorText: s.stepErrors['location'],
@@ -486,7 +485,7 @@ class _StepSecurity extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         Text(
-          'Secure your account',
+          context.l10n.secureYourAccount,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -494,12 +493,12 @@ class _StepSecurity extends StatelessWidget {
         ),
         const Gap(8),
         Text(
-          'Choose a strong password to protect your account',
+          context.l10n.strongPasswordHint,
           style: TextStyle(color: context.textSecondary, fontSize: 15),
         ),
         const Gap(20),
         AuthTextField(
-          label: 'Password *',
+          label: context.l10n.passwordRequired,
           hint: '********',
           controller: password,
           obscureText: !s.isPasswordVisible,
@@ -518,7 +517,7 @@ class _StepSecurity extends StatelessWidget {
         PasswordStrengthBar(password: s.password),
         const Gap(16),
         AuthTextField(
-          label: 'Confirm Password *',
+          label: context.l10n.confirmPasswordRequired,
           hint: '********',
           controller: confirm,
           obscureText: !s.isConfirmPasswordVisible,
@@ -563,7 +562,7 @@ class _StepSecurity extends StatelessWidget {
                   runSpacing: 4,
                   children: [
                     Text(
-                      'I agree to the',
+                      context.l10n.agreeTo,
                       style: TextStyle(
                         fontSize: 14,
                         color: context.textSecondary,
@@ -572,7 +571,7 @@ class _StepSecurity extends StatelessWidget {
                     InkWell(
                       onTap: () {},
                       child: Text(
-                        'Terms of Service',
+                        context.l10n.termsOfService,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -581,7 +580,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'and',
+                      context.l10n.andWord,
                       style: TextStyle(
                         fontSize: 14,
                         color: context.textSecondary,
@@ -590,7 +589,7 @@ class _StepSecurity extends StatelessWidget {
                     InkWell(
                       onTap: () {},
                       child: Text(
-                        'Privacy Policy',
+                        context.l10n.privacyPolicy,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -649,7 +648,7 @@ class _StepStore extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
         Text(
-          'Set up your store',
+          context.l10n.setUpYourStore,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -657,13 +656,13 @@ class _StepStore extends StatelessWidget {
         ),
         const Gap(8),
         Text(
-          'Tell buyers about your store',
+          context.l10n.tellBuyersStore,
           style: TextStyle(color: context.textSecondary, fontSize: 15),
         ),
         const Gap(20),
         AuthTextField(
-          label: 'Store Name *',
-          hint: "e.g. Ahmed's Electronics",
+          label: context.l10n.storeNameRequired,
+          hint: context.l10n.storeNameHint,
           controller: storeName,
           prefixIcon: const Icon(LucideIcons.store),
           errorText: s.stepErrors['storeName'],
@@ -680,7 +679,7 @@ class _StepStore extends StatelessWidget {
         ),
         const Gap(16),
         Text(
-          'Store Category *',
+          context.l10n.storeCategoryRequired,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -696,7 +695,7 @@ class _StepStore extends StatelessWidget {
             fillColor: context.surfaceColor,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          hint: Text('What do you mainly sell?'),
+          hint: Text(context.l10n.storeSellHint),
           items: _storeCategories
               .map((c) => DropdownMenuItem(value: c, child: Text(c)))
               .toList(),
@@ -714,8 +713,8 @@ class _StepStore extends StatelessWidget {
           ),
         const Gap(16),
         AuthTextField(
-          label: 'Store Description *',
-          hint: 'Describe your store and what makes it unique...',
+          label: context.l10n.storeDescriptionRequired,
+          hint: context.l10n.storeDescriptionHint,
           controller: storeDesc,
           maxLines: 3,
           errorText: s.stepErrors['storeDescription'],
@@ -730,7 +729,7 @@ class _StepStore extends StatelessWidget {
         ),
         const Gap(16),
         Text(
-          'Store Logo (optional)',
+          context.l10n.storeLogoOptional,
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
         ),
         const Gap(10),
@@ -780,7 +779,7 @@ class _StepStore extends StatelessWidget {
           children: [
             Expanded(
               child: AuthTextField(
-                label: 'City *',
+                label: context.l10n.cityRequired,
                 controller: storeCity,
                 onChanged: (v) => n.updateField(storeCity: v),
               ),
@@ -788,7 +787,7 @@ class _StepStore extends StatelessWidget {
             const Gap(12),
             Expanded(
               child: AuthTextField(
-                label: 'Wilaya *',
+                label: context.l10n.wilayaRequired,
                 controller: storeWilaya,
                 onChanged: (v) => n.updateField(storeWilaya: v),
               ),
@@ -848,7 +847,9 @@ class _VendorSuccessOverlay extends ConsumerWidget {
               ),
               const Gap(20),
               Text(
-                'Welcome to xStore, ${name.isEmpty ? 'Seller' : name.split(' ').first}! 🎉',
+                context.l10n.vendorWelcome(
+                  name.isEmpty ? context.l10n.sellerFallbackName : name.split(' ').first,
+                ),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
@@ -857,13 +858,13 @@ class _VendorSuccessOverlay extends ConsumerWidget {
               ),
               const Gap(10),
               Text(
-                'Your store is ready. Start listing!',
+                context.l10n.storeReady,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: context.textSecondary),
               ),
               const Gap(24),
               AuthButton(
-                label: 'Go to My Store',
+                label: context.l10n.goToMyStore,
                 onPressed: () {
                   ref.read(registerNotifierProvider.notifier).dismissVendorSuccessOverlay();
                   context.go(AppRoutes.home);

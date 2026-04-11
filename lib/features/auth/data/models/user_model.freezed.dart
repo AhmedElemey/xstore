@@ -35,6 +35,11 @@ mixin _$UserModel {
   String? get storeCity => throw _privateConstructorUsedError;
   String? get storeWilaya => throw _privateConstructorUsedError;
   String? get whatsappNumber => throw _privateConstructorUsedError;
+  double? get latitude => throw _privateConstructorUsedError;
+  double? get longitude => throw _privateConstructorUsedError;
+  String? get governorate => throw _privateConstructorUsedError;
+  String? get town => throw _privateConstructorUsedError;
+  String? get detailAddress => throw _privateConstructorUsedError;
   String? get bio => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   String? get instagramHandle => throw _privateConstructorUsedError;
@@ -72,6 +77,11 @@ abstract class $UserModelCopyWith<$Res> {
       String? storeCity,
       String? storeWilaya,
       String? whatsappNumber,
+      double? latitude,
+      double? longitude,
+      String? governorate,
+      String? town,
+      String? detailAddress,
       String? bio,
       DateTime? dateOfBirth,
       String? instagramHandle,
@@ -112,6 +122,11 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? storeCity = freezed,
     Object? storeWilaya = freezed,
     Object? whatsappNumber = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
+    Object? governorate = freezed,
+    Object? town = freezed,
+    Object? detailAddress = freezed,
     Object? bio = freezed,
     Object? dateOfBirth = freezed,
     Object? instagramHandle = freezed,
@@ -196,6 +211,26 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      governorate: freezed == governorate
+          ? _value.governorate
+          : governorate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      town: freezed == town
+          ? _value.town
+          : town // ignore: cast_nullable_to_non_nullable
+              as String?,
+      detailAddress: freezed == detailAddress
+          ? _value.detailAddress
+          : detailAddress // ignore: cast_nullable_to_non_nullable
+              as String?,
       bio: freezed == bio
           ? _value.bio
           : bio // ignore: cast_nullable_to_non_nullable
@@ -252,6 +287,11 @@ abstract class _$$UserModelImplCopyWith<$Res>
       String? storeCity,
       String? storeWilaya,
       String? whatsappNumber,
+      double? latitude,
+      double? longitude,
+      String? governorate,
+      String? town,
+      String? detailAddress,
       String? bio,
       DateTime? dateOfBirth,
       String? instagramHandle,
@@ -290,6 +330,11 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? storeCity = freezed,
     Object? storeWilaya = freezed,
     Object? whatsappNumber = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
+    Object? governorate = freezed,
+    Object? town = freezed,
+    Object? detailAddress = freezed,
     Object? bio = freezed,
     Object? dateOfBirth = freezed,
     Object? instagramHandle = freezed,
@@ -374,6 +419,26 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      governorate: freezed == governorate
+          ? _value.governorate
+          : governorate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      town: freezed == town
+          ? _value.town
+          : town // ignore: cast_nullable_to_non_nullable
+              as String?,
+      detailAddress: freezed == detailAddress
+          ? _value.detailAddress
+          : detailAddress // ignore: cast_nullable_to_non_nullable
+              as String?,
       bio: freezed == bio
           ? _value.bio
           : bio // ignore: cast_nullable_to_non_nullable
@@ -425,6 +490,11 @@ class _$UserModelImpl implements _UserModel {
       this.storeCity,
       this.storeWilaya,
       this.whatsappNumber,
+      this.latitude,
+      this.longitude,
+      this.governorate,
+      this.town,
+      this.detailAddress,
       this.bio,
       this.dateOfBirth,
       this.instagramHandle,
@@ -475,6 +545,16 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String? whatsappNumber;
   @override
+  final double? latitude;
+  @override
+  final double? longitude;
+  @override
+  final String? governorate;
+  @override
+  final String? town;
+  @override
+  final String? detailAddress;
+  @override
   final String? bio;
   @override
   final DateTime? dateOfBirth;
@@ -490,7 +570,7 @@ class _$UserModelImpl implements _UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, isNewUser: $isNewUser)';
+    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, isNewUser: $isNewUser)';
   }
 
   @override
@@ -531,6 +611,15 @@ class _$UserModelImpl implements _UserModel {
                 other.storeWilaya == storeWilaya) &&
             (identical(other.whatsappNumber, whatsappNumber) ||
                 other.whatsappNumber == whatsappNumber) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude) &&
+            (identical(other.governorate, governorate) ||
+                other.governorate == governorate) &&
+            (identical(other.town, town) || other.town == town) &&
+            (identical(other.detailAddress, detailAddress) ||
+                other.detailAddress == detailAddress) &&
             (identical(other.bio, bio) || other.bio == bio) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth) &&
@@ -565,6 +654,11 @@ class _$UserModelImpl implements _UserModel {
         storeCity,
         storeWilaya,
         whatsappNumber,
+        latitude,
+        longitude,
+        governorate,
+        town,
+        detailAddress,
         bio,
         dateOfBirth,
         instagramHandle,
@@ -601,6 +695,11 @@ abstract class _UserModel implements UserModel {
       final String? storeCity,
       final String? storeWilaya,
       final String? whatsappNumber,
+      final double? latitude,
+      final double? longitude,
+      final String? governorate,
+      final String? town,
+      final String? detailAddress,
       final String? bio,
       final DateTime? dateOfBirth,
       final String? instagramHandle,
@@ -646,6 +745,16 @@ abstract class _UserModel implements UserModel {
   String? get storeWilaya;
   @override
   String? get whatsappNumber;
+  @override
+  double? get latitude;
+  @override
+  double? get longitude;
+  @override
+  String? get governorate;
+  @override
+  String? get town;
+  @override
+  String? get detailAddress;
   @override
   String? get bio;
   @override

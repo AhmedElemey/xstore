@@ -3,7 +3,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -80,7 +79,7 @@ class QuantityControl extends StatelessWidget {
         if (lowStock) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${AppStrings.onlyLeftPrefix}$maxQuantity${AppStrings.onlyLeftSuffix}',
+            '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
             style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
           ),
         ],

@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
 import '../providers/cart_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -40,7 +38,7 @@ class CartSummaryCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.cartOrderSummary,
+              context.l10n.cartOrderSummary,
               style: AppTypography.titleMedium.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -48,41 +46,41 @@ class CartSummaryCard extends ConsumerWidget {
             Divider(height: AppSpacing.x2l),
             _row(
               context,
-              AppStrings.cartSubtotalLine(n),
-              Formatters.dzdWhole(summary.subtotal),
+              context.l10n.cartSubtotalLine(n),
+              context.formatCurrency(summary.subtotal),
             ),
             const SizedBox(height: AppSpacing.sm),
             _row(
               context,
-              AppStrings.cartShippingLine,
-              Formatters.dzdWhole(summary.shippingTotal),
+              context.l10n.cartShippingLine,
+              context.formatCurrency(summary.shippingTotal),
             ),
             if (code != null && summary.discount > 0) ...[
               const SizedBox(height: AppSpacing.sm),
               _row(
                 context,
-                AppStrings.cartCouponLine(code),
-                '-${Formatters.dzdWhole(summary.discount)}',
+                context.l10n.cartCouponLine(code),
+                '-${context.formatCurrency(summary.discount)}',
                 valueColor: AppColors.success,
               ),
             ],
             Divider(height: AppSpacing.x2l),
             _row(
               context,
-              AppStrings.cartTotalLine,
-              Formatters.dzdWhole(summary.total),
+              context.l10n.cartTotalLine,
+              context.formatCurrency(summary.total),
               emphasize: true,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              AppStrings.cartCashOnDeliveryNote,
+              context.l10n.cartCashOnDeliveryNote,
               style: AppTypography.bodySmall.copyWith(
                 color: context.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              AppStrings.cartSecureCheckout,
+              context.l10n.cartSecureCheckout,
               style: AppTypography.bodySmall.copyWith(
                 color: context.textSecondary,
               ),

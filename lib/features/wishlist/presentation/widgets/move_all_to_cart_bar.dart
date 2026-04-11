@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
@@ -47,7 +46,7 @@ class MoveAllToCartBar extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                AppStrings.wishlistItemsAvailableLine(total, avail),
+                context.l10n.wishlistItemsAvailableLine(total, avail),
                 style: AppTypography.bodySmall.copyWith(
                   color: context.textSecondary,
                 ),
@@ -68,17 +67,17 @@ class MoveAllToCartBar extends ConsumerWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    AppStrings.wishlistAddedToCartCount(n),
+                                    context.l10n.wishlistAddedToCartCount(n),
                                   ),
                                   action: SnackBarAction(
-                                    label: AppStrings.wishlistViewCart,
+                                    label: context.l10n.wishlistViewCart,
                                     onPressed: () =>
                                         context.push(AppRoutes.cart),
                                   ),
                                 ),
                               );
                             },
-                      child: Text(AppStrings.wishlistMoveAllToCart),
+                      child: Text(context.l10n.wishlistMoveAllToCart),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -86,12 +85,12 @@ class MoveAllToCartBar extends ConsumerWidget {
                     child: OutlinedButton(
                       onPressed: () {
                         Share.share(
-                          AppStrings.wishlistShareText(
+                          context.l10n.wishlistShareText(
                             'https://xstore.app/wishlist',
                           ),
                         );
                       },
-                      child: Text(AppStrings.wishlistShareWishlist),
+                      child: Text(context.l10n.wishlistShareWishlist),
                     ),
                   ),
                 ],

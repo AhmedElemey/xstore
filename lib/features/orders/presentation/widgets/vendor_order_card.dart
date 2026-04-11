@@ -5,10 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/order_entity.dart';
 import 'order_status_badge.dart';
 
@@ -58,7 +56,7 @@ class VendorOrderCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            pending ? AppStrings.vendorNewOrder : order.formattedOrderId,
+                            pending ? context.l10n.vendorNewOrder : order.formattedOrderId,
                             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                   color: pending ? AppColors.warning : context.textPrimary,
                                   fontWeight: FontWeight.w800,
@@ -117,7 +115,7 @@ class VendorOrderCard extends StatelessWidget {
                           ?.copyWith(color: context.textSecondary),
                     ),
                     Text(
-                      '${Formatters.currency(order.items.first.price)} · Qty: ${order.items.first.quantity}',
+                      '${context.formatCurrency(order.items.first.price)} · Qty: ${order.items.first.quantity}',
                       style: Theme.of(context)
                           .textTheme
                           .labelMedium
@@ -125,7 +123,7 @@ class VendorOrderCard extends StatelessWidget {
                     ),
                     if (order.items.length > 1)
                       Text(
-                        '+ ${order.items.length - 1} ${AppStrings.ordersMoreItemsSuffixPlural}',
+                        context.l10n.ordersMoreItems(order.items.length - 1),
                         style: Theme.of(context)
                             .textTheme
                             .labelSmall
@@ -133,7 +131,7 @@ class VendorOrderCard extends StatelessWidget {
                       ),
                     const Divider(height: AppSpacing.lg),
                     Text(
-                      '${_paymentMethodLabel(order.paymentMethod)} · ${Formatters.currency(order.total)} ${AppStrings.currencyDzd}',
+                      '${_paymentMethodLabel(context, order.paymentMethod)} · ${context.formatCurrency(order.total)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: context.textSecondary,
                           ),
@@ -158,7 +156,7 @@ class VendorOrderCard extends StatelessWidget {
             child: OutlinedButton(
               onPressed: onReject,
               style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
-              child: Text(AppStrings.vendorRejectOrder),
+              child: Text(context.l10n.vendorRejectOrder),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -167,7 +165,7 @@ class VendorOrderCard extends StatelessWidget {
             child: FilledButton(
               onPressed: onConfirm,
               style: FilledButton.styleFrom(backgroundColor: AppColors.success),
-              child: Text(AppStrings.vendorConfirmOrder),
+              child: Text(context.l10n.vendorConfirmOrder),
             ),
           ),
         ],
@@ -176,25 +174,25 @@ class VendorOrderCard extends StatelessWidget {
     if (order.status == OrderStatus.confirmed) {
       return OutlinedButton(
         onPressed: onProcessing,
-        child: Text(AppStrings.vendorMarkProcessing),
+        child: Text(context.l10n.vendorMarkProcessing),
       );
     }
     if (order.status == OrderStatus.processing) {
       return FilledButton(
         onPressed: onShipped,
-        child: Text(AppStrings.vendorMarkShipped),
+        child: Text(context.l10n.vendorMarkShipped),
       );
     }
     return OutlinedButton(
       onPressed: null,
-      child: Text(AppStrings.ordersViewDetails),
+      child: Text(context.l10n.ordersViewDetails),
     );
   }
 
-  String _paymentMethodLabel(PaymentMethod method) => switch (method) {
-        PaymentMethod.cashOnDelivery => AppStrings.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => AppStrings.ordersPaymentCib,
-        PaymentMethod.dahabiCard => AppStrings.ordersPaymentDahabi,
-        PaymentMethod.baridimob => AppStrings.ordersPaymentBaridimob,
+  String _paymentMethodLabel(BuildContext context, PaymentMethod method) => switch (method) {
+        PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
+        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
+        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
+        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
       };
 }

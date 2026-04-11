@@ -3,7 +3,6 @@ import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -30,13 +29,13 @@ class ExploreEmptyState extends StatelessWidget {
             ),
             const Gap(AppSpacing.lg),
             Text(
-              AppStrings.noResultsTitle,
+              context.l10n.noResultsTitle,
               style: AppTypography.titleMedium,
               textAlign: TextAlign.center,
             ),
             const Gap(AppSpacing.sm),
             Text(
-              AppStrings.noResultsSubtitle,
+              context.l10n.noResultsSubtitle,
               style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
               textAlign: TextAlign.center,
             ),
@@ -46,12 +45,12 @@ class ExploreEmptyState extends StatelessWidget {
               alignment: WrapAlignment.center,
               children: [
                 ActionChip(
-                  label: Text(AppStrings.mensFashion),
-                  onPressed: () => onPickCategory(AppStrings.categoryQueryMens),
+                  label: Text(context.l10n.mensFashion),
+                  onPressed: () => onPickCategory(context.l10n.categoryQueryMens),
                 ),
                 ActionChip(
-                  label: Text(AppStrings.womensFashion),
-                  onPressed: () => onPickCategory(AppStrings.categoryQueryWomens),
+                  label: Text(context.l10n.womensFashion),
+                  onPressed: () => onPickCategory(context.l10n.categoryQueryWomens),
                 ),
               ],
             ),

@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_typography.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -40,18 +39,18 @@ class XstoreBottomNav extends ConsumerWidget {
 
     final labels = isVendor
         ? [
-            AppStrings.navHome,
-            AppStrings.navExplore,
-            AppStrings.navAddListing,
-            AppStrings.incomingOrders,
-            AppStrings.navProfile,
+            context.l10n.navHome,
+            context.l10n.navExplore,
+            context.l10n.navAddListing,
+            context.l10n.incomingOrders,
+            context.l10n.navProfile,
           ]
         : [
-            AppStrings.navHome,
-            AppStrings.navExplore,
-            AppStrings.navWishlist,
-            AppStrings.navOrders,
-            AppStrings.navProfile,
+            context.l10n.navHome,
+            context.l10n.navExplore,
+            context.l10n.navWishlist,
+            context.l10n.navOrders,
+            context.l10n.navProfile,
           ];
 
     final icons = isVendor

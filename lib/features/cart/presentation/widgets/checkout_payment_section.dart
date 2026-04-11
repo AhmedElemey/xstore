@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/checkout_provider.dart';
@@ -42,18 +41,18 @@ class _CheckoutPaymentSectionState
     super.dispose();
   }
 
-  static String _title(PaymentMethod m) => switch (m) {
-        PaymentMethod.cashOnDelivery => AppStrings.checkoutPayCodTitle,
-        PaymentMethod.cibCard => AppStrings.checkoutPayCibTitle,
-        PaymentMethod.dahabiCard => AppStrings.checkoutPayDahabiTitle,
-        PaymentMethod.baridimob => AppStrings.checkoutPayBaridiTitle,
+  static String _title(BuildContext context, PaymentMethod m) => switch (m) {
+        PaymentMethod.cashOnDelivery => context.l10n.checkoutPayCodTitle,
+        PaymentMethod.cibCard => context.l10n.checkoutPayCibTitle,
+        PaymentMethod.dahabiCard => context.l10n.checkoutPayDahabiTitle,
+        PaymentMethod.baridimob => context.l10n.checkoutPayBaridiTitle,
       };
 
-  static String _sub(PaymentMethod m) => switch (m) {
-        PaymentMethod.cashOnDelivery => AppStrings.checkoutPayCodSubtitle,
-        PaymentMethod.cibCard => AppStrings.checkoutPayCibSubtitle,
-        PaymentMethod.dahabiCard => AppStrings.checkoutPayDahabiSubtitle,
-        PaymentMethod.baridimob => AppStrings.checkoutPayBaridiSubtitle,
+  static String _sub(BuildContext context, PaymentMethod m) => switch (m) {
+        PaymentMethod.cashOnDelivery => context.l10n.checkoutPayCodSubtitle,
+        PaymentMethod.cibCard => context.l10n.checkoutPayCibSubtitle,
+        PaymentMethod.dahabiCard => context.l10n.checkoutPayDahabiSubtitle,
+        PaymentMethod.baridimob => context.l10n.checkoutPayBaridiSubtitle,
       };
 
   void _pushCard() {
@@ -74,7 +73,7 @@ class _CheckoutPaymentSectionState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          AppStrings.checkoutPaymentTitle,
+          context.l10n.checkoutPaymentTitle,
           style: AppTypography.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -114,13 +113,13 @@ class _CheckoutPaymentSectionState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _title(m),
+                              _title(context, m),
                               style: AppTypography.titleMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             Text(
-                              _sub(m),
+                              _sub(context, m),
                               style: AppTypography.bodySmall.copyWith(
                                 color: context.textSecondary,
                               ),
@@ -139,7 +138,7 @@ class _CheckoutPaymentSectionState
           TextField(
             controller: _num,
             decoration: InputDecoration(
-              labelText: AppStrings.checkoutCardNumber,
+              labelText: context.l10n.checkoutCardNumber,
               border: const OutlineInputBorder(),
               prefixIcon: _cardBrandIcon(_num.text),
             ),
@@ -152,8 +151,8 @@ class _CheckoutPaymentSectionState
               Expanded(
                 child: TextField(
                   controller: _exp,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.checkoutCardExpiry,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.checkoutCardExpiry,
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (_) => _pushCard(),
@@ -163,8 +162,8 @@ class _CheckoutPaymentSectionState
               Expanded(
                 child: TextField(
                   controller: _cvv,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.checkoutCardCvv,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.checkoutCardCvv,
                     border: OutlineInputBorder(),
                   ),
                   obscureText: true,
@@ -180,8 +179,8 @@ class _CheckoutPaymentSectionState
           maxLines: 3,
           maxLength: 200,
           decoration: InputDecoration(
-            labelText: AppStrings.checkoutDeliveryNoteLabel,
-            hintText: AppStrings.checkoutDeliveryNoteHint,
+            labelText: context.l10n.checkoutDeliveryNoteLabel,
+            hintText: context.l10n.checkoutDeliveryNoteLabel,
             border: const OutlineInputBorder(),
           ),
           onChanged: notifier.updateDeliveryNote,

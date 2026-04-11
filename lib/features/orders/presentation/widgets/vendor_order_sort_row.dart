@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/vendor_orders_provider.dart';
 
@@ -17,12 +16,13 @@ class VendorOrderSortRow extends StatelessWidget {
   final int count;
   final ValueChanged<VendorOrderSortOption> onChanged;
 
-  static String label(VendorOrderSortOption value) => switch (value) {
-        VendorOrderSortOption.newestFirst => AppStrings.vendorSortNewestFirst,
-        VendorOrderSortOption.oldestFirst => AppStrings.vendorSortOldestFirst,
-        VendorOrderSortOption.highestValue => AppStrings.vendorSortHighestValue,
-        VendorOrderSortOption.needsAction => AppStrings.vendorSortNeedsAction,
-        VendorOrderSortOption.buyerNameAZ => AppStrings.vendorSortBuyerName,
+  static String label(BuildContext context, VendorOrderSortOption value) =>
+      switch (value) {
+        VendorOrderSortOption.newestFirst => context.l10n.vendorSortNewestFirst,
+        VendorOrderSortOption.oldestFirst => context.l10n.vendorSortOldestFirst,
+        VendorOrderSortOption.highestValue => context.l10n.vendorSortHighestValue,
+        VendorOrderSortOption.needsAction => context.l10n.vendorSortNeedsAction,
+        VendorOrderSortOption.buyerNameAZ => context.l10n.vendorSortBuyerName,
       };
 
   @override
@@ -46,7 +46,7 @@ class VendorOrderSortRow extends StatelessWidget {
             child: DropdownButton<VendorOrderSortOption>(
               value: sort,
               items: VendorOrderSortOption.values
-                  .map((e) => DropdownMenuItem(value: e, child: Text(label(e))))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(label(context, e))))
                   .toList(),
               onChanged: (value) {
                 if (value != null) onChanged(value);
@@ -55,7 +55,7 @@ class VendorOrderSortRow extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            AppStrings.ordersCountLine(count),
+            context.l10n.ordersCountLine(count),
             style: Theme.of(context)
                 .textTheme
                 .bodySmall

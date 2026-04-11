@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/cart_item_entity.dart';
@@ -114,7 +113,7 @@ class CartItemCard extends StatelessWidget {
                                 vertical: AppSpacing.xs,
                               ),
                               child: Text(
-                                AppStrings.cartUnavailableBadge,
+                                context.l10n.cartUnavailableBadge,
                                 style: AppTypography.labelSmall.copyWith(
                                   color: AppColors.white,
                                   fontWeight: FontWeight.w600,
@@ -193,9 +192,9 @@ class CartItemCard extends StatelessWidget {
               Text(
                 item.shippingAvailable
                     ? (item.shippingCost <= 0
-                        ? AppStrings.cartShippingFree
-                        : AppStrings.cartShippingPaid(item.shippingCost))
-                    : AppStrings.cartPickupOnly,
+                        ? context.l10n.cartShippingFree
+                        : context.l10n.cartShippingPaid(item.shippingCost.round()))
+                    : context.l10n.cartPickupOnly,
                 style: AppTypography.labelSmall.copyWith(
                   color: item.shippingAvailable
                       ? (item.shippingCost <= 0
@@ -207,7 +206,7 @@ class CartItemCard extends StatelessWidget {
               if (!available) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  AppStrings.cartUnavailableHint,
+                  context.l10n.cartUnavailableHint,
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.error,
                   ),
@@ -219,7 +218,7 @@ class CartItemCard extends StatelessWidget {
                   TextButton(
                     onPressed: onRemove,
                     child: Text(
-                      AppStrings.cartRemove,
+                      context.l10n.cartRemove,
                       style: AppTypography.labelLarge.copyWith(
                         color: AppColors.error,
                       ),
@@ -230,7 +229,7 @@ class CartItemCard extends StatelessWidget {
                     TextButton(
                       onPressed: onSaveForLater,
                       child: Text(
-                        AppStrings.cartSaveForLater,
+                        context.l10n.cartSaveForLater,
                         style: AppTypography.labelLarge.copyWith(
                           color: AppColors.primary,
                         ),
