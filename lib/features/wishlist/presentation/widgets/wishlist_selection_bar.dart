@@ -6,6 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class WishlistSelectionBar extends ConsumerWidget {
   const WishlistSelectionBar({super.key});
@@ -88,18 +89,15 @@ class WishlistSelectionBar extends ConsumerWidget {
                                   .read(wishlistProvider.notifier)
                                   .addSelectedToCart();
                               if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    context.l10n.wishlistAddedToCartCount(
-                                      addable,
-                                    ),
-                                  ),
-                                  action: SnackBarAction(
-                                    label: context.l10n.wishlistViewCart,
-                                    onPressed: () =>
-                                        context.push(AppRoutes.cart),
-                                  ),
+                              AppSnackbar.show(
+                                context,
+                                message: context.l10n.wishlistAddedToCartCount(
+                                  addable,
+                                ),
+                                action: SnackBarAction(
+                                  label: context.l10n.wishlistViewCart,
+                                  onPressed: () =>
+                                      context.push(AppRoutes.cart),
                                 ),
                               );
                             },

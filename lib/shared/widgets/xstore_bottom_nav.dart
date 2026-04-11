@@ -3,15 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../core/animations/animated_widgets.dart';
+import '../../core/animations/app_animations.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
 import 'notification_icon_badge.dart';
-import '../../core/utils/extensions/context_extensions.dart';
 
+/// Bottom navigation using implicit animations only (no [TickerProviderStateMixin]).
+/// Avoids ticker / dispose races when the shell unmounts during transitions.
 class XstoreBottomNav extends ConsumerWidget {
   const XstoreBottomNav({
     super.key,
@@ -69,54 +73,103 @@ class XstoreBottomNav extends ConsumerWidget {
             LucideIcons.user,
           ];
 
-    return Material(
-      elevation: 8,
-      color: context.surfaceColor,
-      shadowColor: context.textPrimary.withValues(alpha: 0.08),
+    return Container(
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        boxShadow: [
+          BoxShadow(
+            color: context.cardShadowColor,
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: Row(
-            children: List.generate(5, (i) {
-              final selected = shell.currentIndex == i;
-              final accentMid = isVendor && i == 2;
-              final color = accentMid
-                  ? AppColors.accent
-                  : (selected ? AppColors.primary : context.textSecondary);
-              final style = AppTypography.labelSmall.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-              );
-              return Expanded(
-                child: InkWell(
-                  onTap: () => _onTap(i),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        NotificationIconBadge(
-                          count: !isVendor && i == 1 ? cartCount : 0,
-                          child: Icon(
-                            icons[i],
-                            color: color,
-                            size: AppSpacing.x2l,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: SizedBox(
+            height: 56,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final selected = shell.currentIndex == index;
+                final accentMid = isVendor && index == 2;
+                final inactiveColor = accentMid && !selected
+                    ? AppColors.accent
+                    : context.textSecondary;
+                final activeColor =
+                    accentMid ? AppColors.accent : context.primaryColor;
+
+                return Expanded(
+                  child: AnimatedTap(
+                    onTap: () => _onTap(index),
+                    child: TweenAnimationBuilder<double>(
+                      duration: AppAnimations.fast,
+                      curve: AppAnimations.enter,
+                      tween: Tween<double>(end: selected ? 1.0 : 0.0),
+                      builder: (context, t, _) {
+                        final blended =
+                            Color.lerp(inactiveColor, activeColor, t)!;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 2,
+                            vertical: 2,
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          labels[i],
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: style,
-                        ),
-                      ],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              NotificationIconBadge(
+                                count:
+                                    !isVendor && index == 1 ? cartCount : 0,
+                                child: Transform.scale(
+                                  scale: 1.0 + (t * 0.12),
+                                  child: Icon(
+                                    icons[index],
+                                    color: blended,
+                                    size: 22,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              SizedBox(
+                                height: 4,
+                                child: Center(
+                                  child: AnimatedContainer(
+                                    duration: AppAnimations.normal,
+                                    curve: AppAnimations.enter,
+                                    width: selected ? 18 : 0,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: activeColor,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                labels[index],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: blended,
+                                  fontSize: 10,
+                                  fontWeight: selected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
       ),

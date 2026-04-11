@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
@@ -18,6 +19,7 @@ import '../widgets/photo_upload_section.dart';
 import '../widgets/quantity_stepper.dart';
 import '../utils/listing_localized_labels.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key});
@@ -88,34 +90,39 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   }
 
   Future<void> _openPhotoSheet() async {
-    await showModalBottomSheet<void>(
+    await showAnimatedBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(LucideIcons.camera),
-              title: Text(ctx.l10n.listingTakePhoto),
-              onTap: () {
-                Navigator.pop(ctx);
-                ref.read(listingFormNotifierProvider.notifier).pickFromCamera();
-              },
-            ),
-            ListTile(
-              leading: const Icon(LucideIcons.imagePlus),
-              title: Text(ctx.l10n.listingChooseFromGallery),
-              onTap: () {
-                Navigator.pop(ctx);
-                ref.read(listingFormNotifierProvider.notifier).pickFromGallery();
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
+      builder: (ctx) => Material(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(LucideIcons.camera),
+                title: Text(ctx.l10n.listingTakePhoto),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ref
+                      .read(listingFormNotifierProvider.notifier)
+                      .pickFromCamera();
+                },
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.imagePlus),
+                title: Text(ctx.l10n.listingChooseFromGallery),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ref
+                      .read(listingFormNotifierProvider.notifier)
+                      .pickFromGallery();
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );
@@ -144,15 +151,14 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     final err = ref.read(listingFormNotifierProvider).errors['submit'];
     if (err != null) {
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(err),
-          backgroundColor: AppColors.error,
-          action: SnackBarAction(
-            label: retryLabel,
-            textColor: Colors.white,
-            onPressed: () => _publish(),
-          ),
+      AppSnackbar.show(
+        context,
+        message: err,
+        backgroundColor: AppColors.error,
+        action: SnackBarAction(
+          label: retryLabel,
+          textColor: Colors.white,
+          onPressed: () => _publish(),
         ),
       );
     }
@@ -204,11 +210,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       return;
                     }
                     // ignore: use_build_context_synchronously
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(context.l10n.listingDraftSaved),
-                        behavior: SnackBarBehavior.floating,
-                      ),
+                    AppSnackbar.success(
+                      context,
+                      context.l10n.listingDraftSaved,
                     );
                   },
             child: Text(context.l10n.saveDraft),

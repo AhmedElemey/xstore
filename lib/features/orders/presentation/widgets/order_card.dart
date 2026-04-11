@@ -12,6 +12,7 @@ import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class OrderCard extends ConsumerWidget {
   const OrderCard({
@@ -296,9 +297,7 @@ class OrderCard extends ConsumerWidget {
                 onPressed: () async {
                   await notifier.reorder(order.id);
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.l10n.addedToCart)),
-                    );
+                    AppSnackbar.success(context, context.l10n.addedToCart);
                   }
                 },
                 child: Text(context.l10n.ordersReorder),
@@ -505,12 +504,10 @@ class OrderCard extends ConsumerWidget {
   }
 
   void _trackingSnack(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
+    AppSnackbar.show(
+      context,
+      message:
           order.trackingNumber ?? context.l10n.ordersTrackOnCourier,
-        ),
-      ),
     );
   }
 
@@ -562,8 +559,9 @@ class OrderCard extends ConsumerWidget {
                   FilledButton(
                     onPressed: () {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(context.l10n.ordersReviewThanks)),
+                      AppSnackbar.success(
+                        context,
+                        context.l10n.ordersReviewThanks,
                       );
                     },
                     child: Text(context.l10n.ordersSubmitReview),
@@ -632,7 +630,7 @@ class OrderCard extends ConsumerWidget {
   void _errSnack(BuildContext context, WidgetRef ref) {
     final err = ref.read(ordersNotifierProvider).error;
     if (err != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+      AppSnackbar.error(context, err);
       ref.read(ordersNotifierProvider.notifier).clearError();
     }
   }

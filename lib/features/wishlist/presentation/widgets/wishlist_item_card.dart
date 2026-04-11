@@ -11,6 +11,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../providers/wishlist_provider.dart';
 import 'price_drop_badge.dart';
@@ -31,26 +32,24 @@ class WishlistItemCard extends ConsumerWidget {
   final VoidCallback onToggleSelect;
 
   void _undoSnack(BuildContext context, WidgetRef ref) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.wishlistRemovedSnack),
-        duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: context.l10n.cartUndo,
-          onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
-        ),
+    AppSnackbar.show(
+      context,
+      message: context.l10n.wishlistRemovedSnack,
+      duration: const Duration(seconds: 5),
+      action: SnackBarAction(
+        label: context.l10n.cartUndo,
+        onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
       ),
     );
   }
 
   void _addedToCartSnack(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.wishlistSingleAddedToCart),
-        action: SnackBarAction(
-          label: context.l10n.wishlistViewCart,
-          onPressed: () => context.push(AppRoutes.cart),
-        ),
+    AppSnackbar.show(
+      context,
+      message: context.l10n.wishlistSingleAddedToCart,
+      action: SnackBarAction(
+        label: context.l10n.wishlistViewCart,
+        onPressed: () => context.push(AppRoutes.cart),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/animations/animated_widgets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -48,9 +49,9 @@ class QuantitySelector extends StatelessWidget {
                   Container(
                     alignment: Alignment.center,
                     width: AppSpacing.x3l + AppSpacing.sm,
-                    child: Text(
-                      '$quantity',
-                      style: theme.textTheme.titleMedium?.copyWith(
+                    child: AnimatedCounter(
+                      value: quantity,
+                      style: theme.textTheme.titleMedium!.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),

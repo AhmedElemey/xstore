@@ -8,6 +8,8 @@ import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/wishlist/presentation/providers/wishlist_provider.dart';
 import '../../core/utils/extensions/context_extensions.dart';
+import 'app_snackbar.dart';
+import 'heart_burst_animation.dart';
 
 /// Single entry point for wishlist heart UI: state, toggle, and snackbars.
 class WishHeartButton extends ConsumerWidget {
@@ -52,9 +54,14 @@ class WishHeartButton extends ConsumerWidget {
         constraints: BoxConstraints.tightFor(width: size + 8, height: size + 8),
         iconSize: size,
         onPressed: () => _onTap(context, ref, isWishlisted),
-        icon: Icon(
-          isWishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          color: isWishlisted ? AppColors.error : outlineColor,
+        icon: HeartBurstAnimation(
+          isFavorite: isWishlisted,
+          child: Icon(
+            isWishlisted
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            color: isWishlisted ? AppColors.error : outlineColor,
+          ),
         ),
       ),
     );
@@ -69,27 +76,24 @@ class WishHeartButton extends ConsumerWidget {
     if (!context.mounted) return;
     final nowWishlisted = ref.read(wishlistProvider).wishlistedListingIds
         .contains(listingId);
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
+    ScaffoldMessenger.of(context).clearSnackBars();
     if (nowWishlisted && !wasWishlisted) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(AppStrings.wishlistSavedSnack),
-          action: SnackBarAction(
-            label: AppStrings.wishlistView,
-            onPressed: () => context.go(AppRoutes.wishlist),
-          ),
+      AppSnackbar.show(
+        context,
+        message: AppStrings.wishlistSavedSnack,
+        action: SnackBarAction(
+          label: AppStrings.wishlistView,
+          onPressed: () => context.go(AppRoutes.wishlist),
         ),
       );
     } else if (!nowWishlisted && wasWishlisted) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(AppStrings.wishlistRemovedSnack),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: AppStrings.cartUndo,
-            onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
-          ),
+      AppSnackbar.show(
+        context,
+        message: AppStrings.wishlistRemovedSnack,
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: AppStrings.cartUndo,
+          onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
         ),
       );
     }

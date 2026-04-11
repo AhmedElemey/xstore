@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class MoveAllToCartBar extends ConsumerWidget {
   const MoveAllToCartBar({super.key});
@@ -64,16 +65,13 @@ class MoveAllToCartBar extends ConsumerWidget {
                                   .read(wishlistProvider.notifier)
                                   .moveAllToCart();
                               if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    context.l10n.wishlistAddedToCartCount(n),
-                                  ),
-                                  action: SnackBarAction(
-                                    label: context.l10n.wishlistViewCart,
-                                    onPressed: () =>
-                                        context.push(AppRoutes.cart),
-                                  ),
+                              AppSnackbar.show(
+                                context,
+                                message: context.l10n.wishlistAddedToCartCount(n),
+                                action: SnackBarAction(
+                                  label: context.l10n.wishlistViewCart,
+                                  onPressed: () =>
+                                      context.push(AppRoutes.cart),
                                 ),
                               );
                             },

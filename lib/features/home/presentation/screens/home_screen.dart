@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
@@ -99,7 +102,7 @@ class HomeScreen extends ConsumerWidget {
                       ? () => context.push(AppRoutes.cart)
                       : null,
                   cartItemCount: cartCount,
-                ),
+                ).fadeSlideIn(duration: AppAnimations.medium),
               ),
             ),
             SliverPadding(
@@ -107,7 +110,9 @@ class HomeScreen extends ConsumerWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   banners.toWidget(
-                    data: (data) => HeroBannerCarousel(banners: data),
+                    data: (data) => HeroBannerCarousel(banners: data).scaleIn(
+                      delay: const Duration(milliseconds: 100),
+                    ),
                     loading: () => _BannerShimmer(),
                     errorBuilder: (e) => ErrorStateWidget(
                       message: e.toString(),
@@ -115,13 +120,23 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const Gap(AppSpacing.lg),
-                  const FlashSaleBanner(),
+                  FlashSaleBanner()
+                      .animate()
+                      .fadeIn(duration: AppAnimations.medium)
+                      .slideX(
+                        begin: -0.05,
+                        end: 0,
+                        duration: AppAnimations.medium,
+                        curve: AppAnimations.enter,
+                      ),
                   const Gap(AppSpacing.lg),
                   Text(
                     context.l10n.shopByCategory,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
+                  ).fadeSlideIn(
+                    delay: const Duration(milliseconds: 200),
                   ),
                   const Gap(AppSpacing.md),
                   categories.toWidget(
@@ -148,7 +163,15 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const Gap(AppSpacing.lg),
-                  const FeaturedCategoriesBanner(),
+                  FeaturedCategoriesBanner()
+                      .animate()
+                      .fadeIn(duration: AppAnimations.normal)
+                      .slideY(
+                        begin: 0.06,
+                        end: 0,
+                        duration: AppAnimations.medium,
+                        curve: AppAnimations.enter,
+                      ),
                   const Gap(AppSpacing.lg),
                   newArrivals.toWidget(
                     data: (data) => NewArrivalsGrid(

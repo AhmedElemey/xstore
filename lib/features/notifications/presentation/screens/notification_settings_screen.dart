@@ -9,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -83,9 +84,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
       await _p!.setBool(e.key, e.value);
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.notificationSettingsSaved)),
-      );
+      AppSnackbar.success(context, context.l10n.notificationSettingsSaved);
     }
   }
 

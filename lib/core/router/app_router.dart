@@ -12,6 +12,7 @@ import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/phone_auth_provider.dart';
+import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
@@ -33,6 +34,7 @@ import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/coming_soon_screen.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
+import '../animations/page_transitions.dart';
 import 'app_routes.dart';
 import 'router_notifier.dart';
 
@@ -43,7 +45,11 @@ List<StatefulShellBranch> _consumerShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const HomeScreen(),
+            ),
           ),
         ],
       ),
@@ -51,7 +57,11 @@ List<StatefulShellBranch> _consumerShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.explore,
-            builder: (context, state) => const ExploreScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const ExploreScreen(),
+            ),
           ),
         ],
       ),
@@ -59,7 +69,11 @@ List<StatefulShellBranch> _consumerShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.wishlist,
-            builder: (context, state) => const WishlistScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const WishlistScreen(),
+            ),
           ),
         ],
       ),
@@ -67,7 +81,11 @@ List<StatefulShellBranch> _consumerShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.orders,
-            builder: (context, state) => const OrdersScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const OrdersScreen(),
+            ),
           ),
         ],
       ),
@@ -75,7 +93,11 @@ List<StatefulShellBranch> _consumerShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.profile,
-            builder: (context, state) => const ProfileScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const ProfileScreen(),
+            ),
           ),
         ],
       ),
@@ -86,7 +108,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const HomeScreen(),
+            ),
           ),
         ],
       ),
@@ -94,7 +120,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.explore,
-            builder: (context, state) => const ExploreScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const ExploreScreen(),
+            ),
           ),
         ],
       ),
@@ -102,7 +132,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.listingAdd,
-            builder: (context, state) => const AddListingScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const AddListingScreen(),
+            ),
           ),
         ],
       ),
@@ -110,7 +144,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.vendorOrders,
-            builder: (context, state) => const VendorOrdersScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const VendorOrdersScreen(),
+            ),
           ),
         ],
       ),
@@ -118,7 +156,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
         routes: [
           GoRoute(
             path: AppRoutes.profile,
-            builder: (context, state) => const ProfileScreen(),
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const ProfileScreen(),
+            ),
           ),
         ],
       ),
@@ -128,41 +170,82 @@ List<StatefulShellBranch> _vendorShellBranches() => [
 GoRouter goRouter(GoRouterRef ref) {
   final refresh = ref.watch(routerNotifierProvider);
   final auth = ref.watch(authProvider);
+  final needsRoleSelection = ref.watch(
+    socialAuthProvider.select((s) => s.needsRoleSelection),
+  );
+  final holdVendorSuccess = ref.watch(
+    registerNotifierProvider.select((s) => s.showVendorSuccessOverlay),
+  );
   final isVendor = auth.valueOrNull?.isVendor == true;
   final shellBranches = isVendor ? _vendorShellBranches() : _consumerShellBranches();
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
-    redirect: (context, state) => xStoreGoRouterRedirect(ref, state),
+    // Do not call ref.read/watch here: redirect runs while refreshListenable
+    // notifies (same turn as auth updates), when goRouter's element can be outdated.
+    redirect: (context, state) => computeXStoreAuthRedirect(
+      auth: auth,
+      needsRoleSelection: needsRoleSelection,
+      matchedLocation: state.matchedLocation,
+      holdRegisterForVendorSuccess: holdVendorSuccess,
+    ),
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => fadeScaleTransition(
+          context,
+          state,
+          const SplashScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, state) => const OnboardingScreen(),
+        pageBuilder: (context, state) => fadeScaleTransition(
+          context,
+          state,
+          const OnboardingScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const RegisterScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.socialRoleSelect,
-        builder: (context, state) => const SocialRoleScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const SocialRoleScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ForgotPasswordScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.otp,
-        builder: (context, state) => const OtpScreen(),
+        pageBuilder: (context, state) => slideUpTransition(
+          context,
+          state,
+          const OtpScreen(),
+        ),
         redirect: (context, state) {
           final phoneState = ref.read(phoneAuthProvider);
           if (phoneState.verificationId == null) return AppRoutes.login;
@@ -180,124 +263,224 @@ GoRouter goRouter(GoRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.cart,
-        builder: (context, state) => const CartScreen(),
+        pageBuilder: (context, state) => slideUpTransition(
+          context,
+          state,
+          const CartScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.checkout,
-        builder: (context, state) => const CheckoutScreen(),
+        pageBuilder: (context, state) => slideUpTransition(
+          context,
+          state,
+          const CheckoutScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.listingMy,
-        builder: (context, state) => const MyListingsScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const MyListingsScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.incomingOrders,
-        builder: (context, state) => const OrdersScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const OrdersScreen(),
+        ),
       ),
       GoRoute(
         path: '${AppRoutes.vendorOrders}/:orderId',
-        builder: (context, state) => VendorOrderDetailScreen(
-          orderId: state.pathParameters['orderId'] ?? '',
+        pageBuilder: (context, state) => slideUpTransition(
+          context,
+          state,
+          VendorOrderDetailScreen(
+            orderId: state.pathParameters['orderId'] ?? '',
+          ),
         ),
       ),
       GoRoute(
         path: '${AppRoutes.orderDetail}/:orderId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['orderId'] ?? '';
-          return OrderDetailScreen(orderId: id);
+          return slideUpTransition(
+            context,
+            state,
+            OrderDetailScreen(orderId: id),
+          );
         },
       ),
       GoRoute(
         path: '${AppRoutes.product}/:id/reviews',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return ProductReviewsScreen(listingId: id);
+          return slideRightTransition(
+            context,
+            state,
+            ProductReviewsScreen(listingId: id),
+          );
         },
       ),
       GoRoute(
         path: '${AppRoutes.sellerProfile}/:sellerId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['sellerId'] ?? '';
-          return VendorStoreScreen(sellerId: id);
+          return slideRightTransition(
+            context,
+            state,
+            VendorStoreScreen(sellerId: id),
+          );
         },
       ),
       GoRoute(
         path: AppRoutes.profileEdit,
-        builder: (context, state) => const EditProfileScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const EditProfileScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.settings,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.settings),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.settings),
+        ),
       ),
       GoRoute(
         path: AppRoutes.analytics,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuAnalytics),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuAnalytics),
+        ),
       ),
       GoRoute(
         path: AppRoutes.myOrdersPlaceholder,
-        builder: (context, state) =>
-            const ComingSoonScreen(title: AppStrings.menuMyOrders),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuMyOrders),
+        ),
       ),
       GoRoute(
         path: AppRoutes.earnings,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuEarnings),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuEarnings),
+        ),
       ),
       GoRoute(
         path: AppRoutes.recentlyViewed,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuRecentlyViewed),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuRecentlyViewed),
+        ),
       ),
       GoRoute(
         path: AppRoutes.myReviews,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuMyReviews),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuMyReviews),
+        ),
       ),
       GoRoute(
         path: AppRoutes.changePassword,
-        builder: (context, state) =>
-            const ComingSoonScreen(title: AppStrings.menuChangePassword),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuChangePassword),
+        ),
       ),
       GoRoute(
         path: AppRoutes.notifications,
-        builder: (context, state) => const NotificationsScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const NotificationsScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.notificationSettings,
-        builder: (context, state) => const NotificationSettingsScreen(),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const NotificationSettingsScreen(),
+        ),
       ),
       GoRoute(
         path: '/chat/:threadId',
-        builder: (context, state) =>
-            const ComingSoonScreen(title: AppStrings.chatSeller),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.chatSeller),
+        ),
       ),
       GoRoute(
         path: AppRoutes.paymentMethods,
-        builder: (context, state) =>
-            const ComingSoonScreen(title: AppStrings.menuPaymentMethods),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuPaymentMethods),
+        ),
       ),
       GoRoute(
         path: AppRoutes.addresses,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuAddresses),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuAddresses),
+        ),
       ),
       GoRoute(
         path: AppRoutes.storeHours,
-        builder: (context, state) => const StoreHoursScreen(),
+        pageBuilder: (context, state) => slideUpTransition(
+          context,
+          state,
+          const StoreHoursScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.help,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuHelpCenter),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuHelpCenter),
+        ),
       ),
       GoRoute(
         path: AppRoutes.terms,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuTerms),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuTerms),
+        ),
       ),
       GoRoute(
         path: AppRoutes.privacy,
-        builder: (context, state) => const ComingSoonScreen(title: AppStrings.menuPrivacy),
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const ComingSoonScreen(title: AppStrings.menuPrivacy),
+        ),
       ),
       GoRoute(
         path: '${AppRoutes.product}/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
-          return ProductDetailScreen(productId: id);
+          return slideUpTransition(
+            context,
+            state,
+            ProductDetailScreen(productId: id),
+          );
         },
       ),
     ],

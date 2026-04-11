@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/category_entity.dart';
 
@@ -27,9 +29,13 @@ class CategoryChipRow extends StatelessWidget {
         separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
         itemBuilder: (context, index) {
           final c = categories[index];
-          return ActionChip(
-            label: Text(c.name),
-            onPressed: () => onSelected?.call(c),
+          return RepaintBoundary(
+            child: ActionChip(
+              label: Text(c.name),
+              onPressed: () => onSelected?.call(c),
+            ).fadeSlideIn(
+              delay: AppAnimations.staggerDelayCapped(index),
+            ),
           );
         },
       ),

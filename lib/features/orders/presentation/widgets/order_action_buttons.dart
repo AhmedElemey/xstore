@@ -12,6 +12,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/order_entity.dart'
     show OrderEntity, OrderStatus, ShippingInfo;
 import '../providers/order_detail_provider.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 /// Sticky footer actions on order detail — routes actions to [OrderDetailNotifier].
 class OrderActionButtons extends ConsumerWidget {
@@ -134,13 +135,10 @@ class OrderActionButtons extends ConsumerWidget {
               child: OutlinedButton(
                 onPressed: busy
                     ? null
-                    : () => ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              order.trackingNumber ??
-                                  context.l10n.ordersTrackOnCourier,
-                            ),
-                          ),
+                    : () => AppSnackbar.show(
+                          context,
+                          message: order.trackingNumber ??
+                              context.l10n.ordersTrackOnCourier,
                         ),
                 child: Text(context.l10n.ordersTrackOrder),
               ),
@@ -180,8 +178,9 @@ class OrderActionButtons extends ConsumerWidget {
                     : () async {
                         await notifier.reorder();
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(context.l10n.addedToCart)),
+                          AppSnackbar.success(
+                            context,
+                            context.l10n.addedToCart,
                           );
                         }
                       },
@@ -218,7 +217,7 @@ class OrderActionButtons extends ConsumerWidget {
   void _err(BuildContext context, WidgetRef ref, String id) {
     final e = ref.read(orderDetailNotifierProvider(id)).error;
     if (e != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e)));
+      AppSnackbar.error(context, e);
       ref.read(orderDetailNotifierProvider(id).notifier).clearError();
     }
   }
@@ -426,8 +425,9 @@ class OrderActionButtons extends ConsumerWidget {
                 FilledButton(
                   onPressed: () {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(context.l10n.ordersReviewThanks)),
+                    AppSnackbar.success(
+                      context,
+                      context.l10n.ordersReviewThanks,
                     );
                   },
                   child: Text(context.l10n.ordersSubmitReview),

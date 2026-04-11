@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../widgets/notification_filter_tabs.dart';
@@ -45,13 +46,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   void _delete(BuildContext context, NotificationEntity e) {
     ref.read(notificationsProvider.notifier).onDeleteConfirmed(e);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.notificationsDeletedSnack(e.title)),
-        action: SnackBarAction(
-          label: context.l10n.notificationsUndo,
-          onPressed: () => ref.read(notificationsProvider.notifier).cancelDeleteUndo(e),
-        ),
+    AppSnackbar.show(
+      context,
+      message: context.l10n.notificationsDeletedSnack(e.title),
+      action: SnackBarAction(
+        label: context.l10n.notificationsUndo,
+        onPressed: () =>
+            ref.read(notificationsProvider.notifier).cancelDeleteUndo(e),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../constants/app_colors.dart';
 import '../../localization/app_localizations.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 
 extension BuildContextX on BuildContext {
   ThemeData get theme => Theme.of(this);
@@ -54,9 +55,7 @@ extension BuildContextX on BuildContext {
       isDark ? AppColors.darkOverlay : AppColors.lightOverlay;
 
   void showSnack(String message) {
-    ScaffoldMessenger.maybeOf(
-      this,
-    )?.showSnackBar(SnackBar(content: Text(message)));
+    AppSnackbar.info(this, message);
   }
 }
 

@@ -10,6 +10,7 @@ import '../../domain/entities/order_entity.dart';
 import '../widgets/order_detail_scroll_content.dart';
 import '../widgets/order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/order_detail_skeleton.dart';
 
 class OrderDetailScreen extends ConsumerStatefulWidget {
@@ -38,7 +39,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     ref.listen(orderDetailNotifierProvider(widget.orderId), (p, n) {
       final err = n.error;
       if (err != null && err != p?.error && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+        AppSnackbar.error(context, err);
         ref.read(orderDetailNotifierProvider(widget.orderId).notifier).clearError();
       }
     });

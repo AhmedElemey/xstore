@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -36,6 +37,9 @@ class PriceDropBadge extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-    );
+    )
+        .animate()
+        .fadeIn()
+        .slideX(begin: 0.2, end: 0);
   }
 }

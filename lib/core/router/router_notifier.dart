@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
@@ -62,20 +61,6 @@ String? computeXStoreAuthRedirect({
     },
     loading: () => null,
     error: (_, __) => AppRoutes.login,
-  );
-}
-
-/// Typed wrapper for [GoRouter.redirect] using the active [Ref].
-String? xStoreGoRouterRedirect(Ref ref, GoRouterState state) {
-  final holdVendorSuccess =
-      ref.read(registerNotifierProvider).showVendorSuccessOverlay;
-  final needsRoleSelection =
-      ref.read(socialAuthProvider.select((s) => s.needsRoleSelection));
-  return computeXStoreAuthRedirect(
-    auth: ref.read(authProvider),
-    needsRoleSelection: needsRoleSelection,
-    matchedLocation: state.matchedLocation,
-    holdRegisterForVendorSuccess: holdVendorSuccess,
   );
 }
 

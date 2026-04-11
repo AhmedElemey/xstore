@@ -43,8 +43,12 @@ class ProductStickyBar extends StatelessWidget {
               OutlinedButton(
                 onPressed: onChat,
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  minimumSize: const Size(AppSpacing.x3l + AppSpacing.md, AppSpacing.x3l + AppSpacing.md),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  minimumSize: const Size(
+                    AppSpacing.x3l + AppSpacing.md,
+                    AppSpacing.x3l + AppSpacing.md,
+                  ),
                 ),
                 child: const Icon(LucideIcons.messageCircle, size: 22),
               ),

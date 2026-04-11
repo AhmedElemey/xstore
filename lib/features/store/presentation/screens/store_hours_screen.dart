@@ -8,6 +8,7 @@ import '../providers/store_hours_provider.dart';
 import '../widgets/copy_hours_sheet.dart';
 import '../widgets/day_schedule_tile.dart';
 import '../widgets/store_status_banner.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/store_hours_skeleton.dart';
 
 class StoreHoursScreen extends ConsumerStatefulWidget {
@@ -49,8 +50,11 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                           await notifier.toggleStoreStatus();
                           if (!context.mounted) return;
                           final open = ref.read(storeHoursNotifierProvider).isStoreOpen;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(open ? context.l10n.storeNowOpen : context.l10n.storeNowClosed)),
+                          AppSnackbar.info(
+                            context,
+                            open
+                                ? context.l10n.storeNowOpen
+                                : context.l10n.storeNowClosed,
                           );
                         },
                         onEditMessage: () => _showMessageSheet(context, notifier, current.temporaryMessage),
@@ -85,13 +89,13 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                                 label: Text(_presetLabel(context, preset)),
                                 onPressed: () {
                                   final text = context.l10n.applyPresetConfirm(_presetLabel(context, preset));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(text),
-                                      action: SnackBarAction(
-                                        label: context.l10n.applyFilters,
-                                        onPressed: () => notifier.applyPreset(preset),
-                                      ),
+                                  AppSnackbar.show(
+                                    context,
+                                    message: text,
+                                    action: SnackBarAction(
+                                      label: context.l10n.applyFilters,
+                                      onPressed: () =>
+                                          notifier.applyPreset(preset),
                                     ),
                                   );
                                 },
@@ -126,15 +130,14 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                           ? () async {
                               final savedText = context.l10n.workingHoursSaved;
                               final invalidText = context.l10n.invalidHoursError;
-                              final messenger = ScaffoldMessenger.of(context);
                               final navigator = Navigator.of(context);
                               final ok = await notifier.saveStoreHours();
                               if (!mounted) return;
                               if (ok) {
-                                messenger.showSnackBar(SnackBar(content: Text(savedText)));
+                                AppSnackbar.success(context, savedText);
                                 navigator.pop();
                               } else {
-                                messenger.showSnackBar(SnackBar(content: Text(invalidText)));
+                                AppSnackbar.error(context, invalidText);
                               }
                             }
                           : null,

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -16,6 +17,7 @@ import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../widgets/profile_avatar_picker.dart';
 import '../widgets/vendor_location_section.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/edit_profile_skeleton.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -142,31 +144,40 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _pickCategory() async {
-    await showModalBottomSheet<void>(
+    await showAnimatedBottomSheet<void>(
       context: context,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text(context.l10n.storeCategoryLabel, style: AppTypography.titleMedium),
-            ),
-            for (final c in _storeCategoryOptions)
-              ListTile(
-                title: Text(c),
-                trailing: _category == c ? const Icon(Icons.check) : null,
-                onTap: () {
-                  setState(() {
-                    _category = c;
-                    _storeCategory.text = c;
-                  });
-                  ref.read(profileNotifierProvider.notifier).updateField('storeCategory', c);
-                  Navigator.pop(ctx);
-                },
+      builder: (ctx) => Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(
+                  context.l10n.storeCategoryLabel,
+                  style: AppTypography.titleMedium,
+                ),
               ),
-          ],
+              for (final c in _storeCategoryOptions)
+                ListTile(
+                  title: Text(c),
+                  trailing: _category == c ? const Icon(Icons.check) : null,
+                  onTap: () {
+                    setState(() {
+                      _category = c;
+                      _storeCategory.text = c;
+                    });
+                    ref
+                        .read(profileNotifierProvider.notifier)
+                        .updateField('storeCategory', c);
+                    Navigator.pop(ctx);
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -189,39 +200,47 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _avatarSheet() async {
-    await showModalBottomSheet<void>(
+    await showAnimatedBottomSheet<void>(
       context: context,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(LucideIcons.camera),
-              title: Text(context.l10n.takePhoto),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await ref.read(profileNotifierProvider.notifier).pickAvatar(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(LucideIcons.image),
-              title: Text(context.l10n.chooseFromGallery),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await ref.read(profileNotifierProvider.notifier).pickAvatar(ImageSource.gallery);
-              },
-            ),
-            ListTile(
-              leading: const Icon(LucideIcons.trash2),
-              title: Text(context.l10n.removePhoto),
-              onTap: () {
-                ref.read(profileNotifierProvider.notifier).markAvatarRemoved();
-                Navigator.pop(ctx);
-                setState(() {});
-              },
-            ),
-          ],
+      builder: (ctx) => Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(LucideIcons.camera),
+                title: Text(context.l10n.takePhoto),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(profileNotifierProvider.notifier)
+                      .pickAvatar(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.image),
+                title: Text(context.l10n.chooseFromGallery),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(profileNotifierProvider.notifier)
+                      .pickAvatar(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.trash2),
+                title: Text(context.l10n.removePhoto),
+                onTap: () {
+                  ref.read(profileNotifierProvider.notifier).markAvatarRemoved();
+                  Navigator.pop(ctx);
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -233,14 +252,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!mounted) return;
     final err = ref.read(profileNotifierProvider).error;
     if (err != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorText(context, err))),
-      );
+      AppSnackbar.error(context, _errorText(context, err));
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.profileUpdatedSuccess)),
-    );
+    AppSnackbar.success(context, context.l10n.profileUpdatedSuccess);
     Navigator.of(context).pop();
   }
 
@@ -256,26 +271,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         _governorate.text = next.editGovernorate;
         _town.text = next.editTown;
         _detailAddress.text = next.editDetailAddress;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.locationDetected)),
-        );
+        AppSnackbar.success(context, context.l10n.locationDetected);
       }
       if (prev?.locationAction != next.locationAction &&
           next.locationAction != null &&
           mounted) {
         if (next.locationAction == 'open_location_settings') {
-          final open = await showDialog<bool>(
+          final open = await showAnimatedDialog<bool>(
             context: context,
-            builder: (ctx) => AlertDialog(
+            child: AlertDialog(
               title: Text(context.l10n.locationServicesOff),
               content: Text(context.l10n.enableLocationServices),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
+                  onPressed: () => Navigator.pop(context, false),
                   child: Text(context.l10n.cancel),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
+                  onPressed: () => Navigator.pop(context, true),
                   child: Text(context.l10n.openSettings),
                 ),
               ],
@@ -283,17 +296,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           );
           if (open == true) await Geolocator.openLocationSettings();
         } else if (next.locationAction == 'open_app_settings') {
-          final open = await showDialog<bool>(
+          final open = await showAnimatedDialog<bool>(
             context: context,
-            builder: (ctx) => AlertDialog(
+            child: AlertDialog(
               title: Text(context.l10n.locationPermissionPermanent),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
+                  onPressed: () => Navigator.pop(context, false),
                   child: Text(context.l10n.cancel),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
+                  onPressed: () => Navigator.pop(context, true),
                   child: Text(context.l10n.openAppSettings),
                 ),
               ],

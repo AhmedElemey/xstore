@@ -37,10 +37,19 @@ class VendorOrderFilterTabs extends StatefulWidget {
 
 class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1100),
-  )..repeat(reverse: true);
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    // Eager init: lazy `late final` + initializer would run on first read only.
+    // If `dispose` runs before any `shouldPulse` tab built, lazy init ran while
+    // unmounted → TickerMode lookup crashed.
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat(reverse: true);
+  }
 
   @override
   void dispose() {

@@ -10,6 +10,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -136,9 +137,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen(registerNotifierProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!)),
-        );
+        AppSnackbar.error(context, next.error!);
       }
     });
 

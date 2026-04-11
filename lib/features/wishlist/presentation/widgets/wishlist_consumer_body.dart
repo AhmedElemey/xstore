@@ -16,6 +16,7 @@ import 'wishlist_price_drop_banner.dart';
 import 'wishlist_selection_bar.dart';
 import 'wishlist_sort_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/wishlist_skeleton.dart';
 
 String _filterEmptyTitle(BuildContext context, WishlistFilter f) {
@@ -63,9 +64,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       (prev, next) {
       final err = next;
       if (err != null && err != prev && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(err)),
-        );
+        AppSnackbar.error(context, err);
         notifier.clearError();
       }
     });

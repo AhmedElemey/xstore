@@ -18,7 +18,9 @@ import 'profile_menu_tile.dart';
 import 'profile_switch_tile.dart';
 import 'theme_toggle_tile.dart';
 import 'language_toggle_tile.dart';
+import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class ProfileMenuBlocks extends ConsumerWidget {
   const ProfileMenuBlocks({
@@ -38,9 +40,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
     );
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.errorGeneric)),
-      );
+      AppSnackbar.error(context, context.l10n.errorGeneric);
     }
   }
 
@@ -49,10 +49,11 @@ class ProfileMenuBlocks extends ConsumerWidget {
   }
 
   Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
-    await showDialog<void>(
+    await showAnimatedDialog<void>(
       context: context,
-      builder: (ctx) => DeleteAccountDialog(
-        onConfirm: () => ref.read(profileNotifierProvider.notifier).deleteAccount(),
+      child: DeleteAccountDialog(
+        onConfirm: () =>
+            ref.read(profileNotifierProvider.notifier).deleteAccount(),
       ),
     );
   }

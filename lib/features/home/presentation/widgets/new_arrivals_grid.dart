@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
@@ -34,27 +36,31 @@ class NewArrivalsGrid extends StatelessWidget {
             return Wrap(
               spacing: spacing,
               runSpacing: spacing,
-              children: display
-                  .map(
-                    (listing) => SizedBox(
-                      key: ValueKey<String>(listing.id),
-                      width: tileWidth,
-                      child: RepaintBoundary(
-                        child: ProductCard(
-                          key: ValueKey<String>('new-arrival-${listing.id}'),
-                          title: listing.title,
-                          price: listing.price,
-                          imageUrl: listing.imageUrls.isNotEmpty
-                              ? listing.imageUrls.first
-                              : null,
-                          discountPercent: 0,
-                          listingId: listing.id,
-                          onTap: () => onOpenProduct?.call(listing),
-                        ),
+              children: display.asMap().entries.map(
+                (entry) {
+                  final i = entry.key;
+                  final listing = entry.value;
+                  return SizedBox(
+                    key: ValueKey<String>(listing.id),
+                    width: tileWidth,
+                    child: RepaintBoundary(
+                      child: ProductCard(
+                        key: ValueKey<String>('new-arrival-${listing.id}'),
+                        title: listing.title,
+                        price: listing.price,
+                        imageUrl: listing.imageUrls.isNotEmpty
+                            ? listing.imageUrls.first
+                            : null,
+                        discountPercent: 0,
+                        listingId: listing.id,
+                        onTap: () => onOpenProduct?.call(listing),
+                      ).fadeSlideIn(
+                        delay: AppAnimations.staggerDelayCapped(i),
                       ),
                     ),
-                  )
-                  .toList(),
+                  );
+                },
+              ).toList(),
             );
           },
         ),

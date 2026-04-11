@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -8,6 +10,7 @@ import '../providers/orders_provider.dart';
 import 'order_card.dart';
 import 'order_empty_state.dart';
 import 'order_filter_tabs.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/consumer_orders_skeleton.dart';
 
 class ConsumerOrdersView extends ConsumerStatefulWidget {
@@ -68,9 +71,7 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
     ref.listen<String?>(ordersNotifierProvider.select((s) => s.error), (p, n) {
       final err = n;
       if (err != null && err != p && context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(err)));
+        AppSnackbar.error(context, err);
         notifier.clearError();
       }
     });
@@ -171,6 +172,8 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                               key: ValueKey(list[i].id),
                               order: list[i],
                               isVendor: false,
+                            ).fadeSlideIn(
+                              delay: AppAnimations.staggerDelayCapped(i),
                             ),
                           ),
                         );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/order_entity.dart';
@@ -10,6 +12,7 @@ import 'order_empty_state.dart';
 import 'order_filter_tabs.dart';
 import 'order_stats_banner.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
 
 class VendorOrdersView extends ConsumerStatefulWidget {
@@ -73,9 +76,7 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
     ref.listen<String?>(ordersNotifierProvider.select((s) => s.error), (p, n) {
       final err = n;
       if (err != null && err != p && context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(err)));
+        AppSnackbar.error(context, err);
         notifier.clearError();
       }
     });
@@ -129,13 +130,9 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.filter_list_rounded),
-                            onPressed: () =>
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.l10n.ordersFiltersMoreSoon,
-                                    ),
-                                  ),
+                            onPressed: () => AppSnackbar.info(
+                                  context,
+                                  context.l10n.ordersFiltersMoreSoon,
                                 ),
                           ),
                         ],
@@ -244,6 +241,8 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
                               key: ValueKey(list[i].id),
                               order: list[i],
                               isVendor: true,
+                            ).fadeSlideIn(
+                              delay: AppAnimations.staggerDelayCapped(i),
                             ),
                           ),
                         );

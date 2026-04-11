@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -168,7 +172,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         selectedIndex: data.selectedImageIndex,
                         onPageChanged: notifier.selectImage,
                         listingId: listing.id,
-                      ),
+                      ).animate().fadeIn(duration: AppAnimations.medium),
                     ),
                   ),
                   SliverToBoxAdapter(
@@ -183,10 +187,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       reviewCountLabel: reviewSummary != null
                           ? _formatCount(reviewSummary.totalCount)
                           : '1,230',
+                    ).fadeSlideIn(
+                      delay: const Duration(milliseconds: 150),
                     ),
                   ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
-                  const SliverToBoxAdapter(child: QuickActionsRow()),
+                  SliverToBoxAdapter(
+                    child: const QuickActionsRow().fadeSlideIn(
+                      delay: const Duration(milliseconds: 180),
+                    ),
+                  ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   if (data.seller != null)
                     SliverToBoxAdapter(
@@ -198,6 +208,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         onCardTap: () => context.push(
                           '${AppRoutes.sellerProfile}/${data.seller!.id}',
                         ),
+                      ).fadeSlideIn(
+                        delay: const Duration(milliseconds: 200),
                       ),
                     ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
@@ -206,6 +218,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       text: listing.description,
                       expanded: data.isDescriptionExpanded,
                       onToggle: notifier.toggleDescription,
+                    ).fadeSlideIn(
+                      delay: const Duration(milliseconds: 250),
                     ),
                   ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
@@ -221,6 +235,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       maxQuantity: data.stockQuantity,
                       onDecrement: notifier.decrementQuantity,
                       onIncrement: notifier.incrementQuantity,
+                    ).fadeSlideIn(
+                      delay: const Duration(milliseconds: 280),
                     ),
                   ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
@@ -266,24 +282,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               showAddToCart: !isVendor,
               isAddingToCart: data.isAddingToCart,
               onChat: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.chatSellerSoon)),
-                );
+                AppSnackbar.info(context, context.l10n.chatSellerSoon);
               },
               onAddToCart: () async {
                 await notifier.addToCart();
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.addedToCart)),
+                  AppSnackbar.success(
+                    context,
+                    context.l10n.addedToCart,
                   );
                 }
               },
               onBuyNow: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.expressCheckoutSoon)),
-                );
+                AppSnackbar.info(context, context.l10n.expressCheckoutSoon);
               },
-            ),
+            )
+                .animate()
+                .slideY(
+                  begin: 1,
+                  end: 0,
+                  duration: AppAnimations.medium,
+                  curve: AppAnimations.enter,
+                ),
           ),
         );
       },

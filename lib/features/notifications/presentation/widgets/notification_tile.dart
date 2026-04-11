@@ -9,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/pulsing_dot.dart';
 import '../../domain/entities/notification_entity.dart';
 import 'notification_type_visual.dart';
@@ -34,7 +35,6 @@ class NotificationTile extends StatelessWidget {
   final bool markAllReadAnimating;
 
   Future<void> _menu(BuildContext context) async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
     final box = context.findRenderObject() as RenderBox?;
     final overlay = Navigator.of(context).overlay?.context.findRenderObject() as RenderBox?;
     if (box == null || overlay == null) return;
@@ -63,7 +63,8 @@ class NotificationTile extends StatelessWidget {
     if (v == 'c') {
       final copiedMessage = context.l10n.notificationsCopied;
       await Clipboard.setData(ClipboardData(text: '${entity.title}\n${entity.body}'));
-      messenger?.showSnackBar(SnackBar(content: Text(copiedMessage)));
+      if (!context.mounted) return;
+      AppSnackbar.success(context, copiedMessage);
     }
   }
 

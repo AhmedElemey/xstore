@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -11,6 +12,7 @@ import '../../domain/entities/cart_item_entity.dart';
 import '../providers/cart_provider.dart';
 import 'cart_item_card.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class CartVendorGroupBlock extends ConsumerWidget {
   const CartVendorGroupBlock({
@@ -163,14 +165,13 @@ class CartVendorGroupBlock extends ConsumerWidget {
 
   void _showUndoSnack(BuildContext context, WidgetRef ref, String name) {
     ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.cartRemovedSnack(name)),
-        duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: context.l10n.cartUndo,
-          onPressed: () => ref.read(cartProvider.notifier).undoRemove(),
-        ),
+    AppSnackbar.show(
+      context,
+      message: context.l10n.cartRemovedSnack(name),
+      duration: const Duration(seconds: 5),
+      action: SnackBarAction(
+        label: context.l10n.cartUndo,
+        onPressed: () => ref.read(cartProvider.notifier).undoRemove(),
       ),
     );
   }
@@ -181,9 +182,9 @@ class CartVendorGroupBlock extends ConsumerWidget {
     CartItemEntity item,
   ) async {
     final ctrl = TextEditingController(text: '${item.quantity}');
-    final v = await showDialog<int>(
+    final v = await showAnimatedDialog<int>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      child: AlertDialog(
         title: Text(context.l10n.quantity),
         content: TextField(
           controller: ctrl,
@@ -192,13 +193,13 @@ class CartVendorGroupBlock extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(context),
             child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               final parsed = int.tryParse(ctrl.text.trim());
-              Navigator.pop(ctx, parsed);
+              Navigator.pop(context, parsed);
             },
             child: Text(context.l10n.save),
           ),

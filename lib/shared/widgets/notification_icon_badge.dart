@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/animations/app_animations.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 
-/// Red count badge (top-right). Hidden when [count] is 0.
+/// Red count badge (top-right). Uses a stable [Stack] so implicit animations are
+/// not torn down mid-flight (avoids "deactivated ancestor" from flutter_animate).
 class NotificationIconBadge extends StatelessWidget {
   const NotificationIconBadge({
     super.key,
@@ -18,8 +20,9 @@ class NotificationIconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (count <= 0) return child;
-    final label = count > maxCount ? '$maxCount+' : '$count';
+    final show = count > 0;
+    final label = show ? (count > maxCount ? '$maxCount+' : '$count') : '';
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -27,23 +30,38 @@ class NotificationIconBadge extends StatelessWidget {
         Positioned(
           right: -AppSpacing.xs,
           top: -AppSpacing.xs,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: AppSpacing.xs / 2,
-            ),
-            constraints: const BoxConstraints(minWidth: AppSpacing.md + AppSpacing.xs),
-            decoration: BoxDecoration(
-              color: AppColors.error,
-              borderRadius: BorderRadius.circular(AppSpacing.x3l),
-            ),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
+          child: IgnorePointer(
+            ignoring: !show,
+            child: AnimatedOpacity(
+              opacity: show ? 1.0 : 0.0,
+              duration: AppAnimations.fast,
+              curve: AppAnimations.enter,
+              child: AnimatedScale(
+                scale: show ? 1.0 : 0.0,
+                duration: AppAnimations.fast,
+                curve: AppAnimations.enter,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: AppSpacing.xs / 2,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: AppSpacing.md + AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
+                    borderRadius: BorderRadius.circular(AppSpacing.x3l),
+                  ),
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

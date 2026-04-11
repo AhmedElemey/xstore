@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import '../../../../core/animations/animated_widgets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -92,66 +92,72 @@ class _ListingFormFieldState extends State<ListingFormField> {
           ),
           const SizedBox(height: 6),
         ],
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: _focused && !hasError
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.18),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : null,
-          ),
-          child: TextField(
-            controller: widget.controller,
-            focusNode: _focus,
-            minLines: widget.minLines,
-            maxLines: effectiveMaxLines,
-            maxLength: widget.maxLength,
-            keyboardType: widget.keyboardType,
-            onChanged: widget.onChanged,
-            inputFormatters: widget.inputFormatters,
-            textCapitalization: widget.textCapitalization,
-            buildCounter: widget.maxLength != null
-                ? (
-                    context, {
-                    required currentLength,
-                    required isFocused,
-                    maxLength,
-                  }) =>
-                    const SizedBox.shrink()
-                : null,
-            style: Theme.of(context).textTheme.bodyLarge,
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: widget.prefix,
-              prefixText: widget.prefixText,
-              suffixIcon: widget.suffix,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
+        Builder(
+          builder: (context) {
+            final box = AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: _focused && !hasError
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.18),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
               ),
-              border: hasError ? errorUnderline : normalBorder,
-              enabledBorder: hasError ? errorUnderline : normalBorder,
-              focusedBorder: hasError ? errorUnderline : focusedNormal,
-              disabledBorder: normalBorder,
-            ),
-          ),
+              child: TextField(
+                controller: widget.controller,
+                focusNode: _focus,
+                minLines: widget.minLines,
+                maxLines: effectiveMaxLines,
+                maxLength: widget.maxLength,
+                keyboardType: widget.keyboardType,
+                onChanged: widget.onChanged,
+                inputFormatters: widget.inputFormatters,
+                textCapitalization: widget.textCapitalization,
+                buildCounter: widget.maxLength != null
+                    ? (
+                        context, {
+                        required currentLength,
+                        required isFocused,
+                        maxLength,
+                      }) =>
+                        const SizedBox.shrink()
+                    : null,
+                style: Theme.of(context).textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  hintText: widget.hint,
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: widget.prefix,
+                  prefixText: widget.prefixText,
+                  suffixIcon: widget.suffix,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                  border: hasError ? errorUnderline : normalBorder,
+                  enabledBorder: hasError ? errorUnderline : normalBorder,
+                  focusedBorder: hasError ? errorUnderline : focusedNormal,
+                  disabledBorder: normalBorder,
+                ),
+              ),
+            );
+            return box;
+          },
         ),
         if (counter != null)
           Padding(
             padding: const EdgeInsets.only(top: 4, right: 4),
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text(
-                counter,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              child: AnimatedCounter(
+                value: len,
+                suffix: '/${widget.maxLength}',
+                style: Theme.of(context).textTheme.labelSmall!.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),

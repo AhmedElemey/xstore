@@ -15,6 +15,7 @@ import '../widgets/checkout_progress.dart';
 import '../widgets/checkout_review_section.dart';
 import '../widgets/order_confirmation_sheet.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class CheckoutScreen extends ConsumerWidget {
   const CheckoutScreen({super.key});
@@ -38,7 +39,7 @@ class CheckoutScreen extends ConsumerWidget {
         final msg = ck.error != null
             ? checkoutErrorMessage(context, ck.error)
             : (c.error ?? context.l10n.checkoutErrorGeneric);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        AppSnackbar.error(context, msg);
         return;
       }
       ref.invalidate(ordersNotifierProvider);

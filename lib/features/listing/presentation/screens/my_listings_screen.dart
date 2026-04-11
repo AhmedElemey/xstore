@@ -5,7 +5,9 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/app_dialogs.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -19,6 +21,7 @@ import '../widgets/listing_filter_tabs.dart';
 import '../widgets/listing_options_sheet.dart';
 import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
@@ -45,13 +48,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         if (!mounted) {
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Listing published successfully'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackbar.success(context, 'Listing published successfully');
         context.go(AppRoutes.listingMy);
         ref.read(myListingsNotifierProvider.notifier).fetchListings();
       });
@@ -84,9 +81,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     final controller = TextEditingController(
       text: ref.read(myListingsNotifierProvider).searchQuery,
     );
-    showDialog<void>(
+    showAnimatedDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      child: AlertDialog(
         title: Text('Search listings'),
         content: TextField(
           controller: controller,
@@ -94,14 +91,14 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           decoration: const InputDecoration(hintText: 'Search by title'),
           onSubmitted: (v) {
             ref.read(myListingsNotifierProvider.notifier).setSearchQuery(v);
-            Navigator.of(ctx).pop();
+            Navigator.of(context).pop();
           },
         ),
         actions: [
           TextButton(
             onPressed: () {
               ref.read(myListingsNotifierProvider.notifier).setSearchQuery('');
-              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
             },
             child: Text('Clear'),
           ),
@@ -110,7 +107,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               ref
                   .read(myListingsNotifierProvider.notifier)
                   .setSearchQuery(controller.text);
-              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
             },
             child: Text('Search'),
           ),
@@ -120,21 +117,21 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }
 
   Future<void> _confirmDelete(ListingEntity listing) async {
-    final ok = await showDialog<bool>(
+    final ok = await showAnimatedDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      child: AlertDialog(
         title: Text('Delete listing?'),
         content: Text('“${listing.title}” will be removed permanently.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
+            onPressed: () => Navigator.of(context).pop(false),
             child: Text('Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            onPressed: () => Navigator.of(ctx).pop(true),
+            onPressed: () => Navigator.of(context).pop(true),
             child: Text('Delete'),
           ),
         ],
@@ -148,35 +145,38 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }
 
   void _showOptions(ListingEntity listing) {
-    showModalBottomSheet<void>(
+    showAnimatedBottomSheet<void>(
       context: context,
-      showDragHandle: false,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => ListingOptionsSheet(
-        listing: listing,
-        onEdit: () {
-          context.push(AppRoutes.listingAdd);
-        },
-        onPause: () => ref
-            .read(myListingsNotifierProvider.notifier)
-            .pauseListing(listing.id),
-        onResume: () => ref
-            .read(myListingsNotifierProvider.notifier)
-            .resumeListing(listing.id),
-        onViewStats: () {
-          showModalBottomSheet<void>(
-            context: context,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            builder: (_) => ListingStatsSheet(listing: listing),
-          );
-        },
-        onDelete: () => _confirmDelete(listing),
+      builder: (ctx) => Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: ListingOptionsSheet(
+          listing: listing,
+          onEdit: () {
+            context.push(AppRoutes.listingAdd);
+          },
+          onPause: () => ref
+              .read(myListingsNotifierProvider.notifier)
+              .pauseListing(listing.id),
+          onResume: () => ref
+              .read(myListingsNotifierProvider.notifier)
+              .resumeListing(listing.id),
+          onViewStats: () {
+            showAnimatedBottomSheet<void>(
+              context: context,
+              builder: (_) => Material(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                clipBehavior: Clip.antiAlias,
+                child: ListingStatsSheet(listing: listing),
+              ),
+            );
+          },
+          onDelete: () => _confirmDelete(listing),
+        ),
       ),
     );
   }
@@ -218,9 +218,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       next,
     ) {
       if (next != null && next.isNotEmpty && next != prev) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next), behavior: SnackBarBehavior.floating),
-        );
+        AppSnackbar.error(context, next);
       }
     });
 
@@ -393,6 +391,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 key: ValueKey(item.id),
                 listing: item,
                 onOpenMenu: () => _showOptions(item),
+              ).fadeSlideIn(
+                delay: AppAnimations.staggerDelayCapped(i),
               ),
             );
           },
@@ -426,6 +426,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               key: ValueKey(item.id),
               listing: item,
               onOpenMenu: () => _showOptions(item),
+            ).fadeSlideIn(
+              delay: AppAnimations.staggerDelayCapped(i),
             ),
           );
         },

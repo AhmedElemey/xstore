@@ -18,6 +18,7 @@ import 'order_price_breakdown.dart';
 import 'order_status_badge.dart';
 import 'order_timeline.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 
 class OrderDetailScrollContent extends ConsumerWidget {
   const OrderDetailScrollContent({super.key, required this.order});
@@ -321,10 +322,9 @@ class _SellerSection extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(context.l10n.ordersMessageSellerSoon),
-                ),
+              onPressed: () => AppSnackbar.info(
+                context,
+                context.l10n.ordersMessageSellerSoon,
               ),
               child: Text(context.l10n.ordersMessageSeller),
             ),
@@ -458,10 +458,9 @@ class _TrackingCard extends StatelessWidget {
                         Clipboard.setData(
                           ClipboardData(text: order.trackingNumber!),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(context.l10n.ordersTrackingCopied),
-                          ),
+                        AppSnackbar.success(
+                          context,
+                          context.l10n.ordersTrackingCopied,
                         );
                       },
               ),
@@ -480,10 +479,9 @@ class _TrackingCard extends StatelessWidget {
             ),
           const SizedBox(height: AppSpacing.md),
           OutlinedButton(
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(context.l10n.ordersCourierWebsiteSoon),
-              ),
+            onPressed: () => AppSnackbar.info(
+              context,
+              context.l10n.ordersCourierWebsiteSoon,
             ),
             child: Text(context.l10n.ordersTrackOnCourier),
           ),

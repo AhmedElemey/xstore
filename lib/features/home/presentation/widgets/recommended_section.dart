@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/animations/app_animations.dart';
+import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -29,7 +32,7 @@ class RecommendedSection extends ConsumerWidget {
               child: Text(
                 context.l10n.recommended,
                 style: Theme.of(context).textTheme.titleLarge,
-              ),
+              ).fadeSlideIn(),
             ),
             TextButton(
               onPressed: () => context.go(AppRoutes.explore),
@@ -86,6 +89,7 @@ class _RecommendedList extends StatelessWidget {
         separatorBuilder: (_, __) => const Gap(AppSpacing.md),
         itemBuilder: (context, i) {
           final listing = items[i];
+          final delay = AppAnimations.staggerDelayCapped(i);
           return SizedBox(
             key: ValueKey<String>(listing.id),
             width: AppSpacing.x4l * 3 + AppSpacing.lg,
@@ -100,7 +104,15 @@ class _RecommendedList extends StatelessWidget {
                 discountPercent: 0,
                 listingId: listing.id,
                 onTap: () => context.push('${AppRoutes.product}/${listing.id}'),
-              ),
+              )
+                  .fadeSlideIn(delay: delay, offsetY: 0)
+                  .animate(delay: delay)
+                  .slideX(
+                    begin: 0.05,
+                    end: 0,
+                    duration: AppAnimations.normal,
+                    curve: AppAnimations.enter,
+                  ),
             ),
           );
         },
