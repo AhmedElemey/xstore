@@ -37,6 +37,23 @@ async function rasterOpaque(buf, size) {
     .toBuffer();
 }
 
+/** Renders clean 1024 master icon (orange X, no underline). */
+async function renderMasterIcon() {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+    <rect width="1024" height="1024" fill="#4F46E5"/>
+    <g transform="translate(512 480)">
+      <rect x="-96" y="-360" width="192" height="720" rx="48" fill="#FD6E01" transform="rotate(43)"/>
+      <rect x="-96" y="-360" width="192" height="720" rx="48" fill="#FD6E01" transform="rotate(-43)"/>
+    </g>
+  </svg>`;
+
+  return sharp(Buffer.from(svg))
+    .flatten({ background: { r: 79, g: 70, b: 229 } })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
 /** Indigo AppColors.primary (#4F46E5) → transparency for adaptive foreground. */
 async function keyedForeground(masterBuf, innerPx, totalPx) {
   const keyed = await sharp(masterBuf)
@@ -95,11 +112,16 @@ async function main() {
     process.exit(1);
   }
   const raw = fs.readFileSync(iconIn);
+  const existingNormalized = await rasterOpaque(raw, 1024);
+  if (!existingNormalized) {
+    console.error("Failed to normalize existing icon");
+    process.exit(1);
+  }
 
-  const master1024 = await rasterOpaque(raw, 1024);
+  const master1024 = await renderMasterIcon();
   fs.mkdirSync(path.dirname(iconIn), { recursive: true });
   fs.writeFileSync(iconIn, master1024);
-  console.log("Normalized assets/icon.png to 1024x1024 opaque");
+  console.log("Updated assets/icon.png (orange X, underline removed, clean render)");
 
   fs.mkdirSync(IOS_DIR, { recursive: true });
   for (const [filename, px] of iosExports) {
