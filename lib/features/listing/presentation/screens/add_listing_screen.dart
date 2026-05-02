@@ -7,6 +7,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../data/listing_categories_data.dart';
 import '../providers/listing_form_notifier.dart';
@@ -93,7 +94,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     await showAnimatedBottomSheet<void>(
       context: context,
       builder: (ctx) => Material(
-        color: Colors.white,
+        color: ctx.elevatedSurfaceColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
         child: SafeArea(
@@ -101,8 +102,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(LucideIcons.camera),
-                title: Text(ctx.l10n.listingTakePhoto),
+                leading: Icon(LucideIcons.camera, color: ctx.iconPrimary),
+                title: Text(
+                  ctx.l10n.listingTakePhoto,
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.bodyLarge?.copyWith(color: ctx.textPrimary),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   ref
@@ -111,8 +117,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(LucideIcons.imagePlus),
-                title: Text(ctx.l10n.listingChooseFromGallery),
+                leading: Icon(LucideIcons.imagePlus, color: ctx.iconPrimary),
+                title: Text(
+                  ctx.l10n.listingChooseFromGallery,
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.bodyLarge?.copyWith(color: ctx.textPrimary),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   ref
@@ -192,9 +203,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         title: Text(context.l10n.addListing),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.textSecondary,
-            ),
+            style: TextButton.styleFrom(foregroundColor: context.textSecondary),
             onPressed: form.isSubmitting
                 ? null
                 : () async {
@@ -204,7 +213,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     notifier.updateField('description', _description.text);
                     notifier.updateField('brand', _brand.text);
                     notifier.updateField('location', _location.text);
-                    notifier.updateField('shippingCostInput', _shippingCost.text);
+                    notifier.updateField(
+                      'shippingCostInput',
+                      _shippingCost.text,
+                    );
                     await notifier.saveDraft();
                     if (!context.mounted) {
                       return;
@@ -266,10 +278,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   Text(
                     context.l10n.listingCompareAtTitle,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
+                      color: context.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: context.scaledPx(6)),
                   ListingFormField(
                     label: '',
                     controller: _compare,
@@ -284,17 +297,21 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   Text(
                     context.l10n.listingCompareAtHelper,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade500,
-                        ),
+                      color: context.textHint,
+                      height: 1.35,
+                    ),
                   ),
                   if (showCompareWarn)
                     Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.only(top: context.scaledPx(6)),
                       child: Text(
                         context.l10n.listingCompareAtWarning,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.orange.shade800,
-                            ),
+                          color: context.isDark
+                              ? AppColors.warningLight
+                              : AppColors.warning,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   const Gap(AppSpacing.lg),
@@ -309,7 +326,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     onChanged: (v) => notifier.updateField('description', v),
                   ),
                   const Gap(AppSpacing.x3l),
-                  _AccentSectionTitle(context.l10n.listingSectionCategoryDetails),
+                  _AccentSectionTitle(
+                    context.l10n.listingSectionCategoryDetails,
+                  ),
                   const Gap(AppSpacing.lg),
                   _PickerField(
                     label: context.l10n.listingFormCategoryLabel,
@@ -320,8 +339,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       context: context,
                       title: context.l10n.listingFormCategoryPickerTitle,
                       categories: ListingCategoriesData.categories,
-                      selectedId:
-                          form.categoryId.isEmpty ? null : form.categoryId,
+                      selectedId: form.categoryId.isEmpty
+                          ? null
+                          : form.categoryId,
                       onSelected: (id) =>
                           notifier.updateField('categoryId', id),
                     ),
@@ -380,23 +400,35 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                         children: [
                           Text(
                             context.l10n.listingBrandOptional,
-                            style: Theme.of(context).textTheme.labelLarge,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: context.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: context.scaledPx(6)),
                           TextField(
                             controller: c,
                             focusNode: fn,
                             onChanged: (v) => notifier.updateField('brand', v),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: context.textPrimary),
                             decoration: InputDecoration(
                               hintText: context.l10n.listingBrandHint,
+                              hintStyle: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: context.textHint),
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: context.surfaceVariantColor,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 14,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: context.scaledPx(
+                                  AppTypography.rem(0.875),
+                                ),
+                                vertical: context.scaledPx(
+                                  AppTypography.rem(0.875),
+                                ),
                               ),
                             ),
                           ),
@@ -407,7 +439,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       return Align(
                         alignment: Alignment.topLeft,
                         child: Material(
+                          color: context.surfaceColor,
+                          surfaceTintColor: Colors.transparent,
                           elevation: 4,
+                          shadowColor: context.shadowColor,
                           borderRadius: BorderRadius.circular(12),
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxHeight: 200),
@@ -419,7 +454,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                                 final o = opts.elementAt(i);
                                 return ListTile(
                                   dense: true,
-                                  title: Text(o),
+                                  title: Text(
+                                    o,
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(color: context.textPrimary),
+                                  ),
                                   onTap: () => onSelected(o),
                                 );
                               },
@@ -449,7 +488,12 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                   const Gap(AppSpacing.lg),
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(context.l10n.listingShippingAvailable),
+                    title: Text(
+                      context.l10n.listingShippingAvailable,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: context.textPrimary,
+                      ),
+                    ),
                     value: form.shippingAvailable,
                     onChanged: (v) =>
                         notifier.updateField('shippingAvailable', v),
@@ -470,12 +514,15 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     ),
                   ],
                   const Gap(AppSpacing.x3l),
-                  _AccentSectionTitle(context.l10n.listingSectionProductAttributes),
+                  _AccentSectionTitle(
+                    context.l10n.listingSectionProductAttributes,
+                  ),
                   Text(
                     context.l10n.listingAttributesSubtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: context.colorScheme.onSurfaceVariant,
+                      height: 1.35,
+                    ),
                   ),
                   const Gap(AppSpacing.lg),
                   AttributesSection(
@@ -483,8 +530,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     valueControllers: _attrVals,
                     onAdd: notifier.addAttribute,
                     onRemove: notifier.removeAttribute,
-                    onKeyChanged: (i, v) =>
-                        notifier.updateAttribute(i, key: v),
+                    onKeyChanged: (i, v) => notifier.updateAttribute(i, key: v),
                     onValueChanged: (i, v) =>
                         notifier.updateAttribute(i, value: v),
                   ),
@@ -548,13 +594,15 @@ class _AccentSectionTitle extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: context.scaledPx(10)),
         Expanded(
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              fontWeight: FontWeight.bold,
+              color: context.textPrimary,
+              letterSpacing: context.scaledPx(-0.2),
+            ),
           ),
         ),
       ],
@@ -583,16 +631,26 @@ class _PickerField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: context.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: context.scaledPx(6)),
         Material(
-          color: Colors.white,
+          color: context.surfaceVariantColor,
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(12),
+            splashColor: context.primaryColor.withValues(alpha: 0.08),
+            highlightColor: context.primaryColor.withValues(alpha: 0.06),
             child: InputDecorator(
               decoration: InputDecoration(
+                filled: true,
+                fillColor: context.surfaceVariantColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
@@ -605,29 +663,38 @@ class _PickerField extends StatelessWidget {
                     color: hasError ? AppColors.error : context.textDisabled,
                   ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: context.scaledPx(AppTypography.rem(0.875)),
+                  vertical: context.scaledPx(AppTypography.rem(0.875)),
                 ),
-                suffixIcon: const Icon(LucideIcons.chevronDown),
+                suffixIcon: Icon(
+                  LucideIcons.chevronDown,
+                  color: context.iconSecondary,
+                  size: 22,
+                ),
               ),
               child: Text(
                 value,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: valueIsPlaceholder ? Colors.grey.shade600 : null,
-                    ),
+                  color: valueIsPlaceholder
+                      ? context.textHint
+                      : context.textPrimary,
+                ),
               ),
             ),
           ),
         ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: 4, left: 4),
+            padding: EdgeInsets.only(
+              top: context.scaledPx(4),
+              left: context.scaledPx(4),
+            ),
             child: Text(
               errorText!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
       ],
@@ -689,10 +756,10 @@ class _PublishBar extends StatelessWidget {
                     )
                   : Text(
                       publishLabel,
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                        fontSize: AppTypography.rem(1),
                       ),
                     ),
             ),

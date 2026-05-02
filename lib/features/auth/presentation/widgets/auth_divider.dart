@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AuthDivider extends StatelessWidget {
@@ -18,11 +19,11 @@ class AuthDivider extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: context.scaledPx(12)),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppTypography.rem(0.8125),
               color: context.textSecondary,
             ),
           ),

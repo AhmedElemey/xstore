@@ -3,6 +3,14 @@ abstract final class AppSpacing {
   static const sm = 8.0;
   static const md = 12.0;
   static const lg = 16.0;
+
+  /// [InputDecoration] content insets at text-scale 1.0 (`0.875rem` / `0.75rem`).
+  static const inputContentPaddingH = 14.0;
+  static const inputContentPaddingV = 12.0;
+
+  /// [ChipThemeData.padding] baseline (~`0.625rem` / `0.375rem`).
+  static const chipPaddingH = 10.0;
+  static const chipPaddingV = 6.0;
   /// Profile header avatar overlap (half of 90px diameter).
   static const profileAvatarHalfOut = 45.0;
   static const xl = 20.0;

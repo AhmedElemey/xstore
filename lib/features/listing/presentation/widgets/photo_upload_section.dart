@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Horizontal photo strip: add tile, previews, reorder via long-press drag.
@@ -27,6 +28,9 @@ class PhotoUploadSection extends StatelessWidget {
 
   static const double tile = 100;
 
+  /// Wider than [tile] so icon + localized label fit in one row.
+  static const double addPhotoTileWidth = 152;
+
   @override
   Widget build(BuildContext context) {
     final showAdd = paths.length < 5;
@@ -37,16 +41,16 @@ class PhotoUploadSection extends StatelessWidget {
       children: [
         Text(
           context.l10n.listingPhotoSectionTitle,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const Gap(AppSpacing.sm),
         Text(
           context.l10n.listingPhotoSectionSubtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const Gap(AppSpacing.lg),
         SizedBox(
@@ -68,9 +72,13 @@ class PhotoUploadSection extends StatelessWidget {
                     ),
                   ),
                 if (showAdd)
-                  _AddPhotoTile(
-                    size: tile,
-                    onTap: onOpenPicker,
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.md),
+                    child: _AddPhotoTile(
+                      width: addPhotoTileWidth,
+                      height: tile,
+                      onTap: onOpenPicker,
+                    ),
                   ),
               ],
             ),
@@ -78,12 +86,15 @@ class PhotoUploadSection extends StatelessWidget {
         ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
+            padding: EdgeInsets.only(
+              top: context.scaledPx(6),
+              left: context.scaledPx(4),
+            ),
             child: Text(
               errorText!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
       ],
@@ -93,11 +104,13 @@ class PhotoUploadSection extends StatelessWidget {
 
 class _AddPhotoTile extends StatelessWidget {
   const _AddPhotoTile({
-    required this.size,
+    required this.width,
+    required this.height,
     required this.onTap,
   });
 
-  final double size;
+  final double width;
+  final double height;
   final VoidCallback onTap;
 
   @override
@@ -113,20 +126,35 @@ class _AddPhotoTile extends StatelessWidget {
             radius: 12,
           ),
           child: SizedBox(
-            width: size,
-            height: size,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(LucideIcons.plus, color: context.textSecondary, size: 28),
-                const SizedBox(height: 4),
-                Text(
-                  context.l10n.listingAddPhotoTile,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.grey.shade600,
+            width: width,
+            height: height,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: context.scaledPx(10)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    LucideIcons.badgePlus,
+                    color: context.iconSecondary,
+                    size: 24,
+                  ),
+                  SizedBox(width: context.scaledPx(8)),
+                  Expanded(
+                    child: Text(
+                      context.l10n.listingAddPhotoTile,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: context.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
                       ),
-                ),
-              ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -203,10 +231,7 @@ class _PhotoTile extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.file(
-            File(path),
-            fit: BoxFit.cover,
-          ),
+          Image.file(File(path), fit: BoxFit.cover),
           if (isCover)
             Positioned(
               left: 6,
@@ -221,7 +246,7 @@ class _PhotoTile extends StatelessWidget {
                   context.l10n.listingPhotoCoverBadge,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 11,
+                    fontSize: AppTypography.rem(0.6875),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -238,7 +263,11 @@ class _PhotoTile extends StatelessWidget {
                 onTap: onRemove,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(LucideIcons.x, color: context.surfaceColor, size: AppSpacing.lg),
+                  child: Icon(
+                    LucideIcons.x,
+                    color: context.surfaceColor,
+                    size: AppSpacing.lg,
+                  ),
                 ),
               ),
             ),
@@ -266,10 +295,7 @@ class _DashedBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     final path = Path()..addRRect(r);
-    canvas.drawPath(
-      _dashPath(path, 6, 4),
-      paint,
-    );
+    canvas.drawPath(_dashPath(path, 6, 4), paint);
   }
 
   Path _dashPath(Path source, double dash, double gap) {

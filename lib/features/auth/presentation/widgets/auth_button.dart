@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AuthButton extends StatelessWidget {
@@ -59,7 +60,7 @@ class AuthButton extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: AppTypography.rem(1),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

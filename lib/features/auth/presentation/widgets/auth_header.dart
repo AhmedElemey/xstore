@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Gradient hero area for auth screens (logo + titles on indigo gradient).
 class AuthHeader extends StatelessWidget {
@@ -10,7 +12,7 @@ class AuthHeader extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.showWave = false,
-    this.logoSize = 32,
+    this.logoSize = AppTypography.authWordmarkSize,
   });
 
   /// Fraction of screen height (e.g. 0.4 for login).
@@ -52,7 +54,7 @@ class AuthHeader extends StatelessWidget {
                       fontSize: logoSize,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
-                      letterSpacing: -0.5,
+                      letterSpacing: context.scaledPx(-0.5),
                       shadows: [
                         Shadow(
                           color: Colors.white.withValues(alpha: 0.35),
@@ -61,24 +63,24 @@ class AuthHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: context.scaledPx(12)),
                   Text(
                     title,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: AppTypography.rem(1),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   if (subtitle != null) ...[
-                    const SizedBox(height: 6),
+                    SizedBox(height: context.scaledPx(6)),
                     Text(
                       subtitle!,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
+                        fontSize: AppTypography.rem(0.875),
                       ),
                     ),
                   ],

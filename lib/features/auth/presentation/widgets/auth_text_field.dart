@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class AuthTextField extends StatelessWidget {
@@ -48,12 +49,12 @@ class AuthTextField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: AppTypography.rem(0.8125),
             fontWeight: FontWeight.w600,
             color: context.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.scaledPx(8)),
         TextFormField(
           controller: controller,
           validator: validator,
@@ -66,7 +67,7 @@ class AuthTextField extends StatelessWidget {
           inputFormatters: inputFormatters,
           textInputAction: textInputAction,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: AppTypography.rem(1),
             color: context.textPrimary,
           ),
           decoration: InputDecoration(
@@ -80,9 +81,9 @@ class AuthTextField extends StatelessWidget {
                     child: prefixIcon!,
                   ),
             suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: context.scaledPx(16),
+              vertical: context.scaledPx(16),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

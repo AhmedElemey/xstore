@@ -22,6 +22,13 @@ class XstoreApp extends ConsumerWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'xStore',
+      builder: (context, child) {
+        final scaler = MediaQuery.textScalerOf(context);
+        return Theme(
+          data: AppTheme.withScaledTextSpacing(Theme.of(context), scaler),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       theme: AppTheme.light.copyWith(
         textTheme: useArabicFont
             ? AppTheme.light.textTheme.apply(fontFamily: 'Cairo')

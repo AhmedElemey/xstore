@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/animations/animated_widgets.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Outlined field (12px radius), optional counter, focus shadow; errors use red underline + helper text.
@@ -65,7 +66,9 @@ class _ListingFormFieldState extends State<ListingFormField> {
   Widget build(BuildContext context) {
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
     final len = widget.controller?.text.length ?? 0;
-    final counter = widget.maxLength != null ? '$len/${widget.maxLength}' : null;
+    final counter = widget.maxLength != null
+        ? '$len/${widget.maxLength}'
+        : null;
     final effectiveMaxLines = widget.minLines != null
         ? widget.maxLines
         : (widget.maxLines ?? 1);
@@ -88,9 +91,11 @@ class _ListingFormFieldState extends State<ListingFormField> {
         if (widget.label.isNotEmpty) ...[
           Text(
             widget.label,
-            style: Theme.of(context).textTheme.labelLarge,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: context.textPrimary),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: context.scaledPx(6)),
         ],
         Builder(
           builder: (context) {
@@ -124,20 +129,32 @@ class _ListingFormFieldState extends State<ListingFormField> {
                         required currentLength,
                         required isFocused,
                         maxLength,
-                      }) =>
-                        const SizedBox.shrink()
+                      }) => const SizedBox.shrink()
                     : null,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: context.textPrimary),
                 decoration: InputDecoration(
                   hintText: widget.hint,
+                  hintStyle: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: context.textHint),
                   filled: true,
-                  fillColor: Colors.white,
-                  prefixIcon: widget.prefix,
+                  fillColor: context.surfaceVariantColor,
+                  prefixIcon: widget.prefix == null
+                      ? null
+                      : IconTheme.merge(
+                          data: IconThemeData(color: context.iconSecondary),
+                          child: widget.prefix!,
+                        ),
                   prefixText: widget.prefixText,
+                  prefixStyle: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: context.textPrimary),
                   suffixIcon: widget.suffix,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: context.scaledPx(AppTypography.rem(0.875)),
+                    vertical: context.scaledPx(AppTypography.rem(0.875)),
                   ),
                   border: hasError ? errorUnderline : normalBorder,
                   enabledBorder: hasError ? errorUnderline : normalBorder,
@@ -151,26 +168,32 @@ class _ListingFormFieldState extends State<ListingFormField> {
         ),
         if (counter != null)
           Padding(
-            padding: const EdgeInsets.only(top: 4, right: 4),
+            padding: EdgeInsets.only(
+              top: context.scaledPx(4),
+              right: context.scaledPx(4),
+            ),
             child: Align(
               alignment: Alignment.centerRight,
               child: AnimatedCounter(
                 value: len,
                 suffix: '/${widget.maxLength}',
                 style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: 4, left: 4),
+            padding: EdgeInsets.only(
+              top: context.scaledPx(4),
+              left: context.scaledPx(4),
+            ),
             child: Text(
               widget.errorText!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
       ],

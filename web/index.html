@@ -31,6 +31,10 @@
 
   <title>xstore</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    /* Respect browser / OS default font size (user-adjustable); Flutter web inherits logical px from this baseline. */
+    html { font-size: 100%; }
+  </style>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

@@ -13,6 +13,18 @@ extension BuildContextX on BuildContext {
 
   TextTheme get textTheme => Theme.of(this).textTheme;
 
+  TextScaler get textScaler => MediaQuery.textScalerOf(this);
+
+  /// Lengths that should grow/shrink with the user’s text-size setting (spacing
+  /// around type, badges). Prefer this over raw logical px for text-adjacent UI.
+  ///
+  /// `TextScaler.scale` expects non-negative values, while UI metrics like
+  /// `letterSpacing` can be negative. Keep sign externally and scale magnitude.
+  double scaledPx(double logicalPixels) {
+    final sign = logicalPixels.isNegative ? -1.0 : 1.0;
+    return sign * textScaler.scale(logicalPixels.abs());
+  }
+
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
   bool get isDark => theme.brightness == Brightness.dark;
@@ -21,7 +33,10 @@ extension BuildContextX on BuildContext {
 
   Color get surfaceColor => colorScheme.surface;
 
-  Color get surfaceVariantColor => colorScheme.surfaceContainerHighest;
+  /// Filled inputs use app surface-variant tokens — do not rely on derived
+  /// [ColorScheme.surfaceContainerHighest] alone (can break contrast in dark mode).
+  Color get surfaceVariantColor =>
+      isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant;
 
   Color get elevatedSurfaceColor =>
       isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurface;

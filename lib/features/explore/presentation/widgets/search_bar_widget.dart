@@ -33,8 +33,9 @@ class SearchBarWidget extends StatelessWidget {
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: context.l10n.exploreSearchPlaceholder,
-            hintStyle:
-                AppTypography.bodyMedium.copyWith(color: context.textSecondary),
+            hintStyle: AppTypography.bodyMedium.copyWith(
+              color: context.textHint,
+            ),
             prefixIcon: Icon(LucideIcons.search, color: context.textSecondary),
             suffixIcon: v.text.isEmpty
                 ? null
@@ -56,9 +57,9 @@ class SearchBarWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.md),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: context.scaledPx(AppSpacing.lg),
+              vertical: context.scaledPx(AppSpacing.md),
             ),
           ),
         );

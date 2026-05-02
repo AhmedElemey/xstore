@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
+import '../constants/app_spacing.dart';
 import '../constants/app_typography.dart';
 
 abstract final class AppTheme {
   static ThemeData get light {
-    const scheme = ColorScheme(
+    final scheme = const ColorScheme(
       brightness: Brightness.light,
       primary: AppColors.primary,
       onPrimary: AppColors.white,
@@ -16,6 +17,13 @@ abstract final class AppTheme {
       onError: AppColors.white,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightTextPrimary,
+    ).copyWith(
+      onSurfaceVariant: AppColors.lightTextSecondary,
+      outline: AppColors.lightBorder,
+      outlineVariant: AppColors.lightBorder,
+      surfaceContainer: AppColors.lightSurfaceVariant,
+      surfaceContainerHigh: AppColors.lightSurfaceVariant,
+      surfaceContainerHighest: AppColors.lightSurfaceVariant,
     );
 
     return _themeData(
@@ -39,7 +47,7 @@ abstract final class AppTheme {
   }
 
   static ThemeData get dark {
-    const scheme = ColorScheme(
+    final scheme = const ColorScheme(
       brightness: Brightness.dark,
       primary: AppColors.primaryLight,
       onPrimary: AppColors.darkBackground,
@@ -49,6 +57,13 @@ abstract final class AppTheme {
       onError: AppColors.darkBackground,
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
+    ).copyWith(
+      onSurfaceVariant: AppColors.darkTextSecondary,
+      outline: AppColors.darkBorder,
+      outlineVariant: AppColors.darkBorder,
+      surfaceContainer: AppColors.darkSurfaceVariant,
+      surfaceContainerHigh: AppColors.darkSurfaceElevated,
+      surfaceContainerHighest: AppColors.darkSurfaceVariant,
     );
 
     return _themeData(
@@ -102,6 +117,8 @@ abstract final class AppTheme {
       labelMedium: AppTypography.labelMedium.copyWith(color: textSecondary),
       labelSmall: AppTypography.labelSmall.copyWith(color: textSecondary),
     );
+    final inputTextStyle = textTheme.bodyLarge?.copyWith(color: textPrimary);
+    final inputHintStyle = textTheme.bodyMedium?.copyWith(color: textHint);
 
     final baseInputBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -153,14 +170,19 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceVariant,
-        hintStyle: textTheme.bodyMedium?.copyWith(color: textHint),
+        hintStyle: inputHintStyle,
         labelStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
         floatingLabelStyle: textTheme.bodyMedium?.copyWith(
           color: scheme.primary,
         ),
+        helperStyle: inputHintStyle,
+        prefixStyle: inputTextStyle,
+        suffixStyle: inputTextStyle,
+        counterStyle: inputHintStyle,
+        errorStyle: textTheme.bodySmall?.copyWith(color: scheme.error),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
+          horizontal: AppSpacing.inputContentPaddingH,
+          vertical: AppSpacing.inputContentPaddingV,
         ),
         border: baseInputBorder,
         enabledBorder: baseInputBorder,
@@ -175,6 +197,37 @@ abstract final class AppTheme {
         ),
         disabledBorder: baseInputBorder.copyWith(
           borderSide: BorderSide(color: borderColor.withValues(alpha: 0.6)),
+        ),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: scheme.primary,
+        selectionColor: scheme.primary.withValues(alpha: 0.2),
+        selectionHandleColor: scheme.primary,
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: inputTextStyle,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: surfaceVariant,
+          hintStyle: inputHintStyle,
+          labelStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
+          floatingLabelStyle: textTheme.bodyMedium?.copyWith(
+            color: scheme.primary,
+          ),
+          helperStyle: inputHintStyle,
+          prefixStyle: inputTextStyle,
+          suffixStyle: inputTextStyle,
+          border: baseInputBorder,
+          enabledBorder: baseInputBorder,
+          focusedBorder: baseInputBorder.copyWith(
+            borderSide: BorderSide(color: scheme.primary, width: 1.4),
+          ),
+          disabledBorder: baseInputBorder.copyWith(
+            borderSide: BorderSide(color: borderColor.withValues(alpha: 0.6)),
+          ),
+        ),
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(elevatedSurface),
         ),
       ),
       cardTheme: CardThemeData(
@@ -192,7 +245,10 @@ abstract final class AppTheme {
         disabledColor: surfaceVariant.withValues(alpha: 0.55),
         selectedColor: scheme.primary.withValues(alpha: 0.12),
         secondarySelectedColor: scheme.primary.withValues(alpha: 0.16),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.chipPaddingH,
+          vertical: AppSpacing.chipPaddingV,
+        ),
         shape: StadiumBorder(side: BorderSide(color: borderColor)),
         labelStyle: textTheme.labelMedium?.copyWith(color: textPrimary),
         secondaryLabelStyle: textTheme.labelMedium?.copyWith(
@@ -270,6 +326,36 @@ abstract final class AppTheme {
       splashColor: scheme.primary.withValues(alpha: 0.1),
       highlightColor: overlayColor.withValues(alpha: 0.1),
       hoverColor: overlayColor.withValues(alpha: 0.08),
+      // Ensure editable text is always explicit and readable in every theme.
+      primaryTextTheme: textTheme.apply(
+        bodyColor: textPrimary,
+        displayColor: textPrimary,
+      ),
+    );
+  }
+
+  /// Scales text-adjacent paddings with [TextScaler] so inputs and chips keep
+  /// rhythm when OS / accessibility text size changes.
+  static ThemeData withScaledTextSpacing(ThemeData theme, TextScaler scaler) {
+    final inputPadding = EdgeInsets.symmetric(
+      horizontal: scaler.scale(AppSpacing.inputContentPaddingH),
+      vertical: scaler.scale(AppSpacing.inputContentPaddingV),
+    );
+    final chipPadding = EdgeInsets.symmetric(
+      horizontal: scaler.scale(AppSpacing.chipPaddingH),
+      vertical: scaler.scale(AppSpacing.chipPaddingV),
+    );
+    final menuInput = theme.dropdownMenuTheme.inputDecorationTheme;
+    return theme.copyWith(
+      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+        contentPadding: inputPadding,
+      ),
+      chipTheme: theme.chipTheme.copyWith(padding: chipPadding),
+      dropdownMenuTheme: theme.dropdownMenuTheme.copyWith(
+        inputDecorationTheme: menuInput?.copyWith(
+          contentPadding: inputPadding,
+        ),
+      ),
     );
   }
 }
