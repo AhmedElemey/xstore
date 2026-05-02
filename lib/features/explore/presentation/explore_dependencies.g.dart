@@ -7,7 +7,7 @@ part of 'explore_dependencies.dart';
 // **************************************************************************
 
 String _$exploreRemoteDataSourceHash() =>
-    r'7d6e6aa44c78300fe3bfa59c5eeb839388a766de';
+    r'69e1e0a56b57ea52cad596127cf7ea2ca9998546';
 
 /// See also [exploreRemoteDataSource].
 @ProviderFor(exploreRemoteDataSource)

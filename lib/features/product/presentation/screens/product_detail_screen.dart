@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../core/constants/app_colors.dart';
 
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
@@ -41,7 +42,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _reviewsKey = GlobalKey();
-  double _appBarFill = 0;
+  late final ValueNotifier<double> _appBarFill = ValueNotifier<double>(0);
 
   @override
   void initState() {
@@ -53,14 +54,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final threshold = AppSpacing.x4l * 2 + AppSpacing.x3l + AppSpacing.md;
     final next =
         (_scrollController.offset / threshold).clamp(0.0, 1.0).toDouble();
-    if ((next - _appBarFill).abs() > 0.02) {
-      setState(() => _appBarFill = next);
+    if ((next - _appBarFill.value).abs() > 0.02) {
+      _appBarFill.value = next;
     }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _appBarFill.dispose();
     super.dispose();
   }
 
@@ -122,9 +124,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
         final notifier =
             ref.read(productDetailProvider(widget.productId).notifier);
-        final isVendor = ref.watch(authProvider).valueOrNull?.isVendor == true;
-        final iconColor =
-            Color.lerp(context.surfaceColor, context.iconPrimary, _appBarFill)!;
+        final isVendor = ref.watch(
+          authProvider.select((a) => a.valueOrNull?.isVendor == true),
+        );
         final reviewSummary = data.reviewSummary;
 
         return Scaffold(
@@ -136,44 +138,63 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               CustomScrollView(
                 controller: _scrollController,
                 slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    stretch: true,
-                    expandedHeight: AppSpacing.x4l * 8 - AppSpacing.x3l,
-                    elevation: _appBarFill > 0.9 ? 2 : 0,
-                    shadowColor: context.cardShadowColor,
-                    backgroundColor:
-                        context.surfaceColor.withValues(alpha: _appBarFill),
-                    surfaceTintColor: Colors.transparent,
-                    systemOverlayStyle: _appBarFill > 0.55
-                        ? SystemUiOverlayStyle.dark
-                        : SystemUiOverlayStyle.light,
-                    iconTheme: IconThemeData(color: iconColor),
-                    actionsIconTheme: IconThemeData(color: iconColor),
-                    leading: IconButton(
-                      icon: Icon(LucideIcons.chevronLeft, color: iconColor),
-                      onPressed: () => context.pop(),
-                    ),
-                    actions: [
-                      IconButton(
-                        icon: Icon(LucideIcons.share2, color: iconColor),
-                        onPressed: () =>
-                            _shareListing(listing.title, listing.id),
-                      ),
-                    ],
-                    flexibleSpace: FlexibleSpaceBar(
-                      collapseMode: CollapseMode.parallax,
-                      stretchModes: const [
-                        StretchMode.zoomBackground,
-                        StretchMode.blurBackground,
-                      ],
-                      background: ProductImageGallery(
-                        imageUrls: listing.imageUrls,
-                        selectedIndex: data.selectedImageIndex,
-                        onPageChanged: notifier.selectImage,
-                        listingId: listing.id,
-                      ).animate().fadeIn(duration: AppAnimations.medium),
-                    ),
+                  AnimatedBuilder(
+                    animation: _appBarFill,
+                    builder: (context, _) {
+                      final fill = _appBarFill.value;
+                      final blended = Color.lerp(
+                            context.surfaceColor,
+                            context.iconPrimary,
+                            fill,
+                          )!;
+                      return SliverAppBar(
+                        pinned: true,
+                        stretch: true,
+                        expandedHeight:
+                            AppSpacing.x4l * 8 - AppSpacing.x3l,
+                        elevation: fill > 0.9 ? 2 : 0,
+                        shadowColor: context.cardShadowColor,
+                        backgroundColor:
+                            context.surfaceColor.withValues(alpha: fill),
+                        surfaceTintColor: AppColors.transparent,
+                        systemOverlayStyle: fill > 0.55
+                            ? SystemUiOverlayStyle.dark
+                            : SystemUiOverlayStyle.light,
+                        iconTheme: IconThemeData(color: blended),
+                        actionsIconTheme: IconThemeData(color: blended),
+                        leading: IconButton(
+                          tooltip:
+                              MaterialLocalizations.of(context).backButtonTooltip,
+                          icon: Icon(LucideIcons.chevronLeft, color: blended),
+                          onPressed: () => context.pop(),
+                        ),
+                        actions: [
+                          IconButton(
+                            tooltip: context.l10n.share,
+                            icon:
+                                Icon(LucideIcons.share2, color: blended),
+                            onPressed: () =>
+                                _shareListing(listing.title, listing.id),
+                          ),
+                        ],
+                        flexibleSpace: FlexibleSpaceBar(
+                          collapseMode: CollapseMode.parallax,
+                          stretchModes: const [
+                            StretchMode.zoomBackground,
+                            StretchMode.blurBackground,
+                          ],
+                          background: ProductImageGallery(
+                            titleForSemantics: listing.title,
+                            imageUrls: listing.imageUrls,
+                            selectedIndex: data.selectedImageIndex,
+                            onPageChanged: notifier.selectImage,
+                            listingId: listing.id,
+                          )
+                              .animate()
+                              .fadeIn(duration: AppAnimations.medium),
+                        ),
+                      );
+                    },
                   ),
                   SliverToBoxAdapter(
                     child: ProductHeader(

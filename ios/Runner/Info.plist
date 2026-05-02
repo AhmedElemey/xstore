@@ -2,6 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Social sign-in placeholders: paste values from YOUR backend / Firebase / Meta console PER environment (Dev / Staging / Prod). Never ship example IDs. -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleURLTypes</key>
@@ -11,13 +12,15 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.YOUR_REVERSED_CLIENT_ID</string>
+				<!-- Google Sign-In: reversed iOS OAuth client ID, e.g. com.googleusercontent.apps.123xxxx -->
+				<string>REPLACE_WITH_GOOGLE_REVERSED_IOS_CLIENT_ID</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fbYOUR_FACEBOOK_APP_ID</string>
+				<!-- Facebook Login: literal `fb` + numeric App ID, e.g. fb1234567890 -->
+				<string>fbREPLACE_WITH_FACEBOOK_APP_ID</string>
 			</array>
 		</dict>
 	</array>
@@ -61,9 +64,9 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>FacebookAppID</key>
-	<string>YOUR_FACEBOOK_APP_ID</string>
+	<string>REPLACE_WITH_FACEBOOK_APP_ID</string>
 	<key>FacebookClientToken</key>
-	<string>YOUR_FACEBOOK_CLIENT_TOKEN</string>
+	<string>REPLACE_WITH_FACEBOOK_CLIENT_TOKEN</string>
 	<key>FacebookDisplayName</key>
 	<string>xStore</string>
 	<key>LSApplicationQueriesSchemes</key>

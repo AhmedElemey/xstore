@@ -26,7 +26,7 @@ class ListingStatsBanner extends StatelessWidget {
             AppColors.darkSurfaceElevated,
           ]
         : <Color>[
-            const Color(0xFFEEF2FF),
+            AppColors.notificationUnreadBackground,
             AppColors.lightSurface,
           ];
 

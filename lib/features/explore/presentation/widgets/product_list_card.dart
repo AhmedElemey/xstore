@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -32,34 +33,43 @@ class ProductListCard extends StatelessWidget {
       color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.md),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-                child: SizedBox(
-                  width: AppSpacing.x4l * 2 + AppSpacing.lg,
-                  height: AppSpacing.x4l * 2 + AppSpacing.lg,
-                  child: item.imageUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: item.imageUrl!,
-                          cacheManager: AppImageCacheManager.instance,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) =>
-                              ColoredBox(color: context.textDisabled),
-                          errorWidget: (_, __, ___) =>
-                              ColoredBox(color: context.textDisabled),
-                        )
-                      : ColoredBox(color: context.textDisabled),
+      child: Semantics(
+        button: true,
+        label:
+            '${item.name}, ${Formatters.currency(item.price)}, ${item.condition}',
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSpacing.sm),
+                  child: SizedBox(
+                    width: AppSpacing.x4l * 2 + AppSpacing.lg,
+                    height: AppSpacing.x4l * 2 + AppSpacing.lg,
+                    child: item.imageUrl != null
+                        ? Semantics(
+                            image: true,
+                            label:
+                                '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
+                            child: CachedNetworkImage(
+                              imageUrl: item.imageUrl!,
+                              cacheManager: AppImageCacheManager.instance,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) =>
+                                  ColoredBox(color: context.textDisabled),
+                              errorWidget: (_, __, ___) =>
+                                  ColoredBox(color: context.textDisabled),
+                            ),
+                          )
+                        : ColoredBox(color: context.textDisabled),
+                  ),
                 ),
-              ),
-              const Gap(AppSpacing.md),
-              Expanded(
-                child: Column(
+                const Gap(AppSpacing.md),
+                Expanded(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -130,15 +140,19 @@ class ProductListCard extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: onAddToCart,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            onAddToCart();
+                          },
                           child: Text(context.l10n.addToCart),
                         ),
                       ),
                     ],
                   ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -4,7 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
@@ -29,9 +31,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ];
 
   static const _slideColors = [
-    [Color(0xFF818CF8), Color(0xFF4F46E5)],
-    [Color(0xFFFDBA74), Color(0xFFF97316)],
-    [Color(0xFF6EE7B7), Color(0xFF22C55E)],
+    [AppColors.primaryLight, AppColors.primary],
+    [AppColors.accentLight, AppColors.accent],
+    [AppColors.successLight, AppColors.success],
   ];
 
   Future<void> _finish() async {
@@ -101,7 +103,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ),
                       ),
                     ),
-                    const Gap(4),
+                    const Gap(AppSpacing.xs),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(_slideIcons.length, (i) {
@@ -109,7 +111,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 280),
                           curve: Curves.easeOutCubic,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                           height: 8,
                           width: active ? 28 : 8,
                           decoration: BoxDecoration(
@@ -121,7 +123,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         );
                       }),
                     ),
-                    const Gap(20),
+                    const Gap(AppSpacing.xl),
                     Expanded(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 320),
@@ -137,13 +139,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 context.l10n.onboardingTitle2,
                                 context.l10n.onboardingTitle3,
                               ][_page],
-                              style: TextStyle(
-                                fontSize: 24,
+                              style: AppTypography.titleLarge.copyWith(
                                 fontWeight: FontWeight.w800,
                                 color: context.textPrimary,
                               ),
                             ),
-                            const Gap(12),
+                            const Gap(AppSpacing.md),
                             Text(
                               [
                                 context.l10n.onboardingSubtitle1,
@@ -151,8 +152,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 context.l10n.onboardingSubtitle3,
                               ][_page],
                               maxLines: 3,
-                              style: TextStyle(
-                                fontSize: 15,
+                              style: AppTypography.body15.copyWith(
                                 height: 1.45,
                                 color: context.textSecondary,
                               ),
@@ -223,7 +223,7 @@ class _IllustrationArea extends StatelessWidget {
           child: Icon(
             icon,
             size: 88,
-            color: Colors.white.withValues(alpha: 0.95),
+            color: AppColors.white.withValues(alpha: 0.95),
           ),
         ),
       ),

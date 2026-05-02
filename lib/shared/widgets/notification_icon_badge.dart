@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/animations/app_animations.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
+import '../../core/constants/app_typography.dart';
 
 /// Red count badge (top-right). Uses a stable [Stack] so implicit animations are
 /// not torn down mid-flight (avoids "deactivated ancestor" from flutter_animate).
@@ -55,9 +56,11 @@ class NotificationIconBadge extends StatelessWidget {
                   child: Text(
                     label,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.white,
-                      fontSize: 10,
+                      fontFamily: AppTypography.fontFamily,
+                      fontFamilyFallback: AppTypography.fontFamilyFallback,
+                      fontSize: AppTypography.rem(0.625),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

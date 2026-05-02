@@ -54,7 +54,7 @@ class SocialButton extends StatelessWidget {
                   )
                 else
                   SizedBox(width: 22, height: 22, child: Center(child: icon)),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Text(
                   label,
                   style: AppTypography.labelLarge.copyWith(

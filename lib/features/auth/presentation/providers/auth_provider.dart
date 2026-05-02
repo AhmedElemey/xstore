@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/constants/prefs_keys.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
@@ -137,30 +139,24 @@ class LoginNotifier extends _$LoginNotifier {
 
   void clearError() => state = state.copyWith(error: null);
 
-  bool validate() {
+  bool validate(AppLocalizations l10n) {
     final id = state.email.trim();
     final pass = state.password;
-    if (id.isEmpty) {
-      state = state.copyWith(error: 'Email or phone is required');
+    final idErr = Validators.loginEmailOrPhone(l10n, id);
+    if (idErr != null) {
+      state = state.copyWith(error: idErr);
       return false;
     }
-    if (!_isValidEmailOrPhone(id)) {
-      state = state.copyWith(error: 'Enter a valid email or 10+ digit phone');
-      return false;
-    }
-    if (pass.isEmpty) {
-      state = state.copyWith(error: 'Password is required');
-      return false;
-    }
-    if (pass.length < 6) {
-      state = state.copyWith(error: 'Password must be at least 6 characters');
+    final passErr = Validators.loginPassword(l10n, pass);
+    if (passErr != null) {
+      state = state.copyWith(error: passErr);
       return false;
     }
     return true;
   }
 
-  Future<void> login() async {
-    if (!validate()) return;
+  Future<void> login(AppLocalizations l10n) async {
+    if (!validate(l10n)) return;
     state = state.copyWith(isLoading: true, error: null);
     final params = LoginParams(
       emailOrPhone: state.email.trim(),
@@ -185,13 +181,6 @@ class LoginNotifier extends _$LoginNotifier {
       },
     );
   }
-}
-
-bool _isValidEmailOrPhone(String v) {
-  final t = v.trim();
-  if (RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(t)) return true;
-  final digits = t.replaceAll(RegExp(r'\D'), '');
-  return digits.length >= 10;
 }
 
 String slugifyStoreName(String input) {
@@ -313,64 +302,78 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
   }
 
-  Map<String, String> validateStep(int step) {
+  Map<String, String> validateStep(int step, AppLocalizations l10n) {
     final errors = <String, String>{};
     switch (step) {
       case 1:
         if (state.selectedRole == null) {
-          errors['role'] = 'Select how you want to use xStore';
+          errors['role'] = l10n.validationRegisterRoleRequired;
         }
         return errors;
       case 2:
-        if (state.fullName.trim().length < 3 ||
-            !RegExp(r'^[a-zA-Z\s]+$').hasMatch(state.fullName.trim())) {
-          errors['fullName'] = 'Enter your full name (letters only, min 3 chars)';
-        }
-        if (!_isValidEmail(state.email)) {
-          errors['email'] = 'Enter a valid email';
-        }
-        if (!_isValidPhone(state.phoneNumber)) {
-          errors['phone'] = 'Enter a valid phone number';
-        }
-        if (state.location.trim().isEmpty) {
-          errors['location'] = 'City is required';
-        }
+        final fn = Validators.personFullName(l10n, state.fullName);
+        if (fn != null) errors['fullName'] = fn;
+
+        final em = Validators.registerEmail(l10n, state.email);
+        if (em != null) errors['email'] = em;
+
+        final ph = Validators.registerPhoneEgypt(
+          l10n,
+          rawInput: state.phoneNumber,
+        );
+        if (ph != null) errors['phone'] = ph;
+
+        final loc = Validators.nonEmptyLine(
+          l10n,
+          state.location,
+          (l) => l.validationCityRequired,
+        );
+        if (loc != null) errors['location'] = loc;
+
         if (state.dateOfBirth != null) {
           final age = DateTime.now().difference(state.dateOfBirth!).inDays ~/ 365;
           if (age < 18) {
-            errors['dob'] = 'You must be at least 18 years old';
+            errors['dob'] = l10n.validationAgeMinimum18;
           }
         }
         return errors;
       case 3:
-        if (state.password.length < 8) {
-          errors['password'] = 'Password must be at least 8 characters';
-        }
-        if (state.password != state.confirmPassword) {
-          errors['confirm'] = 'Passwords do not match';
-        }
+        final pw = Validators.registerPassword(l10n, state.password);
+        if (pw != null) errors['password'] = pw;
+
+        final match = Validators.confirmPasswordMatches(
+          l10n,
+          state.password,
+          state.confirmPassword,
+        );
+        if (match != null) errors['confirm'] = match;
+
         if (!state.agreedToTerms) {
-          errors['terms'] = 'Please accept the terms to continue';
+          errors['terms'] = l10n.validationTermsRequired;
         }
         return errors;
       case 4:
         if (state.selectedRole != UserRole.vendor) {
           return errors;
         }
-        if (state.storeName.trim().isEmpty) {
-          errors['storeName'] = 'Store name is required';
-        }
+        final sn = Validators.nonEmptyLine(
+          l10n,
+          state.storeName,
+          (l) => l.validationStoreNameRequired,
+        );
+        if (sn != null) errors['storeName'] = sn;
+
         if (state.storeCategory.isEmpty) {
-          errors['storeCategory'] = 'Pick a category';
+          errors['storeCategory'] = l10n.validationStoreCategoryRequired;
         }
         final desc = state.storeDescription.trim();
         if (desc.length < 3) {
-          errors['storeDescription'] = 'Describe your store';
+          errors['storeDescription'] = l10n.validationStoreDescriptionShort;
         } else if (desc.length > 300) {
-          errors['storeDescription'] = 'Max 300 characters';
+          errors['storeDescription'] = l10n.validationStoreDescriptionMax;
         }
         if (state.storeCity.trim().isEmpty || state.storeWilaya.trim().isEmpty) {
-          errors['storeLocation'] = 'City and wilaya are required';
+          errors['storeLocation'] = l10n.validationStoreCityWilayaRequired;
         }
         return errors;
       default:
@@ -378,8 +381,8 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
   }
 
-  bool nextStep() {
-    final errors = validateStep(state.currentStep);
+  bool nextStep(AppLocalizations l10n) {
+    final errors = validateStep(state.currentStep, l10n);
     if (errors.isNotEmpty) {
       state = state.copyWith(stepErrors: errors);
       return false;
@@ -445,10 +448,10 @@ class RegisterNotifier extends _$RegisterNotifier {
   }
 
   /// Consumer: call from step 3. Vendor: call from step 4.
-  Future<void> submitFromCurrentStep() async {
+  Future<void> submitFromCurrentStep(AppLocalizations l10n) async {
     final role = state.selectedRole ?? UserRole.consumer;
     if (role == UserRole.consumer && state.currentStep == 3) {
-      final e3 = validateStep(3);
+      final e3 = validateStep(3, l10n);
       if (e3.isNotEmpty) {
         state = state.copyWith(stepErrors: e3);
         return;
@@ -457,7 +460,7 @@ class RegisterNotifier extends _$RegisterNotifier {
       return;
     }
     if (role == UserRole.vendor && state.currentStep == 4) {
-      final all = {...validateStep(3), ...validateStep(4)};
+      final all = {...validateStep(3, l10n), ...validateStep(4, l10n)};
       if (all.isNotEmpty) {
         state = state.copyWith(stepErrors: all);
         return;
@@ -465,14 +468,4 @@ class RegisterNotifier extends _$RegisterNotifier {
       await _executeRegister();
     }
   }
-}
-
-bool _isValidEmail(String v) {
-  final t = v.trim();
-  return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(t);
-}
-
-bool _isValidPhone(String v) {
-  final digits = v.replaceAll(RegExp(r'\D'), '');
-  return RegExp(r'^01[0125]\d{8}$').hasMatch(digits);
 }

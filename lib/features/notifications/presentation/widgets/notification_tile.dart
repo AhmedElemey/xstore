@@ -192,9 +192,9 @@ class NotificationTile extends StatelessWidget {
                                   entity.title,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: (u ? AppTypography.titleMedium : AppTypography.bodyLarge).copyWith(
-                                    fontSize: 14,
-                                    fontWeight: u ? FontWeight.w700 : FontWeight.w500,
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    fontWeight:
+                                        u ? FontWeight.w700 : FontWeight.w500,
                                     color: context.textPrimary,
                                   ),
                                 ),
@@ -215,7 +215,6 @@ class NotificationTile extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(
                               color: context.textSecondary,
-                              fontSize: 13,
                             ),
                           ),
                         ],

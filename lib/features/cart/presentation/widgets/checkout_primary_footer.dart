@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -56,7 +57,12 @@ class CheckoutPrimaryFooter extends StatelessWidget {
           child: Material(
             color: AppColors.transparent,
             child: InkWell(
-              onTap: onPressed,
+              onTap: busy || onPressed == null
+                  ? null
+                  : () {
+                      HapticFeedback.lightImpact();
+                      onPressed!();
+                    },
               borderRadius: BorderRadius.circular(AppSpacing.lg),
               child: Center(
                 child: busy

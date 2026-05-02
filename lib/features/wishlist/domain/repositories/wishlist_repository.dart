@@ -34,5 +34,5 @@ abstract interface class WishlistRepository {
   );
 
   /// Catalog-only preview for optimistic UI (not persisted).
-  WishlistItemEntity stubFromListingId(String listingId);
+  Future<WishlistItemEntity> stubFromListingId(String listingId);
 }

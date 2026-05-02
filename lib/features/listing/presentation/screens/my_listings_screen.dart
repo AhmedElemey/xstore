@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/constants/app_colors.dart';
 
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/app_dialogs.dart';
@@ -228,7 +229,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         automaticallyImplyLeading: false,
         centerTitle: true,
         backgroundColor: context.surfaceColor,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         title: Text('My Listings'),
         actions: [
           IconButton(

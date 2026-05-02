@@ -105,7 +105,7 @@ class _MiniStat extends StatelessWidget {
         children: [
           Icon(icon, size: AppSpacing.x2l, color: AppColors.primary),
           const SizedBox(height: AppSpacing.xs),
-          Text(value, style: AppTypography.titleMedium.copyWith(fontSize: 18)),
+          Text(value, style: AppTypography.titleSmall),
           Text(
             label,
             style: AppTypography.labelSmall,

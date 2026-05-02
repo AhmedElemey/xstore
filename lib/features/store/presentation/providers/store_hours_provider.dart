@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/network/dio_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/store_hours_datasource.dart';
 import '../../data/repositories/store_hours_repository_impl.dart';
@@ -10,6 +11,7 @@ import '../../domain/entities/store_hours_entity.dart';
 import '../../domain/repositories/store_hours_repository.dart';
 import '../../domain/usecases/get_store_hours_usecase.dart';
 import '../../domain/usecases/toggle_store_status_usecase.dart';
+import '../../domain/store_hours_validator.dart';
 import '../../domain/usecases/update_store_hours_usecase.dart';
 
 part 'store_hours_provider.freezed.dart';
@@ -50,7 +52,7 @@ extension StoreHoursStateX on StoreHoursState {
 
 @riverpod
 StoreHoursDataSource storeHoursDataSource(StoreHoursDataSourceRef ref) {
-  return StoreHoursDataSourceImpl();
+  return StoreHoursDataSourceImpl(ref.watch(dioProvider));
 }
 
 @riverpod
@@ -197,7 +199,7 @@ class StoreHoursNotifier extends _$StoreHoursNotifier {
   Future<bool> saveStoreHours() async {
     final current = state.current;
     if (current == null) return false;
-    if (!_validate(current.schedule)) {
+    if (!StoreHoursValidator.isScheduleTimeOrderValid(current.schedule)) {
       state = state.copyWith(error: 'invalid');
       return false;
     }
@@ -265,16 +267,6 @@ class StoreHoursNotifier extends _$StoreHoursNotifier {
       hasChanges: true,
     );
   }
-}
-
-bool _validate(List<DayScheduleEntity> schedule) {
-  for (final day in schedule) {
-    if (!day.isOpen || day.is24Hours) continue;
-    final open = day.openTime.hour * 60 + day.openTime.minute;
-    final close = day.closeTime.hour * 60 + day.closeTime.minute;
-    if (close <= open) return false;
-  }
-  return true;
 }
 
 bool _isClosedNow(DayScheduleEntity schedule, TimeOfDay now) {

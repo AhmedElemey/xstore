@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
@@ -50,6 +51,9 @@ class WishHeartButton extends ConsumerWidget {
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: IconButton(
+        tooltip: isWishlisted
+            ? context.l10n.wishlistRemovedSnack
+            : context.l10n.buyerFeature4,
         padding: EdgeInsets.zero,
         constraints: BoxConstraints.tightFor(width: size + 8, height: size + 8),
         iconSize: size,
@@ -72,6 +76,7 @@ class WishHeartButton extends ConsumerWidget {
     WidgetRef ref,
     bool wasWishlisted,
   ) async {
+    HapticFeedback.lightImpact();
     await ref.read(wishlistProvider.notifier).toggleWishlist(listingId);
     if (!context.mounted) return;
     final nowWishlisted = ref.read(wishlistProvider).wishlistedListingIds

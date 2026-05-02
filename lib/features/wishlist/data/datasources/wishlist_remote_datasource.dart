@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
+import '../../../../core/network/api_endpoints.dart';
 import '../../../cart/domain/entities/cart_item_entity.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 
@@ -24,7 +26,7 @@ abstract interface class WishlistRemoteDataSource {
 
   WishlistItemEntity entityFromCartItem(CartItemEntity item);
 
-  WishlistItemEntity buildFromListingId(String listingId, {String? wishId});
+  Future<WishlistItemEntity> buildFromListingId(String listingId, {String? wishId});
 
   Future<WishlistItemEntity> upsertItem(WishlistItemEntity item);
 }
@@ -33,6 +35,7 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   WishlistRemoteDataSourceImpl(this._dio);
 
   final Dio _dio;
+  static const _wishlistPath = '/wishlist';
 
   static final List<WishlistItemEntity> _items = [];
 
@@ -217,8 +220,16 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       _ensureMockSeed();
       return _items.map(_withComputedDrop).toList();
     }
-    final _ = _dio;
-    throw UnimplementedError();
+    try {
+      final response = await _dio.get<List<dynamic>>('$_wishlistPath/$consumerId');
+      final list = response.data ?? const [];
+      return list
+          .whereType<Map>()
+          .map((e) => _fromMap(Map<String, dynamic>.from(e)))
+          .toList();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to fetch wishlist');
+    }
   }
 
   @override
@@ -234,11 +245,21 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
         return _withComputedDrop(_items[existing]);
       }
       final id = 'wish_${DateTime.now().microsecondsSinceEpoch}';
-      final e = buildFromListingId(listingId, wishId: id);
+      final e = await buildFromListingId(listingId, wishId: id);
       _items.add(e);
       return _withComputedDrop(e);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_wishlistPath/$consumerId/items',
+        data: {'listingId': listingId},
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty wishlist response');
+      return _fromMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to add wishlist item');
+    }
   }
 
   @override
@@ -251,7 +272,11 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       _items.removeWhere((e) => e.listingId == listingId);
       return;
     }
-    throw UnimplementedError();
+    try {
+      await _dio.delete<void>('$_wishlistPath/$consumerId/items/$listingId');
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to remove wishlist item');
+    }
   }
 
   @override
@@ -261,7 +286,11 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       _items.clear();
       return;
     }
-    throw UnimplementedError();
+    try {
+      await _dio.delete<void>('$_wishlistPath/$consumerId');
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to clear wishlist');
+    }
   }
 
   @override
@@ -272,9 +301,7 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       id: 'wish_${now.microsecondsSinceEpoch}',
       listingId: item.listingId,
       listingName: item.listingName,
-      listingImages: item.listingImage.isNotEmpty
-          ? [item.listingImage]
-          : MockImages.productImages(20),
+      listingImages: item.listingImage.isNotEmpty ? [item.listingImage] : const [],
       listingSlug: item.listingSlug,
       vendorId: item.vendorId,
       vendorName: item.vendorName,
@@ -314,11 +341,36 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
         _items.firstWhere((e) => e.listingId == item.listingId),
       );
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.put<Map<String, dynamic>>(
+        '$_wishlistPath/items/${item.listingId}',
+        data: _toMap(item),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty wishlist response');
+      return _fromMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to save wishlist item');
+    }
   }
 
   @override
-  WishlistItemEntity buildFromListingId(String listingId, {String? wishId}) {
+  Future<WishlistItemEntity> buildFromListingId(String listingId, {String? wishId}) async {
+    if (MockConfig.useMock) {
+      return _buildFromListingIdMock(listingId, wishId: wishId);
+    }
+    try {
+      final response =
+          await _dio.get<Map<String, dynamic>>(ApiEndpoints.listingDetail(listingId));
+      final raw = response.data;
+      if (raw == null) throw const ServerException('Empty listing response');
+      return _fromListingPayload(raw, wishId: wishId);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to load listing');
+    }
+  }
+
+  WishlistItemEntity _buildFromListingIdMock(String listingId, {String? wishId}) {
     final m = mockListingModels.firstWhere((e) => e.id == listingId);
     final vid = _vendorIdForListing(listingId);
     final vd = _vendorDisplay(vid);
@@ -358,4 +410,166 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       lastPriceCheckAt: now,
     );
   }
+
+  Map<String, dynamic> _listingPayloadRoot(Map<String, dynamic> json) {
+    final nested = json['listing'];
+    if (nested is Map) return Map<String, dynamic>.from(nested);
+    return json;
+  }
+
+  WishlistItemEntity _fromListingPayload(Map<String, dynamic> json, {String? wishId}) {
+    final root = _listingPayloadRoot(json);
+    final listingId = (root['id'] ?? '').toString();
+    final now = DateTime.now();
+    final id = wishId ?? 'wish_${now.microsecondsSinceEpoch}';
+
+    final sellerRaw = root['seller'] ?? root['vendor'] ?? json['seller'];
+    final seller =
+        sellerRaw is Map ? Map<String, dynamic>.from(sellerRaw) : <String, dynamic>{};
+
+    final vid = (root['vendorId'] ?? root['sellerId'] ?? seller['id'] ?? '')
+        .toString();
+    final vendorName =
+        (seller['name'] ?? seller['displayName'] ?? '').toString();
+    final store =
+        (seller['storeName'] ?? seller['businessName'] ?? vendorName).toString();
+    final avatar = (seller['avatarUrl'] ?? seller['avatar'] ?? '').toString();
+
+    final imgs = root['imageUrls'];
+    final listingImages = imgs is List && imgs.isNotEmpty
+        ? imgs.map((e) => e.toString()).where((e) => e.isNotEmpty).toList()
+        : [
+            if ((root['imageUrl'] ?? '').toString().isNotEmpty)
+              root['imageUrl'].toString(),
+          ];
+
+    final price = _num(root['price']);
+    final compareRaw = root['compareAtPrice'] ?? root['compare_at_price'];
+    final compare = compareRaw == null ? null : _num(compareRaw);
+
+    final catRaw = root['categoryLabel'] ?? root['category'];
+    final category = catRaw is String
+        ? catRaw
+        : catRaw is Map && catRaw['name'] is String
+            ? catRaw['name'] as String
+            : catRaw?.toString() ?? '';
+
+    final condRaw = root['conditionLabel'] ?? root['condition'];
+    final condition =
+        condRaw is String ? condRaw : condRaw?.toString() ?? '';
+
+    final rating = _num(root['rating'] ?? root['averageRating']);
+
+    final reviewCountRaw = root['reviewCount'];
+    final reviewsList = root['reviews'];
+    final reviewCount = reviewCountRaw is num
+        ? reviewCountRaw.toInt()
+        : int.tryParse(reviewCountRaw?.toString() ?? '') ??
+            (reviewsList is List ? reviewsList.length : 0);
+
+    final stockRaw = root['stockQuantity'] ?? root['stock'] ?? root['quantity'];
+    final stock =
+        stockRaw is num ? stockRaw.toInt() : int.tryParse(stockRaw?.toString() ?? '') ?? 1;
+
+    final shipAvail =
+        json['shippingAvailable'] != false && root['shippingAvailable'] != false;
+    final shippingCost = shipAvail ? (price >= 20000 ? 0.0 : 500.0) : 0.0;
+
+    return WishlistItemEntity(
+      id: id,
+      listingId: listingId,
+      listingName: (root['title'] ?? root['name'] ?? '').toString(),
+      listingImages: listingImages,
+      listingSlug: (root['slug'] ?? listingId).toString(),
+      vendorId: vid.isEmpty ? 'vendor_unknown' : vid,
+      vendorName: vendorName.isEmpty ? '—' : vendorName,
+      vendorStoreName: store.isEmpty ? vendorName : store,
+      vendorAvatar: avatar,
+      isVendorVerified:
+          seller['verified'] == true || seller['isVerified'] == true,
+      price: price,
+      compareAtPrice: compare,
+      previousPrice: price,
+      priceDropPercent: null,
+      category: category,
+      condition: condition,
+      rating: rating == 0 ? 4.7 : rating,
+      reviewCount: reviewCount,
+      stockQuantity: stock,
+      isAvailable: root['isAvailable'] != false,
+      isInCart: false,
+      shippingAvailable: shipAvail,
+      shippingCost: shippingCost,
+      addedAt: now,
+      lastPriceCheckAt: now,
+    );
+  }
+
+  WishlistItemEntity _fromMap(Map<String, dynamic> json) {
+    final images = (json['listingImages'] as List<dynamic>? ?? const [])
+        .map((e) => e.toString())
+        .toList();
+    return WishlistItemEntity(
+      id: (json['id'] ?? '').toString(),
+      listingId: (json['listingId'] ?? '').toString(),
+      listingName: (json['listingName'] ?? '').toString(),
+      listingImages: images,
+      listingSlug: (json['listingSlug'] ?? '').toString(),
+      vendorId: (json['vendorId'] ?? '').toString(),
+      vendorName: (json['vendorName'] ?? '').toString(),
+      vendorStoreName: (json['vendorStoreName'] ?? '').toString(),
+      vendorAvatar: (json['vendorAvatar'] ?? '').toString(),
+      isVendorVerified: json['isVendorVerified'] != false,
+      price: _num(json['price']),
+      compareAtPrice:
+          json['compareAtPrice'] == null ? null : _num(json['compareAtPrice']),
+      previousPrice:
+          json['previousPrice'] == null ? null : _num(json['previousPrice']),
+      priceDropPercent: (json['priceDropPercent'] as num?)?.toInt(),
+      category: (json['category'] ?? '').toString(),
+      condition: (json['condition'] ?? '').toString(),
+      rating: _num(json['rating']),
+      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
+      stockQuantity: (json['stockQuantity'] as num?)?.toInt() ?? 1,
+      isAvailable: json['isAvailable'] != false,
+      isInCart: json['isInCart'] == true,
+      shippingAvailable: json['shippingAvailable'] != false,
+      shippingCost: _num(json['shippingCost']),
+      addedAt:
+          DateTime.tryParse((json['addedAt'] ?? '').toString()) ?? DateTime.now(),
+      lastPriceCheckAt:
+          DateTime.tryParse((json['lastPriceCheckAt'] ?? '').toString()) ??
+              DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> _toMap(WishlistItemEntity item) => {
+        'id': item.id,
+        'listingId': item.listingId,
+        'listingName': item.listingName,
+        'listingImages': item.listingImages,
+        'listingSlug': item.listingSlug,
+        'vendorId': item.vendorId,
+        'vendorName': item.vendorName,
+        'vendorStoreName': item.vendorStoreName,
+        'vendorAvatar': item.vendorAvatar,
+        'isVendorVerified': item.isVendorVerified,
+        'price': item.price,
+        'compareAtPrice': item.compareAtPrice,
+        'previousPrice': item.previousPrice,
+        'priceDropPercent': item.priceDropPercent,
+        'category': item.category,
+        'condition': item.condition,
+        'rating': item.rating,
+        'reviewCount': item.reviewCount,
+        'stockQuantity': item.stockQuantity,
+        'isAvailable': item.isAvailable,
+        'isInCart': item.isInCart,
+        'shippingAvailable': item.shippingAvailable,
+        'shippingCost': item.shippingCost,
+        'addedAt': item.addedAt.toIso8601String(),
+        'lastPriceCheckAt': item.lastPriceCheckAt.toIso8601String(),
+      };
+
+  double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
 }

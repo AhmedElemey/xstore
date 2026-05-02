@@ -34,7 +34,7 @@ class CartRepositoryImpl implements CartRepository {
     required int quantity,
   }) async {
     try {
-      final line = _remote.buildLineFromListing(listingId, quantity);
+      final line = await _remote.buildLineFromListing(listingId, quantity);
       return Right(
         await _remote.addOrUpdateItem(consumerId: consumerId, item: line),
       );

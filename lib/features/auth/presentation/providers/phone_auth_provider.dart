@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../domain/entities/send_otp_params.dart';
 import '../../domain/entities/verify_otp_params.dart';
@@ -75,9 +76,9 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
   final Ref ref;
   Timer? _timer;
 
-  void updatePhone(String value) {
+  void updatePhone(String value, AppLocalizations l10n) {
     final normalized = AppValidators.normalizeEgyptLocal(value);
-    final err = normalized.isEmpty ? null : AppValidators.egyptPhone(normalized);
+    final err = normalized.isEmpty ? null : Validators.egyptPhone(l10n, normalized);
     state = state.copyWith(
       phoneNumber: normalized,
       phoneError: err,
@@ -86,8 +87,8 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
     );
   }
 
-  Future<bool> sendOtp() async {
-    final err = AppValidators.egyptPhone(state.phoneNumber);
+  Future<bool> sendOtp(AppLocalizations l10n) async {
+    final err = Validators.egyptPhone(l10n, state.phoneNumber);
     if (err != null) {
       state = state.copyWith(phoneError: err, isSendingOtp: false);
       return false;
@@ -150,9 +151,9 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
     });
   }
 
-  Future<void> resendOtp() async {
+  Future<void> resendOtp(AppLocalizations l10n) async {
     if (!state.canResend || state.isSendingOtp) return;
-    await sendOtp();
+    await sendOtp(l10n);
   }
 
   void clearPhoneError() => state = state.copyWith(clearPhoneError: true);

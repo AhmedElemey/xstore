@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../../core/constants/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
@@ -7,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../widgets/auth_button.dart';
@@ -50,7 +52,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(LucideIcons.arrowLeft, color: context.iconPrimary),
@@ -59,7 +61,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.x2l),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 320),
             child: _step == 1
@@ -103,22 +105,21 @@ class _StepEmail extends StatelessWidget {
       children: [
         Text(
           'Reset Password',
-          style: TextStyle(
-            fontSize: 26,
+          style: AppTypography.titleLarge.copyWith(
+            fontSize: AppTypography.rem(1.625),
             fontWeight: FontWeight.w800,
             color: context.textPrimary,
           ),
         ),
-        const Gap(12),
+        const Gap(AppSpacing.md),
         Text(
           "Enter your email and we'll send you a reset link",
-          style: TextStyle(
-            fontSize: 15,
+          style: AppTypography.body15.copyWith(
             height: 1.4,
             color: context.textSecondary,
           ),
         ),
-        const Gap(28),
+        const Gap(AppSpacing.spacing28),
         AuthTextField(
           label: 'Email',
           controller: emailController,
@@ -161,27 +162,25 @@ class _StepCheckEmail extends StatelessWidget {
             height: 120,
           ),
         ),
-        const Gap(24),
+        const Gap(AppSpacing.x2l),
         Text(
           'Check your email',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 24,
+          style: AppTypography.titleLarge.copyWith(
             fontWeight: FontWeight.w800,
             color: context.textPrimary,
           ),
         ),
-        const Gap(12),
+        const Gap(AppSpacing.md),
         Text(
           'We sent a reset link to\n$email',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15,
+          style: AppTypography.body15.copyWith(
             height: 1.45,
             color: context.textSecondary,
           ),
         ),
-        const Gap(24),
+        const Gap(AppSpacing.x2l),
         if (cooldown > 0)
           Text(
             'Resend in ${cooldown}s',

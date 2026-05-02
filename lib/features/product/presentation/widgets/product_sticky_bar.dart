@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -56,7 +57,12 @@ class ProductStickyBar extends StatelessWidget {
               if (showAddToCart) ...[
                 Expanded(
                   child: FilledButton(
-                    onPressed: isAddingToCart ? null : onAddToCart,
+                    onPressed: isAddingToCart
+                        ? null
+                        : () {
+                            HapticFeedback.lightImpact();
+                            onAddToCart();
+                          },
                     child: isAddingToCart
                         ? SizedBox(
                             width: 22,

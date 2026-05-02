@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../providers/auth_states.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -64,31 +66,31 @@ class PasswordStrengthBar extends StatelessWidget {
     switch (s) {
       case PasswordStrength.none:
         return [
-          const Color(0xFFE5E7EB),
-          const Color(0xFFE5E7EB),
-          const Color(0xFFE5E7EB),
-          const Color(0xFFE5E7EB),
+          AppColors.lightBorder,
+          AppColors.lightBorder,
+          AppColors.lightBorder,
+          AppColors.lightBorder,
         ];
       case PasswordStrength.weak:
         return [
           AppColors.error,
-          const Color(0xFFE5E7EB),
-          const Color(0xFFE5E7EB),
-          const Color(0xFFE5E7EB),
+          AppColors.lightBorder,
+          AppColors.lightBorder,
+          AppColors.lightBorder,
         ];
       case PasswordStrength.fair:
         return [
           AppColors.error,
           AppColors.warning,
-          const Color(0xFFE5E7EB),
-          const Color(0xFFE5E7EB),
+          AppColors.lightBorder,
+          AppColors.lightBorder,
         ];
       case PasswordStrength.good:
         return [
           AppColors.error,
           AppColors.warning,
           const Color(0xFFEAB308),
-          const Color(0xFFE5E7EB),
+          AppColors.lightBorder,
         ];
       case PasswordStrength.strong:
         return [
@@ -120,7 +122,7 @@ class PasswordStrengthBar extends StatelessWidget {
                 margin: EdgeInsets.only(right: i < 3 ? 6 : 0),
                 height: 6,
                 decoration: BoxDecoration(
-                  color: active ? colors[i] : const Color(0xFFE5E7EB),
+                  color: active ? colors[i] : AppColors.lightBorder,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -128,11 +130,10 @@ class PasswordStrengthBar extends StatelessWidget {
           }),
         ),
         if (label.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTypography.body12.copyWith(
               fontWeight: FontWeight.w600,
               color: strength == PasswordStrength.strong
                   ? AppColors.success
@@ -140,7 +141,7 @@ class PasswordStrengthBar extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         _RequirementRow(
           met: password.length >= 8,
           text: 'At least 8 characters',
@@ -183,12 +184,11 @@ class _RequirementRow extends StatelessWidget {
             size: 18,
             color: met ? AppColors.success : context.textDisabled,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 13,
+              style: AppTypography.bodySmall.copyWith(
                 color: met ? AppColors.success : context.textSecondary,
               ),
             ),

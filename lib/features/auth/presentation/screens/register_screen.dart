@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import '../../../../core/constants/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -8,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
@@ -119,15 +121,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _onPrimary(RegisterState s, RegisterNotifier n) async {
+    final l10n = context.l10n;
     if (s.selectedRole == UserRole.consumer && s.currentStep == 3) {
-      await n.submitFromCurrentStep();
+      await n.submitFromCurrentStep(l10n);
       return;
     }
     if (s.selectedRole == UserRole.vendor && s.currentStep == 4) {
-      await n.submitFromCurrentStep();
+      await n.submitFromCurrentStep(l10n);
       return;
     }
-    n.nextStep();
+    n.nextStep(l10n);
   }
 
   @override
@@ -162,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: Text(
                   context.l10n.stepOf(s.currentStep, s.totalSteps),
                   style: TextStyle(
@@ -171,9 +174,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
               ),
-              const Gap(8),
+              const Gap(AppSpacing.sm),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
@@ -184,9 +187,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
               ),
-              const Gap(8),
+              const Gap(AppSpacing.sm),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(
@@ -195,8 +198,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: Text(
                         labels[i],
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: AppTypography.labelSmall.copyWith(
                           fontWeight: i + 1 == s.currentStep
                               ? FontWeight.w800
                               : FontWeight.w500,
@@ -209,7 +211,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
               ),
-              const Gap(16),
+              const Gap(AppSpacing.lg),
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 320),
@@ -234,7 +236,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 child: AuthButton(
                   label: s.selectedRole == UserRole.vendor && s.currentStep == 4
                       ? context.l10n.createMyStore
@@ -301,32 +303,30 @@ class _StepRole extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
         Text(
           context.l10n.joinAs,
-          style: TextStyle(
-            fontSize: 24,
+          style: AppTypography.titleLarge.copyWith(
             fontWeight: FontWeight.w800,
             color: context.textPrimary,
           ),
         ),
-        const Gap(10),
+        const Gap(AppSpacing.spacing10),
         Text(
           context.l10n.chooseHowUse,
-          style: TextStyle(
-            fontSize: 15,
+          style: AppTypography.body15.copyWith(
             height: 1.4,
             color: context.textSecondary,
           ),
         ),
-        const Gap(20),
+        const Gap(AppSpacing.xl),
         if (s.stepErrors.containsKey('role'))
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Text(
               s.stepErrors['role']!,
-              style: TextStyle(color: AppColors.error, fontSize: 13),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
         RoleSelectorCard(
@@ -359,9 +359,9 @@ class _StepRole extends StatelessWidget {
             context.l10n.sellerFeature4,
           ],
         ),
-        const Gap(20),
+        const Gap(AppSpacing.xl),
         AuthDivider(label: context.l10n.socialLoginDivider),
-        const Gap(20),
+        const Gap(AppSpacing.xl),
         const SocialLoginRow(),
       ],
     );
@@ -394,21 +394,21 @@ class _StepPersonal extends StatelessWidget {
         : DateFormat('d MMM yyyy').format(s.dateOfBirth!);
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
         Text(
           context.l10n.tellUsAboutYou,
-          style: TextStyle(
-            fontSize: 24,
+          style: AppTypography.titleLarge.copyWith(
             fontWeight: FontWeight.w800,
           ),
         ),
-        const Gap(8),
+        const Gap(AppSpacing.sm),
         Text(
           context.l10n.infoOnProfile,
-          style: TextStyle(color: context.textSecondary, fontSize: 15),
+          style:
+              AppTypography.body15.copyWith(color: context.textSecondary),
         ),
-        const Gap(20),
+        const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.fullNameRequired,
           controller: fullName,
@@ -416,7 +416,7 @@ class _StepPersonal extends StatelessWidget {
           errorText: s.stepErrors['fullName'],
           onChanged: (v) => n.updateField(fullName: v),
         ),
-        const Gap(14),
+        const Gap(AppSpacing.inputContentPaddingH),
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: email,
           builder: (context, val, _) {
@@ -434,7 +434,7 @@ class _StepPersonal extends StatelessWidget {
             );
           },
         ),
-        const Gap(14),
+        const Gap(AppSpacing.inputContentPaddingH),
         PhoneInputField(
           controller: phone,
           errorText: s.stepErrors['phone'],
@@ -442,7 +442,7 @@ class _StepPersonal extends StatelessWidget {
             phoneNumber: v.replaceAll(RegExp(r'\D'), ''),
           ),
         ),
-        const Gap(14),
+        const Gap(AppSpacing.inputContentPaddingH),
         AuthTextField(
           label: context.l10n.dateOfBirthOptional,
           readOnly: true,
@@ -451,7 +451,7 @@ class _StepPersonal extends StatelessWidget {
           prefixIcon: const Icon(LucideIcons.calendar),
           errorText: s.stepErrors['dob'],
         ),
-        const Gap(14),
+        const Gap(AppSpacing.inputContentPaddingH),
         AuthTextField(
           label: context.l10n.locationCityRequired,
           hint: context.l10n.locationHintAlgiers,
@@ -481,21 +481,21 @@ class _StepSecurity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
         Text(
           context.l10n.secureYourAccount,
-          style: TextStyle(
-            fontSize: 24,
+          style: AppTypography.titleLarge.copyWith(
             fontWeight: FontWeight.w800,
           ),
         ),
-        const Gap(8),
+        const Gap(AppSpacing.sm),
         Text(
           context.l10n.strongPasswordHint,
-          style: TextStyle(color: context.textSecondary, fontSize: 15),
+          style:
+              AppTypography.body15.copyWith(color: context.textSecondary),
         ),
-        const Gap(20),
+        const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.passwordRequired,
           hint: '********',
@@ -512,9 +512,9 @@ class _StepSecurity extends StatelessWidget {
           errorText: s.stepErrors['password'],
           onChanged: n.updatePasswordFields,
         ),
-        const Gap(12),
+        const Gap(AppSpacing.md),
         PasswordStrengthBar(password: s.password),
-        const Gap(16),
+        const Gap(AppSpacing.lg),
         AuthTextField(
           label: context.l10n.confirmPasswordRequired,
           hint: '********',
@@ -543,7 +543,7 @@ class _StepSecurity extends StatelessWidget {
           errorText: s.stepErrors['confirm'],
           onChanged: n.updateConfirmPassword,
         ),
-        const Gap(16),
+        const Gap(AppSpacing.lg),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -554,7 +554,7 @@ class _StepSecurity extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: AppSpacing.spacing10),
                 child: Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: 4,
@@ -562,8 +562,7 @@ class _StepSecurity extends StatelessWidget {
                   children: [
                     Text(
                       context.l10n.agreeTo,
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: AppTypography.bodyMedium.copyWith(
                         color: context.textSecondary,
                       ),
                     ),
@@ -571,8 +570,7 @@ class _StepSecurity extends StatelessWidget {
                       onTap: () {},
                       child: Text(
                         context.l10n.termsOfService,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.accent,
                         ),
@@ -580,8 +578,7 @@ class _StepSecurity extends StatelessWidget {
                     ),
                     Text(
                       context.l10n.andWord,
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: AppTypography.bodyMedium.copyWith(
                         color: context.textSecondary,
                       ),
                     ),
@@ -589,8 +586,7 @@ class _StepSecurity extends StatelessWidget {
                       onTap: () {},
                       child: Text(
                         context.l10n.privacyPolicy,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.accent,
                         ),
@@ -605,7 +601,7 @@ class _StepSecurity extends StatelessWidget {
         if (s.stepErrors.containsKey('terms'))
           Text(
             s.stepErrors['terms']!,
-            style: TextStyle(color: AppColors.error, fontSize: 13),
+            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
           ),
       ],
     );
@@ -644,21 +640,21 @@ class _StepStore extends StatelessWidget {
             .toUpperCase();
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
         Text(
           context.l10n.setUpYourStore,
-          style: TextStyle(
-            fontSize: 24,
+          style: AppTypography.titleLarge.copyWith(
             fontWeight: FontWeight.w800,
           ),
         ),
-        const Gap(8),
+        const Gap(AppSpacing.sm),
         Text(
           context.l10n.tellBuyersStore,
-          style: TextStyle(color: context.textSecondary, fontSize: 15),
+          style:
+              AppTypography.body15.copyWith(color: context.textSecondary),
         ),
-        const Gap(20),
+        const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.storeNameRequired,
           hint: context.l10n.storeNameHint,
@@ -667,25 +663,23 @@ class _StepStore extends StatelessWidget {
           errorText: s.stepErrors['storeName'],
           onChanged: (v) => n.updateField(storeName: v),
         ),
-        const Gap(8),
+        const Gap(AppSpacing.sm),
         Text(
           'Your store URL: xstore.com/store/${s.storeSlug}',
-          style: TextStyle(
-            fontSize: 13,
+          style: AppTypography.bodySmall.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const Gap(16),
+        const Gap(AppSpacing.lg),
         Text(
           context.l10n.storeCategoryRequired,
-          style: TextStyle(
-            fontSize: 13,
+          style: AppTypography.bodySmall.copyWith(
             fontWeight: FontWeight.w600,
             color: context.textPrimary,
           ),
         ),
-        const Gap(8),
+        const Gap(AppSpacing.sm),
         DropdownButtonFormField<String>(
           // ignore: deprecated_member_use
           value: s.storeCategory.isEmpty ? null : s.storeCategory,
@@ -707,10 +701,11 @@ class _StepStore extends StatelessWidget {
             padding: const EdgeInsets.only(top: 6),
             child: Text(
               s.stepErrors['storeCategory']!,
-              style: TextStyle(color: AppColors.error, fontSize: 13),
+              style:
+                  AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
-        const Gap(16),
+        const Gap(AppSpacing.lg),
         AuthTextField(
           label: context.l10n.storeDescriptionRequired,
           hint: context.l10n.storeDescriptionHint,
@@ -723,15 +718,17 @@ class _StepStore extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Text(
             '${s.storeDescription.length}/300',
-            style: TextStyle(fontSize: 12, color: context.textSecondary),
+            style: AppTypography.body12.copyWith(
+              color: context.textSecondary,
+            ),
           ),
         ),
-        const Gap(16),
+        const Gap(AppSpacing.lg),
         Text(
           context.l10n.storeLogoOptional,
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
         ),
-        const Gap(10),
+        const Gap(AppSpacing.spacing10),
         Center(
           child: Material(
             type: MaterialType.transparency,
@@ -757,9 +754,8 @@ class _StepStore extends StatelessWidget {
                         alignment: Alignment.center,
                         child: Text(
                           initials,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
+                          style: AppTypography.displayMedium.copyWith(
+                            color: AppColors.white,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -768,11 +764,11 @@ class _StepStore extends StatelessWidget {
             ),
           ),
         ),
-        const Gap(16),
+        const Gap(AppSpacing.lg),
         if (s.stepErrors.containsKey('storeLocation'))
           Text(
             s.stepErrors['storeLocation']!,
-            style: TextStyle(color: AppColors.error, fontSize: 13),
+            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
           ),
         Row(
           children: [
@@ -783,7 +779,7 @@ class _StepStore extends StatelessWidget {
                 onChanged: (v) => n.updateField(storeCity: v),
               ),
             ),
-            const Gap(12),
+            const Gap(AppSpacing.md),
             Expanded(
               child: AuthTextField(
                 label: context.l10n.wilayaRequired,
@@ -793,7 +789,7 @@ class _StepStore extends StatelessWidget {
             ),
           ],
         ),
-        const Gap(14),
+        const Gap(AppSpacing.inputContentPaddingH),
         PhoneInputField(
           controller: whatsapp,
           onChanged: (v) => n.updateField(
@@ -813,11 +809,11 @@ class _VendorSuccessOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      color: Colors.black.withValues(alpha: context.isDark ? 0.65 : 0.54),
+      color: AppColors.black.withValues(alpha: context.isDark ? 0.65 : 0.54),
       child: Center(
         child: Container(
-          margin: const EdgeInsets.all(24),
-          padding: const EdgeInsets.all(28),
+          margin: const EdgeInsets.all(AppSpacing.x2l),
+          padding: const EdgeInsets.all(AppSpacing.spacing28),
           decoration: BoxDecoration(
             color: context.surfaceColor,
             borderRadius: BorderRadius.circular(24),
@@ -836,32 +832,33 @@ class _VendorSuccessOverlay extends ConsumerWidget {
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(AppSpacing.spacing18),
                   decoration: BoxDecoration(
                     color: AppColors.success,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 48),
+                  child: const Icon(Icons.check, color: AppColors.white, size: 48),
                 ),
               ),
-              const Gap(20),
+              const Gap(AppSpacing.xl),
               Text(
                 context.l10n.vendorWelcome(
                   name.isEmpty ? context.l10n.sellerFallbackName : name.split(' ').first,
                 ),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
+                style: AppTypography.titleMedium.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const Gap(10),
+              const Gap(AppSpacing.spacing10),
               Text(
                 context.l10n.storeReady,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: context.textSecondary),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textSecondary,
+                ),
               ),
-              const Gap(24),
+              const Gap(AppSpacing.x2l),
               AuthButton(
                 label: context.l10n.goToMyStore,
                 onPressed: () {

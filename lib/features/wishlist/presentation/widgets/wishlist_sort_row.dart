@@ -52,10 +52,9 @@ class WishlistSortRow extends ConsumerWidget {
                   children: [
                     Text(
                       wishlistSortLabel(context, sortOption),
-                      style: AppTypography.labelLarge.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: context.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.xs),
@@ -134,10 +133,9 @@ class _FilterChip extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: AppTypography.labelLarge.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: selected ? AppColors.white : context.textPrimary,
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
               ),
             ),
           ),

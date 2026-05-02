@@ -31,7 +31,7 @@ class PhoneLoginButton extends StatelessWidget {
           height: 56,
           width: double.infinity,
           child: Material(
-            color: Colors.transparent,
+            color: AppColors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: enabled && !isLoading ? onPressed : null,
@@ -42,13 +42,13 @@ class PhoneLoginButton extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                         ),
                       )
                     : Text(
                         context.l10n.sendVerificationCode,
                         style: AppTypography.labelLarge.copyWith(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

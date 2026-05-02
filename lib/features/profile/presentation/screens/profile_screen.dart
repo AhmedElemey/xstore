@@ -31,9 +31,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     _scroll = ScrollController();
-    _scroll.addListener(() {
-      if (mounted) setState(() {});
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(profileNotifierProvider.notifier).fetchProfile();
       ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();

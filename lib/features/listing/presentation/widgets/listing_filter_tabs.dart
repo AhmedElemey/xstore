@@ -62,7 +62,7 @@ class _FilterChipPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final outline = context.borderColor.withValues(alpha: 0.8);
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),

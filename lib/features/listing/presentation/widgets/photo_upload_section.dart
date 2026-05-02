@@ -116,7 +116,7 @@ class _AddPhotoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -215,7 +215,7 @@ class _PhotoTile extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: dragTarget ? AppColors.primary : Colors.transparent,
+          color: dragTarget ? AppColors.primary : AppColors.transparent,
           width: 2,
         ),
         boxShadow: dragTarget
@@ -231,21 +231,26 @@ class _PhotoTile extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.file(File(path), fit: BoxFit.cover),
+          Semantics(
+            label:
+                '${context.l10n.listingPhotoSectionTitle} ${index + 1}',
+            image: true,
+            child: Image.file(File(path), fit: BoxFit.cover),
+          ),
           if (isCover)
             Positioned(
               left: 6,
               bottom: 6,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade600,
+                  color: AppColors.materialGreen600,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   context.l10n.listingPhotoCoverBadge,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontSize: AppTypography.rem(0.6875),
                     fontWeight: FontWeight.w600,
                   ),
@@ -255,18 +260,21 @@ class _PhotoTile extends StatelessWidget {
           Positioned(
             top: AppSpacing.xs,
             right: AppSpacing.xs,
-            child: Material(
-              color: AppColors.error,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onRemove,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(
-                    LucideIcons.x,
-                    color: context.surfaceColor,
-                    size: AppSpacing.lg,
+            child: Tooltip(
+              message: MaterialLocalizations.of(context).deleteButtonTooltip,
+              child: Material(
+                color: AppColors.error,
+                shape: const CircleBorder(),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: onRemove,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    child: Icon(
+                      LucideIcons.x,
+                      color: context.surfaceColor,
+                      size: AppSpacing.lg,
+                    ),
                   ),
                 ),
               ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class RoleSelectorCard extends StatelessWidget {
@@ -33,7 +36,7 @@ class RoleSelectorCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Material(
         color: bg,
         borderRadius: BorderRadius.circular(20),
@@ -42,11 +45,11 @@ class RoleSelectorCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isSelected ? selectionBorderColor : const Color(0xFFE5E7EB),
+                color: isSelected ? selectionBorderColor : AppColors.lightBorder,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -58,7 +61,7 @@ class RoleSelectorCard extends StatelessWidget {
                     top: -4,
                     right: -4,
                     child: Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(AppSpacing.xs),
                       decoration: BoxDecoration(
                         color: selectionBorderColor,
                         shape: BoxShape.circle,
@@ -71,7 +74,7 @@ class RoleSelectorCard extends StatelessWidget {
                       ),
                       child: const Icon(
                         Icons.check,
-                        color: Colors.white,
+                        color: AppColors.white,
                         size: 16,
                       ),
                     ),
@@ -80,28 +83,26 @@ class RoleSelectorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(icon, size: 48, color: accentColor),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       title,
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: AppTypography.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         color: context.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.spacing6),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: AppTypography.bodyMedium.copyWith(
                         height: 1.35,
                         color: context.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.inputContentPaddingH),
                     ...features.map(
                       (f) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.spacing6),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -110,12 +111,11 @@ class RoleSelectorCard extends StatelessWidget {
                               size: 18,
                               color: accentColor.withValues(alpha: 0.85),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.sm),
                             Expanded(
                               child: Text(
                                 f,
-                                style: TextStyle(
-                                  fontSize: 13,
+                                style: AppTypography.bodySmall.copyWith(
                                   color: context.textSecondary,
                                 ),
                               ),

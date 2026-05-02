@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/network/dio_provider.dart';
 import '../data/datasources/explore_remote_datasource.dart';
 import '../data/repositories/explore_repository_impl.dart';
 import '../domain/repositories/explore_repository.dart';
@@ -10,7 +11,7 @@ part 'explore_dependencies.g.dart';
 
 @Riverpod(keepAlive: true)
 ExploreRemoteDataSource exploreRemoteDataSource(ExploreRemoteDataSourceRef ref) {
-  return ExploreRemoteDataSourceImpl();
+  return ExploreRemoteDataSourceImpl(ref.watch(dioProvider));
 }
 
 @Riverpod(keepAlive: true)

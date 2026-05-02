@@ -10,12 +10,16 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 class ProductImageGallery extends StatefulWidget {
   const ProductImageGallery({
     super.key,
+    this.titleForSemantics,
     required this.imageUrls,
     required this.selectedIndex,
     required this.onPageChanged,
     required this.listingId,
     this.bottomInset = 0,
   });
+
+  /// Used only for accessibility (image semantic labels).
+  final String? titleForSemantics;
 
   final List<String> imageUrls;
   final int selectedIndex;
@@ -55,6 +59,16 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
     super.dispose();
   }
 
+  String _listingLabel(BuildContext context) {
+    final t = widget.titleForSemantics?.trim();
+    if (t != null && t.isNotEmpty) return t;
+    return context.l10n.productScreenTitle;
+  }
+
+  String _photoLabel(BuildContext context, int index, int total) =>
+      '${_listingLabel(context)} · ${context.l10n.listingPhotoSectionTitle} '
+      '${index + 1} / $total';
+
   @override
   Widget build(BuildContext context) {
     final urls = widget.imageUrls;
@@ -83,19 +97,23 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
               panEnabled: false,
               minScale: 1,
               maxScale: 4,
-              child: CachedNetworkImage(
-                imageUrl: urls[i],
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                placeholder: (_, __) => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
-                errorWidget: (_, __, ___) => ColoredBox(
-                  color: context.textDisabled,
-                  child: Icon(
-                    LucideIcons.imageOff,
-                    color: context.textSecondary,
+              child: Semantics(
+                image: true,
+                label: _photoLabel(context, i, urls.length),
+                child: CachedNetworkImage(
+                  imageUrl: urls[i],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  placeholder: (_, __) => const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                  errorWidget: (_, __, ___) => ColoredBox(
+                    color: context.textDisabled,
+                    child: Icon(
+                      LucideIcons.imageOff,
+                      color: context.textSecondary,
+                    ),
                   ),
                 ),
               ),
@@ -146,26 +164,37 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
                   itemBuilder: (context, i) {
                     final sel = i == widget.selectedIndex;
-                    return GestureDetector(
-                      onTap: () => widget.onPageChanged(i),
-                      child: Container(
-                        width: AppSpacing.x4l,
-                        height: AppSpacing.x4l,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(AppSpacing.sm),
-                          border: Border.all(
-                            color: sel
-                                ? context.surfaceColor
-                                : context.surfaceColor.withValues(alpha: 0.35),
-                            width: sel ? AppSpacing.xs / 2 : AppSpacing.xs / 4,
+                    return Semantics(
+                      button: true,
+                      label:
+                          '${_photoLabel(context, i, urls.length)} · thumbnail',
+                      child: GestureDetector(
+                        onTap: () => widget.onPageChanged(i),
+                        child: Container(
+                          width: AppSpacing.x4l,
+                          height: AppSpacing.x4l,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.sm),
+                            border: Border.all(
+                              color: sel
+                                  ? context.surfaceColor
+                                  : context.surfaceColor.withValues(alpha: 0.35),
+                              width:
+                                  sel ? AppSpacing.xs / 2 : AppSpacing.xs / 4,
+                            ),
                           ),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: CachedNetworkImage(
-                          imageUrl: urls[i],
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) =>
-                              const Icon(LucideIcons.imageOff),
+                          clipBehavior: Clip.antiAlias,
+                          child: Semantics(
+                            image: true,
+                            label: _photoLabel(context, i, urls.length),
+                            child: CachedNetworkImage(
+                              imageUrl: urls[i],
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) =>
+                                  const Icon(LucideIcons.imageOff),
+                            ),
+                          ),
                         ),
                       ),
                     );

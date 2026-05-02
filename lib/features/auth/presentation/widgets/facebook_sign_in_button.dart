@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../core/constants/app_colors.dart';
 
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/social_auth_provider.dart';
@@ -22,9 +23,9 @@ class FacebookSignInButton extends ConsumerWidget {
       isLoading: isLoading,
       icon: SvgPicture.asset('assets/icons/facebook_logo.svg'),
       label: context.l10n.continueWithFacebook,
-      borderColor: const Color(0xFF1877F2),
-      bgColor: const Color(0xFF1877F2),
-      textColor: Colors.white,
+      borderColor: AppColors.facebookBrandBlue,
+      bgColor: AppColors.facebookBrandBlue,
+      textColor: AppColors.white,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -194,10 +195,9 @@ class WishlistItemCard extends ConsumerWidget {
                           item.listingName,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleMedium.copyWith(
+                          style: AppTypography.bodyLarge.copyWith(
                             fontWeight: FontWeight.w700,
                             color: context.textPrimary,
-                            fontSize: 16,
                           ),
                         ),
                         const Gap(AppSpacing.xs),
@@ -225,10 +225,9 @@ class WishlistItemCard extends ConsumerWidget {
                           children: [
                             Text(
                               Formatters.dzdWhole(item.price),
-                              style: AppTypography.labelLarge.copyWith(
+                              style: AppTypography.bodyLarge.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w800,
-                                fontSize: 16,
                               ),
                             ),
                             if (strike != null) ...[
@@ -328,6 +327,7 @@ class WishlistItemCard extends ConsumerWidget {
                       FilledButton(
                         onPressed: item.isAvailable
                             ? () async {
+                                HapticFeedback.lightImpact();
                                 await ref
                                     .read(wishlistProvider.notifier)
                                     .moveListingToCart(item.listingId);

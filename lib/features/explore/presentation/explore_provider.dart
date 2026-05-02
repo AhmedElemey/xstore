@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/prefs_keys.dart';
 import '../../../shared/providers/shared_providers.dart';
+import '../data/datasources/explore_remote_datasource.dart';
 import '../domain/entities/search_result_entity.dart';
 import 'explore_dependencies.dart';
 import 'explore_state.dart';
@@ -70,7 +71,7 @@ class Explore extends _$Explore {
         state = state.copyWith(
           isSearching: false,
           results: sorted,
-          hasMore: list.length >= 6,
+          hasMore: list.length >= ExploreRemoteDataSourceImpl.pageSize,
           page: 1,
         );
       },
@@ -94,7 +95,7 @@ class Explore extends _$Explore {
           isLoadingMore: false,
           results: _sort(merged),
           page: next,
-          hasMore: list.length >= 6,
+          hasMore: list.length >= ExploreRemoteDataSourceImpl.pageSize,
         );
       },
     );

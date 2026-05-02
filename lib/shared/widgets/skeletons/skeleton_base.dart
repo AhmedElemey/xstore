@@ -23,7 +23,7 @@ class SkeletonBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: context.isDark ? AppColors.darkSurfaceVariant : const Color(0xFFE5E7EB),
+        color: context.isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );
@@ -77,8 +77,8 @@ class ShimmerWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: context.isDark ? AppColors.darkSurfaceVariant : const Color(0xFFE5E7EB),
-      highlightColor: context.isDark ? AppColors.darkSurfaceElevated : const Color(0xFFF9FAFB),
+      baseColor: context.isDark ? AppColors.darkSurfaceVariant : AppColors.lightBorder,
+      highlightColor: context.isDark ? AppColors.darkSurfaceElevated : AppColors.neutral50,
       child: child,
     );
   }

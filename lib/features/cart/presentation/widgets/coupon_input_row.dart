@@ -49,9 +49,8 @@ class CouponInputRow extends ConsumerWidget {
           children: [
             Text(
               context.l10n.cartPromoHeading,
-              style: AppTypography.titleMedium.copyWith(
+              style: AppTypography.titleSmall.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 18
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

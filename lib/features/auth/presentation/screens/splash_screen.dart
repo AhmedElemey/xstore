@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
@@ -77,7 +79,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
-  static const _deepIndigo = Color(0xFF3730A3);
+  static const _deepIndigo = AppColors.primaryDark;
 
   @override
   Widget build(BuildContext context) {
@@ -106,28 +108,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       scale: Tween<double>(begin: 0.85, end: 1).animate(_logoScale),
                       child: Text(
                         'xStore',
-                        style: TextStyle(
-                          fontSize: 48,
+                        style: AppTypography.displayLarge.copyWith(
+                          fontSize: AppTypography.rem(3),
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: AppColors.white,
                           letterSpacing: -1,
                           shadows: [
                             Shadow(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: AppColors.white.withValues(alpha: 0.4),
                               blurRadius: 28,
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     FadeTransition(
                       opacity: _taglineOpacity,
                       child: Text(
                         'Buy & Sell Anything',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.92),
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.92),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -137,17 +138,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 48),
+              padding: const EdgeInsets.only(bottom: AppSpacing.x4l),
               child: SizedBox(
                 width: MediaQuery.sizeOf(context).width * 0.4,
                 child: Shimmer.fromColors(
-                  baseColor: Colors.white.withValues(alpha: 0.25),
-                  highlightColor: Colors.white.withValues(alpha: 0.65),
+                  baseColor: AppColors.white.withValues(alpha: 0.25),
+                  highlightColor: AppColors.white.withValues(alpha: 0.65),
                   period: const Duration(milliseconds: 1200),
                   child: Container(
                     height: 3,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

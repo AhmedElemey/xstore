@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
@@ -47,6 +48,7 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                         isOpen: state.isStoreOpen,
                         message: current.temporaryMessage,
                         onToggle: () async {
+                          HapticFeedback.lightImpact();
                           await notifier.toggleStoreStatus();
                           if (!context.mounted) return;
                           final open = ref.read(storeHoursNotifierProvider).isStoreOpen;

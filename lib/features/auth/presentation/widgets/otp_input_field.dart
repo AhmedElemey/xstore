@@ -45,7 +45,7 @@ class OtpInputField extends StatelessWidget {
     );
     final filledTheme = defaultTheme.copyWith(
       decoration: defaultTheme.decoration!.copyWith(
-        color: context.isDark ? AppColors.darkSurfaceVariant : const Color(0xFFEEF2FF),
+        color: context.isDark ? AppColors.darkSurfaceVariant : AppColors.notificationUnreadBackground,
         border: Border.all(color: AppColors.primary, width: 1.5),
       ),
     );

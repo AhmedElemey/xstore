@@ -495,10 +495,9 @@ class _VendorStoreStatsCard extends StatelessWidget {
                   Text(
                     cells[i].$1,
                     textAlign: TextAlign.center,
-                    style: AppTypography.titleMedium.copyWith(
+                    style: AppTypography.bodyLarge.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
                     ),
                   ),
                   const Gap(AppSpacing.xs),

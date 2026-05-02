@@ -43,8 +43,27 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
             pinned: true, backgroundColor: context.surfaceColor, elevation: 0,
             title: Text('${context.l10n.orderHashPrefix}${o.formattedOrderId}'),
             actions: [
-              IconButton(icon: const Icon(Icons.ios_share_rounded), onPressed: () => Share.share('${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${o.total} ${context.l10n.currencyDzd}')),
-              PopupMenuButton<String>(onSelected: (v) => context.showSnack(v), itemBuilder: (_) => [PopupMenuItem(value: context.l10n.vendorPrintOrder, child: Text(context.l10n.vendorPrintOrder)), PopupMenuItem(value: context.l10n.vendorReportIssue, child: Text(context.l10n.vendorReportIssue))]),
+              IconButton(
+                tooltip: context.l10n.share,
+                icon: const Icon(Icons.ios_share_rounded),
+                onPressed: () => Share.share(
+                  '${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${o.total} ${context.l10n.currencyDzd}',
+                ),
+              ),
+              PopupMenuButton<String>(
+                tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+                onSelected: (v) => context.showSnack(v),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: context.l10n.vendorPrintOrder,
+                    child: Text(context.l10n.vendorPrintOrder),
+                  ),
+                  PopupMenuItem(
+                    value: context.l10n.vendorReportIssue,
+                    child: Text(context.l10n.vendorReportIssue),
+                  ),
+                ],
+              ),
             ],
           ),
           SliverToBoxAdapter(
@@ -66,7 +85,36 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 _Card(child: OrderPriceBreakdown(order: o, vendorMode: true)),
                 if (o.status == OrderStatus.shipped) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.vendorShippingInfoTitle, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), Row(children: [Expanded(child: Text(o.trackingNumber ?? '—')), IconButton(onPressed: () { if ((o.trackingNumber ?? '').isNotEmpty) { Clipboard.setData(ClipboardData(text: o.trackingNumber!)); context.showSnack(context.l10n.ordersTrackingCopied); } }, icon: const Icon(Icons.copy_rounded))]), Text(o.courierName ?? '—')])),
+                  _Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(context.l10n.vendorShippingInfoTitle,
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: AppSpacing.sm),
+                        Row(
+                          children: [
+                            Expanded(child: Text(o.trackingNumber ?? '—')),
+                            IconButton(
+                              tooltip: MaterialLocalizations.of(context)
+                                  .copyButtonLabel,
+                              onPressed: () {
+                                if ((o.trackingNumber ?? '').isNotEmpty) {
+                                  Clipboard.setData(
+                                    ClipboardData(text: o.trackingNumber!),
+                                  );
+                                  context
+                                      .showSnack(context.l10n.ordersTrackingCopied);
+                                }
+                              },
+                              icon: const Icon(Icons.copy_rounded),
+                            ),
+                          ],
+                        ),
+                        Text(o.courierName ?? '—'),
+                      ],
+                    ),
+                  ),
                 ],
                 if (o.status == OrderStatus.cancelled) ...[
                   const SizedBox(height: AppSpacing.lg),
@@ -108,7 +156,7 @@ class _StatusHeader extends StatelessWidget {
   final OrderEntity order;
   @override
   Widget build(BuildContext context) {
-    final c = switch (order.status) { OrderStatus.pending => AppColors.warning, OrderStatus.confirmed => AppColors.primary, OrderStatus.processing => const Color(0xFF6366F1), OrderStatus.shipped => const Color(0xFF8B5CF6), OrderStatus.delivered => AppColors.success, _ => AppColors.error };
+    final c = switch (order.status) { OrderStatus.pending => AppColors.warning, OrderStatus.confirmed => AppColors.primary, OrderStatus.processing => AppColors.orderStatusProcessing, OrderStatus.shipped => AppColors.orderStatusShipped, OrderStatus.delivered => AppColors.success, _ => AppColors.error };
     final text = switch (order.status) {
       OrderStatus.pending => context.l10n.vendorStatusPending,
       OrderStatus.confirmed => context.l10n.vendorStatusConfirmed,

@@ -45,14 +45,14 @@ class ConditionSelector extends StatelessWidget {
               label: Text(
                 display,
                 style: TextStyle(
-                  color: isSel ? Colors.white : Colors.grey.shade600,
+                  color: isSel ? AppColors.white : AppColors.materialGrey600,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               selected: isSel,
               onSelected: (_) => onChanged(o),
               selectedColor: AppColors.primary,
-              backgroundColor: Colors.transparent,
+              backgroundColor: AppColors.transparent,
               side: BorderSide(
                 color: hasError && !isSel ? AppColors.error : context.textDisabled,
               ),

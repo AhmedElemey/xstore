@@ -131,7 +131,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       .pickFromGallery();
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
             ],
           ),
         ),
@@ -150,7 +150,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
     final retryLabel = context.l10n.retry;
-    final ok = await notifier.submit();
+    final ok = await notifier.submit(context.l10n);
     if (!mounted) {
       return;
     }
@@ -166,7 +166,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         backgroundColor: AppColors.error,
         action: SnackBarAction(
           label: retryLabel,
-          textColor: Colors.white,
+          textColor: AppColors.white,
           onPressed: () => _publish(),
         ),
       );
@@ -196,7 +196,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         backgroundColor: context.backgroundColor,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: AppColors.transparent,
         centerTitle: true,
         title: Text(context.l10n.addListing),
         actions: [
@@ -242,297 +242,39 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  PhotoUploadSection(
-                    paths: form.photoPaths,
-                    errorText: err['photos'],
-                    onOpenPicker: _openPhotoSheet,
-                    onRemove: notifier.removePhoto,
-                    onReorder: notifier.reorderPhotos,
+                  _ListingPhotosBasicsSection(
+                    form: form,
+                    notifier: notifier,
+                    errors: err,
+                    openPhotoPicker: _openPhotoSheet,
+                    nameController: _name,
+                    priceController: _price,
+                    compareController: _compare,
+                    descriptionController: _description,
+                    showCompareWarn: showCompareWarn,
                   ),
-                  const Gap(AppSpacing.x3l),
-                  _AccentSectionTitle(context.l10n.listingSectionBasicInfo),
-                  const Gap(AppSpacing.lg),
-                  ListingFormField(
-                    label: context.l10n.listingProductNameLabel,
-                    controller: _name,
-                    hint: context.l10n.listingProductNameHint,
-                    maxLength: 100,
-                    errorText: err['name'],
-                    onChanged: (v) => notifier.updateField('name', v),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  ListingFormField(
-                    label: context.l10n.listingPriceLabel,
-                    controller: _price,
-                    hint: '0.00',
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    prefixText: '${notifier.currencyCode} ',
-                    errorText: err['price'],
-                    onChanged: (v) => notifier.updateField('priceInput', v),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  Text(
-                    context.l10n.listingCompareAtTitle,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                  _ListingCategoryBrandSection(
+                    form: form,
+                    notifier: notifier,
+                    errors: err,
+                    brandController: _brand,
+                    brandFocusNode: _brandFocus,
+                    categoryDisplay: _categoryLabel(form.categoryId),
+                    subcategoryDisplay: _subcategoryLabel(
+                      form.categoryId,
+                      form.subcategoryId,
                     ),
                   ),
-                  SizedBox(height: context.scaledPx(6)),
-                  ListingFormField(
-                    label: '',
-                    controller: _compare,
-                    hint: '0.00',
-                    prefixText: '${notifier.currencyCode} ',
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    onChanged: (v) =>
-                        notifier.updateField('compareAtPriceInput', v),
+                  _ListingShippingAttributesSection(
+                    form: form,
+                    notifier: notifier,
+                    errors: err,
+                    locationController: _location,
+                    shippingCostController: _shippingCost,
+                    attrKeyControllers: _attrKeys,
+                    attrValueControllers: _attrVals,
                   ),
-                  Text(
-                    context.l10n.listingCompareAtHelper,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.textHint,
-                      height: 1.35,
-                    ),
-                  ),
-                  if (showCompareWarn)
-                    Padding(
-                      padding: EdgeInsets.only(top: context.scaledPx(6)),
-                      child: Text(
-                        context.l10n.listingCompareAtWarning,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: context.isDark
-                              ? AppColors.warningLight
-                              : AppColors.warning,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  const Gap(AppSpacing.lg),
-                  ListingFormField(
-                    label: context.l10n.listingDescriptionLabel,
-                    controller: _description,
-                    hint: context.l10n.listingDescriptionHint,
-                    minLines: 4,
-                    maxLines: null,
-                    maxLength: 1000,
-                    errorText: err['description'],
-                    onChanged: (v) => notifier.updateField('description', v),
-                  ),
-                  const Gap(AppSpacing.x3l),
-                  _AccentSectionTitle(
-                    context.l10n.listingSectionCategoryDetails,
-                  ),
-                  const Gap(AppSpacing.lg),
-                  _PickerField(
-                    label: context.l10n.listingFormCategoryLabel,
-                    value: _categoryLabel(form.categoryId),
-                    valueIsPlaceholder: form.categoryId.isEmpty,
-                    errorText: err['category'],
-                    onTap: () => showListingCategoryPicker(
-                      context: context,
-                      title: context.l10n.listingFormCategoryPickerTitle,
-                      categories: ListingCategoriesData.categories,
-                      selectedId: form.categoryId.isEmpty
-                          ? null
-                          : form.categoryId,
-                      onSelected: (id) =>
-                          notifier.updateField('categoryId', id),
-                    ),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  if (form.categoryId.isNotEmpty) ...[
-                    _PickerField(
-                      label: context.l10n.listingFormSubcategoryLabel,
-                      value: _subcategoryLabel(
-                        form.categoryId,
-                        form.subcategoryId,
-                      ),
-                      valueIsPlaceholder: form.subcategoryId.isEmpty,
-                      errorText: err['subcategory'],
-                      onTap: () {
-                        final cat = ListingCategoriesData.categoryById(
-                          form.categoryId,
-                        );
-                        if (cat == null) {
-                          return;
-                        }
-                        showListingSubcategoryPicker(
-                          context: context,
-                          category: cat,
-                          selectedId: form.subcategoryId.isEmpty
-                              ? null
-                              : form.subcategoryId,
-                          onSelected: (id) =>
-                              notifier.updateField('subcategoryId', id),
-                        );
-                      },
-                    ),
-                    const Gap(AppSpacing.lg),
-                  ],
-                  ConditionSelector(
-                    options: ListingCategoriesData.conditions,
-                    selected: form.condition,
-                    errorText: err['condition'],
-                    optionLabel: (o) => listingLocalizedCondition(context, o),
-                    onChanged: (v) => notifier.updateField('condition', v),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  RawAutocomplete<String>(
-                    textEditingController: _brand,
-                    focusNode: _brandFocus,
-                    optionsBuilder: (tv) {
-                      return notifier.brandSuggestionsFor(tv.text);
-                    },
-                    onSelected: (s) {
-                      _brand.text = s;
-                      notifier.updateField('brand', s);
-                    },
-                    fieldViewBuilder: (context, c, fn, onFieldSubmitted) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.listingBrandOptional,
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: context.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                          SizedBox(height: context.scaledPx(6)),
-                          TextField(
-                            controller: c,
-                            focusNode: fn,
-                            onChanged: (v) => notifier.updateField('brand', v),
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: context.textPrimary),
-                            decoration: InputDecoration(
-                              hintText: context.l10n.listingBrandHint,
-                              hintStyle: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: context.textHint),
-                              filled: true,
-                              fillColor: context.surfaceVariantColor,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: context.scaledPx(
-                                  AppTypography.rem(0.875),
-                                ),
-                                vertical: context.scaledPx(
-                                  AppTypography.rem(0.875),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                    optionsViewBuilder: (context, onSelected, opts) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          color: context.surfaceColor,
-                          surfaceTintColor: Colors.transparent,
-                          elevation: 4,
-                          shadowColor: context.shadowColor,
-                          borderRadius: BorderRadius.circular(12),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: opts.length,
-                              itemBuilder: (context, i) {
-                                final o = opts.elementAt(i);
-                                return ListTile(
-                                  dense: true,
-                                  title: Text(
-                                    o,
-                                    style: Theme.of(context).textTheme.bodyLarge
-                                        ?.copyWith(color: context.textPrimary),
-                                  ),
-                                  onTap: () => onSelected(o),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const Gap(AppSpacing.x3l),
-                  _AccentSectionTitle(context.l10n.listingSectionStockShipping),
-                  const Gap(AppSpacing.lg),
-                  QuantityStepper(
-                    quantity: form.quantity,
-                    errorText: err['quantity'],
-                    onChanged: (q) => notifier.updateField('quantity', q),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  ListingFormField(
-                    label: context.l10n.listingFormLocationLabel,
-                    controller: _location,
-                    hint: context.l10n.listingFormLocationHint,
-                    prefix: const Icon(LucideIcons.mapPin, size: 22),
-                    errorText: err['location'],
-                    onChanged: (v) => notifier.updateField('location', v),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      context.l10n.listingShippingAvailable,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: context.textPrimary,
-                      ),
-                    ),
-                    value: form.shippingAvailable,
-                    onChanged: (v) =>
-                        notifier.updateField('shippingAvailable', v),
-                  ),
-                  if (form.shippingAvailable) ...[
-                    const Gap(AppSpacing.md),
-                    ListingFormField(
-                      label: context.l10n.listingShippingCostLabel,
-                      controller: _shippingCost,
-                      hint: '0.00',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      prefixText: '${notifier.currencyCode} ',
-                      errorText: err['shippingCost'],
-                      onChanged: (v) =>
-                          notifier.updateField('shippingCostInput', v),
-                    ),
-                  ],
-                  const Gap(AppSpacing.x3l),
-                  _AccentSectionTitle(
-                    context.l10n.listingSectionProductAttributes,
-                  ),
-                  Text(
-                    context.l10n.listingAttributesSubtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                      height: 1.35,
-                    ),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  AttributesSection(
-                    keyControllers: _attrKeys,
-                    valueControllers: _attrVals,
-                    onAdd: notifier.addAttribute,
-                    onRemove: notifier.removeAttribute,
-                    onKeyChanged: (i, v) => notifier.updateAttribute(i, key: v),
-                    onValueChanged: (i, v) =>
-                        notifier.updateAttribute(i, value: v),
-                  ),
-                  const Gap(48),
+                  const Gap(AppSpacing.x4l),
                 ],
               ),
             ),
@@ -571,6 +313,362 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       return context.l10n.listingSelectSubcategory;
     }
     return listingLocalizedSubcategoryName(context, catId, subId);
+  }
+}
+
+class _ListingPhotosBasicsSection extends StatelessWidget {
+  const _ListingPhotosBasicsSection({
+    required this.form,
+    required this.notifier,
+    required this.errors,
+    required this.openPhotoPicker,
+    required this.nameController,
+    required this.priceController,
+    required this.compareController,
+    required this.descriptionController,
+    required this.showCompareWarn,
+  });
+
+  final ListingFormState form;
+  final ListingFormNotifier notifier;
+  final Map<String, String?> errors;
+  final VoidCallback openPhotoPicker;
+  final TextEditingController nameController;
+  final TextEditingController priceController;
+  final TextEditingController compareController;
+  final TextEditingController descriptionController;
+  final bool showCompareWarn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PhotoUploadSection(
+          paths: form.photoPaths,
+          errorText: errors['photos'],
+          onOpenPicker: openPhotoPicker,
+          onRemove: notifier.removePhoto,
+          onReorder: notifier.reorderPhotos,
+        ),
+        const Gap(AppSpacing.x3l),
+        _AccentSectionTitle(context.l10n.listingSectionBasicInfo),
+        const Gap(AppSpacing.lg),
+        ListingFormField(
+          label: context.l10n.listingProductNameLabel,
+          controller: nameController,
+          hint: context.l10n.listingProductNameHint,
+          maxLength: 100,
+          errorText: errors['name'],
+          onChanged: (v) => notifier.updateField('name', v),
+        ),
+        const Gap(AppSpacing.lg),
+        ListingFormField(
+          label: context.l10n.listingPriceLabel,
+          controller: priceController,
+          hint: '0.00',
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          prefixText: '${notifier.currencyCode} ',
+          errorText: errors['price'],
+          onChanged: (v) => notifier.updateField('priceInput', v),
+        ),
+        const Gap(AppSpacing.lg),
+        Text(
+          context.l10n.listingCompareAtTitle,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        SizedBox(height: context.scaledPx(6)),
+        ListingFormField(
+          label: '',
+          controller: compareController,
+          hint: '0.00',
+          prefixText: '${notifier.currencyCode} ',
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onChanged: (v) => notifier.updateField('compareAtPriceInput', v),
+        ),
+        Text(
+          context.l10n.listingCompareAtHelper,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.textHint,
+                height: 1.35,
+              ),
+        ),
+        if (showCompareWarn)
+          Padding(
+            padding: EdgeInsets.only(top: context.scaledPx(6)),
+            child: Text(
+              context.l10n.listingCompareAtWarning,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: context.isDark
+                        ? AppColors.warningLight
+                        : AppColors.warning,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ),
+        const Gap(AppSpacing.lg),
+        ListingFormField(
+          label: context.l10n.listingDescriptionLabel,
+          controller: descriptionController,
+          hint: context.l10n.listingDescriptionHint,
+          minLines: 4,
+          maxLines: null,
+          maxLength: 1000,
+          errorText: errors['description'],
+          onChanged: (v) => notifier.updateField('description', v),
+        ),
+      ],
+    );
+  }
+}
+
+class _ListingCategoryBrandSection extends StatelessWidget {
+  const _ListingCategoryBrandSection({
+    required this.form,
+    required this.notifier,
+    required this.errors,
+    required this.brandController,
+    required this.brandFocusNode,
+    required this.categoryDisplay,
+    required this.subcategoryDisplay,
+  });
+
+  final ListingFormState form;
+  final ListingFormNotifier notifier;
+  final Map<String, String?> errors;
+  final TextEditingController brandController;
+  final FocusNode brandFocusNode;
+  final String categoryDisplay;
+  final String subcategoryDisplay;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Gap(AppSpacing.x3l),
+        _AccentSectionTitle(context.l10n.listingSectionCategoryDetails),
+        const Gap(AppSpacing.lg),
+        _PickerField(
+          label: context.l10n.listingFormCategoryLabel,
+          value: categoryDisplay,
+          valueIsPlaceholder: form.categoryId.isEmpty,
+          errorText: errors['category'],
+          onTap: () => showListingCategoryPicker(
+            context: context,
+            title: context.l10n.listingFormCategoryPickerTitle,
+            categories: ListingCategoriesData.categories,
+            selectedId:
+                form.categoryId.isEmpty ? null : form.categoryId,
+            onSelected: (id) => notifier.updateField('categoryId', id),
+          ),
+        ),
+        const Gap(AppSpacing.lg),
+        if (form.categoryId.isNotEmpty) ...[
+          _PickerField(
+            label: context.l10n.listingFormSubcategoryLabel,
+            value: subcategoryDisplay,
+            valueIsPlaceholder: form.subcategoryId.isEmpty,
+            errorText: errors['subcategory'],
+            onTap: () {
+              final cat =
+                  ListingCategoriesData.categoryById(form.categoryId);
+              if (cat == null) {
+                return;
+              }
+              showListingSubcategoryPicker(
+                context: context,
+                category: cat,
+                selectedId: form.subcategoryId.isEmpty
+                    ? null
+                    : form.subcategoryId,
+                onSelected: (id) => notifier.updateField('subcategoryId', id),
+              );
+            },
+          ),
+          const Gap(AppSpacing.lg),
+        ],
+        ConditionSelector(
+          options: ListingCategoriesData.conditions,
+          selected: form.condition,
+          errorText: errors['condition'],
+          optionLabel: (o) => listingLocalizedCondition(context, o),
+          onChanged: (v) => notifier.updateField('condition', v),
+        ),
+        const Gap(AppSpacing.lg),
+        RawAutocomplete<String>(
+          textEditingController: brandController,
+          focusNode: brandFocusNode,
+          optionsBuilder: (tv) => notifier.brandSuggestionsFor(tv.text),
+          onSelected: (s) {
+            brandController.text = s;
+            notifier.updateField('brand', s);
+          },
+          fieldViewBuilder: (context, c, fn, onFieldSubmitted) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.listingBrandOptional,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: context.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                SizedBox(height: context.scaledPx(6)),
+                TextField(
+                  controller: c,
+                  focusNode: fn,
+                  onChanged: (v) => notifier.updateField('brand', v),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: context.textPrimary,
+                      ),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.listingBrandHint,
+                    hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: context.textHint,
+                        ),
+                    filled: true,
+                    fillColor: context.surfaceVariantColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: context.scaledPx(AppTypography.rem(0.875)),
+                      vertical: context.scaledPx(AppTypography.rem(0.875)),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          optionsViewBuilder: (context, onSelected, opts) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                color: context.surfaceColor,
+                surfaceTintColor: AppColors.transparent,
+                elevation: 4,
+                shadowColor: context.shadowColor,
+                borderRadius: BorderRadius.circular(12),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: opts.length,
+                    itemBuilder: (context, i) {
+                      final o = opts.elementAt(i);
+                      return ListTile(
+                        dense: true,
+                        title: Text(
+                          o,
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: context.textPrimary),
+                        ),
+                        onTap: () => onSelected(o),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _ListingShippingAttributesSection extends StatelessWidget {
+  const _ListingShippingAttributesSection({
+    required this.form,
+    required this.notifier,
+    required this.errors,
+    required this.locationController,
+    required this.shippingCostController,
+    required this.attrKeyControllers,
+    required this.attrValueControllers,
+  });
+
+  final ListingFormState form;
+  final ListingFormNotifier notifier;
+  final Map<String, String?> errors;
+  final TextEditingController locationController;
+  final TextEditingController shippingCostController;
+  final List<TextEditingController> attrKeyControllers;
+  final List<TextEditingController> attrValueControllers;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Gap(AppSpacing.x3l),
+        _AccentSectionTitle(context.l10n.listingSectionStockShipping),
+        const Gap(AppSpacing.lg),
+        QuantityStepper(
+          quantity: form.quantity,
+          errorText: errors['quantity'],
+          onChanged: (q) => notifier.updateField('quantity', q),
+        ),
+        const Gap(AppSpacing.lg),
+        ListingFormField(
+          label: context.l10n.listingFormLocationLabel,
+          controller: locationController,
+          hint: context.l10n.listingFormLocationHint,
+          prefix: const Icon(LucideIcons.mapPin, size: 22),
+          errorText: errors['location'],
+          onChanged: (v) => notifier.updateField('location', v),
+        ),
+        const Gap(AppSpacing.lg),
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            context.l10n.listingShippingAvailable,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: context.textPrimary,
+                ),
+          ),
+          value: form.shippingAvailable,
+          onChanged: (v) => notifier.updateField('shippingAvailable', v),
+        ),
+        if (form.shippingAvailable) ...[
+          const Gap(AppSpacing.md),
+          ListingFormField(
+            label: context.l10n.listingShippingCostLabel,
+            controller: shippingCostController,
+            hint: '0.00',
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            prefixText: '${notifier.currencyCode} ',
+            errorText: errors['shippingCost'],
+            onChanged: (v) => notifier.updateField('shippingCostInput', v),
+          ),
+        ],
+        const Gap(AppSpacing.x3l),
+        _AccentSectionTitle(context.l10n.listingSectionProductAttributes),
+        Text(
+          context.l10n.listingAttributesSubtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+        ),
+        const Gap(AppSpacing.lg),
+        AttributesSection(
+          keyControllers: attrKeyControllers,
+          valueControllers: attrValueControllers,
+          onAdd: notifier.addAttribute,
+          onRemove: notifier.removeAttribute,
+          onKeyChanged: (i, v) => notifier.updateAttribute(i, key: v),
+          onValueChanged: (i, v) =>
+              notifier.updateAttribute(i, value: v),
+        ),
+      ],
+    );
   }
 }
 
@@ -640,43 +738,47 @@ class _PickerField extends StatelessWidget {
         Material(
           color: context.surfaceVariantColor,
           borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
-            splashColor: context.primaryColor.withValues(alpha: 0.08),
-            highlightColor: context.primaryColor.withValues(alpha: 0.06),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: context.surfaceVariantColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: hasError ? AppColors.error : context.textDisabled,
+          child: Semantics(
+            button: true,
+            label: '${label.isNotEmpty ? '$label · ' : ''}$value',
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              splashColor: context.primaryColor.withValues(alpha: 0.08),
+              highlightColor: context.primaryColor.withValues(alpha: 0.06),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: context.surfaceVariantColor,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: hasError ? AppColors.error : context.textDisabled,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: hasError ? AppColors.error : context.textDisabled,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: context.scaledPx(AppTypography.rem(0.875)),
+                    vertical: context.scaledPx(AppTypography.rem(0.875)),
+                  ),
+                  suffixIcon: Icon(
+                    LucideIcons.chevronDown,
+                    color: context.iconSecondary,
+                    size: 22,
                   ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: hasError ? AppColors.error : context.textDisabled,
+                child: Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: valueIsPlaceholder
+                        ? context.textHint
+                        : context.textPrimary,
                   ),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: context.scaledPx(AppTypography.rem(0.875)),
-                  vertical: context.scaledPx(AppTypography.rem(0.875)),
-                ),
-                suffixIcon: Icon(
-                  LucideIcons.chevronDown,
-                  color: context.iconSecondary,
-                  size: 22,
-                ),
-              ),
-              child: Text(
-                value,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: valueIsPlaceholder
-                      ? context.textHint
-                      : context.textPrimary,
                 ),
               ),
             ),
@@ -718,7 +820,7 @@ class _PublishBar extends StatelessWidget {
     final gradient = LinearGradient(
       colors: enabled
           ? [AppColors.primary, AppColors.accent]
-          : [Colors.grey.shade400, Colors.grey.shade500],
+          : [AppColors.materialGrey400, AppColors.materialGrey500],
     );
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -738,7 +840,7 @@ class _PublishBar extends StatelessWidget {
         width: double.infinity,
         height: 52,
         child: Material(
-          color: Colors.transparent,
+          color: AppColors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: enabled && !loading ? onPressed : null,
@@ -749,13 +851,13 @@ class _PublishBar extends StatelessWidget {
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     )
                   : Text(
                       publishLabel,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: AppTypography.rem(1),
                       ),

@@ -2709,6 +2709,97 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidLongitude => 'Invalid longitude value';
 
   @override
+  String get validationEmailOrPhoneRequired => 'Email or phone is required';
+
+  @override
+  String get validationLoginPasswordRequired => 'Password is required';
+
+  @override
+  String get validationRegisterRoleRequired =>
+      'Select how you want to use xStore';
+
+  @override
+  String get validationFullNameInvalid =>
+      'Enter your full name (letters only, min 3 chars)';
+
+  @override
+  String get validationEmailInvalid => 'Enter a valid email';
+
+  @override
+  String get validationRegisterPhoneInvalid => 'Enter a valid phone number';
+
+  @override
+  String get validationCityRequired => 'City is required';
+
+  @override
+  String get validationAgeMinimum18 => 'You must be at least 18 years old';
+
+  @override
+  String get validationPasswordMinEight =>
+      'Password must be at least 8 characters';
+
+  @override
+  String get validationPasswordsMismatch => 'Passwords do not match';
+
+  @override
+  String get validationTermsRequired => 'Please accept the terms to continue';
+
+  @override
+  String get validationStoreNameRequired => 'Store name is required';
+
+  @override
+  String get validationStoreCategoryRequired => 'Pick a category';
+
+  @override
+  String get validationStoreDescriptionShort => 'Describe your store';
+
+  @override
+  String get validationStoreDescriptionMax => 'Max 300 characters';
+
+  @override
+  String get validationStoreCityWilayaRequired =>
+      'City and wilaya are required';
+
+  @override
+  String get listingValidationPhotosRequired => 'Add at least one photo';
+
+  @override
+  String get listingValidationNameRequired => 'Product name is required';
+
+  @override
+  String get listingValidationNameMax => 'Max 100 characters';
+
+  @override
+  String get listingValidationPriceInvalid => 'Enter a valid price';
+
+  @override
+  String get listingValidationDescriptionRequired => 'Description is required';
+
+  @override
+  String get listingValidationDescriptionMax => 'Max 1000 characters';
+
+  @override
+  String get listingValidationCategoryRequired => 'Select a category';
+
+  @override
+  String get listingValidationSubcategoryRequired => 'Select a subcategory';
+
+  @override
+  String get listingValidationConditionRequired => 'Select a condition';
+
+  @override
+  String get listingValidationQuantityMin => 'Minimum quantity is 1';
+
+  @override
+  String get listingValidationLocationRequired => 'Location is required';
+
+  @override
+  String get listingValidationShippingCost => 'Enter shipping cost';
+
+  @override
+  String get listingValidationFixFields => 'Please fix the highlighted fields';
+
+  @override
   String get egypt => 'Egypt';
 
   @override

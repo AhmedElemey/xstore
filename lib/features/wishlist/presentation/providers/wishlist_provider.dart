@@ -153,7 +153,7 @@ class Wishlist extends _$Wishlist {
     final snapIds = Set<String>.from(state.wishlistedListingIds);
     WishlistItemEntity stub;
     try {
-      stub = _repo.stubFromListingId(listingId);
+      stub = await _repo.stubFromListingId(listingId);
     } catch (_) {
       return;
     }

@@ -7,7 +7,7 @@ part of 'store_hours_provider.dart';
 // **************************************************************************
 
 String _$storeHoursDataSourceHash() =>
-    r'bf56d66c1a39c193be6f5bda931340c8aa506307';
+    r'3a9f7a50a3dd770754ac091b74206db5d055ec6b';
 
 /// See also [storeHoursDataSource].
 @ProviderFor(storeHoursDataSource)

@@ -4,6 +4,13 @@ abstract final class AppSpacing {
   static const md = 12.0;
   static const lg = 16.0;
 
+  /// In-between values used frequently in Gap / SizedBox layouts.
+  static const spacing6 = 6.0;
+  static const spacing10 = 10.0;
+  static const spacing18 = 18.0;
+  static const spacing22 = 22.0;
+  static const spacing28 = 28.0;
+
   /// [InputDecoration] content insets at text-scale 1.0 (`0.875rem` / `0.75rem`).
   static const inputContentPaddingH = 14.0;
   static const inputContentPaddingV = 12.0;

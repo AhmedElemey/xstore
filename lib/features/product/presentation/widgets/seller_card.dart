@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
@@ -62,9 +63,8 @@ class SellerCard extends ConsumerWidget {
                         children: [
                           Text(
                             seller.name,
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: AppTypography.titleSmall.copyWith(
                               fontWeight: FontWeight.w700,
-                              fontSize: 18
                             ),
                           ),
                           const Gap(AppSpacing.xs),

@@ -28,7 +28,7 @@ class DayScheduleTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isOpen = schedule.isOpen;
     final bg = isOpen
-        ? (context.isDark ?  AppColors.primary.withValues(alpha: 0.12) : const Color(0xFFF5F3FF))
+        ? (context.isDark ?  AppColors.primary.withValues(alpha: 0.12) : AppColors.indigoTint50)
         : context.surfaceColor;
     final border = isOpen ? AppColors.primary : context.borderColor;
     return AnimatedSize(

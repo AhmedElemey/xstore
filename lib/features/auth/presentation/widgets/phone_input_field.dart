@@ -46,11 +46,11 @@ class PhoneInputField extends StatelessWidget {
         SizedBox(
           height: 52,
           child: Material(
-            color: Colors.transparent,
+            color: AppColors.transparent,
             borderRadius: BorderRadius.circular(12),
             child: Container(
               decoration: BoxDecoration(
-                 color: Colors.transparent,
+                 color: AppColors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: errorText != null ? AppColors.error : context.borderColor,
@@ -80,7 +80,7 @@ class PhoneInputField extends StatelessWidget {
                 ],
                 style: AppTypography.bodyLarge.copyWith(color: context.textPrimary),
                 decoration: InputDecoration(
-                  fillColor:  Colors.transparent,
+                  fillColor:  AppColors.transparent,
                   hintText: '01012345678',
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(right: 8),
@@ -114,7 +114,7 @@ class PhoneInputField extends StatelessWidget {
                   disabledBorder: InputBorder.none,
                   errorBorder: InputBorder.none,
                   focusedErrorBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.inputContentPaddingH),
                   isDense: true,
                 ),
               ),

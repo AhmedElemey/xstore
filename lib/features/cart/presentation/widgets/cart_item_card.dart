@@ -114,10 +114,9 @@ class CartItemCard extends StatelessWidget {
                               ),
                               child: Text(
                                 context.l10n.cartUnavailableBadge,
-                                style: AppTypography.labelSmall.copyWith(
+                                style: AppTypography.titleSmall.copyWith(
                                   color: AppColors.white,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 18
                                 ),
                               ),
                             ),
@@ -134,12 +133,11 @@ class CartItemCard extends StatelessWidget {
                           item.listingName,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleMedium.copyWith(
+                          style: AppTypography.titleSmall.copyWith(
                             fontWeight: FontWeight.w700,
                             color: available
                                 ? context.textPrimary
                                 : context.textDisabled,
-                            fontSize: 18
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -154,12 +152,11 @@ class CartItemCard extends StatelessWidget {
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           Formatters.dzdWhole(item.price),
-                          style: AppTypography.titleMedium.copyWith(
+                          style: AppTypography.titleSmall.copyWith(
                             color: available
                                 ? AppColors.primary
                                 : context.textDisabled,
                             fontWeight: FontWeight.w800,
-                            fontSize: 18
                           ),
                         ),
                         if (compare != null && compare > item.price)

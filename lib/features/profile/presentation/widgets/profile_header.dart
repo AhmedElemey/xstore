@@ -78,7 +78,6 @@ class ProfileHeader extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.titleMedium.copyWith(
                               fontWeight: FontWeight.w700,
-                              fontSize: 20,
                             ),
                           ),
                         ),
@@ -137,9 +136,9 @@ class ProfileHeader extends StatelessWidget {
                 ),
                 child: Text(
                   context.l10n.editProfile,
-                  style: AppTypography.labelLarge.copyWith(
+                  style: AppTypography.body12.copyWith(
                     color: AppColors.primary,
-                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

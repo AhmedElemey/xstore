@@ -65,10 +65,9 @@ class WishlistPriceDropBanner extends ConsumerWidget {
                       children: [
                         Text(
                           context.l10n.wishlistPriceDropBanner(dropCount),
-                          style: AppTypography.titleMedium.copyWith(
+                          style: AppTypography.bodyLarge.copyWith(
                             color: AppColors.white,
                             fontWeight: FontWeight.w700,
-                            fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),

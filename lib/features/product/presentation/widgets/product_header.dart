@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
@@ -50,9 +51,8 @@ class ProductHeader extends StatelessWidget {
             listing.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleLarge?.copyWith(
+            style: AppTypography.titleSmall.copyWith(
               fontWeight: FontWeight.w700,
-              fontSize: 18
             ),
           ),
           const Gap(AppSpacing.md),
@@ -63,19 +63,17 @@ class ProductHeader extends StatelessWidget {
             children: [
               Text(
                 Formatters.currency(price),
-                style: theme.textTheme.headlineMedium?.copyWith(
+                style: AppTypography.titleSmall.copyWith(
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.primary,
-                  fontSize: 18
                 ),
               ),
               if (hasCompare) ...[
                 Text(
                   Formatters.currency(compareAtPrice!),
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: AppTypography.titleSmall.copyWith(
                     decoration: TextDecoration.lineThrough,
                     color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 18
                   ),
                 ),
                 Container(
@@ -101,7 +99,7 @@ class ProductHeader extends StatelessWidget {
           ),
           const Gap(AppSpacing.md),
           Material(
-            color: Colors.transparent,
+            color: AppColors.transparent,
             child: InkWell(
               onTap: onTapReviews,
               borderRadius: BorderRadius.circular(AppSpacing.sm),
@@ -117,9 +115,8 @@ class ProductHeader extends StatelessWidget {
                     const Gap(AppSpacing.xs),
                     Text(
                       '$ratingLabel${context.l10n.reviewsDotSeparator}$reviewCountLabel${context.l10n.reviewsSuffix}',
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: AppTypography.titleSmall.copyWith(
                         fontWeight: FontWeight.w600,
-                        fontSize: 18
                       ),
                     ),
                     Icon(

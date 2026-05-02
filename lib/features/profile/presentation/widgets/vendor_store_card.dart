@@ -62,8 +62,7 @@ class VendorStoreCard extends ConsumerWidget {
                   children: [
                     Text(
                       storeName,
-                      style: AppTypography.titleMedium.copyWith(
-                        fontSize: 16,
+                      style: AppTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -93,7 +92,7 @@ class VendorStoreCard extends ConsumerWidget {
                 ),
                 child: Text(
                   context.l10n.manageStore,
-                  style: AppTypography.labelLarge.copyWith(fontSize: 11),
+                  style: AppTypography.labelSmall,
                 ),
               ),
             ],

@@ -6,7 +6,24 @@ part of 'product_dependencies.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$productRepositoryHash() => r'9d5f9ba0d15ff7f9cafc9843c63dd46de00b0e38';
+String _$productRemoteDataSourceHash() =>
+    r'efed2f764762b22fe646d5707e6bdcf0d098fdfd';
+
+/// See also [productRemoteDataSource].
+@ProviderFor(productRemoteDataSource)
+final productRemoteDataSourceProvider =
+    Provider<ProductRemoteDataSource>.internal(
+  productRemoteDataSource,
+  name: r'productRemoteDataSourceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$productRemoteDataSourceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef ProductRemoteDataSourceRef = ProviderRef<ProductRemoteDataSource>;
+String _$productRepositoryHash() => r'62fc081d8b70504bd76340f4df92e2f395c025fa';
 
 /// See also [productRepository].
 @ProviderFor(productRepository)

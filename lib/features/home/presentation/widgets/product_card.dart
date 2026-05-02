@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
@@ -163,9 +164,7 @@ class _Footer extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall!.copyWith(
-              fontSize: 14
-            ),
+            style: AppTypography.bodyMedium,
           ),
           const Gap(AppSpacing.xs),
           Row(
@@ -175,9 +174,9 @@ class _Footer extends StatelessWidget {
                   textDirection: TextDirection.ltr,
                   child: Text(
                     context.formatCurrency(price),
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: AppColors.primary,
-                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

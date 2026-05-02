@@ -58,7 +58,9 @@ class OrderCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                      style: AppTypography.titleMedium.copyWith(fontSize: 16),
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   OrderStatusBadge(status: order.status, compact: true),

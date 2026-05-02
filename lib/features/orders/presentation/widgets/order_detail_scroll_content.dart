@@ -169,9 +169,8 @@ class _StatusBanner extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             orderStatusLabel(context, order.status),
-            style: AppTypography.titleMedium.copyWith(
+            style: AppTypography.titleCompact.copyWith(
               color: AppColors.white,
-              fontSize: 22,
               fontWeight: FontWeight.w700,
             ),
           ),

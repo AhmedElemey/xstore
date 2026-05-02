@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
@@ -42,7 +43,7 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
             child: Transform.translate(
               offset: const Offset(0, -18),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 decoration: BoxDecoration(
                   color: context.surfaceColor,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -58,19 +59,19 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
                           ? const Icon(Icons.person, size: 38)
                           : null,
                     ),
-                    const Gap(10),
+                    const Gap(AppSpacing.spacing10),
                     Text(
                       'Welcome, ${pending?.displayName ?? 'there'}! 👋',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const Gap(4),
+                    const Gap(AppSpacing.xs),
                     Text(
                       'One last step — how will you use xStore?',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: context.textSecondary),
                     ),
-                    const Gap(18),
+                    const Gap(AppSpacing.spacing18),
                     RoleSelectorCard(
                       title: "I'm a Buyer",
                       subtitle: 'Discover and buy products from verified sellers',
@@ -97,7 +98,7 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
                         'Manage orders & inventory',
                       ],
                     ),
-                    const Gap(12),
+                    const Gap(AppSpacing.md),
                     AuthButton(
                       label: 'Continue',
                       isLoading: social.isAnyLoading,

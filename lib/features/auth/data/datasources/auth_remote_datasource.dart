@@ -49,9 +49,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       return UserModel.fromJson(data);
     } on DioException catch (e) {
-      if (_isOffline(e)) {
-        return _demoUser(email: identifier);
-      }
       throw _mapDio(e);
     }
   }
@@ -89,22 +86,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       return UserModel.fromJson(data);
     } on DioException catch (e) {
-      if (_isOffline(e)) {
-        return userModelFromRegisterParams(params);
-      }
       throw _mapDio(e);
     }
-  }
-
-  bool _isOffline(DioException e) {
-    return e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout;
-  }
-
-  UserModel _demoUser({required String email}) {
-    return mockLoginIsVendor(email)
-        ? mockVendorUserModel(email: email)
-        : mockConsumerUserModel(email: email);
   }
 
   AppException _mapDio(DioException e) {
@@ -113,7 +96,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.connectionError:
-        return NetworkException(e.message);
+        return const NetworkException(
+          'Network unavailable. Please check your connection and try again.',
+        );
       case DioExceptionType.badResponse:
         final code = e.response?.statusCode;
         if (code == 401 || code == 403) {

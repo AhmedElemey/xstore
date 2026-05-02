@@ -54,8 +54,29 @@ abstract final class AppColors {
   static const textSecondary = lightTextSecondary;
   static const textDisabled = lightTextDisabled;
   static const white = Color(0xFFFFFFFF);
+  static const black = Color(0xFF000000);
   static const transparent = Color(0x00000000);
   static const profileHeaderGradientEnd = primaryDark;
+
+  /// Material `Colors.grey` shades (preserve exact hues when swapping off `material.dart`).
+  static const materialGrey400 = Color(0xFFBDBDBD);
+  static const materialGrey500 = Color(0xFF9E9E9E);
+  static const materialGrey600 = Color(0xFF757575);
+
+  /// `Colors.green.shade600`.
+  static const materialGreen600 = Color(0xFF43A047);
+
+  /// Google sign-in border color.
+  static const googleOAuthOutlineGrey = Color(0xFFDADCE0);
+
+  /// Facebook brand primary.
+  static const facebookBrandBlue = Color(0xFF1877F2);
+
+  /// Skeleton / shimmer neutral highlight (~gray-50).
+  static const neutral50 = Color(0xFFF9FAFB);
+
+  /// Indigo-50 surface tint (listing / schedule highlights).
+  static const indigoTint50 = Color(0xFFF5F3FF);
 
   /// Order status badges (aligned with design spec).
   static const orderStatusPending = Color(0xFFF59E0B);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -96,7 +97,12 @@ class _StepperIcon extends StatelessWidget {
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                HapticFeedback.lightImpact();
+                onTap!();
+              },
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: Icon(

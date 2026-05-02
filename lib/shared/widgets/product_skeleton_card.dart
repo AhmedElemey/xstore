@@ -13,10 +13,10 @@ class ProductSkeletonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = context.isDark
         ? AppColors.darkSurfaceVariant
-        : const Color(0xFFE5E7EB);
+        : AppColors.lightBorder;
     final highlight = context.isDark
         ? AppColors.darkSurfaceElevated
-        : const Color(0xFFF9FAFB);
+        : AppColors.neutral50;
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,

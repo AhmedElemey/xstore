@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
@@ -56,6 +57,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   OrdersRemoteDataSourceImpl(this._dio);
 
   final Dio _dio;
+  static const _ordersPath = '/orders';
 
   static List<OrderModel>? _consumerCache;
   static List<OrderModel>? _vendorCache;
@@ -402,8 +404,19 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           _consumerOrders.where((e) => e.consumerId == consumerId).toList();
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
-    final _ = _dio;
-    throw UnimplementedError();
+    try {
+      final response = await _dio.get<List<dynamic>>(
+        '$_ordersPath/consumer/$consumerId',
+        queryParameters: {'page': page, 'pageSize': pageSize},
+      );
+      final list = response.data ?? const [];
+      return list
+          .whereType<Map>()
+          .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
+          .toList();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to fetch consumer orders');
+    }
   }
 
   @override
@@ -416,8 +429,19 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       final mine = _vendorOrders.where((e) => e.vendorId == vendorId).toList();
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
-    final _ = _dio;
-    throw UnimplementedError();
+    try {
+      final response = await _dio.get<List<dynamic>>(
+        '$_ordersPath/vendor/$vendorId',
+        queryParameters: {'page': page, 'pageSize': pageSize},
+      );
+      final list = response.data ?? const [];
+      return list
+          .whereType<Map>()
+          .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
+          .toList();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to fetch vendor orders');
+    }
   }
 
   @override
@@ -431,7 +455,19 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       }
       return MockConfig.simulate(null);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$_ordersPath/$orderId',
+      );
+      final data = response.data;
+      if (data == null) return null;
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      throw ServerException(e.message ?? 'Failed to fetch order');
+    }
   }
 
   @override
@@ -464,7 +500,24 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ),
       );
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$_ordersPath/vendor/$vendorId/stats',
+      );
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException('Empty vendor order stats');
+      }
+      return OrderStatsEntity(
+        pendingCount: (data['pendingCount'] as num?)?.toInt() ?? 0,
+        activeCount: (data['activeCount'] as num?)?.toInt() ?? 0,
+        monthCount: (data['monthCount'] as num?)?.toInt() ?? 0,
+        totalCount: (data['totalCount'] as num?)?.toInt() ?? 0,
+        totalRevenue: (data['totalRevenue'] as num?)?.toDouble() ?? 0,
+      );
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to fetch vendor order stats');
+    }
   }
 
   void _replace(OrderModel next) {
@@ -498,7 +551,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_ordersPath/$orderId/cancel',
+        data: {'reason': reason, 'isVendorSession': isVendorSession},
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to cancel order');
+    }
   }
 
   @override
@@ -515,7 +578,16 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_ordersPath/$orderId/confirm',
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to confirm order');
+    }
   }
 
   @override
@@ -536,7 +608,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_ordersPath/$orderId/reject',
+        data: {'reason': reason},
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to reject order');
+    }
   }
 
   @override
@@ -552,7 +634,16 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_ordersPath/$orderId/processing',
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to mark order processing');
+    }
   }
 
   @override
@@ -579,7 +670,21 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_ordersPath/$orderId/shipped',
+        data: {
+          'trackingNumber': shippingInfo.trackingNumber,
+          'courierName': shippingInfo.courierName,
+          'estimatedDelivery': shippingInfo.estimatedDelivery?.toIso8601String(),
+        },
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to mark order shipped');
+    }
   }
 
   @override
@@ -596,7 +701,16 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    throw UnimplementedError();
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '$_ordersPath/$orderId/delivered',
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to mark order delivered');
+    }
   }
 
   @override
@@ -606,6 +720,153 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _consumerCache = [order, ..._consumerOrders];
       return;
     }
-    throw UnimplementedError();
+    try {
+      await _dio.post<void>(
+        '$_ordersPath/consumer/${order.consumerId}',
+        data: _orderToApiMap(order),
+      );
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to register placed order');
+    }
   }
+
+  OrderModel _orderFromApiMap(Map<String, dynamic> data) {
+    final items = (data['items'] as List<dynamic>? ?? const [])
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+    final address =
+        Map<String, dynamic>.from((data['deliveryAddress'] as Map?) ?? const {});
+    final statusRaw = (data['status'] ?? '').toString().toLowerCase();
+    final paymentRaw = (data['paymentMethod'] ?? '').toString().toLowerCase();
+    return OrderModel(
+      id: (data['id'] ?? '').toString(),
+      consumerId: (data['consumerId'] ?? '').toString(),
+      consumerName: (data['consumerName'] ?? '').toString(),
+      consumerPhone: (data['consumerPhone'] ?? '').toString(),
+      consumerAvatar: (data['consumerAvatar'] ?? '').toString(),
+      vendorId: (data['vendorId'] ?? '').toString(),
+      vendorName: (data['vendorName'] ?? '').toString(),
+      vendorStoreName: (data['vendorStoreName'] ?? '').toString(),
+      vendorAvatar: (data['vendorAvatar'] ?? '').toString(),
+      vendorRating: (data['vendorRating'] as num?)?.toDouble() ?? 4.8,
+      items: items
+          .map(
+            (e) => OrderItemModel(
+              id: (e['id'] ?? '').toString(),
+              listingId: (e['listingId'] ?? '').toString(),
+              listingName: (e['listingName'] ?? '').toString(),
+              listingImage: (e['listingImage'] ?? '').toString(),
+              category: (e['category'] ?? '').toString(),
+              condition: (e['condition'] ?? '').toString(),
+              price: (e['price'] as num?)?.toDouble() ?? 0,
+              quantity: (e['quantity'] as num?)?.toInt() ?? 1,
+              total: (e['total'] as num?)?.toDouble() ?? 0,
+            ),
+          )
+          .toList(),
+      status: switch (statusRaw) {
+        'confirmed' => OrderStatus.confirmed,
+        'processing' => OrderStatus.processing,
+        'shipped' => OrderStatus.shipped,
+        'delivered' => OrderStatus.delivered,
+        'cancelled' => OrderStatus.cancelled,
+        'refunded' => OrderStatus.refunded,
+        _ => OrderStatus.pending,
+      },
+      paymentMethod: switch (paymentRaw) {
+        'cibcard' => PaymentMethod.cibCard,
+        'dahabicard' => PaymentMethod.dahabiCard,
+        'baridimob' => PaymentMethod.baridimob,
+        _ => PaymentMethod.cashOnDelivery,
+      },
+      isPaid: data['isPaid'] == true,
+      deliveryAddress: OrderAddressModel(
+        fullName: (address['fullName'] ?? '').toString(),
+        phone: (address['phone'] ?? '').toString(),
+        street: (address['street'] ?? '').toString(),
+        city: (address['city'] ?? '').toString(),
+        wilaya: (address['wilaya'] ?? '').toString(),
+        postalCode: address['postalCode'] as String?,
+        isDefault: address['isDefault'] == true,
+      ),
+      subtotal: (data['subtotal'] as num?)?.toDouble() ?? 0,
+      shippingCost: (data['shippingCost'] as num?)?.toDouble() ?? 0,
+      discount: (data['discount'] as num?)?.toDouble() ?? 0,
+      total: (data['total'] as num?)?.toDouble() ?? 0,
+      trackingNumber: data['trackingNumber'] as String?,
+      courierName: data['courierName'] as String?,
+      trackingLocation: data['trackingLocation'] as String?,
+      estimatedDelivery: DateTime.tryParse(
+        (data['estimatedDelivery'] ?? '').toString(),
+      ),
+      cancelReason: data['cancelReason'] as String?,
+      notes: data['notes'] as String?,
+      createdAt:
+          DateTime.tryParse((data['createdAt'] ?? '').toString()) ?? DateTime.now(),
+      updatedAt:
+          DateTime.tryParse((data['updatedAt'] ?? '').toString()) ?? DateTime.now(),
+      confirmedAt:
+          DateTime.tryParse((data['confirmedAt'] ?? '').toString()),
+      shippedAt: DateTime.tryParse((data['shippedAt'] ?? '').toString()),
+      deliveredAt: DateTime.tryParse((data['deliveredAt'] ?? '').toString()),
+      cancelledAt: DateTime.tryParse((data['cancelledAt'] ?? '').toString()),
+    );
+  }
+
+  Map<String, dynamic> _orderToApiMap(OrderModel order) => {
+        'id': order.id,
+        'consumerId': order.consumerId,
+        'consumerName': order.consumerName,
+        'consumerPhone': order.consumerPhone,
+        'consumerAvatar': order.consumerAvatar,
+        'vendorId': order.vendorId,
+        'vendorName': order.vendorName,
+        'vendorStoreName': order.vendorStoreName,
+        'vendorAvatar': order.vendorAvatar,
+        'vendorRating': order.vendorRating,
+        'items': order.items
+            .map(
+              (e) => {
+                'id': e.id,
+                'listingId': e.listingId,
+                'listingName': e.listingName,
+                'listingImage': e.listingImage,
+                'category': e.category,
+                'condition': e.condition,
+                'price': e.price,
+                'quantity': e.quantity,
+                'total': e.total,
+              },
+            )
+            .toList(),
+        'status': order.status.name,
+        'paymentMethod': order.paymentMethod.name,
+        'isPaid': order.isPaid,
+        'deliveryAddress': {
+          'fullName': order.deliveryAddress.fullName,
+          'phone': order.deliveryAddress.phone,
+          'street': order.deliveryAddress.street,
+          'city': order.deliveryAddress.city,
+          'wilaya': order.deliveryAddress.wilaya,
+          'postalCode': order.deliveryAddress.postalCode,
+          'isDefault': order.deliveryAddress.isDefault,
+        },
+        'subtotal': order.subtotal,
+        'shippingCost': order.shippingCost,
+        'discount': order.discount,
+        'total': order.total,
+        'trackingNumber': order.trackingNumber,
+        'courierName': order.courierName,
+        'trackingLocation': order.trackingLocation,
+        'estimatedDelivery': order.estimatedDelivery?.toIso8601String(),
+        'cancelReason': order.cancelReason,
+        'notes': order.notes,
+        'createdAt': order.createdAt.toIso8601String(),
+        'updatedAt': order.updatedAt.toIso8601String(),
+        'confirmedAt': order.confirmedAt?.toIso8601String(),
+        'shippedAt': order.shippedAt?.toIso8601String(),
+        'deliveredAt': order.deliveredAt?.toIso8601String(),
+        'cancelledAt': order.cancelledAt?.toIso8601String(),
+      };
 }

@@ -5288,6 +5288,180 @@ abstract class AppLocalizations {
   /// **'Invalid longitude value'**
   String get invalidLongitude;
 
+  /// No description provided for @validationEmailOrPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or phone is required'**
+  String get validationEmailOrPhoneRequired;
+
+  /// No description provided for @validationLoginPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get validationLoginPasswordRequired;
+
+  /// No description provided for @validationRegisterRoleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how you want to use xStore'**
+  String get validationRegisterRoleRequired;
+
+  /// No description provided for @validationFullNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name (letters only, min 3 chars)'**
+  String get validationFullNameInvalid;
+
+  /// No description provided for @validationEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get validationEmailInvalid;
+
+  /// No description provided for @validationRegisterPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get validationRegisterPhoneInvalid;
+
+  /// No description provided for @validationCityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'City is required'**
+  String get validationCityRequired;
+
+  /// No description provided for @validationAgeMinimum18.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 18 years old'**
+  String get validationAgeMinimum18;
+
+  /// No description provided for @validationPasswordMinEight.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get validationPasswordMinEight;
+
+  /// No description provided for @validationPasswordsMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validationPasswordsMismatch;
+
+  /// No description provided for @validationTermsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the terms to continue'**
+  String get validationTermsRequired;
+
+  /// No description provided for @validationStoreNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Store name is required'**
+  String get validationStoreNameRequired;
+
+  /// No description provided for @validationStoreCategoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category'**
+  String get validationStoreCategoryRequired;
+
+  /// No description provided for @validationStoreDescriptionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your store'**
+  String get validationStoreDescriptionShort;
+
+  /// No description provided for @validationStoreDescriptionMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 300 characters'**
+  String get validationStoreDescriptionMax;
+
+  /// No description provided for @validationStoreCityWilayaRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'City and wilaya are required'**
+  String get validationStoreCityWilayaRequired;
+
+  /// No description provided for @listingValidationPhotosRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one photo'**
+  String get listingValidationPhotosRequired;
+
+  /// No description provided for @listingValidationNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Product name is required'**
+  String get listingValidationNameRequired;
+
+  /// No description provided for @listingValidationNameMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 100 characters'**
+  String get listingValidationNameMax;
+
+  /// No description provided for @listingValidationPriceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price'**
+  String get listingValidationPriceInvalid;
+
+  /// No description provided for @listingValidationDescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Description is required'**
+  String get listingValidationDescriptionRequired;
+
+  /// No description provided for @listingValidationDescriptionMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 1000 characters'**
+  String get listingValidationDescriptionMax;
+
+  /// No description provided for @listingValidationCategoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category'**
+  String get listingValidationCategoryRequired;
+
+  /// No description provided for @listingValidationSubcategoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a subcategory'**
+  String get listingValidationSubcategoryRequired;
+
+  /// No description provided for @listingValidationConditionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a condition'**
+  String get listingValidationConditionRequired;
+
+  /// No description provided for @listingValidationQuantityMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum quantity is 1'**
+  String get listingValidationQuantityMin;
+
+  /// No description provided for @listingValidationLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is required'**
+  String get listingValidationLocationRequired;
+
+  /// No description provided for @listingValidationShippingCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter shipping cost'**
+  String get listingValidationShippingCost;
+
+  /// No description provided for @listingValidationFixFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fix the highlighted fields'**
+  String get listingValidationFixFields;
+
   /// No description provided for @egypt.
   ///
   /// In en, this message translates to:

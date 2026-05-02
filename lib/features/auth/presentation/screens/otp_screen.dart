@@ -78,11 +78,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                         ref.read(phoneAuthProvider.notifier).reset();
                         context.pop();
                       },
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back, color: AppColors.white),
                     ),
                   ),
                   const Spacer(),
-                  const Icon(LucideIcons.smartphone, color: Colors.white, size: 80),
+                  const Icon(LucideIcons.smartphone, color: AppColors.white, size: 80),
                   const Spacer(),
                 ],
               ),
@@ -184,7 +184,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                             style: AppTypography.bodySmall.copyWith(color: context.textSecondary),
                           ),
                           TextButton(
-                            onPressed: () => ref.read(phoneAuthProvider.notifier).resendOtp(),
+                            onPressed: () =>
+                                ref.read(phoneAuthProvider.notifier).resendOtp(context.l10n),
                             child: Text(context.l10n.resendCode),
                           ),
                         ],

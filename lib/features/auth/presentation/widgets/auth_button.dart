@@ -53,13 +53,13 @@ class AuthButton extends StatelessWidget {
                     width: 26,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   )
                 : Text(
                     label,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: AppTypography.rem(1),
                       fontWeight: FontWeight.w700,
                     ),

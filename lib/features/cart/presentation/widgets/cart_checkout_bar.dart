@@ -82,10 +82,9 @@ class CartCheckoutBar extends ConsumerWidget {
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  style: AppTypography.titleMedium.copyWith(
+                  style: AppTypography.bodyLarge.copyWith(
                     color: AppColors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 16
                   ),
                 ),
               ),

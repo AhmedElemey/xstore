@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
@@ -226,14 +228,9 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     return buf.toString();
   }
 
-  double? _parseMoney(String input) {
-    final n = double.tryParse(input.replaceAll(',', ''));
-    return n;
-  }
-
   bool get showCompareAtWarning {
-    final p = _parseMoney(state.priceInput);
-    final c = _parseMoney(state.compareAtPriceInput);
+    final p = Validators.parseMoneyInput(state.priceInput);
+    final c = Validators.parseMoneyInput(state.compareAtPriceInput);
     if (p == null || c == null) {
       return false;
     }
@@ -283,75 +280,39 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     return n;
   }
 
-  Map<String, String> _collectErrors() {
-    final err = <String, String>{};
-
-    if (state.photoPaths.isEmpty) {
-      err['photos'] = 'Add at least one photo';
-    }
-    if (state.name.trim().isEmpty) {
-      err['name'] = 'Product name is required';
-    } else if (state.name.trim().length > 100) {
-      err['name'] = 'Max 100 characters';
-    }
-
-    final price = _parseMoney(state.priceInput);
-    if (price == null || price <= 0) {
-      err['price'] = 'Enter a valid price';
-    }
-
-    if (state.description.trim().isEmpty) {
-      err['description'] = 'Description is required';
-    } else if (state.description.trim().length > 1000) {
-      err['description'] = 'Max 1000 characters';
-    }
-
-    if (state.categoryId.isEmpty) {
-      err['category'] = 'Select a category';
-    }
-    if (state.subcategoryId.isEmpty && state.categoryId.isNotEmpty) {
-      err['subcategory'] = 'Select a subcategory';
-    }
-    if (state.condition.isEmpty) {
-      err['condition'] = 'Select a condition';
-    }
-
-    if (state.quantity < 1) {
-      err['quantity'] = 'Minimum quantity is 1';
-    }
-
-    if (state.location.trim().isEmpty) {
-      err['location'] = 'Location is required';
-    }
-
-    if (state.shippingAvailable) {
-      final sc = _parseMoney(state.shippingCostInput);
-      if (sc == null || sc < 0) {
-        err['shippingCost'] = 'Enter shipping cost';
-      }
-    }
-
-    return err;
-  }
+  ListingFormValidationInput get _validationInput => ListingFormValidationInput(
+        photoPaths: state.photoPaths,
+        name: state.name,
+        priceInput: state.priceInput,
+        description: state.description,
+        categoryId: state.categoryId,
+        subcategoryId: state.subcategoryId,
+        condition: state.condition,
+        quantity: state.quantity,
+        location: state.location,
+        shippingAvailable: state.shippingAvailable,
+        shippingCostInput: state.shippingCostInput,
+      );
 
   /// Whether all required fields satisfy validation (no errors written to state).
-  bool get canSubmit => !state.isSubmitting && _collectErrors().isEmpty;
+  bool get canSubmit =>
+      !state.isSubmitting && !Validators.listingFormHasErrors(_validationInput);
 
-  bool validate() {
-    final err = _collectErrors();
+  bool validate(AppLocalizations l10n) {
+    final err = Validators.listingFormErrors(l10n, _validationInput);
     state = state.copyWith(errors: err);
     return err.isEmpty;
   }
 
   /// Publishes listing; on success clears form and draft. Returns `true` if published.
-  Future<bool> submit() async {
-    if (!validate()) {
+  Future<bool> submit(AppLocalizations l10n) async {
+    if (!validate(l10n)) {
       return false;
     }
 
     state = state.copyWith(isSubmitting: true);
     try {
-      final price = _parseMoney(state.priceInput)!;
+      final price = Validators.parseMoneyInput(state.priceInput)!;
       final descBuf = StringBuffer(state.description.trim());
       if (state.attributes.isNotEmpty) {
         descBuf.writeln();
@@ -389,7 +350,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         final sc = state.shippingCost ?? 0;
         descBuf.writeln('Shipping: $sc $_currencyCode');
       }
-      final cmp = _parseMoney(state.compareAtPrice);
+      final cmp = Validators.parseMoneyInput(state.compareAtPrice);
       if (cmp != null && cmp > 0) {
         descBuf.writeln('Compare-at price: $cmp');
       }
@@ -429,13 +390,13 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   }
 
   /// Spec: `submit` as [AsyncValue] — use with `ref.listen` / UI that expects `AsyncValue<void>`.
-  Future<AsyncValue<void>> submitAsync() async {
+  Future<AsyncValue<void>> submitAsync(AppLocalizations l10n) async {
     return AsyncValue.guard(() async {
-      final ok = await submit();
+      final ok = await submit(l10n);
       if (!ok) {
         final msg = state.errors['submit'] ??
             (state.errors.isNotEmpty ? state.errors.values.first : null) ??
-            'Please fix the highlighted fields';
+            l10n.listingValidationFixFields;
         throw Exception(msg);
       }
     });

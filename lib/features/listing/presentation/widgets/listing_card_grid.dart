@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
@@ -22,7 +23,6 @@ class ListingCardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
     return Container(
       decoration: BoxDecoration(
@@ -74,18 +74,16 @@ class ListingCardGrid extends StatelessWidget {
                         listing.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
+                        style: AppTypography.body15.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
                         ),
                       ),
                       const Gap(AppSpacing.sm),
                       Text(
                         Formatters.currency(listing.price),
-                        style: theme.textTheme.titleSmall?.copyWith(
+                        style: AppTypography.body15.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
                         ),
                       ),
                     ],

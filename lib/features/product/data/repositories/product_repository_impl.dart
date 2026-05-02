@@ -6,6 +6,7 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../home/domain/repositories/home_repository.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
+import '../datasources/product_remote_datasource.dart';
 import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/product_review_entity.dart';
 import '../../domain/entities/review_entity.dart';
@@ -13,12 +14,23 @@ import '../../domain/entities/product_seller_entity.dart';
 import '../../domain/repositories/product_repository.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  ProductRepositoryImpl(this._homeRepository);
+  ProductRepositoryImpl(
+    this._homeRepository, {
+    required ProductRemoteDataSource remote,
+  }) : _remote = remote;
 
   final HomeRepository _homeRepository;
+  final ProductRemoteDataSource _remote;
 
   @override
   Future<Either<Failure, ProductDetailEntity>> getProductDetail(String id) async {
+    if (!MockConfig.useMock) {
+      try {
+        return Right(await _remote.fetchProductDetail(id));
+      } catch (e) {
+        return Left(Failure.server(e.toString()));
+      }
+    }
     final dealsResult = await _homeRepository.getHotDeals();
     return dealsResult.fold(Left.new, (deals) {
       DealEntity? match;
@@ -119,7 +131,7 @@ class ProductRepositoryImpl implements ProductRepository {
     return ProductSellerEntity(
       id: 'seller_${id.hashCode}',
       name: 'TechCorner Store',
-      avatarUrl: 'https://picsum.photos/seed/seller$id/128/128',
+      avatarUrl: '',
       rating: 4.9,
       salesCount: 230,
       verified: true,
@@ -201,6 +213,18 @@ class ProductRepositoryImpl implements ProductRepository {
     required String productId,
     required String category,
   }) async {
+    if (!MockConfig.useMock) {
+      try {
+        return Right(
+          await _remote.fetchSimilarProducts(
+            productId: productId,
+            category: category,
+          ),
+        );
+      } catch (e) {
+        return Left(Failure.server(e.toString()));
+      }
+    }
     final dealsResult = await _homeRepository.getHotDeals();
     return dealsResult.fold(Left.new, (deals) {
       final filtered = deals.where((d) => d.id != productId).take(5);
@@ -220,6 +244,13 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<Either<Failure, List<ReviewEntity>>> getProductReviews(String productId) async {
+    if (!MockConfig.useMock) {
+      try {
+        return Right(await _remote.fetchProductReviews(productId));
+      } catch (e) {
+        return Left(Failure.server(e.toString()));
+      }
+    }
     final reviews = _reviewsFor(productId);
     return Right(
       reviews

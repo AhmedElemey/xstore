@@ -2702,6 +2702,96 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invalidLongitude => 'قيمة خط الطول غلط';
 
   @override
+  String get validationEmailOrPhoneRequired =>
+      'البريد الإلكتروني أو رقم الموبايل مطلوب';
+
+  @override
+  String get validationLoginPasswordRequired => 'كلمة السر مطلوبة';
+
+  @override
+  String get validationRegisterRoleRequired => 'اختر إزاي عايز تستخدم xStore';
+
+  @override
+  String get validationFullNameInvalid =>
+      'اكتب اسمك الكامل (حروف بس، 3 حروف على الأقل)';
+
+  @override
+  String get validationEmailInvalid => 'اكتب بريد إلكتروني صحيح';
+
+  @override
+  String get validationRegisterPhoneInvalid => 'اكتب رقم موبايل صحيح';
+
+  @override
+  String get validationCityRequired => 'المحافظة/المدينة مطلوبة';
+
+  @override
+  String get validationAgeMinimum18 => 'لازم يكون عندك 18 سنة على الأقل';
+
+  @override
+  String get validationPasswordMinEight =>
+      'كلمة السر لازم تكون 8 أحرف على الأقل';
+
+  @override
+  String get validationPasswordsMismatch => 'كلمتا السر مش متطابقتين';
+
+  @override
+  String get validationTermsRequired => 'يوافق على الشروط عشان تكمل';
+
+  @override
+  String get validationStoreNameRequired => 'اسم المتجر مطلوب';
+
+  @override
+  String get validationStoreCategoryRequired => 'اختار تصنيف';
+
+  @override
+  String get validationStoreDescriptionShort => 'صف متجرك';
+
+  @override
+  String get validationStoreDescriptionMax => 'أقصى 300 حرف';
+
+  @override
+  String get validationStoreCityWilayaRequired => 'المدينة والولاية مطلوبين';
+
+  @override
+  String get listingValidationPhotosRequired => 'ضيف صورة واحدة على الأقل';
+
+  @override
+  String get listingValidationNameRequired => 'اسم المنتج مطلوب';
+
+  @override
+  String get listingValidationNameMax => 'أقصى 100 حرف';
+
+  @override
+  String get listingValidationPriceInvalid => 'اكتب سعر صحيح';
+
+  @override
+  String get listingValidationDescriptionRequired => 'الوصف مطلوب';
+
+  @override
+  String get listingValidationDescriptionMax => 'أقصى 1000 حرف';
+
+  @override
+  String get listingValidationCategoryRequired => 'اختار التصنيف';
+
+  @override
+  String get listingValidationSubcategoryRequired => 'اختار التصنيف الفرعي';
+
+  @override
+  String get listingValidationConditionRequired => 'اختار الحالة';
+
+  @override
+  String get listingValidationQuantityMin => 'الحد الأدنى للكمية 1';
+
+  @override
+  String get listingValidationLocationRequired => 'الموقع مطلوب';
+
+  @override
+  String get listingValidationShippingCost => 'اكتب تكلفة الشحن';
+
+  @override
+  String get listingValidationFixFields => 'عدّل الحقول المظللة';
+
+  @override
   String get egypt => 'مصر';
 
   @override

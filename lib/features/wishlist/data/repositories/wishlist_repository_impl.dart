@@ -106,7 +106,7 @@ class WishlistRepositoryImpl implements WishlistRepository {
   }
 
   @override
-  WishlistItemEntity stubFromListingId(String listingId) {
+  Future<WishlistItemEntity> stubFromListingId(String listingId) {
     return _remote.buildFromListingId(listingId);
   }
 }

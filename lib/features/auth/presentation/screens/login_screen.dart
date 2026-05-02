@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../../../core/constants/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -7,9 +8,11 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
@@ -70,19 +73,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final n = ref.read(loginNotifierProvider.notifier);
     n.updateEmail(_email.text.trim());
     n.updatePassword(_password.text);
-    await n.login();
+    await n.login(context.l10n);
     if (!mounted) return;
     final err = ref.read(loginNotifierProvider).error;
     if (err == null) {
       context.go(AppRoutes.home);
     }
-  }
-
-  bool _isValidEmailOrPhone(String v) {
-    final t = v.trim();
-    if (RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(t)) return true;
-    final digits = t.replaceAll(RegExp(r'\D'), '');
-    return digits.length >= 10;
   }
 
   Future<void> _openPhoneLoginSheet() async {
@@ -112,41 +108,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 children: [
                   Text(
                     context.l10n.enterYourPhoneNumber,
-                    style: TextStyle(
-                      fontSize: 20,
+                    style: AppTypography.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
                       color: context.textPrimary,
                     ),
                   ),
-                  const Gap(6),
+                  const Gap(AppSpacing.spacing6),
                   Text(
                     context.l10n.sendOtpSubtitle,
-                    style: TextStyle(color: context.textSecondary),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: context.textSecondary,
+                    ),
                   ),
-                  const Gap(16),
+                  const Gap(AppSpacing.lg),
                   PhoneInputField(
                     controller: _phone,
                     errorText: hasError ? state.phoneError : null,
-                    onChanged: notifier.updatePhone,
+                    onChanged: (v) => notifier.updatePhone(v, context.l10n),
                   ),
-                  const Gap(16),
+                  const Gap(AppSpacing.lg),
                   PhoneLoginButton(
                     isLoading: state.isSendingOtp,
                     enabled: isValid && !state.isSendingOtp,
                     onPressed: () async {
                       final navigator = Navigator.of(context);
-                      final ok = await notifier.sendOtp();
+                      final ok = await notifier.sendOtp(context.l10n);
                       if (!mounted || !ok) return;
                       navigator.pop();
                       if (!mounted) return;
                       this.context.push(AppRoutes.otp);
                     },
                   ),
-                  const Gap(10),
+                  const Gap(AppSpacing.spacing10),
                   Text(
                     context.l10n.smsRatesNote,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: context.textSecondary, fontSize: 12),
+                    style: AppTypography.body12.copyWith(
+                      color: context.textSecondary,
+                    ),
                   ),
                 ],
               );
@@ -165,6 +164,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         _shakeController.forward(from: 0);
       }
     });
+
+    final l10n = context.l10n;
+    final emailFormatError = Validators.loginEmailOrPhone(l10n, login.email.trim());
+    final passwordFormatError = Validators.loginPassword(l10n, login.password);
+    final notifierAuthError = login.error != null &&
+        login.error != emailFormatError &&
+        login.error != passwordFormatError;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -217,7 +223,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           onRegisterTap: () =>
                               context.push(AppRoutes.register),
                         ),
-                        const Gap(20),
+                        const Gap(AppSpacing.xl),
                         AuthTextField(
                           label: context.l10n.email,
                           hint: context.l10n.enterEmailHint,
@@ -225,25 +231,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           prefixIcon: const Icon(LucideIcons.mail),
-                          errorText: login.error != null &&
-                                  (login.error!.contains('Email') ||
-                                      login.error!.contains('phone') ||
-                                      login.error!.contains('valid'))
-                              ? login.error
-                              : null,
+                          errorText:
+                              login.error != null && login.error == emailFormatError
+                                  ? login.error
+                                  : null,
                           onChanged: (v) =>
                               ref.read(loginNotifierProvider.notifier).updateEmail(v),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return context.l10n.requiredField;
-                            }
-                            if (!_isValidEmailOrPhone(v)) {
-                              return context.l10n.validEmailOrPhone;
-                            }
-                            return null;
-                          },
+                          validator: (v) =>
+                              Validators.loginEmailOrPhone(context.l10n, v ?? ''),
                         ),
-                        const Gap(16),
+                        const Gap(AppSpacing.lg),
                         AuthTextField(
                           label: context.l10n.password,
                           hint: context.l10n.passwordMask,
@@ -262,30 +259,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               color: context.iconSecondary,
                             ),
                           ),
-                          errorText: login.error != null &&
-                                  login.error!.toLowerCase().contains('password')
-                              ? login.error
-                              : null,
+                          errorText:
+                              login.error != null && login.error == passwordFormatError
+                                  ? login.error
+                                  : null,
                           onChanged: (v) => ref
                               .read(loginNotifierProvider.notifier)
                               .updatePassword(v),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return context.l10n.requiredField;
-                            if (v.length < 6) return context.l10n.minSixChars;
-                            return null;
-                          },
+                          validator: (v) =>
+                              Validators.loginPassword(context.l10n, v ?? ''),
                         ),
-                        if (login.error != null &&
-                            !login.error!.toLowerCase().contains('password') &&
-                            !login.error!.contains('Email') &&
-                            !login.error!.contains('phone') &&
-                            !login.error!.contains('valid')) ...[
-                          const Gap(8),
+                        if (login.error != null && notifierAuthError) ...[
+                          const Gap(AppSpacing.sm),
                           Text(
                             login.error!,
-                            style: TextStyle(
+                            style: AppTypography.bodySmall.copyWith(
                               color: AppColors.error,
-                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -314,14 +303,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             ),
                             Text(
                               context.l10n.rememberMe,
-                              style: TextStyle(
-                                fontSize: 14,
+                              style: AppTypography.bodyMedium.copyWith(
                                 color: context.textPrimary,
                               ),
                             ),
                           ],
                         ),
-                        const Gap(8),
+                        const Gap(AppSpacing.sm),
                         AuthButton(
                           label: context.l10n.login,
                           isLoading: login.isLoading,
@@ -334,9 +322,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   }
                                 },
                         ),
-                        const Gap(20),
+                        const Gap(AppSpacing.xl),
                         const AuthDivider(),
-                        const Gap(12),
+                        const Gap(AppSpacing.md),
                         SocialButton(
                           onTap: _openPhoneLoginSheet,
                           isLoading: false,
@@ -347,20 +335,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                           label: context.l10n.continueWithPhoneNumber,
                           borderColor: context.borderColor,
-                          bgColor: Colors.transparent,
+                          bgColor: AppColors.transparent,
                           textColor: context.textPrimary,
                         ),
-                        const Gap(12),
+                        const Gap(AppSpacing.md),
                         const SocialLoginRow(),
-                        const Gap(12),
+                        const Gap(AppSpacing.md),
                         Center(
                           child: TextButton(
                             onPressed: () =>
                                 context.push(AppRoutes.register),
                             child: RichText(
                               text: TextSpan(
-                                style: TextStyle(
-                                  fontSize: 14,
+                                style: AppTypography.bodyMedium.copyWith(
                                   color: context.textSecondary,
                                 ),
                                 children: [
@@ -405,13 +392,12 @@ class _LoginRegisterTabs extends StatelessWidget {
             children: [
               Text(
                 context.l10n.login,
-                style: TextStyle(
-                  fontSize: 17,
+                style: AppTypography.navTabLarge.copyWith(
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary,
                 ),
               ),
-              const Gap(8),
+              const Gap(AppSpacing.sm),
               Container(
                 height: 3,
                 decoration: BoxDecoration(
@@ -429,13 +415,11 @@ class _LoginRegisterTabs extends StatelessWidget {
               children: [
                 Text(
                   context.l10n.register,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.navTabMedium.copyWith(
                     color: context.textSecondary.withValues(alpha: 0.85),
                   ),
                 ),
-                const Gap(8),
+                const Gap(AppSpacing.sm),
                 const SizedBox(height: 3),
               ],
             ),

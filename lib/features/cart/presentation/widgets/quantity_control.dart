@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -112,7 +113,12 @@ class _QtyButton extends StatelessWidget {
         ),
       ),
       child: InkWell(
-        onTap: enabled ? onTap : null,
+        onTap: enabled
+            ? () {
+                HapticFeedback.lightImpact();
+                onTap();
+              }
+            : null,
         borderRadius: BorderRadius.circular(AppSpacing.sm),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),

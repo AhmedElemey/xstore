@@ -13,7 +13,7 @@ import '../../../../shared/widgets/notification_bell_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Collapsible gradient header; title fades in when scrolled past expanded region.
-class ProfileSliverAppBar extends StatelessWidget {
+class ProfileSliverAppBar extends StatefulWidget {
   const ProfileSliverAppBar({
     super.key,
     required this.scrollController,
@@ -30,15 +30,46 @@ class ProfileSliverAppBar extends StatelessWidget {
   final double expandedHeight;
 
   @override
+  State<ProfileSliverAppBar> createState() => _ProfileSliverAppBarState();
+}
+
+class _ProfileSliverAppBarState extends State<ProfileSliverAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_handleScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfileSliverAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController.removeListener(_handleScroll);
+      widget.scrollController.addListener(_handleScroll);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_handleScroll);
+    super.dispose();
+  }
+
+  void _handleScroll() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final threshold = expandedHeight - kToolbarHeight;
-    final offset = scrollController.hasClients ? scrollController.offset : 0.0;
+    final threshold = widget.expandedHeight - kToolbarHeight;
+    final offset =
+        widget.scrollController.hasClients ? widget.scrollController.offset : 0.0;
     final showCollapsedTitle = offset > threshold * 0.35;
 
     return SliverAppBar(
       pinned: true,
       stretch: true,
-      expandedHeight: expandedHeight,
+      expandedHeight: widget.expandedHeight,
       backgroundColor: AppColors.primary,
       surfaceTintColor: AppColors.primary.withValues(alpha: 0),
       foregroundColor: AppColors.white,
@@ -92,16 +123,20 @@ class ProfileSliverAppBar extends StatelessWidget {
   }
 
   Widget _buildBackgroundImage() {
-    if (avatarFile != null) {
-      return Image.file(avatarFile!, fit: BoxFit.cover);
+    if (widget.avatarFile != null) {
+      return Image.file(widget.avatarFile!, fit: BoxFit.cover);
     }
 
-    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: avatarUrl!,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => _buildFallback(),
-        errorWidget: (_, __, ___) => _buildFallback(),
+    if (widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty) {
+      return Semantics(
+        image: true,
+        label: '${context.l10n.navProfile}: ${widget.userName}',
+        child: CachedNetworkImage(
+          imageUrl: widget.avatarUrl!,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => _buildFallback(),
+          errorWidget: (_, __, ___) => _buildFallback(),
+        ),
       );
     }
 
@@ -109,7 +144,7 @@ class ProfileSliverAppBar extends StatelessWidget {
   }
 
   Widget _buildFallback() {
-    final parts = userName
+    final parts = widget.userName
         .trim()
         .split(RegExp(r'\s+'))
         .where((e) => e.isNotEmpty)

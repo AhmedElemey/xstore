@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/login_params.dart';
@@ -34,8 +35,8 @@ class AuthRepositoryImpl implements AuthRepository {
   final PhoneAuthDatasource _phone;
   final FlutterSecureStorage _secureStorage;
 
-  static const _tokenKey = 'xstore_auth_token';
-  static const _userKey = 'xstore_auth_user';
+  static const _tokenKey = PrefsKeys.authToken;
+  static const _userKey = PrefsKeys.authUser;
 
   @override
   Future<Either<Failure, UserEntity?>> restoreSession() async {

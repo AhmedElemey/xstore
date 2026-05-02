@@ -249,6 +249,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             },
                           ),
                           IconButton(
+                            tooltip: state.viewMode == ExploreViewMode.grid
+                                ? context.l10n.wishlistListContentDesc
+                                : context.l10n.wishlistGridContentDesc,
                             onPressed: notifier.toggleViewMode,
                             icon: Icon(
                               state.viewMode == ExploreViewMode.grid

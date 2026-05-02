@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../../../core/constants/app_colors.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,13 +26,13 @@ class AppleSignInButton extends ConsumerWidget {
       isLoading: isLoading,
       icon: Icon(
         Icons.apple,
-        color: isDark ? Colors.white : Colors.black,
+        color: isDark ? AppColors.white : AppColors.black,
         size: 22,
       ),
       label: context.l10n.continueWithApple,
       borderColor: context.borderColor,
-      bgColor: isDark ? Colors.black : Colors.white,
-      textColor: isDark ? Colors.white : Colors.black,
+      bgColor: isDark ? AppColors.black : AppColors.white,
+      textColor: isDark ? AppColors.white : AppColors.black,
     );
   }
 }

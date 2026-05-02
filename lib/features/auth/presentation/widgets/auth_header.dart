@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -22,7 +23,7 @@ class AuthHeader extends StatelessWidget {
   final bool showWave;
   final double logoSize;
 
-  static const _deepIndigo = Color(0xFF3730A3);
+  static const _deepIndigo = AppColors.primaryDark;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class AuthHeader extends StatelessWidget {
           child: 
             
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.x2l),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -53,11 +54,11 @@ class AuthHeader extends StatelessWidget {
                     style: TextStyle(
                       fontSize: logoSize,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: AppColors.white,
                       letterSpacing: context.scaledPx(-0.5),
                       shadows: [
                         Shadow(
-                          color: Colors.white.withValues(alpha: 0.35),
+                          color: AppColors.white.withValues(alpha: 0.35),
                           blurRadius: 24,
                         ),
                       ],
@@ -68,7 +69,7 @@ class AuthHeader extends StatelessWidget {
                     title,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: AppTypography.rem(1),
                       fontWeight: FontWeight.w500,
                     ),
@@ -79,7 +80,7 @@ class AuthHeader extends StatelessWidget {
                       subtitle!,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: AppColors.white.withValues(alpha: 0.9),
                         fontSize: AppTypography.rem(0.875),
                       ),
                     ),

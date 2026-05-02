@@ -26,7 +26,7 @@ class DetectLocationButton extends StatelessWidget {
         width: double.infinity,
         height: 52,
         decoration: BoxDecoration(
-          color: context.isDark ? AppColors.darkSurfaceVariant : const Color(0xFFEEF2FF),
+          color: context.isDark ? AppColors.darkSurfaceVariant : AppColors.notificationUnreadBackground,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: AppColors.primary.withValues(alpha: 0.4),

@@ -155,7 +155,7 @@ class XstoreBottomNav extends ConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.labelSmall.copyWith(
                                   color: blended,
-                                  fontSize: 10,
+                                  fontSize: AppTypography.rem(0.625),
                                   fontWeight: selected
                                       ? FontWeight.w600
                                       : FontWeight.w500,

@@ -78,6 +78,13 @@ abstract final class AppTypography {
     height: 1.35,
   );
 
+  /// 12 logical px (between [labelMedium] and [bodySmall] line metrics).
+  static TextStyle get body12 => _base.copyWith(
+    fontSize: rem(0.75),
+    fontWeight: FontWeight.w400,
+    height: 1.35,
+  );
+
   static TextStyle get labelLarge => _base.copyWith(
     fontSize: rem(0.875),
     fontWeight: FontWeight.w600,
@@ -94,6 +101,34 @@ abstract final class AppTypography {
     fontSize: rem(0.6875),
     fontWeight: FontWeight.w500,
     height: 1.2,
+  );
+
+  /// 15 logical px — between [bodyMedium] and [bodyLarge].
+  static TextStyle get body15 => _base.copyWith(
+    fontSize: rem(0.9375),
+    fontWeight: FontWeight.w400,
+    height: 1.35,
+  );
+
+  /// Compact section title (~22 px).
+  static TextStyle get titleCompact => _base.copyWith(
+    fontSize: rem(1.375),
+    fontWeight: FontWeight.w600,
+    height: 1.25,
+  );
+
+  /// Auth tab emphasis (~17 px — use [copyWith] for weight/color).
+  static TextStyle get navTabLarge => _base.copyWith(
+    fontSize: rem(1.0625),
+    fontWeight: FontWeight.w700,
+    height: 1.25,
+  );
+
+  /// Secondary auth tab (~17 px).
+  static TextStyle get navTabMedium => _base.copyWith(
+    fontSize: rem(1.0625),
+    fontWeight: FontWeight.w600,
+    height: 1.25,
   );
 
   /// Material [TextTheme] for [ThemeData] derived from [ColorScheme].

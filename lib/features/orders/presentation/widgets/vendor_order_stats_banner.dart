@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -139,7 +140,10 @@ class VendorOrderStatsBanner extends StatelessWidget {
         side: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      child: Text(label,style: TextStyle(fontSize: 13,fontWeight: FontWeight.w600)),
+      child: Text(
+        label,
+        style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
+      ),
     );
   }
 

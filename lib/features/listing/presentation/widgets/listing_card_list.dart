@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
@@ -67,21 +68,19 @@ class ListingCardList extends StatelessWidget {
                     listing.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: AppTypography.body15.copyWith(
                       fontWeight: FontWeight.w500,
-                      fontSize: 15
                     ),
                   ),
                   const Gap(AppSpacing.sm),
                   Text(
                     Formatters.currency(listing.price),
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: AppTypography.body15.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
-                      fontSize: 15
                     ),
                   ),
-                  const Gap(4),
+                  const Gap(AppSpacing.xs),
                   Text(
                     _metaLine,
                     maxLines: 1,
@@ -93,7 +92,7 @@ class ListingCardList extends StatelessWidget {
                   const Gap(AppSpacing.sm),
                   StatusBadge(status: listing.status),
                   if (listing.postedAt != null) ...[
-                    const Gap(4),
+                    const Gap(AppSpacing.xs),
                     Text(
                       'Posted ${Formatters.shortDate(listing.postedAt!)}',
                       style: theme.textTheme.labelSmall?.copyWith(

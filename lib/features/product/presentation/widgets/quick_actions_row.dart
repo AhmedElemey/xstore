@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({super.key});
@@ -34,7 +35,7 @@ class QuickActionsRow extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Text(items[i].$1, style: TextStyle(fontSize: 20)),
+                    Text(items[i].$1, style: AppTypography.titleMedium),
                     const Gap(AppSpacing.xs),
                     Text(
                       items[i].$2,
