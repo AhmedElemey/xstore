@@ -37,15 +37,16 @@ async function rasterOpaque(buf, size) {
     .toBuffer();
 }
 
-/** Renders clean 1024 master icon (orange X, no underline). */
+/** Renders classic 1024 master icon (white X + orange underline). */
 async function renderMasterIcon() {
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
     <rect width="1024" height="1024" fill="#4F46E5"/>
     <g transform="translate(512 480)">
-      <rect x="-96" y="-360" width="192" height="720" rx="48" fill="#FD6E01" transform="rotate(43)"/>
-      <rect x="-96" y="-360" width="192" height="720" rx="48" fill="#FD6E01" transform="rotate(-43)"/>
+      <rect x="-96" y="-360" width="192" height="720" rx="48" fill="#FFFFFF" transform="rotate(43)"/>
+      <rect x="-96" y="-360" width="192" height="720" rx="48" fill="#FFFFFF" transform="rotate(-43)"/>
     </g>
+    <rect x="235" y="838" width="554" height="72" rx="12" fill="#FD6E01"/>
   </svg>`;
 
   return sharp(Buffer.from(svg))
@@ -121,7 +122,7 @@ async function main() {
   const master1024 = await renderMasterIcon();
   fs.mkdirSync(path.dirname(iconIn), { recursive: true });
   fs.writeFileSync(iconIn, master1024);
-  console.log("Updated assets/icon.png (orange X, underline removed, clean render)");
+  console.log("Updated assets/icon.png (white X + orange underline, classic render)");
 
   fs.mkdirSync(IOS_DIR, { recursive: true });
   for (const [filename, px] of iosExports) {
