@@ -130,12 +130,11 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                           ? () async {
                               final savedText = context.l10n.workingHoursSaved;
                               final invalidText = context.l10n.invalidHoursError;
-                              final navigator = Navigator.of(context);
                               final ok = await notifier.saveStoreHours();
-                              if (!mounted) return;
+                              if (!context.mounted) return;
                               if (ok) {
                                 AppSnackbar.success(context, savedText);
-                                navigator.pop();
+                                Navigator.of(context).pop();
                               } else {
                                 AppSnackbar.error(context, invalidText);
                               }

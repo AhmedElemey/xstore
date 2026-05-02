@@ -151,17 +151,15 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
 
     final retryLabel = context.l10n.retry;
     final ok = await notifier.submit();
-    if (!context.mounted) {
+    if (!mounted) {
       return;
     }
     if (ok) {
-      // ignore: use_build_context_synchronously
       context.go('${AppRoutes.listingMy}?msg=published');
       return;
     }
     final err = ref.read(listingFormNotifierProvider).errors['submit'];
     if (err != null) {
-      // ignore: use_build_context_synchronously
       AppSnackbar.show(
         context,
         message: err,
