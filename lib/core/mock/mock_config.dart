@@ -4,7 +4,7 @@ class MockConfig {
   /// Toggle to switch between mock and real network data.
   static const bool _mockFromDefine = bool.fromEnvironment(
     'MOCK',
-    defaultValue: false,
+    defaultValue: true,
   );
   static const bool useMock = !kReleaseMode && _mockFromDefine;
 
