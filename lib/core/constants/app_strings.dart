@@ -218,7 +218,7 @@ abstract final class AppStrings {
   static const languageEnglish = 'English';
   static const languageFrench = 'French';
   static const languageArabic = 'Arabic';
-  static const profileFooterLine = 'xStore v1.0.0 · Made with ❤️ in Algeria';
+  static const profileFooterLine = 'xStore v1.0.0 · Made with ❤️ in Egypt';
   static const statStoreViews = 'Views';
   static const statStoreSaves = 'Saves';
   static const statStoreActive = 'Active';
@@ -234,7 +234,7 @@ abstract final class AppStrings {
   static const vendorStoreStatResponse = 'Response Rate';
   static const placeholderScreenSubtitle = 'This screen is coming soon.';
   static const shareXStoreMessage =
-      'Shop and sell on xStore — Algeria\'s modern marketplace.';
+      'Shop and sell on xStore — Egypt\'s modern marketplace.';
   /// Placeholder listing URLs for “Rate xStore”.
   static const iosAppStoreUrl = 'https://apps.apple.com';
   static const androidPlayStoreUrl = 'https://play.google.com/store';
@@ -552,9 +552,9 @@ abstract final class AppStrings {
   static const checkoutPayCibTitle = '💳 CIB Card';
   static const checkoutPayCibSubtitle = 'Debit/Credit card payment';
   static const checkoutPayDahabiTitle = '🟡 Dahabicard';
-  static const checkoutPayDahabiSubtitle = 'Algeria Post golden card';
+  static const checkoutPayDahabiSubtitle = 'Egypt Post golden card';
   static const checkoutPayBaridiTitle = '🟢 BaridiMob';
-  static const checkoutPayBaridiSubtitle = 'Algeria Post mobile payment';
+  static const checkoutPayBaridiSubtitle = 'Egypt Post mobile payment';
   static const checkoutCardExpiry = 'MM/YY';
   static const checkoutCardCvv = 'CVV';
   static const checkoutCardNumber = 'Card number';

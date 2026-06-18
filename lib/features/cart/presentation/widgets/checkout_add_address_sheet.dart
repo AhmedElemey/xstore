@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/algeria_wilayas.dart';
+import '../../../../core/constants/egypt_wilayas.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
@@ -18,7 +18,7 @@ Future<void> showCheckoutAddAddressSheet(
   final streetCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
   final postalCtrl = TextEditingController();
-  var wilaya = AlgeriaWilayas.names.first;
+  var wilaya = EgyptWilayas.names.first;
   var isDefault = false;
 
   await showModalBottomSheet<void>(
@@ -86,7 +86,7 @@ Future<void> showCheckoutAddAddressSheet(
                       labelText: context.l10n.checkoutWilaya,
                       border: const OutlineInputBorder(),
                     ),
-                    items: AlgeriaWilayas.names
+                    items: EgyptWilayas.names
                         .map(
                           (w) => DropdownMenuItem(value: w, child: Text(w)),
                         )

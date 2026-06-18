@@ -170,26 +170,22 @@ List<StatefulShellBranch> _vendorShellBranches() => [
 @Riverpod(keepAlive: true)
 GoRouter goRouter(GoRouterRef ref) {
   final refresh = ref.watch(routerNotifierProvider);
-  final auth = ref.watch(authProvider);
-  final needsRoleSelection = ref.watch(
-    socialAuthProvider.select((s) => s.needsRoleSelection),
+  // Only rebuild the route tree when vendor vs consumer tabs change — not on every
+  // auth refresh, or login would recreate GoRouter and reset to [initialLocation].
+  final isVendor = ref.watch(
+    authProvider.select((auth) => auth.valueOrNull?.isVendor == true),
   );
-  final holdVendorSuccess = ref.watch(
-    registerNotifierProvider.select((s) => s.showVendorSuccessOverlay),
-  );
-  final isVendor = auth.valueOrNull?.isVendor == true;
   final shellBranches = isVendor ? _vendorShellBranches() : _consumerShellBranches();
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
-    // Do not call ref.read/watch here: redirect runs while refreshListenable
-    // notifies (same turn as auth updates), when goRouter's element can be outdated.
     redirect: (context, state) => computeXStoreAuthRedirect(
-      auth: auth,
-      needsRoleSelection: needsRoleSelection,
+      auth: ref.read(authProvider),
+      needsRoleSelection: ref.read(socialAuthProvider).needsRoleSelection,
       matchedLocation: state.matchedLocation,
-      holdRegisterForVendorSuccess: holdVendorSuccess,
+      holdRegisterForVendorSuccess:
+          ref.read(registerNotifierProvider).showVendorSuccessOverlay,
     ),
     routes: [
       GoRoute(

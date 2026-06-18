@@ -14,12 +14,12 @@ const mockVendorUser = UserEntity(
   rating: 4.8,
   totalSales: 142,
   joinedAt: null,
-  location: 'Algiers, Algeria',
+  location: 'Algiers, Egypt',
   storeName: "Ahmed's Electronics",
   storeSlug: 'ahmeds-electronics',
   storeCategory: 'Electronics',
   storeDescription:
-      'Premium electronics at the best prices in Algeria. All products are genuine and come with full warranty.',
+      'Premium electronics at the best prices in Egypt. All products are genuine and come with full warranty.',
   storeCity: 'Algiers',
   storeWilaya: 'Alger',
   whatsappNumber: '+20 105 551 2345',
@@ -38,7 +38,7 @@ const mockConsumerUser = UserEntity(
   role: UserRole.consumer,
   isVerified: false,
   joinedAt: null,
-  location: 'Oran, Algeria',
+  location: 'Oran, Egypt',
 );
 
 UserModel mockVendorUserModel({

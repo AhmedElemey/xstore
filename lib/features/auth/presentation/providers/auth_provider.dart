@@ -119,6 +119,12 @@ class Auth extends _$Auth {
       (_) => AsyncData(user),
     );
   }
+
+  /// Session already persisted (e.g. login/register API) — update auth without
+  /// reloading from storage, which would recreate [GoRouter] mid-navigation.
+  void adoptSession(UserEntity user) {
+    state = AsyncData(user);
+  }
 }
 
 @riverpod
@@ -168,7 +174,7 @@ class LoginNotifier extends _$LoginNotifier {
       (failure) async {
         state = state.copyWith(isLoading: false, error: failure.toString());
       },
-      (_) async {
+      (user) async {
         if (state.rememberMe) {
           final prefs = await ref.read(sharedPreferencesProvider.future);
           await prefs.setString(PrefsKeys.rememberedEmail, state.email.trim());
@@ -177,7 +183,7 @@ class LoginNotifier extends _$LoginNotifier {
           await prefs.remove(PrefsKeys.rememberedEmail);
         }
         state = state.copyWith(isLoading: false, error: null);
-        ref.invalidate(authProvider);
+        ref.read(authProvider.notifier).adoptSession(user);
       },
     );
   }
@@ -436,13 +442,13 @@ class RegisterNotifier extends _$RegisterNotifier {
       (failure) {
         state = state.copyWith(isLoading: false, error: failure.toString());
       },
-      (_) {
+      (user) {
         state = state.copyWith(
           isLoading: false,
           error: null,
           showVendorSuccessOverlay: role == UserRole.vendor,
         );
-        ref.invalidate(authProvider);
+        ref.read(authProvider.notifier).adoptSession(user);
       },
     );
   }

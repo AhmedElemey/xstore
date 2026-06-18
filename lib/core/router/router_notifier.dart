@@ -68,6 +68,10 @@ final class RouterNotifier extends Listenable {
   RouterNotifier(this._ref) {
     _ref.listen(authProvider, (_, __) => _notify());
     _ref.listen(socialAuthProvider.select((s) => s.needsRoleSelection), (_, __) => _notify());
+    _ref.listen(
+      registerNotifierProvider.select((s) => s.showVendorSuccessOverlay),
+      (_, __) => _notify(),
+    );
   }
 
   final Ref _ref;

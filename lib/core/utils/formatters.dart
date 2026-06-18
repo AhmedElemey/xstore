@@ -13,7 +13,7 @@ abstract final class Formatters {
     return '${f.format(amount.round())} ${AppStrings.currencyDzd}';
   }
 
-  /// Algerian DZD saved for profile stats; [minorUnits] e.g. 23000 → 230 DZD shown.
+  /// Egyptn DZD saved for profile stats; [minorUnits] e.g. 23000 → 230 DZD shown.
   static String dzdSavedDisplay(int minorUnits) {
     if (minorUnits <= 0) return '0';
     final whole = minorUnits ~/ 100;

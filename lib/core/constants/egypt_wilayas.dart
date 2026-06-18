@@ -1,0 +1,32 @@
+/// Egypt governorates (27) for address forms.
+abstract final class EgyptWilayas {
+  static const List<String> names = [
+    'Cairo',
+    'Alexandria',
+    'Giza',
+    'Qalyubia',
+    'Port Said',
+    'Suez',
+    'Luxor',
+    'Aswan',
+    'Asyut',
+    'Beheira',
+    'Beni Suef',
+    'Dakahlia',
+    'Damietta',
+    'Fayoum',
+    'Gharbia',
+    'Ismailia',
+    'Kafr El Sheikh',
+    'Matrouh',
+    'Minya',
+    'Monufia',
+    'New Valley',
+    'North Sinai',
+    'Qena',
+    'Red Sea',
+    'Sharqia',
+    'Sohag',
+    'South Sinai',
+  ];
+}

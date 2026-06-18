@@ -818,7 +818,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageArabic => 'Arabic';
 
   @override
-  String get profileFooterLine => 'xStore v1.0.0 · Made with ❤️ in Algeria';
+  String get profileFooterLine => 'xStore v1.0.0 · Made with ❤️ in Egypt';
 
   @override
   String get statStoreViews => 'Views';
@@ -1621,13 +1621,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutPayDahabiTitle => '🟡 Dahabicard';
 
   @override
-  String get checkoutPayDahabiSubtitle => 'Algeria Post golden card';
+  String get checkoutPayDahabiSubtitle => 'Egypt Post golden card';
 
   @override
   String get checkoutPayBaridiTitle => '🟢 BaridiMob';
 
   @override
-  String get checkoutPayBaridiSubtitle => 'Algeria Post mobile payment';
+  String get checkoutPayBaridiSubtitle => 'Egypt Post mobile payment';
 
   @override
   String get checkoutCardExpiry => 'MM/YY';

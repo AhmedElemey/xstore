@@ -1715,7 +1715,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileFooterLine.
   ///
   /// In en, this message translates to:
-  /// **'xStore v1.0.0 · Made with ❤️ in Algeria'**
+  /// **'xStore v1.0.0 · Made with ❤️ in Egypt'**
   String get profileFooterLine;
 
   /// No description provided for @statStoreViews.
@@ -3311,7 +3311,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutPayDahabiSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Algeria Post golden card'**
+  /// **'Egypt Post golden card'**
   String get checkoutPayDahabiSubtitle;
 
   /// No description provided for @checkoutPayBaridiTitle.
@@ -3323,7 +3323,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutPayBaridiSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Algeria Post mobile payment'**
+  /// **'Egypt Post mobile payment'**
   String get checkoutPayBaridiSubtitle;
 
   /// No description provided for @checkoutCardExpiry.
