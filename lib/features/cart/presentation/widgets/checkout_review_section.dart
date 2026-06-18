@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
@@ -72,7 +73,7 @@ class CheckoutReviewSection extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    '${it.listingName} · ${context.l10n.quantity} ${it.quantity} · ${Formatters.dzdWhole(it.price * it.quantity)}',
+                    '${it.listingName} · ${context.l10n.quantity} ${it.quantity} · ${context.formatCurrency(it.price * it.quantity)}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodySmall,
@@ -115,7 +116,7 @@ class CheckoutReviewSection extends ConsumerWidget {
           spacing: AppSpacing.xs,
           children: [
             TextButton(
-              onPressed: () {},
+              onPressed: () => context.push(AppRoutes.terms),
               child: Text(context.l10n.menuTerms),
             ),
             Text(

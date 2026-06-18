@@ -83,7 +83,7 @@ class OrderPriceBreakdown extends StatelessWidget {
               style: AppTypography.titleMedium,
             ),
             Text(
-              '${_fmt(order.total)} ${context.l10n.currencyDzd}',
+              context.formatCurrency(order.total),
               style: AppTypography.titleMedium.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w700,
@@ -112,15 +112,11 @@ class OrderPriceBreakdown extends StatelessWidget {
               ),
             ),
             Text(
-              '${_fmt(value)} ${context.l10n.currencyDzd}',
+              context.formatCurrency(value),
               style: AppTypography.bodyLarge,
             ),
           ],
         ),
       );
 
-  String _fmt(double v) {
-    if (v == v.roundToDouble()) return v.toStringAsFixed(0);
-    return v.toStringAsFixed(2);
-  }
 }

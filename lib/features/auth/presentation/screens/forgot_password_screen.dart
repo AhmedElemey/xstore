@@ -1,17 +1,15 @@
-import 'dart:async';
-
-import '../../../../core/constants/app_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../widgets/auth_button.dart';
+import '../../../../core/utils/validators.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_text_field.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -22,28 +20,43 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  int _step = 1;
   final _email = TextEditingController();
-  int _cooldown = 0;
-  Timer? _timer;
+  bool _isLoading = false;
+  String? _error;
 
   @override
   void dispose() {
-    _timer?.cancel();
     _email.dispose();
     super.dispose();
   }
 
-  void _startCooldown() {
-    _timer?.cancel();
-    setState(() => _cooldown = 60);
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_cooldown <= 1) {
-        t.cancel();
-        setState(() => _cooldown = 0);
-      } else {
-        setState(() => _cooldown--);
-      }
+  String? _validateEmail(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return context.l10n.validationEmailOrPhoneRequired;
+    }
+    return Validators.registerEmail(context.l10n, trimmed);
+  }
+
+  /// Password reset API is not defined in [ApiEndpoints] or auth docs yet.
+  /// The "check your email" step should only appear after a confirmed API success.
+  Future<void> _sendResetLink() async {
+    final emailError = _validateEmail(_email.text);
+    if (emailError != null) {
+      setState(() => _error = emailError);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    // Fail closed until POST /auth/forgot-password (or equivalent) is implemented.
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+      _error = context.l10n.genericError;
     });
   }
 
@@ -62,162 +75,58 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.x2l),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 320),
-            child: _step == 1
-                ? _StepEmail(
-                    key: const ValueKey(1),
-                    emailController: _email,
-                    onSend: () {
-                      if (_email.text.trim().isEmpty) return;
-                      setState(() => _step = 2);
-                      _startCooldown();
-                    },
-                  )
-                : _StepCheckEmail(
-                    key: const ValueKey(2),
-                    email: _email.text.trim(),
-                    cooldown: _cooldown,
-                    onResend: _cooldown == 0 ? _startCooldown : null,
-                    onBackToLogin: () => context.go(AppRoutes.login),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Reset Password',
+                style: AppTypography.titleLarge.copyWith(
+                  fontSize: AppTypography.rem(1.625),
+                  fontWeight: FontWeight.w800,
+                  color: context.textPrimary,
+                ),
+              ),
+              const Gap(AppSpacing.md),
+              Text(
+                "Enter your email and we'll send you a reset link",
+                style: AppTypography.body15.copyWith(
+                  height: 1.4,
+                  color: context.textSecondary,
+                ),
+              ),
+              const Gap(AppSpacing.spacing28),
+              AuthTextField(
+                label: 'Email',
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: const Icon(LucideIcons.mail),
+                errorText: _error,
+                onChanged: (_) {
+                  if (_error != null) {
+                    setState(() => _error = null);
+                  }
+                },
+              ),
+              const Spacer(),
+              XstoreButton(
+                label: 'Send Reset Link',
+                isLoading: _isLoading,
+                onPressed: _isLoading ? null : _sendResetLink,
+              ),
+              TextButton(
+                onPressed: () => context.go(AppRoutes.login),
+                child: Text(
+                  'Back to Login',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
                   ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-
-class _StepEmail extends StatelessWidget {
-  const _StepEmail({
-    super.key,
-    required this.emailController,
-    required this.onSend,
-  });
-
-  final TextEditingController emailController;
-  final VoidCallback onSend;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Reset Password',
-          style: AppTypography.titleLarge.copyWith(
-            fontSize: AppTypography.rem(1.625),
-            fontWeight: FontWeight.w800,
-            color: context.textPrimary,
-          ),
-        ),
-        const Gap(AppSpacing.md),
-        Text(
-          "Enter your email and we'll send you a reset link",
-          style: AppTypography.body15.copyWith(
-            height: 1.4,
-            color: context.textSecondary,
-          ),
-        ),
-        const Gap(AppSpacing.spacing28),
-        AuthTextField(
-          label: 'Email',
-          controller: emailController,
-          keyboardType: TextInputType.emailAddress,
-          prefixIcon: const Icon(LucideIcons.mail),
-        ),
-        const Spacer(),
-        AuthButton(
-          label: 'Send Reset Link',
-          onPressed: onSend,
-        ),
-      ],
-    );
-  }
-}
-
-class _StepCheckEmail extends StatelessWidget {
-  const _StepCheckEmail({
-    super.key,
-    required this.email,
-    required this.cooldown,
-    required this.onResend,
-    required this.onBackToLogin,
-  });
-
-  final String email;
-  final int cooldown;
-  final VoidCallback? onResend;
-  final VoidCallback onBackToLogin;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Center(
-          child: SvgPicture.string(
-            _mailSvg,
-            width: 120,
-            height: 120,
-          ),
-        ),
-        const Gap(AppSpacing.x2l),
-        Text(
-          'Check your email',
-          textAlign: TextAlign.center,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-            color: context.textPrimary,
-          ),
-        ),
-        const Gap(AppSpacing.md),
-        Text(
-          'We sent a reset link to\n$email',
-          textAlign: TextAlign.center,
-          style: AppTypography.body15.copyWith(
-            height: 1.45,
-            color: context.textSecondary,
-          ),
-        ),
-        const Gap(AppSpacing.x2l),
-        if (cooldown > 0)
-          Text(
-            'Resend in ${cooldown}s',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: context.textSecondary),
-          )
-        else
-          TextButton(
-            onPressed: onResend,
-            child: Text(
-              'Resend email',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AppColors.accent,
-              ),
-            ),
-          ),
-        const Spacer(),
-        TextButton(
-          onPressed: onBackToLogin,
-          child: Text(
-            'Back to Login',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-const _mailSvg = '''
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <circle cx="60" cy="60" r="56" fill="#EEF2FF"/>
-  <path d="M30 45h60v30H30V45z" stroke="#4F46E5" stroke-width="2.5" fill="white" rx="4"/>
-  <path d="M30 45l30 20 30-20" stroke="#4F46E5" stroke-width="2.5" fill="none"/>
-</svg>
-''';

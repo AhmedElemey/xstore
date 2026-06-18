@@ -11,6 +11,7 @@ import '../widgets/day_schedule_tile.dart';
 import '../widgets/store_status_banner.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/store_hours_skeleton.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class StoreHoursScreen extends ConsumerStatefulWidget {
   const StoreHoursScreen({super.key});
@@ -125,31 +126,23 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: state.hasChanges
-                          ? () async {
-                              final savedText = context.l10n.workingHoursSaved;
-                              final invalidText = context.l10n.invalidHoursError;
-                              final ok = await notifier.saveStoreHours();
-                              if (!context.mounted) return;
-                              if (ok) {
-                                AppSnackbar.success(context, savedText);
-                                Navigator.of(context).pop();
-                              } else {
-                                AppSnackbar.error(context, invalidText);
-                              }
+                  child: XstoreButton(
+                    label: context.l10n.saveWorkingHours,
+                    isLoading: state.isSaving,
+                    onPressed: state.hasChanges && !state.isSaving
+                        ? () async {
+                            final savedText = context.l10n.workingHoursSaved;
+                            final invalidText = context.l10n.invalidHoursError;
+                            final ok = await notifier.saveStoreHours();
+                            if (!context.mounted) return;
+                            if (ok) {
+                              AppSnackbar.success(context, savedText);
+                              Navigator.of(context).pop();
+                            } else {
+                              AppSnackbar.error(context, invalidText);
                             }
-                          : null,
-                      child: state.isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(context.l10n.saveWorkingHours),
-                    ),
+                          }
+                        : null,
                   ),
                 ),
               ],

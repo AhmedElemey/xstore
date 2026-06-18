@@ -83,7 +83,7 @@ class OrderItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${_fmt(item.price)} × ${item.quantity} = ${_fmt(item.total)} ${context.l10n.currencyDzd}',
+                  '${context.formatCurrency(item.price)} × ${item.quantity} = ${context.formatCurrency(item.total)}',
                   style: AppTypography.bodyMedium.copyWith(
                     color: context.textSecondary,
                   ),
@@ -111,8 +111,4 @@ class OrderItemTile extends StatelessWidget {
       ),
     );
   }
-
-  String _fmt(double v) => v == v.roundToDouble()
-      ? v.toStringAsFixed(0)
-      : v.toStringAsFixed(2);
 }

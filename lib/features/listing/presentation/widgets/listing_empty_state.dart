@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/listing_entity.dart';
-import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 /// Centered illustration + CTA when no listings match the current filter.
 class ListingEmptyState extends StatelessWidget {
@@ -65,17 +64,9 @@ class ListingEmptyState extends StatelessWidget {
                 ),
               ),
               const Gap(AppSpacing.x2l),
-              FilledButton(
+              XstoreButton(
+                label: 'Add Your First Listing',
                 onPressed: onAddListing,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: context.surfaceColor,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.x2l,
-                    vertical: AppSpacing.lg,
-                  ),
-                ),
-                child: Text('Add Your First Listing'),
               ),
             ],
           ),

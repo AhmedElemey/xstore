@@ -8,7 +8,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -36,7 +35,7 @@ class ProductGridCard extends StatelessWidget {
       child: Semantics(
         button: true,
         label:
-            '${item.name}, ${Formatters.currency(item.price)}, ${item.condition}',
+            '${item.name}, ${context.formatCurrency(item.price)}, ${item.condition}',
         child: InkWell(
           onTap: onTap,
           child: Column(
@@ -112,13 +111,13 @@ class ProductGridCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          Formatters.currency(item.price),
+                          context.formatCurrency(item.price),
                           style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
                         ),
                         if (item.compareAtPrice != null) ...[
                           const Gap(AppSpacing.sm),
                           Text(
-                            Formatters.currency(item.compareAtPrice!),
+                            context.formatCurrency(item.compareAtPrice!),
                             style: AppTypography.bodySmall.copyWith(
                               decoration: TextDecoration.lineThrough,
                             ),

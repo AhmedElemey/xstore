@@ -52,9 +52,8 @@ class VendorOrderStatsBanner extends StatelessWidget {
               _divider(text),
               _item(
                 context,
-                _fmt(totalRevenue),
+                context.formatCurrency(totalRevenue),
                 context.l10n.vendorStatRevenue,
-                suffix: context.l10n.currencyDzd,
               ),
             ],
           ),
@@ -146,8 +145,4 @@ class VendorOrderStatsBanner extends StatelessWidget {
       ),
     );
   }
-
-  String _fmt(double value) => value == value.roundToDouble()
-      ? value.toStringAsFixed(0)
-      : value.toStringAsFixed(1);
 }

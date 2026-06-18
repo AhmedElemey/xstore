@@ -19,6 +19,7 @@ import 'order_status_badge.dart';
 import 'order_timeline.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class OrderDetailScrollContent extends ConsumerWidget {
   const OrderDetailScrollContent({super.key, required this.order});
@@ -328,10 +329,10 @@ class _SellerSection extends StatelessWidget {
               child: Text(context.l10n.ordersMessageSeller),
             ),
             const SizedBox(height: AppSpacing.sm),
-            FilledButton(
+            XstoreButton(
+              label: context.l10n.visitStore,
               onPressed: () =>
                   context.push('${AppRoutes.sellerProfile}/${order.vendorId}'),
-              child: Text(context.l10n.visitStore),
             ),
           ],
         ),

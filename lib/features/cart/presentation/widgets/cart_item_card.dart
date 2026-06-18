@@ -4,7 +4,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import 'quantity_control.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -151,7 +150,7 @@ class CartItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          Formatters.dzdWhole(item.price),
+                          context.formatCurrency(item.price),
                           style: AppTypography.titleSmall.copyWith(
                             color: available
                                 ? AppColors.primary
@@ -161,7 +160,7 @@ class CartItemCard extends StatelessWidget {
                         ),
                         if (compare != null && compare > item.price)
                           Text(
-                            Formatters.dzdWhole(compare),
+                            context.formatCurrency(compare),
                             style: AppTypography.bodySmall.copyWith(
                               color: context.textSecondary,
                               decoration: TextDecoration.lineThrough,

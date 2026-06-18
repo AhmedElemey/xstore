@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
 import 'move_all_to_cart_bar.dart';
@@ -64,7 +65,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       (prev, next) {
       final err = next;
       if (err != null && err != prev && context.mounted) {
-        AppSnackbar.error(context, err);
+        AppSnackbar.error(context, resolveAppError(context, err));
         notifier.clearError();
       }
     });

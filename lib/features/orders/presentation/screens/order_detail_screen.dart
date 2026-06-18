@@ -68,7 +68,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                                 icon: const Icon(Icons.ios_share_rounded),
                                 onPressed: () {
                                   Share.share(
-                                    '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${order.formattedOrderId}\n${orderStatusLabel(context, order.status)}\n${order.total} ${context.l10n.currencyDzd}',
+                                    '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${order.formattedOrderId}\n${orderStatusLabel(context, order.status)}\n${context.formatCurrency(order.total)}',
                                   );
                                 },
                               ),

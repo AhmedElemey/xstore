@@ -47,22 +47,8 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 tooltip: context.l10n.share,
                 icon: const Icon(Icons.ios_share_rounded),
                 onPressed: () => Share.share(
-                  '${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${o.total} ${context.l10n.currencyDzd}',
+                  '${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${context.formatCurrency(o.total)}',
                 ),
-              ),
-              PopupMenuButton<String>(
-                tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
-                onSelected: (v) => context.showSnack(v),
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: context.l10n.vendorPrintOrder,
-                    child: Text(context.l10n.vendorPrintOrder),
-                  ),
-                  PopupMenuItem(
-                    value: context.l10n.vendorReportIssue,
-                    child: Text(context.l10n.vendorReportIssue),
-                  ),
-                ],
               ),
             ],
           ),

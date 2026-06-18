@@ -32,6 +32,7 @@ import '../../features/notifications/presentation/screens/notifications_screen.d
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
 import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/coming_soon_screen.dart';
+import '../../shared/screens/trust_info_screens.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
 import '../animations/page_transitions.dart';
@@ -429,7 +430,7 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const ComingSoonScreen(title: AppStrings.menuPaymentMethods),
+          const PaymentMethodsInfoScreen(),
         ),
       ),
       GoRoute(
@@ -437,7 +438,7 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const ComingSoonScreen(title: AppStrings.menuAddresses),
+          const AddressesInfoScreen(),
         ),
       ),
       GoRoute(
@@ -453,7 +454,7 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const ComingSoonScreen(title: AppStrings.menuHelpCenter),
+          const HelpCenterInfoScreen(),
         ),
       ),
       GoRoute(
@@ -461,7 +462,7 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const ComingSoonScreen(title: AppStrings.menuTerms),
+          const TermsInfoScreen(),
         ),
       ),
       GoRoute(
@@ -469,7 +470,7 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const ComingSoonScreen(title: AppStrings.menuPrivacy),
+          const PrivacyInfoScreen(),
         ),
       ),
       GoRoute(

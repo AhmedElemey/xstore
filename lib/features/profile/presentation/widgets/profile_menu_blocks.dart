@@ -120,7 +120,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.primary,
                     label: context.l10n.menuMyOrders,
-                    onTap: () => context.push(AppRoutes.myOrdersPlaceholder),
+                    onTap: () => context.push(AppRoutes.orders),
                   ),
                   ProfileMenuTile(
                     icon: LucideIcons.heart,

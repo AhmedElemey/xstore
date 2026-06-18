@@ -13,6 +13,7 @@ import '../../domain/entities/order_entity.dart'
     show OrderEntity, OrderStatus, ShippingInfo;
 import '../providers/order_detail_provider.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 /// Sticky footer actions on order detail — routes actions to [OrderDetailNotifier].
 class OrderActionButtons extends ConsumerWidget {
@@ -76,24 +77,18 @@ class OrderActionButtons extends ConsumerWidget {
           ],
         );
       case OrderStatus.confirmed:
-        return SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: busy
-                ? null
-                : () => _run(context, ref, orderId, notifier.markProcessing),
-            child: Text(context.l10n.ordersMarkProcessing),
-          ),
+        return XstoreButton(
+          label: context.l10n.ordersMarkProcessing,
+          isLoading: busy,
+          onPressed: busy
+              ? null
+              : () => _run(context, ref, orderId, notifier.markProcessing),
         );
       case OrderStatus.processing:
-        return SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: busy
-                ? null
-                : () => _ship(context, ref, orderId, notifier),
-            child: Text(context.l10n.ordersMarkShipped),
-          ),
+        return XstoreButton(
+          label: context.l10n.ordersMarkShipped,
+          isLoading: busy,
+          onPressed: busy ? null : () => _ship(context, ref, orderId, notifier),
         );
       case OrderStatus.shipped:
       case OrderStatus.delivered:
@@ -190,12 +185,9 @@ class OrderActionButtons extends ConsumerWidget {
           ],
         );
       case OrderStatus.cancelled:
-        return SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () => context.go(AppRoutes.explore),
-            child: Text(context.l10n.ordersShopAgain),
-          ),
+        return XstoreButton(
+          label: context.l10n.ordersShopAgain,
+          onPressed: () => context.go(AppRoutes.explore),
         );
       case OrderStatus.processing:
       case OrderStatus.refunded:
@@ -301,7 +293,8 @@ class OrderActionButtons extends ConsumerWidget {
                     if (d != null) setS(() => eta = d);
                   },
                 ),
-                FilledButton(
+                XstoreButton(
+                  label: context.l10n.ordersConfirmShipment,
                   onPressed: () async {
                     Navigator.pop(ctx);
                     await notifier.markShipped(
@@ -316,7 +309,6 @@ class OrderActionButtons extends ConsumerWidget {
                       ),
                     );
                   },
-                  child: Text(context.l10n.ordersConfirmShipment),
                 ),
               ],
             ),
@@ -422,15 +414,19 @@ class OrderActionButtons extends ConsumerWidget {
                   maxLines: 3,
                   decoration: InputDecoration(hintText: context.l10n.ordersReviewHint),
                 ),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    AppSnackbar.success(
-                      context,
-                      context.l10n.ordersReviewThanks,
-                    );
-                  },
-                  child: Text(context.l10n.ordersSubmitReview),
+                Tooltip(
+                  message: context.l10n.placeholderScreenSubtitle,
+                  child: XstoreButton(
+                    label: context.l10n.ordersSubmitReview,
+                    onPressed: null,
+                  ),
+                ),
+                Text(
+                  context.l10n.placeholderScreenSubtitle,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.textSecondary,
+                  ),
                 ),
               ],
             ),

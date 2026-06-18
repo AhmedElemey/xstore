@@ -16,12 +16,11 @@ import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
-import '../widgets/auth_button.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/phone_input_field.dart';
-import '../widgets/phone_login_button.dart';
 import '../widgets/social_button.dart';
 import '../widgets/social_login_row.dart';
 
@@ -127,17 +126,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     onChanged: (v) => notifier.updatePhone(v, context.l10n),
                   ),
                   const Gap(AppSpacing.lg),
-                  PhoneLoginButton(
+                  XstoreButton(
+                    label: context.l10n.sendVerificationCode,
                     isLoading: state.isSendingOtp,
-                    enabled: isValid && !state.isSendingOtp,
-                    onPressed: () async {
-                      final navigator = Navigator.of(context);
-                      final ok = await notifier.sendOtp(context.l10n);
-                      if (!mounted || !ok) return;
-                      navigator.pop();
-                      if (!mounted) return;
-                      this.context.push(AppRoutes.otp);
-                    },
+                    onPressed: isValid && !state.isSendingOtp
+                        ? () async {
+                            final navigator = Navigator.of(context);
+                            final ok = await notifier.sendOtp(context.l10n);
+                            if (!mounted || !ok) return;
+                            navigator.pop();
+                            if (!mounted) return;
+                            this.context.push(AppRoutes.otp);
+                          }
+                        : null,
                   ),
                   const Gap(AppSpacing.spacing10),
                   Text(
@@ -310,7 +311,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ],
                         ),
                         const Gap(AppSpacing.sm),
-                        AuthButton(
+                        XstoreButton(
                           label: context.l10n.login,
                           isLoading: login.isLoading,
                           onPressed: login.isLoading

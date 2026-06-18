@@ -1,0 +1,267 @@
+{
+  "module": "Authentication",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Login",
+      "method": "POST",
+      "path": "/auth/login",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Inline Map<String, dynamic> built from LoginParams domain entity",
+        "domainParamsClass": "LoginParams",
+        "domainParamsFile": "lib/features/auth/domain/entities/login_params.dart",
+        "fields": [
+          { "name": "emailOrPhone", "type": "String", "required": true },
+          { "name": "password", "type": "String", "required": true },
+          { "name": "rememberMe", "type": "bool", "required": true }
+        ]
+      },
+      "response": {
+        "modelClass": "UserModel",
+        "modelFile": "lib/features/auth/data/models/user_model.dart",
+        "wrapper": null,
+        "fields": [
+          { "name": "id", "type": "String", "required": true },
+          { "name": "name", "type": "String", "required": false, "default": "" },
+          { "name": "email", "type": "String", "required": true },
+          { "name": "phoneNumber", "type": "String", "required": false, "default": "" },
+          { "name": "avatarUrl", "type": "String?", "required": false },
+          { "name": "role", "type": "UserRole (vendor | consumer)", "required": true },
+          { "name": "isVerified", "type": "bool", "required": false, "default": false },
+          { "name": "rating", "type": "double?", "required": false },
+          { "name": "totalSales", "type": "int?", "required": false },
+          { "name": "joinedAt", "type": "DateTime? (ISO 8601)", "required": false },
+          { "name": "location", "type": "String?", "required": false },
+          { "name": "storeName", "type": "String?", "required": false },
+          { "name": "storeSlug", "type": "String?", "required": false },
+          { "name": "storeCategory", "type": "String?", "required": false },
+          { "name": "storeDescription", "type": "String?", "required": false },
+          { "name": "storeLogoUrl", "type": "String?", "required": false },
+          { "name": "storeCity", "type": "String?", "required": false },
+          { "name": "storeWilaya", "type": "String?", "required": false },
+          { "name": "whatsappNumber", "type": "String?", "required": false },
+          { "name": "latitude", "type": "double?", "required": false },
+          { "name": "longitude", "type": "double?", "required": false },
+          { "name": "governorate", "type": "String?", "required": false },
+          { "name": "town", "type": "String?", "required": false },
+          { "name": "detailAddress", "type": "String?", "required": false },
+          { "name": "bio", "type": "String?", "required": false },
+          { "name": "dateOfBirth", "type": "DateTime? (ISO 8601)", "required": false },
+          { "name": "instagramHandle", "type": "String?", "required": false },
+          { "name": "facebookPage", "type": "String?", "required": false },
+          { "name": "token", "type": "String?", "required": false },
+          { "name": "isNewUser", "type": "bool", "required": false, "default": false }
+        ]
+      },
+      "notes": [
+        "rememberMe is sent to API but only persisted locally when true",
+        "Token is stored via AuthRepositoryImpl._persistUser() when UserModel.token is non-null",
+        "No separate refreshToken field — token is embedded in the user payload"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Register",
+      "method": "POST",
+      "path": "/auth/register",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/auth/data/datasources/auth_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Inline Map<String, dynamic> built from RegisterParams domain entity",
+        "domainParamsClass": "RegisterParams",
+        "domainParamsFile": "lib/features/auth/domain/entities/register_params.dart",
+        "fields": [
+          { "name": "role", "type": "String (UserRole.name → 'vendor' | 'consumer')", "required": true },
+          { "name": "fullName", "type": "String", "required": true },
+          { "name": "email", "type": "String", "required": true },
+          { "name": "phoneNumber", "type": "String", "required": true },
+          { "name": "countryCode", "type": "String", "required": true },
+          { "name": "dateOfBirth", "type": "String? (ISO 8601)", "required": false },
+          { "name": "location", "type": "String", "required": true },
+          { "name": "password", "type": "String", "required": true },
+          { "name": "storeName", "type": "String?", "required": false, "vendorOnly": true },
+          { "name": "storeCategory", "type": "String?", "required": false, "vendorOnly": true },
+          { "name": "storeDescription", "type": "String?", "required": false, "vendorOnly": true },
+          { "name": "storeCity", "type": "String?", "required": false, "vendorOnly": true },
+          { "name": "storeWilaya", "type": "String?", "required": false, "vendorOnly": true },
+          { "name": "whatsappNumber", "type": "String?", "required": false, "vendorOnly": true }
+        ]
+      },
+      "response": {
+        "modelClass": "UserModel",
+        "modelFile": "lib/features/auth/data/models/user_model.dart",
+        "wrapper": null,
+        "note": "Same fields as Login response — see endpoint id:1"
+      },
+      "notes": [
+        "RegisterParams.storeLogoPath exists in domain entity but is NOT sent in HTTP body",
+        "Vendor logo upload is handled locally only — no multipart form data"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Logout",
+      "method": "POST",
+      "path": "/auth/logout",
+      "transport": "REST (Dio)",
+      "implemented": false,
+      "implementationFile": null,
+      "request": null,
+      "response": null,
+      "notes": [
+        "Endpoint constant exists in lib/core/network/api_endpoints.dart but is never called",
+        "AuthRepositoryImpl.logout() only calls SocialAuthDatasource.signOutSocial() and clears secure storage",
+        "Logout is currently client-side only"
+      ]
+    }
+  ],
+  "nonRestAuthFlows": [
+    {
+      "id": 4,
+      "name": "Send OTP (Phone)",
+      "transport": "Firebase Auth (verifyPhoneNumber)",
+      "implementationFile": "lib/features/auth/data/datasources/phone_auth_datasource.dart",
+      "request": {
+        "modelClass": "SendOtpParams",
+        "modelFile": "lib/features/auth/domain/entities/send_otp_params.dart",
+        "fields": [
+          { "name": "phoneNumber", "type": "String", "required": true },
+          { "name": "e164Number", "type": "String", "required": true }
+        ]
+      },
+      "response": {
+        "modelClass": "SendOtpResult",
+        "modelFile": "lib/features/auth/domain/entities/send_otp_result.dart",
+        "fields": [
+          { "name": "verificationId", "type": "String", "required": true },
+          { "name": "phoneNumber", "type": "String", "required": true },
+          { "name": "resendToken", "type": "int?", "required": false },
+          { "name": "expiresAt", "type": "DateTime", "required": true }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "name": "Verify OTP (Phone)",
+      "transport": "Firebase Auth (PhoneAuthProvider.credential + signInWithCredential)",
+      "implementationFile": "lib/features/auth/data/datasources/phone_auth_datasource.dart",
+      "request": {
+        "modelClass": "VerifyOtpParams",
+        "modelFile": "lib/features/auth/domain/entities/verify_otp_params.dart",
+        "fields": [
+          { "name": "verificationId", "type": "String", "required": true },
+          { "name": "otpCode", "type": "String", "required": true },
+          { "name": "phoneNumber", "type": "String", "required": false, "default": "" }
+        ]
+      },
+      "response": {
+        "modelClass": "UserEntity",
+        "modelFile": "lib/features/auth/domain/entities/user_entity.dart",
+        "note": "Constructed from Firebase User object, not from REST JSON",
+        "fields": [
+          { "name": "id", "type": "String", "required": true },
+          { "name": "name", "type": "String", "required": true },
+          { "name": "email", "type": "String", "required": true },
+          { "name": "phoneNumber", "type": "String", "required": true },
+          { "name": "avatarUrl", "type": "String?", "required": false },
+          { "name": "role", "type": "UserRole (always consumer in Firebase path)", "required": true },
+          { "name": "isVerified", "type": "bool", "required": true },
+          { "name": "isNewUser", "type": "bool", "required": false, "note": "Set from additionalUserInfo.isNewUser" }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "name": "Google Sign-In",
+      "transport": "google_sign_in + Firebase Auth",
+      "implementationFile": "lib/features/auth/data/datasources/social_auth_datasource.dart",
+      "request": null,
+      "response": {
+        "modelClass": "SocialAuthResult",
+        "modelFile": "lib/features/auth/domain/entities/social_auth_result.dart",
+        "fields": [
+          { "name": "provider", "type": "SocialProvider (google)", "required": true },
+          { "name": "uid", "type": "String", "required": true },
+          { "name": "email", "type": "String?", "required": false },
+          { "name": "displayName", "type": "String?", "required": false },
+          { "name": "photoUrl", "type": "String?", "required": false },
+          { "name": "accessToken", "type": "String?", "required": false },
+          { "name": "idToken", "type": "String?", "required": false },
+          { "name": "isNewUser", "type": "bool", "required": false, "default": false }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "name": "Apple Sign-In",
+      "transport": "sign_in_with_apple + Firebase Auth",
+      "implementationFile": "lib/features/auth/data/datasources/social_auth_datasource.dart",
+      "request": null,
+      "response": {
+        "modelClass": "SocialAuthResult",
+        "modelFile": "lib/features/auth/domain/entities/social_auth_result.dart",
+        "note": "Same fields as Google Sign-In; provider: apple"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Facebook Sign-In",
+      "transport": "flutter_facebook_auth + Firebase Auth",
+      "implementationFile": "lib/features/auth/data/datasources/social_auth_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body — SDK login with permissions: ['email', 'public_profile']"
+      },
+      "response": {
+        "modelClass": "SocialAuthResult",
+        "modelFile": "lib/features/auth/domain/entities/social_auth_result.dart",
+        "note": "Same fields as Google Sign-In; provider: facebook"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Social Sign-Out",
+      "transport": "Firebase Auth + Google Sign-In + Facebook Auth SDKs",
+      "implementationFile": "lib/features/auth/data/datasources/social_auth_datasource.dart",
+      "request": null,
+      "response": null
+    }
+  ],
+  "notImplemented": [
+    {
+      "feature": "Forgot Password",
+      "status": "UI only — ForgotPasswordScreen exists with local state, no repository or API call"
+    },
+    {
+      "feature": "Refresh Token",
+      "status": "Not present anywhere in auth module"
+    },
+    {
+      "feature": "Reset Password",
+      "status": "Not present"
+    },
+    {
+      "feature": "ApiResponse<T> wrapper",
+      "status": "Not used for any auth responses"
+    }
+  ],
+  "knownGaps": [
+    "No typed request model classes — login and register use inline Map<String, dynamic> in the datasource layer",
+    "/auth/logout endpoint is declared but never called — logout is client-side only",
+    "Phone and social sign-in flows bypass the backend entirely — they never hit REST auth routes",
+    "No separate refreshToken field — token is embedded inside the UserModel payload",
+    "RegisterParams.storeLogoPath exists in domain but is excluded from the HTTP request body"
+  ]
+}

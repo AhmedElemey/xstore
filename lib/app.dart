@@ -7,6 +7,7 @@ import 'core/localization/localization_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/providers/shared_providers.dart';
+import 'shared/widgets/offline_banner.dart';
 
 class XstoreApp extends ConsumerWidget {
   const XstoreApp({super.key});
@@ -26,7 +27,9 @@ class XstoreApp extends ConsumerWidget {
         final scaler = MediaQuery.textScalerOf(context);
         return Theme(
           data: AppTheme.withScaledTextSpacing(Theme.of(context), scaler),
-          child: child ?? const SizedBox.shrink(),
+          child: OfflineBannerHost(
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
       theme: AppTheme.light.copyWith(

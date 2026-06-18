@@ -180,8 +180,8 @@ abstract final class AppStrings {
   static const statResponse = 'Response';
   static const statOrders = 'Orders';
   static const statWishlist = 'Wishlist';
-  static const statDzdSaved = 'DZD Saved';
-  static const currencyDzd = 'DZD';
+  static const statTotalSaved = 'Total Saved';
+  static const currencyDzd = 'EGP';
   static const storeInformation = 'Store Information';
   static const fullNameLabel = 'Full Name';
   static const emailAddressLabel = 'Email Address';
@@ -575,6 +575,9 @@ abstract final class AppStrings {
   static const checkoutErrorNoPayment = 'Please select a payment method';
   static const checkoutErrorNoItems = 'No items selected for checkout';
   static const checkoutErrorCard = 'Please enter a valid card number';
+  static const checkoutErrorExpiry = 'Enter a valid expiry date (MM/YY)';
+  static const checkoutErrorCvv = 'Enter a valid CVV (3–4 digits)';
+  static const checkoutPaymentSecure = 'Your payment info is encrypted';
   static const checkoutErrorGeneric = 'Could not place order';
   static const orderPlacedTitle = 'Order Placed! 🎉';
   static String orderPlacedNumber(String id) => 'Order #$id';

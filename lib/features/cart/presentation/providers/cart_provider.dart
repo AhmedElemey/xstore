@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
@@ -147,6 +148,10 @@ class Cart extends _$Cart {
   }) async {
     final id = _consumerId;
     if (id == null || quantity <= 0) return;
+    if (!ref.read(isOnlineProvider)) {
+      state = state.copyWith(error: kOfflineErrorCode);
+      return;
+    }
     final prevIds = state.items.map((x) => x.id).toSet();
     state = state.copyWith(isUpdating: true, error: null);
     final result = await ref.read(addToCartUseCaseProvider).call(
@@ -398,6 +403,10 @@ class Cart extends _$Cart {
   }
 
   Future<OrderEntity?> placeOrder(PlaceOrderParams params) async {
+    if (!ref.read(isOnlineProvider)) {
+      state = state.copyWith(error: kOfflineErrorCode);
+      return null;
+    }
     state = state.copyWith(isUpdating: true, error: null);
     final result = await ref.read(placeOrderUseCaseProvider).call(params);
     return result.fold(

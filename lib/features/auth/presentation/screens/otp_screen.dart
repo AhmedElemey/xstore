@@ -15,6 +15,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../providers/phone_auth_provider.dart';
 import '../widgets/otp_input_field.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -146,25 +147,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                       ),
                     ),
                     const Gap(AppSpacing.lg),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: FilledButton(
-                        onPressed: st.otpCode.length == 6 && !st.isVerifyingOtp
-                            ? () async {
-                                final ok = await ref.read(phoneAuthProvider.notifier).verifyOtp();
-                                if (!context.mounted || !ok) return;
-                                context.go(AppRoutes.home);
-                              }
-                            : null,
-                        child: st.isVerifyingOtp
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : Text(context.l10n.verifyAndContinue),
-                      ),
+                    XstoreButton(
+                      label: context.l10n.verifyAndContinue,
+                      isLoading: st.isVerifyingOtp,
+                      onPressed: st.otpCode.length == 6 && !st.isVerifyingOtp
+                          ? () async {
+                              final ok = await ref
+                                  .read(phoneAuthProvider.notifier)
+                                  .verifyOtp();
+                              if (!context.mounted || !ok) return;
+                              context.go(AppRoutes.home);
+                            }
+                          : null,
                     ),
                     const Gap(AppSpacing.md),
                     if (!st.canResend)

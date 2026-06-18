@@ -16,7 +16,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
-import '../widgets/auth_button.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
 import '../widgets/role_selector_card.dart';
@@ -237,7 +237,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.xl),
-                child: AuthButton(
+                child: XstoreButton(
                   label: s.selectedRole == UserRole.vendor && s.currentStep == 4
                       ? context.l10n.createMyStore
                       : context.l10n.continueLabel,
@@ -859,7 +859,7 @@ class _VendorSuccessOverlay extends ConsumerWidget {
                 ),
               ),
               const Gap(AppSpacing.x2l),
-              AuthButton(
+              XstoreButton(
                 label: context.l10n.goToMyStore,
                 onPressed: () {
                   ref.read(registerNotifierProvider.notifier).dismissVendorSuccessOverlay();

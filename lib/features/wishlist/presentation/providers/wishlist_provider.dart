@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/domain/entities/cart_item_entity.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
@@ -256,6 +257,10 @@ class Wishlist extends _$Wishlist {
   Future<void> moveListingToCart(String listingId) async {
     final id = _consumerId;
     if (id == null) return;
+    if (!ref.read(isOnlineProvider)) {
+      state = state.copyWith(error: kOfflineErrorCode);
+      return;
+    }
     state = state.copyWith(isUpdating: true, error: null);
     final r = await ref.read(moveToCartUseCaseProvider).call(
           consumerId: id,
@@ -276,6 +281,10 @@ class Wishlist extends _$Wishlist {
   Future<void> moveAllToCart() async {
     final id = _consumerId;
     if (id == null) return;
+    if (!ref.read(isOnlineProvider)) {
+      state = state.copyWith(error: kOfflineErrorCode);
+      return;
+    }
     // Every in-stock listing: cart add is idempotent; already-in-cart still OK.
     final targets = state.items.where((e) => e.isAvailable).toList();
     state = state.copyWith(isUpdating: true, error: null);

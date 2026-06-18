@@ -711,7 +711,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statWishlist => 'المفضلة';
 
   @override
-  String get statDzdSaved => 'ج.م موفرة';
+  String get statTotalSaved => 'إجمالي التوفير';
 
   @override
   String get currencyDzd => 'ج.م';
@@ -859,6 +859,35 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get placeholderScreenSubtitle => 'الشاشة دي جاية قريباً.';
+
+  @override
+  String get trustInfoPaymentMethodsBody =>
+      'حفظ طرق الدفع مش متاح دلوقتي. وقت الدفع تقدر تدفع كاش عند الاستلام أو تدخل بيانات البطاقة للطلب ده بس — مش بنحفظ البطاقة هنا.';
+
+  @override
+  String get trustInfoAddressesBody =>
+      'دفتر العناوين المحفوظة جاي قريباً. دلوقتي اختار أو أضف عنوان التوصيل أثناء الدفع قبل تأكيد الطلب.';
+
+  @override
+  String get trustInfoTermsBody =>
+      'شروط الخدمة لسه مش منشورة في التطبيق. مش بنعرض نص قانوني مؤقت هنا. الشروط الكاملة هتظهر على الشاشة دي قبل الإطلاق.';
+
+  @override
+  String get trustInfoPrivacyBody =>
+      'سياسة الخصوصية لسه مش منشورة في التطبيق. مش بنعرض نص قانوني مؤقت هنا. هنوضّح إزاي بنتعامل مع بياناتك هنا قبل الإطلاق.';
+
+  @override
+  String get trustInfoHelpBody =>
+      'مقالات المساعدة والدعم المباشر لسه مش متاحين. لأسئلة الطلبات، افتح طلباتي. تقدر تتحكم في التنبيهات من إعدادات الإشعارات.';
+
+  @override
+  String get trustInfoActionCheckout => 'روح للدفع';
+
+  @override
+  String get trustInfoHelpViewOrders => 'روح لطلباتي';
+
+  @override
+  String get trustInfoHelpNotifications => 'إعدادات الإشعارات';
 
   @override
   String get iosAppStoreUrl => 'https://apps.apple.com';
@@ -1642,6 +1671,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get checkoutErrorCard => 'ادخل رقم بطاقة صحيح';
+
+  @override
+  String get checkoutErrorExpiry => 'ادخل تاريخ انتهاء صحيح (شهر/سنة)';
+
+  @override
+  String get checkoutErrorCvv => 'ادخل رمز CVV صحيح (3–4 أرقام)';
+
+  @override
+  String get checkoutPaymentSecure => 'بيانات الدفع مشفّرة';
 
   @override
   String get checkoutErrorGeneric => 'مقدرناش نكمل الطلب';

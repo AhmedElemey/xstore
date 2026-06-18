@@ -6,7 +6,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'listing_thumbnail.dart';
 import 'status_badge.dart';
@@ -80,7 +79,7 @@ class ListingCardGrid extends StatelessWidget {
                       ),
                       const Gap(AppSpacing.sm),
                       Text(
-                        Formatters.currency(listing.price),
+                        context.formatCurrency(listing.price),
                         style: AppTypography.body15.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,

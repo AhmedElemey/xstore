@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class OrderEmptyState extends StatelessWidget {
   const OrderEmptyState({
@@ -63,17 +64,9 @@ class OrderEmptyState extends StatelessWidget {
             ),
             if (!filterActive) ...[
               const SizedBox(height: AppSpacing.x2l),
-              FilledButton(
+              XstoreButton(
+                label: context.l10n.ordersBrowseProducts,
                 onPressed: () => context.go(AppRoutes.explore),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.x2l,
-                    vertical: AppSpacing.md,
-                  ),
-                ),
-                child: Text(context.l10n.ordersBrowseProducts),
               ),
             ],
           ],

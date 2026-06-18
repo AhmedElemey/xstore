@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/place_order_params.dart';
@@ -69,8 +70,34 @@ class Checkout extends _$Checkout {
     if (p == null) return 'noPayment';
     if (p == PaymentMethod.cibCard) {
       final n = state.cardNumber.replaceAll(RegExp(r'\s'), '');
-      if (n.length < 12) return 'invalidCard';
+      if (n.length < 12 || n.length > 19 || !RegExp(r'^\d+$').hasMatch(n)) {
+        return 'invalidCard';
+      }
+      if (_cardExpiryError(state.cardExpiry) != null) return 'invalidExpiry';
+      if (_cardCvvError(state.cardCvv) != null) return 'invalidCvv';
     }
+    return null;
+  }
+
+  String? _cardExpiryError(String raw) {
+    final t = raw.trim();
+    if (t.isEmpty) return 'empty';
+    final m = RegExp(r'^(\d{2})/(\d{2})$').firstMatch(t);
+    if (m == null) return 'invalid';
+    final month = int.tryParse(m.group(1)!);
+    final yy = int.tryParse(m.group(2)!);
+    if (month == null || yy == null || month < 1 || month > 12) return 'invalid';
+    final year = 2000 + yy;
+    final now = DateTime.now();
+    final lastDay = DateTime(year, month + 1, 0);
+    if (lastDay.isBefore(DateTime(now.year, now.month))) return 'invalid';
+    return null;
+  }
+
+  String? _cardCvvError(String raw) {
+    final d = raw.replaceAll(RegExp(r'\D'), '');
+    if (d.isEmpty) return 'empty';
+    if (d.length < 3 || d.length > 4) return 'invalid';
     return null;
   }
 
@@ -104,6 +131,10 @@ class Checkout extends _$Checkout {
   }
 
   Future<OrderEntity?> placeOrder() async {
+    if (!ref.read(isOnlineProvider)) {
+      state = state.copyWith(error: 'offline');
+      return null;
+    }
     final cart = ref.read(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
     final selected = cart.selectedAvailableItems.toList();
@@ -150,6 +181,7 @@ class Checkout extends _$Checkout {
     state = state.copyWith(
       isPlacingOrder: false,
       placedOrderId: order?.id,
+      error: order == null ? (state.error ?? 'failed') : null,
     );
     return order;
   }

@@ -3,18 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import '../widgets/checkout_address_section.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../widgets/checkout_error_banner.dart';
 import '../widgets/checkout_payment_section.dart';
 import '../widgets/checkout_primary_footer.dart';
 import '../widgets/checkout_progress.dart';
 import '../widgets/checkout_review_section.dart';
 import '../widgets/order_confirmation_sheet.dart';
-import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class CheckoutScreen extends ConsumerWidget {
@@ -38,7 +38,7 @@ class CheckoutScreen extends ConsumerWidget {
         final c = ref.read(cartProvider);
         final msg = ck.error != null
             ? checkoutErrorMessage(context, ck.error)
-            : (c.error ?? context.l10n.checkoutErrorGeneric);
+            : resolveAppError(context, c.error);
         AppSnackbar.error(context, msg);
         return;
       }
@@ -50,7 +50,7 @@ class CheckoutScreen extends ConsumerWidget {
     final label = st.currentStep < 3
         ? context.l10n.checkoutContinue
         : context.l10n.checkoutPlaceOrderTotal(
-            Formatters.dzdWhole(cart.total),
+            context.formatCurrency(cart.total),
           );
 
     return Scaffold(
@@ -74,7 +74,7 @@ class CheckoutScreen extends ConsumerWidget {
       body: Column(
         children: [
           CheckoutProgress(step: st.currentStep),
-          if (st.currentStep < 3) CheckoutErrorBanner(messageKey: st.error),
+          CheckoutErrorBanner(messageKey: st.error),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.lg),

@@ -149,7 +149,7 @@ class OrderCard extends ConsumerWidget {
                             ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(
-                            '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${_fmt(first.total)} ${context.l10n.currencyDzd}',
+                            '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${context.formatCurrency(first.total)}',
                             style: AppTypography.bodyLarge.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w700,
@@ -333,9 +333,6 @@ class OrderCard extends ConsumerWidget {
         PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
         PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
       };
-
-  String _fmt(double v) =>
-      v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
 
   String _shortDate(DateTime d) => DateFormat('MMM d, yyyy').format(d);
 

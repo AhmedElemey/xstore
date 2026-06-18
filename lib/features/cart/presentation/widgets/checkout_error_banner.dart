@@ -9,6 +9,10 @@ String checkoutErrorMessage(BuildContext context, String? k) => switch (k) {
       'noPayment' => context.l10n.checkoutErrorNoPayment,
       'noItems' => context.l10n.checkoutErrorNoItems,
       'invalidCard' => context.l10n.checkoutErrorCard,
+      'invalidExpiry' => context.l10n.checkoutErrorExpiry,
+      'invalidCvv' => context.l10n.checkoutErrorCvv,
+      'failed' => context.l10n.checkoutErrorGeneric,
+      'offline' => context.l10n.noInternet,
       'noConsumer' => context.l10n.signInPrompt,
       _ => context.l10n.checkoutErrorGeneric,
     };

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class WishlistEmptyState extends StatelessWidget {
   const WishlistEmptyState({
@@ -70,23 +70,13 @@ class WishlistEmptyState extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 const SizedBox(height: AppSpacing.x2l),
-                FilledButton(
+                XstoreButton(
+                  label: filtered
+                      ? context.l10n.wishlistShowAllItems
+                      : context.l10n.discoverProducts,
                   onPressed: filtered
                       ? onShowAll
                       : () => context.go(AppRoutes.explore),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md,horizontal: AppSpacing.md),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.md),
-                    ),
-                  ),
-                  child: Text(
-                    filtered
-                        ? context.l10n.wishlistShowAllItems
-                        : context.l10n.discoverProducts,
-                        style: TextStyle( color: AppColors.white,),
-                  ),
                 ),
               ],
             ),

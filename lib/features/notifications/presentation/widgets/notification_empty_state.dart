@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class NotificationEmptyState extends ConsumerStatefulWidget {
   const NotificationEmptyState({super.key, required this.isAllFilter});
@@ -108,9 +109,9 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
             ),
             if (!all) ...[
               SizedBox(height: AppSpacing.x2l),
-              FilledButton(
+              XstoreButton(
+                label: context.l10n.notificationsShowAll,
                 onPressed: () => n.applyFilter(NotificationFilter.all),
-                child: Text(context.l10n.notificationsShowAll),
               ),
             ],
           ],

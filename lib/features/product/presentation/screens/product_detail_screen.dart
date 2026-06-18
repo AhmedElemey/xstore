@@ -11,7 +11,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -104,11 +107,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               children: [
                 Text(e.toString(), textAlign: TextAlign.center),
                 const Gap(AppSpacing.lg),
-                FilledButton(
+                XstoreButton(
+                  label: context.l10n.retry,
                   onPressed: () => ref
                       .read(productDetailProvider(widget.productId).notifier)
                       .fetchProduct(widget.productId),
-                  child: Text(context.l10n.retry),
                 ),
               ],
             ),
@@ -307,12 +310,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               },
               onAddToCart: () async {
                 await notifier.addToCart();
-                if (context.mounted) {
-                  AppSnackbar.success(
+                if (!context.mounted) return;
+                final cartError = ref.read(cartProvider).error;
+                if (cartError != null) {
+                  AppSnackbar.error(
                     context,
-                    context.l10n.addedToCart,
+                    resolveAppError(context, cartError),
                   );
+                  ref.read(cartProvider.notifier).clearError();
+                  return;
                 }
+                AppSnackbar.success(
+                  context,
+                  context.l10n.addedToCart,
+                );
               },
               onBuyNow: () {
                 AppSnackbar.info(context, context.l10n.expressCheckoutSoon);

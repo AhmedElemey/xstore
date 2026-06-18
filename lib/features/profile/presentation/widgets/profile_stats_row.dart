@@ -4,7 +4,6 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -95,8 +94,8 @@ class ProfileStatsRow extends StatelessWidget {
           const _VertDivider(),
           Expanded(
             child: _StatCell(
-              value: Formatters.dzdSavedDisplay(savedDzd ?? 0),
-              label: context.l10n.statDzdSaved,
+              value: context.formatCurrency((savedDzd ?? 0) / 100.0),
+              label: context.l10n.statTotalSaved,
               onTap: onSavedTap,
             ),
           ),

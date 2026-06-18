@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_strings.dart';
+import 'xstore_button.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   const ErrorStateWidget({
@@ -37,9 +38,9 @@ class ErrorStateWidget extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const Gap(AppSpacing.lg),
-              FilledButton(
+              XstoreButton(
+                label: AppStrings.retry,
                 onPressed: onRetry,
-                child: Text(AppStrings.retry),
               ),
             ],
           ],

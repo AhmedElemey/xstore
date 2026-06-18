@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/utils/formatters.dart';
 import '../providers/cart_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class CartCheckoutBar extends ConsumerWidget {
   const CartCheckoutBar({super.key});
@@ -35,7 +33,7 @@ class CartCheckoutBar extends ConsumerWidget {
     final label = checkout.selectedCount == 0
         ? context.l10n.cartProceedCheckout
         : context.l10n.cartProceedCheckoutTotal(
-            Formatters.dzdWhole(checkout.total),
+            context.formatCurrency(checkout.total),
           );
 
     return Container(
@@ -55,42 +53,9 @@ class CartCheckoutBar extends ConsumerWidget {
           ),
         ],
       ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: disabled
-                ? null
-                : const LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.profileHeaderGradientEnd,
-                    ],
-                  ),
-            color: disabled ? context.textDisabled : null,
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
-          ),
-          child: Material(
-            color: AppColors.transparent,
-            child: InkWell(
-              onTap: disabled
-                  ? null
-                  : () => context.push(AppRoutes.checkout),
-              borderRadius: BorderRadius.circular(AppSpacing.lg),
-              child: Center(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyLarge.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      child: XstoreButton(
+        label: label,
+        onPressed: disabled ? null : () => context.push(AppRoutes.checkout),
       ),
     );
   }

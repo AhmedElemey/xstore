@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class CheckoutPrimaryFooter extends StatelessWidget {
   const CheckoutPrimaryFooter({
@@ -38,53 +37,15 @@ class CheckoutPrimaryFooter extends StatelessWidget {
           ),
         ],
       ),
-      child: SizedBox(
-        height: 56,
-        width: double.infinity,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: busy
-                ? null
-                : const LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.profileHeaderGradientEnd,
-                    ],
-                  ),
-            color: busy ? context.textDisabled : null,
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
-          ),
-          child: Material(
-            color: AppColors.transparent,
-            child: InkWell(
-              onTap: busy || onPressed == null
-                  ? null
-                  : () {
-                      HapticFeedback.lightImpact();
-                      onPressed!();
-                    },
-              borderRadius: BorderRadius.circular(AppSpacing.lg),
-              child: Center(
-                child: busy
-                    ? const SizedBox(
-                        width: AppSpacing.lg,
-                        height: AppSpacing.lg,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.white,
-                        ),
-                      )
-                    : Text(
-                        label,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-        ),
+      child: XstoreButton(
+        label: label,
+        isLoading: busy,
+        onPressed: busy || onPressed == null
+            ? null
+            : () {
+                HapticFeedback.lightImpact();
+                onPressed!();
+              },
       ),
     );
   }

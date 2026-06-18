@@ -18,7 +18,7 @@ part 'listing_form_notifier.g.dart';
 
 const _draftKey = 'xstore_listing_form_draft';
 const _maxPhotos = 5;
-const _currencyCode = 'DZD';
+const _currencyCode = 'EGP';
 
 @riverpod
 class ListingFormNotifier extends _$ListingFormNotifier {

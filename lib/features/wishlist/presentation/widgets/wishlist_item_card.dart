@@ -11,7 +11,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../providers/wishlist_provider.dart';
@@ -224,7 +223,7 @@ class WishlistItemCard extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              Formatters.dzdWhole(item.price),
+                              context.formatCurrency(item.price),
                               style: AppTypography.bodyLarge.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w800,
@@ -233,7 +232,7 @@ class WishlistItemCard extends ConsumerWidget {
                             if (strike != null) ...[
                               const Gap(AppSpacing.sm),
                               Text(
-                                Formatters.dzdWhole(strike),
+                                context.formatCurrency(strike),
                                 style: AppTypography.bodySmall.copyWith(
                                   color: context.textSecondary,
                                   decoration: TextDecoration.lineThrough,

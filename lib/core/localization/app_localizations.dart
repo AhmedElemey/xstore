@@ -1496,16 +1496,16 @@ abstract class AppLocalizations {
   /// **'Wishlist'**
   String get statWishlist;
 
-  /// No description provided for @statDzdSaved.
+  /// No description provided for @statTotalSaved.
   ///
   /// In en, this message translates to:
-  /// **'DZD Saved'**
-  String get statDzdSaved;
+  /// **'Total Saved'**
+  String get statTotalSaved;
 
   /// No description provided for @currencyDzd.
   ///
   /// In en, this message translates to:
-  /// **'DZD'**
+  /// **'EGP'**
   String get currencyDzd;
 
   /// No description provided for @storeInformation.
@@ -1795,6 +1795,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This screen is coming soon.'**
   String get placeholderScreenSubtitle;
+
+  /// No description provided for @trustInfoPaymentMethodsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved payment methods aren\'t available yet. When you check out, you can pay securely with cash on delivery or enter card details for that order only — card details are used during checkout and are not saved here.'**
+  String get trustInfoPaymentMethodsBody;
+
+  /// No description provided for @trustInfoAddressesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A saved address book is coming soon. For now, choose or add your delivery address during checkout before you place an order.'**
+  String get trustInfoAddressesBody;
+
+  /// No description provided for @trustInfoTermsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Our Terms of Service are not published in the app yet. We don\'t show placeholder legal text here. Full terms will appear on this screen before launch.'**
+  String get trustInfoTermsBody;
+
+  /// No description provided for @trustInfoPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Our Privacy Policy is not published in the app yet. We don\'t show placeholder legal text here. How we collect and use your data will be documented here before launch.'**
+  String get trustInfoPrivacyBody;
+
+  /// No description provided for @trustInfoHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Help articles and live support aren\'t available in the app yet. For order questions, open My Orders. You can manage alerts under Notification settings.'**
+  String get trustInfoHelpBody;
+
+  /// No description provided for @trustInfoActionCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to checkout'**
+  String get trustInfoActionCheckout;
+
+  /// No description provided for @trustInfoHelpViewOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to My Orders'**
+  String get trustInfoHelpViewOrders;
+
+  /// No description provided for @trustInfoHelpNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings'**
+  String get trustInfoHelpNotifications;
 
   /// No description provided for @iosAppStoreUrl.
   ///
@@ -3361,6 +3409,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter a valid card number'**
   String get checkoutErrorCard;
+
+  /// No description provided for @checkoutErrorExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid expiry date (MM/YY)'**
+  String get checkoutErrorExpiry;
+
+  /// No description provided for @checkoutErrorCvv.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid CVV (3–4 digits)'**
+  String get checkoutErrorCvv;
+
+  /// No description provided for @checkoutPaymentSecure.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment info is encrypted'**
+  String get checkoutPaymentSecure;
 
   /// No description provided for @checkoutErrorGeneric.
   ///

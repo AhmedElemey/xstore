@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../providers/cart_provider.dart';
 import 'cart_checkout_bar.dart';
 import 'cart_empty_state.dart';
@@ -44,7 +45,7 @@ class CartConsumerBody extends ConsumerWidget {
               child: ListTile(
                 leading: const Icon(Icons.error_outline, color: AppColors.error),
                 title: Text(
-                  error,
+                  resolveAppError(context, error),
                   style: TextStyle(color: AppColors.error),
                 ),
                 trailing: IconButton(

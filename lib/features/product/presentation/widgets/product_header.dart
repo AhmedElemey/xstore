@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 
@@ -62,7 +61,7 @@ class ProductHeader extends StatelessWidget {
             runSpacing: AppSpacing.xs,
             children: [
               Text(
-                Formatters.currency(price),
+                context.formatCurrency(price),
                 style: AppTypography.titleSmall.copyWith(
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.primary,
@@ -70,7 +69,7 @@ class ProductHeader extends StatelessWidget {
               ),
               if (hasCompare) ...[
                 Text(
-                  Formatters.currency(compareAtPrice!),
+                  context.formatCurrency(compareAtPrice!),
                   style: AppTypography.titleSmall.copyWith(
                     decoration: TextDecoration.lineThrough,
                     color: theme.colorScheme.onSurfaceVariant,

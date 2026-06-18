@@ -10,7 +10,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
-import '../widgets/auth_button.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -161,7 +161,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ),
                       ),
                     ),
-                    AuthButton(
+                    XstoreButton(
                       label: _page == _slideIcons.length - 1
                           ? context.l10n.getStarted
                           : context.l10n.next,

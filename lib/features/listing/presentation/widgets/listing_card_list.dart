@@ -74,7 +74,7 @@ class ListingCardList extends StatelessWidget {
                   ),
                   const Gap(AppSpacing.sm),
                   Text(
-                    Formatters.currency(listing.price),
+                    context.formatCurrency(listing.price),
                     style: AppTypography.body15.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,

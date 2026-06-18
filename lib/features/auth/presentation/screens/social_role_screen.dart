@@ -7,7 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/social_auth_provider.dart';
-import '../widgets/auth_button.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/role_selector_card.dart';
 
@@ -99,7 +99,7 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
                       ],
                     ),
                     const Gap(AppSpacing.md),
-                    AuthButton(
+                    XstoreButton(
                       label: 'Continue',
                       isLoading: social.isAnyLoading,
                       onPressed: _selectedRole == null

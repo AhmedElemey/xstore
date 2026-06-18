@@ -7,6 +7,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class CartEmptyState extends StatelessWidget {
   const CartEmptyState({super.key});
@@ -51,21 +52,9 @@ class CartEmptyState extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.x2l),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => context.go(AppRoutes.explore),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.md,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.md),
-                    ),
-                  ),
-                  child: Text(context.l10n.cartStartShopping),
-                ),
+              XstoreButton(
+                label: context.l10n.cartStartShopping,
+                onPressed: () => context.go(AppRoutes.explore),
               ),
               TextButton(
                 onPressed: () => context.go(AppRoutes.wishlist),

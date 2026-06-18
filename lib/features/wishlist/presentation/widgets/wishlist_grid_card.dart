@@ -10,7 +10,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
@@ -191,7 +190,7 @@ class WishlistGridCard extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        Formatters.dzdWhole(item.price),
+                        context.formatCurrency(item.price),
                         style: AppTypography.labelLarge.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w800,
@@ -201,7 +200,7 @@ class WishlistGridCard extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text(
-                            Formatters.dzdWhole(strike),
+                            context.formatCurrency(strike),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(

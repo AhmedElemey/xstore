@@ -710,10 +710,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statWishlist => 'Wishlist';
 
   @override
-  String get statDzdSaved => 'DZD Saved';
+  String get statTotalSaved => 'Total Saved';
 
   @override
-  String get currencyDzd => 'DZD';
+  String get currencyDzd => 'EGP';
 
   @override
   String get storeInformation => 'Store Information';
@@ -858,6 +858,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placeholderScreenSubtitle => 'This screen is coming soon.';
+
+  @override
+  String get trustInfoPaymentMethodsBody =>
+      'Saved payment methods aren\'t available yet. When you check out, you can pay securely with cash on delivery or enter card details for that order only — card details are used during checkout and are not saved here.';
+
+  @override
+  String get trustInfoAddressesBody =>
+      'A saved address book is coming soon. For now, choose or add your delivery address during checkout before you place an order.';
+
+  @override
+  String get trustInfoTermsBody =>
+      'Our Terms of Service are not published in the app yet. We don\'t show placeholder legal text here. Full terms will appear on this screen before launch.';
+
+  @override
+  String get trustInfoPrivacyBody =>
+      'Our Privacy Policy is not published in the app yet. We don\'t show placeholder legal text here. How we collect and use your data will be documented here before launch.';
+
+  @override
+  String get trustInfoHelpBody =>
+      'Help articles and live support aren\'t available in the app yet. For order questions, open My Orders. You can manage alerts under Notification settings.';
+
+  @override
+  String get trustInfoActionCheckout => 'Go to checkout';
+
+  @override
+  String get trustInfoHelpViewOrders => 'Go to My Orders';
+
+  @override
+  String get trustInfoHelpNotifications => 'Notification settings';
 
   @override
   String get iosAppStoreUrl => 'https://apps.apple.com';
@@ -1641,6 +1670,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkoutErrorCard => 'Please enter a valid card number';
+
+  @override
+  String get checkoutErrorExpiry => 'Enter a valid expiry date (MM/YY)';
+
+  @override
+  String get checkoutErrorCvv => 'Enter a valid CVV (3–4 digits)';
+
+  @override
+  String get checkoutPaymentSecure => 'Your payment info is encrypted';
 
   @override
   String get checkoutErrorGeneric => 'Could not place order';

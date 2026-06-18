@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'status_badge.dart';
 
@@ -51,7 +51,7 @@ class ListingCard extends StatelessWidget {
             ),
             const Gap(AppSpacing.md),
             Text(
-              Formatters.currency(listing.price),
+              context.formatCurrency(listing.price),
               style: theme.textTheme.labelLarge?.copyWith(
                 color: theme.colorScheme.primary,
               ),
