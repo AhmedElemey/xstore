@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -66,7 +66,11 @@ String? computeXStoreAuthRedirect({
 
 final class RouterNotifier extends Listenable {
   RouterNotifier(this._ref) {
-    _ref.listen(authProvider, (_, __) => _notify());
+    _ref.listen(authProvider, (_, __) {
+      // Delay one frame so ref.read(authProvider) returns
+      // AsyncData when redirect evaluates — fixes release timing
+      WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
+    });
     _ref.listen(socialAuthProvider.select((s) => s.needsRoleSelection), (_, __) => _notify());
     _ref.listen(
       registerNotifierProvider.select((s) => s.showVendorSuccessOverlay),

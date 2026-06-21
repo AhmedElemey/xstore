@@ -1,12 +1,10 @@
-import 'package:flutter/foundation.dart';
-
 class MockConfig {
   /// Toggle to switch between mock and real network data.
   static const bool _mockFromDefine = bool.fromEnvironment(
     'MOCK',
     defaultValue: true,
   );
-  static const bool useMock = !kReleaseMode && _mockFromDefine;
+  static const bool useMock = _mockFromDefine;
 
   /// Simulated latency for loading states (refresh, submits, etc.).
   static const Duration mockDelay = Duration(milliseconds: 800);

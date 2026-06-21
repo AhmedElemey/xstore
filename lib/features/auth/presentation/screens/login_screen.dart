@@ -73,6 +73,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     n.updateEmail(_email.text.trim());
     n.updatePassword(_password.text);
     await n.login(context.l10n);
+    if (!mounted) return;
+    final loginState = ref.read(loginNotifierProvider);
+    final authState = ref.read(authProvider);
+    if (loginState.error == null && authState.valueOrNull != null) {
+      context.go(AppRoutes.home);
+    }
   }
 
   Future<void> _openPhoneLoginSheet() async {

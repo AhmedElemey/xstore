@@ -2,17 +2,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
-import '../../../../shared/providers/shared_providers.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/datasources/social_auth_datasource.dart';
 import '../../data/datasources/phone_auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
-import '../../domain/entities/login_params.dart';
-import '../../domain/entities/register_params.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -164,28 +160,24 @@ class LoginNotifier extends _$LoginNotifier {
   Future<void> login(AppLocalizations l10n) async {
     if (!validate(l10n)) return;
     state = state.copyWith(isLoading: true, error: null);
-    final params = LoginParams(
-      emailOrPhone: state.email.trim(),
-      password: state.password,
-      rememberMe: state.rememberMe,
-    );
-    final result = await ref.read(loginUseCaseProvider).call(params);
-    await result.fold(
-      (failure) async {
-        state = state.copyWith(isLoading: false, error: failure.toString());
-      },
-      (user) async {
-        if (state.rememberMe) {
-          final prefs = await ref.read(sharedPreferencesProvider.future);
-          await prefs.setString(PrefsKeys.rememberedEmail, state.email.trim());
-        } else {
-          final prefs = await ref.read(sharedPreferencesProvider.future);
-          await prefs.remove(PrefsKeys.rememberedEmail);
-        }
-        state = state.copyWith(isLoading: false, error: null);
-        ref.read(authProvider.notifier).adoptSession(user);
-      },
-    );
+    try {
+      // DEMO: remove when real API is ready
+      await Future.delayed(const Duration(milliseconds: 2500));
+      final demoUser = UserEntity(
+        id: 'demo-001',
+        name: 'Demo User',
+        email: state.email.trim(),
+        phoneNumber: '',
+        role: UserRole.consumer,
+        isVerified: true,
+        joinedAt: DateTime.now(),
+      );
+      state = state.copyWith(isLoading: false, error: null);
+      ref.read(authProvider.notifier).adoptSession(demoUser);
+      // END DEMO
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
 }
 
@@ -415,42 +407,30 @@ class RegisterNotifier extends _$RegisterNotifier {
   }
 
   Future<void> _executeRegister() async {
-    final role = state.selectedRole ?? UserRole.consumer;
-    final params = RegisterParams(
-      role: role,
-      fullName: state.fullName.trim(),
-      email: state.email.trim(),
-      phoneNumber: state.phoneNumber.replaceAll(RegExp(r'\D'), ''),
-      countryCode: '+20',
-      dateOfBirth: state.dateOfBirth,
-      location: state.location.trim(),
-      password: state.password,
-      storeName: role == UserRole.vendor ? state.storeName.trim() : null,
-      storeCategory: role == UserRole.vendor ? state.storeCategory : null,
-      storeDescription: role == UserRole.vendor ? state.storeDescription.trim() : null,
-      storeLogoPath: state.storeLogoPath,
-      storeCity: role == UserRole.vendor ? state.storeCity.trim() : null,
-      storeWilaya: role == UserRole.vendor ? state.storeWilaya.trim() : null,
-      whatsappNumber: state.whatsappNumber.trim().isEmpty
-          ? null
-          : state.whatsappNumber.trim(),
-    );
-
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
-    final result = await ref.read(registerUseCaseProvider).call(params);
-    result.fold(
-      (failure) {
-        state = state.copyWith(isLoading: false, error: failure.toString());
-      },
-      (user) {
-        state = state.copyWith(
-          isLoading: false,
-          error: null,
-          showVendorSuccessOverlay: role == UserRole.vendor,
-        );
-        ref.read(authProvider.notifier).adoptSession(user);
-      },
-    );
+    try {
+      // DEMO: remove when real API is ready
+      await Future.delayed(const Duration(milliseconds: 2500));
+      final demoUser = UserEntity(
+        id: 'demo-001',
+        name: state.fullName.trim(),
+        email: state.email.trim(),
+        phoneNumber: state.phoneNumber,
+        role: state.selectedRole ?? UserRole.consumer,
+        isVerified: true,
+        joinedAt: DateTime.now(),
+      );
+      state = state.copyWith(
+        isLoading: false,
+        error: null,
+        showVendorSuccessOverlay:
+            (state.selectedRole ?? UserRole.consumer) == UserRole.vendor,
+      );
+      ref.read(authProvider.notifier).adoptSession(demoUser);
+      // END DEMO
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
 
   /// Consumer: call from step 3. Vendor: call from step 4.
