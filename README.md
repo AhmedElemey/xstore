@@ -83,7 +83,37 @@ Key areas covered by automated tests:
 
 ## Building and releasing
 
-### Android
+### Android (go-task)
+
+[go-task](https://taskfile.dev) wraps flavor-specific release APK builds. Install Task (`brew install go-task` on macOS), then from the project root:
+
+```bash
+task build:dev    # dev APK  → build/app/outputs/flutter-apk/app-dev-release.apk
+task build:prod   # prod APK → build/app/outputs/flutter-apk/app-prod-release.apk
+task build:all    # both, in sequence
+task clean        # flutter clean && flutter pub get
+```
+
+Default API origins are set in **`Taskfile.yml`** (`vars.API_BASE_URL_DEV` / `API_BASE_URL_PROD`). No real URLs are committed to the repo — replace the `CHANGE_ME` placeholders in that file, or override at call time:
+
+```bash
+API_BASE_URL_DEV=https://staging-api.example.com task build:dev
+API_BASE_URL_PROD=https://api.example.com task build:prod
+```
+
+Release builds need **`android/key.properties`** and a local release keystore (see [Android deployment](https://docs.flutter.dev/deployment/android#signing-the-app)). CI uses GitHub Actions secrets instead.
+
+Equivalent raw Flutter commands:
+
+```bash
+flutter build apk --release --flavor dev -t lib/main_dev.dart \
+  --dart-define=API_BASE_URL=https://your.api.host --dart-define=MOCK=false
+
+flutter build apk --release --flavor prod -t lib/main_prod.dart \
+  --dart-define=API_BASE_URL=https://your.api.host --dart-define=MOCK=false
+```
+
+### Android (manual)
 
 Debug APK:
 

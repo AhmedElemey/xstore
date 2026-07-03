@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "304127266125",
+    "project_id": "xstore-22e2f",
+    "storage_bucket": "xstore-22e2f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304127266125:android:7bf82fecabeed953f93b04",
+        "android_client_info": {
+          "package_name": "com.xstore.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw2L1su_CuWpOvwUX6uThx4oPhy4lAbvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "304127266125-4m1278jhlu9o4qq0gmbb82jlkialtldi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.xstore.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304127266125:android:1071a43571f0b0e0f93b04",
+        "android_client_info": {
+          "package_name": "com.xstore.app.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw2L1su_CuWpOvwUX6uThx4oPhy4lAbvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "304127266125-4m1278jhlu9o4qq0gmbb82jlkialtldi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.xstore.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
