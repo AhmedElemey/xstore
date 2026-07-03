@@ -1,0 +1,152 @@
+{
+  "module": "Explore",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Search Listings",
+      "method": "GET",
+      "path": "/listings",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/explore/data/datasources/explore_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Query parameters only",
+        "queryParams": [
+          {
+            "name": "q",
+            "type": "String",
+            "required": false,
+            "note": "Omitted when query is empty"
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "pageSize",
+            "type": "int",
+            "required": true,
+            "default": 20
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<SearchResultModel>",
+        "modelFile": "lib/features/explore/data/models/search_result_model.dart",
+        "wrapper": "Unwraps items/data/results/listings from Map or raw List",
+        "note": "Each item mapped via SearchResultModel.fromListingLike (listing-shaped JSON)",
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "imageUrl",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "condition",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rating",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "reviewCount",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "sellerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "isSellerVerified",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "location",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "hasShipping",
+            "type": "bool",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "pageSize constant: ExploreRemoteDataSourceImpl.pageSize = 20"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Search Suggestions",
+      "method": "GET",
+      "path": "/listings/suggestions",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/explore/data/datasources/explore_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Query parameters only",
+        "queryParams": [
+          {
+            "name": "q",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<String>",
+        "modelFile": null,
+        "wrapper": "Accepts raw List<String> or { items: [...] }",
+        "note": "Returns up to 12 suggestions"
+      },
+      "notes": []
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [],
+  "knownGaps": [
+    "Search reuses /listings path shared with listing module create endpoint",
+    "Suggestions response is untyped List<String> at parse site"
+  ]
+}

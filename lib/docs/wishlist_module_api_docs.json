@@ -1,0 +1,732 @@
+{
+  "module": "Wishlist",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Get Wishlist",
+      "method": "GET",
+      "path": "/wishlist/{consumerId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<WishlistItemEntity>",
+        "modelFile": "lib/features/wishlist/domain/entities/wishlist_item_entity.dart",
+        "wrapper": null,
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingImages",
+            "type": "List<String>",
+            "required": true
+          },
+          {
+            "name": "listingSlug",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "isVendorVerified",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "previousPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "priceDropPercent",
+            "type": "int?",
+            "required": false
+          },
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "condition",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rating",
+            "type": "double",
+            "required": false,
+            "default": 4.7
+          },
+          {
+            "name": "reviewCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "stockQuantity",
+            "type": "int",
+            "required": false,
+            "default": 1
+          },
+          {
+            "name": "isAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "isInCart",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "shippingAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": false,
+            "default": 0.0
+          },
+          {
+            "name": "addedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "lastPriceCheckAt",
+            "type": "DateTime",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Path constant _wishlistPath = '/wishlist'"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Add to Wishlist",
+      "method": "POST",
+      "path": "/wishlist/{consumerId}/items",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "fields": [
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "WishlistItemEntity",
+        "modelFile": "lib/features/wishlist/domain/entities/wishlist_item_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingImages",
+            "type": "List<String>",
+            "required": true
+          },
+          {
+            "name": "listingSlug",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "isVendorVerified",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "previousPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "priceDropPercent",
+            "type": "int?",
+            "required": false
+          },
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "condition",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rating",
+            "type": "double",
+            "required": false,
+            "default": 4.7
+          },
+          {
+            "name": "reviewCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "stockQuantity",
+            "type": "int",
+            "required": false,
+            "default": 1
+          },
+          {
+            "name": "isAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "isInCart",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "shippingAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": false,
+            "default": 0.0
+          },
+          {
+            "name": "addedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "lastPriceCheckAt",
+            "type": "DateTime",
+            "required": true
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 3,
+      "name": "Remove from Wishlist",
+      "method": "DELETE",
+      "path": "/wishlist/{consumerId}/items/{listingId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          },
+          {
+            "name": "listingId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": null,
+        "note": "void — no response body"
+      },
+      "notes": []
+    },
+    {
+      "id": 4,
+      "name": "Clear Wishlist",
+      "method": "DELETE",
+      "path": "/wishlist/{consumerId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": null,
+        "note": "void"
+      },
+      "notes": []
+    },
+    {
+      "id": 5,
+      "name": "Upsert Wishlist Item",
+      "method": "PUT",
+      "path": "/wishlist/items/{listingId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Full WishlistItemEntity serialized via _toMap",
+        "domainParamsClass": "WishlistItemEntity",
+        "domainParamsFile": "lib/features/wishlist/domain/entities/wishlist_item_entity.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingImages",
+            "type": "List<String>",
+            "required": true
+          },
+          {
+            "name": "listingSlug",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "isVendorVerified",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "previousPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "priceDropPercent",
+            "type": "int?",
+            "required": false
+          },
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "condition",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rating",
+            "type": "double",
+            "required": false,
+            "default": 4.7
+          },
+          {
+            "name": "reviewCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "stockQuantity",
+            "type": "int",
+            "required": false,
+            "default": 1
+          },
+          {
+            "name": "isAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "isInCart",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "shippingAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": false,
+            "default": 0.0
+          },
+          {
+            "name": "addedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "lastPriceCheckAt",
+            "type": "DateTime",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "WishlistItemEntity",
+        "modelFile": "lib/features/wishlist/domain/entities/wishlist_item_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingImages",
+            "type": "List<String>",
+            "required": true
+          },
+          {
+            "name": "listingSlug",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "isVendorVerified",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "previousPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "priceDropPercent",
+            "type": "int?",
+            "required": false
+          },
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "condition",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "rating",
+            "type": "double",
+            "required": false,
+            "default": 4.7
+          },
+          {
+            "name": "reviewCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "stockQuantity",
+            "type": "int",
+            "required": false,
+            "default": 1
+          },
+          {
+            "name": "isAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "isInCart",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "shippingAvailable",
+            "type": "bool",
+            "required": false,
+            "default": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": false,
+            "default": 0.0
+          },
+          {
+            "name": "addedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "lastPriceCheckAt",
+            "type": "DateTime",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Note: path does not include consumerId"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Build From Listing",
+      "method": "GET",
+      "path": "/listings/{listingId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "listingId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "WishlistItemEntity",
+        "modelFile": "lib/features/wishlist/domain/entities/wishlist_item_entity.dart",
+        "wrapper": null,
+        "note": "Built via _fromListingPayload"
+      },
+      "notes": [
+        "Cross-module listing detail fetch"
+      ]
+    }
+  ],
+  "nonRestFlows": [
+    {
+      "id": 7,
+      "name": "Entity From Cart Item",
+      "transport": "Local conversion (no HTTP)",
+      "implementationFile": "lib/features/wishlist/data/datasources/wishlist_remote_datasource.dart",
+      "request": {
+        "modelClass": "CartItemEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_item_entity.dart"
+      },
+      "response": {
+        "modelClass": "WishlistItemEntity",
+        "modelFile": "lib/features/wishlist/domain/entities/wishlist_item_entity.dart"
+      }
+    }
+  ],
+  "notImplemented": [],
+  "knownGaps": [
+    "No wishlist routes in ApiEndpoints",
+    "Uses domain entities as DTOs — no wishlist_model.dart",
+    "Upsert PUT path omits consumerId segment"
+  ]
+}

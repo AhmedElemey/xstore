@@ -1,0 +1,148 @@
+{
+  "module": "Home",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Fetch Banners",
+      "method": "GET",
+      "path": "/home/banners",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/home/data/datasources/home_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": "List<BannerModel>",
+        "modelFile": "lib/features/home/data/models/banner_model.dart",
+        "wrapper": null,
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "imageUrl",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "actionUrl",
+            "type": "String?",
+            "required": false
+          }
+        ]
+      },
+      "notes": [
+        "Falls back to inline mock banners on connection error"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Fetch Hot Deals",
+      "method": "GET",
+      "path": "/home/hot-deals",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/home/data/datasources/home_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": "List<DealModel>",
+        "modelFile": "lib/features/home/data/models/deal_model.dart",
+        "wrapper": null,
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "imageUrl",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "discountPercent",
+            "type": "double",
+            "required": false,
+            "default": 0.0
+          }
+        ]
+      },
+      "notes": [
+        "Also used by HomeRepositoryImpl.getNewArrivals() and getRecommended() — no separate API",
+        "New arrivals/recommended are derived client-side from hot deals data"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Fetch Categories",
+      "method": "GET",
+      "path": "/home/categories",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/home/data/datasources/home_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": "List<CategoryModel>",
+        "modelFile": "lib/features/home/data/models/category_model.dart",
+        "wrapper": null,
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "iconUrl",
+            "type": "String?",
+            "required": false
+          }
+        ]
+      },
+      "notes": [
+        "Falls back to inline mock categories on connection error"
+      ]
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [],
+  "knownGaps": [
+    "No dedicated new-arrivals or recommended endpoints — both reuse hot deals",
+    "No typed request models — all home endpoints are GET with no body"
+  ]
+}

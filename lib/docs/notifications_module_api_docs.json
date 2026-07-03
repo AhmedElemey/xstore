@@ -1,0 +1,202 @@
+{
+  "module": "Notifications",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [],
+  "nonRestFlows": [
+    {
+      "id": 1,
+      "name": "Fetch Notifications Page",
+      "transport": "Mock-only (in-memory)",
+      "implementationFile": "lib/features/notifications/data/datasources/notifications_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "role",
+            "type": "UserRole"
+          },
+          {
+            "name": "page",
+            "type": "int"
+          },
+          {
+            "name": "pageSize",
+            "type": "int"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<NotificationEntity>",
+        "modelFile": "lib/features/notifications/domain/entities/notification_entity.dart",
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "type",
+            "type": "NotificationType"
+          },
+          {
+            "name": "priority",
+            "type": "NotificationPriority",
+            "default": "normal"
+          },
+          {
+            "name": "title",
+            "type": "String"
+          },
+          {
+            "name": "body",
+            "type": "String"
+          },
+          {
+            "name": "imageUrl",
+            "type": "String?"
+          },
+          {
+            "name": "actionRoute",
+            "type": "String?"
+          },
+          {
+            "name": "actionData",
+            "type": "Map<String, dynamic>?"
+          },
+          {
+            "name": "isRead",
+            "type": "bool",
+            "default": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime"
+          },
+          {
+            "name": "orderId",
+            "type": "String?"
+          },
+          {
+            "name": "listingId",
+            "type": "String?"
+          },
+          {
+            "name": "reviewId",
+            "type": "String?"
+          },
+          {
+            "name": "senderId",
+            "type": "String?"
+          },
+          {
+            "name": "senderName",
+            "type": "String?"
+          },
+          {
+            "name": "senderAvatar",
+            "type": "String?"
+          },
+          {
+            "name": "discountPercent",
+            "type": "int?"
+          },
+          {
+            "name": "priceDropAmount",
+            "type": "double?"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Unread Count",
+      "transport": "Mock-only",
+      "implementationFile": "lib/features/notifications/data/datasources/notifications_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "role",
+            "type": "UserRole"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "int"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Mark Read",
+      "transport": "Mock-only",
+      "implementationFile": "lib/features/notifications/data/datasources/notifications_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          }
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": 4,
+      "name": "Mark All Read",
+      "transport": "Mock-only",
+      "implementationFile": "lib/features/notifications/data/datasources/notifications_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "role",
+            "type": "UserRole"
+          }
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": 5,
+      "name": "Mark Unread",
+      "transport": "Mock-only",
+      "implementationFile": "lib/features/notifications/data/datasources/notifications_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          }
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": 6,
+      "name": "Delete Notification",
+      "transport": "Mock-only",
+      "implementationFile": "lib/features/notifications/data/datasources/notifications_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          }
+        ]
+      },
+      "response": null
+    }
+  ],
+  "notImplemented": [
+    {
+      "feature": "All notification REST endpoints",
+      "status": "No Dio usage — data from mock_notifications.dart with in-memory _deleted/_readOverride state"
+    }
+  ],
+  "knownGaps": [
+    "NotificationsRemoteDataSource has no Dio dependency",
+    "No notification routes in ApiEndpoints",
+    "All operations are simulated with artificial delays"
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "module": "Store (Store Hours)",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Get Store Hours",
+      "method": "GET",
+      "path": "/vendors/{vendorId}/store-hours",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/store/data/datasources/store_hours_datasource.dart",
+      "request": {
+        "pathParams": [
+          {
+            "name": "vendorId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "StoreHoursModel",
+        "modelFile": "lib/features/store/data/models/store_hours_model.dart",
+        "fields": [
+          {
+            "name": "vendorId",
+            "type": "String"
+          },
+          {
+            "name": "isStoreOpen",
+            "type": "bool"
+          },
+          {
+            "name": "temporaryMessage",
+            "type": "String?"
+          },
+          {
+            "name": "schedule",
+            "type": "List<DayScheduleModel>",
+            "itemFields": [
+              {
+                "name": "day",
+                "type": "DayOfWeek (enum name string)",
+                "required": true
+              },
+              {
+                "name": "isOpen",
+                "type": "bool",
+                "required": true
+              },
+              {
+                "name": "openTime",
+                "type": "String (HH:mm)",
+                "required": true,
+                "note": "Serialized from openHour/openMinute"
+              },
+              {
+                "name": "closeTime",
+                "type": "String (HH:mm)",
+                "required": true
+              },
+              {
+                "name": "is24Hours",
+                "type": "bool",
+                "required": true
+              },
+              {
+                "name": "isClosed",
+                "type": "bool",
+                "required": true
+              }
+            ]
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime"
+          }
+        ]
+      },
+      "notes": [
+        "Path not in ApiEndpoints"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Update Store Hours",
+      "method": "PUT",
+      "path": "/vendors/{vendorId}/store-hours",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/store/data/datasources/store_hours_datasource.dart",
+      "request": {
+        "modelClass": "StoreHoursModel",
+        "modelFile": "lib/features/store/data/models/store_hours_model.dart",
+        "note": "Serialized via _toMap"
+      },
+      "response": {
+        "modelClass": "StoreHoursModel",
+        "modelFile": "lib/features/store/data/models/store_hours_model.dart"
+      },
+      "notes": []
+    },
+    {
+      "id": 3,
+      "name": "Toggle Store Status",
+      "method": "PATCH",
+      "path": "/vendors/{vendorId}/store-status",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/store/data/datasources/store_hours_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "isStoreOpen",
+            "type": "bool",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "bool",
+        "note": "Returns isOpen value — not parsed from response body"
+      },
+      "notes": []
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [],
+  "knownGaps": [
+    "Store hours paths not in ApiEndpoints",
+    "StoreHoursDataSourceImpl accepts optional Dio — throws if null and MockConfig.useMock is false"
+  ]
+}

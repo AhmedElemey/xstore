@@ -1,0 +1,254 @@
+{
+  "module": "Product",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Fetch Product Detail",
+      "method": "GET",
+      "path": "/listings/{id}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/product/data/datasources/product_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body",
+        "pathParams": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true,
+            "alias": "listingId"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "ProductDetailEntity",
+        "modelFile": "lib/features/product/domain/entities/product_detail_entity.dart",
+        "wrapper": null,
+        "note": "Parsed inline via _parseProductDetail — accepts flat or nested listing JSON",
+        "fields": [
+          {
+            "name": "listing",
+            "type": "ListingEntity",
+            "required": true,
+            "note": "Parsed via ListingModel.fromJson"
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "stockQuantity",
+            "type": "int",
+            "required": false,
+            "default": 99
+          },
+          {
+            "name": "locationLine",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "seller",
+            "type": "ProductSellerEntity?",
+            "required": false
+          },
+          {
+            "name": "specifications",
+            "type": "Map<String, String>",
+            "required": false,
+            "default": "{}"
+          },
+          {
+            "name": "reviewSummary",
+            "type": "ReviewSummaryEntity?",
+            "required": false
+          },
+          {
+            "name": "reviews",
+            "type": "List<ProductReviewEntity>",
+            "required": false,
+            "default": "[]"
+          },
+          {
+            "name": "similarProducts",
+            "type": "List<DealEntity>",
+            "required": false,
+            "default": "[]"
+          }
+        ]
+      },
+      "notes": [
+        "Accepts alternate JSON keys: compare_at_price, stock, seller/vendor, specs/specifications",
+        "Listing may be nested under 'listing' key or at root level"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Fetch Similar Products",
+      "method": "GET",
+      "path": "/listings/similar",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/product/data/datasources/product_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Query parameters only",
+        "queryParams": [
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<ProductDetailEntity>",
+        "modelFile": "lib/features/product/domain/entities/product_detail_entity.dart",
+        "wrapper": "Unwraps items/data/results/listings from Map or raw List",
+        "note": "Simplified ProductDetailEntity — seller/reviews/similar omitted",
+        "itemFields": [
+          {
+            "name": "listing",
+            "type": "ListingEntity",
+            "required": true,
+            "note": "Parsed via ListingModel.fromJson"
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "stockQuantity",
+            "type": "int",
+            "required": false,
+            "default": 99
+          },
+          {
+            "name": "locationLine",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "seller",
+            "type": "ProductSellerEntity?",
+            "required": false
+          },
+          {
+            "name": "specifications",
+            "type": "Map<String, String>",
+            "required": false,
+            "default": "{}"
+          },
+          {
+            "name": "reviewSummary",
+            "type": "ReviewSummaryEntity?",
+            "required": false
+          },
+          {
+            "name": "reviews",
+            "type": "List<ProductReviewEntity>",
+            "required": false,
+            "default": "[]"
+          },
+          {
+            "name": "similarProducts",
+            "type": "List<DealEntity>",
+            "required": false,
+            "default": "[]"
+          }
+        ]
+      },
+      "notes": [
+        "Excludes current productId client-side"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Fetch Product Reviews",
+      "method": "GET",
+      "path": "/listings/{listingId}/reviews",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/product/data/datasources/product_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body",
+        "pathParams": [
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<ReviewEntity>",
+        "modelFile": "lib/features/product/domain/entities/review_entity.dart",
+        "wrapper": "Unwraps items/data/results/listings from Map or raw List",
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "userName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "userAvatar",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "rating",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "comment",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "helpfulCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Accepts alternate keys: author, avatar, stars, text, date"
+      ]
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [],
+  "knownGaps": [
+    "No dedicated response DTO — ProductDetailEntity parsed manually from Map",
+    "Flexible JSON key aliases increase backend contract ambiguity"
+  ]
+}

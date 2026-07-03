@@ -1,0 +1,1754 @@
+{
+  "module": "Orders",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Get Consumer Orders",
+      "method": "GET",
+      "path": "/orders/consumer/{consumerId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "queryParams": [
+          {
+            "name": "page",
+            "type": "int"
+          },
+          {
+            "name": "pageSize",
+            "type": "int"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<OrderModel>",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "wrapper": null,
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 2,
+      "name": "Get Vendor Orders",
+      "method": "GET",
+      "path": "/orders/vendor/{vendorId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "queryParams": [
+          {
+            "name": "page",
+            "type": "int"
+          },
+          {
+            "name": "pageSize",
+            "type": "int"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<OrderModel>",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "wrapper": null,
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 3,
+      "name": "Get Order By ID",
+      "method": "GET",
+      "path": "/orders/{orderId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "pathParams": [
+          {
+            "name": "orderId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": [
+        "Returns null on 404"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Get Vendor Order Stats",
+      "method": "GET",
+      "path": "/orders/vendor/{vendorId}/stats",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "pathParams": [
+          {
+            "name": "vendorId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "OrderStatsEntity",
+        "modelFile": "lib/features/orders/domain/entities/order_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "pendingCount",
+            "type": "int"
+          },
+          {
+            "name": "activeCount",
+            "type": "int"
+          },
+          {
+            "name": "monthCount",
+            "type": "int"
+          },
+          {
+            "name": "totalCount",
+            "type": "int"
+          },
+          {
+            "name": "totalRevenue",
+            "type": "double"
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 5,
+      "name": "Cancel Order",
+      "method": "POST",
+      "path": "/orders/{orderId}/cancel",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "reason",
+            "type": "String"
+          },
+          {
+            "name": "isVendorSession",
+            "type": "bool"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 6,
+      "name": "Confirm Order",
+      "method": "POST",
+      "path": "/orders/{orderId}/confirm",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": [
+        "Vendor action"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Reject Order",
+      "method": "POST",
+      "path": "/orders/{orderId}/reject",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "fields": [
+          {
+            "name": "reason",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": [
+        "Vendor action"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Mark Processing",
+      "method": "POST",
+      "path": "/orders/{orderId}/processing",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 9,
+      "name": "Mark Shipped",
+      "method": "POST",
+      "path": "/orders/{orderId}/shipped",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "domainParamsClass": "ShippingInfo",
+        "domainParamsFile": "lib/features/orders/domain/entities/order_entity.dart",
+        "fields": [
+          {
+            "name": "trackingNumber",
+            "type": "String?"
+          },
+          {
+            "name": "courierName",
+            "type": "String?"
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "String? (ISO 8601)"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 10,
+      "name": "Mark Delivered",
+      "method": "POST",
+      "path": "/orders/{orderId}/delivered",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": "OrderModel",
+        "modelFile": "lib/features/orders/data/models/order_model.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerPhone",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": false,
+            "default": 4.8
+          },
+          {
+            "name": "items",
+            "type": "List<OrderItemModel>",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "OrderStatus",
+            "required": true
+          },
+          {
+            "name": "paymentMethod",
+            "type": "PaymentMethod",
+            "required": true
+          },
+          {
+            "name": "isPaid",
+            "type": "bool",
+            "required": false,
+            "default": false
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "OrderAddressModel",
+            "required": true
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "trackingNumber",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "courierName",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "trackingLocation",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "estimatedDelivery",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelReason",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "notes",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "createdAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "updatedAt",
+            "type": "DateTime",
+            "required": true
+          },
+          {
+            "name": "confirmedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "shippedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "deliveredAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "cancelledAt",
+            "type": "DateTime?",
+            "required": false
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 11,
+      "name": "Register Placed Consumer Order",
+      "method": "POST",
+      "path": "/orders/consumer/{consumerId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/orders/data/datasources/orders_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Full OrderModel serialized via _orderToApiMap"
+      },
+      "response": {
+        "modelClass": null,
+        "note": "void — no response body parsed"
+      },
+      "notes": [
+        "Called after checkout to persist order; separate from cart POST /orders place order"
+      ]
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [
+    {
+      "feature": "POST /orders (Place Order)",
+      "status": "Implemented in cart module (CartRemoteDataSourceImpl.placeOrder), not in orders datasource"
+    }
+  ],
+  "knownGaps": [
+    "Order creation split: POST /orders in cart, register in orders datasource",
+    "No /orders routes in ApiEndpoints — uses inline _ordersPath",
+    "OrderModel has no fromJson — API parsing is inline in _orderFromApiMap"
+  ]
+}

@@ -1,0 +1,741 @@
+{
+  "module": "Cart",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Get Cart",
+      "method": "GET",
+      "path": "/cart/{consumerId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CartEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<CartItemEntity>",
+            "required": true
+          },
+          {
+            "name": "couponCode",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "coupon",
+            "type": "CouponEntity?",
+            "required": false
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "itemCount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Path constant _cartPath = '/cart' — not in ApiEndpoints"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Add or Update Cart Item",
+      "method": "POST",
+      "path": "/cart/{consumerId}/items",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Inline Map from CartItemEntity via _cartItemToMap",
+        "domainParamsClass": "CartItemEntity",
+        "domainParamsFile": "lib/features/cart/domain/entities/cart_item_entity.dart",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingImage",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "listingSlug",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorStoreName",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorAvatar",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "vendorRating",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "vendorVerified",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "compareAtPrice",
+            "type": "double?",
+            "required": false
+          },
+          {
+            "name": "quantity",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "maxQuantity",
+            "type": "int",
+            "required": true
+          },
+          {
+            "name": "category",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "condition",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "shippingAvailable",
+            "type": "bool",
+            "required": true
+          },
+          {
+            "name": "shippingCost",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "isAvailable",
+            "type": "bool",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CartEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<CartItemEntity>",
+            "required": true
+          },
+          {
+            "name": "couponCode",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "coupon",
+            "type": "CouponEntity?",
+            "required": false
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "itemCount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 3,
+      "name": "Remove Cart Item",
+      "method": "DELETE",
+      "path": "/cart/{consumerId}/items/{itemId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          },
+          {
+            "name": "itemId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CartEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<CartItemEntity>",
+            "required": true
+          },
+          {
+            "name": "couponCode",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "coupon",
+            "type": "CouponEntity?",
+            "required": false
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "itemCount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 4,
+      "name": "Update Item Quantity",
+      "method": "PATCH",
+      "path": "/cart/{consumerId}/items/{itemId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "fields": [
+          {
+            "name": "quantity",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CartEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<CartItemEntity>",
+            "required": true
+          },
+          {
+            "name": "couponCode",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "coupon",
+            "type": "CouponEntity?",
+            "required": false
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "itemCount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 5,
+      "name": "Clear Cart",
+      "method": "DELETE",
+      "path": "/cart/{consumerId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CartEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<CartItemEntity>",
+            "required": true
+          },
+          {
+            "name": "couponCode",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "coupon",
+            "type": "CouponEntity?",
+            "required": false
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "itemCount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 6,
+      "name": "Apply Coupon",
+      "method": "POST",
+      "path": "/cart/coupons/apply",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "fields": [
+          {
+            "name": "code",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "eligibleSubtotal",
+            "type": "double",
+            "required": true
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CouponEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "code",
+            "type": "String"
+          },
+          {
+            "name": "discountType",
+            "type": "DiscountType (percentage | fixed)"
+          },
+          {
+            "name": "discountValue",
+            "type": "double"
+          },
+          {
+            "name": "minOrderAmount",
+            "type": "double?"
+          },
+          {
+            "name": "maxDiscount",
+            "type": "double?"
+          },
+          {
+            "name": "isValid",
+            "type": "bool",
+            "default": true
+          },
+          {
+            "name": "message",
+            "type": "String",
+            "default": ""
+          }
+        ]
+      },
+      "notes": [
+        "Mock codes: SAVE10, FREE500, WELCOME"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Remove Coupon",
+      "method": "DELETE",
+      "path": "/cart/{consumerId}/coupon",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "CartEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_entity.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "consumerId",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "items",
+            "type": "List<CartItemEntity>",
+            "required": true
+          },
+          {
+            "name": "couponCode",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "coupon",
+            "type": "CouponEntity?",
+            "required": false
+          },
+          {
+            "name": "subtotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "discount",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "total",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "itemCount",
+            "type": "int",
+            "required": true
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "id": 8,
+      "name": "Place Order",
+      "method": "POST",
+      "path": "/orders",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "Inline Map from PlaceOrderParams via _placeOrderPayload",
+        "domainParamsClass": "PlaceOrderParams",
+        "domainParamsFile": "lib/features/cart/domain/entities/place_order_params.dart",
+        "fields": [
+          {
+            "name": "consumerId",
+            "type": "String"
+          },
+          {
+            "name": "deliveryAddress",
+            "type": "Object (fullName, phone, street, city, wilaya, postalCode)"
+          },
+          {
+            "name": "paymentMethod",
+            "type": "String (PaymentMethod.name)"
+          },
+          {
+            "name": "items",
+            "type": "List<Object>"
+          },
+          {
+            "name": "subtotal",
+            "type": "double"
+          },
+          {
+            "name": "shippingTotal",
+            "type": "double"
+          },
+          {
+            "name": "discount",
+            "type": "double"
+          },
+          {
+            "name": "total",
+            "type": "double"
+          },
+          {
+            "name": "deliveryNote",
+            "type": "String?"
+          }
+        ],
+        "note2": "PlaceOrderParams.cardNumber/cardExpiry/cardCvv exist in domain but are NOT sent in HTTP body"
+      },
+      "response": {
+        "modelClass": "OrderEntity",
+        "modelFile": "lib/features/orders/domain/entities/order_entity.dart",
+        "wrapper": null,
+        "note": "Parsed via _orderFromMap inline"
+      },
+      "notes": [
+        "Checkout lives in cart datasource; orders module handles post-checkout reads"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Build Line From Listing",
+      "method": "GET",
+      "path": "/listings/{listingId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/cart/data/datasources/cart_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "pathParams": [
+          {
+            "name": "listingId",
+            "type": "String"
+          }
+        ],
+        "note": "Method param quantity used client-side only"
+      },
+      "response": {
+        "modelClass": "CartItemEntity",
+        "modelFile": "lib/features/cart/domain/entities/cart_item_entity.dart",
+        "wrapper": null,
+        "note": "Built via _fromListingPayload from listing detail JSON"
+      },
+      "notes": [
+        "Cross-module: reuses product listing detail endpoint"
+      ]
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [
+    {
+      "feature": "Cart paths in ApiEndpoints",
+      "status": "Cart routes use inline _cartPath constant, not ApiEndpoints"
+    }
+  ],
+  "knownGaps": [
+    "No cart/* routes declared in lib/core/network/api_endpoints.dart",
+    "Card payment fields in PlaceOrderParams not sent to API",
+    "CartEntity uses domain entity as response DTO — no separate cart_model.dart"
+  ]
+}

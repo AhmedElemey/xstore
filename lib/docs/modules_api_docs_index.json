@@ -1,0 +1,83 @@
+{
+  "title": "xStore Module API Documentation Index",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "modules": [
+    {
+      "module": "Authentication",
+      "file": "lib/docs/auth_module_api_docs.json",
+      "restEndpoints": 3,
+      "nonRestFlows": 6
+    },
+    {
+      "module": "Home",
+      "file": "lib/docs/home_module_api_docs.json",
+      "restEndpoints": 3,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Listing",
+      "file": "lib/docs/listing_module_api_docs.json",
+      "restEndpoints": 4,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Product",
+      "file": "lib/docs/product_module_api_docs.json",
+      "restEndpoints": 3,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Explore",
+      "file": "lib/docs/explore_module_api_docs.json",
+      "restEndpoints": 2,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Cart",
+      "file": "lib/docs/cart_module_api_docs.json",
+      "restEndpoints": 9,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Wishlist",
+      "file": "lib/docs/wishlist_module_api_docs.json",
+      "restEndpoints": 6,
+      "nonRestFlows": 1
+    },
+    {
+      "module": "Orders",
+      "file": "lib/docs/orders_module_api_docs.json",
+      "restEndpoints": 11,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Profile",
+      "file": "lib/docs/profile_module_api_docs.json",
+      "restEndpoints": 6,
+      "nonRestFlows": 0
+    },
+    {
+      "module": "Notifications",
+      "file": "lib/docs/notifications_module_api_docs.json",
+      "restEndpoints": 0,
+      "nonRestFlows": 6
+    },
+    {
+      "module": "Store (Store Hours)",
+      "file": "lib/docs/store_module_api_docs.json",
+      "restEndpoints": 3,
+      "nonRestFlows": 0
+    }
+  ],
+  "totalRestEndpoints": 50,
+  "notes": [
+    "Auth documentation: lib/docs/auth_module_api_docs.json (created separately)",
+    "Many modules use inline path constants instead of ApiEndpoints",
+    "MockConfig.useMock=true bypasses REST for most modules in development"
+  ]
+}

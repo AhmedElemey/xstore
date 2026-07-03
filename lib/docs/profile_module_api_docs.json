@@ -1,0 +1,272 @@
+{
+  "module": "Profile",
+  "baseUrl": "{API_BASE_URL} (from --dart-define=API_BASE_URL, fallback: http://localhost:8080)",
+  "globalInterceptors": {
+    "file": "lib/core/network/dio_provider.dart",
+    "onRequest": "Reads PrefsKeys.authToken from FlutterSecureStorage; sets Authorization: Bearer <token> if present",
+    "onError401": "Deletes authToken and authUser from secure storage; invalidates authProvider"
+  },
+  "endpoints": [
+    {
+      "id": 1,
+      "name": "Get Profile",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/profile/data/datasources/profile_remote_datasource.dart",
+      "request": {
+        "pathParams": [
+          {
+            "name": "userId",
+            "type": "String",
+            "note": "sessionUser.id"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "ProfileModel",
+        "modelFile": "lib/features/profile/data/models/profile_model.dart",
+        "wrapper": null,
+        "fields": [
+          {
+            "name": "user",
+            "type": "UserModel",
+            "note": "Same fields as auth UserModel — see lib/docs/auth_module_api_docs.json endpoint id:1"
+          },
+          {
+            "name": "ordersCount",
+            "type": "int",
+            "default": 0
+          },
+          {
+            "name": "wishlistCount",
+            "type": "int",
+            "default": 0
+          },
+          {
+            "name": "savedAmountDzd",
+            "type": "int",
+            "default": 0
+          },
+          {
+            "name": "storeViewCount",
+            "type": "int",
+            "default": 0
+          },
+          {
+            "name": "storeSaveCount",
+            "type": "int",
+            "default": 0
+          },
+          {
+            "name": "storeActiveListings",
+            "type": "int",
+            "default": 0
+          },
+          {
+            "name": "responseRatePercent",
+            "type": "int",
+            "default": 0
+          }
+        ]
+      },
+      "notes": [
+        "Response wraps user under data['user'] key"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Get Vendor Store Profile",
+      "method": "GET",
+      "path": "/users/{sellerId}/store",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/profile/data/datasources/profile_remote_datasource.dart",
+      "request": {
+        "pathParams": [
+          {
+            "name": "sellerId",
+            "type": "String"
+          }
+        ],
+        "note": "Public — no auth required per comment"
+      },
+      "response": {
+        "modelClass": "ProfileModel",
+        "modelFile": "lib/features/profile/data/models/profile_model.dart",
+        "note": "Vendor stats: storeViewCount, storeSaveCount, storeActiveListings, responseRatePercent"
+      },
+      "notes": []
+    },
+    {
+      "id": 3,
+      "name": "Update Profile",
+      "method": "PUT",
+      "path": "/users/{userId}",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/profile/data/datasources/profile_remote_datasource.dart",
+      "request": {
+        "modelClass": "UserModel",
+        "modelFile": "lib/features/auth/data/models/user_model.dart",
+        "note": "Built from UserEntity.toJson() via UserModel(...).toJson() — token excluded (null)"
+      },
+      "response": {
+        "modelClass": "UserModel",
+        "modelFile": "lib/features/auth/data/models/user_model.dart",
+        "note": "Top-level UserModel JSON"
+      },
+      "notes": []
+    },
+    {
+      "id": 4,
+      "name": "Update Avatar",
+      "method": "POST",
+      "path": "/users/{userId}/avatar",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/profile/data/datasources/profile_remote_datasource.dart",
+      "request": {
+        "note": "filePath param exists but multipart upload NOT implemented — empty POST body"
+      },
+      "response": {
+        "modelClass": "String",
+        "note": "Returns placeholder avatar URL — real upload not wired"
+      },
+      "notes": [
+        "⚠️ Multipart file upload not implemented"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Delete Account",
+      "method": "DELETE",
+      "path": "/users/me",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/profile/data/datasources/profile_remote_datasource.dart",
+      "request": {
+        "modelClass": null,
+        "note": "No request body"
+      },
+      "response": {
+        "modelClass": null,
+        "note": "void"
+      },
+      "notes": []
+    },
+    {
+      "id": 6,
+      "name": "Fetch Vendor Store Listings",
+      "method": "GET",
+      "path": "/users/{sellerId}/listings",
+      "transport": "REST (Dio)",
+      "implemented": true,
+      "implementationFile": "lib/features/profile/data/datasources/profile_remote_datasource.dart",
+      "request": {
+        "queryParams": [
+          {
+            "name": "category",
+            "type": "String?",
+            "required": false
+          },
+          {
+            "name": "page",
+            "type": "int"
+          },
+          {
+            "name": "pageSize",
+            "type": "int"
+          }
+        ]
+      },
+      "response": {
+        "modelClass": "List<ListingEntity>",
+        "modelFile": "lib/features/listing/data/models/listing_model.dart",
+        "wrapper": "{ items: [...] }",
+        "itemFields": [
+          {
+            "name": "id",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "title",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "String",
+            "required": true
+          },
+          {
+            "name": "price",
+            "type": "double",
+            "required": true
+          },
+          {
+            "name": "status",
+            "type": "String",
+            "required": false,
+            "default": "draft"
+          },
+          {
+            "name": "imageUrls",
+            "type": "List<String>",
+            "required": false,
+            "default": "[]"
+          },
+          {
+            "name": "categoryLabel",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "conditionLabel",
+            "type": "String",
+            "required": false,
+            "default": ""
+          },
+          {
+            "name": "postedAt",
+            "type": "DateTime?",
+            "required": false
+          },
+          {
+            "name": "viewCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "saveCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          },
+          {
+            "name": "inquiryCount",
+            "type": "int",
+            "required": false,
+            "default": 0
+          }
+        ]
+      },
+      "notes": []
+    }
+  ],
+  "nonRestFlows": [],
+  "notImplemented": [
+    {
+      "feature": "Avatar multipart upload",
+      "status": "POST called without FormData — returns hardcoded placeholder URL"
+    }
+  ],
+  "knownGaps": [
+    "Avatar update ignores filePath parameter",
+    "Profile reuses auth UserModel for user payload"
+  ]
+}
