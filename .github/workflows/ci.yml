@@ -1,0 +1,189 @@
+# =============================================================================
+# GitHub Actions — Continuous Integration for xStore (Android + iOS)
+# =============================================================================
+#
+# WHAT THIS DOES
+# -----------------------------------------------------------------------------
+# Runs on every push / pull request to main (and manually) to guarantee the app
+# stays healthy on BOTH platforms. Three parallel jobs:
+#
+#   1. analyze-and-test   (ubuntu)  — codegen, `flutter analyze`, `flutter test`
+#   2. build-android      (ubuntu)  — debug APK build (prod flavor), validates
+#                                     the Android build compiles
+#   3. build-ios          (macos)   — `flutter build ios --no-codesign`, validates
+#                                     the iOS build compiles
+#
+# WHY DEBUG / NO-CODESIGN
+# -----------------------------------------------------------------------------
+# These jobs prove the code COMPILES and TESTS PASS on both platforms without
+# needing any secrets:
+#   - Android debug uses debug signing (no keystore needed). Release signing is
+#     only required by android/app/build.gradle.kts for *release* assemble/bundle
+#     tasks (see isReleaseBuildTask()).
+#   - iOS --no-codesign skips Apple certificates/provisioning entirely.
+#   - Debug builds skip the API_BASE_URL release assert in
+#     lib/core/network/api_endpoints.dart, so no API variables are required.
+#
+# NOTE ON iOS FLAVORS
+# -----------------------------------------------------------------------------
+# Android defines dev/prod product flavors, but the iOS project has only the
+# default "Runner" scheme (no dev/prod Xcode schemes). Passing --flavor to an
+# iOS build would therefore FAIL. The dev/prod split on iOS is handled purely at
+# the Dart level via the entry point (main_dev.dart / main_prod.dart calling
+# bootstrap(AppFlavor.*)), so the iOS job selects the target with -t and does NOT
+# pass --flavor. If native iOS flavors are needed later, add matching Xcode
+# schemes + build configurations first.
+#
+# Signed release builds live in the separate `build-and-release-apk.yml`
+# workflow (Android). A signed iOS IPA requires an Apple Developer account and
+# certificates — see the note at the bottom of this file.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.35.6"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1) Static analysis + unit/widget tests
+  # ---------------------------------------------------------------------------
+  analyze-and-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Run code generation (freezed / riverpod / json)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Verify formatting (informational)
+        continue-on-error: true
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test --reporter expanded
+
+  # ---------------------------------------------------------------------------
+  # 2) Android build validation (debug, no signing secrets required)
+  # ---------------------------------------------------------------------------
+  build-android:
+    name: Build Android (debug)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build debug APK (prod flavor)
+        run: |
+          flutter build apk --debug \
+            --flavor prod \
+            -t lib/main_prod.dart \
+            --dart-define=MOCK=true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xstore-android-debug
+          path: build/app/outputs/flutter-apk/app-prod-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # 3) iOS build validation (unsigned — no Apple certificates required)
+  # ---------------------------------------------------------------------------
+  build-ios:
+    name: Build iOS (no codesign)
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build iOS (unsigned)
+        run: |
+          flutter build ios --debug --no-codesign \
+            -t lib/main_prod.dart \
+            --dart-define=MOCK=true
+
+# =============================================================================
+# FOLLOW-UP: distributing a SIGNED iOS build
+# -----------------------------------------------------------------------------
+# This CI proves iOS compiles, but shipping to TestFlight / App Store needs an
+# Apple Developer account and code signing. When you have them, add a release
+# job that:
+#   1. Installs the distribution certificate + provisioning profile from secrets
+#      (e.g. via apple-actions/import-codesign-certs).
+#   2. Runs: flutter build ipa --release -t lib/main_prod.dart \
+#              --dart-define=API_BASE_URL=<real> --dart-define=MOCK=false \
+#              --export-options-plist=ios/ExportOptions.plist
+#   3. Uploads to TestFlight via `xcrun altool` / `fastlane pilot` /
+#      apple-actions/upload-testflight-build.
+# Native iOS dev/prod flavors (Xcode schemes) should be added before then if you
+# want separate bundle IDs per environment.
+# =============================================================================
