@@ -1741,6 +1741,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readLess => 'Read less';
 
   @override
+  String get writeReview => 'Write a Review';
+
+  @override
+  String get editReview => 'Edit Review';
+
+  @override
+  String get deleteReview => 'Delete';
+
+  @override
+  String get reviewRatingLabel => 'Your rating';
+
+  @override
+  String get reviewCommentHint => 'Share your thoughts about this product';
+
+  @override
+  String get submitReview => 'Submit';
+
+  @override
+  String get signInToWriteReview => 'Sign in to write a review';
+
+  @override
+  String get deleteReviewConfirmTitle => 'Delete review?';
+
+  @override
+  String get deleteReviewConfirmMessage => 'This can\'t be undone.';
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
   String get quantity => 'Quantity';
 
   @override
@@ -2354,6 +2384,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullNameRequired => 'Full Name *';
 
   @override
+  String get fullNameArRequired => 'Full Name (Arabic) *';
+
+  @override
+  String get storeNameArRequired => 'Store Name (Arabic) *';
+
+  @override
+  String get storeDescriptionArRequired => 'Store Description (Arabic) *';
+
+  @override
   String get emailAddressRequired => 'Email Address *';
 
   @override
@@ -2373,7 +2412,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordRequired => 'Password *';
 
   @override
+  String get newPasswordRequired => 'New Password *';
+
+  @override
   String get confirmPasswordRequired => 'Confirm Password *';
+
+  @override
+  String get resetPasswordTitle => 'Reset Password';
+
+  @override
+  String resetPasswordOtpSentTo(String email) {
+    return 'Enter the code sent to $email and choose a new password';
+  }
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get passwordResetSuccess =>
+      'Password reset. Please sign in with your new password.';
 
   @override
   String get agreeTo => 'I agree to the';
@@ -2797,6 +2854,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get validationStoreCityWilayaRequired =>
       'City and wilaya are required';
+
+  @override
+  String get validationFullNameArRequired => 'Arabic full name is required';
+
+  @override
+  String get validationStoreNameArRequired => 'Arabic store name is required';
+
+  @override
+  String get validationStoreDescriptionArShort =>
+      'Describe your store in Arabic';
 
   @override
   String get listingValidationPhotosRequired => 'Add at least one photo';

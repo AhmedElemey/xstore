@@ -4,21 +4,20 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../data/listing_categories_data.dart';
-import '../utils/listing_localized_labels.dart';
-import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 
 Future<void> showListingCategoryPicker({
   required BuildContext context,
   required String title,
-  required List<ListingCategoryOption> categories,
-  required String? selectedId,
-  required ValueChanged<String> onSelected,
+  required List<CatalogCategoryEntity> categories,
+  required int? selectedId,
+  required String Function(CatalogCategoryEntity) labelOf,
+  required ValueChanged<int> onSelected,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: context.surfaceColor,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
     ),
@@ -47,7 +46,7 @@ Future<void> showListingCategoryPicker({
                   ],
                 ),
               ),
-              Divider(height: 1),
+              const Divider(height: 1),
               SizedBox(
                 height: MediaQuery.of(ctx).size.height * 0.45,
                 child: ListView.builder(
@@ -56,8 +55,11 @@ Future<void> showListingCategoryPicker({
                     final c = categories[i];
                     final sel = c.id == selectedId;
                     return ListTile(
-                      leading: Icon(c.icon, color: AppColors.primary),
-                      title: Text(listingLocalizedCategoryName(context, c.id)),
+                      // CatalogCategoryEntity has no per-category icon
+                      // (unlike the old hardcoded taxonomy) — one generic
+                      // icon for all rows.
+                      leading: const Icon(LucideIcons.tag, color: AppColors.primary),
+                      title: Text(labelOf(c)),
                       trailing:
                           sel ? const Icon(LucideIcons.check, color: AppColors.primary) : null,
                       onTap: () {
@@ -79,14 +81,16 @@ Future<void> showListingCategoryPicker({
 
 Future<void> showListingSubcategoryPicker({
   required BuildContext context,
-  required ListingCategoryOption category,
-  required String? selectedId,
-  required ValueChanged<String> onSelected,
+  required String title,
+  required List<CatalogCategoryEntity> subcategories,
+  required int? selectedId,
+  required String Function(CatalogCategoryEntity) labelOf,
+  required ValueChanged<int> onSelected,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: context.surfaceColor,
+    backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
     ),
@@ -102,7 +106,7 @@ Future<void> showListingSubcategoryPicker({
                 children: [
                   Expanded(
                     child: Text(
-                      '${ctx.l10n.subcategoryPickerPrefix}${listingLocalizedCategoryName(ctx, category.id)}',
+                      title,
                       style: Theme.of(ctx).textTheme.titleLarge,
                     ),
                   ),
@@ -113,14 +117,12 @@ Future<void> showListingSubcategoryPicker({
                 ],
               ),
             ),
-            Divider(height: 1),
-            ...category.subcategories.map(
+            const Divider(height: 1),
+            ...subcategories.map(
               (s) {
                 final sel = s.id == selectedId;
                 return ListTile(
-                  title: Text(
-                    listingLocalizedSubcategoryName(ctx, category.id, s.id),
-                  ),
+                  title: Text(labelOf(s)),
                   trailing: sel
                       ? const Icon(LucideIcons.check, color: AppColors.primary)
                       : null,

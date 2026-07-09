@@ -10,9 +10,16 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../cities/domain/entities/city_entity.dart';
+import '../../../cities/presentation/providers/city_dependencies.dart';
+import '../../../governments/domain/entities/government_entity.dart';
+import '../../../governments/presentation/providers/government_dependencies.dart';
+import '../../../store_categories/domain/entities/store_category_entity.dart';
+import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -24,18 +31,6 @@ import '../widgets/auth_divider.dart';
 import '../widgets/social_login_row.dart';
 import '../widgets/phone_input_field.dart';
 
-const _storeCategories = [
-  'Electronics',
-  'Fashion',
-  'Home',
-  'Beauty',
-  'Sports',
-  'Books',
-  'Food',
-  'Automotive',
-  'Mixed/Other',
-];
-
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -45,15 +40,16 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _fullName = TextEditingController();
+  final _fullNameAr = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _location = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
   final _storeName = TextEditingController();
+  final _storeNameAr = TextEditingController();
   final _storeDesc = TextEditingController();
-  final _storeCity = TextEditingController();
-  final _storeWilaya = TextEditingController();
+  final _storeDescAr = TextEditingController();
   final _whatsapp = TextEditingController();
 
   @override
@@ -67,15 +63,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _fullName.dispose();
+    _fullNameAr.dispose();
     _email.dispose();
     _phone.dispose();
     _location.dispose();
     _password.dispose();
     _confirm.dispose();
     _storeName.dispose();
+    _storeNameAr.dispose();
     _storeDesc.dispose();
-    _storeCity.dispose();
-    _storeWilaya.dispose();
+    _storeDescAr.dispose();
     _whatsapp.dispose();
     super.dispose();
   }
@@ -265,6 +262,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           s: s,
           n: n,
           fullName: _fullName,
+          fullNameAr: _fullNameAr,
           email: _email,
           phone: _phone,
           location: _location,
@@ -282,9 +280,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           s: s,
           n: n,
           storeName: _storeName,
+          storeNameAr: _storeNameAr,
           storeDesc: _storeDesc,
-          storeCity: _storeCity,
-          storeWilaya: _storeWilaya,
+          storeDescAr: _storeDescAr,
           whatsapp: _whatsapp,
         );
       default:
@@ -373,6 +371,7 @@ class _StepPersonal extends StatelessWidget {
     required this.s,
     required this.n,
     required this.fullName,
+    required this.fullNameAr,
     required this.email,
     required this.phone,
     required this.location,
@@ -382,6 +381,7 @@ class _StepPersonal extends StatelessWidget {
   final RegisterState s;
   final RegisterNotifier n;
   final TextEditingController fullName;
+  final TextEditingController fullNameAr;
   final TextEditingController email;
   final TextEditingController phone;
   final TextEditingController location;
@@ -415,6 +415,14 @@ class _StepPersonal extends StatelessWidget {
           prefixIcon: const Icon(LucideIcons.user),
           errorText: s.stepErrors['fullName'],
           onChanged: (v) => n.updateField(fullName: v),
+        ),
+        const Gap(AppSpacing.inputContentPaddingH),
+        AuthTextField(
+          label: context.l10n.fullNameArRequired,
+          controller: fullNameAr,
+          prefixIcon: const Icon(LucideIcons.user),
+          errorText: s.stepErrors['fullNameAr'],
+          onChanged: (v) => n.updateField(fullNameAr: v),
         ),
         const Gap(AppSpacing.inputContentPaddingH),
         ValueListenableBuilder<TextEditingValue>(
@@ -608,27 +616,74 @@ class _StepSecurity extends StatelessWidget {
   }
 }
 
-class _StepStore extends StatelessWidget {
+class _StepStore extends ConsumerWidget {
   const _StepStore({
     required this.s,
     required this.n,
     required this.storeName,
+    required this.storeNameAr,
     required this.storeDesc,
-    required this.storeCity,
-    required this.storeWilaya,
+    required this.storeDescAr,
     required this.whatsapp,
   });
 
   final RegisterState s;
   final RegisterNotifier n;
   final TextEditingController storeName;
+  final TextEditingController storeNameAr;
   final TextEditingController storeDesc;
-  final TextEditingController storeCity;
-  final TextEditingController storeWilaya;
+  final TextEditingController storeDescAr;
   final TextEditingController whatsapp;
 
+  /// Renders a labeled dropdown for a reference-data lookup (city / government
+  /// / store category), sourced from an [AsyncValue] provider.
+  Widget _lookupDropdown<T>({
+    required BuildContext context,
+    required AsyncValue<List<T>> async,
+    required int? value,
+    required int Function(T) idOf,
+    required String Function(T) labelOf,
+    required String hint,
+    required ValueChanged<int?> onChanged,
+    String? errorText,
+  }) {
+    return async.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (_, __) => Text(
+        context.l10n.genericError,
+        style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+      ),
+      data: (items) => DropdownButtonFormField<int>(
+        // ignore: deprecated_member_use
+        value: value != null && items.any((e) => idOf(e) == value)
+            ? value
+            : null,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: context.surfaceColor,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+          errorText: errorText,
+        ),
+        hint: Text(hint),
+        items: items
+            .map(
+              (e) => DropdownMenuItem(
+                value: idOf(e),
+                child: Text(labelOf(e)),
+              ),
+            )
+            .toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isArabic = ref.watch(appIsArabicProvider);
     final initials = s.storeName.isEmpty
         ? '?'
         : s.storeName
@@ -663,6 +718,14 @@ class _StepStore extends StatelessWidget {
           errorText: s.stepErrors['storeName'],
           onChanged: (v) => n.updateField(storeName: v),
         ),
+        const Gap(AppSpacing.inputContentPaddingH),
+        AuthTextField(
+          label: context.l10n.storeNameArRequired,
+          controller: storeNameAr,
+          prefixIcon: const Icon(LucideIcons.store),
+          errorText: s.stepErrors['storeNameAr'],
+          onChanged: (v) => n.updateField(storeNameAr: v),
+        ),
         const Gap(AppSpacing.sm),
         Text(
           'Your store URL: xstore.com/store/${s.storeSlug}',
@@ -680,31 +743,16 @@ class _StepStore extends StatelessWidget {
           ),
         ),
         const Gap(AppSpacing.sm),
-        DropdownButtonFormField<String>(
-          // ignore: deprecated_member_use
-          value: s.storeCategory.isEmpty ? null : s.storeCategory,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: context.surfaceColor,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          hint: Text(context.l10n.storeSellHint),
-          items: _storeCategories
-              .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-              .toList(),
-          onChanged: (v) {
-            if (v != null) n.updateField(storeCategory: v);
-          },
+        _lookupDropdown<StoreCategoryEntity>(
+          context: context,
+          async: ref.watch(allStoreCategoriesProvider),
+          value: s.storeCategoryId,
+          idOf: (e) => e.id,
+          labelOf: (e) => e.name.resolve(isArabic),
+          hint: context.l10n.storeSellHint,
+          errorText: s.stepErrors['storeCategory'],
+          onChanged: (v) => n.updateField(storeCategoryId: v),
         ),
-        if (s.stepErrors.containsKey('storeCategory'))
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              s.stepErrors['storeCategory']!,
-              style:
-                  AppTypography.bodySmall.copyWith(color: AppColors.error),
-            ),
-          ),
         const Gap(AppSpacing.lg),
         AuthTextField(
           label: context.l10n.storeDescriptionRequired,
@@ -718,6 +766,23 @@ class _StepStore extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Text(
             '${s.storeDescription.length}/300',
+            style: AppTypography.body12.copyWith(
+              color: context.textSecondary,
+            ),
+          ),
+        ),
+        const Gap(AppSpacing.lg),
+        AuthTextField(
+          label: context.l10n.storeDescriptionArRequired,
+          controller: storeDescAr,
+          maxLines: 3,
+          errorText: s.stepErrors['storeDescriptionAr'],
+          onChanged: (v) => n.updateField(storeDescriptionAr: v),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            '${s.storeDescriptionAr.length}/300',
             style: AppTypography.body12.copyWith(
               color: context.textSecondary,
             ),
@@ -771,20 +836,29 @@ class _StepStore extends StatelessWidget {
             style: AppTypography.bodySmall.copyWith(color: AppColors.error),
           ),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: AuthTextField(
-                label: context.l10n.cityRequired,
-                controller: storeCity,
-                onChanged: (v) => n.updateField(storeCity: v),
+              child: _lookupDropdown<CityEntity>(
+                context: context,
+                async: ref.watch(allCitiesProvider),
+                value: s.storeCityId,
+                idOf: (e) => e.id,
+                labelOf: (e) => e.name.resolve(isArabic),
+                hint: context.l10n.cityRequired,
+                onChanged: (v) => n.updateField(storeCityId: v),
               ),
             ),
             const Gap(AppSpacing.md),
             Expanded(
-              child: AuthTextField(
-                label: context.l10n.wilayaRequired,
-                controller: storeWilaya,
-                onChanged: (v) => n.updateField(storeWilaya: v),
+              child: _lookupDropdown<GovernmentEntity>(
+                context: context,
+                async: ref.watch(allGovernmentsProvider),
+                value: s.storeGovernmentId,
+                idOf: (e) => e.id,
+                labelOf: (e) => e.name.resolve(isArabic),
+                hint: context.l10n.wilayaRequired,
+                onChanged: (v) => n.updateField(storeGovernmentId: v),
               ),
             ),
           ],

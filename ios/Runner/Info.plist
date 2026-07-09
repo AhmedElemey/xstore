@@ -12,14 +12,16 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- Google Sign-In: reversed iOS OAuth client ID, e.g. com.googleusercontent.apps.123xxxx -->
-				<string>REPLACE_WITH_GOOGLE_REVERSED_IOS_CLIENT_ID</string>
+				<!-- Google Sign-In: reversed iOS OAuth client ID from GoogleService-Info.plist REVERSED_CLIENT_ID -->
+				<string>com.googleusercontent.apps.304127266125-4m1278jhlu9o4qq0gmbb82jlkialtldi</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- Facebook Login: literal `fb` + numeric App ID, e.g. fb1234567890 -->
+				<!-- TODO: Replace with `fb` + numeric Facebook App ID from Meta developer
+				     console. Also update FacebookAppID/FacebookClientToken below and
+				     android/.../strings.xml + AndroidManifest.xml meta-data. -->
 				<string>fbREPLACE_WITH_FACEBOOK_APP_ID</string>
 			</array>
 		</dict>
@@ -63,6 +65,8 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- TODO: Facebook App ID + Client Token from Meta developer console — also update
+	     CFBundleURLSchemes `fb…` above and android/.../strings.xml + AndroidManifest.xml. -->
 	<key>FacebookAppID</key>
 	<string>REPLACE_WITH_FACEBOOK_APP_ID</string>
 	<key>FacebookClientToken</key>

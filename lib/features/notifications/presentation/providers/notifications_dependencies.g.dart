@@ -7,7 +7,7 @@ part of 'notifications_dependencies.dart';
 // **************************************************************************
 
 String _$notificationsRemoteDataSourceHash() =>
-    r'17d0f60b8613ac58d438767d23b1fbddd832e06e';
+    r'6409ea06dbcfbfb257bcecb2c678ebb6247a6b5e';
 
 /// See also [notificationsRemoteDataSource].
 @ProviderFor(notificationsRemoteDataSource)

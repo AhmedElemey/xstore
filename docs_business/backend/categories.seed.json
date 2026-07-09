@@ -1,0 +1,345 @@
+{
+  "version": 1,
+  "source": "xStore app taxonomy (listing_categories_data.dart)",
+  "currency": "EGP",
+  "categories": [
+    {
+      "id": "electronics",
+      "name": "Electronics",
+      "slug": "electronics",
+      "icon": "smartphone",
+      "sortOrder": 1,
+      "isActive": true,
+      "attributeHints": [
+        "RAM",
+        "Storage",
+        "Battery",
+        "Screen size"
+      ],
+      "subcategories": [
+        {
+          "id": "phones",
+          "name": "Phones & tablets",
+          "slug": "phones",
+          "sortOrder": 1
+        },
+        {
+          "id": "laptops",
+          "name": "Laptops & PCs",
+          "slug": "laptops",
+          "sortOrder": 2
+        },
+        {
+          "id": "audio",
+          "name": "Audio",
+          "slug": "audio",
+          "sortOrder": 3
+        },
+        {
+          "id": "accessories",
+          "name": "Accessories",
+          "slug": "accessories",
+          "sortOrder": 4
+        }
+      ]
+    },
+    {
+      "id": "fashion",
+      "name": "Fashion",
+      "slug": "fashion",
+      "icon": "shirt",
+      "sortOrder": 2,
+      "isActive": true,
+      "attributeHints": [
+        "Size",
+        "Color",
+        "Material",
+        "Fit"
+      ],
+      "subcategories": [
+        {
+          "id": "mens",
+          "name": "Men's",
+          "slug": "mens",
+          "sortOrder": 1
+        },
+        {
+          "id": "womens",
+          "name": "Women's",
+          "slug": "womens",
+          "sortOrder": 2
+        },
+        {
+          "id": "kids",
+          "name": "Kids",
+          "slug": "kids",
+          "sortOrder": 3
+        },
+        {
+          "id": "shoes",
+          "name": "Shoes",
+          "slug": "shoes",
+          "sortOrder": 4
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "name": "Home & Garden",
+      "slug": "home",
+      "icon": "sofa",
+      "sortOrder": 3,
+      "isActive": true,
+      "attributeHints": [
+        "Dimensions",
+        "Color",
+        "Material",
+        "Weight"
+      ],
+      "subcategories": [
+        {
+          "id": "furniture",
+          "name": "Furniture",
+          "slug": "furniture",
+          "sortOrder": 1
+        },
+        {
+          "id": "decor",
+          "name": "Decor",
+          "slug": "decor",
+          "sortOrder": 2
+        },
+        {
+          "id": "kitchen",
+          "name": "Kitchen",
+          "slug": "kitchen",
+          "sortOrder": 3
+        },
+        {
+          "id": "garden",
+          "name": "Garden",
+          "slug": "garden",
+          "sortOrder": 4
+        }
+      ]
+    },
+    {
+      "id": "beauty",
+      "name": "Beauty",
+      "slug": "beauty",
+      "icon": "sparkles",
+      "sortOrder": 4,
+      "isActive": true,
+      "attributeHints": [
+        "Volume",
+        "Skin type",
+        "Ingredients"
+      ],
+      "subcategories": [
+        {
+          "id": "skincare",
+          "name": "Skincare",
+          "slug": "skincare",
+          "sortOrder": 1
+        },
+        {
+          "id": "makeup",
+          "name": "Makeup",
+          "slug": "makeup",
+          "sortOrder": 2
+        },
+        {
+          "id": "hair",
+          "name": "Hair care",
+          "slug": "hair",
+          "sortOrder": 3
+        }
+      ]
+    },
+    {
+      "id": "sports",
+      "name": "Sports",
+      "slug": "sports",
+      "icon": "dumbbell",
+      "sortOrder": 5,
+      "isActive": true,
+      "attributeHints": [
+        "Size",
+        "Weight",
+        "Material"
+      ],
+      "subcategories": [
+        {
+          "id": "fitness",
+          "name": "Fitness",
+          "slug": "fitness",
+          "sortOrder": 1
+        },
+        {
+          "id": "outdoor",
+          "name": "Outdoor",
+          "slug": "outdoor",
+          "sortOrder": 2
+        },
+        {
+          "id": "team",
+          "name": "Team sports",
+          "slug": "team",
+          "sortOrder": 3
+        }
+      ]
+    },
+    {
+      "id": "toys",
+      "name": "Toys",
+      "slug": "toys",
+      "icon": "baby",
+      "sortOrder": 6,
+      "isActive": true,
+      "attributeHints": [
+        "Age range",
+        "Material",
+        "Battery"
+      ],
+      "subcategories": [
+        {
+          "id": "games",
+          "name": "Games",
+          "slug": "games",
+          "sortOrder": 1
+        },
+        {
+          "id": "dolls",
+          "name": "Dolls & figures",
+          "slug": "dolls",
+          "sortOrder": 2
+        },
+        {
+          "id": "educational",
+          "name": "Educational",
+          "slug": "educational",
+          "sortOrder": 3
+        }
+      ]
+    },
+    {
+      "id": "automotive",
+      "name": "Automotive",
+      "slug": "automotive",
+      "icon": "car",
+      "sortOrder": 7,
+      "isActive": true,
+      "attributeHints": [
+        "Compatibility",
+        "Year",
+        "Part number"
+      ],
+      "subcategories": [
+        {
+          "id": "parts",
+          "name": "Parts",
+          "slug": "parts",
+          "sortOrder": 1
+        },
+        {
+          "id": "accessories",
+          "name": "Accessories",
+          "slug": "accessories",
+          "sortOrder": 2
+        },
+        {
+          "id": "care",
+          "name": "Care products",
+          "slug": "care",
+          "sortOrder": 3
+        }
+      ]
+    },
+    {
+      "id": "food",
+      "name": "Food & Drinks",
+      "slug": "food",
+      "icon": "utensils",
+      "sortOrder": 8,
+      "isActive": true,
+      "attributeHints": [
+        "Weight",
+        "Expiry",
+        "Ingredients"
+      ],
+      "subcategories": [
+        {
+          "id": "beverages",
+          "name": "Beverages",
+          "slug": "beverages",
+          "sortOrder": 1
+        },
+        {
+          "id": "snacks",
+          "name": "Snacks",
+          "slug": "snacks",
+          "sortOrder": 2
+        },
+        {
+          "id": "grocery",
+          "name": "Grocery",
+          "slug": "grocery",
+          "sortOrder": 3
+        }
+      ]
+    },
+    {
+      "id": "books",
+      "name": "Books",
+      "slug": "books",
+      "icon": "bookOpen",
+      "sortOrder": 9,
+      "isActive": true,
+      "attributeHints": [
+        "Author",
+        "ISBN",
+        "Language"
+      ],
+      "subcategories": [
+        {
+          "id": "fiction",
+          "name": "Fiction",
+          "slug": "fiction",
+          "sortOrder": 1
+        },
+        {
+          "id": "nonfiction",
+          "name": "Non-fiction",
+          "slug": "nonfiction",
+          "sortOrder": 2
+        },
+        {
+          "id": "textbooks",
+          "name": "Textbooks",
+          "slug": "textbooks",
+          "sortOrder": 3
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "slug": "other",
+      "icon": "shapes",
+      "sortOrder": 10,
+      "isActive": true,
+      "attributeHints": [
+        "Type",
+        "Condition notes"
+      ],
+      "subcategories": [
+        {
+          "id": "misc",
+          "name": "Miscellaneous",
+          "slug": "misc",
+          "sortOrder": 1
+        }
+      ]
+    }
+  ]
+}

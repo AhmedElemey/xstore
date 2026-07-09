@@ -1742,6 +1742,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get readLess => 'اقرأ أقل';
 
   @override
+  String get writeReview => 'اكتب تقييم';
+
+  @override
+  String get editReview => 'تعديل التقييم';
+
+  @override
+  String get deleteReview => 'حذف';
+
+  @override
+  String get reviewRatingLabel => 'تقييمك';
+
+  @override
+  String get reviewCommentHint => 'شاركنا رأيك في هذا المنتج';
+
+  @override
+  String get submitReview => 'إرسال';
+
+  @override
+  String get signInToWriteReview => 'سجّل الدخول لكتابة تقييم';
+
+  @override
+  String get deleteReviewConfirmTitle => 'حذف التقييم؟';
+
+  @override
+  String get deleteReviewConfirmMessage => 'لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get noReviewsYet => 'لا توجد تقييمات بعد';
+
+  @override
   String get quantity => 'الكمية';
 
   @override
@@ -2351,6 +2381,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullNameRequired => 'الاسم الكامل *';
 
   @override
+  String get fullNameArRequired => 'الاسم الكامل (بالعربية) *';
+
+  @override
+  String get storeNameArRequired => 'اسم المتجر (بالعربية) *';
+
+  @override
+  String get storeDescriptionArRequired => 'وصف المتجر (بالعربية) *';
+
+  @override
   String get emailAddressRequired => 'البريد الإلكتروني *';
 
   @override
@@ -2369,7 +2408,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordRequired => 'كلمة المرور *';
 
   @override
+  String get newPasswordRequired => 'كلمة المرور الجديدة *';
+
+  @override
   String get confirmPasswordRequired => 'تأكيد كلمة المرور *';
+
+  @override
+  String get resetPasswordTitle => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String resetPasswordOtpSentTo(String email) {
+    return 'أدخل الكود المرسل إلى $email واختر كلمة مرور جديدة';
+  }
+
+  @override
+  String get resetPassword => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get passwordResetSuccess =>
+      'تم إعادة تعيين كلمة المرور. سجّل الدخول بكلمة المرور الجديدة.';
 
   @override
   String get agreeTo => 'أنا موافق على';
@@ -2789,6 +2846,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationStoreCityWilayaRequired => 'المدينة والولاية مطلوبين';
+
+  @override
+  String get validationFullNameArRequired => 'الاسم الكامل بالعربية مطلوب';
+
+  @override
+  String get validationStoreNameArRequired => 'اسم المتجر بالعربية مطلوب';
+
+  @override
+  String get validationStoreDescriptionArShort => 'صف متجرك بالعربية';
 
   @override
   String get listingValidationPhotosRequired => 'ضيف صورة واحدة على الأقل';

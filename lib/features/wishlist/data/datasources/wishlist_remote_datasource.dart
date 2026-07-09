@@ -5,7 +5,9 @@ import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
+import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../cart/domain/entities/cart_item_entity.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 
@@ -35,7 +37,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   WishlistRemoteDataSourceImpl(this._dio);
 
   final Dio _dio;
-  static const _wishlistPath = '/wishlist';
 
   static final List<WishlistItemEntity> _items = [];
 
@@ -221,14 +222,22 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       return _items.map(_withComputedDrop).toList();
     }
     try {
-      final response = await _dio.get<List<dynamic>>('$_wishlistPath/$consumerId');
+      // ASSUMPTION: response is the full 23-field WishlistItemEntity shape
+      // (denormalized listing+vendor info), matching _fromMap below. If the
+      // real API returns a slim {id, listingId, addedAt} shape instead,
+      // parsing will silently produce a mostly-empty entity — verify
+      // against a live response.
+      final response = await _dio.get<List<dynamic>>(
+        '${ApiEndpoints.wishlist}/$consumerId',
+        options: ApiAuthHeaders.authenticated(),
+      );
       final list = response.data ?? const [];
       return list
           .whereType<Map>()
           .map((e) => _fromMap(Map<String, dynamic>.from(e)))
           .toList();
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to fetch wishlist');
+      throw mapDioException(e);
     }
   }
 
@@ -250,15 +259,18 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       return _withComputedDrop(e);
     }
     try {
+      // ASSUMPTION: response is the full WishlistItemEntity shape — see
+      // getWishlist above.
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_wishlistPath/$consumerId/items',
+        ApiEndpoints.wishlistItems(consumerId),
         data: {'listingId': listingId},
+        options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty wishlist response');
       return _fromMap(data);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to add wishlist item');
+      throw mapDioException(e);
     }
   }
 
@@ -273,9 +285,12 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       return;
     }
     try {
-      await _dio.delete<void>('$_wishlistPath/$consumerId/items/$listingId');
+      await _dio.delete<void>(
+        ApiEndpoints.wishlistItem(consumerId, listingId),
+        options: ApiAuthHeaders.authenticated(),
+      );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to remove wishlist item');
+      throw mapDioException(e);
     }
   }
 
@@ -287,9 +302,12 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       return;
     }
     try {
-      await _dio.delete<void>('$_wishlistPath/$consumerId');
+      await _dio.delete<void>(
+        '${ApiEndpoints.wishlist}/$consumerId',
+        options: ApiAuthHeaders.authenticated(),
+      );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to clear wishlist');
+      throw mapDioException(e);
     }
   }
 
@@ -342,15 +360,22 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       );
     }
     try {
+      // NOT in the confirmed backend contract (the Postman collection has
+      // no PUT /api/wishlist/items/{listingId} route). This is an
+      // app-invented "save cart item to wishlist with full metadata"
+      // endpoint used by the cart -> wishlist move flow. Kept working as-is
+      // (prefix/error-mapper fixed for consistency); may 404 against a real
+      // backend until/unless this route is confirmed or added.
       final response = await _dio.put<Map<String, dynamic>>(
-        '$_wishlistPath/items/${item.listingId}',
+        '${ApiEndpoints.wishlist}/items/${item.listingId}',
         data: _toMap(item),
+        options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty wishlist response');
       return _fromMap(data);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to save wishlist item');
+      throw mapDioException(e);
     }
   }
 
@@ -360,13 +385,15 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       return _buildFromListingIdMock(listingId, wishId: wishId);
     }
     try {
-      final response =
-          await _dio.get<Map<String, dynamic>>(ApiEndpoints.listingDetail(listingId));
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.apiListingDetail(listingId),
+        options: ApiAuthHeaders.public(),
+      );
       final raw = response.data;
       if (raw == null) throw const ServerException('Empty listing response');
       return _fromListingPayload(raw, wishId: wishId);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load listing');
+      throw mapDioException(e);
     }
   }
 

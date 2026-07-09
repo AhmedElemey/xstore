@@ -43,9 +43,29 @@ class UserEntity with _$UserEntity {
     String? instagramHandle,
     String? facebookPage,
     @Default(false) bool isNewUser,
+    // --- Bilingual/backend-ID fields (Phase 1 backend integration) ---
+    // Additive: legacy fields above are kept so unrelated screens keep
+    // working. [name] is populated from [fullNameEn] on login/register for
+    // backward compatibility — see UserModel.fromJson.
+    String? fullNameEn,
+    String? fullNameAr,
+    String? storeNameEn,
+    String? storeNameAr,
+    String? storeDescriptionEn,
+    String? storeDescriptionAr,
+    int? storeCategoryId,
+    int? storeCityId,
+    int? storeGovernmentId,
   }) = _UserEntity;
 
   bool get isVendor => role == UserRole.vendor;
+
+  /// Resolves the bilingual full name for the current app language, falling
+  /// back to legacy [name] when the En/Ar variant is unset.
+  String displayName(bool isArabic) {
+    final localized = isArabic ? fullNameAr : fullNameEn;
+    return (localized != null && localized.isNotEmpty) ? localized : name;
+  }
 }
 
 extension UserEntityNavRoleX on UserEntity? {

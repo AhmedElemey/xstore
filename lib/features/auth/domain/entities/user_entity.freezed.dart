@@ -44,7 +44,20 @@ mixin _$UserEntity {
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   String? get instagramHandle => throw _privateConstructorUsedError;
   String? get facebookPage => throw _privateConstructorUsedError;
-  bool get isNewUser => throw _privateConstructorUsedError;
+  bool get isNewUser =>
+      throw _privateConstructorUsedError; // --- Bilingual/backend-ID fields (Phase 1 backend integration) ---
+// Additive: legacy fields above are kept so unrelated screens keep
+// working. [name] is populated from [fullNameEn] on login/register for
+// backward compatibility — see UserModel.fromJson.
+  String? get fullNameEn => throw _privateConstructorUsedError;
+  String? get fullNameAr => throw _privateConstructorUsedError;
+  String? get storeNameEn => throw _privateConstructorUsedError;
+  String? get storeNameAr => throw _privateConstructorUsedError;
+  String? get storeDescriptionEn => throw _privateConstructorUsedError;
+  String? get storeDescriptionAr => throw _privateConstructorUsedError;
+  int? get storeCategoryId => throw _privateConstructorUsedError;
+  int? get storeCityId => throw _privateConstructorUsedError;
+  int? get storeGovernmentId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserEntityCopyWith<UserEntity> get copyWith =>
@@ -86,7 +99,16 @@ abstract class $UserEntityCopyWith<$Res> {
       DateTime? dateOfBirth,
       String? instagramHandle,
       String? facebookPage,
-      bool isNewUser});
+      bool isNewUser,
+      String? fullNameEn,
+      String? fullNameAr,
+      String? storeNameEn,
+      String? storeNameAr,
+      String? storeDescriptionEn,
+      String? storeDescriptionAr,
+      int? storeCategoryId,
+      int? storeCityId,
+      int? storeGovernmentId});
 }
 
 /// @nodoc
@@ -131,6 +153,15 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
     Object? instagramHandle = freezed,
     Object? facebookPage = freezed,
     Object? isNewUser = null,
+    Object? fullNameEn = freezed,
+    Object? fullNameAr = freezed,
+    Object? storeNameEn = freezed,
+    Object? storeNameAr = freezed,
+    Object? storeDescriptionEn = freezed,
+    Object? storeDescriptionAr = freezed,
+    Object? storeCategoryId = freezed,
+    Object? storeCityId = freezed,
+    Object? storeGovernmentId = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -249,6 +280,42 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
           ? _value.isNewUser
           : isNewUser // ignore: cast_nullable_to_non_nullable
               as bool,
+      fullNameEn: freezed == fullNameEn
+          ? _value.fullNameEn
+          : fullNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      fullNameAr: freezed == fullNameAr
+          ? _value.fullNameAr
+          : fullNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameEn: freezed == storeNameEn
+          ? _value.storeNameEn
+          : storeNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameAr: freezed == storeNameAr
+          ? _value.storeNameAr
+          : storeNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionEn: freezed == storeDescriptionEn
+          ? _value.storeDescriptionEn
+          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionAr: freezed == storeDescriptionAr
+          ? _value.storeDescriptionAr
+          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCategoryId: freezed == storeCategoryId
+          ? _value.storeCategoryId
+          : storeCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeCityId: freezed == storeCityId
+          ? _value.storeCityId
+          : storeCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeGovernmentId: freezed == storeGovernmentId
+          ? _value.storeGovernmentId
+          : storeGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -290,7 +357,16 @@ abstract class _$$UserEntityImplCopyWith<$Res>
       DateTime? dateOfBirth,
       String? instagramHandle,
       String? facebookPage,
-      bool isNewUser});
+      bool isNewUser,
+      String? fullNameEn,
+      String? fullNameAr,
+      String? storeNameEn,
+      String? storeNameAr,
+      String? storeDescriptionEn,
+      String? storeDescriptionAr,
+      int? storeCategoryId,
+      int? storeCityId,
+      int? storeGovernmentId});
 }
 
 /// @nodoc
@@ -333,6 +409,15 @@ class __$$UserEntityImplCopyWithImpl<$Res>
     Object? instagramHandle = freezed,
     Object? facebookPage = freezed,
     Object? isNewUser = null,
+    Object? fullNameEn = freezed,
+    Object? fullNameAr = freezed,
+    Object? storeNameEn = freezed,
+    Object? storeNameAr = freezed,
+    Object? storeDescriptionEn = freezed,
+    Object? storeDescriptionAr = freezed,
+    Object? storeCategoryId = freezed,
+    Object? storeCityId = freezed,
+    Object? storeGovernmentId = freezed,
   }) {
     return _then(_$UserEntityImpl(
       id: null == id
@@ -451,6 +536,42 @@ class __$$UserEntityImplCopyWithImpl<$Res>
           ? _value.isNewUser
           : isNewUser // ignore: cast_nullable_to_non_nullable
               as bool,
+      fullNameEn: freezed == fullNameEn
+          ? _value.fullNameEn
+          : fullNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      fullNameAr: freezed == fullNameAr
+          ? _value.fullNameAr
+          : fullNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameEn: freezed == storeNameEn
+          ? _value.storeNameEn
+          : storeNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameAr: freezed == storeNameAr
+          ? _value.storeNameAr
+          : storeNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionEn: freezed == storeDescriptionEn
+          ? _value.storeDescriptionEn
+          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionAr: freezed == storeDescriptionAr
+          ? _value.storeDescriptionAr
+          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCategoryId: freezed == storeCategoryId
+          ? _value.storeCategoryId
+          : storeCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeCityId: freezed == storeCityId
+          ? _value.storeCityId
+          : storeCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeGovernmentId: freezed == storeGovernmentId
+          ? _value.storeGovernmentId
+          : storeGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -487,7 +608,16 @@ class _$UserEntityImpl extends _UserEntity {
       this.dateOfBirth,
       this.instagramHandle,
       this.facebookPage,
-      this.isNewUser = false})
+      this.isNewUser = false,
+      this.fullNameEn,
+      this.fullNameAr,
+      this.storeNameEn,
+      this.storeNameAr,
+      this.storeDescriptionEn,
+      this.storeDescriptionAr,
+      this.storeCategoryId,
+      this.storeCityId,
+      this.storeGovernmentId})
       : super._();
 
   @override
@@ -552,10 +682,32 @@ class _$UserEntityImpl extends _UserEntity {
   @override
   @JsonKey()
   final bool isNewUser;
+// --- Bilingual/backend-ID fields (Phase 1 backend integration) ---
+// Additive: legacy fields above are kept so unrelated screens keep
+// working. [name] is populated from [fullNameEn] on login/register for
+// backward compatibility — see UserModel.fromJson.
+  @override
+  final String? fullNameEn;
+  @override
+  final String? fullNameAr;
+  @override
+  final String? storeNameEn;
+  @override
+  final String? storeNameAr;
+  @override
+  final String? storeDescriptionEn;
+  @override
+  final String? storeDescriptionAr;
+  @override
+  final int? storeCategoryId;
+  @override
+  final int? storeCityId;
+  @override
+  final int? storeGovernmentId;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, isNewUser: $isNewUser)';
+    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId)';
   }
 
   @override
@@ -613,7 +765,25 @@ class _$UserEntityImpl extends _UserEntity {
             (identical(other.facebookPage, facebookPage) ||
                 other.facebookPage == facebookPage) &&
             (identical(other.isNewUser, isNewUser) ||
-                other.isNewUser == isNewUser));
+                other.isNewUser == isNewUser) &&
+            (identical(other.fullNameEn, fullNameEn) ||
+                other.fullNameEn == fullNameEn) &&
+            (identical(other.fullNameAr, fullNameAr) ||
+                other.fullNameAr == fullNameAr) &&
+            (identical(other.storeNameEn, storeNameEn) ||
+                other.storeNameEn == storeNameEn) &&
+            (identical(other.storeNameAr, storeNameAr) ||
+                other.storeNameAr == storeNameAr) &&
+            (identical(other.storeDescriptionEn, storeDescriptionEn) ||
+                other.storeDescriptionEn == storeDescriptionEn) &&
+            (identical(other.storeDescriptionAr, storeDescriptionAr) ||
+                other.storeDescriptionAr == storeDescriptionAr) &&
+            (identical(other.storeCategoryId, storeCategoryId) ||
+                other.storeCategoryId == storeCategoryId) &&
+            (identical(other.storeCityId, storeCityId) ||
+                other.storeCityId == storeCityId) &&
+            (identical(other.storeGovernmentId, storeGovernmentId) ||
+                other.storeGovernmentId == storeGovernmentId));
   }
 
   @override
@@ -647,7 +817,16 @@ class _$UserEntityImpl extends _UserEntity {
         dateOfBirth,
         instagramHandle,
         facebookPage,
-        isNewUser
+        isNewUser,
+        fullNameEn,
+        fullNameAr,
+        storeNameEn,
+        storeNameAr,
+        storeDescriptionEn,
+        storeDescriptionAr,
+        storeCategoryId,
+        storeCityId,
+        storeGovernmentId
       ]);
 
   @JsonKey(ignore: true)
@@ -687,7 +866,16 @@ abstract class _UserEntity extends UserEntity {
       final DateTime? dateOfBirth,
       final String? instagramHandle,
       final String? facebookPage,
-      final bool isNewUser}) = _$UserEntityImpl;
+      final bool isNewUser,
+      final String? fullNameEn,
+      final String? fullNameAr,
+      final String? storeNameEn,
+      final String? storeNameAr,
+      final String? storeDescriptionEn,
+      final String? storeDescriptionAr,
+      final int? storeCategoryId,
+      final int? storeCityId,
+      final int? storeGovernmentId}) = _$UserEntityImpl;
   const _UserEntity._() : super._();
 
   @override
@@ -748,6 +936,27 @@ abstract class _UserEntity extends UserEntity {
   String? get facebookPage;
   @override
   bool get isNewUser;
+  @override // --- Bilingual/backend-ID fields (Phase 1 backend integration) ---
+// Additive: legacy fields above are kept so unrelated screens keep
+// working. [name] is populated from [fullNameEn] on login/register for
+// backward compatibility — see UserModel.fromJson.
+  String? get fullNameEn;
+  @override
+  String? get fullNameAr;
+  @override
+  String? get storeNameEn;
+  @override
+  String? get storeNameAr;
+  @override
+  String? get storeDescriptionEn;
+  @override
+  String? get storeDescriptionAr;
+  @override
+  int? get storeCategoryId;
+  @override
+  int? get storeCityId;
+  @override
+  int? get storeGovernmentId;
   @override
   @JsonKey(ignore: true)
   _$$UserEntityImplCopyWith<_$UserEntityImpl> get copyWith =>

@@ -38,14 +38,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   ];
 
   final _name = TextEditingController();
+  final _fullNameAr = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _location = TextEditingController();
   final _dobText = TextEditingController();
   final _bio = TextEditingController();
   final _storeName = TextEditingController();
+  final _storeNameAr = TextEditingController();
   final _storeCategory = TextEditingController();
   final _storeDescription = TextEditingController();
+  final _storeDescriptionAr = TextEditingController();
   final _storeCity = TextEditingController();
   final _storeWilaya = TextEditingController();
   final _whatsapp = TextEditingController();
@@ -72,14 +75,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   void dispose() {
     _name.dispose();
+    _fullNameAr.dispose();
     _email.dispose();
     _phone.dispose();
     _location.dispose();
     _dobText.dispose();
     _bio.dispose();
     _storeName.dispose();
+    _storeNameAr.dispose();
     _storeCategory.dispose();
     _storeDescription.dispose();
+    _storeDescriptionAr.dispose();
     _storeCity.dispose();
     _storeWilaya.dispose();
     _whatsapp.dispose();
@@ -95,6 +101,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   void _syncFromState(ProfileState s) {
     _name.text = s.editName;
+    _fullNameAr.text = s.editFullNameAr;
     _email.text = s.editEmail;
     _phone.text = s.editPhone;
     _location.text = s.editLocation;
@@ -103,10 +110,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         : '';
     _bio.text = s.editBio;
     _storeName.text = s.editStoreName;
+    _storeNameAr.text = s.editStoreNameAr;
     _category = s.editStoreCategory;
     _storeCategory.text =
         _category.isEmpty ? context.l10n.requiredField : _category;
     _storeDescription.text = s.editStoreDescription;
+    _storeDescriptionAr.text = s.editStoreDescriptionAr;
     _storeCity.text = s.editStoreCity;
     _storeWilaya.text = s.editStoreWilaya;
     _whatsapp.text = s.editWhatsapp;
@@ -123,13 +132,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void _pushFieldsToNotifier() {
     final n = ref.read(profileNotifierProvider.notifier);
     n.updateField('name', _name.text);
+    n.updateField('fullNameAr', _fullNameAr.text);
     n.updateField('email', _email.text);
     n.updateField('phone', _phone.text);
     n.updateField('location', _location.text);
     n.updateField('bio', _bio.text);
     n.updateField('storeName', _storeName.text);
+    n.updateField('storeNameAr', _storeNameAr.text);
     n.updateField('storeCategory', _category);
     n.updateField('storeDescription', _storeDescription.text);
+    n.updateField('storeDescriptionAr', _storeDescriptionAr.text);
     n.updateField('storeCity', _storeCity.text);
     n.updateField('storeWilaya', _storeWilaya.text);
     n.updateField('whatsapp', _whatsapp.text);
@@ -380,6 +392,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
           const Gap(AppSpacing.md),
           TextField(
+            controller: _fullNameAr,
+            decoration: InputDecoration(
+              labelText: context.l10n.fullNameArRequired,
+              prefixIcon: const Icon(LucideIcons.user),
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: (v) =>
+                ref.read(profileNotifierProvider.notifier).updateField('fullNameAr', v),
+          ),
+          const Gap(AppSpacing.md),
+          TextField(
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
@@ -441,6 +464,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             const Gap(AppSpacing.md),
             TextField(
+              controller: _storeNameAr,
+              decoration: InputDecoration(
+                labelText: context.l10n.storeNameArRequired,
+                prefixIcon: const Icon(LucideIcons.store),
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (v) => ref
+                  .read(profileNotifierProvider.notifier)
+                  .updateField('storeNameAr', v),
+            ),
+            const Gap(AppSpacing.md),
+            TextField(
               readOnly: true,
               controller: _storeCategory,
               decoration: InputDecoration(
@@ -460,6 +495,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               onChanged: (v) =>
                   ref.read(profileNotifierProvider.notifier).updateField('storeDescription', v),
+            ),
+            const Gap(AppSpacing.md),
+            TextField(
+              controller: _storeDescriptionAr,
+              maxLines: 4,
+              decoration: InputDecoration(
+                labelText: context.l10n.storeDescriptionArRequired,
+                prefixIcon: const Icon(LucideIcons.fileText),
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (v) => ref
+                  .read(profileNotifierProvider.notifier)
+                  .updateField('storeDescriptionAr', v),
             ),
             const Gap(AppSpacing.md),
             TextField(

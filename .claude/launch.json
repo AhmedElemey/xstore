@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "xstore-web-dev",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "-t", "lib/main_dev.dart", "--web-port=8765"],
+      "port": 8765
+    },
+    {
+      "name": "xstore-qa-baseline",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /private/tmp/claude-501/-Users-ahmedtaha-xStore/f450551c-b981-481e-8cf7-4e2a2a798876/scratchpad/qa-worktree-repo && flutter run -d web-server -t lib/main_dev.dart --web-port=8766 --web-hostname=0.0.0.0"],
+      "port": 8766
+    }
+  ]
+}

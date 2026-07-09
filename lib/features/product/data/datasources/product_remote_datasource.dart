@@ -1,13 +1,17 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
+import '../../../../core/network/paginated_result.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
 import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/product_review_entity.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../domain/entities/review_entity.dart';
+import '../../domain/entities/review_write_params.dart';
 
 abstract interface class ProductRemoteDataSource {
   Future<ProductDetailEntity> fetchProductDetail(String listingId);
@@ -17,7 +21,27 @@ abstract interface class ProductRemoteDataSource {
     required String category,
   });
 
-  Future<List<ReviewEntity>> fetchProductReviews(String listingId);
+  Future<PaginatedResult<ReviewEntity>> fetchProductReviews({
+    required String listingId,
+    required int page,
+    required int pageSize,
+  });
+
+  Future<ReviewEntity> createReview({
+    required String listingId,
+    required ReviewWriteParams params,
+  });
+
+  Future<ReviewEntity> updateReview({
+    required String listingId,
+    required String reviewId,
+    required ReviewWriteParams params,
+  });
+
+  Future<void> deleteReview({
+    required String listingId,
+    required String reviewId,
+  });
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -29,7 +53,8 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   Future<ProductDetailEntity> fetchProductDetail(String listingId) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
-        ApiEndpoints.listingDetail(listingId),
+        ApiEndpoints.apiListingDetail(listingId),
+        options: ApiAuthHeaders.public(),
       );
       final raw = response.data;
       if (raw == null) {
@@ -37,7 +62,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       }
       return _parseProductDetail(raw, listingId);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load product');
+      throw mapDioException(e);
     }
   }
 
@@ -47,8 +72,12 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     required String category,
   }) async {
     try {
+      // Spec's similar-listings endpoint is id-based (not category-based)
+      // — `category` is kept in the signature for source compatibility but
+      // no longer used to build the request.
       final response = await _dio.get<dynamic>(
-        ApiEndpoints.listingsSimilar(category: category),
+        ApiEndpoints.apiListingSimilar(productId),
+        options: ApiAuthHeaders.public(),
       );
       final list = _unwrapList(response.data);
       return list
@@ -56,20 +85,103 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .where((e) => e.listing.id != productId)
           .toList();
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load similar products');
+      throw mapDioException(e);
     }
   }
 
   @override
-  Future<List<ReviewEntity>> fetchProductReviews(String listingId) async {
+  Future<PaginatedResult<ReviewEntity>> fetchProductReviews({
+    required String listingId,
+    required int page,
+    required int pageSize,
+  }) async {
     try {
+      // ASSUMPTION: envelope is {"items": [...], "totalCount": N} matching
+      // cities/governments precedent. Falls back to a bare list with
+      // items.length as totalCount if no envelope is present.
       final response = await _dio.get<dynamic>(
-        ApiEndpoints.listingReviews(listingId),
+        ApiEndpoints.apiListingReviews(listingId),
+        queryParameters: {'page': page, 'pageSize': pageSize},
+        options: ApiAuthHeaders.public(),
       );
-      final list = _unwrapList(response.data);
-      return list.map((e) => _parseReview(Map<String, dynamic>.from(e))).toList();
+      final data = response.data;
+      if (data is Map) {
+        final m = Map<String, dynamic>.from(data);
+        final rawItems = m['items'] as List<dynamic>? ?? [];
+        final items = rawItems
+            .whereType<Map>()
+            .map((e) => _parseReview(Map<String, dynamic>.from(e)))
+            .toList();
+        return PaginatedResult(
+          items: items,
+          page: page,
+          pageSize: pageSize,
+          totalCount: m['totalCount'] as int? ?? items.length,
+        );
+      }
+      final list = _unwrapList(data).map(_parseReview).toList();
+      return PaginatedResult(
+        items: list,
+        page: page,
+        pageSize: pageSize,
+        totalCount: list.length,
+      );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load reviews');
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<ReviewEntity> createReview({
+    required String listingId,
+    required ReviewWriteParams params,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.apiListingReviews(listingId),
+        data: {'rating': params.rating, 'comment': params.comment},
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty review response');
+      return _parseReview(data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<ReviewEntity> updateReview({
+    required String listingId,
+    required String reviewId,
+    required ReviewWriteParams params,
+  }) async {
+    try {
+      final response = await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.apiListingReview(listingId, reviewId),
+        data: {'rating': params.rating, 'comment': params.comment},
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty review response');
+      return _parseReview(data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<void> deleteReview({
+    required String listingId,
+    required String reviewId,
+  }) async {
+    try {
+      await _dio.delete<void>(
+        ApiEndpoints.apiListingReview(listingId, reviewId),
+        options: ApiAuthHeaders.authenticated(),
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
     }
   }
 

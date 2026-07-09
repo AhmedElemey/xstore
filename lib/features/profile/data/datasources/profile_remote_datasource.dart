@@ -5,7 +5,9 @@ import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
+import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
@@ -199,24 +201,22 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
     }
     try {
+      // GET /api/auth/get-profile — identifies the user via the auth token,
+      // not sessionUser.id. Response is the raw user object directly (not
+      // wrapped in {"user": ...} like the old /users/{id} shape).
       final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.users}/${sessionUser.id}',
+        ApiEndpoints.getProfile,
+        options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty profile');
-      final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
-      return ProfileModel(
-        user: user,
-        ordersCount: data['ordersCount'] as int? ?? 0,
-        wishlistCount: data['wishlistCount'] as int? ?? 0,
-        savedAmountDzd: data['savedAmountDzd'] as int? ?? 0,
-        storeViewCount: data['storeViewCount'] as int? ?? 0,
-        storeSaveCount: data['storeSaveCount'] as int? ?? 0,
-        storeActiveListings: data['storeActiveListings'] as int? ?? 0,
-        responseRatePercent: data['responseRatePercent'] as int? ?? 0,
-      );
+      final user = UserModel.fromJson(data);
+      // ASSUMPTION: get-profile returns identity fields only — no confirmed
+      // backend source yet for orders/wishlist/store stats. Default to 0
+      // until a real source exists (Phase 2, once listings/orders land).
+      return ProfileModel(user: user);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error');
+      throw mapDioException(e);
     }
   }
 
@@ -249,45 +249,51 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           instagramHandle: updated.instagramHandle,
           facebookPage: updated.facebookPage,
           token: null,
+          fullNameEn: updated.fullNameEn,
+          fullNameAr: updated.fullNameAr,
+          storeNameEn: updated.storeNameEn,
+          storeNameAr: updated.storeNameAr,
+          storeDescriptionEn: updated.storeDescriptionEn,
+          storeDescriptionAr: updated.storeDescriptionAr,
+          storeCategoryId: updated.storeCategoryId,
+          storeCityId: updated.storeCityId,
+          storeGovernmentId: updated.storeGovernmentId,
         ),
       );
       return model;
     }
     try {
+      // PUT /api/auth/update-profile — key names per the API spec, which
+      // differ from this app's internal field names in a couple of spots
+      // (whatsAppNumber capital-A, instagramPage vs instagramHandle).
       final response = await _dio.put<Map<String, dynamic>>(
-        '${ApiEndpoints.users}/${updated.id}',
-        data: UserModel(
-          id: updated.id,
-          name: updated.name,
-          email: updated.email,
-          phoneNumber: updated.phoneNumber,
-          avatarUrl: updated.avatarUrl,
-          role: updated.role,
-          isVerified: updated.isVerified,
-          rating: updated.rating,
-          totalSales: updated.totalSales,
-          joinedAt: updated.joinedAt,
-          location: updated.location,
-          storeName: updated.storeName,
-          storeSlug: updated.storeSlug,
-          storeCategory: updated.storeCategory,
-          storeDescription: updated.storeDescription,
-          storeLogoUrl: updated.storeLogoUrl,
-          storeCity: updated.storeCity,
-          storeWilaya: updated.storeWilaya,
-          whatsappNumber: updated.whatsappNumber,
-          bio: updated.bio,
-          dateOfBirth: updated.dateOfBirth,
-          instagramHandle: updated.instagramHandle,
-          facebookPage: updated.facebookPage,
-          token: null,
-        ).toJson(),
+        ApiEndpoints.updateProfile,
+        data: {
+          'fullNameEn': updated.fullNameEn ?? updated.name,
+          'fullNameAr': updated.fullNameAr ?? updated.name,
+          'email': updated.email,
+          'phoneNumber': updated.phoneNumber,
+          if (updated.avatarUrl != null) 'avatarUrl': updated.avatarUrl,
+          if (updated.storeNameEn != null) 'storeNameEn': updated.storeNameEn,
+          if (updated.storeNameAr != null) 'storeNameAr': updated.storeNameAr,
+          if (updated.storeDescriptionEn != null)
+            'storeDescriptionEn': updated.storeDescriptionEn,
+          if (updated.storeDescriptionAr != null)
+            'storeDescriptionAr': updated.storeDescriptionAr,
+          if (updated.whatsappNumber != null)
+            'whatsAppNumber': updated.whatsappNumber,
+          if (updated.instagramHandle != null)
+            'instagramPage': updated.instagramHandle,
+          if (updated.facebookPage != null)
+            'facebookPage': updated.facebookPage,
+        },
+        options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
       return UserModel.fromJson(data);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error');
+      throw mapDioException(e);
     }
   }
 

@@ -21,6 +21,7 @@ mixin _$ProfileState {
   bool get isUpdating => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError; // Edit form
   String get editName => throw _privateConstructorUsedError;
+  String get editFullNameAr => throw _privateConstructorUsedError;
   String get editEmail => throw _privateConstructorUsedError;
   String get editPhone => throw _privateConstructorUsedError;
   String get editLocation => throw _privateConstructorUsedError;
@@ -28,8 +29,10 @@ mixin _$ProfileState {
   File? get editAvatarFile => throw _privateConstructorUsedError;
   bool get avatarRemoved => throw _privateConstructorUsedError;
   String get editStoreName => throw _privateConstructorUsedError;
+  String get editStoreNameAr => throw _privateConstructorUsedError;
   String get editStoreCategory => throw _privateConstructorUsedError;
   String get editStoreDescription => throw _privateConstructorUsedError;
+  String get editStoreDescriptionAr => throw _privateConstructorUsedError;
   String get editStoreCity => throw _privateConstructorUsedError;
   String get editStoreWilaya => throw _privateConstructorUsedError;
   String get editWhatsapp => throw _privateConstructorUsedError;
@@ -67,6 +70,7 @@ abstract class $ProfileStateCopyWith<$Res> {
       bool isUpdating,
       String? error,
       String editName,
+      String editFullNameAr,
       String editEmail,
       String editPhone,
       String editLocation,
@@ -74,8 +78,10 @@ abstract class $ProfileStateCopyWith<$Res> {
       File? editAvatarFile,
       bool avatarRemoved,
       String editStoreName,
+      String editStoreNameAr,
       String editStoreCategory,
       String editStoreDescription,
+      String editStoreDescriptionAr,
       String editStoreCity,
       String editStoreWilaya,
       String editWhatsapp,
@@ -117,6 +123,7 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? isUpdating = null,
     Object? error = freezed,
     Object? editName = null,
+    Object? editFullNameAr = null,
     Object? editEmail = null,
     Object? editPhone = null,
     Object? editLocation = null,
@@ -124,8 +131,10 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? editAvatarFile = freezed,
     Object? avatarRemoved = null,
     Object? editStoreName = null,
+    Object? editStoreNameAr = null,
     Object? editStoreCategory = null,
     Object? editStoreDescription = null,
+    Object? editStoreDescriptionAr = null,
     Object? editStoreCity = null,
     Object? editStoreWilaya = null,
     Object? editWhatsapp = null,
@@ -167,6 +176,10 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
           ? _value.editName
           : editName // ignore: cast_nullable_to_non_nullable
               as String,
+      editFullNameAr: null == editFullNameAr
+          ? _value.editFullNameAr
+          : editFullNameAr // ignore: cast_nullable_to_non_nullable
+              as String,
       editEmail: null == editEmail
           ? _value.editEmail
           : editEmail // ignore: cast_nullable_to_non_nullable
@@ -195,6 +208,10 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
           ? _value.editStoreName
           : editStoreName // ignore: cast_nullable_to_non_nullable
               as String,
+      editStoreNameAr: null == editStoreNameAr
+          ? _value.editStoreNameAr
+          : editStoreNameAr // ignore: cast_nullable_to_non_nullable
+              as String,
       editStoreCategory: null == editStoreCategory
           ? _value.editStoreCategory
           : editStoreCategory // ignore: cast_nullable_to_non_nullable
@@ -202,6 +219,10 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
       editStoreDescription: null == editStoreDescription
           ? _value.editStoreDescription
           : editStoreDescription // ignore: cast_nullable_to_non_nullable
+              as String,
+      editStoreDescriptionAr: null == editStoreDescriptionAr
+          ? _value.editStoreDescriptionAr
+          : editStoreDescriptionAr // ignore: cast_nullable_to_non_nullable
               as String,
       editStoreCity: null == editStoreCity
           ? _value.editStoreCity
@@ -309,6 +330,7 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       bool isUpdating,
       String? error,
       String editName,
+      String editFullNameAr,
       String editEmail,
       String editPhone,
       String editLocation,
@@ -316,8 +338,10 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       File? editAvatarFile,
       bool avatarRemoved,
       String editStoreName,
+      String editStoreNameAr,
       String editStoreCategory,
       String editStoreDescription,
+      String editStoreDescriptionAr,
       String editStoreCity,
       String editStoreWilaya,
       String editWhatsapp,
@@ -358,6 +382,7 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? isUpdating = null,
     Object? error = freezed,
     Object? editName = null,
+    Object? editFullNameAr = null,
     Object? editEmail = null,
     Object? editPhone = null,
     Object? editLocation = null,
@@ -365,8 +390,10 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? editAvatarFile = freezed,
     Object? avatarRemoved = null,
     Object? editStoreName = null,
+    Object? editStoreNameAr = null,
     Object? editStoreCategory = null,
     Object? editStoreDescription = null,
+    Object? editStoreDescriptionAr = null,
     Object? editStoreCity = null,
     Object? editStoreWilaya = null,
     Object? editWhatsapp = null,
@@ -408,6 +435,10 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
           ? _value.editName
           : editName // ignore: cast_nullable_to_non_nullable
               as String,
+      editFullNameAr: null == editFullNameAr
+          ? _value.editFullNameAr
+          : editFullNameAr // ignore: cast_nullable_to_non_nullable
+              as String,
       editEmail: null == editEmail
           ? _value.editEmail
           : editEmail // ignore: cast_nullable_to_non_nullable
@@ -436,6 +467,10 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
           ? _value.editStoreName
           : editStoreName // ignore: cast_nullable_to_non_nullable
               as String,
+      editStoreNameAr: null == editStoreNameAr
+          ? _value.editStoreNameAr
+          : editStoreNameAr // ignore: cast_nullable_to_non_nullable
+              as String,
       editStoreCategory: null == editStoreCategory
           ? _value.editStoreCategory
           : editStoreCategory // ignore: cast_nullable_to_non_nullable
@@ -443,6 +478,10 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
       editStoreDescription: null == editStoreDescription
           ? _value.editStoreDescription
           : editStoreDescription // ignore: cast_nullable_to_non_nullable
+              as String,
+      editStoreDescriptionAr: null == editStoreDescriptionAr
+          ? _value.editStoreDescriptionAr
+          : editStoreDescriptionAr // ignore: cast_nullable_to_non_nullable
               as String,
       editStoreCity: null == editStoreCity
           ? _value.editStoreCity
@@ -533,6 +572,7 @@ class _$ProfileStateImpl implements _ProfileState {
       this.isUpdating = false,
       this.error,
       this.editName = '',
+      this.editFullNameAr = '',
       this.editEmail = '',
       this.editPhone = '',
       this.editLocation = '',
@@ -540,8 +580,10 @@ class _$ProfileStateImpl implements _ProfileState {
       this.editAvatarFile,
       this.avatarRemoved = false,
       this.editStoreName = '',
+      this.editStoreNameAr = '',
       this.editStoreCategory = '',
       this.editStoreDescription = '',
+      this.editStoreDescriptionAr = '',
       this.editStoreCity = '',
       this.editStoreWilaya = '',
       this.editWhatsapp = '',
@@ -579,6 +621,9 @@ class _$ProfileStateImpl implements _ProfileState {
   final String editName;
   @override
   @JsonKey()
+  final String editFullNameAr;
+  @override
+  @JsonKey()
   final String editEmail;
   @override
   @JsonKey()
@@ -599,10 +644,16 @@ class _$ProfileStateImpl implements _ProfileState {
   final String editStoreName;
   @override
   @JsonKey()
+  final String editStoreNameAr;
+  @override
+  @JsonKey()
   final String editStoreCategory;
   @override
   @JsonKey()
   final String editStoreDescription;
+  @override
+  @JsonKey()
+  final String editStoreDescriptionAr;
   @override
   @JsonKey()
   final String editStoreCity;
@@ -666,7 +717,7 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   String toString() {
-    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editBio: $editBio, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreName: $editStoreName, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
+    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editBio: $editBio, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
   }
 
   @override
@@ -682,6 +733,8 @@ class _$ProfileStateImpl implements _ProfileState {
             (identical(other.error, error) || other.error == error) &&
             (identical(other.editName, editName) ||
                 other.editName == editName) &&
+            (identical(other.editFullNameAr, editFullNameAr) ||
+                other.editFullNameAr == editFullNameAr) &&
             (identical(other.editEmail, editEmail) ||
                 other.editEmail == editEmail) &&
             (identical(other.editPhone, editPhone) ||
@@ -695,10 +748,14 @@ class _$ProfileStateImpl implements _ProfileState {
                 other.avatarRemoved == avatarRemoved) &&
             (identical(other.editStoreName, editStoreName) ||
                 other.editStoreName == editStoreName) &&
+            (identical(other.editStoreNameAr, editStoreNameAr) ||
+                other.editStoreNameAr == editStoreNameAr) &&
             (identical(other.editStoreCategory, editStoreCategory) ||
                 other.editStoreCategory == editStoreCategory) &&
             (identical(other.editStoreDescription, editStoreDescription) ||
                 other.editStoreDescription == editStoreDescription) &&
+            (identical(other.editStoreDescriptionAr, editStoreDescriptionAr) ||
+                other.editStoreDescriptionAr == editStoreDescriptionAr) &&
             (identical(other.editStoreCity, editStoreCity) ||
                 other.editStoreCity == editStoreCity) &&
             (identical(other.editStoreWilaya, editStoreWilaya) ||
@@ -748,6 +805,7 @@ class _$ProfileStateImpl implements _ProfileState {
         isUpdating,
         error,
         editName,
+        editFullNameAr,
         editEmail,
         editPhone,
         editLocation,
@@ -755,8 +813,10 @@ class _$ProfileStateImpl implements _ProfileState {
         editAvatarFile,
         avatarRemoved,
         editStoreName,
+        editStoreNameAr,
         editStoreCategory,
         editStoreDescription,
+        editStoreDescriptionAr,
         editStoreCity,
         editStoreWilaya,
         editWhatsapp,
@@ -792,6 +852,7 @@ abstract class _ProfileState implements ProfileState {
       final bool isUpdating,
       final String? error,
       final String editName,
+      final String editFullNameAr,
       final String editEmail,
       final String editPhone,
       final String editLocation,
@@ -799,8 +860,10 @@ abstract class _ProfileState implements ProfileState {
       final File? editAvatarFile,
       final bool avatarRemoved,
       final String editStoreName,
+      final String editStoreNameAr,
       final String editStoreCategory,
       final String editStoreDescription,
+      final String editStoreDescriptionAr,
       final String editStoreCity,
       final String editStoreWilaya,
       final String editWhatsapp,
@@ -832,6 +895,8 @@ abstract class _ProfileState implements ProfileState {
   @override // Edit form
   String get editName;
   @override
+  String get editFullNameAr;
+  @override
   String get editEmail;
   @override
   String get editPhone;
@@ -846,9 +911,13 @@ abstract class _ProfileState implements ProfileState {
   @override
   String get editStoreName;
   @override
+  String get editStoreNameAr;
+  @override
   String get editStoreCategory;
   @override
   String get editStoreDescription;
+  @override
+  String get editStoreDescriptionAr;
   @override
   String get editStoreCity;
   @override

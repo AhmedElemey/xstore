@@ -3,25 +3,53 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_listings.dart';
+import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
+import '../../domain/entities/listing_entity.dart';
 import '../models/listing_model.dart';
 
 abstract interface class ListingRemoteDataSource {
   Future<ListingModel> createListing({
-    required String title,
-    required String description,
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
     required double price,
-    required List<String> imagePaths,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    List<String> imageUrls = const [],
   });
 
   Future<List<ListingModel>> fetchMyListings();
 
   Future<ListingModel> updateListing({
     required String id,
-    required String title,
-    required String description,
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
     required double price,
-    required String status,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    required List<String> imageUrls,
+    required ListingStatus status,
   });
 
   Future<void> deleteListing(String id);
@@ -43,32 +71,73 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   @override
   Future<ListingModel> createListing({
-    required String title,
-    required String description,
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
     required double price,
-    required List<String> imagePaths,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    List<String> imageUrls = const [],
   }) async {
     if (MockConfig.useMock) {
       final model = ListingModel(
         id: 'listing_${DateTime.now().microsecondsSinceEpoch}',
-        title: title,
-        description: description,
+        title: titleEn,
+        description: descriptionEn,
         price: price,
         status: 'pending',
-        imageUrls: List<String>.from(imagePaths),
+        imageUrls: imageUrls,
+        titleEn: titleEn,
+        titleAr: titleAr,
+        descriptionEn: descriptionEn,
+        descriptionAr: descriptionAr,
+        compareAtPrice: compareAtPrice,
+        categoryId: categoryId,
+        subcategoryId: subcategoryId,
+        condition: listingConditionToDto(condition),
+        brand: brand,
+        stockQuantity: stockQuantity,
+        shippingAvailable: shippingAvailable,
+        shippingCost: shippingCost,
+        location: location,
+        attributes: attributes,
       );
       _mockList.insert(0, model);
       return MockConfig.simulate(model);
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.listings,
+        ApiEndpoints.apiListings,
         data: {
-          'title': title,
-          'description': description,
+          'titleEn': titleEn,
+          'titleAr': titleAr,
+          'descriptionEn': descriptionEn,
+          'descriptionAr': descriptionAr,
           'price': price,
-          'images': imagePaths,
+          'compareAtPrice': compareAtPrice,
+          'categoryId': categoryId,
+          'subcategoryId': subcategoryId,
+          'condition': listingConditionToDto(condition),
+          'brand': brand,
+          'stockQuantity': stockQuantity,
+          'shippingAvailable': shippingAvailable,
+          'shippingCost': shippingCost,
+          'location': location,
+          'attributes': attributes,
+          // NOTE (known gap): no image-upload endpoint exists in the
+          // backend yet. Always empty until one is confirmed and wired.
+          'imageUrls': imageUrls,
         },
+        options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) {
@@ -81,16 +150,30 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       if (_isOffline(e)) {
         final model = ListingModel(
           id: 'local-${DateTime.now().microsecondsSinceEpoch}',
-          title: title,
-          description: description,
+          title: titleEn,
+          description: descriptionEn,
           price: price,
           status: 'pending',
-          imageUrls: List<String>.from(imagePaths),
+          imageUrls: imageUrls,
+          titleEn: titleEn,
+          titleAr: titleAr,
+          descriptionEn: descriptionEn,
+          descriptionAr: descriptionAr,
+          compareAtPrice: compareAtPrice,
+          categoryId: categoryId,
+          subcategoryId: subcategoryId,
+          condition: listingConditionToDto(condition),
+          brand: brand,
+          stockQuantity: stockQuantity,
+          shippingAvailable: shippingAvailable,
+          shippingCost: shippingCost,
+          location: location,
+          attributes: attributes,
         );
         _localMine.insert(0, model);
         return model;
       }
-      throw _mapDio(e);
+      throw mapDioException(e);
     }
   }
 
@@ -100,7 +183,10 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       return MockConfig.simulate(List<ListingModel>.from(_mockList));
     }
     try {
-      final response = await _dio.get<List<dynamic>>(ApiEndpoints.myListings);
+      final response = await _dio.get<List<dynamic>>(
+        ApiEndpoints.apiMyListings,
+        options: ApiAuthHeaders.authenticated(),
+      );
       final list = response.data ?? [];
       final remote = list
           .map(
@@ -115,17 +201,30 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       if (_isOffline(e)) {
         return List<ListingModel>.from(_localMine);
       }
-      throw _mapDio(e);
+      throw mapDioException(e);
     }
   }
 
   @override
   Future<ListingModel> updateListing({
     required String id,
-    required String title,
-    required String description,
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
     required double price,
-    required String status,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    required List<String> imageUrls,
+    required ListingStatus status,
   }) async {
     if (MockConfig.useMock) {
       final idx = _mockList.indexWhere((e) => e.id == id);
@@ -133,23 +232,55 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
         throw const ServerException('Listing not found');
       }
       final updated = _mockList[idx].copyWith(
-        title: title,
-        description: description,
+        title: titleEn,
+        description: descriptionEn,
         price: price,
-        status: status,
+        status: _statusToDto(status),
+        titleEn: titleEn,
+        titleAr: titleAr,
+        descriptionEn: descriptionEn,
+        descriptionAr: descriptionAr,
+        compareAtPrice: compareAtPrice,
+        categoryId: categoryId,
+        subcategoryId: subcategoryId,
+        condition: listingConditionToDto(condition),
+        brand: brand,
+        stockQuantity: stockQuantity,
+        shippingAvailable: shippingAvailable,
+        shippingCost: shippingCost,
+        location: location,
+        attributes: attributes,
+        imageUrls: imageUrls,
       );
       _mockList[idx] = updated;
       return MockConfig.simulate(updated);
     }
     try {
-      final response = await _dio.patch<Map<String, dynamic>>(
-        '${ApiEndpoints.listings}/$id',
+      // Spec: id is sent in the BODY, PUT to the collection root — not
+      // /api/listings/{id}. Confirmed from the Postman collection.
+      final response = await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.apiListings,
         data: {
-          'title': title,
-          'description': description,
+          'id': id,
+          'titleEn': titleEn,
+          'titleAr': titleAr,
+          'descriptionEn': descriptionEn,
+          'descriptionAr': descriptionAr,
           'price': price,
-          'status': status,
+          'compareAtPrice': compareAtPrice,
+          'categoryId': categoryId,
+          'subcategoryId': subcategoryId,
+          'condition': listingConditionToDto(condition),
+          'brand': brand,
+          'stockQuantity': stockQuantity,
+          'shippingAvailable': shippingAvailable,
+          'shippingCost': shippingCost,
+          'location': location,
+          'attributes': attributes,
+          'imageUrls': imageUrls,
+          'status': _statusToDto(status),
         },
+        options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) {
@@ -163,15 +294,30 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           throw const ServerException('Listing not found');
         }
         final updated = _localMine[idx].copyWith(
-          title: title,
-          description: description,
+          title: titleEn,
+          description: descriptionEn,
           price: price,
-          status: status,
+          status: _statusToDto(status),
+          titleEn: titleEn,
+          titleAr: titleAr,
+          descriptionEn: descriptionEn,
+          descriptionAr: descriptionAr,
+          compareAtPrice: compareAtPrice,
+          categoryId: categoryId,
+          subcategoryId: subcategoryId,
+          condition: listingConditionToDto(condition),
+          brand: brand,
+          stockQuantity: stockQuantity,
+          shippingAvailable: shippingAvailable,
+          shippingCost: shippingCost,
+          location: location,
+          attributes: attributes,
+          imageUrls: imageUrls,
         );
         _localMine[idx] = updated;
         return updated;
       }
-      throw _mapDio(e);
+      throw mapDioException(e);
     }
   }
 
@@ -183,14 +329,17 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       return;
     }
     try {
-      await _dio.delete<void>('${ApiEndpoints.listings}/$id');
+      await _dio.delete<void>(
+        ApiEndpoints.apiListingDetail(id),
+        options: ApiAuthHeaders.authenticated(),
+      );
       _localMine.removeWhere((e) => e.id == id);
     } on DioException catch (e) {
       if (_isOffline(e)) {
         _localMine.removeWhere((e) => e.id == id);
         return;
       }
-      throw _mapDio(e);
+      throw mapDioException(e);
     }
   }
 
@@ -199,15 +348,20 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
         e.type == DioExceptionType.connectionTimeout;
   }
 
-  AppException _mapDio(DioException e) {
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-      case DioExceptionType.connectionError:
-        return NetworkException(e.message);
-      default:
-        return ServerException(e.message);
+  String _statusToDto(ListingStatus status) {
+    switch (status) {
+      case ListingStatus.pending:
+        return 'pending';
+      case ListingStatus.active:
+        return 'active';
+      case ListingStatus.draft:
+        return 'draft';
+      case ListingStatus.paused:
+        return 'paused';
+      case ListingStatus.sold:
+        return 'sold';
+      case ListingStatus.rejected:
+        return 'rejected';
     }
   }
 }

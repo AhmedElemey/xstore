@@ -14,17 +14,41 @@ class ListingRepositoryImpl implements ListingRepository {
 
   @override
   Future<Either<Failure, ListingEntity>> createListing({
-    required String title,
-    required String description,
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
     required double price,
-    required List<String> imagePaths,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    List<String> imageUrls = const [],
   }) async {
     try {
       final model = await _remote.createListing(
-        title: title,
-        description: description,
+        titleEn: titleEn,
+        titleAr: titleAr,
+        descriptionEn: descriptionEn,
+        descriptionAr: descriptionAr,
         price: price,
-        imagePaths: imagePaths,
+        compareAtPrice: compareAtPrice,
+        categoryId: categoryId,
+        subcategoryId: subcategoryId,
+        condition: condition,
+        brand: brand,
+        stockQuantity: stockQuantity,
+        shippingAvailable: shippingAvailable,
+        shippingCost: shippingCost,
+        location: location,
+        attributes: attributes,
+        imageUrls: imageUrls,
       );
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -53,18 +77,44 @@ class ListingRepositoryImpl implements ListingRepository {
   @override
   Future<Either<Failure, ListingEntity>> updateListing({
     required String id,
-    required String title,
-    required String description,
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
     required double price,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    required List<String> imageUrls,
     required ListingStatus status,
   }) async {
     try {
       final model = await _remote.updateListing(
         id: id,
-        title: title,
-        description: description,
+        titleEn: titleEn,
+        titleAr: titleAr,
+        descriptionEn: descriptionEn,
+        descriptionAr: descriptionAr,
         price: price,
-        status: _statusToDto(status),
+        compareAtPrice: compareAtPrice,
+        categoryId: categoryId,
+        subcategoryId: subcategoryId,
+        condition: condition,
+        brand: brand,
+        stockQuantity: stockQuantity,
+        shippingAvailable: shippingAvailable,
+        shippingCost: shippingCost,
+        location: location,
+        attributes: attributes,
+        imageUrls: imageUrls,
+        status: status,
       );
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -87,23 +137,6 @@ class ListingRepositoryImpl implements ListingRepository {
       return Left(Failure.server(e.message));
     } catch (e) {
       return Left(Failure.server(e.toString()));
-    }
-  }
-
-  String _statusToDto(ListingStatus status) {
-    switch (status) {
-      case ListingStatus.pending:
-        return 'pending';
-      case ListingStatus.active:
-        return 'active';
-      case ListingStatus.draft:
-        return 'draft';
-      case ListingStatus.paused:
-        return 'paused';
-      case ListingStatus.sold:
-        return 'sold';
-      case ListingStatus.rejected:
-        return 'rejected';
     }
   }
 }

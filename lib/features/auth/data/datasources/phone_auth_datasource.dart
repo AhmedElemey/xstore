@@ -9,6 +9,11 @@ import '../../../../core/utils/validators.dart';
 import '../../domain/entities/send_otp_result.dart';
 import '../../domain/entities/user_entity.dart';
 
+/// Fixed test code accepted by [PhoneAuthDatasourceImpl.verifyOtp] when
+/// `MockConfig.useMock` — no real SMS is sent, so there's nothing else to
+/// enter here during local dev/testing.
+const kMockPhoneOtpCode = '123456';
+
 abstract interface class PhoneAuthDatasource {
   Future<SendOtpResult> sendOtp({
     required String e164Number,
@@ -39,13 +44,34 @@ class PhoneAuthDatasourceImpl implements PhoneAuthDatasource {
         phoneNumber: AppValidators.toLocalEgypt(e164Number),
         resendToken: null,
         expiresAt: DateTime.now().add(const Duration(seconds: 60)),
+        debugOtp: kMockPhoneOtpCode,
       );
     }
 
     final completer = Completer<SendOtpResult>();
     await _auth.verifyPhoneNumber(
       phoneNumber: e164Number,
-      verificationCompleted: (_) {},
+      verificationCompleted: (credential) async {
+        if (completer.isCompleted) return;
+        try {
+          await _auth.signInWithCredential(credential);
+          if (!completer.isCompleted) {
+            completer.complete(
+              SendOtpResult(
+                verificationId: '',
+                phoneNumber: AppValidators.toLocalEgypt(e164Number),
+                resendToken: null,
+                expiresAt: DateTime.now().add(const Duration(seconds: 60)),
+                autoVerified: true,
+              ),
+            );
+          }
+        } on FirebaseAuthException catch (e) {
+          if (!completer.isCompleted) {
+            completer.completeError(PhoneAuthException(_mapFirebaseError(e.code)));
+          }
+        }
+      },
       verificationFailed: (e) {
         if (!completer.isCompleted) {
           completer.completeError(PhoneAuthException(_mapFirebaseError(e.code)));
@@ -78,7 +104,7 @@ class PhoneAuthDatasourceImpl implements PhoneAuthDatasource {
   }) async {
     if (MockConfig.useMock) {
       await Future<void>.delayed(const Duration(milliseconds: 800));
-      if (otpCode != '123456') {
+      if (otpCode != kMockPhoneOtpCode) {
         throw const PhoneAuthException(AppStrings.otpInvalidCode);
       }
       final isVendor = phoneNumber.startsWith('011') || phoneNumber.startsWith('015');
@@ -94,19 +120,15 @@ class PhoneAuthDatasourceImpl implements PhoneAuthDatasource {
     }
 
     try {
-      final credential = PhoneAuthProvider.credential(
+      final (user, isNew) = await _signInOrUseExistingSession(
         verificationId: verificationId,
-        smsCode: otpCode,
+        otpCode: otpCode,
       );
-      final userCredential = await _auth.signInWithCredential(credential);
-      final user = userCredential.user;
-      if (user == null) throw const PhoneAuthException(AppStrings.genericError);
-      final isNew = userCredential.additionalUserInfo?.isNewUser ?? false;
       return UserEntity(
         id: user.uid,
         name: user.displayName ?? AppValidators.formatEgyptPhone(user.phoneNumber ?? ''),
         email: user.email ?? '',
-        phoneNumber: AppValidators.toLocalEgypt(user.phoneNumber ?? ''),
+        phoneNumber: AppValidators.toLocalEgypt(user.phoneNumber ?? phoneNumber),
         avatarUrl: user.photoURL,
         role: UserRole.consumer,
         isVerified: user.phoneNumber != null,
@@ -116,6 +138,27 @@ class PhoneAuthDatasourceImpl implements PhoneAuthDatasource {
     } on FirebaseAuthException catch (e) {
       throw PhoneAuthException(_mapFirebaseError(e.code));
     }
+  }
+
+  Future<(User, bool)> _signInOrUseExistingSession({
+    required String verificationId,
+    required String otpCode,
+  }) async {
+    final current = _auth.currentUser;
+    if (otpCode.isEmpty &&
+        current != null &&
+        current.phoneNumber != null &&
+        current.phoneNumber!.isNotEmpty) {
+      return (current, false);
+    }
+    final credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: otpCode,
+    );
+    final userCredential = await _auth.signInWithCredential(credential);
+    final user = userCredential.user;
+    if (user == null) throw const PhoneAuthException(AppStrings.genericError);
+    return (user, userCredential.additionalUserInfo?.isNewUser ?? false);
   }
 
   String _mapFirebaseError(String code) {

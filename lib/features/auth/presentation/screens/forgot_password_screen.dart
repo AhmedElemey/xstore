@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -9,17 +11,20 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _email = TextEditingController();
   bool _isLoading = false;
   String? _error;
@@ -38,8 +43,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Validators.registerEmail(context.l10n, trimmed);
   }
 
-  /// Password reset API is not defined in [ApiEndpoints] or auth docs yet.
-  /// The "check your email" step should only appear after a confirmed API success.
   Future<void> _sendResetLink() async {
     final emailError = _validateEmail(_email.text);
     if (emailError != null) {
@@ -52,12 +55,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _error = null;
     });
 
-    // Fail closed until POST /auth/forgot-password (or equivalent) is implemented.
+    final email = _email.text.trim();
+    final result = await ref.read(forgotPasswordUseCaseProvider).call(email);
+
     if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-      _error = context.l10n.genericError;
-    });
+    result.fold(
+      (failure) {
+        setState(() {
+          _isLoading = false;
+          _error = failure.toString();
+        });
+      },
+      (debugOtp) {
+        setState(() => _isLoading = false);
+        // The backend echoes the OTP in the response while no real
+        // email gateway is wired up — surface it for debugging only.
+        if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
+          AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+        }
+        context.push(AppRoutes.resetPassword, extra: email);
+      },
+    );
   }
 
   @override
@@ -79,7 +97,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Reset Password',
+                context.l10n.resetPasswordTitle,
                 style: AppTypography.titleLarge.copyWith(
                   fontSize: AppTypography.rem(1.625),
                   fontWeight: FontWeight.w800,

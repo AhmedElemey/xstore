@@ -8,8 +8,9 @@
 # stays healthy on BOTH platforms. Three parallel jobs:
 #
 #   1. analyze-and-test   (ubuntu)  — codegen, `flutter analyze`, `flutter test`
+#                                     (MOCK=true default + MOCK=false for Firebase paths)
 #   2. build-android      (ubuntu)  — debug APK build (prod flavor), validates
-#                                     the Android build compiles
+#                                     the Android build compiles (no artifact upload)
 #   3. build-ios          (macos)   — `flutter build ios --no-codesign`, validates
 #                                     the iOS build compiles
 #
@@ -63,20 +64,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: bash .github/scripts/checkout.sh
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
+        run: bash .github/scripts/setup-flutter.sh "$FLUTTER_VERSION"
 
       - name: Flutter pub get
         run: flutter pub get
@@ -91,8 +85,11 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Run tests
+      - name: Run tests (MOCK=true, default)
         run: flutter test --reporter expanded
+
+      - name: Run tests (MOCK=false)
+        run: flutter test --dart-define=MOCK=false --reporter expanded
 
   # ---------------------------------------------------------------------------
   # 2) Android build validation (debug, no signing secrets required)
@@ -102,30 +99,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: bash .github/scripts/checkout.sh
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+        run: bash .github/scripts/setup-flutter.sh "$FLUTTER_VERSION" android
 
       - name: Flutter pub get
         run: flutter pub get
@@ -137,30 +117,21 @@ jobs:
             -t lib/main_prod.dart \
             --dart-define=MOCK=true
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: xstore-android-debug
-          path: build/app/outputs/flutter-apk/app-prod-debug.apk
-          if-no-files-found: error
-          retention-days: 7
-
   # ---------------------------------------------------------------------------
   # 3) iOS build validation (unsigned — no Apple certificates required)
   # ---------------------------------------------------------------------------
   build-ios:
     name: Build iOS (no codesign)
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: bash .github/scripts/checkout.sh
+
+      - name: Select Xcode 16.2 (Swift 6 — required by FBSDKLoginKit)
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
+        run: bash .github/scripts/setup-flutter.sh "$FLUTTER_VERSION"
 
       - name: Flutter pub get
         run: flutter pub get

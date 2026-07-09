@@ -251,6 +251,7 @@ mixin _$RegisterState {
   int get totalSteps => throw _privateConstructorUsedError;
   UserRole? get selectedRole => throw _privateConstructorUsedError;
   String get fullName => throw _privateConstructorUsedError;
+  String get fullNameAr => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String get phoneNumber => throw _privateConstructorUsedError;
   String get countryCode => throw _privateConstructorUsedError;
@@ -263,12 +264,17 @@ mixin _$RegisterState {
   PasswordStrength get passwordStrength => throw _privateConstructorUsedError;
   bool get agreedToTerms => throw _privateConstructorUsedError;
   String get storeName => throw _privateConstructorUsedError;
+  String get storeNameAr => throw _privateConstructorUsedError;
   String get storeSlug => throw _privateConstructorUsedError;
   String get storeCategory => throw _privateConstructorUsedError;
   String get storeDescription => throw _privateConstructorUsedError;
+  String get storeDescriptionAr => throw _privateConstructorUsedError;
   String? get storeLogoPath => throw _privateConstructorUsedError;
   String get storeCity => throw _privateConstructorUsedError;
   String get storeWilaya => throw _privateConstructorUsedError;
+  int? get storeCategoryId => throw _privateConstructorUsedError;
+  int? get storeCityId => throw _privateConstructorUsedError;
+  int? get storeGovernmentId => throw _privateConstructorUsedError;
   String get whatsappNumber => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -291,6 +297,7 @@ abstract class $RegisterStateCopyWith<$Res> {
       int totalSteps,
       UserRole? selectedRole,
       String fullName,
+      String fullNameAr,
       String email,
       String phoneNumber,
       String countryCode,
@@ -303,12 +310,17 @@ abstract class $RegisterStateCopyWith<$Res> {
       PasswordStrength passwordStrength,
       bool agreedToTerms,
       String storeName,
+      String storeNameAr,
       String storeSlug,
       String storeCategory,
       String storeDescription,
+      String storeDescriptionAr,
       String? storeLogoPath,
       String storeCity,
       String storeWilaya,
+      int? storeCategoryId,
+      int? storeCityId,
+      int? storeGovernmentId,
       String whatsappNumber,
       bool isLoading,
       String? error,
@@ -333,6 +345,7 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
     Object? totalSteps = null,
     Object? selectedRole = freezed,
     Object? fullName = null,
+    Object? fullNameAr = null,
     Object? email = null,
     Object? phoneNumber = null,
     Object? countryCode = null,
@@ -345,12 +358,17 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
     Object? passwordStrength = null,
     Object? agreedToTerms = null,
     Object? storeName = null,
+    Object? storeNameAr = null,
     Object? storeSlug = null,
     Object? storeCategory = null,
     Object? storeDescription = null,
+    Object? storeDescriptionAr = null,
     Object? storeLogoPath = freezed,
     Object? storeCity = null,
     Object? storeWilaya = null,
+    Object? storeCategoryId = freezed,
+    Object? storeCityId = freezed,
+    Object? storeGovernmentId = freezed,
     Object? whatsappNumber = null,
     Object? isLoading = null,
     Object? error = freezed,
@@ -373,6 +391,10 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      fullNameAr: null == fullNameAr
+          ? _value.fullNameAr
+          : fullNameAr // ignore: cast_nullable_to_non_nullable
               as String,
       email: null == email
           ? _value.email
@@ -422,6 +444,10 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
           ? _value.storeName
           : storeName // ignore: cast_nullable_to_non_nullable
               as String,
+      storeNameAr: null == storeNameAr
+          ? _value.storeNameAr
+          : storeNameAr // ignore: cast_nullable_to_non_nullable
+              as String,
       storeSlug: null == storeSlug
           ? _value.storeSlug
           : storeSlug // ignore: cast_nullable_to_non_nullable
@@ -433,6 +459,10 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
       storeDescription: null == storeDescription
           ? _value.storeDescription
           : storeDescription // ignore: cast_nullable_to_non_nullable
+              as String,
+      storeDescriptionAr: null == storeDescriptionAr
+          ? _value.storeDescriptionAr
+          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
               as String,
       storeLogoPath: freezed == storeLogoPath
           ? _value.storeLogoPath
@@ -446,6 +476,18 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
           ? _value.storeWilaya
           : storeWilaya // ignore: cast_nullable_to_non_nullable
               as String,
+      storeCategoryId: freezed == storeCategoryId
+          ? _value.storeCategoryId
+          : storeCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeCityId: freezed == storeCityId
+          ? _value.storeCityId
+          : storeCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeGovernmentId: freezed == storeGovernmentId
+          ? _value.storeGovernmentId
+          : storeGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
       whatsappNumber: null == whatsappNumber
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
@@ -483,6 +525,7 @@ abstract class _$$RegisterStateImplCopyWith<$Res>
       int totalSteps,
       UserRole? selectedRole,
       String fullName,
+      String fullNameAr,
       String email,
       String phoneNumber,
       String countryCode,
@@ -495,12 +538,17 @@ abstract class _$$RegisterStateImplCopyWith<$Res>
       PasswordStrength passwordStrength,
       bool agreedToTerms,
       String storeName,
+      String storeNameAr,
       String storeSlug,
       String storeCategory,
       String storeDescription,
+      String storeDescriptionAr,
       String? storeLogoPath,
       String storeCity,
       String storeWilaya,
+      int? storeCategoryId,
+      int? storeCityId,
+      int? storeGovernmentId,
       String whatsappNumber,
       bool isLoading,
       String? error,
@@ -523,6 +571,7 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
     Object? totalSteps = null,
     Object? selectedRole = freezed,
     Object? fullName = null,
+    Object? fullNameAr = null,
     Object? email = null,
     Object? phoneNumber = null,
     Object? countryCode = null,
@@ -535,12 +584,17 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
     Object? passwordStrength = null,
     Object? agreedToTerms = null,
     Object? storeName = null,
+    Object? storeNameAr = null,
     Object? storeSlug = null,
     Object? storeCategory = null,
     Object? storeDescription = null,
+    Object? storeDescriptionAr = null,
     Object? storeLogoPath = freezed,
     Object? storeCity = null,
     Object? storeWilaya = null,
+    Object? storeCategoryId = freezed,
+    Object? storeCityId = freezed,
+    Object? storeGovernmentId = freezed,
     Object? whatsappNumber = null,
     Object? isLoading = null,
     Object? error = freezed,
@@ -563,6 +617,10 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      fullNameAr: null == fullNameAr
+          ? _value.fullNameAr
+          : fullNameAr // ignore: cast_nullable_to_non_nullable
               as String,
       email: null == email
           ? _value.email
@@ -612,6 +670,10 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
           ? _value.storeName
           : storeName // ignore: cast_nullable_to_non_nullable
               as String,
+      storeNameAr: null == storeNameAr
+          ? _value.storeNameAr
+          : storeNameAr // ignore: cast_nullable_to_non_nullable
+              as String,
       storeSlug: null == storeSlug
           ? _value.storeSlug
           : storeSlug // ignore: cast_nullable_to_non_nullable
@@ -623,6 +685,10 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
       storeDescription: null == storeDescription
           ? _value.storeDescription
           : storeDescription // ignore: cast_nullable_to_non_nullable
+              as String,
+      storeDescriptionAr: null == storeDescriptionAr
+          ? _value.storeDescriptionAr
+          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
               as String,
       storeLogoPath: freezed == storeLogoPath
           ? _value.storeLogoPath
@@ -636,6 +702,18 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
           ? _value.storeWilaya
           : storeWilaya // ignore: cast_nullable_to_non_nullable
               as String,
+      storeCategoryId: freezed == storeCategoryId
+          ? _value.storeCategoryId
+          : storeCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeCityId: freezed == storeCityId
+          ? _value.storeCityId
+          : storeCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeGovernmentId: freezed == storeGovernmentId
+          ? _value.storeGovernmentId
+          : storeGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
       whatsappNumber: null == whatsappNumber
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
@@ -668,6 +746,7 @@ class _$RegisterStateImpl implements _RegisterState {
       this.totalSteps = 3,
       this.selectedRole,
       this.fullName = '',
+      this.fullNameAr = '',
       this.email = '',
       this.phoneNumber = '',
       this.countryCode = '+20',
@@ -680,12 +759,17 @@ class _$RegisterStateImpl implements _RegisterState {
       this.passwordStrength = PasswordStrength.none,
       this.agreedToTerms = false,
       this.storeName = '',
+      this.storeNameAr = '',
       this.storeSlug = '',
       this.storeCategory = '',
       this.storeDescription = '',
+      this.storeDescriptionAr = '',
       this.storeLogoPath,
       this.storeCity = '',
       this.storeWilaya = '',
+      this.storeCategoryId,
+      this.storeCityId,
+      this.storeGovernmentId,
       this.whatsappNumber = '',
       this.isLoading = false,
       this.error,
@@ -704,6 +788,9 @@ class _$RegisterStateImpl implements _RegisterState {
   @override
   @JsonKey()
   final String fullName;
+  @override
+  @JsonKey()
+  final String fullNameAr;
   @override
   @JsonKey()
   final String email;
@@ -741,6 +828,9 @@ class _$RegisterStateImpl implements _RegisterState {
   final String storeName;
   @override
   @JsonKey()
+  final String storeNameAr;
+  @override
+  @JsonKey()
   final String storeSlug;
   @override
   @JsonKey()
@@ -749,6 +839,9 @@ class _$RegisterStateImpl implements _RegisterState {
   @JsonKey()
   final String storeDescription;
   @override
+  @JsonKey()
+  final String storeDescriptionAr;
+  @override
   final String? storeLogoPath;
   @override
   @JsonKey()
@@ -756,6 +849,12 @@ class _$RegisterStateImpl implements _RegisterState {
   @override
   @JsonKey()
   final String storeWilaya;
+  @override
+  final int? storeCategoryId;
+  @override
+  final int? storeCityId;
+  @override
+  final int? storeGovernmentId;
   @override
   @JsonKey()
   final String whatsappNumber;
@@ -779,7 +878,7 @@ class _$RegisterStateImpl implements _RegisterState {
 
   @override
   String toString() {
-    return 'RegisterState(currentStep: $currentStep, totalSteps: $totalSteps, selectedRole: $selectedRole, fullName: $fullName, email: $email, phoneNumber: $phoneNumber, countryCode: $countryCode, dateOfBirth: $dateOfBirth, location: $location, password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, isConfirmPasswordVisible: $isConfirmPasswordVisible, passwordStrength: $passwordStrength, agreedToTerms: $agreedToTerms, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoPath: $storeLogoPath, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, isLoading: $isLoading, error: $error, stepErrors: $stepErrors, showVendorSuccessOverlay: $showVendorSuccessOverlay)';
+    return 'RegisterState(currentStep: $currentStep, totalSteps: $totalSteps, selectedRole: $selectedRole, fullName: $fullName, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, countryCode: $countryCode, dateOfBirth: $dateOfBirth, location: $location, password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, isConfirmPasswordVisible: $isConfirmPasswordVisible, passwordStrength: $passwordStrength, agreedToTerms: $agreedToTerms, storeName: $storeName, storeNameAr: $storeNameAr, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeDescriptionAr: $storeDescriptionAr, storeLogoPath: $storeLogoPath, storeCity: $storeCity, storeWilaya: $storeWilaya, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, isLoading: $isLoading, error: $error, stepErrors: $stepErrors, showVendorSuccessOverlay: $showVendorSuccessOverlay)';
   }
 
   @override
@@ -795,6 +894,8 @@ class _$RegisterStateImpl implements _RegisterState {
                 other.selectedRole == selectedRole) &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
+            (identical(other.fullNameAr, fullNameAr) ||
+                other.fullNameAr == fullNameAr) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phoneNumber, phoneNumber) ||
                 other.phoneNumber == phoneNumber) &&
@@ -819,18 +920,28 @@ class _$RegisterStateImpl implements _RegisterState {
                 other.agreedToTerms == agreedToTerms) &&
             (identical(other.storeName, storeName) ||
                 other.storeName == storeName) &&
+            (identical(other.storeNameAr, storeNameAr) ||
+                other.storeNameAr == storeNameAr) &&
             (identical(other.storeSlug, storeSlug) ||
                 other.storeSlug == storeSlug) &&
             (identical(other.storeCategory, storeCategory) ||
                 other.storeCategory == storeCategory) &&
             (identical(other.storeDescription, storeDescription) ||
                 other.storeDescription == storeDescription) &&
+            (identical(other.storeDescriptionAr, storeDescriptionAr) ||
+                other.storeDescriptionAr == storeDescriptionAr) &&
             (identical(other.storeLogoPath, storeLogoPath) ||
                 other.storeLogoPath == storeLogoPath) &&
             (identical(other.storeCity, storeCity) ||
                 other.storeCity == storeCity) &&
             (identical(other.storeWilaya, storeWilaya) ||
                 other.storeWilaya == storeWilaya) &&
+            (identical(other.storeCategoryId, storeCategoryId) ||
+                other.storeCategoryId == storeCategoryId) &&
+            (identical(other.storeCityId, storeCityId) ||
+                other.storeCityId == storeCityId) &&
+            (identical(other.storeGovernmentId, storeGovernmentId) ||
+                other.storeGovernmentId == storeGovernmentId) &&
             (identical(other.whatsappNumber, whatsappNumber) ||
                 other.whatsappNumber == whatsappNumber) &&
             (identical(other.isLoading, isLoading) ||
@@ -850,6 +961,7 @@ class _$RegisterStateImpl implements _RegisterState {
         totalSteps,
         selectedRole,
         fullName,
+        fullNameAr,
         email,
         phoneNumber,
         countryCode,
@@ -862,12 +974,17 @@ class _$RegisterStateImpl implements _RegisterState {
         passwordStrength,
         agreedToTerms,
         storeName,
+        storeNameAr,
         storeSlug,
         storeCategory,
         storeDescription,
+        storeDescriptionAr,
         storeLogoPath,
         storeCity,
         storeWilaya,
+        storeCategoryId,
+        storeCityId,
+        storeGovernmentId,
         whatsappNumber,
         isLoading,
         error,
@@ -888,6 +1005,7 @@ abstract class _RegisterState implements RegisterState {
       final int totalSteps,
       final UserRole? selectedRole,
       final String fullName,
+      final String fullNameAr,
       final String email,
       final String phoneNumber,
       final String countryCode,
@@ -900,12 +1018,17 @@ abstract class _RegisterState implements RegisterState {
       final PasswordStrength passwordStrength,
       final bool agreedToTerms,
       final String storeName,
+      final String storeNameAr,
       final String storeSlug,
       final String storeCategory,
       final String storeDescription,
+      final String storeDescriptionAr,
       final String? storeLogoPath,
       final String storeCity,
       final String storeWilaya,
+      final int? storeCategoryId,
+      final int? storeCityId,
+      final int? storeGovernmentId,
       final String whatsappNumber,
       final bool isLoading,
       final String? error,
@@ -920,6 +1043,8 @@ abstract class _RegisterState implements RegisterState {
   UserRole? get selectedRole;
   @override
   String get fullName;
+  @override
+  String get fullNameAr;
   @override
   String get email;
   @override
@@ -945,17 +1070,27 @@ abstract class _RegisterState implements RegisterState {
   @override
   String get storeName;
   @override
+  String get storeNameAr;
+  @override
   String get storeSlug;
   @override
   String get storeCategory;
   @override
   String get storeDescription;
   @override
+  String get storeDescriptionAr;
+  @override
   String? get storeLogoPath;
   @override
   String get storeCity;
   @override
   String get storeWilaya;
+  @override
+  int? get storeCategoryId;
+  @override
+  int? get storeCityId;
+  @override
+  int? get storeGovernmentId;
   @override
   String get whatsappNumber;
   @override

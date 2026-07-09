@@ -52,7 +52,11 @@ class ProductDetail extends _$ProductDetail {
           productId: listingId,
           category: entity.listing.categoryLabel,
         );
-    final reviewsResult = await ref.read(getProductReviewsUseCaseProvider).call(listingId);
+    final reviewsResult = await ref.read(getProductReviewsUseCaseProvider).call(
+          productId: listingId,
+          page: 0,
+          pageSize: 3,
+        );
 
     final simList = similarResult.fold((_) => <ProductDetailEntity>[], (l) => l);
     final deals = simList.map((p) {
@@ -68,7 +72,7 @@ class ProductDetail extends _$ProductDetail {
       );
     }).toList();
 
-    final revList = reviewsResult.fold((_) => <ReviewEntity>[], (l) => l);
+    final revList = reviewsResult.fold((_) => <ReviewEntity>[], (p) => p.items);
     final uiReviews = revList
         .map(
           (r) => ProductReviewEntity(

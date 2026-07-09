@@ -9,11 +9,24 @@ import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/datasources/social_auth_datasource.dart';
 import '../../data/datasources/phone_auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../domain/entities/consumer_register_params.dart';
+import '../../domain/entities/login_params.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/vendor_register_params.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../../domain/usecases/register_consumer_usecase.dart';
+import '../../domain/usecases/register_vendor_usecase.dart';
+import '../../domain/usecases/change_password_usecase.dart';
+import '../../domain/usecases/forgot_password_usecase.dart';
+import '../../domain/usecases/verify_forgot_password_otp_usecase.dart';
+import '../../domain/usecases/refresh_token_usecase.dart';
+import '../../domain/usecases/send_email_otp_usecase.dart';
+import '../../domain/usecases/verify_email_otp_usecase.dart';
+import '../../domain/usecases/send_phone_otp_backend_usecase.dart';
+import '../../domain/usecases/verify_phone_otp_backend_usecase.dart';
 import '../../domain/usecases/apple_sign_in_usecase.dart';
 import '../../domain/usecases/facebook_sign_in_usecase.dart';
 import '../../domain/usecases/google_sign_in_usecase.dart';
@@ -61,6 +74,62 @@ LoginUseCase loginUseCase(LoginUseCaseRef ref) {
 @riverpod
 RegisterUseCase registerUseCase(RegisterUseCaseRef ref) {
   return RegisterUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+RegisterConsumerUseCase registerConsumerUseCase(RegisterConsumerUseCaseRef ref) {
+  return RegisterConsumerUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+RegisterVendorUseCase registerVendorUseCase(RegisterVendorUseCaseRef ref) {
+  return RegisterVendorUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+ChangePasswordUseCase changePasswordUseCase(ChangePasswordUseCaseRef ref) {
+  return ChangePasswordUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+ForgotPasswordUseCase forgotPasswordUseCase(ForgotPasswordUseCaseRef ref) {
+  return ForgotPasswordUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+VerifyForgotPasswordOtpUseCase verifyForgotPasswordOtpUseCase(
+  VerifyForgotPasswordOtpUseCaseRef ref,
+) {
+  return VerifyForgotPasswordOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+RefreshTokenUseCase refreshTokenUseCase(RefreshTokenUseCaseRef ref) {
+  return RefreshTokenUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+SendEmailOtpUseCase sendEmailOtpUseCase(SendEmailOtpUseCaseRef ref) {
+  return SendEmailOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+VerifyEmailOtpUseCase verifyEmailOtpUseCase(VerifyEmailOtpUseCaseRef ref) {
+  return VerifyEmailOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+SendPhoneOtpBackendUseCase sendPhoneOtpBackendUseCase(
+  SendPhoneOtpBackendUseCaseRef ref,
+) {
+  return SendPhoneOtpBackendUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+VerifyPhoneOtpBackendUseCase verifyPhoneOtpBackendUseCase(
+  VerifyPhoneOtpBackendUseCaseRef ref,
+) {
+  return VerifyPhoneOtpBackendUseCase(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
@@ -160,24 +229,21 @@ class LoginNotifier extends _$LoginNotifier {
   Future<void> login(AppLocalizations l10n) async {
     if (!validate(l10n)) return;
     state = state.copyWith(isLoading: true, error: null);
-    try {
-      // DEMO: remove when real API is ready
-      await Future.delayed(const Duration(milliseconds: 2500));
-      final demoUser = UserEntity(
-        id: 'demo-001',
-        name: 'Demo User',
-        email: state.email.trim(),
-        phoneNumber: '',
-        role: UserRole.consumer,
-        isVerified: true,
-        joinedAt: DateTime.now(),
-      );
-      state = state.copyWith(isLoading: false, error: null);
-      ref.read(authProvider.notifier).adoptSession(demoUser);
-      // END DEMO
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-    }
+    final result = await ref.read(loginUseCaseProvider).call(
+          LoginParams(
+            emailOrPhone: state.email.trim(),
+            password: state.password,
+            rememberMe: state.rememberMe,
+          ),
+        );
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.toString()),
+      (user) {
+        state = state.copyWith(isLoading: false, error: null);
+        ref.read(authProvider.notifier).adoptSession(user);
+      },
+    );
   }
 }
 
@@ -247,20 +313,27 @@ class RegisterNotifier extends _$RegisterNotifier {
 
   void updateField({
     String? fullName,
+    String? fullNameAr,
     String? email,
     String? phoneNumber,
     String? countryCode,
     DateTime? dateOfBirth,
     String? location,
     String? storeName,
+    String? storeNameAr,
     String? storeCategory,
     String? storeDescription,
+    String? storeDescriptionAr,
     String? storeCity,
     String? storeWilaya,
+    int? storeCategoryId,
+    int? storeCityId,
+    int? storeGovernmentId,
     String? whatsappNumber,
   }) {
     var next = state;
     if (fullName != null) next = next.copyWith(fullName: fullName);
+    if (fullNameAr != null) next = next.copyWith(fullNameAr: fullNameAr);
     if (email != null) next = next.copyWith(email: email);
     if (phoneNumber != null) next = next.copyWith(phoneNumber: phoneNumber);
     if (countryCode != null) next = next.copyWith(countryCode: countryCode);
@@ -272,6 +345,7 @@ class RegisterNotifier extends _$RegisterNotifier {
         storeSlug: slugifyStoreName(storeName),
       );
     }
+    if (storeNameAr != null) next = next.copyWith(storeNameAr: storeNameAr);
     if (storeCategory != null) next = next.copyWith(storeCategory: storeCategory);
     if (storeDescription != null) {
       final t = storeDescription.length > 300
@@ -279,8 +353,21 @@ class RegisterNotifier extends _$RegisterNotifier {
           : storeDescription;
       next = next.copyWith(storeDescription: t);
     }
+    if (storeDescriptionAr != null) {
+      final t = storeDescriptionAr.length > 300
+          ? storeDescriptionAr.substring(0, 300)
+          : storeDescriptionAr;
+      next = next.copyWith(storeDescriptionAr: t);
+    }
     if (storeCity != null) next = next.copyWith(storeCity: storeCity);
     if (storeWilaya != null) next = next.copyWith(storeWilaya: storeWilaya);
+    if (storeCategoryId != null) {
+      next = next.copyWith(storeCategoryId: storeCategoryId);
+    }
+    if (storeCityId != null) next = next.copyWith(storeCityId: storeCityId);
+    if (storeGovernmentId != null) {
+      next = next.copyWith(storeGovernmentId: storeGovernmentId);
+    }
     if (whatsappNumber != null) next = next.copyWith(whatsappNumber: whatsappNumber);
     state = next.copyWith(stepErrors: {}, error: null);
   }
@@ -311,6 +398,13 @@ class RegisterNotifier extends _$RegisterNotifier {
       case 2:
         final fn = Validators.personFullName(l10n, state.fullName);
         if (fn != null) errors['fullName'] = fn;
+
+        final fnAr = Validators.nonEmptyLine(
+          l10n,
+          state.fullNameAr,
+          (l) => l.validationFullNameArRequired,
+        );
+        if (fnAr != null) errors['fullNameAr'] = fnAr;
 
         final em = Validators.registerEmail(l10n, state.email);
         if (em != null) errors['email'] = em;
@@ -361,7 +455,14 @@ class RegisterNotifier extends _$RegisterNotifier {
         );
         if (sn != null) errors['storeName'] = sn;
 
-        if (state.storeCategory.isEmpty) {
+        final snAr = Validators.nonEmptyLine(
+          l10n,
+          state.storeNameAr,
+          (l) => l.validationStoreNameArRequired,
+        );
+        if (snAr != null) errors['storeNameAr'] = snAr;
+
+        if (state.storeCategoryId == null) {
           errors['storeCategory'] = l10n.validationStoreCategoryRequired;
         }
         final desc = state.storeDescription.trim();
@@ -370,7 +471,13 @@ class RegisterNotifier extends _$RegisterNotifier {
         } else if (desc.length > 300) {
           errors['storeDescription'] = l10n.validationStoreDescriptionMax;
         }
-        if (state.storeCity.trim().isEmpty || state.storeWilaya.trim().isEmpty) {
+        final descAr = state.storeDescriptionAr.trim();
+        if (descAr.length < 3) {
+          errors['storeDescriptionAr'] = l10n.validationStoreDescriptionArShort;
+        } else if (descAr.length > 300) {
+          errors['storeDescriptionAr'] = l10n.validationStoreDescriptionMax;
+        }
+        if (state.storeCityId == null || state.storeGovernmentId == null) {
           errors['storeLocation'] = l10n.validationStoreCityWilayaRequired;
         }
         return errors;
@@ -408,29 +515,50 @@ class RegisterNotifier extends _$RegisterNotifier {
 
   Future<void> _executeRegister() async {
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
-    try {
-      // DEMO: remove when real API is ready
-      await Future.delayed(const Duration(milliseconds: 2500));
-      final demoUser = UserEntity(
-        id: 'demo-001',
-        name: state.fullName.trim(),
-        email: state.email.trim(),
-        phoneNumber: state.phoneNumber,
-        role: state.selectedRole ?? UserRole.consumer,
-        isVerified: true,
-        joinedAt: DateTime.now(),
-      );
-      state = state.copyWith(
-        isLoading: false,
-        error: null,
-        showVendorSuccessOverlay:
-            (state.selectedRole ?? UserRole.consumer) == UserRole.vendor,
-      );
-      ref.read(authProvider.notifier).adoptSession(demoUser);
-      // END DEMO
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-    }
+    final role = state.selectedRole ?? UserRole.consumer;
+    final result = role == UserRole.vendor
+        ? await ref.read(registerVendorUseCaseProvider).call(
+              VendorRegisterParams(
+                fullNameEn: state.fullName.trim(),
+                fullNameAr: state.fullNameAr.trim(),
+                email: state.email.trim(),
+                phoneNumber: state.phoneNumber,
+                password: state.password,
+                confirmPassword: state.confirmPassword,
+                dateOfBirth: state.dateOfBirth,
+                storeNameEn: state.storeName,
+                storeNameAr: state.storeNameAr,
+                storeDescriptionEn: state.storeDescription,
+                storeDescriptionAr: state.storeDescriptionAr,
+                storeCategoryId: state.storeCategoryId!,
+                storeCityId: state.storeCityId!,
+                storeGovernmentId: state.storeGovernmentId!,
+                whatsappNumber: state.whatsappNumber,
+              ),
+            )
+        : await ref.read(registerConsumerUseCaseProvider).call(
+              ConsumerRegisterParams(
+                fullNameEn: state.fullName.trim(),
+                fullNameAr: state.fullNameAr.trim(),
+                email: state.email.trim(),
+                phoneNumber: state.phoneNumber,
+                password: state.password,
+                confirmPassword: state.confirmPassword,
+                dateOfBirth: state.dateOfBirth,
+              ),
+            );
+    result.fold(
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.toString()),
+      (user) {
+        state = state.copyWith(
+          isLoading: false,
+          error: null,
+          showVendorSuccessOverlay: role == UserRole.vendor,
+        );
+        ref.read(authProvider.notifier).adoptSession(user);
+      },
+    );
   }
 
   /// Consumer: call from step 3. Vendor: call from step 4.

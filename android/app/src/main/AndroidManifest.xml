@@ -6,6 +6,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
+        <!-- TODO: Facebook App ID + Client Token — also update ios/Runner/Info.plist
+             (FacebookAppID, FacebookClientToken, CFBundleURLSchemes) and
+             android/app/src/main/res/values/strings.xml (facebook_app_id,
+             facebook_client_token, fb_login_protocol_scheme). -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />

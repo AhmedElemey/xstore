@@ -111,9 +111,24 @@ class MyListingsNotifier extends _$MyListingsNotifier {
 
     final result = await ref.read(updateListingUseCaseProvider).call(
           id: listing.id,
-          title: listing.title,
-          description: listing.description,
+          titleEn: listing.titleEn.isNotEmpty ? listing.titleEn : listing.title,
+          titleAr: listing.titleAr,
+          descriptionEn: listing.descriptionEn.isNotEmpty
+              ? listing.descriptionEn
+              : listing.description,
+          descriptionAr: listing.descriptionAr,
           price: listing.price,
+          compareAtPrice: listing.compareAtPrice,
+          categoryId: listing.categoryId ?? 0,
+          subcategoryId: listing.subcategoryId,
+          condition: listing.condition ?? ListingCondition.newItem,
+          brand: listing.brand,
+          stockQuantity: listing.stockQuantity,
+          shippingAvailable: listing.shippingAvailable,
+          shippingCost: listing.shippingCost,
+          location: listing.location,
+          attributes: listing.attributes,
+          imageUrls: listing.imageUrls,
           status: nextStatus,
         );
 

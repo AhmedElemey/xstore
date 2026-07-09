@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/network/dio_provider.dart';
 import '../../data/datasources/notifications_remote_datasource.dart';
 import '../../data/repositories/notifications_repository_impl.dart';
 import '../../domain/repositories/notifications_repository.dart';
@@ -15,7 +16,7 @@ part 'notifications_dependencies.g.dart';
 NotificationsRemoteDataSource notificationsRemoteDataSource(
   NotificationsRemoteDataSourceRef ref,
 ) {
-  return NotificationsRemoteDataSourceImpl();
+  return NotificationsRemoteDataSourceImpl(ref.watch(dioProvider));
 }
 
 @Riverpod(keepAlive: true)

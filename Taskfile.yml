@@ -28,6 +28,18 @@ vars:
     sh: echo ${API_BASE_URL_PROD:-https://api.xstore.local}
 
 tasks:
+  version:bump:
+    desc: Increment the build number (the +N in pubspec.yaml's version line)
+    cmds:
+      - |
+        VERSION_LINE=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+        APP_VERSION="${VERSION_LINE%%+*}"
+        BUILD_NUMBER="${VERSION_LINE##*+}"
+        NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+        NEW_VERSION_LINE="${APP_VERSION}+${NEW_BUILD_NUMBER}"
+        perl -pi -e "s/^version: .*/version: ${NEW_VERSION_LINE}/" pubspec.yaml
+        echo "Bumped version: ${VERSION_LINE} -> ${NEW_VERSION_LINE}"
+
   build:dev:
     desc: Build release APK for the dev flavor (com.xstore.app.dev)
     cmds:
@@ -43,6 +55,28 @@ tasks:
     cmds:
       - task: build:dev
       - task: build:prod
+
+  release:apk:
+    desc: Bump the build number, then build release APKs for dev and prod (LOCAL — no GitHub, no email)
+    cmds:
+      - task: version:bump
+      - task: build:all
+
+  release:remote:dev:
+    desc: Trigger the GitHub Actions release workflow for dev (bumps version, builds, publishes a release, and emails you the APK link)
+    cmds:
+      - gh workflow run build-and-release-apk.yml -f flavor=dev
+
+  release:remote:prod:
+    desc: Trigger the GitHub Actions release workflow for prod (bumps version, builds, publishes a release, and emails you the APK link)
+    cmds:
+      - gh workflow run build-and-release-apk.yml -f flavor=prod
+
+  release:remote:all:
+    desc: Trigger the GitHub Actions release workflow for both dev and prod
+    cmds:
+      - task: release:remote:dev
+      - task: release:remote:prod
 
   build-obfuscate-apk:
     cmds:

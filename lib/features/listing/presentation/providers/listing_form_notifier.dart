@@ -8,6 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../domain/entities/listing_entity.dart';
 import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
 import 'listing_form_state.dart';
@@ -304,6 +305,27 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     return err.isEmpty;
   }
 
+  ListingCondition? _conditionFromFormValue(String raw) {
+    // state.condition is a free display string sourced from
+    // ListingCategoriesData.conditions ('New','Like New','Good','Used',
+    // 'For Parts') via condition_selector.dart — map it to the enum here
+    // rather than changing the selector widget's value domain.
+    switch (raw) {
+      case 'New':
+        return ListingCondition.newItem;
+      case 'Like New':
+        return ListingCondition.likeNew;
+      case 'Good':
+        return ListingCondition.good;
+      case 'Used':
+        return ListingCondition.used;
+      case 'For Parts':
+        return ListingCondition.forParts;
+      default:
+        return null;
+    }
+  }
+
   /// Publishes listing; on success clears form and draft. Returns `true` if published.
   Future<bool> submit(AppLocalizations l10n) async {
     if (!validate(l10n)) {
@@ -313,54 +335,48 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     state = state.copyWith(isSubmitting: true);
     try {
       final price = Validators.parseMoneyInput(state.priceInput)!;
-      final descBuf = StringBuffer(state.description.trim());
-      if (state.attributes.isNotEmpty) {
-        descBuf.writeln();
-        for (final a in state.attributes) {
-          if (a.key.trim().isNotEmpty) {
-            descBuf.writeln('${a.key.trim()}: ${a.value.trim()}');
-          }
-        }
-      }
-      final cat = ListingCategoriesData.categoryById(state.categoryId);
-      ListingSubcategoryOption? sub;
-      if (cat != null) {
-        for (final s in cat.subcategories) {
-          if (s.id == state.subcategoryId) {
-            sub = s;
-            break;
-          }
-        }
-      }
-      if (cat != null) {
-        descBuf.writeln('Category: ${cat.name}');
-      }
-      if (sub != null) {
-        descBuf.writeln('Subcategory: ${sub.name}');
-      }
-      if (state.condition.isNotEmpty) {
-        descBuf.writeln('Condition: ${state.condition}');
-      }
-      if (state.brand.trim().isNotEmpty) {
-        descBuf.writeln('Brand: ${state.brand.trim()}');
-      }
-      descBuf.writeln('Qty: ${state.quantity}');
-      descBuf.writeln('Location: ${state.location.trim()}');
-      if (state.shippingAvailable) {
-        final sc = state.shippingCost ?? 0;
-        descBuf.writeln('Shipping: $sc $_currencyCode');
-      }
-      final cmp = Validators.parseMoneyInput(state.compareAtPrice);
-      if (cmp != null && cmp > 0) {
-        descBuf.writeln('Compare-at price: $cmp');
+      final categoryId = int.tryParse(state.categoryId);
+      final subcategoryId = int.tryParse(state.subcategoryId);
+      final condition = _conditionFromFormValue(state.condition);
+      final compareAt = Validators.parseMoneyInput(state.compareAtPrice);
+      final shippingCost = state.shippingAvailable ? (state.shippingCost ?? 0) : 0.0;
+      final attributesMap = <String, String>{
+        for (final a in state.attributes)
+          if (a.key.trim().isNotEmpty) a.key.trim(): a.value.trim(),
+      };
+
+      if (categoryId == null || condition == null) {
+        state = state.copyWith(
+          isSubmitting: false,
+          errors: {...state.errors, 'submit': l10n.listingValidationFixFields},
+        );
+        return false;
       }
 
       final useCase = ref.read(createListingUseCaseProvider);
       final result = await useCase(
-        title: state.name.trim(),
-        description: descBuf.toString().trim(),
+        // ASSUMPTION: single-language form input for now — same string sent
+        // for both En/Ar variants until the form gains a dedicated Arabic
+        // title/description field.
+        titleEn: state.name.trim(),
+        titleAr: state.name.trim(),
+        descriptionEn: state.description.trim(),
+        descriptionAr: state.description.trim(),
         price: price,
-        imagePaths: state.photos.map((f) => f.path).toList(),
+        compareAtPrice: (compareAt != null && compareAt > 0) ? compareAt : null,
+        categoryId: categoryId,
+        subcategoryId: subcategoryId,
+        condition: condition,
+        brand: state.brand.trim(),
+        stockQuantity: state.quantity,
+        shippingAvailable: state.shippingAvailable,
+        shippingCost: shippingCost,
+        location: state.location.trim(),
+        attributes: attributesMap,
+        // NOTE (known gap): no image-upload endpoint exists in the backend
+        // yet. photoPaths remain local-only for in-form preview; imageUrls
+        // is sent empty until an upload endpoint is confirmed and wired.
+        imageUrls: const [],
       );
 
       var success = false;

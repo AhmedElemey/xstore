@@ -3548,6 +3548,66 @@ abstract class AppLocalizations {
   /// **'Read less'**
   String get readLess;
 
+  /// No description provided for @writeReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a Review'**
+  String get writeReview;
+
+  /// No description provided for @editReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Review'**
+  String get editReview;
+
+  /// No description provided for @deleteReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteReview;
+
+  /// No description provided for @reviewRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get reviewRatingLabel;
+
+  /// No description provided for @reviewCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your thoughts about this product'**
+  String get reviewCommentHint;
+
+  /// No description provided for @submitReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submitReview;
+
+  /// No description provided for @signInToWriteReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to write a review'**
+  String get signInToWriteReview;
+
+  /// No description provided for @deleteReviewConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete review?'**
+  String get deleteReviewConfirmTitle;
+
+  /// No description provided for @deleteReviewConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get deleteReviewConfirmMessage;
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get noReviewsYet;
+
   /// No description provided for @quantity.
   ///
   /// In en, this message translates to:
@@ -4616,6 +4676,24 @@ abstract class AppLocalizations {
   /// **'Full Name *'**
   String get fullNameRequired;
 
+  /// No description provided for @fullNameArRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name (Arabic) *'**
+  String get fullNameArRequired;
+
+  /// No description provided for @storeNameArRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Name (Arabic) *'**
+  String get storeNameArRequired;
+
+  /// No description provided for @storeDescriptionArRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Description (Arabic) *'**
+  String get storeDescriptionArRequired;
+
   /// No description provided for @emailAddressRequired.
   ///
   /// In en, this message translates to:
@@ -4652,11 +4730,41 @@ abstract class AppLocalizations {
   /// **'Password *'**
   String get passwordRequired;
 
+  /// No description provided for @newPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password *'**
+  String get newPasswordRequired;
+
   /// No description provided for @confirmPasswordRequired.
   ///
   /// In en, this message translates to:
   /// **'Confirm Password *'**
   String get confirmPasswordRequired;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordOtpSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code sent to {email} and choose a new password'**
+  String resetPasswordOtpSentTo(String email);
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset. Please sign in with your new password.'**
+  String get passwordResetSuccess;
 
   /// No description provided for @agreeTo.
   ///
@@ -5449,6 +5557,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'City and wilaya are required'**
   String get validationStoreCityWilayaRequired;
+
+  /// No description provided for @validationFullNameArRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic full name is required'**
+  String get validationFullNameArRequired;
+
+  /// No description provided for @validationStoreNameArRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic store name is required'**
+  String get validationStoreNameArRequired;
+
+  /// No description provided for @validationStoreDescriptionArShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your store in Arabic'**
+  String get validationStoreDescriptionArShort;
 
   /// No description provided for @listingValidationPhotosRequired.
   ///

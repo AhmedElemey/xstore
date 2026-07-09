@@ -32,9 +32,13 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editPhone.trim() == u.phoneNumber.trim() &&
       s.editLocation.trim() == (u.location ?? '').trim() &&
       s.editBio.trim() == (u.bio ?? '').trim() &&
+      s.editFullNameAr.trim() == (u.fullNameAr ?? '').trim() &&
       s.editStoreName.trim() == (u.storeName ?? '').trim() &&
+      s.editStoreNameAr.trim() == (u.storeNameAr ?? '').trim() &&
       s.editStoreCategory.trim() == (u.storeCategory ?? '').trim() &&
       s.editStoreDescription.trim() == (u.storeDescription ?? '').trim() &&
+      s.editStoreDescriptionAr.trim() ==
+          (u.storeDescriptionAr ?? '').trim() &&
       s.editStoreCity.trim() == (u.storeCity ?? '').trim() &&
       s.editStoreWilaya.trim() == (u.storeWilaya ?? '').trim() &&
       s.editWhatsapp.trim() == (u.whatsappNumber ?? '').trim() &&
@@ -92,6 +96,9 @@ class ProfileNotifier extends _$ProfileNotifier {
       case 'name':
         next = next.copyWith(editName: value as String);
         break;
+      case 'fullNameAr':
+        next = next.copyWith(editFullNameAr: value as String);
+        break;
       case 'email':
         next = next.copyWith(editEmail: value as String);
         break;
@@ -107,11 +114,17 @@ class ProfileNotifier extends _$ProfileNotifier {
       case 'storeName':
         next = next.copyWith(editStoreName: value as String);
         break;
+      case 'storeNameAr':
+        next = next.copyWith(editStoreNameAr: value as String);
+        break;
       case 'storeCategory':
         next = next.copyWith(editStoreCategory: value as String);
         break;
       case 'storeDescription':
         next = next.copyWith(editStoreDescription: value as String);
+        break;
+      case 'storeDescriptionAr':
+        next = next.copyWith(editStoreDescriptionAr: value as String);
         break;
       case 'storeCity':
         next = next.copyWith(editStoreCity: value as String);

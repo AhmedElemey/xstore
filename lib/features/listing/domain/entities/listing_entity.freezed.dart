@@ -27,7 +27,27 @@ mixin _$ListingEntity {
   DateTime? get postedAt => throw _privateConstructorUsedError;
   int get viewCount => throw _privateConstructorUsedError;
   int get saveCount => throw _privateConstructorUsedError;
-  int get inquiryCount => throw _privateConstructorUsedError;
+  int get inquiryCount =>
+      throw _privateConstructorUsedError; // --- Phase 2 backend integration additions ---
+  String get vendorId =>
+      throw _privateConstructorUsedError; // ASSUMPTION: GET responses return flat title/description (English
+// display) alongside the En/Ar write fields — unconfirmed, verify
+// against a live response; if GET only returns titleEn/titleAr,
+// resolve title := titleEn in the model parser.
+  String get titleEn => throw _privateConstructorUsedError;
+  String get titleAr => throw _privateConstructorUsedError;
+  String get descriptionEn => throw _privateConstructorUsedError;
+  String get descriptionAr => throw _privateConstructorUsedError;
+  double? get compareAtPrice => throw _privateConstructorUsedError;
+  int? get categoryId => throw _privateConstructorUsedError;
+  int? get subcategoryId => throw _privateConstructorUsedError;
+  ListingCondition? get condition => throw _privateConstructorUsedError;
+  String get brand => throw _privateConstructorUsedError;
+  int get stockQuantity => throw _privateConstructorUsedError;
+  bool get shippingAvailable => throw _privateConstructorUsedError;
+  double get shippingCost => throw _privateConstructorUsedError;
+  String get location => throw _privateConstructorUsedError;
+  Map<String, String> get attributes => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ListingEntityCopyWith<ListingEntity> get copyWith =>
@@ -52,7 +72,22 @@ abstract class $ListingEntityCopyWith<$Res> {
       DateTime? postedAt,
       int viewCount,
       int saveCount,
-      int inquiryCount});
+      int inquiryCount,
+      String vendorId,
+      String titleEn,
+      String titleAr,
+      String descriptionEn,
+      String descriptionAr,
+      double? compareAtPrice,
+      int? categoryId,
+      int? subcategoryId,
+      ListingCondition? condition,
+      String brand,
+      int stockQuantity,
+      bool shippingAvailable,
+      double shippingCost,
+      String location,
+      Map<String, String> attributes});
 }
 
 /// @nodoc
@@ -80,6 +115,21 @@ class _$ListingEntityCopyWithImpl<$Res, $Val extends ListingEntity>
     Object? viewCount = null,
     Object? saveCount = null,
     Object? inquiryCount = null,
+    Object? vendorId = null,
+    Object? titleEn = null,
+    Object? titleAr = null,
+    Object? descriptionEn = null,
+    Object? descriptionAr = null,
+    Object? compareAtPrice = freezed,
+    Object? categoryId = freezed,
+    Object? subcategoryId = freezed,
+    Object? condition = freezed,
+    Object? brand = null,
+    Object? stockQuantity = null,
+    Object? shippingAvailable = null,
+    Object? shippingCost = null,
+    Object? location = null,
+    Object? attributes = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -130,6 +180,66 @@ class _$ListingEntityCopyWithImpl<$Res, $Val extends ListingEntity>
           ? _value.inquiryCount
           : inquiryCount // ignore: cast_nullable_to_non_nullable
               as int,
+      vendorId: null == vendorId
+          ? _value.vendorId
+          : vendorId // ignore: cast_nullable_to_non_nullable
+              as String,
+      titleEn: null == titleEn
+          ? _value.titleEn
+          : titleEn // ignore: cast_nullable_to_non_nullable
+              as String,
+      titleAr: null == titleAr
+          ? _value.titleAr
+          : titleAr // ignore: cast_nullable_to_non_nullable
+              as String,
+      descriptionEn: null == descriptionEn
+          ? _value.descriptionEn
+          : descriptionEn // ignore: cast_nullable_to_non_nullable
+              as String,
+      descriptionAr: null == descriptionAr
+          ? _value.descriptionAr
+          : descriptionAr // ignore: cast_nullable_to_non_nullable
+              as String,
+      compareAtPrice: freezed == compareAtPrice
+          ? _value.compareAtPrice
+          : compareAtPrice // ignore: cast_nullable_to_non_nullable
+              as double?,
+      categoryId: freezed == categoryId
+          ? _value.categoryId
+          : categoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      subcategoryId: freezed == subcategoryId
+          ? _value.subcategoryId
+          : subcategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      condition: freezed == condition
+          ? _value.condition
+          : condition // ignore: cast_nullable_to_non_nullable
+              as ListingCondition?,
+      brand: null == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String,
+      stockQuantity: null == stockQuantity
+          ? _value.stockQuantity
+          : stockQuantity // ignore: cast_nullable_to_non_nullable
+              as int,
+      shippingAvailable: null == shippingAvailable
+          ? _value.shippingAvailable
+          : shippingAvailable // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shippingCost: null == shippingCost
+          ? _value.shippingCost
+          : shippingCost // ignore: cast_nullable_to_non_nullable
+              as double,
+      location: null == location
+          ? _value.location
+          : location // ignore: cast_nullable_to_non_nullable
+              as String,
+      attributes: null == attributes
+          ? _value.attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as Map<String, String>,
     ) as $Val);
   }
 }
@@ -154,7 +264,22 @@ abstract class _$$ListingEntityImplCopyWith<$Res>
       DateTime? postedAt,
       int viewCount,
       int saveCount,
-      int inquiryCount});
+      int inquiryCount,
+      String vendorId,
+      String titleEn,
+      String titleAr,
+      String descriptionEn,
+      String descriptionAr,
+      double? compareAtPrice,
+      int? categoryId,
+      int? subcategoryId,
+      ListingCondition? condition,
+      String brand,
+      int stockQuantity,
+      bool shippingAvailable,
+      double shippingCost,
+      String location,
+      Map<String, String> attributes});
 }
 
 /// @nodoc
@@ -180,6 +305,21 @@ class __$$ListingEntityImplCopyWithImpl<$Res>
     Object? viewCount = null,
     Object? saveCount = null,
     Object? inquiryCount = null,
+    Object? vendorId = null,
+    Object? titleEn = null,
+    Object? titleAr = null,
+    Object? descriptionEn = null,
+    Object? descriptionAr = null,
+    Object? compareAtPrice = freezed,
+    Object? categoryId = freezed,
+    Object? subcategoryId = freezed,
+    Object? condition = freezed,
+    Object? brand = null,
+    Object? stockQuantity = null,
+    Object? shippingAvailable = null,
+    Object? shippingCost = null,
+    Object? location = null,
+    Object? attributes = null,
   }) {
     return _then(_$ListingEntityImpl(
       id: null == id
@@ -230,6 +370,66 @@ class __$$ListingEntityImplCopyWithImpl<$Res>
           ? _value.inquiryCount
           : inquiryCount // ignore: cast_nullable_to_non_nullable
               as int,
+      vendorId: null == vendorId
+          ? _value.vendorId
+          : vendorId // ignore: cast_nullable_to_non_nullable
+              as String,
+      titleEn: null == titleEn
+          ? _value.titleEn
+          : titleEn // ignore: cast_nullable_to_non_nullable
+              as String,
+      titleAr: null == titleAr
+          ? _value.titleAr
+          : titleAr // ignore: cast_nullable_to_non_nullable
+              as String,
+      descriptionEn: null == descriptionEn
+          ? _value.descriptionEn
+          : descriptionEn // ignore: cast_nullable_to_non_nullable
+              as String,
+      descriptionAr: null == descriptionAr
+          ? _value.descriptionAr
+          : descriptionAr // ignore: cast_nullable_to_non_nullable
+              as String,
+      compareAtPrice: freezed == compareAtPrice
+          ? _value.compareAtPrice
+          : compareAtPrice // ignore: cast_nullable_to_non_nullable
+              as double?,
+      categoryId: freezed == categoryId
+          ? _value.categoryId
+          : categoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      subcategoryId: freezed == subcategoryId
+          ? _value.subcategoryId
+          : subcategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      condition: freezed == condition
+          ? _value.condition
+          : condition // ignore: cast_nullable_to_non_nullable
+              as ListingCondition?,
+      brand: null == brand
+          ? _value.brand
+          : brand // ignore: cast_nullable_to_non_nullable
+              as String,
+      stockQuantity: null == stockQuantity
+          ? _value.stockQuantity
+          : stockQuantity // ignore: cast_nullable_to_non_nullable
+              as int,
+      shippingAvailable: null == shippingAvailable
+          ? _value.shippingAvailable
+          : shippingAvailable // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shippingCost: null == shippingCost
+          ? _value.shippingCost
+          : shippingCost // ignore: cast_nullable_to_non_nullable
+              as double,
+      location: null == location
+          ? _value.location
+          : location // ignore: cast_nullable_to_non_nullable
+              as String,
+      attributes: null == attributes
+          ? _value._attributes
+          : attributes // ignore: cast_nullable_to_non_nullable
+              as Map<String, String>,
     ));
   }
 }
@@ -249,8 +449,24 @@ class _$ListingEntityImpl implements _ListingEntity {
       this.postedAt,
       this.viewCount = 0,
       this.saveCount = 0,
-      this.inquiryCount = 0})
-      : _imageUrls = imageUrls;
+      this.inquiryCount = 0,
+      this.vendorId = '',
+      this.titleEn = '',
+      this.titleAr = '',
+      this.descriptionEn = '',
+      this.descriptionAr = '',
+      this.compareAtPrice,
+      this.categoryId,
+      this.subcategoryId,
+      this.condition,
+      this.brand = '',
+      this.stockQuantity = 0,
+      this.shippingAvailable = false,
+      this.shippingCost = 0.0,
+      this.location = '',
+      final Map<String, String> attributes = const <String, String>{}})
+      : _imageUrls = imageUrls,
+        _attributes = attributes;
 
   @override
   final String id;
@@ -288,10 +504,61 @@ class _$ListingEntityImpl implements _ListingEntity {
   @override
   @JsonKey()
   final int inquiryCount;
+// --- Phase 2 backend integration additions ---
+  @override
+  @JsonKey()
+  final String vendorId;
+// ASSUMPTION: GET responses return flat title/description (English
+// display) alongside the En/Ar write fields — unconfirmed, verify
+// against a live response; if GET only returns titleEn/titleAr,
+// resolve title := titleEn in the model parser.
+  @override
+  @JsonKey()
+  final String titleEn;
+  @override
+  @JsonKey()
+  final String titleAr;
+  @override
+  @JsonKey()
+  final String descriptionEn;
+  @override
+  @JsonKey()
+  final String descriptionAr;
+  @override
+  final double? compareAtPrice;
+  @override
+  final int? categoryId;
+  @override
+  final int? subcategoryId;
+  @override
+  final ListingCondition? condition;
+  @override
+  @JsonKey()
+  final String brand;
+  @override
+  @JsonKey()
+  final int stockQuantity;
+  @override
+  @JsonKey()
+  final bool shippingAvailable;
+  @override
+  @JsonKey()
+  final double shippingCost;
+  @override
+  @JsonKey()
+  final String location;
+  final Map<String, String> _attributes;
+  @override
+  @JsonKey()
+  Map<String, String> get attributes {
+    if (_attributes is EqualUnmodifiableMapView) return _attributes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_attributes);
+  }
 
   @override
   String toString() {
-    return 'ListingEntity(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount)';
+    return 'ListingEntity(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount, vendorId: $vendorId, titleEn: $titleEn, titleAr: $titleAr, descriptionEn: $descriptionEn, descriptionAr: $descriptionAr, compareAtPrice: $compareAtPrice, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, stockQuantity: $stockQuantity, shippingAvailable: $shippingAvailable, shippingCost: $shippingCost, location: $location, attributes: $attributes)';
   }
 
   @override
@@ -318,24 +585,67 @@ class _$ListingEntityImpl implements _ListingEntity {
             (identical(other.saveCount, saveCount) ||
                 other.saveCount == saveCount) &&
             (identical(other.inquiryCount, inquiryCount) ||
-                other.inquiryCount == inquiryCount));
+                other.inquiryCount == inquiryCount) &&
+            (identical(other.vendorId, vendorId) ||
+                other.vendorId == vendorId) &&
+            (identical(other.titleEn, titleEn) || other.titleEn == titleEn) &&
+            (identical(other.titleAr, titleAr) || other.titleAr == titleAr) &&
+            (identical(other.descriptionEn, descriptionEn) ||
+                other.descriptionEn == descriptionEn) &&
+            (identical(other.descriptionAr, descriptionAr) ||
+                other.descriptionAr == descriptionAr) &&
+            (identical(other.compareAtPrice, compareAtPrice) ||
+                other.compareAtPrice == compareAtPrice) &&
+            (identical(other.categoryId, categoryId) ||
+                other.categoryId == categoryId) &&
+            (identical(other.subcategoryId, subcategoryId) ||
+                other.subcategoryId == subcategoryId) &&
+            (identical(other.condition, condition) ||
+                other.condition == condition) &&
+            (identical(other.brand, brand) || other.brand == brand) &&
+            (identical(other.stockQuantity, stockQuantity) ||
+                other.stockQuantity == stockQuantity) &&
+            (identical(other.shippingAvailable, shippingAvailable) ||
+                other.shippingAvailable == shippingAvailable) &&
+            (identical(other.shippingCost, shippingCost) ||
+                other.shippingCost == shippingCost) &&
+            (identical(other.location, location) ||
+                other.location == location) &&
+            const DeepCollectionEquality()
+                .equals(other._attributes, _attributes));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      title,
-      description,
-      price,
-      status,
-      const DeepCollectionEquality().hash(_imageUrls),
-      categoryLabel,
-      conditionLabel,
-      postedAt,
-      viewCount,
-      saveCount,
-      inquiryCount);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        title,
+        description,
+        price,
+        status,
+        const DeepCollectionEquality().hash(_imageUrls),
+        categoryLabel,
+        conditionLabel,
+        postedAt,
+        viewCount,
+        saveCount,
+        inquiryCount,
+        vendorId,
+        titleEn,
+        titleAr,
+        descriptionEn,
+        descriptionAr,
+        compareAtPrice,
+        categoryId,
+        subcategoryId,
+        condition,
+        brand,
+        stockQuantity,
+        shippingAvailable,
+        shippingCost,
+        location,
+        const DeepCollectionEquality().hash(_attributes)
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -357,7 +667,22 @@ abstract class _ListingEntity implements ListingEntity {
       final DateTime? postedAt,
       final int viewCount,
       final int saveCount,
-      final int inquiryCount}) = _$ListingEntityImpl;
+      final int inquiryCount,
+      final String vendorId,
+      final String titleEn,
+      final String titleAr,
+      final String descriptionEn,
+      final String descriptionAr,
+      final double? compareAtPrice,
+      final int? categoryId,
+      final int? subcategoryId,
+      final ListingCondition? condition,
+      final String brand,
+      final int stockQuantity,
+      final bool shippingAvailable,
+      final double shippingCost,
+      final String location,
+      final Map<String, String> attributes}) = _$ListingEntityImpl;
 
   @override
   String get id;
@@ -383,6 +708,39 @@ abstract class _ListingEntity implements ListingEntity {
   int get saveCount;
   @override
   int get inquiryCount;
+  @override // --- Phase 2 backend integration additions ---
+  String get vendorId;
+  @override // ASSUMPTION: GET responses return flat title/description (English
+// display) alongside the En/Ar write fields — unconfirmed, verify
+// against a live response; if GET only returns titleEn/titleAr,
+// resolve title := titleEn in the model parser.
+  String get titleEn;
+  @override
+  String get titleAr;
+  @override
+  String get descriptionEn;
+  @override
+  String get descriptionAr;
+  @override
+  double? get compareAtPrice;
+  @override
+  int? get categoryId;
+  @override
+  int? get subcategoryId;
+  @override
+  ListingCondition? get condition;
+  @override
+  String get brand;
+  @override
+  int get stockQuantity;
+  @override
+  bool get shippingAvailable;
+  @override
+  double get shippingCost;
+  @override
+  String get location;
+  @override
+  Map<String, String> get attributes;
   @override
   @JsonKey(ignore: true)
   _$$ListingEntityImplCopyWith<_$ListingEntityImpl> get copyWith =>

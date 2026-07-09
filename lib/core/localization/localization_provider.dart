@@ -49,3 +49,9 @@ final appLocaleProvider =
     StateNotifierProvider<AppLocaleNotifier, AppLanguage>(
   (ref) => AppLocaleNotifier(ref),
 );
+
+/// Convenience for resolving [LocalizedText] fields from widgets:
+/// `city.name.resolve(ref.watch(appIsArabicProvider))`.
+final appIsArabicProvider = Provider<bool>(
+  (ref) => ref.watch(appLocaleProvider) == AppLanguage.arabic,
+);

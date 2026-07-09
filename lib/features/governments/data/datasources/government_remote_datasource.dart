@@ -1,0 +1,82 @@
+import 'package:dio/dio.dart';
+
+import '../../../../core/error/exceptions.dart';
+import '../../../../core/mock/mock_config.dart';
+import '../../../../core/mock/mock_reference_data.dart';
+import '../../../../core/network/api_auth_headers.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
+import '../models/government_model.dart';
+
+abstract interface class GovernmentRemoteDataSource {
+  Future<({List<GovernmentModel> items, int totalCount})> getGovernments({
+    required int page,
+    required int pageSize,
+  });
+
+  Future<GovernmentModel> getGovernmentById(int id);
+}
+
+class GovernmentRemoteDataSourceImpl implements GovernmentRemoteDataSource {
+  GovernmentRemoteDataSourceImpl(this._dio);
+
+  final Dio _dio;
+
+  @override
+  Future<({List<GovernmentModel> items, int totalCount})> getGovernments({
+    required int page,
+    required int pageSize,
+  }) async {
+    if (MockConfig.useMock) {
+      final all = MockReferenceData.governments;
+      final start = page * pageSize;
+      final slice = start >= all.length
+          ? <GovernmentModel>[]
+          : all.skip(start).take(pageSize).toList();
+      return MockConfig.simulate((items: slice, totalCount: all.length));
+    }
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.governments,
+        queryParameters: {'page': page, 'pageSize': pageSize},
+        options: ApiAuthHeaders.public(),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty response');
+      final rawItems = data['items'] as List<dynamic>? ?? [];
+      final items = rawItems
+          .map((e) =>
+              GovernmentModel.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList();
+      return (
+        items: items,
+        totalCount: data['totalCount'] as int? ?? items.length,
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<GovernmentModel> getGovernmentById(int id) async {
+    if (MockConfig.useMock) {
+      final government =
+          MockReferenceData.governments.where((g) => g.id == id).firstOrNull;
+      if (government == null) {
+        throw const ServerException('Government not found');
+      }
+      return MockConfig.simulate(government);
+    }
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '${ApiEndpoints.governments}/$id',
+        options: ApiAuthHeaders.public(),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty response');
+      return GovernmentModel.fromJson(data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+}

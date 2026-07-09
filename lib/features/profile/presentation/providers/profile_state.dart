@@ -16,6 +16,7 @@ class ProfileState with _$ProfileState {
     String? error,
     // Edit form
     @Default('') String editName,
+    @Default('') String editFullNameAr,
     @Default('') String editEmail,
     @Default('') String editPhone,
     @Default('') String editLocation,
@@ -23,8 +24,10 @@ class ProfileState with _$ProfileState {
     File? editAvatarFile,
     @Default(false) bool avatarRemoved,
     @Default('') String editStoreName,
+    @Default('') String editStoreNameAr,
     @Default('') String editStoreCategory,
     @Default('') String editStoreDescription,
+    @Default('') String editStoreDescriptionAr,
     @Default('') String editStoreCity,
     @Default('') String editStoreWilaya,
     @Default('') String editWhatsapp,
@@ -62,13 +65,16 @@ extension ProfileStateX on ProfileState {
       profile: p,
       error: null,
       editName: u.name,
+      editFullNameAr: u.fullNameAr ?? '',
       editEmail: u.email,
       editPhone: u.phoneNumber,
       editLocation: u.location ?? '',
       editBio: u.bio ?? '',
       editStoreName: u.storeName ?? '',
+      editStoreNameAr: u.storeNameAr ?? '',
       editStoreCategory: u.storeCategory ?? '',
       editStoreDescription: u.storeDescription ?? '',
+      editStoreDescriptionAr: u.storeDescriptionAr ?? '',
       editStoreCity: u.storeCity ?? '',
       editStoreWilaya: u.storeWilaya ?? '',
       editWhatsapp: u.whatsappNumber ?? '',
@@ -112,6 +118,19 @@ extension ProfileStateX on ProfileState {
           ? null
           : editStoreDescription.trim(),
       storeCity: editStoreCity.trim().isEmpty ? null : editStoreCity.trim(),
+      // Bilingual fields sent to /api/auth/update-profile.
+      fullNameEn: editName.trim().isEmpty ? null : editName.trim(),
+      fullNameAr: editFullNameAr.trim().isEmpty ? null : editFullNameAr.trim(),
+      storeNameEn:
+          editStoreName.trim().isEmpty ? null : editStoreName.trim(),
+      storeNameAr:
+          editStoreNameAr.trim().isEmpty ? null : editStoreNameAr.trim(),
+      storeDescriptionEn: editStoreDescription.trim().isEmpty
+          ? null
+          : editStoreDescription.trim(),
+      storeDescriptionAr: editStoreDescriptionAr.trim().isEmpty
+          ? null
+          : editStoreDescriptionAr.trim(),
       storeWilaya:
           editStoreWilaya.trim().isEmpty ? null : editStoreWilaya.trim(),
       whatsappNumber:

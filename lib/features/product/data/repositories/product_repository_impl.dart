@@ -3,6 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_users.dart';
+import '../../../../core/network/paginated_result.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../home/domain/repositories/home_repository.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
@@ -10,6 +11,7 @@ import '../datasources/product_remote_datasource.dart';
 import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/product_review_entity.dart';
 import '../../domain/entities/review_entity.dart';
+import '../../domain/entities/review_write_params.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../domain/repositories/product_repository.dart';
 
@@ -243,30 +245,130 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Either<Failure, List<ReviewEntity>>> getProductReviews(String productId) async {
+  Future<Either<Failure, PaginatedResult<ReviewEntity>>> getProductReviews({
+    required String productId,
+    required int page,
+    required int pageSize,
+  }) async {
     if (!MockConfig.useMock) {
       try {
-        return Right(await _remote.fetchProductReviews(productId));
+        return Right(
+          await _remote.fetchProductReviews(
+            listingId: productId,
+            page: page,
+            pageSize: pageSize,
+          ),
+        );
       } catch (e) {
         return Left(Failure.server(e.toString()));
       }
     }
-    final reviews = _reviewsFor(productId);
+    final all = <ReviewEntity>[
+      ..._reviewsFor(productId).map(
+        (r) => ReviewEntity(
+          id: r.id,
+          userId: 'user_${r.id}',
+          userName: r.userName,
+          userAvatar: r.userAvatarUrl,
+          rating: r.stars,
+          comment: r.text,
+          helpfulCount: r.helpfulCount,
+          createdAt: r.date,
+        ),
+      ),
+      ...(_mockUserReviews[productId] ?? const <ReviewEntity>[]),
+    ];
+    final start = page * pageSize;
+    final slice = start >= all.length
+        ? const <ReviewEntity>[]
+        : all.skip(start).take(pageSize).toList();
     return Right(
-      reviews
-          .map(
-            (r) => ReviewEntity(
-              id: r.id,
-              userId: 'user_${r.id}',
-              userName: r.userName,
-              userAvatar: r.userAvatarUrl,
-              rating: r.stars,
-              comment: r.text,
-              helpfulCount: r.helpfulCount,
-              createdAt: r.date,
-            ),
-          )
-          .toList(),
+      PaginatedResult(
+        items: slice,
+        page: page,
+        pageSize: pageSize,
+        totalCount: all.length,
+      ),
     );
+  }
+
+  // In-memory mock store for create/update/delete round-tripping in mock
+  // mode, keyed by listingId. Matches this file's existing convention of
+  // gating MockConfig.useMock here rather than in the datasource.
+  static final Map<String, List<ReviewEntity>> _mockUserReviews = {};
+
+  @override
+  Future<Either<Failure, ReviewEntity>> createReview({
+    required String listingId,
+    required ReviewWriteParams params,
+  }) async {
+    if (!MockConfig.useMock) {
+      try {
+        return Right(
+          await _remote.createReview(listingId: listingId, params: params),
+        );
+      } catch (e) {
+        return Left(Failure.server(e.toString()));
+      }
+    }
+    final review = ReviewEntity(
+      id: 'review_${DateTime.now().microsecondsSinceEpoch}',
+      userId: mockConsumerUser.id,
+      userName: mockConsumerUser.name,
+      userAvatar: null,
+      rating: params.rating,
+      comment: params.comment,
+      helpfulCount: 0,
+      createdAt: DateTime.now(),
+    );
+    (_mockUserReviews[listingId] ??= <ReviewEntity>[]).insert(0, review);
+    return Right(review);
+  }
+
+  @override
+  Future<Either<Failure, ReviewEntity>> updateReview({
+    required String listingId,
+    required String reviewId,
+    required ReviewWriteParams params,
+  }) async {
+    if (!MockConfig.useMock) {
+      try {
+        return Right(
+          await _remote.updateReview(
+            listingId: listingId,
+            reviewId: reviewId,
+            params: params,
+          ),
+        );
+      } catch (e) {
+        return Left(Failure.server(e.toString()));
+      }
+    }
+    final list = _mockUserReviews[listingId] ?? <ReviewEntity>[];
+    final idx = list.indexWhere((r) => r.id == reviewId);
+    if (idx == -1) return Left(Failure.server('Review not found'));
+    final updated = list[idx].copyWith(
+      rating: params.rating,
+      comment: params.comment,
+    );
+    list[idx] = updated;
+    return Right(updated);
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteReview({
+    required String listingId,
+    required String reviewId,
+  }) async {
+    if (!MockConfig.useMock) {
+      try {
+        await _remote.deleteReview(listingId: listingId, reviewId: reviewId);
+        return const Right(unit);
+      } catch (e) {
+        return Left(Failure.server(e.toString()));
+      }
+    }
+    _mockUserReviews[listingId]?.removeWhere((r) => r.id == reviewId);
+    return const Right(unit);
   }
 }

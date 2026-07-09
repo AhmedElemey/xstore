@@ -22,6 +22,7 @@ class PhoneAuthState {
     this.isSendingOtp = false,
     this.isVerifyingOtp = false,
     this.isNewUser = false,
+    this.debugOtp,
   });
 
   final String phoneNumber;
@@ -36,6 +37,9 @@ class PhoneAuthState {
   final bool isSendingOtp;
   final bool isVerifyingOtp;
   final bool isNewUser;
+
+  /// See [SendOtpResult.debugOtp] — the fixed mock-mode test code, if any.
+  final String? debugOtp;
 
   PhoneAuthState copyWith({
     String? phoneNumber,
@@ -52,6 +56,7 @@ class PhoneAuthState {
     bool? isSendingOtp,
     bool? isVerifyingOtp,
     bool? isNewUser,
+    String? debugOtp,
   }) {
     return PhoneAuthState(
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -66,6 +71,7 @@ class PhoneAuthState {
       isSendingOtp: isSendingOtp ?? this.isSendingOtp,
       isVerifyingOtp: isVerifyingOtp ?? this.isVerifyingOtp,
       isNewUser: isNewUser ?? this.isNewUser,
+      debugOtp: debugOtp ?? this.debugOtp,
     );
   }
 }
@@ -99,25 +105,40 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
       e164Number: AppValidators.toE164Egypt(state.phoneNumber),
     );
     final result = await ref.read(sendOtpUseCaseProvider).call(params);
-    return result.fold((failure) {
-      state = state.copyWith(
-        isSendingOtp: false,
-        phoneError: failure.toString(),
-      );
-      return false;
-    }, (ok) {
-      state = state.copyWith(
-        isSendingOtp: false,
-        verificationId: ok.verificationId,
-        resendToken: ok.resendToken,
-        expiresAt: ok.expiresAt,
-        resendCooldown: 60,
-        canResend: false,
-        clearPhoneError: true,
-      );
-      _startResendCooldown();
-      return true;
-    });
+    return await result.fold<Future<bool>>(
+      (failure) async {
+        state = state.copyWith(
+          isSendingOtp: false,
+          phoneError: failure.toString(),
+        );
+        return false;
+      },
+      (ok) async {
+        if (ok.autoVerified) {
+          state = state.copyWith(
+            isSendingOtp: false,
+            verificationId: ok.verificationId,
+            resendToken: ok.resendToken,
+            expiresAt: ok.expiresAt,
+            clearPhoneError: true,
+            debugOtp: ok.debugOtp,
+          );
+          return verifyOtp(autoVerified: true);
+        }
+        state = state.copyWith(
+          isSendingOtp: false,
+          verificationId: ok.verificationId,
+          resendToken: ok.resendToken,
+          expiresAt: ok.expiresAt,
+          resendCooldown: 60,
+          canResend: false,
+          clearPhoneError: true,
+          debugOtp: ok.debugOtp,
+        );
+        _startResendCooldown();
+        return true;
+      },
+    );
   }
 
   void updateOtp(String code) {
@@ -125,13 +146,16 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
     state = state.copyWith(otpCode: digits, clearOtpError: true);
   }
 
-  Future<bool> verifyOtp() async {
-    if (state.verificationId == null || state.otpCode.length != 6) return false;
+  Future<bool> verifyOtp({bool autoVerified = false}) async {
+    if (!autoVerified &&
+        (state.verificationId == null || state.otpCode.length != 6)) {
+      return false;
+    }
     state = state.copyWith(isVerifyingOtp: true, clearOtpError: true);
     final result = await ref.read(verifyOtpUseCaseProvider).call(
           VerifyOtpParams(
-            verificationId: state.verificationId!,
-            otpCode: state.otpCode,
+            verificationId: state.verificationId ?? '',
+            otpCode: autoVerified ? '' : state.otpCode,
             phoneNumber: state.phoneNumber,
           ),
         );

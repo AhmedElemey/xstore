@@ -8,10 +8,14 @@ import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
+import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../data/listing_categories_data.dart';
 import '../providers/listing_form_notifier.dart';
 import '../providers/listing_form_state.dart';
+import '../utils/catalog_category_tree.dart';
 import '../widgets/attributes_section.dart';
 import '../widgets/category_picker_sheet.dart';
 import '../widgets/condition_selector.dart';
@@ -179,6 +183,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     final notifier = ref.read(listingFormNotifierProvider.notifier);
     final canSubmit = notifier.canSubmit;
     final showCompareWarn = notifier.showCompareAtWarning;
+    final catalogCategories =
+        ref.watch(allCatalogCategoriesProvider).valueOrNull ??
+            const <CatalogCategoryEntity>[];
+    final isArabic = ref.watch(appIsArabicProvider);
 
     ref.listen<ListingFormState>(listingFormNotifierProvider, (prev, next) {
       if (prev?.draftRevision != next.draftRevision) {
@@ -259,9 +267,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     errors: err,
                     brandController: _brand,
                     brandFocusNode: _brandFocus,
-                    categoryDisplay: _categoryLabel(form.categoryId),
+                    catalogCategories: catalogCategories,
+                    isArabic: isArabic,
+                    categoryDisplay:
+                        _categoryLabel(catalogCategories, isArabic, form.categoryId),
                     subcategoryDisplay: _subcategoryLabel(
-                      form.categoryId,
+                      catalogCategories,
+                      isArabic,
                       form.subcategoryId,
                     ),
                   ),
@@ -301,18 +313,34 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     );
   }
 
-  String _categoryLabel(String id) {
+  String _categoryLabel(
+    List<CatalogCategoryEntity> categories,
+    bool isArabic,
+    String id,
+  ) {
     if (id.isEmpty) {
       return context.l10n.listingSelectCategory;
     }
-    return listingLocalizedCategoryName(context, id);
+    final intId = int.tryParse(id);
+    for (final c in categories) {
+      if (c.id == intId) return c.name.resolve(isArabic);
+    }
+    return context.l10n.listingSelectCategory;
   }
 
-  String _subcategoryLabel(String catId, String subId) {
+  String _subcategoryLabel(
+    List<CatalogCategoryEntity> categories,
+    bool isArabic,
+    String subId,
+  ) {
     if (subId.isEmpty) {
       return context.l10n.listingSelectSubcategory;
     }
-    return listingLocalizedSubcategoryName(context, catId, subId);
+    final intId = int.tryParse(subId);
+    for (final c in categories) {
+      if (c.id == intId) return c.name.resolve(isArabic);
+    }
+    return context.l10n.listingSelectSubcategory;
   }
 }
 
@@ -432,6 +460,8 @@ class _ListingCategoryBrandSection extends StatelessWidget {
     required this.errors,
     required this.brandController,
     required this.brandFocusNode,
+    required this.catalogCategories,
+    required this.isArabic,
     required this.categoryDisplay,
     required this.subcategoryDisplay,
   });
@@ -441,11 +471,18 @@ class _ListingCategoryBrandSection extends StatelessWidget {
   final Map<String, String?> errors;
   final TextEditingController brandController;
   final FocusNode brandFocusNode;
+  final List<CatalogCategoryEntity> catalogCategories;
+  final bool isArabic;
   final String categoryDisplay;
   final String subcategoryDisplay;
 
   @override
   Widget build(BuildContext context) {
+    final topLevel = topLevelCategories(catalogCategories);
+    final selectedCategoryId = int.tryParse(form.categoryId);
+    final subs = selectedCategoryId == null
+        ? const <CatalogCategoryEntity>[]
+        : subcategoriesOf(catalogCategories, selectedCategoryId);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -460,10 +497,10 @@ class _ListingCategoryBrandSection extends StatelessWidget {
           onTap: () => showListingCategoryPicker(
             context: context,
             title: context.l10n.listingFormCategoryPickerTitle,
-            categories: ListingCategoriesData.categories,
-            selectedId:
-                form.categoryId.isEmpty ? null : form.categoryId,
-            onSelected: (id) => notifier.updateField('categoryId', id),
+            categories: topLevel,
+            selectedId: selectedCategoryId,
+            labelOf: (c) => c.name.resolve(isArabic),
+            onSelected: (id) => notifier.updateField('categoryId', id.toString()),
           ),
         ),
         const Gap(AppSpacing.lg),
@@ -473,21 +510,15 @@ class _ListingCategoryBrandSection extends StatelessWidget {
             value: subcategoryDisplay,
             valueIsPlaceholder: form.subcategoryId.isEmpty,
             errorText: errors['subcategory'],
-            onTap: () {
-              final cat =
-                  ListingCategoriesData.categoryById(form.categoryId);
-              if (cat == null) {
-                return;
-              }
-              showListingSubcategoryPicker(
-                context: context,
-                category: cat,
-                selectedId: form.subcategoryId.isEmpty
-                    ? null
-                    : form.subcategoryId,
-                onSelected: (id) => notifier.updateField('subcategoryId', id),
-              );
-            },
+            onTap: () => showListingSubcategoryPicker(
+              context: context,
+              title: '${context.l10n.subcategoryPickerPrefix}$categoryDisplay',
+              subcategories: subs,
+              selectedId: int.tryParse(form.subcategoryId),
+              labelOf: (c) => c.name.resolve(isArabic),
+              onSelected: (id) =>
+                  notifier.updateField('subcategoryId', id.toString()),
+            ),
           ),
           const Gap(AppSpacing.lg),
         ],

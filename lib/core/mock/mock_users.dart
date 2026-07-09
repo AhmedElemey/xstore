@@ -1,6 +1,8 @@
 import '../../features/auth/data/models/user_model.dart';
+import '../../features/auth/domain/entities/consumer_register_params.dart';
 import '../../features/auth/domain/entities/register_params.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
+import '../../features/auth/domain/entities/vendor_register_params.dart';
 import 'mock_images.dart';
 
 /// Domain session user (reference display).
@@ -160,5 +162,64 @@ UserModel userModelFromRegisterParams(RegisterParams p, {String? id}) {
     joinedAt: joined,
     location: p.location,
     token: 'mock-token-new-consumer',
+  );
+}
+
+UserModel userModelFromConsumerRegisterParams(
+  ConsumerRegisterParams p, {
+  String? id,
+}) {
+  final newId = id ?? 'user_${p.email.hashCode.abs()}';
+  return UserModel(
+    id: newId,
+    name: p.fullNameEn,
+    email: p.email,
+    phoneNumber: p.phoneNumber,
+    role: UserRole.consumer,
+    isVerified: false,
+    joinedAt: DateTime.now(),
+    dateOfBirth: p.dateOfBirth,
+    fullNameEn: p.fullNameEn,
+    fullNameAr: p.fullNameAr,
+    token: 'mock-token-new-consumer',
+    refreshToken: 'mock-refresh-token-new-consumer',
+  );
+}
+
+UserModel userModelFromVendorRegisterParams(
+  VendorRegisterParams p, {
+  String? id,
+}) {
+  final newId = id ?? 'user_${p.email.hashCode.abs()}';
+  final slug = p.storeNameEn
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
+      .trim()
+      .replaceAll(RegExp(r'\s+'), '-');
+  final safeSlug = slug.isEmpty ? 'store' : slug;
+  return UserModel(
+    id: newId,
+    name: p.fullNameEn,
+    email: p.email,
+    phoneNumber: p.phoneNumber,
+    role: UserRole.vendor,
+    isVerified: false,
+    joinedAt: DateTime.now(),
+    dateOfBirth: p.dateOfBirth,
+    storeName: p.storeNameEn,
+    storeSlug: safeSlug,
+    storeDescription: p.storeDescriptionEn,
+    whatsappNumber: p.whatsappNumber,
+    fullNameEn: p.fullNameEn,
+    fullNameAr: p.fullNameAr,
+    storeNameEn: p.storeNameEn,
+    storeNameAr: p.storeNameAr,
+    storeDescriptionEn: p.storeDescriptionEn,
+    storeDescriptionAr: p.storeDescriptionAr,
+    storeCategoryId: p.storeCategoryId,
+    storeCityId: p.storeCityId,
+    storeGovernmentId: p.storeGovernmentId,
+    token: 'mock-token-new-vendor',
+    refreshToken: 'mock-refresh-token-new-vendor',
   );
 }

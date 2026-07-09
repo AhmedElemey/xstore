@@ -1,47 +1,54 @@
 /*
- FIREBASE SETUP — COMPLETE THESE STEPS FIRST:
+ FIREBASE APPS — this project (xstore-22e2f) should have FOUR apps, one per
+ platform × flavor. Status:
 
- 1. Go to https://console.firebase.google.com
- 2. Create a new project: "xStore"
- 3. Add Android app:
-      Package name: com.xstore.app
-      Download google-services.json
-      Place in: android/app/google-services.json
- 4. Add iOS app:
-      Bundle ID: com.xstore.app
-      Download GoogleService-Info.plist
-      Place in: ios/Runner/GoogleService-Info.plist
- 5. Enable Authentication in Firebase Console:
-      Authentication → Sign-in method → Enable:
-        ✅ Google
-        ✅ Apple
-        ✅ Facebook
- 6. Run FlutterFire CLI:
-      dart pub global activate flutterfire_cli
-      flutterfire configure --project=xstore-app
-    This auto-generates firebase_options.dart
- 7. For Facebook:
-      Go to https://developers.facebook.com
-      Create app → add Facebook Login product
-      Get App ID and App Secret
-      Add to Firebase: Facebook App ID + Secret
- 8. For Apple (iOS only):
-      Requires Apple Developer account ($99/year)
-      Enable Sign In with Apple capability in Xcode
+   1. Android prod  com.xstore.app       appId ...android:7bf82f...   ✅ registered
+   2. Android dev   com.xstore.app.dev   appId ...android:1071a4...   ✅ registered
+   3. iOS prod      com.xstore.app       appId ...ios:d68839...       ✅ registered
+   4. iOS dev       com.xstore.app.dev   appId (none yet)             ❌ MISSING
+
+ TO ADD THE MISSING 4th APP (iOS dev) — requires the Firebase console/CLI:
+   dart pub global activate flutterfire_cli
+   flutterfire configure \
+     --project=xstore-22e2f \
+     --platforms=ios \
+     --ios-bundle-id=com.xstore.app.dev \
+     --out=lib/core/firebase/firebase_options_dev.dart
+   Then paste the generated iOS dev values into `iosDev` below and switch the
+   iOS branch of `forFlavor` to `flavor.isDev ? iosDev : ios`.
+   NOTE: iOS also needs dev/prod Xcode schemes + build configs before a dev
+   bundle id can actually be built — Android has flavors, iOS does not yet.
+
+ Auth providers (Google / Apple / Facebook) are enabled in the Firebase console.
 */
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
+import '../config/app_flavor.dart';
+
 class DefaultFirebaseOptions {
-  static FirebaseOptions get currentPlatform {
+  /// Flavor-blind accessor (kept for backward compatibility). Returns the
+  /// PROD app for the current platform. Prefer [forFlavor].
+  static FirebaseOptions get currentPlatform => _forPlatform(isDev: false);
+
+  /// Flavor-aware options — picks the correct Firebase app for the running
+  /// flavor so the dev build reports to the dev app, not prod.
+  static FirebaseOptions forFlavor(AppFlavor flavor) =>
+      _forPlatform(isDev: flavor.isDev);
+
+  static FirebaseOptions _forPlatform({required bool isDev}) {
     if (kIsWeb) {
       throw UnsupportedError('Web Firebase options are not configured yet.');
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return android;
+        return isDev ? androidDev : android;
       case TargetPlatform.iOS:
+        // Only the prod iOS app (com.xstore.app) exists. The iOS dev app
+        // (com.xstore.app.dev) — the missing 4th app — is not registered yet,
+        // and iOS has no dev flavor/scheme, so dev falls back to prod here.
+        // Once registered, add `iosDev` and use: `isDev ? iosDev : ios`.
         return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError('Firebase options are not configured for macOS.');
@@ -50,6 +57,7 @@ class DefaultFirebaseOptions {
     }
   }
 
+  // --- iOS prod (com.xstore.app) ---
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDHwoekaMb6AEBK9nPZlmwz_DPE6b1_Dow',
     appId: '1:304127266125:ios:d68839a848e5a0e6f93b04',
@@ -60,6 +68,19 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.xstore.app',
   );
 
+  // --- iOS dev (com.xstore.app.dev) — MISSING 4th app. Register it, then fill
+  //     these values in and enable the dev branch in `_forPlatform`.
+  // static const FirebaseOptions iosDev = FirebaseOptions(
+  //   apiKey: '<from flutterfire configure>',
+  //   appId: '1:304127266125:ios:<dev-suffix>',
+  //   messagingSenderId: '304127266125',
+  //   projectId: 'xstore-22e2f',
+  //   storageBucket: 'xstore-22e2f.firebasestorage.app',
+  //   iosClientId: '<dev ios client id>',
+  //   iosBundleId: 'com.xstore.app.dev',
+  // );
+
+  // --- Android prod (com.xstore.app) ---
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAw2L1su_CuWpOvwUX6uThx4oPhy4lAbvw',
     appId: '1:304127266125:android:7bf82fecabeed953f93b04',
@@ -68,4 +89,12 @@ class DefaultFirebaseOptions {
     storageBucket: 'xstore-22e2f.firebasestorage.app',
   );
 
+  // --- Android dev (com.xstore.app.dev) ---
+  static const FirebaseOptions androidDev = FirebaseOptions(
+    apiKey: 'AIzaSyAw2L1su_CuWpOvwUX6uThx4oPhy4lAbvw',
+    appId: '1:304127266125:android:1071a43571f0b0e0f93b04',
+    messagingSenderId: '304127266125',
+    projectId: 'xstore-22e2f',
+    storageBucket: 'xstore-22e2f.firebasestorage.app',
+  );
 }

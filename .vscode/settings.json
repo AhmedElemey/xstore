@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "**/.github/workflows/**/*.yml": "yaml",
+    "**/.github/workflows/**/*.yaml": "yaml"
+  },
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
+  },
+  "yaml.validate": true,
+  "yaml.schemaStore.enable": true,
+  "github-actions.use-enterprise": false,
+  "github-actions.remote-name": "origin"
+}

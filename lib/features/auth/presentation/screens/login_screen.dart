@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../../../core/constants/app_spacing.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -14,6 +15,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
@@ -135,9 +137,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             final navigator = Navigator.of(context);
                             final ok = await notifier.sendOtp(context.l10n);
                             if (!mounted || !ok) return;
+                            // Mock mode sends no real SMS — the fixed test
+                            // code is echoed back here for local dev/testing.
+                            final debugOtp =
+                                ref.read(phoneAuthProvider).debugOtp;
+                            if (kDebugMode &&
+                                debugOtp != null &&
+                                debugOtp.isNotEmpty &&
+                                context.mounted) {
+                              AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+                            }
                             navigator.pop();
                             if (!mounted) return;
-                            this.context.push(AppRoutes.otp);
+                            final authed =
+                                ref.read(authProvider).valueOrNull != null;
+                            if (authed) {
+                              this.context.go(AppRoutes.home);
+                            } else {
+                              this.context.push(AppRoutes.otp);
+                            }
                           }
                         : null,
                   ),

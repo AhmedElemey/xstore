@@ -139,7 +139,7 @@ void main() {
           authRepositoryProvider.overrideWith((ref) {
             return StubAuthRepository(
               restoreUser: null,
-              registerResult: Left(Failure.server('signup failed')),
+              registerConsumerResult: Left(Failure.server('signup failed')),
             );
           }),
           authProvider.overrideWith(() => FakeAuth(null)),
@@ -154,6 +154,7 @@ void main() {
       expect(rn.nextStep(l10n), true);
       rn.updateField(
         fullName: 'Jane Doe',
+        fullNameAr: 'جين دو',
         email: 'jane@test.com',
         phoneNumber: '01012345678',
         location: 'Cairo',

@@ -37,7 +37,17 @@ class UserModel with _$UserModel {
     String? instagramHandle,
     String? facebookPage,
     String? token,
+    String? refreshToken,
     @Default(false) bool isNewUser,
+    String? fullNameEn,
+    String? fullNameAr,
+    String? storeNameEn,
+    String? storeNameAr,
+    String? storeDescriptionEn,
+    String? storeDescriptionAr,
+    int? storeCategoryId,
+    int? storeCityId,
+    int? storeGovernmentId,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -58,7 +68,10 @@ class UserModel with _$UserModel {
 
     return UserModel(
       id: json['id'] as String,
-      name: json['name'] as String? ?? '',
+      // Backward compat: new backend sends fullNameEn/fullNameAr, not name.
+      name: (json['name'] as String?) ??
+          (json['fullNameEn'] as String?) ??
+          '',
       email: json['email'] as String,
       phoneNumber: json['phoneNumber'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
@@ -86,7 +99,17 @@ class UserModel with _$UserModel {
       instagramHandle: json['instagramHandle'] as String?,
       facebookPage: json['facebookPage'] as String?,
       token: json['token'] as String?,
+      refreshToken: json['refreshToken'] as String?,
       isNewUser: json['isNewUser'] as bool? ?? false,
+      fullNameEn: json['fullNameEn'] as String?,
+      fullNameAr: json['fullNameAr'] as String?,
+      storeNameEn: json['storeNameEn'] as String?,
+      storeNameAr: json['storeNameAr'] as String?,
+      storeDescriptionEn: json['storeDescriptionEn'] as String?,
+      storeDescriptionAr: json['storeDescriptionAr'] as String?,
+      storeCategoryId: json['storeCategoryId'] as int?,
+      storeCityId: json['storeCityId'] as int?,
+      storeGovernmentId: json['storeGovernmentId'] as int?,
     );
   }
 }
@@ -122,6 +145,15 @@ extension UserModelX on UserModel {
         instagramHandle: instagramHandle,
         facebookPage: facebookPage,
         isNewUser: isNewUser,
+        fullNameEn: fullNameEn,
+        fullNameAr: fullNameAr,
+        storeNameEn: storeNameEn,
+        storeNameAr: storeNameAr,
+        storeDescriptionEn: storeDescriptionEn,
+        storeDescriptionAr: storeDescriptionAr,
+        storeCategoryId: storeCategoryId,
+        storeCityId: storeCityId,
+        storeGovernmentId: storeGovernmentId,
       );
 
   Map<String, dynamic> toJson() => {
@@ -156,6 +188,18 @@ extension UserModelX on UserModel {
         if (instagramHandle != null) 'instagramHandle': instagramHandle,
         if (facebookPage != null) 'facebookPage': facebookPage,
         if (token != null) 'token': token,
+        if (refreshToken != null) 'refreshToken': refreshToken,
         'isNewUser': isNewUser,
+        if (fullNameEn != null) 'fullNameEn': fullNameEn,
+        if (fullNameAr != null) 'fullNameAr': fullNameAr,
+        if (storeNameEn != null) 'storeNameEn': storeNameEn,
+        if (storeNameAr != null) 'storeNameAr': storeNameAr,
+        if (storeDescriptionEn != null)
+          'storeDescriptionEn': storeDescriptionEn,
+        if (storeDescriptionAr != null)
+          'storeDescriptionAr': storeDescriptionAr,
+        if (storeCategoryId != null) 'storeCategoryId': storeCategoryId,
+        if (storeCityId != null) 'storeCityId': storeCityId,
+        if (storeGovernmentId != null) 'storeGovernmentId': storeGovernmentId,
       };
 }

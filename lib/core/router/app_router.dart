@@ -7,6 +7,7 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
@@ -234,6 +235,14 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const ForgotPasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          ResetPasswordScreen(email: state.extra as String? ?? ''),
         ),
       ),
       GoRoute(

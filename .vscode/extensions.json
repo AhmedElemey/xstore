@@ -1,0 +1,4 @@
+{
+  "recommendations": ["rhysd.actionlint-vscode"],
+  "unwantedRecommendations": ["github.vscode-github-actions"]
+}

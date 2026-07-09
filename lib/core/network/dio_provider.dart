@@ -24,10 +24,17 @@ Dio dio(DioRef ref) {
 
   client.interceptors.add(
     InterceptorsWrapper(
+      // Injects `Authorization: Bearer <token>` when signed in, UNLESS the
+      // request already set an explicit Authorization header (e.g. the
+      // static public-endpoint key from ApiAuthHeaders.public()) — public
+      // calls must not be silently upgraded to Bearer just because a user
+      // happens to be logged in. See core/network/api_auth_headers.dart.
       onRequest: (options, handler) async {
-        final token = await secureStorage.read(key: PrefsKeys.authToken);
-        if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
+        if (!options.headers.containsKey('Authorization')) {
+          final token = await secureStorage.read(key: PrefsKeys.authToken);
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
         }
         handler.next(options);
       },

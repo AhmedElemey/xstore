@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Replace Facebook values below for each flavor/environment. Keep fb_login_protocol_scheme as `fb` + numeric_app_id per Meta docs (see AndroidManifest CustomTabActivity). -->
+<!-- TODO: Replace Facebook values below with real App ID and Client Token from Meta
+     developer console. Also update ios/Runner/Info.plist (FacebookAppID,
+     FacebookClientToken, CFBundleURLSchemes) and AndroidManifest.xml meta-data
+     com.facebook.sdk.ApplicationId / com.facebook.sdk.ClientToken. -->
 <resources>
     <string name="app_name">xStore</string>
     <string name="facebook_app_id">REPLACE_WITH_FACEBOOK_APP_ID</string>

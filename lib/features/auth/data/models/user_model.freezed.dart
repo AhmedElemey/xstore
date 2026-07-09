@@ -45,7 +45,17 @@ mixin _$UserModel {
   String? get instagramHandle => throw _privateConstructorUsedError;
   String? get facebookPage => throw _privateConstructorUsedError;
   String? get token => throw _privateConstructorUsedError;
+  String? get refreshToken => throw _privateConstructorUsedError;
   bool get isNewUser => throw _privateConstructorUsedError;
+  String? get fullNameEn => throw _privateConstructorUsedError;
+  String? get fullNameAr => throw _privateConstructorUsedError;
+  String? get storeNameEn => throw _privateConstructorUsedError;
+  String? get storeNameAr => throw _privateConstructorUsedError;
+  String? get storeDescriptionEn => throw _privateConstructorUsedError;
+  String? get storeDescriptionAr => throw _privateConstructorUsedError;
+  int? get storeCategoryId => throw _privateConstructorUsedError;
+  int? get storeCityId => throw _privateConstructorUsedError;
+  int? get storeGovernmentId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserModelCopyWith<UserModel> get copyWith =>
@@ -87,7 +97,17 @@ abstract class $UserModelCopyWith<$Res> {
       String? instagramHandle,
       String? facebookPage,
       String? token,
-      bool isNewUser});
+      String? refreshToken,
+      bool isNewUser,
+      String? fullNameEn,
+      String? fullNameAr,
+      String? storeNameEn,
+      String? storeNameAr,
+      String? storeDescriptionEn,
+      String? storeDescriptionAr,
+      int? storeCategoryId,
+      int? storeCityId,
+      int? storeGovernmentId});
 }
 
 /// @nodoc
@@ -132,7 +152,17 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? instagramHandle = freezed,
     Object? facebookPage = freezed,
     Object? token = freezed,
+    Object? refreshToken = freezed,
     Object? isNewUser = null,
+    Object? fullNameEn = freezed,
+    Object? fullNameAr = freezed,
+    Object? storeNameEn = freezed,
+    Object? storeNameAr = freezed,
+    Object? storeDescriptionEn = freezed,
+    Object? storeDescriptionAr = freezed,
+    Object? storeCategoryId = freezed,
+    Object? storeCityId = freezed,
+    Object? storeGovernmentId = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -251,10 +281,50 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.token
           : token // ignore: cast_nullable_to_non_nullable
               as String?,
+      refreshToken: freezed == refreshToken
+          ? _value.refreshToken
+          : refreshToken // ignore: cast_nullable_to_non_nullable
+              as String?,
       isNewUser: null == isNewUser
           ? _value.isNewUser
           : isNewUser // ignore: cast_nullable_to_non_nullable
               as bool,
+      fullNameEn: freezed == fullNameEn
+          ? _value.fullNameEn
+          : fullNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      fullNameAr: freezed == fullNameAr
+          ? _value.fullNameAr
+          : fullNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameEn: freezed == storeNameEn
+          ? _value.storeNameEn
+          : storeNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameAr: freezed == storeNameAr
+          ? _value.storeNameAr
+          : storeNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionEn: freezed == storeDescriptionEn
+          ? _value.storeDescriptionEn
+          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionAr: freezed == storeDescriptionAr
+          ? _value.storeDescriptionAr
+          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCategoryId: freezed == storeCategoryId
+          ? _value.storeCategoryId
+          : storeCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeCityId: freezed == storeCityId
+          ? _value.storeCityId
+          : storeCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeGovernmentId: freezed == storeGovernmentId
+          ? _value.storeGovernmentId
+          : storeGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -297,7 +367,17 @@ abstract class _$$UserModelImplCopyWith<$Res>
       String? instagramHandle,
       String? facebookPage,
       String? token,
-      bool isNewUser});
+      String? refreshToken,
+      bool isNewUser,
+      String? fullNameEn,
+      String? fullNameAr,
+      String? storeNameEn,
+      String? storeNameAr,
+      String? storeDescriptionEn,
+      String? storeDescriptionAr,
+      int? storeCategoryId,
+      int? storeCityId,
+      int? storeGovernmentId});
 }
 
 /// @nodoc
@@ -340,7 +420,17 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? instagramHandle = freezed,
     Object? facebookPage = freezed,
     Object? token = freezed,
+    Object? refreshToken = freezed,
     Object? isNewUser = null,
+    Object? fullNameEn = freezed,
+    Object? fullNameAr = freezed,
+    Object? storeNameEn = freezed,
+    Object? storeNameAr = freezed,
+    Object? storeDescriptionEn = freezed,
+    Object? storeDescriptionAr = freezed,
+    Object? storeCategoryId = freezed,
+    Object? storeCityId = freezed,
+    Object? storeGovernmentId = freezed,
   }) {
     return _then(_$UserModelImpl(
       id: null == id
@@ -459,10 +549,50 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.token
           : token // ignore: cast_nullable_to_non_nullable
               as String?,
+      refreshToken: freezed == refreshToken
+          ? _value.refreshToken
+          : refreshToken // ignore: cast_nullable_to_non_nullable
+              as String?,
       isNewUser: null == isNewUser
           ? _value.isNewUser
           : isNewUser // ignore: cast_nullable_to_non_nullable
               as bool,
+      fullNameEn: freezed == fullNameEn
+          ? _value.fullNameEn
+          : fullNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      fullNameAr: freezed == fullNameAr
+          ? _value.fullNameAr
+          : fullNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameEn: freezed == storeNameEn
+          ? _value.storeNameEn
+          : storeNameEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeNameAr: freezed == storeNameAr
+          ? _value.storeNameAr
+          : storeNameAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionEn: freezed == storeDescriptionEn
+          ? _value.storeDescriptionEn
+          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeDescriptionAr: freezed == storeDescriptionAr
+          ? _value.storeDescriptionAr
+          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+              as String?,
+      storeCategoryId: freezed == storeCategoryId
+          ? _value.storeCategoryId
+          : storeCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeCityId: freezed == storeCityId
+          ? _value.storeCityId
+          : storeCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      storeGovernmentId: freezed == storeGovernmentId
+          ? _value.storeGovernmentId
+          : storeGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -500,7 +630,17 @@ class _$UserModelImpl implements _UserModel {
       this.instagramHandle,
       this.facebookPage,
       this.token,
-      this.isNewUser = false});
+      this.refreshToken,
+      this.isNewUser = false,
+      this.fullNameEn,
+      this.fullNameAr,
+      this.storeNameEn,
+      this.storeNameAr,
+      this.storeDescriptionEn,
+      this.storeDescriptionAr,
+      this.storeCategoryId,
+      this.storeCityId,
+      this.storeGovernmentId});
 
   @override
   final String id;
@@ -565,12 +705,32 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String? token;
   @override
+  final String? refreshToken;
+  @override
   @JsonKey()
   final bool isNewUser;
+  @override
+  final String? fullNameEn;
+  @override
+  final String? fullNameAr;
+  @override
+  final String? storeNameEn;
+  @override
+  final String? storeNameAr;
+  @override
+  final String? storeDescriptionEn;
+  @override
+  final String? storeDescriptionAr;
+  @override
+  final int? storeCategoryId;
+  @override
+  final int? storeCityId;
+  @override
+  final int? storeGovernmentId;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, isNewUser: $isNewUser)';
+    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId)';
   }
 
   @override
@@ -628,8 +788,28 @@ class _$UserModelImpl implements _UserModel {
             (identical(other.facebookPage, facebookPage) ||
                 other.facebookPage == facebookPage) &&
             (identical(other.token, token) || other.token == token) &&
+            (identical(other.refreshToken, refreshToken) ||
+                other.refreshToken == refreshToken) &&
             (identical(other.isNewUser, isNewUser) ||
-                other.isNewUser == isNewUser));
+                other.isNewUser == isNewUser) &&
+            (identical(other.fullNameEn, fullNameEn) ||
+                other.fullNameEn == fullNameEn) &&
+            (identical(other.fullNameAr, fullNameAr) ||
+                other.fullNameAr == fullNameAr) &&
+            (identical(other.storeNameEn, storeNameEn) ||
+                other.storeNameEn == storeNameEn) &&
+            (identical(other.storeNameAr, storeNameAr) ||
+                other.storeNameAr == storeNameAr) &&
+            (identical(other.storeDescriptionEn, storeDescriptionEn) ||
+                other.storeDescriptionEn == storeDescriptionEn) &&
+            (identical(other.storeDescriptionAr, storeDescriptionAr) ||
+                other.storeDescriptionAr == storeDescriptionAr) &&
+            (identical(other.storeCategoryId, storeCategoryId) ||
+                other.storeCategoryId == storeCategoryId) &&
+            (identical(other.storeCityId, storeCityId) ||
+                other.storeCityId == storeCityId) &&
+            (identical(other.storeGovernmentId, storeGovernmentId) ||
+                other.storeGovernmentId == storeGovernmentId));
   }
 
   @override
@@ -664,7 +844,17 @@ class _$UserModelImpl implements _UserModel {
         instagramHandle,
         facebookPage,
         token,
-        isNewUser
+        refreshToken,
+        isNewUser,
+        fullNameEn,
+        fullNameAr,
+        storeNameEn,
+        storeNameAr,
+        storeDescriptionEn,
+        storeDescriptionAr,
+        storeCategoryId,
+        storeCityId,
+        storeGovernmentId
       ]);
 
   @JsonKey(ignore: true)
@@ -705,7 +895,17 @@ abstract class _UserModel implements UserModel {
       final String? instagramHandle,
       final String? facebookPage,
       final String? token,
-      final bool isNewUser}) = _$UserModelImpl;
+      final String? refreshToken,
+      final bool isNewUser,
+      final String? fullNameEn,
+      final String? fullNameAr,
+      final String? storeNameEn,
+      final String? storeNameAr,
+      final String? storeDescriptionEn,
+      final String? storeDescriptionAr,
+      final int? storeCategoryId,
+      final int? storeCityId,
+      final int? storeGovernmentId}) = _$UserModelImpl;
 
   @override
   String get id;
@@ -766,7 +966,27 @@ abstract class _UserModel implements UserModel {
   @override
   String? get token;
   @override
+  String? get refreshToken;
+  @override
   bool get isNewUser;
+  @override
+  String? get fullNameEn;
+  @override
+  String? get fullNameAr;
+  @override
+  String? get storeNameEn;
+  @override
+  String? get storeNameAr;
+  @override
+  String? get storeDescriptionEn;
+  @override
+  String? get storeDescriptionAr;
+  @override
+  int? get storeCategoryId;
+  @override
+  int? get storeCityId;
+  @override
+  int? get storeGovernmentId;
   @override
   @JsonKey(ignore: true)
   _$$UserModelImplCopyWith<_$UserModelImpl> get copyWith =>

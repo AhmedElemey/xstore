@@ -92,5 +92,56 @@ final getProductReviewsUseCaseProvider =
 
 typedef GetProductReviewsUseCaseRef
     = AutoDisposeProviderRef<GetProductReviewsUseCase>;
+String _$createReviewUseCaseHash() =>
+    r'9277bf0c748b3f993ed0cad653a528a28a41af73';
+
+/// See also [createReviewUseCase].
+@ProviderFor(createReviewUseCase)
+final createReviewUseCaseProvider =
+    AutoDisposeProvider<CreateReviewUseCase>.internal(
+  createReviewUseCase,
+  name: r'createReviewUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$createReviewUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef CreateReviewUseCaseRef = AutoDisposeProviderRef<CreateReviewUseCase>;
+String _$updateReviewUseCaseHash() =>
+    r'eaf4179eae312f4ef2c6ff5d5dedf743902c01cd';
+
+/// See also [updateReviewUseCase].
+@ProviderFor(updateReviewUseCase)
+final updateReviewUseCaseProvider =
+    AutoDisposeProvider<UpdateReviewUseCase>.internal(
+  updateReviewUseCase,
+  name: r'updateReviewUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$updateReviewUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef UpdateReviewUseCaseRef = AutoDisposeProviderRef<UpdateReviewUseCase>;
+String _$deleteReviewUseCaseHash() =>
+    r'415f402c4315288782a66089df6d893b64278a7d';
+
+/// See also [deleteReviewUseCase].
+@ProviderFor(deleteReviewUseCase)
+final deleteReviewUseCaseProvider =
+    AutoDisposeProvider<DeleteReviewUseCase>.internal(
+  deleteReviewUseCase,
+  name: r'deleteReviewUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$deleteReviewUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef DeleteReviewUseCaseRef = AutoDisposeProviderRef<DeleteReviewUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

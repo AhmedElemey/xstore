@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
+import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../models/search_result_model.dart';
 
 abstract interface class ExploreRemoteDataSource {
@@ -47,13 +48,17 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
       });
     }
     try {
+      // NOTE: category/price/condition/sort filters are applied
+      // client-side in explore_provider.dart today, not sent to the
+      // server — only keyword/page/pageSize are wired here for now.
       final response = await _dio.get<dynamic>(
-        ApiEndpoints.listings,
+        ApiEndpoints.apiListings,
         queryParameters: {
-          if (query.trim().isNotEmpty) 'q': query.trim(),
+          if (query.trim().isNotEmpty) 'keyword': query.trim(),
           'page': page,
           'pageSize': pageSize,
         },
+        options: ApiAuthHeaders.public(),
       );
       final maps = _unwrapObjectList(response.data);
       final models =
@@ -62,7 +67,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
       /// If fewer than a full page arrives, callers treat it as last page via length.
       return models;
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to search listings');
+      throw mapDioException(e);
     }
   }
 
@@ -78,6 +83,8 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
       ];
     }
     try {
+      // NOTE: no /api/... equivalent exists in the confirmed backend
+      // contract for typeahead suggestions — stays on the legacy path.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.listingSearchSuggestions,
         queryParameters: {'q': query.trim()},
@@ -94,7 +101,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
       }
       return [];
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load suggestions');
+      throw mapDioException(e);
     }
   }
 
