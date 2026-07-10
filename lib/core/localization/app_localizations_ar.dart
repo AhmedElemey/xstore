@@ -361,6 +361,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingPriceLabel => 'السعر *';
 
   @override
+  String get commissionYouEarn => 'أرباحك';
+
+  @override
+  String get commissionPlatformFee => 'عمولة المنصة';
+
+  @override
+  String get commissionStatusLabel => 'حالة العمولة';
+
+  @override
+  String get commissionStatusPending => 'قيد الانتظار';
+
+  @override
+  String get commissionStatusDue => 'مستحقة عند التسليم';
+
+  @override
+  String get commissionStatusSettled => 'تمت التسوية';
+
+  @override
+  String get commissionStatusVoided => 'ملغاة';
+
+  @override
+  String get commissionWalletWarnTitle => 'ادفع رسوم المنصة قريبًا';
+
+  @override
+  String commissionWalletWarnBody(String amount, String limit) {
+    return 'عليك $amount كرسوم منصة. ادفعها قبل أن تصل إلى $limit وإلا سيتم إيقاف الإعلانات الجديدة.';
+  }
+
+  @override
+  String get commissionWalletPausedTitle => 'تم إيقاف الإعلانات الجديدة';
+
+  @override
+  String commissionWalletPausedBody(String amount, String limit) {
+    return 'عليك $amount كرسوم منصة، تجاوزت حد $limit. ادفعها لتتمكن من نشر إعلانات جديدة.';
+  }
+
+  @override
+  String get commissionWalletBlockedSubmit =>
+      'الإعلانات الجديدة متوقفة حتى تدفع رسوم المنصة المستحقة.';
+
+  @override
   String get listingCompareAtTitle => 'سعر قبل الخصم (اختياري)';
 
   @override

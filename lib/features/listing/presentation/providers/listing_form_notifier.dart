@@ -8,6 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
@@ -329,6 +330,16 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   /// Publishes listing; on success clears form and draft. Returns `true` if published.
   Future<bool> submit(AppLocalizations l10n) async {
     if (!validate(l10n)) {
+      return false;
+    }
+
+    // Fail-open on loading/error — a network hiccup shouldn't block a
+    // vendor from listing. See vendor_commission_wallet_provider.dart.
+    final wallet = ref.read(vendorCommissionWalletProvider).valueOrNull;
+    if (wallet != null && wallet.isPaused) {
+      state = state.copyWith(
+        errors: {...state.errors, 'submit': l10n.commissionWalletBlockedSubmit},
+      );
       return false;
     }
 

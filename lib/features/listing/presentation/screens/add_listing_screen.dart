@@ -12,6 +12,11 @@ import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import '../../../commission/domain/entities/commission_breakdown.dart';
+import '../../../commission/presentation/providers/commission_config_provider.dart';
+import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import '../../../commission/presentation/widgets/commission_breakdown_card.dart';
+import '../../../commission/presentation/widgets/vendor_commission_alert_banner.dart';
 import '../data/listing_categories_data.dart';
 import '../providers/listing_form_notifier.dart';
 import '../providers/listing_form_state.dart';
@@ -250,6 +255,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (ref.watch(vendorCommissionWalletProvider).valueOrNull
+                      case final wallet?)
+                    VendorCommissionAlertBanner(wallet: wallet),
                   _ListingPhotosBasicsSection(
                     form: form,
                     notifier: notifier,
@@ -344,7 +352,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   }
 }
 
-class _ListingPhotosBasicsSection extends StatelessWidget {
+class _ListingPhotosBasicsSection extends ConsumerWidget {
   const _ListingPhotosBasicsSection({
     required this.form,
     required this.notifier,
@@ -368,7 +376,10 @@ class _ListingPhotosBasicsSection extends StatelessWidget {
   final bool showCompareWarn;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final price = double.tryParse(form.priceInput.trim());
+    final categoryId = int.tryParse(form.categoryId);
+    final rate = ref.watch(commissionRateForCategoryProvider(categoryId));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -400,6 +411,13 @@ class _ListingPhotosBasicsSection extends StatelessWidget {
           errorText: errors['price'],
           onChanged: (v) => notifier.updateField('priceInput', v),
         ),
+        if (price != null && price > 0) ...[
+          const Gap(AppSpacing.sm),
+          CommissionBreakdownCard(
+            breakdown: CommissionBreakdown.forPrice(price, ratePercent: rate),
+            currencyCode: notifier.currencyCode,
+          ),
+        ],
         const Gap(AppSpacing.lg),
         Text(
           context.l10n.listingCompareAtTitle,

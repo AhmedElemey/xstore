@@ -800,6 +800,78 @@ abstract class AppLocalizations {
   /// **'Price *'**
   String get listingPriceLabel;
 
+  /// No description provided for @commissionYouEarn.
+  ///
+  /// In en, this message translates to:
+  /// **'You earn'**
+  String get commissionYouEarn;
+
+  /// No description provided for @commissionPlatformFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform fee'**
+  String get commissionPlatformFee;
+
+  /// No description provided for @commissionStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission status'**
+  String get commissionStatusLabel;
+
+  /// No description provided for @commissionStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get commissionStatusPending;
+
+  /// No description provided for @commissionStatusDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on delivery'**
+  String get commissionStatusDue;
+
+  /// No description provided for @commissionStatusSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get commissionStatusSettled;
+
+  /// No description provided for @commissionStatusVoided.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided'**
+  String get commissionStatusVoided;
+
+  /// No description provided for @commissionWalletWarnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay your platform fees soon'**
+  String get commissionWalletWarnTitle;
+
+  /// No description provided for @commissionWalletWarnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount} in platform fees. Pay it off before it reaches {limit} or new listings will be paused.'**
+  String commissionWalletWarnBody(String amount, String limit);
+
+  /// No description provided for @commissionWalletPausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New listings are paused'**
+  String get commissionWalletPausedTitle;
+
+  /// No description provided for @commissionWalletPausedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount} in platform fees, over the {limit} limit. Pay it off to publish new listings again.'**
+  String commissionWalletPausedBody(String amount, String limit);
+
+  /// No description provided for @commissionWalletBlockedSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'New listings are paused until you pay off your platform fees.'**
+  String get commissionWalletBlockedSubmit;
+
   /// No description provided for @listingCompareAtTitle.
   ///
   /// In en, this message translates to:

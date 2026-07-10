@@ -1,10 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../commission/domain/entities/commission_breakdown.dart';
+import '../../../commission/domain/entities/commission_status.dart';
+import '../../../commission/presentation/providers/commission_config_provider.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+
+/// Order-status → commission-status mapping. COD assumption (see design
+/// memory): commission is only "due" once the vendor has actually collected
+/// cash on delivery; cancelled/refunded orders owe nothing.
+CommissionStatus commissionStatusForOrder(OrderStatus status) {
+  switch (status) {
+    case OrderStatus.cancelled:
+    case OrderStatus.refunded:
+      return CommissionStatus.voided;
+    case OrderStatus.delivered:
+      return CommissionStatus.due;
+    case OrderStatus.pending:
+    case OrderStatus.confirmed:
+    case OrderStatus.processing:
+    case OrderStatus.shipped:
+      return CommissionStatus.pending;
+  }
+}
+
+String commissionStatusLabel(BuildContext context, CommissionStatus s) =>
+    switch (s) {
+      CommissionStatus.pending => context.l10n.commissionStatusPending,
+      CommissionStatus.due => context.l10n.commissionStatusDue,
+      CommissionStatus.settled => context.l10n.commissionStatusSettled,
+      CommissionStatus.voided => context.l10n.commissionStatusVoided,
+    };
 
 String paymentMethodLabel(BuildContext context, PaymentMethod m) => switch (m) {
       PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
@@ -13,7 +43,7 @@ String paymentMethodLabel(BuildContext context, PaymentMethod m) => switch (m) {
       PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
     };
 
-class OrderPriceBreakdown extends StatelessWidget {
+class OrderPriceBreakdown extends ConsumerWidget {
   const OrderPriceBreakdown({
     super.key,
     required this.order,
@@ -24,7 +54,14 @@ class OrderPriceBreakdown extends StatelessWidget {
   final bool vendorMode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Buyer never sees the platform fee — computed only in vendor mode.
+    final rate = vendorMode
+        ? ref.watch(commissionRateForCategoryProvider(null))
+        : 0.0;
+    final commission = vendorMode
+        ? CommissionBreakdown.forPrice(order.total, ratePercent: rate)
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -91,6 +128,55 @@ class OrderPriceBreakdown extends StatelessWidget {
             ),
           ],
         ),
+        if (commission != null) ...[
+          Divider(height: AppSpacing.x2l),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.l10n.commissionStatusLabel,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textSecondary,
+                ),
+              ),
+              Text(
+                commissionStatusLabel(
+                  context,
+                  commissionStatusForOrder(order.status),
+                ),
+                style: AppTypography.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.l10n.commissionYouEarn,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textSecondary,
+                ),
+              ),
+              Text(
+                context.formatCurrency(commission.vendorEarns),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: context.isDark
+                      ? AppColors.successLight
+                      : AppColors.success,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          _row(
+            context,
+            '${context.l10n.commissionPlatformFee} (${commission.ratePercent.toStringAsFixed(0)}%)',
+            commission.feeAmount,
+          ),
+        ],
       ],
     );
   }

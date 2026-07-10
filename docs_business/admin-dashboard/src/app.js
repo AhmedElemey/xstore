@@ -38,6 +38,46 @@ const VENDORS=[
  {n:'Maadi Toy Box',owner:'Sara Mostafa',city:'Cairo',cat:'Toys',status:'pending',products:0,gmv:0,rating:0,vok:false,joined:'Jul 2026',wa:'+20 100 777 8899',email:'play@maaditoys.eg'},
  {n:'Heliopolis Sportswear',owner:'Omar Sherif',city:'Cairo',cat:'Sports',status:'suspended',products:41,gmv:52300,rating:3.9,vok:false,joined:'Apr 2026',wa:'+20 106 321 0099',email:'team@heliosport.eg'},
  {n:'Nasr City Books',owner:'Dina Saeed',city:'Cairo',cat:'Books',status:'pending',products:0,gmv:0,rating:0,vok:false,joined:'Jul 2026',wa:'+20 101 654 3210',email:'read@nasrbooks.eg'}];
+/* per-vendor product listings (keyed by VENDORS index; pending vendors have none) */
+const VLISTINGS={
+ 0:[ // Cairo Tech Hub — Electronics
+  {t:'iPhone 13 Pro 256GB',sub:'Phones & tablets',price:48999,cmp:52999,stock:7,status:'live',sold:42,rating:4.7,emoji:'📱'},
+  {t:'Samsung Galaxy S23',sub:'Phones & tablets',price:41500,cmp:45000,stock:12,status:'live',sold:31,rating:4.6,emoji:'📱'},
+  {t:'Wireless Earbuds Pro',sub:'Audio',price:1899,cmp:2200,stock:40,status:'live',sold:88,rating:4.4,emoji:'🎧'},
+  {t:'Smart Watch Series 8',sub:'Wearables',price:15499,cmp:0,stock:5,status:'live',sold:19,rating:4.5,emoji:'⌚'},
+  {t:'65" 4K Smart TV',sub:'TV & audio',price:22999,cmp:25999,stock:3,status:'live',sold:7,rating:4.8,emoji:'📺'},
+  {t:'USB-C Fast Charger 65W',sub:'Accessories',price:650,cmp:800,stock:0,status:'out',sold:120,rating:4.3,emoji:'🔌'},
+  {t:'Aluminium Laptop Stand',sub:'Accessories',price:480,cmp:0,stock:22,status:'pending',sold:0,rating:0,emoji:'💻'}],
+ 1:[ // Zamalek Boutique — Fashion
+  {t:'Handmade Linen Abaya',sub:"Women's",price:1250,cmp:1600,stock:24,status:'live',sold:54,rating:4.8,emoji:'👗'},
+  {t:'Silk Scarf',sub:'Accessories',price:1250,cmp:0,stock:30,status:'live',sold:40,rating:4.7,emoji:'🧣'},
+  {t:'Leather Handbag',sub:'Bags',price:2400,cmp:2900,stock:8,status:'live',sold:12,rating:4.6,emoji:'👜'},
+  {t:'Cotton Kaftan',sub:"Women's",price:890,cmp:0,stock:15,status:'live',sold:27,rating:4.5,emoji:'👚'},
+  {t:'Embroidered Evening Gown',sub:"Women's",price:3600,cmp:4200,stock:4,status:'pending',sold:0,rating:0,emoji:'👗'}],
+ 3:[ // Giza Gadgets — Electronics
+  {t:'Wireless Earbuds Pro',sub:'Audio',price:1899,cmp:0,stock:18,status:'live',sold:33,rating:4.5,emoji:'🎧'},
+  {t:'Power Bank 20000mAh',sub:'Accessories',price:750,cmp:900,stock:25,status:'live',sold:61,rating:4.4,emoji:'🔋'},
+  {t:'Bluetooth Speaker',sub:'Audio',price:1200,cmp:0,stock:9,status:'live',sold:22,rating:4.3,emoji:'🔊'},
+  {t:'Clear Phone Case',sub:'Accessories',price:150,cmp:0,stock:0,status:'out',sold:200,rating:4.1,emoji:'📱'}],
+ 4:[ // Alexandria Beauty Bar — Beauty
+  {t:'Vitamin-C Serum 30ml',sub:'Skincare',price:480,cmp:0,stock:60,status:'live',sold:145,rating:4.7,emoji:'🧴'},
+  {t:'Hydrating Face Cream',sub:'Skincare',price:620,cmp:750,stock:33,status:'live',sold:78,rating:4.6,emoji:'🧴'},
+  {t:'Matte Lipstick Set',sub:'Makeup',price:390,cmp:0,stock:20,status:'live',sold:52,rating:4.5,emoji:'💄'},
+  {t:'Argan Hair Oil 100ml',sub:'Hair care',price:280,cmp:0,stock:0,status:'out',sold:90,rating:4.4,emoji:'💆'}],
+ 6:[ // Heliopolis Sportswear — Sports (suspended)
+  {t:'Running Shoes',sub:'Footwear',price:890,cmp:1100,stock:14,status:'live',sold:25,rating:3.9,emoji:'👟'},
+  {t:'Yoga Mat',sub:'Fitness',price:450,cmp:0,stock:8,status:'live',sold:18,rating:4.0,emoji:'🧘'},
+  {t:'Gym Gloves',sub:'Fitness',price:220,cmp:0,stock:30,status:'live',sold:11,rating:3.8,emoji:'🧤'}]
+};
+/* per-vendor commission wallet (mirrors VendorCommissionWallet) — thresholds are owner-configurable */
+const VCOMM={
+ 0:{outstanding:60,warn:100,pause:200},   // healthy
+ 1:{outstanding:135,warn:100,pause:200},  // warn
+ 3:{outstanding:210,warn:100,pause:200},  // paused
+ 4:{outstanding:40,warn:100,pause:200},   // healthy
+ 6:{outstanding:180,warn:100,pause:200}}; // warn
+const vcomm=i=>VCOMM[i]||(VCOMM[i]={outstanding:0,warn:100,pause:200});
+const commLevel=c=>c.outstanding>=c.pause?'paused':c.outstanding>=c.warn?'warn':'none';
 const PENDING=[
  {t:'iPhone 13 Pro 256GB',v:'Cairo Tech Hub',vok:true,cat:'Electronics',sub:'Phones & tablets',cond:'Like new',brand:'Apple',price:48999,cmp:52999,stock:7,loc:'Giza',ship:60,emoji:'📱',submitted:'2h ago',
   desc:'Factory unlocked, 89% battery health. Includes original box, cable and adapter. Minor scuff on the frame, screen flawless.',
@@ -155,11 +195,11 @@ function vendors(){
    const act=v.status==='pending'?`<button class="btn btn-ok btn-sm" onclick="vdecide(${i},'approve')">Approve</button><button class="btn btn-no btn-sm" onclick="vdecide(${i},'reject')">Reject</button>`
      :v.status==='suspended'?`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'reinstate')">Reinstate</button>`
      :`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'suspend')">Suspend</button>`;
-   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="vendorDrawer(${i})">${avatar(v.n)}<div><b>${v.n}</b><small>${v.owner} · ${v.city}</small></div></div></td>
+   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${v.n}'s listings">${avatar(v.n)}<div><b>${v.n}</b><small>${v.owner} · ${v.city}</small></div></div></td>
      <td><span class="badge-s b-indigo">🏢 Business</span></td>
      <td><span class="badge-s ${st}"><span class="dotb" style="background:currentColor"></span>${v.status[0].toUpperCase()+v.status.slice(1)}</span></td>
-     <td>${v.products||'—'}</td><td class="money">${v.gmv?EGP(v.gmv):'—'}</td><td>${v.rating?'⭐ '+v.rating:'—'}</td>
-     <td class="r"><button class="btn btn-g btn-sm" onclick="vendorDrawer(${i})">Details</button>${act}</td></tr>`}).join('');
+     <td><a style="cursor:pointer;color:var(--primary);font-weight:600" onclick="openVendorProducts(${i})">${v.products||'—'}</a></td><td class="money">${v.gmv?EGP(v.gmv):'—'}</td><td>${v.rating?'⭐ '+v.rating:'—'}</td>
+     <td class="r"><button class="btn btn-g btn-sm" onclick="openVendorProducts(${i})">Listings</button><button class="btn btn-g btn-sm" onclick="vendorDrawer(${i})">Details</button>${act}</td></tr>`}).join('');
  return `<div class="page-head"><div><h2>Vendors</h2><p><b>Business</b> accounts — sellers on the marketplace (role: vendor). Individual buyers are under <a data-jump="customers" style="color:var(--primary);cursor:pointer">Users</a>.</p></div>
    <div class="tabs"><span class="chip active">All</span><span class="chip">Pending</span><span class="chip">Active</span><span class="chip">Suspended</span></div></div>
    <div class="card"><table><thead><tr><th>Vendor</th><th>Account type</th><th>Status</th><th>Products</th><th>GMV</th><th>Rating</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -323,12 +363,12 @@ function vendorDrawer(i){
    ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'approve\')">Approve vendor</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'reject\')">Reject</button>'
    :v.status==='suspended'
    ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'reinstate\')">Reinstate</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
-   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Opening store products\');closeDrawer()">View products</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'suspend\')">Suspend</button>';
+   :'<button class="btn btn-p" style="flex:1;justify-content:center" onclick="closeDrawer();openVendorProducts('+i+')">View listings</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'suspend\')">Suspend</button>';
  openDrawer('Vendor — '+v.n,
    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+v.n+'</b><div class="muted" style="font-size:12.5px">'+v.owner+' · '+v.city+'</div></div></div>'
    +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🏢 Business</span><span class="badge-s '+sm[0]+'">'+sm[1]+'</span>'+(v.vok?'<span class="badge-s b-green">✓ verified</span>':'<span class="badge-s b-amber">unverified</span>')+'</div>'
    +secH('Business profile')
-   +kv('Owner',v.owner)+kv('Primary category',v.cat)+kv('Location',v.city)+kv('Joined',v.joined)+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')
+   +kv('Owner',v.owner)+kv('Primary category',v.cat)+kv('Location',v.city)+kv('Joined',v.joined)+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')+kv('Wallet — owed to platform','<span style="color:'+(commLevel(vcomm(i))==='paused'?'#B4472E':commLevel(vcomm(i))==='warn'?'#C68A2E':'inherit')+'">'+EGP(vcomm(i).outstanding)+'</span>')
    +secH('Contact')+kv('WhatsApp',v.wa)+kv('Email',v.email),
    actions);
 }
@@ -340,6 +380,165 @@ function vdecide(i,action){
  closeDrawer(); go('vendors');
  const pend=VENDORS.filter(x=>x.status==='pending').length;
  const b=document.querySelector('#nav a[data-view=vendors] .badge'); if(b){if(pend>0)b.textContent=pend;else b.remove();}
+}
+
+/* ---------- vendor page (listings + orders) ---------- */
+const LSTAT={live:['b-green','Live'],pending:['b-amber','Pending'],out:['b-red','Out of stock']};
+const emptyCard=(ico,title,sub)=>`<div class="card"><div class="c-body" style="text-align:center;padding:48px 24px">
+   <div style="font-size:40px;margin-bottom:10px">${ico}</div><b style="font-size:15px">${title}</b>
+   <p class="muted" style="font-size:13px;margin-top:4px">${sub}</p></div></div>`;
+function vendorProducts(i,tab){
+ tab=tab||'listings';
+ const v=VENDORS[i];
+ const list=VLISTINGS[i]||[];
+ const vOrders=ORDERS.map((o,idx)=>({o,idx})).filter(x=>x.o.vendor===v.n);
+ const sm={active:['b-green','Active'],pending:['b-amber','Pending approval'],suspended:['b-red','Suspended']}[v.status];
+ const header=`
+  <div style="margin-bottom:14px"><a class="btn btn-g btn-sm" style="cursor:pointer" onclick="go('vendors')">← Back to vendors</a></div>
+  <div class="page-head">
+    <div style="display:flex;align-items:center;gap:14px">${avatar(v.n)}
+      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${v.n} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
+      <p>${v.owner} · ${v.city} · ${v.cat} · joined ${v.joined}</p></div></div>
+    <button class="btn btn-p" onclick="vendorDrawer(${i})">Vendor details</button></div>
+  <div class="tabs" style="margin-bottom:18px">
+    <span class="chip ${tab==='listings'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'listings')">📦 Listings (${list.length})</span>
+    <span class="chip ${tab==='orders'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'orders')">🧾 Orders (${vOrders.length})</span>
+    <span class="chip ${tab==='commission'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'commission')">💳 Commission</span>
+  </div>`;
+
+ if(tab==='commission') return header+commissionPane(i);
+
+ if(tab==='orders'){
+   const delivered=vOrders.filter(x=>x.o.status==='delivered').length;
+   const ordVal=vOrders.reduce((s,x)=>s+orderTotal(x.o),0);
+   const kpis=`<div class="grid g-4" style="margin-bottom:18px">
+     ${kpi('box',String(vOrders.length),'Orders (30d)','','up','#2E5C6E')}
+     ${kpi('shield',String(delivered),'Delivered','','up','#3F7A5C')}
+     ${kpi('alert',String(vOrders.length-delivered),'In progress','','down','#C68A2E')}
+     ${kpi('chart',ordVal?EGP(ordVal):'—','Order value','','up','#356F80')}</div>`;
+   const rows=vOrders.map(({o,idx})=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td>
+     <td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
+     <td class="muted">${o.items.map(it=>it[0]+' ×'+it[1]).join(', ')}</td>
+     <td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
+     <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td>
+     <td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${idx})">View</button></td></tr>`).join('');
+   const pane=vOrders.length
+     ?`<div class="tabs" style="margin-bottom:16px"><span class="chip active">All (${vOrders.length})</span><span class="chip">Pending</span><span class="chip">Processing</span><span class="chip">Shipped</span><span class="chip">Delivered</span><span class="chip">Cancelled</span></div>
+       <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`
+     :emptyCard('🧾','No orders yet',v.status==='pending'?'This vendor is still pending approval and hasn’t received any orders.':'This vendor has no orders in the selected period.');
+   return header+kpis+pane;
+ }
+
+ // listings tab
+ const live=list.filter(p=>p.status==='live').length;
+ const pend=list.filter(p=>p.status==='pending').length;
+ const kpis=`<div class="grid g-4" style="margin-bottom:18px">
+   ${kpi('box',String(list.length),'Total listings','','up','#2E5C6E')}
+   ${kpi('shield',String(live),'Live','','up','#3F7A5C')}
+   ${kpi('alert',String(pend),'Pending review','','down','#C68A2E')}
+   ${kpi('chart',v.gmv?EGP(v.gmv):'—','GMV (30d)','','up','#356F80')}</div>`;
+ const rows=list.map((p,pi)=>{const cmp=p.cmp?` <small style="text-decoration:line-through;color:var(--text-3)">${EGP(p.cmp)}</small>`:'';
+   return `<tr data-status="${p.status}"><td><div class="u" style="cursor:pointer" onclick="listingDrawer(${i},${pi})"><span class="ua" style="background:linear-gradient(135deg,#EAF0F1,#DAE6E9);font-size:18px">${p.emoji}</span><div><b>${p.t}</b><small>${p.sub}</small></div></div></td>
+     <td class="money">${EGP(p.price)}${cmp}</td>
+     <td>${p.stock||'—'}</td>
+     <td>${p.sold}</td>
+     <td>${p.rating?'⭐ '+p.rating:'—'}</td>
+     <td><span class="badge-s ${LSTAT[p.status][0]}">${LSTAT[p.status][1]}</span></td>
+     <td class="r"><button class="btn btn-g btn-sm" onclick="listingDrawer(${i},${pi})">View</button></td></tr>`}).join('');
+ const pane=list.length
+   ? `<div class="tabs" style="margin-bottom:16px"><span class="chip active">All (${list.length})</span><span class="chip">Live</span><span class="chip">Pending</span><span class="chip">Out of stock</span></div>
+      <div class="card"><table><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Sold (30d)</th><th>Rating</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`
+   : emptyCard('📦','No listings yet',v.status==='pending'?'This vendor is still pending approval and hasn’t published any products.':'This vendor has no products listed.');
+ return header+kpis+pane;
+}
+function openVendorProducts(i,tab){
+ tab=tab||'listings';
+ document.getElementById('content').innerHTML=vendorProducts(i,tab);
+ document.getElementById('topTitle').textContent=VENDORS[i].n+(tab==='orders'?' · Orders':tab==='commission'?' · Commission':' · Listings');
+ document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view==='vendors'));
+ const s=document.getElementById('searchInput'); if(s) s.value='';
+ window.scrollTo(0,0);
+}
+function commissionPane(i){
+ const v=VENDORS[i],c=vcomm(i),lvl=commLevel(c);
+ const badge={none:['b-green','Healthy'],warn:['b-amber','Warn — near limit'],paused:['b-red','Paused — publishing blocked']}[lvl];
+ const banner=lvl==='none'?''
+   :`<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;margin-bottom:18px;background:${lvl==='paused'?'var(--error-bg)':'var(--warning-bg)'};color:${lvl==='paused'?'#8A3A24':'#7E5A14'}">
+       <span style="font-size:20px">${lvl==='paused'?'⛔':'⚠️'}</span>
+       <div><b>${lvl==='paused'?'Publishing blocked':'Approaching the pause limit'}</b>
+       <p style="font-size:12.5px;margin-top:2px">${lvl==='paused'
+         ?`This vendor owes <b>${EGP(c.outstanding)}</b> (≥ pause threshold ${EGP(c.pause)}). New listing publishes are held until the balance is paid down.`
+         :`This vendor owes <b>${EGP(c.outstanding)}</b> (≥ warn threshold ${EGP(c.warn)}). Notify them to pay before publishing is paused at ${EGP(c.pause)}.`}</p></div></div>`;
+ const kpis=`<div class="grid g-4" style="margin-bottom:18px">
+   ${kpi('chart',EGP(c.outstanding),'Outstanding balance','','down',lvl==='paused'?'#B4472E':lvl==='warn'?'#C68A2E':'#3F7A5C')}
+   ${kpi('alert',EGP(c.warn),'Warn threshold','','up','#C68A2E')}
+   ${kpi('shield',EGP(c.pause),'Pause threshold','','up','#B4472E')}
+   ${kpi('box','2%','Commission rate','flat','up','#356F80')}</div>`;
+ const form=`<div class="card"><div class="c-head"><h3>Weekly owed-balance thresholds (EGP)</h3><span class="badge-s ${badge[0]}">${badge[1]}</span></div>
+   <div class="c-body">
+     <div class="form-row"><label>Warn threshold — notify the vendor to pay</label><input id="warnTh" inputmode="numeric" value="${c.warn}"></div>
+     <div class="form-row"><label>Pause threshold — block new listing publishes</label><input id="pauseTh" inputmode="numeric" value="${c.pause}"></div>
+     <p class="muted" style="font-size:12px;margin:-4px 0 14px">Pause must be ≥ warn. At/above <b>warn</b> the vendor is notified; at/above <b>pause</b> new publishes are blocked until paid.</p>
+     <button class="btn btn-p" style="width:100%;justify-content:center" onclick="saveCommThresholds(${i})">Save thresholds</button></div></div>`;
+ const owedColor=lvl==='paused'?'#B4472E':lvl==='warn'?'#C68A2E':'#2C6347';
+ const pay=`<div class="card"><div class="c-head"><h3>Collect payment</h3><span class="badge-s ${badge[0]}">${badge[1]}</span></div>
+   <div class="c-body">
+     <p class="muted" style="font-size:13px">Amount this vendor owes the platform right now:</p>
+     <div style="font-size:30px;font-weight:800;color:${owedColor};margin:6px 0 14px;font-variant-numeric:tabular-nums">${EGP(c.outstanding)}</div>
+     ${c.outstanding>0
+       ?`<div class="form-row"><label>Amount received from vendor (EGP)</label><input id="payAmt" inputmode="numeric" value="${c.outstanding}"></div>
+         <div style="display:flex;gap:8px"><button class="btn btn-ok" style="flex:1;justify-content:center" onclick="recordPayment(${i})">Record payment</button>
+         <button class="btn btn-g" style="flex:1;justify-content:center" onclick="resetWallet(${i})">Mark fully paid</button></div>`
+       :`<div style="padding:14px 16px;background:var(--success-bg);color:#2C6347;border-radius:11px;font-size:13px;font-weight:600">✓ Wallet settled — nothing to collect.</div>`}</div></div>`;
+ const info=`<div class="card"><div class="c-body" style="font-size:12.5px;line-height:1.7;color:var(--text-2)">
+     <b style="color:var(--text)">How the wallet works</b>
+     <p style="margin-top:6px">xStore takes a flat <b>2%</b> commission per COD order. Unpaid commission accrues as the vendor's <b>outstanding balance</b>. When the vendor pays you, hit <b>Record payment</b> (partial) or <b>Mark fully paid</b> to reset the wallet to EGP 0.</p>
+     <p style="margin-top:8px">Below warn → <span class="badge-s b-green">Healthy</span> · ≥ warn → <span class="badge-s b-amber">Warn</span> · ≥ pause → <span class="badge-s b-red">Paused</span> (publishing blocked).</p>
+     <p style="margin-top:8px">Backend: <code>POST /admin/vendors/{id}/commission/settle</code> · thresholds map to <code>warnThresholdEgp</code> / <code>pauseThresholdEgp</code>.</p></div></div>`;
+ return kpis+banner+`<div class="split">${pay}${form}</div><div class="mt">${info}</div>`;
+}
+function resetWallet(i){
+ const c=vcomm(i);
+ if(c.outstanding===0){toast('Wallet already settled');return;}
+ c.outstanding=0;
+ toast('Payment recorded — wallet reset to EGP 0 ✓');
+ openVendorProducts(i,'commission');
+}
+function recordPayment(i){
+ const c=vcomm(i);
+ const amt=parseFloat(document.getElementById('payAmt').value);
+ if(isNaN(amt)||amt<=0){toast('Enter a valid amount');document.getElementById('payAmt').focus();return;}
+ c.outstanding=Math.max(0,Math.round((c.outstanding-amt)*100)/100);
+ toast(c.outstanding===0?'Payment recorded — wallet settled ✓':'Payment recorded — '+EGP(c.outstanding)+' still owed');
+ openVendorProducts(i,'commission');
+}
+function saveCommThresholds(i){
+ const warn=parseFloat(document.getElementById('warnTh').value);
+ const pause=parseFloat(document.getElementById('pauseTh').value);
+ if(isNaN(warn)||warn<0){toast('Enter a valid warn threshold');document.getElementById('warnTh').focus();return;}
+ if(isNaN(pause)||pause<0){toast('Enter a valid pause threshold');document.getElementById('pauseTh').focus();return;}
+ if(pause<warn){toast('Pause threshold must be ≥ warn threshold');document.getElementById('pauseTh').focus();return;}
+ const c=vcomm(i); c.warn=warn; c.pause=pause;
+ toast('Commission thresholds saved ✓');
+ openVendorProducts(i,'commission');
+}
+function listingDrawer(vi,pi){
+ const v=VENDORS[vi],p=(VLISTINGS[vi]||[])[pi]; if(!p)return;
+ const st=LSTAT[p.status];
+ const cmp=p.cmp?' <span style="text-decoration:line-through;color:var(--text-3);font-size:15px;font-weight:500">'+EGP(p.cmp)+'</span> <span class="badge-s b-red">-'+Math.round((1-p.price/p.cmp)*100)+'%</span>':'';
+ const act=p.status==='pending'
+   ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="toast(\'Listing approved — now live ✓\');closeDrawer()">Approve</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing rejected — vendor notified\');closeDrawer()">Reject</button>'
+   :p.status==='live'
+   ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Opening listing editor…\');closeDrawer()">Edit</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing hidden from store\');closeDrawer()">Unpublish</button>'
+   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Restock reminder sent to vendor\');closeDrawer()">Nudge vendor</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
+ openDrawer('Listing — '+p.t,
+   '<div style="width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px">'+p.emoji+'</div>'
+   +'<h3 style="font-size:17px;margin-bottom:6px">'+p.t+'</h3>'
+   +'<div style="font-size:22px;font-weight:800;color:var(--primary)">'+EGP(p.price)+cmp+'</div>'
+   +'<div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s '+st[0]+'">'+st[1]+'</span><span class="badge-s b-indigo">Stock: '+p.stock+'</span><span class="badge-s b-grey">'+p.sold+' sold</span></div>'
+   +secH('Listing details')
+   +kv('Vendor (business)',v.n)+kv('Category',v.cat+' › '+p.sub)+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
+   act);
 }
 
 /* ---------- reusable add-form (opens in the drawer, actually adds) ---------- */
@@ -393,11 +592,11 @@ function deleteCoupon(i){const c=COUPONS[i][0];COUPONS.splice(i,1);toast('Coupon
 function deleteBanner(i){BANNERS.splice(i,1);toast('Banner deleted');go('content');}
 
 /* ---------- filter chips ---------- */
-const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected'];
+const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out'];
 function onChip(chip){
  const g=chip.closest('.tabs'); if(g) g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c===chip));
  const label=chip.innerText.replace(/\s*\(\d+\)/,'').trim();
- let key=label.toLowerCase(); if(key==='in review') key='review';
+ let key=label.toLowerCase(); if(key==='in review') key='review'; if(key==='out of stock') key='out';
  const view=document.getElementById('content');
  const rows=[...view.querySelectorAll('tr[data-status]')];
  const cards=[...view.querySelectorAll('.mod[data-status]')];

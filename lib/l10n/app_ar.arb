@@ -117,6 +117,30 @@
   "listingProductNameLabel": "اسم المنتج *",
   "listingProductNameHint": "مثال: iPhone 15 Pro Max 256GB",
   "listingPriceLabel": "السعر *",
+  "commissionYouEarn": "أرباحك",
+  "commissionPlatformFee": "عمولة المنصة",
+  "commissionStatusLabel": "حالة العمولة",
+  "commissionStatusPending": "قيد الانتظار",
+  "commissionStatusDue": "مستحقة عند التسليم",
+  "commissionStatusSettled": "تمت التسوية",
+  "commissionStatusVoided": "ملغاة",
+  "commissionWalletWarnTitle": "ادفع رسوم المنصة قريبًا",
+  "commissionWalletWarnBody": "عليك {amount} كرسوم منصة. ادفعها قبل أن تصل إلى {limit} وإلا سيتم إيقاف الإعلانات الجديدة.",
+  "@commissionWalletWarnBody": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "limit": {"type": "String"}
+    }
+  },
+  "commissionWalletPausedTitle": "تم إيقاف الإعلانات الجديدة",
+  "commissionWalletPausedBody": "عليك {amount} كرسوم منصة، تجاوزت حد {limit}. ادفعها لتتمكن من نشر إعلانات جديدة.",
+  "@commissionWalletPausedBody": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "limit": {"type": "String"}
+    }
+  },
+  "commissionWalletBlockedSubmit": "الإعلانات الجديدة متوقفة حتى تدفع رسوم المنصة المستحقة.",
   "listingCompareAtTitle": "سعر قبل الخصم (اختياري)",
   "listingCompareAtHelper": "السعر الأصلي لعرض الخصم",
   "listingCompareAtWarning": "سعر قبل الخصم أقل من سعر البيع.",

@@ -12,6 +12,8 @@ import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import '../../../commission/presentation/widgets/vendor_commission_alert_banner.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../providers/my_listings_notifier.dart';
 import '../providers/my_listings_state.dart';
@@ -267,10 +269,23 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               AppSpacing.lg,
               AppSpacing.md,
             ),
-            child: ListingStatsBanner(
-              totalCount: stats.totalCount,
-              activeCount: stats.activeCount,
-              soldCount: stats.soldCount,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Consumer(
+                  builder: (context, ref, _) {
+                    final wallet =
+                        ref.watch(vendorCommissionWalletProvider).valueOrNull;
+                    if (wallet == null) return const SizedBox.shrink();
+                    return VendorCommissionAlertBanner(wallet: wallet);
+                  },
+                ),
+                ListingStatsBanner(
+                  totalCount: stats.totalCount,
+                  activeCount: stats.activeCount,
+                  soldCount: stats.soldCount,
+                ),
+              ],
             ),
           ),
           ListingFilterTabs(

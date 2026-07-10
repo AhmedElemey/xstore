@@ -360,6 +360,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingPriceLabel => 'Price *';
 
   @override
+  String get commissionYouEarn => 'You earn';
+
+  @override
+  String get commissionPlatformFee => 'Platform fee';
+
+  @override
+  String get commissionStatusLabel => 'Commission status';
+
+  @override
+  String get commissionStatusPending => 'Pending';
+
+  @override
+  String get commissionStatusDue => 'Due on delivery';
+
+  @override
+  String get commissionStatusSettled => 'Settled';
+
+  @override
+  String get commissionStatusVoided => 'Voided';
+
+  @override
+  String get commissionWalletWarnTitle => 'Pay your platform fees soon';
+
+  @override
+  String commissionWalletWarnBody(String amount, String limit) {
+    return 'You owe $amount in platform fees. Pay it off before it reaches $limit or new listings will be paused.';
+  }
+
+  @override
+  String get commissionWalletPausedTitle => 'New listings are paused';
+
+  @override
+  String commissionWalletPausedBody(String amount, String limit) {
+    return 'You owe $amount in platform fees, over the $limit limit. Pay it off to publish new listings again.';
+  }
+
+  @override
+  String get commissionWalletBlockedSubmit =>
+      'New listings are paused until you pay off your platform fees.';
+
+  @override
   String get listingCompareAtTitle => 'Compare-at price (optional)';
 
   @override

@@ -23,7 +23,7 @@ final productRemoteDataSourceProvider =
 );
 
 typedef ProductRemoteDataSourceRef = ProviderRef<ProductRemoteDataSource>;
-String _$productRepositoryHash() => r'62fc081d8b70504bd76340f4df92e2f395c025fa';
+String _$productRepositoryHash() => r'12cd100423db3e184e11eda04f0fe4bc5a822613';
 
 /// See also [productRepository].
 @ProviderFor(productRepository)

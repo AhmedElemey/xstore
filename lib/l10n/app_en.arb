@@ -117,6 +117,30 @@
   "listingProductNameLabel": "Product name *",
   "listingProductNameHint": "e.g. iPhone 15 Pro Max 256GB",
   "listingPriceLabel": "Price *",
+  "commissionYouEarn": "You earn",
+  "commissionPlatformFee": "Platform fee",
+  "commissionStatusLabel": "Commission status",
+  "commissionStatusPending": "Pending",
+  "commissionStatusDue": "Due on delivery",
+  "commissionStatusSettled": "Settled",
+  "commissionStatusVoided": "Voided",
+  "commissionWalletWarnTitle": "Pay your platform fees soon",
+  "commissionWalletWarnBody": "You owe {amount} in platform fees. Pay it off before it reaches {limit} or new listings will be paused.",
+  "@commissionWalletWarnBody": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "limit": {"type": "String"}
+    }
+  },
+  "commissionWalletPausedTitle": "New listings are paused",
+  "commissionWalletPausedBody": "You owe {amount} in platform fees, over the {limit} limit. Pay it off to publish new listings again.",
+  "@commissionWalletPausedBody": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "limit": {"type": "String"}
+    }
+  },
+  "commissionWalletBlockedSubmit": "New listings are paused until you pay off your platform fees.",
   "listingCompareAtTitle": "Compare-at price (optional)",
   "listingCompareAtHelper": "Original price for discount display",
   "listingCompareAtWarning": "Compare-at price is lower than your selling price.",
