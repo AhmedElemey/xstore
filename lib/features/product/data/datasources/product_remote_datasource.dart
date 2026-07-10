@@ -200,7 +200,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
             _locationFromParts(json))
         .toString();
 
-    final seller = _parseSeller(json['seller'] ?? json['vendor']);
+    // CONFIRMED against a live backend: listing detail sends flat
+    // userId/userName/userAvatar fields, not a nested seller/vendor object.
+    final seller = _parseSeller(json['seller'] ?? json['vendor']) ??
+        _parseFlatSeller(json);
 
     final specs = _parseStringMap(json['specifications'] ?? json['specs']);
 
@@ -252,6 +255,19 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final country = json['country']?.toString() ?? '';
     final parts = [city, wilaya, country].where((e) => e.isNotEmpty).join(', ');
     return parts.isEmpty ? '' : '📍 $parts';
+  }
+
+  ProductSellerEntity? _parseFlatSeller(Map<String, dynamic> json) {
+    final userId = json['userId'];
+    if (userId == null) return null;
+    return ProductSellerEntity(
+      id: userId.toString(),
+      name: (json['userName'] ?? '').toString(),
+      avatarUrl: (json['userAvatar'] ?? '').toString(),
+      rating: _num(json['rating']),
+      salesCount: 0,
+      verified: false,
+    );
   }
 
   ProductSellerEntity? _parseSeller(Object? raw) {

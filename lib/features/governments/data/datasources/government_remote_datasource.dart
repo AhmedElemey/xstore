@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/mock/mock_config.dart';
-import '../../../../core/mock/mock_reference_data.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
@@ -27,15 +25,9 @@ class GovernmentRemoteDataSourceImpl implements GovernmentRemoteDataSource {
     required int page,
     required int pageSize,
   }) async {
-    if (MockConfig.useMock) {
-      final all = MockReferenceData.governments;
-      final start = page * pageSize;
-      final slice = start >= all.length
-          ? <GovernmentModel>[]
-          : all.skip(start).take(pageSize).toList();
-      return MockConfig.simulate((items: slice, totalCount: all.length));
-    }
     try {
+      // CONFIRMED against a live backend: pagination envelope is
+      // {"items": [...], "totalCount": N, "page", "pageSize", "totalPages"}.
       final response = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.governments,
         queryParameters: {'page': page, 'pageSize': pageSize},
@@ -59,14 +51,6 @@ class GovernmentRemoteDataSourceImpl implements GovernmentRemoteDataSource {
 
   @override
   Future<GovernmentModel> getGovernmentById(int id) async {
-    if (MockConfig.useMock) {
-      final government =
-          MockReferenceData.governments.where((g) => g.id == id).firstOrNull;
-      if (government == null) {
-        throw const ServerException('Government not found');
-      }
-      return MockConfig.simulate(government);
-    }
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '${ApiEndpoints.governments}/$id',

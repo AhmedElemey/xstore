@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/mock/mock_config.dart';
-import '../../../../core/mock/mock_reference_data.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
@@ -30,15 +28,9 @@ class StoreCategoryRemoteDataSourceImpl
     required int page,
     required int pageSize,
   }) async {
-    if (MockConfig.useMock) {
-      final all = MockReferenceData.storeCategories;
-      final start = page * pageSize;
-      final slice = start >= all.length
-          ? <StoreCategoryModel>[]
-          : all.skip(start).take(pageSize).toList();
-      return MockConfig.simulate((items: slice, totalCount: all.length));
-    }
     try {
+      // CONFIRMED against a live backend: pagination envelope is
+      // {"items": [...], "totalCount": N, "page", "pageSize", "totalPages"}.
       final response = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.storeCategories,
         queryParameters: {'page': page, 'pageSize': pageSize},
@@ -62,15 +54,6 @@ class StoreCategoryRemoteDataSourceImpl
 
   @override
   Future<StoreCategoryModel> getStoreCategoryById(int id) async {
-    if (MockConfig.useMock) {
-      final category = MockReferenceData.storeCategories
-          .where((c) => c.id == id)
-          .firstOrNull;
-      if (category == null) {
-        throw const ServerException('Store category not found');
-      }
-      return MockConfig.simulate(category);
-    }
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '${ApiEndpoints.storeCategories}/$id',

@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/mock/mock_config.dart';
-import '../../../../core/mock/mock_notifications.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
@@ -31,31 +29,14 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
 
   final Dio _dio;
 
-  // ---- mock-only in-memory overlay state ----
-  final Set<String> _deleted = {};
-  final Map<String, bool> _readOverride = {};
-
-  List<NotificationEntity> _base(UserRole role) {
-    final raw = mockNotificationsForRole(role, anchor: DateTime.now())
-        .where((e) => !_deleted.contains(e.id))
-        .toList();
-    return raw
-        .map(
-          (e) => _readOverride.containsKey(e.id)
-              ? e.copyWith(isRead: _readOverride[e.id]!)
-              : e,
-        )
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  }
-
-  // ASSUMPTION: query value for `role` — UserRole enum is {vendor, consumer},
-  // no "ALL" member. The collection's example `role=ALL` means "both roles";
-  // this app always requests a specific signed-in user's role, so ALL is
-  // never sent. Using role.name.toUpperCase() -> 'CONSUMER' / 'VENDOR'. If
-  // the backend expects a different token, calls will 400 — that's the
-  // signal to revisit this mapping.
-  String _roleParam(UserRole role) => role.name.toUpperCase();
+  // CONFIRMED against a live backend: `role=CONSUMER`/`role=VENDOR` (and
+  // `Consumer`/`consumer`) all 400 with "The value 'X' is not valid." —
+  // tried Buyer/Customer/Client/User too, none worked. Only `role=All`
+  // (case-insensitive) is confirmed valid. Until the real consumer/vendor
+  // token is found, every fetch requests both roles' notifications
+  // unfiltered — server-side role filtering is effectively disabled for
+  // now (not ideal, but functional; safe fallback with no 400s).
+  String _roleParam(UserRole role) => 'All';
 
   @override
   Future<List<NotificationEntity>> fetchPage({
@@ -63,16 +44,6 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
     required int page,
     required int pageSize,
   }) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 400));
-      final all = _base(role);
-      final start = page * pageSize;
-      if (start >= all.length) return [];
-      return all.sublist(
-        start,
-        start + pageSize > all.length ? all.length : start + pageSize,
-      );
-    }
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.notifications,
@@ -93,10 +64,6 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
 
   @override
   Future<int> unreadCount(UserRole role) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      return _base(role).where((e) => !e.isRead).length;
-    }
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.notificationsUnreadCount,
@@ -120,11 +87,6 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
 
   @override
   Future<void> markRead(String id) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-      _readOverride[id] = true;
-      return;
-    }
     try {
       await _dio.put<void>(
         ApiEndpoints.notificationMarkRead(id),
@@ -137,13 +99,6 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
 
   @override
   Future<void> markAllRead(UserRole role) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      for (final e in _base(role)) {
-        _readOverride[e.id] = true;
-      }
-      return;
-    }
     try {
       await _dio.put<void>(
         ApiEndpoints.notificationsReadAll,
@@ -157,11 +112,6 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
 
   @override
   Future<void> markUnread(String id) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-      _readOverride[id] = false;
-      return;
-    }
     try {
       await _dio.put<void>(
         ApiEndpoints.notificationMarkUnread(id),
@@ -174,12 +124,6 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
 
   @override
   Future<void> deleteNotification(String id) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-      _deleted.add(id);
-      _readOverride.remove(id);
-      return;
-    }
     try {
       await _dio.delete<void>(
         ApiEndpoints.notificationById(id),

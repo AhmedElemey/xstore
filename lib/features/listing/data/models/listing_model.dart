@@ -7,7 +7,10 @@ part 'listing_model.g.dart';
 
 Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   final m = Map<String, dynamic>.from(json);
-  final rawCat = m['categoryLabel'] ?? m['category'];
+  // CONFIRMED against a live backend response: `id` is a JSON number, not a
+  // string — coerce here so the String-typed model field doesn't crash.
+  m['id'] = m['id']?.toString() ?? '';
+  final rawCat = m['categoryLabel'] ?? m['category'] ?? m['categoryNameEn'];
   if (rawCat is String) {
     m['categoryLabel'] = rawCat;
   } else if (rawCat is Map && rawCat['name'] is String) {
@@ -23,12 +26,15 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   m['saveCount'] = m['saveCount'] ?? m['saves'] ?? 0;
   m['inquiryCount'] = m['inquiryCount'] ?? m['inquiries'] ?? 0;
 
-  m['vendorId'] = m['vendorId'] ?? m['sellerId'] ?? '';
+  // CONFIRMED: live backend sends a flat `userId` (int) for the listing
+  // owner, not `vendorId`/`sellerId`/a nested seller object.
+  m['vendorId'] = (m['vendorId'] ?? m['sellerId'] ?? m['userId'])?.toString() ?? '';
   m['titleEn'] = m['titleEn'] ?? m['title'] ?? '';
   m['titleAr'] = m['titleAr'] ?? '';
   m['descriptionEn'] = m['descriptionEn'] ?? m['description'] ?? '';
   m['descriptionAr'] = m['descriptionAr'] ?? '';
-  // ASSUMPTION: flat title/description alongside En/Ar — see ListingEntity.
+  // CONFIRMED: GET responses only send titleEn/titleAr, no flat title —
+  // fall back to titleEn for the legacy display fields.
   m['title'] = m['title'] ?? m['titleEn'] ?? '';
   m['description'] = m['description'] ?? m['descriptionEn'] ?? '';
   m['compareAtPrice'] = m['compareAtPrice'] ?? m['compare_at_price'];
@@ -44,11 +50,39 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
       ? (m['attributes'] as Map)
           .map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''))
       : <String, String>{};
+  // CONFIRMED: `status` is a JSON number (e.g. 2), not a string — coerce
+  // before the String-typed model field parses it. See
+  // _listingStatusFromDto for the ordinal mapping.
+  m['status'] = m['status']?.toString() ?? 'draft';
   return m;
 }
 
-// ASSUMPTION: tokens not enumerated in the API spec, adjust once confirmed.
+// CONFIRMED against live listings: `condition` is a JSON integer, not a
+// string token. Only codes 0 and 2 were observed in sample data (0 on
+// brand-new premium electronics, 2 on a listing titled "Used ... Excellent
+// Condition"). Mapped against the ONLY authoritative-ish source available —
+// the Postman collection's query-param description "New / LikeNew / Good /
+// UsedForParts" (4 values, in that order) — giving New=0, LikeNew=1,
+// Good=2, UsedForParts=3. This is a BEST-EFFORT / LOW-CONFIDENCE mapping:
+// condition=2 could equally be "Good" (per this mapping) or "Used" (per the
+// listing's own title). `forParts` is never produced by this mapping (the
+// collection combines it with `used` into one wire value) but is kept as a
+// distinct Dart enum value for UI purposes; both map to wire code 3 when
+// sending. Confirm the real enum with the backend dev when possible.
 ListingCondition? _conditionFromDto(String? value) {
+  // Numeric wire codes (confirmed shape).
+  switch (value) {
+    case '0':
+      return ListingCondition.newItem;
+    case '1':
+      return ListingCondition.likeNew;
+    case '2':
+      return ListingCondition.good;
+    case '3':
+      return ListingCondition.used;
+  }
+  // String tokens (legacy/mock-path fallback — never seen on the wire from
+  // the live backend, kept for resilience).
   switch (value?.toLowerCase()) {
     case 'new':
       return ListingCondition.newItem;
@@ -63,6 +97,7 @@ ListingCondition? _conditionFromDto(String? value) {
     case 'forparts':
     case 'for_parts':
     case 'for parts':
+    case 'usedforparts':
       return ListingCondition.forParts;
     default:
       return null;
@@ -120,7 +155,29 @@ class ListingModel with _$ListingModel {
       _$ListingModelFromJson(_normalizeListingJson(json));
 }
 
+// CONFIRMED against live listings: `status` is a JSON integer, not a string
+// (only code 2 observed, on publicly-searchable listings — high confidence
+// that's "Active", matching this enum's declared ordinal position). Values
+// 0/1/3/4/5 are inferred by ordinal position matching ListingStatus's
+// declaration order (draft/pending/active/paused/sold/rejected) since no
+// samples with those codes were available — MODERATE confidence, not
+// confirmed. Adjust if a live draft/paused/sold/rejected listing surfaces
+// a different code.
 ListingStatus _listingStatusFromDto(String value) {
+  switch (value) {
+    case '0':
+      return ListingStatus.draft;
+    case '1':
+      return ListingStatus.pending;
+    case '2':
+      return ListingStatus.active;
+    case '3':
+      return ListingStatus.paused;
+    case '4':
+      return ListingStatus.sold;
+    case '5':
+      return ListingStatus.rejected;
+  }
   switch (value.toLowerCase()) {
     case 'pending':
       return ListingStatus.pending;

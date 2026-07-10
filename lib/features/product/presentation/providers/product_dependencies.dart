@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/dio_provider.dart';
-import '../../../home/presentation/providers/home_dependencies.dart';
 import '../../data/datasources/product_remote_datasource.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../domain/repositories/product_repository.dart';
@@ -22,7 +21,6 @@ ProductRemoteDataSource productRemoteDataSource(ProductRemoteDataSourceRef ref) 
 @Riverpod(keepAlive: true)
 ProductRepository productRepository(ProductRepositoryRef ref) {
   return ProductRepositoryImpl(
-    ref.watch(homeRepositoryProvider),
     remote: ref.watch(productRemoteDataSourceProvider),
   );
 }

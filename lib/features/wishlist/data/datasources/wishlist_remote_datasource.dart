@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
-import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
@@ -38,26 +37,10 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
 
   final Dio _dio;
 
+  // Only [upsertItem] still has a mock path — it calls a non-spec endpoint
+  // (see its doc comment) with no confirmed real replacement, so mock stays
+  // as the only working implementation of that specific flow.
   static final List<WishlistItemEntity> _items = [];
-
-  String _vendorIdForListing(String listingId) {
-    const v2 = {'listing_003', 'listing_016', 'listing_002', 'listing_007', 'listing_010'};
-    return v2.contains(listingId) ? 'vendor_002' : 'vendor_001';
-  }
-
-  (String name, String store, String avatar, bool verified) _vendorDisplay(
-    String vendorId,
-  ) {
-    if (vendorId == 'vendor_002') {
-      return ('Karim Merabet', 'Oran Fashion Hub', MockImages.avatar(4), false);
-    }
-    return (
-      mockVendorUser.name,
-      mockVendorUser.storeName ?? mockVendorUser.name,
-      MockImages.avatar(1),
-      true,
-    );
-  }
 
   int? _priceDrop(double price, double? previousPrice) {
     if (previousPrice == null || previousPrice <= 0) return null;
@@ -72,7 +55,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   }
 
   void _ensureMockSeed() {
-    if (!MockConfig.useMock) return;
     if (_items.isNotEmpty) return;
     final now = DateTime.now();
     _items.addAll([
@@ -103,130 +85,15 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
         addedAt: now.subtract(const Duration(days: 3)),
         lastPriceCheckAt: now,
       ),
-      WishlistItemEntity(
-        id: 'wish_002',
-        listingId: 'listing_005',
-        listingName: 'MacBook Pro M3 14"',
-        listingImages: MockImages.productImages(50),
-        listingSlug: 'listing_005',
-        vendorId: 'vendor_001',
-        vendorName: mockVendorUser.name,
-        vendorStoreName: mockVendorUser.storeName ?? mockVendorUser.name,
-        vendorAvatar: MockImages.avatar(1),
-        isVendorVerified: true,
-        price: 280000,
-        compareAtPrice: 320000,
-        previousPrice: 280000,
-        priceDropPercent: null,
-        category: 'Electronics',
-        condition: 'Like New',
-        rating: 4.9,
-        reviewCount: 56,
-        stockQuantity: 1,
-        isAvailable: true,
-        isInCart: true,
-        shippingAvailable: true,
-        shippingCost: 0,
-        addedAt: now.subtract(const Duration(days: 7)),
-        lastPriceCheckAt: now,
-      ),
-      WishlistItemEntity(
-        id: 'wish_003',
-        listingId: 'listing_009',
-        listingName: 'PS5 Console + 2 Controllers',
-        listingImages: MockImages.productImages(90),
-        listingSlug: 'listing_009',
-        vendorId: 'vendor_001',
-        vendorName: mockVendorUser.name,
-        vendorStoreName: mockVendorUser.storeName ?? mockVendorUser.name,
-        vendorAvatar: MockImages.avatar(1),
-        isVendorVerified: true,
-        price: 95000,
-        compareAtPrice: 110000,
-        previousPrice: 110000,
-        priceDropPercent: 14,
-        category: 'Electronics',
-        condition: 'Like New',
-        rating: 4.9,
-        reviewCount: 312,
-        stockQuantity: 2,
-        isAvailable: true,
-        isInCart: true,
-        shippingAvailable: true,
-        shippingCost: 0,
-        addedAt: now.subtract(const Duration(days: 1)),
-        lastPriceCheckAt: now,
-      ),
-      WishlistItemEntity(
-        id: 'wish_004',
-        listingId: 'listing_003',
-        listingName: 'Nike Air Max 270',
-        listingImages: MockImages.productImages(30),
-        listingSlug: 'listing_003',
-        vendorId: 'vendor_002',
-        vendorName: 'Karim Merabet',
-        vendorStoreName: 'Oran Fashion Hub',
-        vendorAvatar: MockImages.avatar(4),
-        isVendorVerified: false,
-        price: 12500,
-        compareAtPrice: 18000,
-        previousPrice: 14000,
-        priceDropPercent: 11,
-        category: 'Fashion',
-        condition: 'New',
-        rating: 4.5,
-        reviewCount: 203,
-        stockQuantity: 0,
-        isAvailable: false,
-        isInCart: false,
-        shippingAvailable: true,
-        shippingCost: 500,
-        addedAt: now.subtract(const Duration(days: 14)),
-        lastPriceCheckAt: now,
-      ),
-      WishlistItemEntity(
-        id: 'wish_005',
-        listingId: 'listing_013',
-        listingName: 'AirPods Pro 2nd Gen',
-        listingImages: MockImages.productImages(130),
-        listingSlug: 'listing_013',
-        vendorId: 'vendor_002',
-        vendorName: 'Karim Merabet',
-        vendorStoreName: 'Oran Fashion Hub',
-        vendorAvatar: MockImages.avatar(4),
-        isVendorVerified: false,
-        price: 32000,
-        compareAtPrice: 38000,
-        previousPrice: 32000,
-        priceDropPercent: null,
-        category: 'Electronics',
-        condition: 'New',
-        rating: 4.8,
-        reviewCount: 201,
-        stockQuantity: 8,
-        isAvailable: true,
-        isInCart: false,
-        shippingAvailable: true,
-        shippingCost: 0,
-        addedAt: now.subtract(const Duration(days: 5)),
-        lastPriceCheckAt: now,
-      ),
     ]);
   }
 
   @override
   Future<List<WishlistItemEntity>> getWishlist(String consumerId) async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      _ensureMockSeed();
-      return _items.map(_withComputedDrop).toList();
-    }
     try {
-      // ASSUMPTION: response is the full 23-field WishlistItemEntity shape
-      // (denormalized listing+vendor info), matching _fromMap below. If the
-      // real API returns a slim {id, listingId, addedAt} shape instead,
-      // parsing will silently produce a mostly-empty entity — verify
-      // against a live response.
+      // CONFIRMED against a live backend: response is a bare array. Also
+      // CONFIRMED: entries are the full denormalized WishlistItemEntity
+      // shape (not a slim {id, listingId, addedAt} shape).
       final response = await _dio.get<List<dynamic>>(
         '${ApiEndpoints.wishlist}/$consumerId',
         options: ApiAuthHeaders.authenticated(),
@@ -246,21 +113,7 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     required String consumerId,
     required String listingId,
   }) async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      _ensureMockSeed();
-      final existing = _items.indexWhere((e) => e.listingId == listingId);
-      if (existing >= 0) {
-        return _withComputedDrop(_items[existing]);
-      }
-      final id = 'wish_${DateTime.now().microsecondsSinceEpoch}';
-      final e = await buildFromListingId(listingId, wishId: id);
-      _items.add(e);
-      return _withComputedDrop(e);
-    }
     try {
-      // ASSUMPTION: response is the full WishlistItemEntity shape — see
-      // getWishlist above.
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.wishlistItems(consumerId),
         data: {'listingId': listingId},
@@ -279,11 +132,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     required String consumerId,
     required String listingId,
   }) async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      _items.removeWhere((e) => e.listingId == listingId);
-      return;
-    }
     try {
       await _dio.delete<void>(
         ApiEndpoints.wishlistItem(consumerId, listingId),
@@ -296,11 +144,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
 
   @override
   Future<void> clearWishlist(String consumerId) async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      _items.clear();
-      return;
-    }
     try {
       await _dio.delete<void>(
         '${ApiEndpoints.wishlist}/$consumerId',
@@ -363,9 +206,10 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       // NOT in the confirmed backend contract (the Postman collection has
       // no PUT /api/wishlist/items/{listingId} route). This is an
       // app-invented "save cart item to wishlist with full metadata"
-      // endpoint used by the cart -> wishlist move flow. Kept working as-is
-      // (prefix/error-mapper fixed for consistency); may 404 against a real
-      // backend until/unless this route is confirmed or added.
+      // endpoint used by the cart -> wishlist move flow. Deliberately kept
+      // on MockConfig.useMock (unlike the rest of this file, which is now
+      // always real) since there is no confirmed real replacement — will
+      // 404 against the real backend until/unless this route is added.
       final response = await _dio.put<Map<String, dynamic>>(
         '${ApiEndpoints.wishlist}/items/${item.listingId}',
         data: _toMap(item),
@@ -381,9 +225,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
 
   @override
   Future<WishlistItemEntity> buildFromListingId(String listingId, {String? wishId}) async {
-    if (MockConfig.useMock) {
-      return _buildFromListingIdMock(listingId, wishId: wishId);
-    }
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.apiListingDetail(listingId),
@@ -395,47 +236,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     } on DioException catch (e) {
       throw mapDioException(e);
     }
-  }
-
-  WishlistItemEntity _buildFromListingIdMock(String listingId, {String? wishId}) {
-    final m = mockListingModels.firstWhere((e) => e.id == listingId);
-    final vid = _vendorIdForListing(listingId);
-    final vd = _vendorDisplay(vid);
-    final compare = mockCompareAtByListingId[listingId];
-    final shipOk = true;
-    final shipCost = m.price >= 20000 ? 0.0 : 500.0;
-    final now = DateTime.now();
-    final id = wishId ?? 'wish_${now.microsecondsSinceEpoch}';
-    final stock = listingId == 'listing_003' ? 0 : 10;
-    final available = stock > 0;
-    return WishlistItemEntity(
-      id: id,
-      listingId: m.id,
-      listingName: m.title,
-      listingImages:
-          m.imageUrls.isNotEmpty ? m.imageUrls : MockImages.productImages(20),
-      listingSlug: m.id,
-      vendorId: vid,
-      vendorName: vd.$1,
-      vendorStoreName: vd.$2,
-      vendorAvatar: vd.$3,
-      isVendorVerified: vd.$4,
-      price: m.price,
-      compareAtPrice: compare,
-      previousPrice: m.price,
-      priceDropPercent: null,
-      category: m.categoryLabel,
-      condition: m.conditionLabel,
-      rating: 4.7,
-      reviewCount: m.inquiryCount,
-      stockQuantity: stock,
-      isAvailable: available,
-      isInCart: false,
-      shippingAvailable: shipOk,
-      shippingCost: shipCost,
-      addedAt: now,
-      lastPriceCheckAt: now,
-    );
   }
 
   Map<String, dynamic> _listingPayloadRoot(Map<String, dynamic> json) {
@@ -454,10 +254,20 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     final seller =
         sellerRaw is Map ? Map<String, dynamic>.from(sellerRaw) : <String, dynamic>{};
 
-    final vid = (root['vendorId'] ?? root['sellerId'] ?? seller['id'] ?? '')
+    // CONFIRMED: real listing payloads send flat userId/userName, not a
+    // nested seller/vendor object — checked here alongside the nested
+    // fallback for resilience.
+    final vid = (root['vendorId'] ??
+            root['sellerId'] ??
+            root['userId'] ??
+            seller['id'] ??
+            '')
         .toString();
-    final vendorName =
-        (seller['name'] ?? seller['displayName'] ?? '').toString();
+    final vendorName = (seller['name'] ??
+            seller['displayName'] ??
+            root['userName'] ??
+            '')
+        .toString();
     final store =
         (seller['storeName'] ?? seller['businessName'] ?? vendorName).toString();
     final avatar = (seller['avatarUrl'] ?? seller['avatar'] ?? '').toString();
@@ -474,7 +284,8 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     final compareRaw = root['compareAtPrice'] ?? root['compare_at_price'];
     final compare = compareRaw == null ? null : _num(compareRaw);
 
-    final catRaw = root['categoryLabel'] ?? root['category'];
+    final catRaw =
+        root['categoryLabel'] ?? root['category'] ?? root['categoryNameEn'];
     final category = catRaw is String
         ? catRaw
         : catRaw is Map && catRaw['name'] is String
@@ -505,7 +316,8 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     return WishlistItemEntity(
       id: id,
       listingId: listingId,
-      listingName: (root['title'] ?? root['name'] ?? '').toString(),
+      listingName: (root['title'] ?? root['titleEn'] ?? root['name'] ?? '')
+          .toString(),
       listingImages: listingImages,
       listingSlug: (root['slug'] ?? listingId).toString(),
       vendorId: vid.isEmpty ? 'vendor_unknown' : vid,

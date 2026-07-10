@@ -1,30 +1,27 @@
 import 'package:dio/dio.dart';
 
-/// Static app/tenant license key used on PUBLIC endpoints only (register,
-/// login, forgot-password, and GET on reference-data lookups).
+/// CONFIRMED against a live backend (was previously an unverified
+/// assumption — see git history for the old theory, which was wrong): the
+/// static Basic license key is sent on EVERY request, public or
+/// authenticated alike, and is set once as a default header in
+/// `dio_provider.dart`. Per-user auth is a completely separate
+/// `X-Auth-Token: <token>` header (NOT `Authorization: Bearer <token>`),
+/// injected automatically by `dio_provider.dart`'s interceptor whenever a
+/// token is stored.
 ///
-/// ASSUMPTION (confirm with backend dev): this Basic key is not a per-user
-/// credential — HTTP only allows one `Authorization` header value, and the
-/// Postman collection shows this same key on every request including
-/// clearly user-scoped ones (GET Profile, My Listings), while login/register
-/// separately return a `token` unused elsewhere in the collection. The only
-/// coherent reading is: this key authenticates PUBLIC endpoints, and is
-/// REPLACED by `Authorization: Bearer <token>` on authenticated endpoints
-/// (see [authenticated] and the guard in `dio_provider.dart`). If this is
-/// wrong, authenticated calls will fail with a clear 401 — that is the
-/// signal to revisit this assumption.
+/// [public] and [authenticated] are now functionally identical (both are
+/// no-ops — the real headers are set centrally in `dio_provider.dart`) but
+/// are kept as distinct call sites throughout the codebase to document
+/// *intent* per endpoint (whether it conceptually requires a signed-in
+/// user), even though nothing here enforces that anymore.
 abstract final class ApiAuthHeaders {
-  static const String _basicLicenseKey =
+  static const String basicLicenseKey =
       'Basic MTEzMTk3Njg6NjAtZGF5ZnJlZXRyaWFs';
 
-  /// Use on calls that do NOT require a signed-in user (register / login /
-  /// forgot-password / reference-data GET).
-  static Options public() => Options(
-        headers: {'Authorization': _basicLicenseKey},
-      );
+  /// Endpoints that don't require a signed-in user (register / login /
+  /// forgot-password / reference-data GET). No-op — see class doc.
+  static Options public() => Options();
 
-  /// Use on authenticated/user-specific endpoints. No explicit header here —
-  /// dio_provider's interceptor injects `Authorization: Bearer <token>`
-  /// automatically when a token is stored.
+  /// Endpoints that require a signed-in user. No-op — see class doc.
   static Options authenticated() => Options();
 }

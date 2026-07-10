@@ -25,28 +25,6 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
 
   @override
   Future<List<SearchResultModel>> searchListings(String query, int page) async {
-    if (MockConfig.useMock) {
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      final base = query.isEmpty ? 'item' : query.toLowerCase();
-      return List.generate(6, (i) {
-        final idx = (page - 1) * 6 + i;
-        return SearchResultModel(
-          id: 'ex_$idx',
-          name: '$base ${idx + 1}',
-          price: 29.99 + idx * 3,
-          compareAtPrice: idx.isEven ? 49.99 + idx : null,
-          imageUrl: null,
-          condition: idx.isEven ? 'New' : 'Like New',
-          category: 'Electronics',
-          rating: 4.2 + (idx % 3) * 0.2,
-          reviewCount: 12 + idx,
-          sellerName: 'Seller $idx',
-          isSellerVerified: idx.isEven,
-          location: 'Algiers',
-          hasShipping: true,
-        );
-      });
-    }
     try {
       // NOTE: category/price/condition/sort filters are applied
       // client-side in explore_provider.dart today, not sent to the

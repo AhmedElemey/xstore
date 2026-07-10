@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        run: bash .github/scripts/checkout.sh
+        uses: actions/checkout@v4
 
       - name: Set up Java 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"

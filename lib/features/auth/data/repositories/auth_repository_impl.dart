@@ -64,7 +64,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> login(LoginParams params) async {
     try {
-      final model = await _remote.login(params);
+      final model = await _resolveFullUser(await _remote.login(params));
       await _persistUser(model);
       return Right(model.toEntity());
     } on AuthException catch (e) {
@@ -102,7 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
     ConsumerRegisterParams params,
   ) async {
     try {
-      final model = await _remote.registerConsumer(params);
+      final model = await _resolveFullUser(await _remote.registerConsumer(params));
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -121,7 +121,7 @@ class AuthRepositoryImpl implements AuthRepository {
     VendorRegisterParams params,
   ) async {
     try {
-      final model = await _remote.registerVendor(params);
+      final model = await _resolveFullUser(await _remote.registerVendor(params));
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -285,14 +285,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> logout() async {
     try {
-      if (!MockConfig.useMock) {
-        // Best-effort — local state is always cleared below regardless of
-        // whether the remote call succeeds (e.g. token already expired).
-        try {
-          await _remote.logout();
-        } catch (_) {
-          // Ignore: local cleanup below is what actually signs the user out.
-        }
+      // Best-effort — local state is always cleared below regardless of
+      // whether the remote call succeeds (e.g. token already expired).
+      try {
+        await _remote.logout();
+      } catch (_) {
+        // Ignore: local cleanup below is what actually signs the user out.
       }
       await _social.signOutSocial();
       await _secureStorage.delete(key: _tokenKey);
@@ -474,6 +472,22 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       return Left(Failure.cache(e.toString()));
     }
+  }
+
+  /// login/register responses only carry `{token, refreshToken}` — no user
+  /// fields at all (confirmed against a live backend; the datasource no
+  /// longer has a mock path for these, so this always runs). Persists the
+  /// token first (so it's sent via X-Auth-Token) and fetches the real user
+  /// via get-profile, merging the token pair back in.
+  Future<UserModel> _resolveFullUser(UserModel loginResult) async {
+    if (loginResult.token != null && loginResult.token!.isNotEmpty) {
+      await _secureStorage.write(key: _tokenKey, value: loginResult.token);
+    }
+    final profile = await _remote.fetchProfile();
+    return profile.copyWith(
+      token: loginResult.token,
+      refreshToken: loginResult.refreshToken,
+    );
   }
 
   Future<void> _persistUser(UserModel model) async {

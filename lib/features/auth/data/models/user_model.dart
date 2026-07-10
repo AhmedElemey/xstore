@@ -52,34 +52,43 @@ class UserModel with _$UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     UserRole parseRole() {
-      final r = json['role'] as String?;
-      if (r == UserRole.vendor.name) return UserRole.vendor;
-      if (r == UserRole.consumer.name) return UserRole.consumer;
+      // CONFIRMED: real get-profile response sends `roleName` (capitalized,
+      // e.g. "Consumer"/"Vendor"), not `role`. Checked case-insensitively
+      // alongside the older `role`/`isVendor` shapes for resilience.
+      final r = (json['roleName'] as String?) ?? (json['role'] as String?);
+      if (r != null) {
+        if (r.toLowerCase() == UserRole.vendor.name) return UserRole.vendor;
+        if (r.toLowerCase() == UserRole.consumer.name) return UserRole.consumer;
+      }
       final legacy = json['isVendor'] as bool? ?? false;
       return legacy ? UserRole.vendor : UserRole.consumer;
     }
 
-    DateTime? parseDate(String? key) {
-      final v = json[key];
+    DateTime? parseDate(String? key, {String? altKey}) {
+      final v = json[key] ?? (altKey != null ? json[altKey] : null);
       if (v == null) return null;
       if (v is String) return DateTime.tryParse(v);
       return null;
     }
 
     return UserModel(
-      id: json['id'] as String,
+      // CONFIRMED: `id` is a JSON number on the real backend, not a string.
+      id: json['id']?.toString() ?? '',
       // Backward compat: new backend sends fullNameEn/fullNameAr, not name.
       name: (json['name'] as String?) ??
           (json['fullNameEn'] as String?) ??
           '',
-      email: json['email'] as String,
+      email: json['email'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
       role: parseRole(),
+      // CONFIRMED: real response sends isEmailVerified/isPhoneVerified
+      // alongside isVerified — isVerified is still the field to use here.
       isVerified: json['isVerified'] as bool? ?? false,
       rating: (json['rating'] as num?)?.toDouble(),
       totalSales: json['totalSales'] as int?,
-      joinedAt: parseDate('joinedAt'),
+      // CONFIRMED: real response sends `creationDate`, not `joinedAt`.
+      joinedAt: parseDate('joinedAt', altKey: 'creationDate'),
       location: json['location'] as String?,
       storeName: json['storeName'] as String?,
       storeSlug: json['storeSlug'] as String?,
@@ -95,7 +104,8 @@ class UserModel with _$UserModel {
       town: json['town'] as String?,
       detailAddress: json['detailAddress'] as String?,
       bio: json['bio'] as String?,
-      dateOfBirth: parseDate('dateOfBirth'),
+      // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`.
+      dateOfBirth: parseDate('dateOfBirth', altKey: 'birthDate'),
       instagramHandle: json['instagramHandle'] as String?,
       facebookPage: json['facebookPage'] as String?,
       token: json['token'] as String?,

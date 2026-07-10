@@ -20,6 +20,12 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel> registerConsumer(ConsumerRegisterParams params);
   Future<UserModel> registerVendor(VendorRegisterParams params);
 
+  /// CONFIRMED against a live backend: login/register only return
+  /// `{token, refreshToken}` — no user fields. Call this immediately after
+  /// (with the token already persisted, so it's sent via X-Auth-Token) to
+  /// get the actual user. Response is wrapped: `{"user": {...}, ...}`.
+  Future<UserModel> fetchProfile();
+
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
@@ -68,16 +74,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final identifier = params.emailOrPhone.trim();
     final password = params.password;
 
-    if (MockConfig.useMock) {
-      if (password == 'wrong123') {
-        throw const AuthException('Invalid credentials');
-      }
-      final model = mockLoginIsVendor(identifier)
-          ? mockVendorUserModel(email: identifier.contains('@') ? identifier : 'vendor@xstore.com')
-          : mockConsumerUserModel(email: identifier.contains('@') ? identifier : 'user@xstore.com');
-      return MockConfig.simulate(model);
-    }
-
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiLogin,
@@ -92,7 +88,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (data == null) {
         throw const ServerException('Empty response');
       }
-      return UserModel.fromJson(data);
+      return _tokenOnlyModel(data, email: identifier);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -137,10 +133,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> registerConsumer(ConsumerRegisterParams params) async {
-    if (MockConfig.useMock) {
-      final model = userModelFromConsumerRegisterParams(params);
-      return MockConfig.simulateScaled(model, multiplier: 2);
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.consumerRegister,
@@ -157,7 +149,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
-      return UserModel.fromJson(data);
+      return _tokenOnlyModel(data, email: params.email);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -165,10 +157,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> registerVendor(VendorRegisterParams params) async {
-    if (MockConfig.useMock) {
-      final model = userModelFromVendorRegisterParams(params);
-      return MockConfig.simulateScaled(model, multiplier: 2);
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.vendorRegister,
@@ -193,7 +181,43 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
-      return UserModel.fromJson(data);
+      return _tokenOnlyModel(data, email: params.email);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  /// Builds a placeholder [UserModel] carrying only the token/refreshToken
+  /// from a login/register response (which has no user fields at all — see
+  /// [AuthRemoteDataSource.fetchProfile] doc). The repository immediately
+  /// replaces this with the real profile; [email] is a best-effort display
+  /// placeholder in case that follow-up call fails.
+  UserModel _tokenOnlyModel(Map<String, dynamic> data, {required String email}) {
+    final token = data['token'] as String?;
+    if (token == null || token.isEmpty) {
+      throw const ServerException('Missing token in response');
+    }
+    return UserModel(
+      id: '',
+      email: email,
+      token: token,
+      refreshToken: data['refreshToken'] as String?,
+    );
+  }
+
+  @override
+  Future<UserModel> fetchProfile() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.getProfile,
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      final userJson = data?['user'];
+      if (userJson is! Map) {
+        throw const ServerException('Empty profile response');
+      }
+      return UserModel.fromJson(Map<String, dynamic>.from(userJson));
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -205,13 +229,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String newPassword,
     required String confirmNewPassword,
   }) async {
-    if (MockConfig.useMock) {
-      if (currentPassword == 'wrong123') {
-        throw const AuthException('Current password is incorrect');
-      }
-      await MockConfig.simulate(null);
-      return;
-    }
     try {
       await _dio.post<void>(
         ApiEndpoints.changePassword,
@@ -229,9 +246,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String?> forgotPassword(String email) async {
-    if (MockConfig.useMock) {
-      return MockConfig.simulate('123456');
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.forgotPassword,
@@ -251,13 +265,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String newPassword,
     required String confirmNewPassword,
   }) async {
-    if (MockConfig.useMock) {
-      if (otpToken != '000000' && otpToken.length != 6) {
-        throw const ServerException('Invalid OTP');
-      }
-      await MockConfig.simulate(null);
-      return;
-    }
     try {
       await _dio.post<void>(
         ApiEndpoints.verifyForgotPasswordOtp,
@@ -278,11 +285,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<({String token, String refreshToken})> refreshToken(
     String token,
   ) async {
-    if (MockConfig.useMock) {
-      return MockConfig.simulate(
-        (token: 'mock-refreshed-token', refreshToken: 'mock-refresh-token'),
-      );
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.refreshToken,
@@ -302,9 +304,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String?> sendEmailOtp(String email) async {
-    if (MockConfig.useMock) {
-      return MockConfig.simulate('123456');
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.sendEmailOtp,
@@ -319,13 +318,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> verifyEmailOtp(String otpToken) async {
-    if (MockConfig.useMock) {
-      if (otpToken != '000000' && otpToken.length != 6) {
-        throw const ServerException('Invalid OTP');
-      }
-      await MockConfig.simulate(null);
-      return;
-    }
     try {
       await _dio.post<void>(
         ApiEndpoints.verifyEmail,
@@ -339,9 +331,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String?> sendPhoneOtpBackend(String phoneNumber) async {
-    if (MockConfig.useMock) {
-      return MockConfig.simulate('123456');
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.sendPhoneOtp,
@@ -356,13 +345,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> verifyPhoneOtpBackend(String otpToken) async {
-    if (MockConfig.useMock) {
-      if (otpToken != '000000' && otpToken.length != 6) {
-        throw const ServerException('Invalid OTP');
-      }
-      await MockConfig.simulate(null);
-      return;
-    }
     try {
       await _dio.post<void>(
         ApiEndpoints.verifyPhone,
@@ -376,10 +358,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      return;
-    }
     try {
       await _dio.post<void>(
         ApiEndpoints.apiLogout,

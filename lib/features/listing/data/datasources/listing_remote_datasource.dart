@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/mock/mock_config.dart';
-import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
@@ -60,14 +58,9 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   final Dio _dio;
 
-  /// Local scaffold cache when API is unavailable.
+  /// Local scaffold cache used only when a request genuinely can't reach
+  /// the network (see [_isOffline]) — a resilience fallback, not mock data.
   final List<ListingModel> _localMine = [];
-
-  /// Mutable mock catalog when [MockConfig.useMock] is true.
-  List<ListingModel>? _mockMine;
-
-  List<ListingModel> get _mockList =>
-      _mockMine ??= List<ListingModel>.from(mockListingModels);
 
   @override
   Future<ListingModel> createListing({
@@ -88,32 +81,6 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required Map<String, String> attributes,
     List<String> imageUrls = const [],
   }) async {
-    if (MockConfig.useMock) {
-      final model = ListingModel(
-        id: 'listing_${DateTime.now().microsecondsSinceEpoch}',
-        title: titleEn,
-        description: descriptionEn,
-        price: price,
-        status: 'pending',
-        imageUrls: imageUrls,
-        titleEn: titleEn,
-        titleAr: titleAr,
-        descriptionEn: descriptionEn,
-        descriptionAr: descriptionAr,
-        compareAtPrice: compareAtPrice,
-        categoryId: categoryId,
-        subcategoryId: subcategoryId,
-        condition: listingConditionToDto(condition),
-        brand: brand,
-        stockQuantity: stockQuantity,
-        shippingAvailable: shippingAvailable,
-        shippingCost: shippingCost,
-        location: location,
-        attributes: attributes,
-      );
-      _mockList.insert(0, model);
-      return MockConfig.simulate(model);
-    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
@@ -179,9 +146,6 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   @override
   Future<List<ListingModel>> fetchMyListings() async {
-    if (MockConfig.useMock) {
-      return MockConfig.simulate(List<ListingModel>.from(_mockList));
-    }
     try {
       final response = await _dio.get<List<dynamic>>(
         ApiEndpoints.apiMyListings,
@@ -226,38 +190,13 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required List<String> imageUrls,
     required ListingStatus status,
   }) async {
-    if (MockConfig.useMock) {
-      final idx = _mockList.indexWhere((e) => e.id == id);
-      if (idx == -1) {
-        throw const ServerException('Listing not found');
-      }
-      final updated = _mockList[idx].copyWith(
-        title: titleEn,
-        description: descriptionEn,
-        price: price,
-        status: _statusToDto(status),
-        titleEn: titleEn,
-        titleAr: titleAr,
-        descriptionEn: descriptionEn,
-        descriptionAr: descriptionAr,
-        compareAtPrice: compareAtPrice,
-        categoryId: categoryId,
-        subcategoryId: subcategoryId,
-        condition: listingConditionToDto(condition),
-        brand: brand,
-        stockQuantity: stockQuantity,
-        shippingAvailable: shippingAvailable,
-        shippingCost: shippingCost,
-        location: location,
-        attributes: attributes,
-        imageUrls: imageUrls,
-      );
-      _mockList[idx] = updated;
-      return MockConfig.simulate(updated);
-    }
     try {
       // Spec: id is sent in the BODY, PUT to the collection root — not
       // /api/listings/{id}. Confirmed from the Postman collection.
+      // NOTE: `status` write format is unconfirmed — sending the lowercase
+      // string token (matching the existing convention), but READ responses
+      // return status as an integer code (see ListingModel). If updates
+      // silently don't change status, this is the first place to check.
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
         data: {
@@ -323,11 +262,6 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   @override
   Future<void> deleteListing(String id) async {
-    if (MockConfig.useMock) {
-      _mockList.removeWhere((e) => e.id == id);
-      await MockConfig.simulate(0);
-      return;
-    }
     try {
       await _dio.delete<void>(
         ApiEndpoints.apiListingDetail(id),
