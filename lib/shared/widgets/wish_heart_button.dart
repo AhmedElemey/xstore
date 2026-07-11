@@ -9,6 +9,7 @@ import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/wishlist/presentation/providers/wishlist_provider.dart';
 import '../../core/utils/extensions/context_extensions.dart';
+import '../utils/require_login.dart';
 import 'app_snackbar.dart';
 import 'heart_burst_animation.dart';
 
@@ -76,6 +77,7 @@ class WishHeartButton extends ConsumerWidget {
     WidgetRef ref,
     bool wasWishlisted,
   ) async {
+    if (!requireLogin(context, ref)) return;
     HapticFeedback.lightImpact();
     await ref.read(wishlistProvider.notifier).toggleWishlist(listingId);
     if (!context.mounted) return;

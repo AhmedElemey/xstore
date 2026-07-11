@@ -4,6 +4,7 @@ abstract final class PrefsKeys {
   static const authUser = 'xstore_auth_user';
   static const exploreRecentSearches = 'explore_recent_searches';
   static const onboardingComplete = 'onboarding_complete';
+  static const guestMode = 'guest_mode';
   static const rememberedEmail = 'remembered_email';
   static const profilePushNotifications = 'profile_push_notifications';
   static const profileEmailUpdates = 'profile_email_updates';

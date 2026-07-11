@@ -35,6 +35,6 @@ GetCityByIdUseCase getCityByIdUseCase(GetCityByIdUseCaseRef ref) {
 @riverpod
 Future<List<CityEntity>> allCities(AllCitiesRef ref) async {
   final result =
-      await ref.watch(getCitiesUseCaseProvider).call(page: 0, pageSize: 200);
+      await ref.watch(getCitiesUseCaseProvider).call(page: 1, pageSize: 200);
   return result.fold((failure) => throw failure, (r) => r.items);
 }

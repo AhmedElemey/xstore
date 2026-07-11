@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import 'legacy_route_options.dart';
+
 /// Debug-only request/response logger. Redacts auth headers and known
 /// sensitive body fields (passwords, tokens, OTP codes) so secrets never
 /// end up in device logs.
@@ -49,6 +51,12 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (response.statusCode == 404 &&
+        response.requestOptions.extra[LegacyRouteOptions.suppressNotFoundLogKey] ==
+            true) {
+      handler.next(response);
+      return;
+    }
     final ms = _elapsedMs(response.requestOptions);
     final buffer = StringBuffer()
       ..writeln(

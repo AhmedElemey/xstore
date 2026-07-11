@@ -57,18 +57,10 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   return m;
 }
 
-// CONFIRMED against live listings: `condition` is a JSON integer, not a
-// string token. Only codes 0 and 2 were observed in sample data (0 on
-// brand-new premium electronics, 2 on a listing titled "Used ... Excellent
-// Condition"). Mapped against the ONLY authoritative-ish source available —
-// the Postman collection's query-param description "New / LikeNew / Good /
-// UsedForParts" (4 values, in that order) — giving New=0, LikeNew=1,
-// Good=2, UsedForParts=3. This is a BEST-EFFORT / LOW-CONFIDENCE mapping:
-// condition=2 could equally be "Good" (per this mapping) or "Used" (per the
-// listing's own title). `forParts` is never produced by this mapping (the
-// collection combines it with `used` into one wire value) but is kept as a
-// distinct Dart enum value for UI purposes; both map to wire code 3 when
-// sending. Confirm the real enum with the backend dev when possible.
+// CONFIRMED against live GET /api/listings and POST validation probes:
+// `condition` is a JSON integer (0=New, 1=LikeNew, 2=Good, 3=Used/ForParts).
+// POST/PUT bodies must be wrapped as `{"command": {...}}` and `attributes`
+// must be a JSON string (or ""), not an object.
 ListingCondition? _conditionFromDto(String? value) {
   // Numeric wire codes (confirmed shape).
   switch (value) {
@@ -104,18 +96,38 @@ ListingCondition? _conditionFromDto(String? value) {
   }
 }
 
-String _conditionToDto(ListingCondition c) {
+int listingConditionToWire(ListingCondition c) {
   switch (c) {
     case ListingCondition.newItem:
-      return 'New';
+      return 0;
     case ListingCondition.likeNew:
-      return 'LikeNew';
+      return 1;
     case ListingCondition.good:
-      return 'Good';
+      return 2;
     case ListingCondition.used:
-      return 'Used';
     case ListingCondition.forParts:
-      return 'ForParts';
+      return 3;
+  }
+}
+
+/// Persisted on [ListingModel.condition] after local/offline writes.
+String listingConditionToDto(ListingCondition c) =>
+    listingConditionToWire(c).toString();
+
+int listingStatusToWire(ListingStatus status) {
+  switch (status) {
+    case ListingStatus.draft:
+      return 0;
+    case ListingStatus.pending:
+      return 1;
+    case ListingStatus.active:
+      return 2;
+    case ListingStatus.paused:
+      return 3;
+    case ListingStatus.sold:
+      return 4;
+    case ListingStatus.rejected:
+      return 5;
   }
 }
 
@@ -227,6 +239,3 @@ extension ListingModelX on ListingModel {
       );
 }
 
-/// Wire token for [ListingCondition] — used by the datasource when sending
-/// create/update payloads.
-String listingConditionToDto(ListingCondition c) => _conditionToDto(c);

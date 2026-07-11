@@ -15,9 +15,18 @@ class ExploreRepositoryImpl implements ExploreRepository {
   Future<Either<Failure, List<SearchResultEntity>>> searchListings({
     required String query,
     required int page,
+    double? minPrice,
+    double? maxPrice,
+    String? condition,
   }) async {
     try {
-      final models = await _remote.searchListings(query, page);
+      final models = await _remote.searchListings(
+        query,
+        page,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        condition: condition,
+      );
       return Right(models.map((m) => m.toEntity()).toList());
     } catch (e) {
       return Left(Failure.server(e.toString()));

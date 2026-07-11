@@ -187,15 +187,15 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
             onConfirmAllPending: () async {
               final ok = await showDialog<bool>(
                 context: context,
-                builder: (_) => AlertDialog(
+                builder: (dialogContext) => AlertDialog(
                   title: Text(context.l10n.vendorConfirmAllPendingTitle),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () => Navigator.pop(dialogContext, false),
                       child: Text(context.l10n.cancel),
                     ),
                     FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
+                      onPressed: () => Navigator.pop(dialogContext, true),
                       child: Text(context.l10n.ordersConfirm),
                     ),
                   ],

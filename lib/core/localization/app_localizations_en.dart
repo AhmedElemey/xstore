@@ -2310,6 +2310,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createOneArrow => 'Create one →';
 
   @override
+  String get guestContinue => 'Continue as Guest';
+
+  @override
+  String get guestLoginRequired => 'Sign in to use this feature';
+
+  @override
+  String get guestLoginRequiredTitle => 'Sign in required';
+
+  @override
+  String get guestLoginDialogSignIn => 'Sign in';
+
+  @override
+  String get guestLoginDialogNotNow => 'Not now';
+
+  @override
   String get skip => 'Skip';
 
   @override
@@ -2944,6 +2959,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listingValidationFixFields => 'Please fix the highlighted fields';
+
+  @override
+  String get listingPublishServerError =>
+      'We couldn\'t publish your listing — the server failed to save it. Your form looks valid; this is a known issue on the live backend. Please try again later.';
 
   @override
   String get egypt => 'Egypt';

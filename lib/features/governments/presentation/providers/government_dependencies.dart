@@ -38,6 +38,6 @@ GetGovernmentByIdUseCase getGovernmentByIdUseCase(
 Future<List<GovernmentEntity>> allGovernments(AllGovernmentsRef ref) async {
   final result = await ref
       .watch(getGovernmentsUseCaseProvider)
-      .call(page: 0, pageSize: 200);
+      .call(page: 1, pageSize: 200);
   return result.fold((failure) => throw failure, (r) => r.items);
 }

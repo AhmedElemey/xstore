@@ -46,7 +46,41 @@ abstract final class AppRoutes {
   static String chatThread(String threadId) => '/chat/$threadId';
 }
 
-/// Vendor-only areas (Add / My listings).
+/// Vendor-only areas: listing management, incoming orders, store tooling.
+/// Guarded centrally in `computeXStoreAuthRedirect` — consumers who deep-link
+/// or navigate here are sent back to home.
 bool isVendorRestrictedRoute(String location) {
-  return location.startsWith('/listing') || location.startsWith('/vendor-orders');
+  return location.startsWith('/listing') ||
+      location.startsWith(AppRoutes.vendorOrders) ||
+      location == AppRoutes.incomingOrders ||
+      location == AppRoutes.storeHours ||
+      location == AppRoutes.earnings ||
+      location == AppRoutes.analytics;
+}
+
+/// Consumer-only areas: the buying flow. Vendors don't shop in this app
+/// (their shell has no cart/wishlist/orders tabs), so a vendor landing here
+/// via deep link or stale navigation is sent back to home.
+///
+/// `/order/:id` is deliberately NOT here — vendors open it too, via
+/// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
+bool isConsumerRestrictedRoute(String location) {
+  return location == AppRoutes.cart ||
+      location == AppRoutes.checkout ||
+      location == AppRoutes.wishlist ||
+      location == AppRoutes.orders;
+}
+
+/// Browse-only areas open to guests (no account needed to look around the
+/// marketplace). Everything account-bound — cart, wishlist, orders, profile,
+/// vendor tooling — stays behind login; guests who navigate there are sent
+/// to the login screen by `computeXStoreAuthRedirect`.
+bool isGuestAccessibleRoute(String location) {
+  return location == AppRoutes.home ||
+      location == AppRoutes.explore ||
+      location.startsWith('${AppRoutes.product}/') ||
+      location.startsWith('${AppRoutes.sellerProfile}/') ||
+      location == AppRoutes.help ||
+      location == AppRoutes.terms ||
+      location == AppRoutes.privacy;
 }

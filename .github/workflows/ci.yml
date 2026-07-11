@@ -8,7 +8,7 @@
 # stays healthy on BOTH platforms. Three parallel jobs:
 #
 #   1. analyze-and-test   (ubuntu)  — codegen, `flutter analyze`, `flutter test`
-#                                     (MOCK=true default + MOCK=false for Firebase paths)
+#                                     (MOCK=false default + MOCK=true for mock data paths)
 #   2. build-android      (ubuntu)  — debug APK build (prod flavor), validates
 #                                     the Android build compiles (no artifact upload)
 #   3. build-ios          (macos)   — `flutter build ios --no-codesign`, validates
@@ -85,11 +85,11 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Run tests (MOCK=true, default)
+      - name: Run tests (MOCK=false, default)
         run: flutter test --reporter expanded
 
-      - name: Run tests (MOCK=false)
-        run: flutter test --dart-define=MOCK=false --reporter expanded
+      - name: Run tests (MOCK=true, mock data paths)
+        run: flutter test --dart-define=MOCK=true --reporter expanded
 
   # ---------------------------------------------------------------------------
   # 2) Android build validation (debug, no signing secrets required)
@@ -114,8 +114,7 @@ jobs:
         run: |
           flutter build apk --debug \
             --flavor prod \
-            -t lib/main_prod.dart \
-            --dart-define=MOCK=true
+            -t lib/main_prod.dart
 
   # ---------------------------------------------------------------------------
   # 3) iOS build validation (unsigned — no Apple certificates required)
@@ -139,8 +138,7 @@ jobs:
       - name: Build iOS (unsigned)
         run: |
           flutter build ios --debug --no-codesign \
-            -t lib/main_prod.dart \
-            --dart-define=MOCK=true
+            -t lib/main_prod.dart
 
 # =============================================================================
 # FOLLOW-UP: distributing a SIGNED iOS build

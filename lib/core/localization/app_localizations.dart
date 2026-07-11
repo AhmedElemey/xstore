@@ -4526,6 +4526,36 @@ abstract class AppLocalizations {
   /// **'Create one →'**
   String get createOneArrow;
 
+  /// No description provided for @guestContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as Guest'**
+  String get guestContinue;
+
+  /// No description provided for @guestLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use this feature'**
+  String get guestLoginRequired;
+
+  /// No description provided for @guestLoginRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get guestLoginRequiredTitle;
+
+  /// No description provided for @guestLoginDialogSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get guestLoginDialogSignIn;
+
+  /// No description provided for @guestLoginDialogNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get guestLoginDialogNotNow;
+
   /// No description provided for @skip.
   ///
   /// In en, this message translates to:
@@ -5725,6 +5755,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please fix the highlighted fields'**
   String get listingValidationFixFields;
+
+  /// No description provided for @listingPublishServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t publish your listing — the server failed to save it. Your form looks valid; this is a known issue on the live backend. Please try again later.'**
+  String get listingPublishServerError;
 
   /// No description provided for @egypt.
   ///

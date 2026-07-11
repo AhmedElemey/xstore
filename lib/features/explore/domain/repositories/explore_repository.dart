@@ -7,6 +7,9 @@ abstract interface class ExploreRepository {
   Future<Either<Failure, List<SearchResultEntity>>> searchListings({
     required String query,
     required int page,
+    double? minPrice,
+    double? maxPrice,
+    String? condition,
   });
 
   Future<Either<Failure, List<String>>> getSuggestions(String query);

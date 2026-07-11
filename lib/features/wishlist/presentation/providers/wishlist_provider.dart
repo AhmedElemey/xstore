@@ -300,7 +300,15 @@ class Wishlist extends _$Wishlist {
   }
 
   Future<void> addFromCartItem(CartItemEntity item) async {
-    final r = await _repo.upsertFromCartItem(item);
+    final id = _consumerId;
+    if (id == null) return;
+    // Same confirmed POST /api/wishlist/{consumerId}/items route as
+    // toggleWishlist — the backend builds the denormalized wishlist entry
+    // itself, so no client-built payload is needed.
+    final r = await ref.read(addToWishlistUseCaseProvider).call(
+          consumerId: id,
+          listingId: item.listingId,
+        );
     await r.fold(
       (_) async {},
       (_) async => fetchWishlist(),

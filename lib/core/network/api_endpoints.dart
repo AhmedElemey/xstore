@@ -7,8 +7,9 @@ abstract final class ApiEndpoints {
   /// Non-empty API origin (no trailing slash), e.g. `https://api.myapp.com`.
   ///
   /// **Release:** [API_BASE_URL] must be provided or the build fails (see static
-  /// assert below). **Debug/profile:** falls back to `http://localhost:8080` when
-  /// unset so local development keeps working.
+  /// assert below). **Debug/profile:** falls back to the hosted integration
+  /// backend when unset, so `flutter run --dart-define=MOCK=false` works with
+  /// no further setup.
   static String get baseUrl {
     assert(
       !kReleaseMode || _fromDefine.trim().isNotEmpty,
@@ -21,42 +22,57 @@ abstract final class ApiEndpoints {
       !kReleaseMode,
       'API_BASE_URL resolved empty in release; use --dart-define=API_BASE_URL=...',
     );
-    return 'http://localhost:8080';
+    return 'https://xstoreegy-001-site1.jtempurl.com';
   }
 
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String logout = '/auth/logout';
+  // ---------------------------------------------------------------------
+  // Legacy routes NOT in the confirmed backend contract (the
+  // xStoreEcommerce Postman collection). Each remaining constant here has
+  // live call sites that have no /api equivalent yet; they fail against
+  // the real backend and are kept only until the backend adds routes.
+  // ---------------------------------------------------------------------
 
-  // TODO(backend): confirm route names and request/response payload shape.
+  /// Legacy generic register — UI now uses [consumerRegister] /
+  /// [vendorRegister]; only the unused RegisterUseCase path references it.
+  static const String register = '/auth/register';
+
+  // TODO(backend): no social/phone token-exchange routes exist yet.
   static const String socialLogin = '/auth/social';
   static const String phoneLogin = '/auth/phone';
 
-  static const String banners = '/home/banners';
-  static const String hotDeals = '/home/hot-deals';
-  static const String categories = '/home/categories';
+  /// Legacy orders module — not on the confirmed `/api` contract; the hosted
+  /// integration backend does not expose these routes yet (404). Call sites
+  /// in `orders_remote_datasource.dart` treat 404 as an empty list until the
+  /// backend ships.
+  static const String orders = '/orders';
+  static String ordersConsumer(String consumerId) =>
+      '$orders/consumer/$consumerId';
+  static String ordersVendor(String vendorId) => '$orders/vendor/$vendorId';
+  static String ordersVendorStats(String vendorId) =>
+      '$orders/vendor/$vendorId/stats';
+  static String orderById(String orderId) => '$orders/$orderId';
+  static String orderCancel(String orderId) => '$orders/$orderId/cancel';
+  static String orderConfirm(String orderId) => '$orders/$orderId/confirm';
+  static String orderReject(String orderId) => '$orders/$orderId/reject';
+  static String orderProcessing(String orderId) => '$orders/$orderId/processing';
+  static String orderShipped(String orderId) => '$orders/$orderId/shipped';
+  static String orderDelivered(String orderId) => '$orders/$orderId/delivered';
 
-  static const String listings = '/listings';
-  static const String myListings = '/listings/mine';
-  static const String listingSearchSuggestions =
-      '$listings/suggestions'; // GET ?q=
+  /// Legacy store-hours module — not on the confirmed `/api` contract; hosted
+  /// backend returns 404 until deployed. See `store_hours_datasource.dart`.
+  static String vendorStoreHours(String vendorId) =>
+      '/vendors/$vendorId/store-hours';
+  static String vendorStoreStatus(String vendorId) =>
+      '/vendors/$vendorId/store-status';
 
-  /// Similar listings for product detail carousel.
-  static String listingsSimilar({required String category}) =>
-      '$listings/similar?category=${Uri.encodeQueryComponent(category)}';
-
-  /// Product reviews for a listing.
-  static String listingReviews(String listingId) =>
-      '$listings/$listingId/reviews';
-
-  /// Full product payload (listing + seller + specs + embedded reviews/summary).
-  static String listingDetail(String id) => '$listings/$id';
-
+  /// Used by profile for vendor store head/stats, avatar upload, account
+  /// delete and public store listings — none of which exist in the
+  /// confirmed contract yet.
   static const String users = '/users';
 
+
   // ---------------------------------------------------------------------
-  // New backend (xStoreEcommerce API, /api prefix). Legacy constants above
-  // are left untouched; they can be deleted once nothing references them.
+  // Confirmed backend (xStoreEcommerce API, /api prefix).
   // ---------------------------------------------------------------------
   static const String _api = '/api';
 

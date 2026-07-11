@@ -8,7 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/review_entity.dart';
@@ -51,9 +51,7 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
   }
 
   Future<void> _openWriteReviewSheet({ReviewEntity? editing}) async {
-    final me = ref.read(authProvider).valueOrNull;
-    if (me == null) {
-      AppSnackbar.info(context, context.l10n.signInToWriteReview);
+    if (!requireLogin(context, ref, message: context.l10n.signInToWriteReview)) {
       return;
     }
     await showModalBottomSheet<void>(

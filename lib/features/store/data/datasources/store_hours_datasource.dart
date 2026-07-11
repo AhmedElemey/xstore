@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_store_hours.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/legacy_route_options.dart';
 import '../../domain/entities/day_schedule_entity.dart';
 import '../models/day_schedule_model.dart';
 import '../models/store_hours_model.dart';
@@ -19,6 +21,22 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
   final Dio? _dio;
   static StoreHoursModel _cache = StoreHoursModel.fromEntity(mockStoreHours);
 
+  static bool _isStoreHoursRouteMissing(DioException e) =>
+      e.response?.statusCode == 404;
+
+  Options get _legacyOptions => LegacyRouteOptions.allowNotFound();
+
+  StoreHoursModel _defaultHoursFor(String vendorId) {
+    return StoreHoursModel.fromEntity(
+      mockStoreHours.copyWith(vendorId: vendorId, updatedAt: DateTime.now()),
+    );
+  }
+
+  StoreHoursModel _fallbackHours(String vendorId) {
+    if (_cache.vendorId == vendorId) return _cache;
+    return _defaultHoursFor(vendorId);
+  }
+
   @override
   Future<StoreHoursModel> getStoreHours(String vendorId) async {
     if (MockConfig.useMock) {
@@ -30,14 +48,27 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
     }
     try {
       final response = await dio.get<Map<String, dynamic>>(
-        '/vendors/$vendorId/store-hours',
+        ApiEndpoints.vendorStoreHours(vendorId),
+        options: _legacyOptions,
       );
+      if (LegacyRouteOptions.isNotFound(response)) {
+        final fallback = _fallbackHours(vendorId);
+        _cache = fallback;
+        return fallback;
+      }
       final data = response.data;
       if (data == null) {
         throw const ServerException('Empty store hours response');
       }
-      return _fromMap(data);
+      final model = _fromMap(data);
+      _cache = model;
+      return model;
     } on DioException catch (e) {
+      if (_isStoreHoursRouteMissing(e)) {
+        final fallback = _fallbackHours(vendorId);
+        _cache = fallback;
+        return fallback;
+      }
       throw ServerException(e.message ?? 'Failed to fetch store hours');
     }
   }
@@ -55,15 +86,26 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
     }
     try {
       final response = await dio.put<Map<String, dynamic>>(
-        '/vendors/${hours.vendorId}/store-hours',
+        ApiEndpoints.vendorStoreHours(hours.vendorId),
         data: _toMap(hours),
+        options: _legacyOptions,
       );
+      if (LegacyRouteOptions.isNotFound(response)) {
+        _cache = hours;
+        return hours;
+      }
       final data = response.data;
       if (data == null) {
         throw const ServerException('Empty store hours response');
       }
-      return _fromMap(data);
+      final model = _fromMap(data);
+      _cache = model;
+      return model;
     } on DioException catch (e) {
+      if (_isStoreHoursRouteMissing(e)) {
+        _cache = hours;
+        return hours;
+      }
       throw ServerException(e.message ?? 'Failed to save store hours');
     }
   }
@@ -86,12 +128,42 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
       throw const ServerException('Store hours API client is not configured');
     }
     try {
-      await dio.patch<void>(
-        '/vendors/$vendorId/store-status',
+      final response = await dio.patch<void>(
+        ApiEndpoints.vendorStoreStatus(vendorId),
         data: {'isStoreOpen': isOpen},
+        options: _legacyOptions,
+      );
+      if (LegacyRouteOptions.isNotFound(response)) {
+        final base = _fallbackHours(vendorId);
+        _cache = StoreHoursModel(
+          vendorId: vendorId,
+          isStoreOpen: isOpen,
+          temporaryMessage: base.temporaryMessage,
+          schedule: base.schedule,
+          updatedAt: DateTime.now(),
+        );
+        return isOpen;
+      }
+      _cache = StoreHoursModel(
+        vendorId: _cache.vendorId == vendorId ? _cache.vendorId : vendorId,
+        isStoreOpen: isOpen,
+        temporaryMessage: _cache.temporaryMessage,
+        schedule: _cache.schedule,
+        updatedAt: DateTime.now(),
       );
       return isOpen;
     } on DioException catch (e) {
+      if (_isStoreHoursRouteMissing(e)) {
+        final base = _fallbackHours(vendorId);
+        _cache = StoreHoursModel(
+          vendorId: vendorId,
+          isStoreOpen: isOpen,
+          temporaryMessage: base.temporaryMessage,
+          schedule: base.schedule,
+          updatedAt: DateTime.now(),
+        );
+        return isOpen;
+      }
       throw ServerException(e.message ?? 'Failed to toggle store status');
     }
   }
@@ -164,4 +236,3 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
   String _fmt(int hour, int minute) =>
       '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
 }
-

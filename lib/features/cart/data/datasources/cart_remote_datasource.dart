@@ -577,8 +577,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       return _fromListing(listingId, quantity);
     }
     try {
-      final response =
-          await _dio.get<Map<String, dynamic>>(ApiEndpoints.listingDetail(listingId));
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.apiListingDetail(listingId),
+      );
       final raw = response.data;
       if (raw == null) throw const ServerException('Empty listing response');
       return _fromListingPayload(raw, quantity);

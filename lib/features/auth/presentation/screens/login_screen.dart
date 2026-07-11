@@ -17,6 +17,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
+import '../providers/guest_mode_provider.dart';
 import '../providers/phone_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_divider.dart';
@@ -380,6 +381,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     ),
                                   ),
                                 ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: TextButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(guestModeProvider.notifier)
+                                  .enable();
+                              if (!context.mounted) return;
+                              context.go(AppRoutes.home);
+                            },
+                            child: Text(
+                              context.l10n.guestContinue,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: context.textSecondary,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ),

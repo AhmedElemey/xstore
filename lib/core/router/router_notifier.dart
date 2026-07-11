@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import 'app_routes.dart';
 
@@ -20,12 +21,16 @@ RouterNotifier routerNotifier(RouterNotifierRef ref) {
 }
 
 /// Redirect guard: unauthenticated users, post-login leave auth screens,
-/// non-vendors blocked from `/listing/*`.
+/// role guards both ways — consumers blocked from vendor areas (listings,
+/// vendor orders, store tooling) and vendors blocked from the buying flow
+/// (cart, checkout, wishlist, consumer orders). Guests ([isGuest]) may
+/// browse [isGuestAccessibleRoute] areas; anything else routes to login.
 String? computeXStoreAuthRedirect({
   required AsyncValue<UserEntity?> auth,
   required bool needsRoleSelection,
   required String matchedLocation,
   bool holdRegisterForVendorSuccess = false,
+  bool isGuest = false,
 }) {
   final loc = matchedLocation;
   final isAuthRoute = loc == AppRoutes.splash ||
@@ -46,6 +51,9 @@ String? computeXStoreAuthRedirect({
         return AppRoutes.home;
       }
       if (!loggedIn) {
+        if (isGuest && isGuestAccessibleRoute(loc)) return null;
+        // Guests may still open auth screens to sign in for real; splash
+        // stays reachable so cold start doesn't loop.
         return isAuthRoute ? null : AppRoutes.login;
       }
       if (isAuthRoute) {
@@ -55,6 +63,9 @@ String? computeXStoreAuthRedirect({
         return AppRoutes.home;
       }
       if (isVendorRestrictedRoute(loc) && !user.isVendor) {
+        return AppRoutes.home;
+      }
+      if (isConsumerRestrictedRoute(loc) && user.isVendor) {
         return AppRoutes.home;
       }
       return null;
@@ -72,6 +83,7 @@ final class RouterNotifier extends Listenable {
       WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
     });
     _ref.listen(socialAuthProvider.select((s) => s.needsRoleSelection), (_, __) => _notify());
+    _ref.listen(guestModeProvider, (_, __) => _notify());
     _ref.listen(
       registerNotifierProvider.select((s) => s.showVendorSuccessOverlay),
       (_, __) => _notify(),

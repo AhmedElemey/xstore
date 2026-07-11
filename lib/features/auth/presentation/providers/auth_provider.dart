@@ -33,6 +33,7 @@ import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/send_otp_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
 import 'auth_states.dart';
+import 'guest_mode_provider.dart';
 
 part 'auth_provider.g.dart';
 
@@ -179,6 +180,7 @@ class Auth extends _$Auth {
   Future<void> setUser(UserEntity user) async {
     state = const AsyncLoading();
     final result = await ref.read(authRepositoryProvider).persistSessionUser(user);
+    ref.read(guestModeProvider.notifier).disable();
     state = result.fold(
       (_) => AsyncData(user),
       (_) => AsyncData(user),
@@ -188,14 +190,24 @@ class Auth extends _$Auth {
   /// Session already persisted (e.g. login/register API) — update auth without
   /// reloading from storage, which would recreate [GoRouter] mid-navigation.
   void adoptSession(UserEntity user) {
+    ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
   }
 }
 
 @riverpod
 class LoginNotifier extends _$LoginNotifier {
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   @override
-  LoginState build() => const LoginState();
+  LoginState build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
+    return const LoginState();
+  }
 
   void updateEmail(String v) => state = state.copyWith(email: v, error: null);
 
@@ -236,6 +248,7 @@ class LoginNotifier extends _$LoginNotifier {
             rememberMe: state.rememberMe,
           ),
         );
+    if (_disposed) return;
     result.fold(
       (failure) =>
           state = state.copyWith(isLoading: false, error: failure.toString()),
@@ -276,8 +289,15 @@ PasswordStrength computePasswordStrengthFor(String p) {
 
 @riverpod
 class RegisterNotifier extends _$RegisterNotifier {
+  // See LoginNotifier._disposed — same guard for in-flight async writes.
+  var _disposed = false;
+
   @override
-  RegisterState build() => const RegisterState();
+  RegisterState build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
+    return const RegisterState();
+  }
 
   void reset() => state = const RegisterState();
 
@@ -382,6 +402,7 @@ class RegisterNotifier extends _$RegisterNotifier {
       maxHeight: 1024,
       imageQuality: 85,
     );
+    if (_disposed) return;
     if (file != null) {
       state = state.copyWith(storeLogoPath: file.path, stepErrors: {});
     }
@@ -547,6 +568,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                 dateOfBirth: state.dateOfBirth,
               ),
             );
+    if (_disposed) return;
     result.fold(
       (failure) =>
           state = state.copyWith(isLoading: false, error: failure.toString()),

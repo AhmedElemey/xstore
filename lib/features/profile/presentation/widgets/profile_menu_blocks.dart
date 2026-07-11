@@ -62,16 +62,12 @@ class ProfileMenuBlocks extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final push = ref.watch(profileNotifierProvider).pushNotificationsEnabled;
     final email = ref.watch(profileNotifierProvider).emailUpdatesEnabled;
-    final vendorOrdersState = ref.watch(vendorOrdersProvider);
-    final pendingVendorOrders = vendorOrdersState.pendingCount;
+    final pendingVendorOrders = ref.watch(
+      vendorOrdersProvider.select((s) => s.pendingCount),
+    );
     final storeOpen = ref.watch(
       storeHoursNotifierProvider.select((s) => s.isStoreOpen),
     );
-    if (isVendor && !vendorOrdersState.isLoading && vendorOrdersState.totalCount == 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(vendorOrdersProvider.notifier).fetchOrders();
-      });
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

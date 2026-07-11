@@ -29,6 +29,7 @@ import '../widgets/photo_upload_section.dart';
 import '../widgets/quantity_stepper.dart';
 import '../utils/listing_localized_labels.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
@@ -377,7 +378,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final price = double.tryParse(form.priceInput.trim());
+    final price = Validators.parseMoneyInput(form.priceInput);
     final categoryId = int.tryParse(form.categoryId);
     final rate = ref.watch(commissionRateForCategoryProvider(categoryId));
     return Column(

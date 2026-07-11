@@ -105,6 +105,7 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
       e164Number: AppValidators.toE164Egypt(state.phoneNumber),
     );
     final result = await ref.read(sendOtpUseCaseProvider).call(params);
+    if (!mounted) return false;
     return await result.fold<Future<bool>>(
       (failure) async {
         state = state.copyWith(
@@ -159,6 +160,7 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
             phoneNumber: state.phoneNumber,
           ),
         );
+    if (!mounted) return false;
     return result.fold((failure) {
       state = state.copyWith(
         isVerifyingOtp: false,
@@ -167,6 +169,7 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
       return false;
     }, (user) async {
       await ref.read(authProvider.notifier).setUser(user);
+      if (!mounted) return true;
       state = state.copyWith(
         isVerifyingOtp: false,
         isNewUser: user.isNewUser,
@@ -191,6 +194,10 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
   void _startResendCooldown() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       if (state.resendCooldown <= 1) {
         t.cancel();
         state = state.copyWith(resendCooldown: 0, canResend: true);
@@ -198,6 +205,12 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
         state = state.copyWith(resendCooldown: state.resendCooldown - 1);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 }
 

@@ -12,9 +12,9 @@
 #   API_BASE_URL_DEV=https://staging.example.com task build:dev
 #   API_BASE_URL_PROD=https://api.example.com task build:prod
 #
-# MOCK=true because xStore has no live backend yet — switch to MOCK=false and set
-# real API_BASE_URL_DEV/PROD once a backend exists. API_BASE_URL must still be
-# non-empty for release compile-time asserts even when mock data is used.
+# MOCK=false: builds run against the live hosted backend
+# (xstoreegy-001-site1.jtempurl.com, verified serving /api/* over HTTPS).
+# Pass MOCK=true manually if you ever need a mock-data build.
 #
 # Release APK builds require android/key.properties and a release keystore locally.
 # =============================================================================
@@ -23,9 +23,9 @@ version: 3
 
 vars:
   API_BASE_URL_DEV:
-    sh: echo ${API_BASE_URL_DEV:-https://api.xstore.local}
+    sh: echo ${API_BASE_URL_DEV:-https://xstoreegy-001-site1.jtempurl.com}
   API_BASE_URL_PROD:
-    sh: echo ${API_BASE_URL_PROD:-https://api.xstore.local}
+    sh: echo ${API_BASE_URL_PROD:-https://xstoreegy-001-site1.jtempurl.com}
 
 tasks:
   version:bump:
@@ -43,12 +43,12 @@ tasks:
   build:dev:
     desc: Build release APK for the dev flavor (com.xstore.app.dev)
     cmds:
-      - flutter build apk --release --flavor dev -t lib/main_dev.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_DEV}}" --dart-define=MOCK=true
+      - flutter build apk --release --flavor dev -t lib/main_dev.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_DEV}}" --dart-define=MOCK=false
 
   build:prod:
     desc: Build release APK for the prod flavor (com.xstore.app)
     cmds:
-      - flutter build apk --release --flavor prod -t lib/main_prod.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_PROD}}" --dart-define=MOCK=true
+      - flutter build apk --release --flavor prod -t lib/main_prod.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_PROD}}" --dart-define=MOCK=false
 
   build:all:
     desc: Build release APKs for dev and prod in sequence

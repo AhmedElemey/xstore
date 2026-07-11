@@ -54,12 +54,22 @@ class Explore extends _$Explore {
     );
   }
 
+  /// Server-side `condition` only supports a single value; send it when
+  /// exactly one is selected, otherwise filter client-side.
+  String? get _serverCondition {
+    final c = state.filters.conditions;
+    return c.length == 1 ? c.first : null;
+  }
+
   Future<void> search(String q) async {
     state = state.copyWith(isSearching: true, page: 1);
     await _persistRecent(q);
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: q,
           page: 1,
+          minPrice: state.filters.minPrice,
+          maxPrice: state.filters.maxPrice,
+          condition: _serverCondition,
         );
     result.fold(
       (_) {
@@ -85,6 +95,9 @@ class Explore extends _$Explore {
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: state.query,
           page: next,
+          minPrice: state.filters.minPrice,
+          maxPrice: state.filters.maxPrice,
+          condition: _serverCondition,
         );
     result.fold(
       (_) => state = state.copyWith(isLoadingMore: false),

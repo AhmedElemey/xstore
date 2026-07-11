@@ -13,6 +13,7 @@ import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/router/app_routes.dart';
@@ -309,6 +310,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 AppSnackbar.info(context, context.l10n.chatSellerSoon);
               },
               onAddToCart: () async {
+                if (!requireLogin(context, ref)) return;
                 await notifier.addToCart();
                 if (!context.mounted) return;
                 final cartError = ref.read(cartProvider).error;

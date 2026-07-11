@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../domain/entities/listing_entity.dart';
@@ -397,7 +398,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
             isSubmitting: false,
             errors: {
               ...state.errors,
-              'submit': failure.toString(),
+              'submit': _listingSubmitErrorMessage(failure, l10n),
             },
           );
         },
@@ -444,6 +445,15 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     state = state.copyWith(
       errors: _clearKey(state.errors, 'submit'),
     );
+  }
+
+  String _listingSubmitErrorMessage(Failure failure, AppLocalizations l10n) {
+    final raw = failure.toString();
+    if (raw.contains('could not save your changes') ||
+        raw.contains('saving the entity changes')) {
+      return l10n.listingPublishServerError;
+    }
+    return raw;
   }
 
   void reset() {

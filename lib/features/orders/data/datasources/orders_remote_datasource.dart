@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/legacy_route_options.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_orders.dart';
@@ -57,7 +59,22 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   OrdersRemoteDataSourceImpl(this._dio);
 
   final Dio _dio;
-  static const _ordersPath = '/orders';
+
+  /// Hosted backend returns 404 for the whole legacy `/orders/*` module until
+  /// it is deployed — treat as "no data" so vendor/consumer screens show the
+  /// empty state instead of error spam.
+  static bool _isOrdersRouteMissing(DioException e) =>
+      e.response?.statusCode == 404;
+
+  Options get _legacyOptions => LegacyRouteOptions.allowNotFound();
+
+  static const _emptyVendorStats = OrderStatsEntity(
+    pendingCount: 0,
+    activeCount: 0,
+    monthCount: 0,
+    totalCount: 0,
+    totalRevenue: 0,
+  );
 
   static List<OrderModel>? _consumerCache;
   static List<OrderModel>? _vendorCache;
@@ -406,15 +423,18 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.get<List<dynamic>>(
-        '$_ordersPath/consumer/$consumerId',
+        ApiEndpoints.ordersConsumer(consumerId),
         queryParameters: {'page': page, 'pageSize': pageSize},
+        options: _legacyOptions,
       );
+      if (LegacyRouteOptions.isNotFound(response)) return const [];
       final list = response.data ?? const [];
       return list
           .whereType<Map>()
           .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
           .toList();
     } on DioException catch (e) {
+      if (_isOrdersRouteMissing(e)) return const [];
       throw ServerException(e.message ?? 'Failed to fetch consumer orders');
     }
   }
@@ -431,15 +451,18 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.get<List<dynamic>>(
-        '$_ordersPath/vendor/$vendorId',
+        ApiEndpoints.ordersVendor(vendorId),
         queryParameters: {'page': page, 'pageSize': pageSize},
+        options: _legacyOptions,
       );
+      if (LegacyRouteOptions.isNotFound(response)) return const [];
       final list = response.data ?? const [];
       return list
           .whereType<Map>()
           .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
           .toList();
     } on DioException catch (e) {
+      if (_isOrdersRouteMissing(e)) return const [];
       throw ServerException(e.message ?? 'Failed to fetch vendor orders');
     }
   }
@@ -457,8 +480,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.get<Map<String, dynamic>>(
-        '$_ordersPath/$orderId',
+        ApiEndpoints.orderById(orderId),
+        options: _legacyOptions,
       );
+      if (LegacyRouteOptions.isNotFound(response)) return null;
       final data = response.data;
       if (data == null) return null;
       return _orderFromApiMap(data);
@@ -502,8 +527,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.get<Map<String, dynamic>>(
-        '$_ordersPath/vendor/$vendorId/stats',
+        ApiEndpoints.ordersVendorStats(vendorId),
+        options: _legacyOptions,
       );
+      if (LegacyRouteOptions.isNotFound(response)) return _emptyVendorStats;
       final data = response.data;
       if (data == null) {
         throw const ServerException('Empty vendor order stats');
@@ -516,6 +543,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         totalRevenue: (data['totalRevenue'] as num?)?.toDouble() ?? 0,
       );
     } on DioException catch (e) {
+      if (_isOrdersRouteMissing(e)) return _emptyVendorStats;
       throw ServerException(e.message ?? 'Failed to fetch vendor order stats');
     }
   }
@@ -553,7 +581,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_ordersPath/$orderId/cancel',
+        ApiEndpoints.orderCancel(orderId),
         data: {'reason': reason, 'isVendorSession': isVendorSession},
       );
       final data = response.data;
@@ -580,7 +608,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_ordersPath/$orderId/confirm',
+        ApiEndpoints.orderConfirm(orderId),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty order response');
@@ -610,7 +638,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_ordersPath/$orderId/reject',
+        ApiEndpoints.orderReject(orderId),
         data: {'reason': reason},
       );
       final data = response.data;
@@ -636,7 +664,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_ordersPath/$orderId/processing',
+        ApiEndpoints.orderProcessing(orderId),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty order response');
@@ -672,7 +700,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_ordersPath/$orderId/shipped',
+        ApiEndpoints.orderShipped(orderId),
         data: {
           'trackingNumber': shippingInfo.trackingNumber,
           'courierName': shippingInfo.courierName,
@@ -703,7 +731,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_ordersPath/$orderId/delivered',
+        ApiEndpoints.orderDelivered(orderId),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty order response');
@@ -722,7 +750,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       await _dio.post<void>(
-        '$_ordersPath/consumer/${order.consumerId}',
+        ApiEndpoints.ordersConsumer(order.consumerId),
         data: _orderToApiMap(order),
       );
     } on DioException catch (e) {

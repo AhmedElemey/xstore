@@ -2310,6 +2310,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createOneArrow => 'إنشاء حساب ←';
 
   @override
+  String get guestContinue => 'كمل كزائر';
+
+  @override
+  String get guestLoginRequired => 'سجل دخولك عشان تستخدم الميزة دي';
+
+  @override
+  String get guestLoginRequiredTitle => 'لازم تسجل دخول';
+
+  @override
+  String get guestLoginDialogSignIn => 'تسجيل الدخول';
+
+  @override
+  String get guestLoginDialogNotNow => 'مش دلوقتي';
+
+  @override
   String get skip => 'تخطي';
 
   @override
@@ -2935,6 +2950,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listingValidationFixFields => 'عدّل الحقول المظللة';
+
+  @override
+  String get listingPublishServerError =>
+      'ما قدرناش ننشر الإعلان — السيرفر فشل في الحفظ. البيانات اللي دخلتها سليمة؛ المشكلة من السيرفر حالياً. جرّب تاني بعدين.';
 
   @override
   String get egypt => 'مصر';

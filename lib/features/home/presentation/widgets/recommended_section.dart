@@ -31,7 +31,7 @@ class RecommendedSection extends ConsumerWidget {
             Expanded(
               child: Text(
                 context.l10n.recommended,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleMedium,
               ).fadeSlideIn(),
             ),
             TextButton(

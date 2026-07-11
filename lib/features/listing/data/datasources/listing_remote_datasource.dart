@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -62,6 +64,53 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   /// the network (see [_isOffline]) — a resilience fallback, not mock data.
   final List<ListingModel> _localMine = [];
 
+  String _attributesToWire(Map<String, String> attributes) {
+    if (attributes.isEmpty) return '';
+    return jsonEncode(attributes);
+  }
+
+  Map<String, dynamic> _listingCommandBody({
+    required String titleEn,
+    required String titleAr,
+    required String descriptionEn,
+    required String descriptionAr,
+    required double price,
+    double? compareAtPrice,
+    required int categoryId,
+    int? subcategoryId,
+    required ListingCondition condition,
+    required String brand,
+    required int stockQuantity,
+    required bool shippingAvailable,
+    required double shippingCost,
+    required String location,
+    required Map<String, String> attributes,
+    required List<String> imageUrls,
+    String? id,
+    ListingStatus? status,
+  }) {
+    return {
+      if (id != null) 'id': id,
+      'titleEn': titleEn,
+      'titleAr': titleAr,
+      'descriptionEn': descriptionEn,
+      'descriptionAr': descriptionAr,
+      'price': price,
+      if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
+      'categoryId': categoryId,
+      if (subcategoryId != null) 'subcategoryId': subcategoryId,
+      'condition': listingConditionToWire(condition),
+      if (brand.isNotEmpty) 'brand': brand,
+      'stockQuantity': stockQuantity,
+      'shippingAvailable': shippingAvailable,
+      'shippingCost': shippingCost,
+      'location': location,
+      'attributes': _attributesToWire(attributes),
+      'imageUrls': imageUrls,
+      if (status != null) 'status': listingStatusToWire(status),
+    };
+  }
+
   @override
   Future<ListingModel> createListing({
     required String titleEn,
@@ -85,24 +134,24 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
         data: {
-          'titleEn': titleEn,
-          'titleAr': titleAr,
-          'descriptionEn': descriptionEn,
-          'descriptionAr': descriptionAr,
-          'price': price,
-          'compareAtPrice': compareAtPrice,
-          'categoryId': categoryId,
-          'subcategoryId': subcategoryId,
-          'condition': listingConditionToDto(condition),
-          'brand': brand,
-          'stockQuantity': stockQuantity,
-          'shippingAvailable': shippingAvailable,
-          'shippingCost': shippingCost,
-          'location': location,
-          'attributes': attributes,
-          // NOTE (known gap): no image-upload endpoint exists in the
-          // backend yet. Always empty until one is confirmed and wired.
-          'imageUrls': imageUrls,
+          'command': _listingCommandBody(
+            titleEn: titleEn,
+            titleAr: titleAr,
+            descriptionEn: descriptionEn,
+            descriptionAr: descriptionAr,
+            price: price,
+            compareAtPrice: compareAtPrice,
+            categoryId: categoryId,
+            subcategoryId: subcategoryId,
+            condition: condition,
+            brand: brand,
+            stockQuantity: stockQuantity,
+            shippingAvailable: shippingAvailable,
+            shippingCost: shippingCost,
+            location: location,
+            attributes: attributes,
+            imageUrls: imageUrls,
+          ),
         },
         options: ApiAuthHeaders.authenticated(),
       );
@@ -193,31 +242,29 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     try {
       // Spec: id is sent in the BODY, PUT to the collection root — not
       // /api/listings/{id}. Confirmed from the Postman collection.
-      // NOTE: `status` write format is unconfirmed — sending the lowercase
-      // string token (matching the existing convention), but READ responses
-      // return status as an integer code (see ListingModel). If updates
-      // silently don't change status, this is the first place to check.
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
         data: {
-          'id': id,
-          'titleEn': titleEn,
-          'titleAr': titleAr,
-          'descriptionEn': descriptionEn,
-          'descriptionAr': descriptionAr,
-          'price': price,
-          'compareAtPrice': compareAtPrice,
-          'categoryId': categoryId,
-          'subcategoryId': subcategoryId,
-          'condition': listingConditionToDto(condition),
-          'brand': brand,
-          'stockQuantity': stockQuantity,
-          'shippingAvailable': shippingAvailable,
-          'shippingCost': shippingCost,
-          'location': location,
-          'attributes': attributes,
-          'imageUrls': imageUrls,
-          'status': _statusToDto(status),
+          'command': _listingCommandBody(
+            id: id,
+            titleEn: titleEn,
+            titleAr: titleAr,
+            descriptionEn: descriptionEn,
+            descriptionAr: descriptionAr,
+            price: price,
+            compareAtPrice: compareAtPrice,
+            categoryId: categoryId,
+            subcategoryId: subcategoryId,
+            condition: condition,
+            brand: brand,
+            stockQuantity: stockQuantity,
+            shippingAvailable: shippingAvailable,
+            shippingCost: shippingCost,
+            location: location,
+            attributes: attributes,
+            imageUrls: imageUrls,
+            status: status,
+          ),
         },
         options: ApiAuthHeaders.authenticated(),
       );
@@ -236,7 +283,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           title: titleEn,
           description: descriptionEn,
           price: price,
-          status: _statusToDto(status),
+          status: listingStatusToWire(status).toString(),
           titleEn: titleEn,
           titleAr: titleAr,
           descriptionEn: descriptionEn,
@@ -280,22 +327,5 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   bool _isOffline(DioException e) {
     return e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout;
-  }
-
-  String _statusToDto(ListingStatus status) {
-    switch (status) {
-      case ListingStatus.pending:
-        return 'pending';
-      case ListingStatus.active:
-        return 'active';
-      case ListingStatus.draft:
-        return 'draft';
-      case ListingStatus.paused:
-        return 'paused';
-      case ListingStatus.sold:
-        return 'sold';
-      case ListingStatus.rejected:
-        return 'rejected';
-    }
   }
 }

@@ -102,6 +102,132 @@ void main() {
         AppRoutes.login,
       );
     });
+
+    test('consumer is blocked from every vendor-only route', () {
+      for (final loc in [
+        AppRoutes.listingAdd,
+        AppRoutes.listingMy,
+        AppRoutes.vendorOrders,
+        '${AppRoutes.vendorOrders}/ord_1',
+        AppRoutes.incomingOrders,
+        AppRoutes.storeHours,
+        AppRoutes.earnings,
+        AppRoutes.analytics,
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: AsyncValue.data(_consumer()),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          AppRoutes.home,
+          reason: 'consumer should be redirected from $loc',
+        );
+      }
+    });
+
+    test('vendor is blocked from every consumer-only route', () {
+      for (final loc in [
+        AppRoutes.cart,
+        AppRoutes.checkout,
+        AppRoutes.wishlist,
+        AppRoutes.orders,
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: AsyncValue.data(_vendor()),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          AppRoutes.home,
+          reason: 'vendor should be redirected from $loc',
+        );
+      }
+    });
+
+    test('guest may browse marketplace routes', () {
+      for (final loc in [
+        AppRoutes.home,
+        AppRoutes.explore,
+        '${AppRoutes.product}/lst_1',
+        '${AppRoutes.product}/lst_1/reviews',
+        '${AppRoutes.sellerProfile}/v99',
+        AppRoutes.help,
+        AppRoutes.login, // guest can always go sign in for real
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: const AsyncValue.data(null),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+            isGuest: true,
+          ),
+          isNull,
+          reason: 'guest should be allowed at $loc',
+        );
+      }
+    });
+
+    test('guest is sent to login from account-bound routes', () {
+      for (final loc in [
+        AppRoutes.cart,
+        AppRoutes.checkout,
+        AppRoutes.wishlist,
+        AppRoutes.orders,
+        AppRoutes.profile,
+        AppRoutes.notifications,
+        AppRoutes.listingAdd,
+        AppRoutes.vendorOrders,
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: const AsyncValue.data(null),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+            isGuest: true,
+          ),
+          AppRoutes.login,
+          reason: 'guest should be redirected to login from $loc',
+        );
+      }
+    });
+
+    test('non-guest unauthenticated user still lands on login', () {
+      expect(
+        computeXStoreAuthRedirect(
+          auth: const AsyncValue.data(null),
+          needsRoleSelection: false,
+          matchedLocation: AppRoutes.home,
+          isGuest: false,
+        ),
+        AppRoutes.login,
+      );
+    });
+
+    test('each role passes its own areas and shared routes', () {
+      for (final (user, loc) in [
+        (_vendor(), AppRoutes.listingAdd),
+        (_vendor(), AppRoutes.storeHours),
+        (_vendor(), AppRoutes.incomingOrders),
+        // Vendors open consumer order detail via incoming orders.
+        (_vendor(), AppRoutes.orderPath('ord_1')),
+        (_consumer(), AppRoutes.cart),
+        (_consumer(), AppRoutes.checkout),
+        (_consumer(), AppRoutes.orderPath('ord_1')),
+        (_consumer(), AppRoutes.profile),
+        (_vendor(), AppRoutes.profile),
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: AsyncValue.data(user),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          isNull,
+          reason: '${user.role} should be allowed at $loc',
+        );
+      }
+    });
   });
 
   group('provider failures', () {

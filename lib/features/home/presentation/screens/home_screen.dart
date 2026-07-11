@@ -14,6 +14,7 @@ import '../../../../core/utils/extensions/async_value_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
 import '../../../../shared/widgets/skeletons/home_skeleton.dart';
@@ -99,7 +100,10 @@ class HomeScreen extends ConsumerWidget {
                 background: HomeHeader(
                   onSearchTap: () => context.go(AppRoutes.explore),
                   onCartTap: isConsumer
-                      ? () => context.push(AppRoutes.cart)
+                      ? () {
+                          if (!requireLogin(context, ref)) return;
+                          context.push(AppRoutes.cart);
+                        }
                       : null,
                   cartItemCount: cartCount,
                 ).fadeSlideIn(duration: AppAnimations.medium),

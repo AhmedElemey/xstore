@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -7,6 +8,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/utils/extensions/context_extensions.dart';
+import '../../shared/utils/require_login.dart';
 import '../../shared/widgets/xstore_button.dart';
 
 /// Honest placeholder for features not yet built — clearer than generic
@@ -138,11 +140,13 @@ class PrivacyInfoScreen extends StatelessWidget {
   }
 }
 
-class HelpCenterInfoScreen extends StatelessWidget {
+/// Consumer widget: the help screen is guest-browsable, so its
+/// account-bound shortcuts go through [requireLogin].
+class HelpCenterInfoScreen extends ConsumerWidget {
   const HelpCenterInfoScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TrustInfoScreen(
       title: context.l10n.menuHelpCenter,
       message: context.l10n.trustInfoHelpBody,
@@ -150,11 +154,17 @@ class HelpCenterInfoScreen extends StatelessWidget {
       actions: [
         TrustInfoAction(
           label: context.l10n.trustInfoHelpViewOrders,
-          onPressed: () => context.push(AppRoutes.orders),
+          onPressed: () {
+            if (!requireLogin(context, ref)) return;
+            context.push(AppRoutes.orders);
+          },
         ),
         TrustInfoAction(
           label: context.l10n.trustInfoHelpNotifications,
-          onPressed: () => context.push(AppRoutes.notificationSettings),
+          onPressed: () {
+            if (!requireLogin(context, ref)) return;
+            context.push(AppRoutes.notificationSettings);
+          },
         ),
       ],
     );

@@ -14,11 +14,11 @@
 # This workflow requests `contents: write` so the default token can publish
 # releases and upload assets.
 #
-# API base URLs are workflow env defaults (MOCK=true placeholders). Update
-# API_BASE_URL_DEV / API_BASE_URL_PROD below when a real backend exists.
+# API base URLs are workflow env defaults pointing at the live hosted backend
+# (xstoreegy-001-site1.jtempurl.com). Override below if the host changes.
 #
-# MOCK=true because xStore has no live backend yet — switch to MOCK=false in this
-# workflow (and Taskfile.yml) once a backend exists.
+# MOCK=false: release APKs run against the live backend. Flip back to
+# MOCK=true here (and in Taskfile.yml) only for mock-data demo builds.
 #
 # These are compile-time values passed via --dart-define=API_BASE_URL=...
 # Release builds assert if API_BASE_URL is empty (see lib/core/network/api_endpoints.dart).
@@ -35,8 +35,8 @@
 # - Android productFlavors: dev (com.xstore.app.dev) and prod (com.xstore.app).
 # - Entry points: lib/main_dev.dart / lib/main_prod.dart via --flavor and -t.
 # - Dart SDK: ^3.9.2 (pubspec.yaml). CI uses Flutter 3.35.6 (stable, Dart 3.9.2).
-# - Always pass --dart-define=MOCK=true for release APKs while no live backend exists
-#   (MockConfig defaults MOCK to true at compile time; explicit for clarity).
+# - MOCK=false is passed explicitly for release APKs (MockConfig defaults MOCK
+#   to true at compile time, which is only right for local dev and tests).
 # - Every run auto-increments the build number (the `+N` in pubspec.yaml's
 #   `version:` line) and commits that change back to the branch before
 #   building, so each release has a unique, traceable build number.
@@ -60,8 +60,8 @@ permissions:
 
 env:
   FLUTTER_VERSION: "3.35.6"
-  API_BASE_URL_DEV: "https://api.dev.xstore.placeholder"
-  API_BASE_URL_PROD: "https://api.xstore.placeholder"
+  API_BASE_URL_DEV: "https://xstoreegy-001-site1.jtempurl.com"
+  API_BASE_URL_PROD: "https://xstoreegy-001-site1.jtempurl.com"
 
 jobs:
   build-and-release:
@@ -142,7 +142,7 @@ jobs:
             --flavor "$BUILD_FLAVOR" \
             -t "lib/main_${BUILD_FLAVOR}.dart" \
             --dart-define=API_BASE_URL="$API_URL" \
-            --dart-define=MOCK=true
+            --dart-define=MOCK=false
 
       - name: Remove signing material from workspace
         if: always()

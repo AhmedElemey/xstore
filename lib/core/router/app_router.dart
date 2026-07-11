@@ -12,6 +12,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../../features/auth/presentation/providers/phone_auth_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
@@ -187,6 +188,7 @@ GoRouter goRouter(GoRouterRef ref) {
       matchedLocation: state.matchedLocation,
       holdRegisterForVendorSuccess:
           ref.read(registerNotifierProvider).showVendorSuccessOverlay,
+      isGuest: ref.read(guestModeProvider),
     ),
     routes: [
       GoRoute(

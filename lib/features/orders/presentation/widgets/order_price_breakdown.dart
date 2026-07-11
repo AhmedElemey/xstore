@@ -10,24 +10,6 @@ import '../../../commission/presentation/providers/commission_config_provider.da
 import '../../domain/entities/order_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
-/// Order-status → commission-status mapping. COD assumption (see design
-/// memory): commission is only "due" once the vendor has actually collected
-/// cash on delivery; cancelled/refunded orders owe nothing.
-CommissionStatus commissionStatusForOrder(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.cancelled:
-    case OrderStatus.refunded:
-      return CommissionStatus.voided;
-    case OrderStatus.delivered:
-      return CommissionStatus.due;
-    case OrderStatus.pending:
-    case OrderStatus.confirmed:
-    case OrderStatus.processing:
-    case OrderStatus.shipped:
-      return CommissionStatus.pending;
-  }
-}
-
 String commissionStatusLabel(BuildContext context, CommissionStatus s) =>
     switch (s) {
       CommissionStatus.pending => context.l10n.commissionStatusPending,

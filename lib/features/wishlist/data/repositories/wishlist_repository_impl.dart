@@ -1,7 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
-import '../../../cart/domain/entities/cart_item_entity.dart';
 import '../../../cart/domain/repositories/cart_repository.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../../domain/repositories/wishlist_repository.dart';
@@ -83,23 +82,6 @@ class WishlistRepositoryImpl implements WishlistRepository {
     try {
       await _remote.clearWishlist(consumerId);
       return const Right(unit);
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  WishlistItemEntity entityFromCartItem(CartItemEntity item) {
-    return _remote.entityFromCartItem(item);
-  }
-
-  @override
-  Future<Either<Failure, WishlistItemEntity>> upsertFromCartItem(
-    CartItemEntity item,
-  ) async {
-    try {
-      final e = _remote.entityFromCartItem(item);
-      return Right(await _remote.upsertItem(e));
     } catch (e) {
       return Left(Failure.server(e.toString()));
     }

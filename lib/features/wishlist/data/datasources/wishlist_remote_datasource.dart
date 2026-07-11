@@ -1,13 +1,9 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/mock/mock_config.dart';
-import '../../../../core/mock/mock_images.dart';
-import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
-import '../../../cart/domain/entities/cart_item_entity.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 
 abstract interface class WishlistRemoteDataSource {
@@ -25,68 +21,13 @@ abstract interface class WishlistRemoteDataSource {
 
   Future<void> clearWishlist(String consumerId);
 
-  WishlistItemEntity entityFromCartItem(CartItemEntity item);
-
   Future<WishlistItemEntity> buildFromListingId(String listingId, {String? wishId});
-
-  Future<WishlistItemEntity> upsertItem(WishlistItemEntity item);
 }
 
 class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   WishlistRemoteDataSourceImpl(this._dio);
 
   final Dio _dio;
-
-  // Only [upsertItem] still has a mock path — it calls a non-spec endpoint
-  // (see its doc comment) with no confirmed real replacement, so mock stays
-  // as the only working implementation of that specific flow.
-  static final List<WishlistItemEntity> _items = [];
-
-  int? _priceDrop(double price, double? previousPrice) {
-    if (previousPrice == null || previousPrice <= 0) return null;
-    if (price >= previousPrice) return null;
-    return (((previousPrice - price) / previousPrice) * 100).round();
-  }
-
-  WishlistItemEntity _withComputedDrop(WishlistItemEntity e) {
-    final p = e.previousPrice;
-    final drop = _priceDrop(e.price, p);
-    return e.copyWith(priceDropPercent: drop);
-  }
-
-  void _ensureMockSeed() {
-    if (_items.isNotEmpty) return;
-    final now = DateTime.now();
-    _items.addAll([
-      WishlistItemEntity(
-        id: 'wish_001',
-        listingId: 'listing_001',
-        listingName: 'iPhone 15 Pro 256GB',
-        listingImages: MockImages.productImages(10),
-        listingSlug: 'listing_001',
-        vendorId: 'vendor_001',
-        vendorName: mockVendorUser.name,
-        vendorStoreName: mockVendorUser.storeName ?? mockVendorUser.name,
-        vendorAvatar: MockImages.avatar(1),
-        isVendorVerified: true,
-        price: 185000,
-        compareAtPrice: 220000,
-        previousPrice: 200000,
-        priceDropPercent: 7,
-        category: 'Electronics',
-        condition: 'Like New',
-        rating: 4.8,
-        reviewCount: 124,
-        stockQuantity: 3,
-        isAvailable: true,
-        isInCart: false,
-        shippingAvailable: true,
-        shippingCost: 0,
-        addedAt: now.subtract(const Duration(days: 3)),
-        lastPriceCheckAt: now,
-      ),
-    ]);
-  }
 
   @override
   Future<List<WishlistItemEntity>> getWishlist(String consumerId) async {
@@ -149,75 +90,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
         '${ApiEndpoints.wishlist}/$consumerId',
         options: ApiAuthHeaders.authenticated(),
       );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
-  WishlistItemEntity entityFromCartItem(CartItemEntity item) {
-    final now = DateTime.now();
-    final prev = item.price;
-    return WishlistItemEntity(
-      id: 'wish_${now.microsecondsSinceEpoch}',
-      listingId: item.listingId,
-      listingName: item.listingName,
-      listingImages: item.listingImage.isNotEmpty ? [item.listingImage] : const [],
-      listingSlug: item.listingSlug,
-      vendorId: item.vendorId,
-      vendorName: item.vendorName,
-      vendorStoreName: item.vendorStoreName,
-      vendorAvatar: item.vendorAvatar,
-      isVendorVerified: item.vendorVerified,
-      price: item.price,
-      compareAtPrice: item.compareAtPrice,
-      previousPrice: prev,
-      priceDropPercent: null,
-      category: item.category,
-      condition: item.condition,
-      rating: item.vendorRating,
-      reviewCount: 0,
-      stockQuantity: item.maxQuantity,
-      isAvailable: item.isAvailable,
-      isInCart: false,
-      shippingAvailable: item.shippingAvailable,
-      shippingCost: item.shippingCost,
-      addedAt: now,
-      lastPriceCheckAt: now,
-    );
-  }
-
-  @override
-  Future<WishlistItemEntity> upsertItem(WishlistItemEntity item) async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      _ensureMockSeed();
-      final idx = _items.indexWhere((e) => e.listingId == item.listingId);
-      if (idx >= 0) {
-        _items[idx] = item;
-      } else {
-        _items.add(item);
-      }
-      return _withComputedDrop(
-        _items.firstWhere((e) => e.listingId == item.listingId),
-      );
-    }
-    try {
-      // NOT in the confirmed backend contract (the Postman collection has
-      // no PUT /api/wishlist/items/{listingId} route). This is an
-      // app-invented "save cart item to wishlist with full metadata"
-      // endpoint used by the cart -> wishlist move flow. Deliberately kept
-      // on MockConfig.useMock (unlike the rest of this file, which is now
-      // always real) since there is no confirmed real replacement — will
-      // 404 against the real backend until/unless this route is added.
-      final response = await _dio.put<Map<String, dynamic>>(
-        '${ApiEndpoints.wishlist}/items/${item.listingId}',
-        data: _toMap(item),
-        options: ApiAuthHeaders.authenticated(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty wishlist response');
-      return _fromMap(data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -381,34 +253,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
               DateTime.now(),
     );
   }
-
-  Map<String, dynamic> _toMap(WishlistItemEntity item) => {
-        'id': item.id,
-        'listingId': item.listingId,
-        'listingName': item.listingName,
-        'listingImages': item.listingImages,
-        'listingSlug': item.listingSlug,
-        'vendorId': item.vendorId,
-        'vendorName': item.vendorName,
-        'vendorStoreName': item.vendorStoreName,
-        'vendorAvatar': item.vendorAvatar,
-        'isVendorVerified': item.isVendorVerified,
-        'price': item.price,
-        'compareAtPrice': item.compareAtPrice,
-        'previousPrice': item.previousPrice,
-        'priceDropPercent': item.priceDropPercent,
-        'category': item.category,
-        'condition': item.condition,
-        'rating': item.rating,
-        'reviewCount': item.reviewCount,
-        'stockQuantity': item.stockQuantity,
-        'isAvailable': item.isAvailable,
-        'isInCart': item.isInCart,
-        'shippingAvailable': item.shippingAvailable,
-        'shippingCost': item.shippingCost,
-        'addedAt': item.addedAt.toIso8601String(),
-        'lastPriceCheckAt': item.lastPriceCheckAt.toIso8601String(),
-      };
 
   double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
 }

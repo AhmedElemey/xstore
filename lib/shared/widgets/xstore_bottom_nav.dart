@@ -12,6 +12,7 @@ import '../../core/utils/extensions/context_extensions.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
+import '../utils/require_login.dart';
 import 'notification_icon_badge.dart';
 
 /// Bottom navigation using implicit animations only (no [TickerProviderStateMixin]).
@@ -24,7 +25,12 @@ class XstoreBottomNav extends ConsumerWidget {
 
   final StatefulNavigationShell shell;
 
-  void _onTap(int index) {
+  void _onTap(BuildContext context, WidgetRef ref, int index) {
+    // Home (0) and Explore (1) are guest-browsable; every other tab is
+    // account-bound. Ask guests to sign in instead of letting the route
+    // redirect bounce them to the login screen with no explanation.
+    // Signed-in users (any role) pass straight through.
+    if (index >= 2 && !requireLogin(context, ref)) return;
     shell.goBranch(
       index,
       initialLocation: index == shell.currentIndex,
@@ -103,7 +109,7 @@ class XstoreBottomNav extends ConsumerWidget {
 
                 return Expanded(
                   child: AnimatedTap(
-                    onTap: () => _onTap(index),
+                    onTap: () => _onTap(context, ref, index),
                     child: TweenAnimationBuilder<double>(
                       duration: AppAnimations.fast,
                       curve: AppAnimations.enter,

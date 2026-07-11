@@ -11,6 +11,8 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../domain/entities/profile_entity.dart';
@@ -108,9 +110,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   void initState() {
     super.initState();
     _bootstrap();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
-    });
   }
 
   Future<void> _refresh() async {
@@ -175,8 +174,12 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joinedLine = joined != null ? DateFormat('MMM y').format(joined) : '';
     final banner = MockImages.banner(widget.sellerId.hashCode);
     final desc = u.storeDescription ?? '';
-    final storeHoursState = ref.watch(storeHoursNotifierProvider);
-    final isOpen = storeHoursState.isStoreOpen;
+    final authUser = ref.watch(authProvider).valueOrNull;
+    final isOwnStore = authUser?.role == UserRole.vendor &&
+        authUser?.id == widget.sellerId;
+    final storeHoursState =
+        isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
+    final isOpen = storeHoursState?.isStoreOpen ?? false;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -262,23 +265,24 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                     ),
                                   ),
                                   const Gap(AppSpacing.xs),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.sm,
-                                      vertical: AppSpacing.xs,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      isOpen ? '● ${context.l10n.storeOpenNow}' : '● ${context.l10n.storeClosedNow}',
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: isOpen ? AppColors.success : AppColors.error,
-                                        fontWeight: FontWeight.w700,
+                                  if (isOwnStore && storeHoursState != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.sm,
+                                        vertical: AppSpacing.xs,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        isOpen ? '● ${context.l10n.storeOpenNow}' : '● ${context.l10n.storeClosedNow}',
+                                        style: AppTypography.labelSmall.copyWith(
+                                          color: isOpen ? AppColors.success : AppColors.error,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
-                                  ),
                                   Text(
                                     '⭐ ${(u.rating ?? 0).toStringAsFixed(1)} · ${u.totalSales ?? 0} ${context.l10n.statSalesShort}'
                                     '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
@@ -347,7 +351,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                     ),
                   ),
                 ),
-              if (storeHoursState.current != null)
+              if (isOwnStore && storeHoursState?.current != null)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
@@ -356,7 +360,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                       children: [
                         Text(context.l10n.storeHours, style: AppTypography.titleMedium),
                         const Gap(AppSpacing.sm),
-                        StoreHoursSummaryCard(schedule: storeHoursState.current!.schedule),
+                        StoreHoursSummaryCard(schedule: storeHoursState!.current!.schedule),
                       ],
                     ),
                   ),

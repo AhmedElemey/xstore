@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/dio_provider.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/store_hours_datasource.dart';
 import '../../data/repositories/store_hours_repository_impl.dart';
@@ -81,7 +82,9 @@ class StoreHoursNotifier extends _$StoreHoursNotifier {
   StoreHoursState build() => const StoreHoursState(original: null, current: null);
 
   Future<void> fetchStoreHours() async {
-    final vendorId = ref.read(authProvider).valueOrNull?.id ?? 'vendor_001';
+    final user = ref.read(authProvider).valueOrNull;
+    if (user == null || user.role != UserRole.vendor) return;
+    final vendorId = user.id;
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(getStoreHoursUseCaseProvider).call(vendorId);
     result.fold(

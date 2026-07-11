@@ -25,7 +25,7 @@ class NewArrivalsGrid extends StatelessWidget {
       children: [
         Text(
           context.l10n.newArrivals,
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         const Gap(AppSpacing.md),
         LayoutBuilder(

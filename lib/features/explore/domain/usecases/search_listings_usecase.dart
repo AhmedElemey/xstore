@@ -12,6 +12,15 @@ class SearchListingsUseCase {
   Future<Either<Failure, List<SearchResultEntity>>> call({
     required String query,
     required int page,
+    double? minPrice,
+    double? maxPrice,
+    String? condition,
   }) =>
-      _repository.searchListings(query: query, page: page);
+      _repository.searchListings(
+        query: query,
+        page: page,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        condition: condition,
+      );
 }

@@ -11,6 +11,7 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../providers/auth_provider.dart';
+import '../providers/guest_mode_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -63,8 +64,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
 
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    final done = prefs.getBool(PrefsKeys.onboardingComplete) ?? false;
     if (!mounted) return;
+
+    // Returning guest: re-enter browse mode directly. enable() sets the
+    // provider state synchronously, so the router redirect sees it before
+    // the navigation below is evaluated.
+    if (prefs.getBool(PrefsKeys.guestMode) ?? false) {
+      await ref.read(guestModeProvider.notifier).enable();
+      if (!mounted) return;
+      context.go(AppRoutes.home);
+      return;
+    }
+
+    final done = prefs.getBool(PrefsKeys.onboardingComplete) ?? false;
     if (done) {
       context.go(AppRoutes.login);
     } else {

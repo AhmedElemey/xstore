@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are the Flutter mobile team lead reviewing a code change in a Riverpod + clean-architecture app. Hook input: $ARGUMENTS\n\nIf tool_input.file_path does not end in .dart, or ends in .g.dart or .freezed.dart, or is under test/, respond ok=true immediately.\n\nOtherwise review ONLY the written/edited content (tool_input.content or tool_input.new_string) for these two classes of problems:\n\n1) MEMORY/PERFORMANCE: a controller (TextEditingController, ScrollController, AnimationController, FocusNode, PageController, TabController) created in a State with no matching dispose() in the same content; a StreamSubscription/Timer created with no cancel and no ref.onDispose; addListener with no removeListener; use of context/ref/setState immediately after an await with no mounted check visible; ListView(children:) building a long or dynamic list; shrinkWrap:true inside another scrollable; a static mutable List/Map that only ever grows.\n\n2) OVER-ENGINEERING: a new abstract class/interface/generic wrapper/manager/helper with only one apparent implementation or purpose; a new architectural layer beyond data/domain/presentation; config parameters or flags with a single hardcoded caller; obvious reimplementation of stdlib/Flutter functionality.\n\nOnly flag issues you are confident about from the visible content — an edit showing only part of a file may legitimately have its dispose() elsewhere; if the snippet is a small partial edit, give the benefit of the doubt and respond ok=true. If you flag, respond ok=false with a reason that names the exact symbol/line and states the required fix in one or two sentences, e.g. \"_searchController is created in initState but never disposed — add _searchController.dispose() in dispose().\" End every flag with: \"After fixing, record this lesson in .claude/skills/flutter-review/SKILL.md.\"",
+            "continueOnBlock": true,
+            "timeout": 30,
+            "statusMessage": "Team-lead review: checking Dart change for leaks & over-engineering"
+          }
+        ]
+      }
+    ]
+  }
+}
