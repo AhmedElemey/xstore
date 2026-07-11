@@ -132,12 +132,14 @@ abstract final class ListingCategoriesData {
     'Generic',
   ];
 
+  /// Canonical condition display tokens — must stay 1:1 with the backend
+  /// `ListingCondition` enum (New=1, LikeNew=2, Good=3, UsedForParts=4);
+  /// see `listingConditionLabel` in listing_model.dart.
   static const List<String> conditions = [
     'New',
     'Like New',
     'Good',
-    'Used',
-    'For Parts',
+    'Used / For Parts',
   ];
 
   static ListingCategoryOption? categoryById(String id) {

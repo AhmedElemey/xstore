@@ -11,7 +11,11 @@ enum ListingStatus {
   rejected,
 }
 
-enum ListingCondition { newItem, likeNew, good, used, forParts }
+/// Mirrors the backend `ListingCondition` C# enum exactly
+/// (New=1, LikeNew=2, Good=3, UsedForParts=4) — wire codes live in
+/// `listing_model.dart`. Do not add app-only values: anything not in the
+/// backend enum cannot round-trip.
+enum ListingCondition { newItem, likeNew, good, usedForParts }
 
 @freezed
 class ListingEntity with _$ListingEntity {

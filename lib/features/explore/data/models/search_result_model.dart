@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../listing/data/models/listing_model.dart'
+    show listingConditionLabelFromRaw;
 import '../../domain/entities/search_result_entity.dart';
 
 part 'search_result_model.freezed.dart';
@@ -59,10 +61,10 @@ class SearchResultModel with _$SearchResultModel {
       price: price,
       compareAtPrice: compare,
       imageUrl: imageUrl,
-      condition: _readString(json, const [
-        'conditionLabel',
-        'condition',
-      ]),
+      // Wire codes 1..4 become display tokens ('New', …); '0' (unset) → ''.
+      condition: listingConditionLabelFromRaw(
+        json['conditionLabel'] ?? json['condition'],
+      ),
       category: _readString(json, const [
         'categoryLabel',
         'category',

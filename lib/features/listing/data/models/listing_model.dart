@@ -18,9 +18,10 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   } else {
     m['categoryLabel'] ??= '';
   }
-  final rawCond = m['conditionLabel'] ?? m['condition'];
+  // Numeric wire codes (1..4) become canonical display tokens; '0'
+  // (backend-unset) becomes '' so the UI shows no condition badge.
   m['conditionLabel'] =
-      rawCond is String ? rawCond : (rawCond?.toString() ?? '');
+      listingConditionLabelFromRaw(m['conditionLabel'] ?? m['condition']);
   m['postedAt'] = m['postedAt'] ?? m['createdAt'];
   m['viewCount'] = m['viewCount'] ?? m['views'] ?? 0;
   m['saveCount'] = m['saveCount'] ?? m['saves'] ?? 0;
@@ -57,25 +58,28 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   return m;
 }
 
-// CONFIRMED against live GET /api/listings and POST/PUT probes:
-// `condition` is a JSON integer (0=New, 1=LikeNew, 2=Good, 3=Used/ForParts).
+// Backend contract (C# enum, 1-based):
+//   ListingCondition { New = 1, LikeNew = 2, Good = 3, UsedForParts = 4 }
+// `0` on the wire is the C# default for an unset field (seed data was
+// created without a condition) — it is NOT a valid member and maps to null.
 // POST/PUT send a flat JSON body (no `command` wrapper — that wrapper passes
 // validation but EF SaveChanges 500s). `attributes` is a JSON string or null,
 // not an object.
 ListingCondition? _conditionFromDto(String? value) {
-  // Numeric wire codes (confirmed shape).
+  // Numeric wire codes (authoritative).
   switch (value) {
-    case '0':
-      return ListingCondition.newItem;
     case '1':
-      return ListingCondition.likeNew;
+      return ListingCondition.newItem;
     case '2':
-      return ListingCondition.good;
+      return ListingCondition.likeNew;
     case '3':
-      return ListingCondition.used;
+      return ListingCondition.good;
+    case '4':
+      return ListingCondition.usedForParts;
+    case '0':
+      return null; // unset on the backend
   }
-  // String tokens (legacy/mock-path fallback — never seen on the wire from
-  // the live backend, kept for resilience).
+  // String tokens (canonical labels, legacy drafts, enum names).
   switch (value?.toLowerCase()) {
     case 'new':
       return ListingCondition.newItem;
@@ -86,12 +90,12 @@ ListingCondition? _conditionFromDto(String? value) {
     case 'good':
       return ListingCondition.good;
     case 'used':
-      return ListingCondition.used;
     case 'forparts':
     case 'for_parts':
     case 'for parts':
     case 'usedforparts':
-      return ListingCondition.forParts;
+    case 'used / for parts':
+      return ListingCondition.usedForParts;
     default:
       return null;
   }
@@ -100,15 +104,49 @@ ListingCondition? _conditionFromDto(String? value) {
 int listingConditionToWire(ListingCondition c) {
   switch (c) {
     case ListingCondition.newItem:
-      return 0;
-    case ListingCondition.likeNew:
       return 1;
-    case ListingCondition.good:
+    case ListingCondition.likeNew:
       return 2;
-    case ListingCondition.used:
-    case ListingCondition.forParts:
+    case ListingCondition.good:
       return 3;
+    case ListingCondition.usedForParts:
+      return 4;
   }
+}
+
+/// Parses any condition representation — wire code ('1'..'4'), canonical
+/// display token ('Used / For Parts'), legacy draft token ('Used'), or
+/// backend enum name ('UsedForParts'). Null for unknown or backend-unset
+/// ('0') values.
+ListingCondition? listingConditionFromToken(String value) =>
+    _conditionFromDto(value);
+
+/// Canonical English display token per condition — the value stored in
+/// filter state, drafts, and `conditionLabel`; localized for display via
+/// `listingLocalizedCondition`.
+String listingConditionLabel(ListingCondition c) {
+  switch (c) {
+    case ListingCondition.newItem:
+      return 'New';
+    case ListingCondition.likeNew:
+      return 'Like New';
+    case ListingCondition.good:
+      return 'Good';
+    case ListingCondition.usedForParts:
+      return 'Used / For Parts';
+  }
+}
+
+/// Display token (or raw string for unknown values) from any wire/legacy
+/// condition representation; empty string when unset.
+String listingConditionLabelFromRaw(Object? raw) {
+  final s = raw?.toString();
+  if (s == null || s.isEmpty) return '';
+  final c = _conditionFromDto(s);
+  if (c != null) return listingConditionLabel(c);
+  // '0' (backend-unset) parses to null — show nothing rather than "0".
+  if (s == '0') return '';
+  return s;
 }
 
 /// Persisted on [ListingModel.condition] after local/offline writes.

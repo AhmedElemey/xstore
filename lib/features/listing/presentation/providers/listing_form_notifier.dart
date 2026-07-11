@@ -10,6 +10,8 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import '../../data/models/listing_model.dart'
+    show listingConditionFromToken;
 import '../../domain/entities/listing_entity.dart';
 import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
@@ -307,26 +309,11 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     return err.isEmpty;
   }
 
-  ListingCondition? _conditionFromFormValue(String raw) {
-    // state.condition is a free display string sourced from
-    // ListingCategoriesData.conditions ('New','Like New','Good','Used',
-    // 'For Parts') via condition_selector.dart — map it to the enum here
-    // rather than changing the selector widget's value domain.
-    switch (raw) {
-      case 'New':
-        return ListingCondition.newItem;
-      case 'Like New':
-        return ListingCondition.likeNew;
-      case 'Good':
-        return ListingCondition.good;
-      case 'Used':
-        return ListingCondition.used;
-      case 'For Parts':
-        return ListingCondition.forParts;
-      default:
-        return null;
-    }
-  }
+  // state.condition is a display token from ListingCategoriesData.conditions
+  // via condition_selector.dart; the shared parser also accepts legacy
+  // tokens from drafts saved before the 4-value backend alignment.
+  ListingCondition? _conditionFromFormValue(String raw) =>
+      listingConditionFromToken(raw);
 
   /// Publishes listing; on success clears form and draft. Returns `true` if published.
   Future<bool> submit(AppLocalizations l10n) async {

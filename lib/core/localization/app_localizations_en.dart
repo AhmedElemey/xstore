@@ -475,6 +475,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingAddAttributeButton => 'Add attribute';
 
   @override
+  String get listingCondUsedForParts => 'Used / For Parts';
+
+  @override
   String get listingCondNew => 'New';
 
   @override
@@ -482,12 +485,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listingCondGood => 'Good';
-
-  @override
-  String get listingCondUsed => 'Used';
-
-  @override
-  String get listingCondForParts => 'For Parts';
 
   @override
   String get listingCatElectronics => 'Electronics';

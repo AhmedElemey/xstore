@@ -87,6 +87,11 @@ Rules for the log:
 - **Rule:** Assume every run/build/test hits the live backend unless `--dart-define=MOCK=true` is passed. When adding datasource code, the real API path is the primary path — mock branches are legacy fixtures. Tests must keep their `skip: MockConfig.useMock ...` guards so both CI modes stay green.
 - **Where it applies:** All datasources, Taskfile/CI defines, and anything reading `MockConfig.useMock`.
 
+### 2026-07-11 — Backend enums are 1-based C#; 0 means unset, not the first member
+- **What happened:** The app mapped listing conditions 0-based (0=New…) from a "confirmed by live probe" comment, but the probe data all had `condition: 0` — the C# default for an unset field, not a member. The real contract is `ListingCondition { New=1, LikeNew=2, Good=3, UsedForParts=4 }`, so every parsed condition was off by one and the app offered 5 seller options against 4 backend values (lossy round-trip).
+- **Rule:** Never infer enum wire codes from seed data — ask for the C# enum declaration. Treat `0` as unset/null for any backend enum. Keep app enums 1:1 with backend enums (no app-only members). Condition mapping is centralized in `listing_model.dart` (`listingConditionFromToken`/`ToWire`/`Label*`) with a contract test in `test/listing_condition_wire_test.dart` — extend those, don't add local switches.
+- **Where it applies:** All wire-enum handling (condition, listing status, order status, payment method) in `data/models`.
+
 ### 2026-07-11 — This app cannot run on Flutter web; verify flows with widget tests
 - **What happened:** Attempting browser verification of the guest sheet hit a permanent black screen: `firebase_options.dart` throws `UnsupportedError` for web inside `bootstrap()` before `runApp`, so the web build never renders a frame.
 - **Rule:** Don't burn time on `flutter run -d chrome/web-server` for this repo until web Firebase options exist. Prove UI flows with widget tests (GoRouter stub harness in `test/require_login_test.dart` is the template). When a user reports old behavior that the current code demonstrably gates, suspect a stale build first and say so — hot reload doesn't always re-run existing widgets; ask for hot restart or a rebuild.

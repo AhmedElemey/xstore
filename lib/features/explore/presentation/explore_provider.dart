@@ -5,6 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/prefs_keys.dart';
 import '../../../shared/providers/shared_providers.dart';
+import '../../listing/data/models/listing_model.dart'
+    show listingConditionFromToken, listingConditionToWire;
 import '../data/datasources/explore_remote_datasource.dart';
 import '../domain/entities/search_result_entity.dart';
 import 'explore_dependencies.dart';
@@ -55,10 +57,14 @@ class Explore extends _$Explore {
   }
 
   /// Server-side `condition` only supports a single value; send it when
-  /// exactly one is selected, otherwise filter client-side.
+  /// exactly one is selected, otherwise filter client-side. The backend
+  /// binds the query param to its C# enum, so send the wire code
+  /// (New=1 … UsedForParts=4), not the display token.
   String? get _serverCondition {
     final c = state.filters.conditions;
-    return c.length == 1 ? c.first : null;
+    if (c.length != 1) return null;
+    final parsed = listingConditionFromToken(c.first);
+    return parsed == null ? null : listingConditionToWire(parsed).toString();
   }
 
   Future<void> search(String q) async {

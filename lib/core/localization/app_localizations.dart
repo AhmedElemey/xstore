@@ -1016,6 +1016,12 @@ abstract class AppLocalizations {
   /// **'Add attribute'**
   String get listingAddAttributeButton;
 
+  /// No description provided for @listingCondUsedForParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Used / For Parts'**
+  String get listingCondUsedForParts;
+
   /// No description provided for @listingCondNew.
   ///
   /// In en, this message translates to:
@@ -1033,18 +1039,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Good'**
   String get listingCondGood;
-
-  /// No description provided for @listingCondUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Used'**
-  String get listingCondUsed;
-
-  /// No description provided for @listingCondForParts.
-  ///
-  /// In en, this message translates to:
-  /// **'For Parts'**
-  String get listingCondForParts;
 
   /// No description provided for @listingCatElectronics.
   ///

@@ -91,8 +91,9 @@ String listingLocalizedCondition(BuildContext context, String condition) {
     'New' => l.listingCondNew,
     'Like New' => l.listingCondLikeNew,
     'Good' => l.listingCondGood,
-    'Used' => l.listingCondUsed,
-    'For Parts' => l.listingCondForParts,
+    'Used / For Parts' => l.listingCondUsedForParts,
+    // Legacy tokens from data saved before the 4-value backend alignment.
+    'Used' || 'For Parts' => l.listingCondUsedForParts,
     _ => condition,
   };
 }

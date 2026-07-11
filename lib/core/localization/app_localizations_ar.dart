@@ -476,6 +476,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingAddAttributeButton => 'إضافة مواصفة';
 
   @override
+  String get listingCondUsedForParts => 'مستعمل / للقطع';
+
+  @override
   String get listingCondNew => 'جديد';
 
   @override
@@ -483,12 +486,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listingCondGood => 'جيد';
-
-  @override
-  String get listingCondUsed => 'مستعمل';
-
-  @override
-  String get listingCondForParts => 'للقطع';
 
   @override
   String get listingCatElectronics => 'إلكترونيات';
