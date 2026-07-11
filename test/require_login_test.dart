@@ -8,6 +8,7 @@ import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/shared/utils/require_login.dart';
+import 'package:xstore/shared/widgets/notification_bell_button.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
 
@@ -73,10 +74,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, isTrue);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(BottomSheet), findsNothing);
   });
 
-  testWidgets('guest gets a dialog and can dismiss it', (tester) async {
+  testWidgets('guest gets the sign-in sheet and can dismiss it',
+      (tester) async {
     bool? result;
     await tester.pumpWidget(_harness(user: null, onResult: (r) => result = r));
     await tester.pumpAndSettle();
@@ -85,19 +87,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, isFalse);
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.text('Sign in required'), findsOneWidget);
 
     await tester.tap(find.text('Not now'));
     await tester.pumpAndSettle();
 
-    // Dismissed: dialog gone, no navigation happened.
-    expect(find.byType(AlertDialog), findsNothing);
+    // Dismissed: sheet gone, no navigation happened.
+    expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('act'), findsOneWidget);
     expect(find.text('login-screen-stub'), findsNothing);
   });
 
-  testWidgets('guest choosing Sign in closes the dialog and navigates',
+  testWidgets('guest choosing Sign in closes the sheet and navigates',
       (tester) async {
     await tester.pumpWidget(_harness(user: null, onResult: (_) {}));
     await tester.pumpAndSettle();
@@ -108,7 +110,58 @@ void main() {
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('login-screen-stub'), findsOneWidget);
+  });
+
+  testWidgets('guest tapping the notification bell gets the sheet, not login',
+      (tester) async {
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            appBar: AppBar(actions: const [NotificationBellButton()]),
+            body: const Text('home-stub'),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.login,
+          builder: (context, state) =>
+              const Scaffold(body: Text('login-screen-stub')),
+        ),
+        GoRoute(
+          path: AppRoutes.notifications,
+          builder: (context, state) =>
+              const Scaffold(body: Text('notifications-stub')),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authProvider.overrideWith(() => FakeAuth(null))],
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(NotificationBellButton));
+    await tester.pumpAndSettle();
+
+    // Sheet shows; neither the notifications screen nor login was pushed.
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.text('Sign in required'), findsOneWidget);
+    expect(find.text('notifications-stub'), findsNothing);
+    expect(find.text('login-screen-stub'), findsNothing);
   });
 }

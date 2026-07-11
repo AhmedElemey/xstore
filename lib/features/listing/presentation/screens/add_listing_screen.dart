@@ -165,7 +165,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       return;
     }
     if (ok) {
-      context.go('${AppRoutes.listingMy}?msg=published');
+      AppSnackbar.success(context, 'Listing published successfully');
+      context.go(AppRoutes.listingMy);
       return;
     }
     final err = ref.read(listingFormNotifierProvider).errors['submit'];

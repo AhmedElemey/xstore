@@ -35,28 +35,7 @@ class MyListingsScreen extends ConsumerStatefulWidget {
 }
 
 class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
-  var _handledPublishToast = false;
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_handledPublishToast) {
-      return;
-    }
-    final msg = GoRouterState.of(context).uri.queryParameters['msg'];
-    if (msg == 'published') {
-      _handledPublishToast = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        AppSnackbar.success(context, 'Listing published successfully');
-        context.go(AppRoutes.listingMy);
-        ref.read(myListingsNotifierProvider.notifier).fetchListings();
-      });
-    }
-  }
 
   void _onScrollNotification(ScrollNotification n) {
     if (n is! UserScrollNotification) {
@@ -158,7 +137,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         child: ListingOptionsSheet(
           listing: listing,
           onEdit: () {
-            context.push(AppRoutes.listingAdd);
+            context.go(AppRoutes.listingAdd);
           },
           onPause: () => ref
               .read(myListingsNotifierProvider.notifier)
@@ -251,7 +230,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               duration: const Duration(milliseconds: 200),
               opacity: fabVisible ? 1 : 0,
               child: FloatingActionButton.extended(
-                onPressed: () => context.push(AppRoutes.listingAdd),
+                onPressed: () => context.go(AppRoutes.listingAdd),
                 icon: const Icon(LucideIcons.plus),
                 label: Text(context.l10n.newListing),
               ),
@@ -377,7 +356,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               height: MediaQuery.of(context).size.height * 0.55,
               child: ListingEmptyState(
                 selectedFilter: selectedFilter,
-                onAddListing: () => context.push(AppRoutes.listingAdd),
+                onAddListing: () => context.go(AppRoutes.listingAdd),
               ),
             ),
           ],

@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/router/app_routes.dart';
 import '../../features/notifications/presentation/providers/notifications_provider.dart';
+import '../utils/require_login.dart';
 import 'notification_icon_badge.dart';
 import '../../core/utils/extensions/context_extensions.dart';
 
@@ -26,7 +27,10 @@ class NotificationBellButton extends ConsumerWidget {
     final count = ref.watch(notificationsProvider.select((s) => s.unreadCount));
     return IconButton(
       tooltip: tooltip,
-      onPressed: () => context.push(AppRoutes.notifications),
+      onPressed: () {
+        if (!requireLogin(context, ref)) return;
+        context.push(AppRoutes.notifications);
+      },
       icon: NotificationIconBadge(
         count: count,
         child: Icon(icon, color: color ?? context.textPrimary),

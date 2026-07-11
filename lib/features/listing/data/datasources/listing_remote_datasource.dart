@@ -69,7 +69,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     return jsonEncode(attributes);
   }
 
-  Map<String, dynamic> _listingCommandBody({
+  Map<String, dynamic> _listingWriteBody({
     required String titleEn,
     required String titleAr,
     required String descriptionEn,
@@ -131,28 +131,28 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     List<String> imageUrls = const [],
   }) async {
     try {
+      // CONFIRMED 2026-07-11: flat JSON body (Postman-style, no `command`
+      // wrapper). Send `condition` as int (0=New), not the string "New".
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
-        data: {
-          'command': _listingCommandBody(
-            titleEn: titleEn,
-            titleAr: titleAr,
-            descriptionEn: descriptionEn,
-            descriptionAr: descriptionAr,
-            price: price,
-            compareAtPrice: compareAtPrice,
-            categoryId: categoryId,
-            subcategoryId: subcategoryId,
-            condition: condition,
-            brand: brand,
-            stockQuantity: stockQuantity,
-            shippingAvailable: shippingAvailable,
-            shippingCost: shippingCost,
-            location: location,
-            attributes: attributes,
-            imageUrls: imageUrls,
-          ),
-        },
+        data: _listingWriteBody(
+          titleEn: titleEn,
+          titleAr: titleAr,
+          descriptionEn: descriptionEn,
+          descriptionAr: descriptionAr,
+          price: price,
+          compareAtPrice: compareAtPrice,
+          categoryId: categoryId,
+          subcategoryId: subcategoryId,
+          condition: condition,
+          brand: brand,
+          stockQuantity: stockQuantity,
+          shippingAvailable: shippingAvailable,
+          shippingCost: shippingCost,
+          location: location,
+          attributes: attributes,
+          imageUrls: imageUrls,
+        ),
         options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
@@ -244,28 +244,26 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       // /api/listings/{id}. Confirmed from the Postman collection.
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
-        data: {
-          'command': _listingCommandBody(
-            id: id,
-            titleEn: titleEn,
-            titleAr: titleAr,
-            descriptionEn: descriptionEn,
-            descriptionAr: descriptionAr,
-            price: price,
-            compareAtPrice: compareAtPrice,
-            categoryId: categoryId,
-            subcategoryId: subcategoryId,
-            condition: condition,
-            brand: brand,
-            stockQuantity: stockQuantity,
-            shippingAvailable: shippingAvailable,
-            shippingCost: shippingCost,
-            location: location,
-            attributes: attributes,
-            imageUrls: imageUrls,
-            status: status,
-          ),
-        },
+        data: _listingWriteBody(
+          id: id,
+          titleEn: titleEn,
+          titleAr: titleAr,
+          descriptionEn: descriptionEn,
+          descriptionAr: descriptionAr,
+          price: price,
+          compareAtPrice: compareAtPrice,
+          categoryId: categoryId,
+          subcategoryId: subcategoryId,
+          condition: condition,
+          brand: brand,
+          stockQuantity: stockQuantity,
+          shippingAvailable: shippingAvailable,
+          shippingCost: shippingCost,
+          location: location,
+          attributes: attributes,
+          imageUrls: imageUrls,
+          status: status,
+        ),
         options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;

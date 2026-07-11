@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "xstore-web-dev",
-      "runtimeExecutable": "flutter",
-      "runtimeArgs": ["run", "-d", "chrome", "-t", "lib/main_dev.dart", "--web-port=8765"],
+      "runtimeExecutable": "/Users/ahmedtaha/development/flutter/bin/flutter",
+      "runtimeArgs": ["run", "-d", "web-server", "-t", "lib/main_dev.dart", "--web-port=8765"],
       "port": 8765
     },
     {

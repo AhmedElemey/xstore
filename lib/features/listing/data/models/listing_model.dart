@@ -57,10 +57,11 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   return m;
 }
 
-// CONFIRMED against live GET /api/listings and POST validation probes:
+// CONFIRMED against live GET /api/listings and POST/PUT probes:
 // `condition` is a JSON integer (0=New, 1=LikeNew, 2=Good, 3=Used/ForParts).
-// POST/PUT bodies must be wrapped as `{"command": {...}}` and `attributes`
-// must be a JSON string (or ""), not an object.
+// POST/PUT send a flat JSON body (no `command` wrapper — that wrapper passes
+// validation but EF SaveChanges 500s). `attributes` is a JSON string or null,
+// not an object.
 ListingCondition? _conditionFromDto(String? value) {
   // Numeric wire codes (confirmed shape).
   switch (value) {

@@ -87,6 +87,16 @@ Rules for the log:
 - **Rule:** Assume every run/build/test hits the live backend unless `--dart-define=MOCK=true` is passed. When adding datasource code, the real API path is the primary path — mock branches are legacy fixtures. Tests must keep their `skip: MockConfig.useMock ...` guards so both CI modes stay green.
 - **Where it applies:** All datasources, Taskfile/CI defines, and anything reading `MockConfig.useMock`.
 
+### 2026-07-11 — This app cannot run on Flutter web; verify flows with widget tests
+- **What happened:** Attempting browser verification of the guest sheet hit a permanent black screen: `firebase_options.dart` throws `UnsupportedError` for web inside `bootstrap()` before `runApp`, so the web build never renders a frame.
+- **Rule:** Don't burn time on `flutter run -d chrome/web-server` for this repo until web Firebase options exist. Prove UI flows with widget tests (GoRouter stub harness in `test/require_login_test.dart` is the template). When a user reports old behavior that the current code demonstrably gates, suspect a stale build first and say so — hot reload doesn't always re-run existing widgets; ask for hot restart or a rebuild.
+- **Where it applies:** All manual verification attempts; any future "works in code, user sees old behavior" reports.
+
+### 2026-07-11 — Fixed-height Columns in bottom sheets overflow
+- **What happened:** The sign-in sheet's Column (icon + title + body + two buttons) overflowed by 14px inside a default `showModalBottomSheet` height constraint — caught only because a widget test rendered it in a 600px-tall viewport.
+- **Rule:** Bottom-sheet content must be wrapped in `SingleChildScrollView` (or use `isScrollControlled` with explicit constraints) — never rely on the content fitting the sheet's max height. Widget-test every new sheet/dialog; the test viewport catches overflows real phones might hide.
+- **Where it applies:** All `showModalBottomSheet`/`showDialog` content in `shared/` and feature widgets.
+
 ### 2026-07-11 — Custom validateStatus can silently disable token refresh
 - **What happened:** `LegacyRouteOptions.allowNotFound` used `validateStatus: status < 500`, which accepted 401/403 as normal responses — `TokenRefreshInterceptor` only acts in `onError`, so expired sessions on legacy routes would never refresh and would render as "empty data" instead.
 - **Rule:** Any per-request `validateStatus` override must keep 401/403 as errors. Widen acceptance only for the specific status being tolerated (e.g. `2xx || 404`), never with a blanket `< 500`.
@@ -122,13 +132,19 @@ Rules for the log:
 - **Rule:** Never tie a fetch side-effect to "list is empty" without a one-shot guard (`hasLoaded`, error latch, or fetch only from the destination screen). Profile badges read existing provider state; they don't prefetch.
 - **Where it applies:** Profile widgets, any `build()`-time `addPostFrameCallback` that triggers network calls.
 
+### 2026-07-11 — Paginated list endpoints use 1-based page
 - **What happened:** `allCities` / `allGovernments` / `allStoreCategories` called the live API with `page=0`, which returns HTTP 500; `page=1` (or omitting `page`) returns 200.
 - **Rule:** The xStoreEcommerce `/api/*` list endpoints use **1-based** `page`. Never send `page=0` on the wire — use `page: 1` for the first page, or translate 0-based notifier state at the datasource boundary (see `notifications_remote_datasource.dart`: `page + 1`).
 - **Where it applies:** Cities, governments, store categories, listings, reviews, notifications — any paginated GET.
 
+### 2026-07-11 — Listing write payload: flat body, int condition
+- **What happened:** Earlier probes concluded POST/PUT needed a `{"command": {...}}` wrapper; that wrapper passes validation but EF SaveChanges 500s. The user's working Postman example is a flat body — but `"condition": "New"` (string) still 400s; `"condition": 0` (int) returns 201. Flat + int condition + string/null `attributes` is the live contract.
+- **Rule:** POST/PUT `/api/listings` send fields at the root — never wrap in `command`. Wire `condition`/`status` as integer codes via `listingConditionToWire` / `listingStatusToWire`. Wire `attributes` as a JSON string (`""`, `jsonEncode(map)`, or null) — never a JSON object. Probe both flat and wrapped shapes before blaming backend SaveChanges.
+- **Where it applies:** `listing_remote_datasource.dart`, `listing_model.dart` wire helpers.
+
 ### 2026-07-11 — Listing write payload uses command wrapper
 - **What happened:** `POST /api/listings` returned 400: `command` required, `condition` rejected as `"LikeNew"` string, `attributes` rejected as `{}` object.
-- **Rule:** Confirmed live contract for create/update: wrap fields in `{"command": {...}}`, send `condition` and `status` as integer codes, and `attributes` as a JSON **string** (`""` or `jsonEncode(map)`). Reads still coerce numeric `condition`/`status` in `ListingModel`.
+- **Rule:** ~~Confirmed live contract for create/update: wrap fields in `{"command": {...}}`~~ **Superseded** by the flat-body lesson above (2026-07-11 same day). Keep integer `condition`/`status` and string `attributes` — drop the wrapper.
 - **Where it applies:** `listing_remote_datasource.dart`, `listing_model.dart` wire helpers (`listingConditionToWire`, `listingStatusToWire`).
 
 ### 2026-07-11 — Parse formatted money with Validators.parseMoneyInput
@@ -136,7 +152,12 @@ Rules for the log:
 - **Rule:** Any UI reading `priceInput` / `compareAtPriceInput` / `shippingCostInput` from listing form state must use `Validators.parseMoneyInput` (strips commas) — never raw `double.tryParse`.
 - **Where it applies:** `add_listing_screen.dart`, any widget displaying derived values from formatted money fields.
 
-### 2026-07-11 — POST /api/listings 500 is backend SaveChanges
-- **What happened:** After fixing the `command` wrapper and integer `condition`, create still returned 500 `saving the entity changes` for every vendor probed on the hosted API — payload passes validation but EF Core fails to persist (not a client shape bug).
-- **Rule:** When live probes confirm 400-fixed payloads still 500 on write, map the opaque EF message to a user-facing publish error (`listingPublishServerError`) and treat as backend gap — don't add more client payload guesses without a confirmed contract change.
-- **Where it applies:** `dio_error_mapper.dart`, `listing_form_notifier.dart`, any future write endpoint returning the same EF boilerplate.
+### 2026-07-11 — Never push a StatefulShellRoute branch from outside the shell
+- **What happened:** After publish, Navigator threw `!keyReservation.contains(key)` (duplicate page keys). `/listing/add` lives in a shell branch; `MyListingsScreen` used `context.push('/listing/add')` from the overlay route `/listing/my`, stacking the same branch route twice. The publish flow also double-navigated (`go` with `?msg=published` then `go` again to strip the query).
+- **Rule:** Routes registered under `StatefulShellRoute` branches are reached with `context.go` (tab switch), never `context.push` from sibling/overlay routes. One navigation per success — show snackbar then `go` once; don't pass toast state via query params that trigger a second `go` on the destination screen.
+- **Where it applies:** `my_listings_screen.dart`, `add_listing_screen.dart`, any future shell-tab route (`listingAdd`, home/explore tabs).
+
+### 2026-07-11 — POST /api/listings 500 was the command wrapper, not EF
+- **What happened:** Create listing 500s were attributed to a backend EF bug; re-probing showed the `command` wrapper 500s while the flat Postman body (with int `condition`) returns 201. The earlier "backend gap" diagnosis was wrong for the current API.
+- **Rule:** Before mapping opaque SaveChanges 500s to `listingPublishServerError`, diff the app's write shape against a known-good flat probe — wrapper vs flat is a common false positive. Keep the user-facing server-error mapping for genuine 500s after the payload shape is confirmed.
+- **Where it applies:** `listing_remote_datasource.dart`, `listing_form_notifier.dart`, `dio_error_mapper.dart`.
