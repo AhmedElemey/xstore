@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../constants/prefs_keys.dart';
 import 'api_auth_headers.dart';
 import 'api_endpoints.dart';
@@ -57,6 +58,7 @@ Dio dio(DioRef ref) {
         await secureStorage.delete(key: PrefsKeys.authToken);
         await secureStorage.delete(key: PrefsKeys.authRefreshToken);
         await secureStorage.delete(key: PrefsKeys.authUser);
+        resetProfileData(ref);
         ref.invalidate(authProvider);
       },
     ),

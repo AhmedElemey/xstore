@@ -104,6 +104,8 @@ extension ProfileStateX on ProfileState {
     if (u == null) {
       throw StateError('No profile loaded');
     }
+    // When [avatarRemoved] is true, avatarUrl is null so update-profile sends
+    // an explicit null and the server clears the stored avatar.
     return u.copyWith(
       name: editName.trim(),
       email: editEmail.trim(),

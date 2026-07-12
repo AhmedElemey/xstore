@@ -20,10 +20,10 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel> registerConsumer(ConsumerRegisterParams params);
   Future<UserModel> registerVendor(VendorRegisterParams params);
 
-  /// CONFIRMED against a live backend: login/register only return
+  /// CONFIRMED live backend: login/register only return
   /// `{token, refreshToken}` — no user fields. Call this immediately after
   /// (with the token already persisted, so it's sent via X-Auth-Token) to
-  /// get the actual user. Response is wrapped: `{"user": {...}, ...}`.
+  /// get the actual user. Response shape: `{"user": {...}, "store": ...}`.
   Future<UserModel> fetchProfile();
 
   Future<void> changePassword({
@@ -213,11 +213,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
-      final userJson = data?['user'];
-      if (userJson is! Map) {
-        throw const ServerException('Empty profile response');
-      }
-      return UserModel.fromJson(Map<String, dynamic>.from(userJson));
+      if (data == null) throw const ServerException('Empty profile response');
+      final userJson = parseProfileUserJson(data);
+      return UserModel.fromJson(userJson);
+    } on FormatException {
+      throw const ServerException('Empty profile response');
     } on DioException catch (e) {
       throw mapDioException(e);
     }

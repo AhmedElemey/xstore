@@ -32,6 +32,7 @@ import '../../domain/usecases/facebook_sign_in_usecase.dart';
 import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/send_otp_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import 'auth_states.dart';
 import 'guest_mode_provider.dart';
 
@@ -165,15 +166,29 @@ VerifyOtpUseCase verifyOtpUseCase(VerifyOtpUseCaseRef ref) {
 
 @Riverpod(keepAlive: true)
 class Auth extends _$Auth {
+  // Notifier fields survive ref.invalidate (build() re-runs on the same
+  // instance), so this stays true across rebuilds triggered by saveProfile
+  // etc. — those already refresh the profile explicitly; only the cold-start
+  // restore should prefetch.
+  var _restoredOnce = false;
+
   @override
   Future<UserEntity?> build() async {
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.restoreSession();
-    return result.fold((_) => null, (user) => user);
+    final firstRestore = !_restoredOnce;
+    _restoredOnce = true;
+    return result.fold((_) => null, (user) {
+      // build() hasn't returned yet, so authProvider still reads as Loading —
+      // pass the user in; a plain prefetch here would see null and no-op.
+      if (firstRestore) prefetchProfileData(ref, user: user);
+      return user;
+    });
   }
 
   Future<void> logout() async {
     await ref.read(logoutUseCaseProvider).call();
+    resetProfileData(ref);
     ref.invalidateSelf();
   }
 
@@ -185,6 +200,7 @@ class Auth extends _$Auth {
       (_) => AsyncData(user),
       (_) => AsyncData(user),
     );
+    prefetchProfileData(ref);
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
@@ -192,6 +208,7 @@ class Auth extends _$Auth {
   void adoptSession(UserEntity user) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
+    prefetchProfileData(ref);
   }
 }
 

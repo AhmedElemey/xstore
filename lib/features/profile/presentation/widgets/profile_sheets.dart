@@ -5,8 +5,36 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/profile_provider.dart';
+
+Future<void> _saveAvatarAfterPick({
+  required BuildContext context,
+  required WidgetRef ref,
+  required ImageSource source,
+}) async {
+  final picked = await ref
+      .read(profileNotifierProvider.notifier)
+      .pickAvatar(source);
+  if (!picked) return;
+
+  try {
+    await ref.read(profileNotifierProvider.notifier).saveProfile();
+    if (!context.mounted) return;
+    final err = ref.read(profileNotifierProvider).error;
+    if (err != null) {
+      AppSnackbar.error(context, resolveAppError(context, err));
+      return;
+    }
+    AppSnackbar.success(context, context.l10n.profileUpdatedSuccess);
+  } catch (_) {
+    if (context.mounted) {
+      AppSnackbar.error(context, context.l10n.errorGeneric);
+    }
+  }
+}
 
 Future<void> showProfileAvatarPickerSheet({
   required BuildContext context,
@@ -24,12 +52,11 @@ Future<void> showProfileAvatarPickerSheet({
             title: Text(context.l10n.takePhoto),
             onTap: () async {
               Navigator.pop(ctx);
-              final picked = await ref
-                  .read(profileNotifierProvider.notifier)
-                  .pickAvatar(ImageSource.camera);
-              if (picked) {
-                await ref.read(profileNotifierProvider.notifier).saveProfile();
-              }
+              await _saveAvatarAfterPick(
+                context: context,
+                ref: ref,
+                source: ImageSource.camera,
+              );
             },
           ),
           ListTile(
@@ -37,12 +64,11 @@ Future<void> showProfileAvatarPickerSheet({
             title: Text(context.l10n.chooseFromGallery),
             onTap: () async {
               Navigator.pop(ctx);
-              final picked = await ref
-                  .read(profileNotifierProvider.notifier)
-                  .pickAvatar(ImageSource.gallery);
-              if (picked) {
-                await ref.read(profileNotifierProvider.notifier).saveProfile();
-              }
+              await _saveAvatarAfterPick(
+                context: context,
+                ref: ref,
+                source: ImageSource.gallery,
+              );
             },
           ),
         ],

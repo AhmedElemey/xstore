@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -15,6 +16,7 @@ import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/vendor_store_card.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -32,7 +34,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     _scroll = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileNotifierProvider.notifier).fetchProfile();
       ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
     });
   }
@@ -44,7 +45,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _onRefresh() async {
-    await ref.read(profileNotifierProvider.notifier).fetchProfile();
+    await ref.read(profileNotifierProvider.notifier).refreshProfileData();
   }
 
   @override
@@ -78,7 +79,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             if (profileState.isLoading && profile == null)
               const SliverFillRemaining(child: ProfileSkeleton())
+            else if (profileState.error != null && profile == null)
+              SliverFillRemaining(
+                child: ErrorStateWidget(
+                  message: resolveAppError(context, profileState.error),
+                  onRetry: _onRefresh,
+                ),
+              )
             else ...[
+              if (profileState.error != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      0,
+                    ),
+                    child: Material(
+                      color: context.colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.error_outline,
+                          color: context.colorScheme.onErrorContainer,
+                        ),
+                        title: Text(
+                          resolveAppError(context, profileState.error),
+                          style: TextStyle(
+                            color: context.colorScheme.onErrorContainer,
+                          ),
+                        ),
+                        trailing: TextButton(
+                          onPressed: _onRefresh,
+                          child: Text(context.l10n.retry),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: Transform.translate(
                   offset: const Offset(0, -AppSpacing.profileAvatarHalfOut),

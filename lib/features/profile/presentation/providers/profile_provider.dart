@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,6 +20,26 @@ import '../../../../shared/providers/shared_providers.dart';
 import '../../../../core/utils/location_service.dart';
 
 part 'profile_provider.g.dart';
+
+/// Schedules an enriched profile reload without blocking the caller (login,
+/// cold start, etc.). Single entry point for "warm profileNotifierProvider".
+///
+/// Pass [user] when the caller already knows the session user and
+/// `authProvider` may still read as Loading — e.g. from inside `Auth.build()`,
+/// where reading it back would return null and skip the fetch.
+void prefetchProfileData(Ref ref, {UserEntity? user}) {
+  if (kDebugMode) {
+    debugPrint('[ProfileNotifier] prefetchProfileData scheduled');
+  }
+  unawaited(
+    ref.read(profileNotifierProvider.notifier).refreshProfileData(user: user),
+  );
+}
+
+/// Clears enriched profile state on logout so the next session starts fresh.
+void resetProfileData(Ref ref) {
+  ref.invalidate(profileNotifierProvider);
+}
 
 bool _isDarkTheme(ThemeMode mode) {
   if (mode == ThemeMode.dark) return true;
@@ -56,28 +79,54 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
 
 @Riverpod(keepAlive: true)
 class ProfileNotifier extends _$ProfileNotifier {
-  @override
-  ProfileState build() => const ProfileState();
+  // Bumped by ref.onDispose, which also fires on invalidate (resetProfileData
+  // on logout / forced 401). In-flight refreshes compare their epoch so a
+  // fetch from the previous session never writes into the next one. A plain
+  // _disposed flag is not enough here: keepAlive invalidate reuses this
+  // instance and build() would reset the flag, reopening the gate.
+  var _sessionEpoch = 0;
 
-  Future<void> fetchProfile() async {
-    final user = ref.read(authProvider).valueOrNull;
-    if (user == null) {
+  @override
+  ProfileState build() {
+    ref.onDispose(() => _sessionEpoch++);
+    return const ProfileState();
+  }
+
+  /// Reloads enriched profile + stats from the server. Use this (not ad-hoc
+  /// fetches) whenever profileNotifierProvider should sync with the backend.
+  ///
+  /// [user] overrides the `authProvider` read for callers holding the session
+  /// user while `authProvider` is still Loading (see [prefetchProfileData]).
+  Future<void> refreshProfileData({UserEntity? user}) async {
+    final sessionUser = user ?? ref.read(authProvider).valueOrNull;
+    if (sessionUser == null) {
       state = const ProfileState();
       return;
     }
 
+    final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     final prefs = await ref.read(sharedPreferencesProvider.future);
+    if (epoch != _sessionEpoch) return;
     final push = prefs.getBool(PrefsKeys.profilePushNotifications) ?? true;
     final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
     final themeMode = ref.read(appThemeModeProvider);
 
-    final result = await ref.read(getProfileUseCaseProvider).call(user);
+    final result = await ref.read(getProfileUseCaseProvider).call(sessionUser);
+    if (epoch != _sessionEpoch) return;
     result.fold(
       (f) {
         state = state.copyWith(isLoading: false, error: f.toString());
       },
       (profile) {
+        if (kDebugMode) {
+          debugPrint(
+            '[ProfileNotifier] refreshProfileData OK — '
+            'orders=${profile.ordersCount} '
+            'wishlist=${profile.wishlistCount} '
+            'role=${profile.user.role.name}',
+          );
+        }
         state = state
             .applyFromProfile(
               profile,
@@ -282,6 +331,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       return;
     }
 
+    final epoch = _sessionEpoch;
     state = state.copyWith(isUpdating: true, error: null, fieldErrors: {});
     var nextUser = state.toEditedUser();
     final avatarPath = state.editAvatarFile?.path;
@@ -291,6 +341,7 @@ class ProfileNotifier extends _$ProfileNotifier {
             userId: u0.id,
             filePath: avatarPath,
           );
+      if (epoch != _sessionEpoch) return;
       final avatarFailed = avatarRes.fold(
         (f) {
           state = state.copyWith(
@@ -308,6 +359,7 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
 
     final res = await ref.read(updateProfileUseCaseProvider).call(nextUser);
+    if (epoch != _sessionEpoch) return;
     UserEntity? updatedUser;
     final profileFailed = res.fold(
       (f) {
@@ -324,6 +376,7 @@ class ProfileNotifier extends _$ProfileNotifier {
     final updated = updatedUser!;
     final persist =
         await ref.read(authRepositoryProvider).persistSessionUser(updated);
+    if (epoch != _sessionEpoch) return;
     final persistFailed = persist.fold(
       (c) {
         state = state.copyWith(isUpdating: false, error: c.toString());
@@ -334,8 +387,9 @@ class ProfileNotifier extends _$ProfileNotifier {
     if (persistFailed) return;
 
     ref.invalidate(authProvider);
+    if (epoch != _sessionEpoch) return;
     state = state.copyWith(isUpdating: false, editAvatarFile: null);
-    await fetchProfile();
+    await refreshProfileData();
   }
 
   Future<void> toggleDarkMode(bool enabled) async {
@@ -359,6 +413,7 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   Future<void> logout() async {
     await ref.read(logoutUseCaseProvider).call();
+    resetProfileData(ref);
     ref.invalidate(authProvider);
     ref.read(goRouterProvider).go(AppRoutes.login);
   }
@@ -371,6 +426,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       },
       (_) async {
         await ref.read(logoutUseCaseProvider).call();
+        resetProfileData(ref);
         ref.invalidate(authProvider);
         ref.invalidateSelf();
         ref.read(goRouterProvider).go(AppRoutes.login);

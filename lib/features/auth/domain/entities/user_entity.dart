@@ -64,7 +64,19 @@ class UserEntity with _$UserEntity {
   /// back to legacy [name] when the En/Ar variant is unset.
   String displayName(bool isArabic) {
     final localized = isArabic ? fullNameAr : fullNameEn;
-    return (localized != null && localized.isNotEmpty) ? localized : name;
+    return (localized != null && localized.trim().isNotEmpty)
+        ? localized.trim()
+        : name;
+  }
+
+  /// Same resolution rules as [displayName], for vendor store names.
+  String displayStoreName(bool isArabic) {
+    final localized = isArabic ? storeNameAr : storeNameEn;
+    if (localized != null && localized.trim().isNotEmpty) {
+      return localized.trim();
+    }
+    final legacy = storeName?.trim();
+    return (legacy != null && legacy.isNotEmpty) ? legacy : '';
   }
 }
 

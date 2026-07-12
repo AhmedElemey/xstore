@@ -54,7 +54,7 @@ Rules for the log:
 
 ### 2026-07-11 — State writes after await in Riverpod notifiers
 - **What happened:** Auth flow notifiers (e.g. `LoginNotifier.login`) assign `state = ...` after `await` with no disposal guard; if the user navigates away mid-request, the autoDispose notifier is disposed and the assignment throws an unhandled StateError.
-- **Rule:** Guard post-await state writes. In `@riverpod` codegen Notifier classes: `_disposed` flag reset in `build()` + `ref.onDispose(() => _disposed = true)`. In `StateNotifier` subclasses: use the built-in `mounted` getter (state_notifier 1.0.0, line 152 — it exists, despite it being commonly believed to be State-only).
+- **Rule:** Guard post-await state writes. In `@riverpod` codegen Notifier classes: `_disposed` flag reset in `build()` + `ref.onDispose(() => _disposed = true)`. In `StateNotifier` subclasses: use the built-in `mounted` getter (state_notifier 1.0.0, line 152 — it exists, despite it being commonly believed to be State-only). Caveat for keepAlive notifiers cleared via `ref.invalidate`: riverpod 2.x reuses the same notifier instance across rebuilds (verified empirically), so a `_disposed` flag reset in `build()` reopens the gate for a fetch still in flight — use a monotonic epoch bumped in `ref.onDispose` and compared per call instead (see `ProfileNotifier._sessionEpoch`).
 - **Where it applies:** Every async method in `@riverpod` Notifier and `StateNotifier` classes that writes `state` after an await.
 
 ### 2026-07-11 — StateNotifier with Timer needs a dispose override
@@ -166,3 +166,43 @@ Rules for the log:
 - **What happened:** Create listing 500s were attributed to a backend EF bug; re-probing showed the `command` wrapper 500s while the flat Postman body (with int `condition`) returns 201. The earlier "backend gap" diagnosis was wrong for the current API.
 - **Rule:** Before mapping opaque SaveChanges 500s to `listingPublishServerError`, diff the app's write shape against a known-good flat probe — wrapper vs flat is a common false positive. Keep the user-facing server-error mapping for genuine 500s after the payload shape is confirmed.
 - **Where it applies:** `listing_remote_datasource.dart`, `listing_form_notifier.dart`, `dio_error_mapper.dart`.
+
+### 2026-07-11 — Profile update-profile wire keys are asymmetric
+- **What happened:** Edit Profile save used a partial PUT body and skipped `avatarUrl` when null, so avatar removal never reached the server; GET used `birthDate`/`whatsAppNumber`/`instagramPage` while read parsing only looked for `dateOfBirth`/`whatsappNumber`/`instagramHandle`.
+- **Rule:** Derive update-profile PUT keys from CONFIRMED get-profile / `UserModel.fromJson` field names; keep documented write-only aliases (`whatsAppNumber`, `instagramPage`); always send `avatarUrl` (null to clear); add `optString` fallbacks in `fromJson` when read/write keys differ.
+- **Where it applies:** `profile_remote_datasource.dart`, `user_model.dart`, `profile_state.dart` `toEditedUser()`.
+
+### 2026-07-11 — Bilingual store name: parse vs display
+- **What happened:** `UserModel.fromJson` collapsed `storeName` with legacy-first precedence and treated `""` as present, so localized keys were skipped; mock get-profile dropped lat/lng on fetch after save.
+- **Rule:** Match `UserEntity.displayName(isArabic)`: add `displayStoreName(isArabic)` for runtime locale; in `fromJson` prefer `storeNameEn`/`storeNameAr` before legacy `storeName`; `optString` treats blank/whitespace as absent; mock get/update share one `_mockUserModelFromEntity` so save→fetch round-trips all profile fields.
+- **Where it applies:** `user_model.dart`, `user_entity.dart`, `profile_remote_datasource.dart`, profile wire tests.
+
+### 2026-07-11 — get-profile response wrapper
+- **What happened:** Live GET/PUT `/api/auth/get-profile` returns `{"user":{...},"store":...}` but `ProfileRemoteDataSource.getProfile` parsed the top-level map as a user; login/register return `{token, refreshToken}` only — no user object.
+- **Rule:** Unwrap profile responses through shared `parseProfileUserJson` (wrapper first, raw user map as safety net); never assume login and get-profile share the same shape; verify with a live probe before fixing parsers.
+- **Where it applies:** `user_model.dart`, `auth_remote_datasource.dart`, `profile_remote_datasource.dart`.
+
+### 2026-07-11 — Prefetch enriched profile after auth
+- **What happened:** `profileNotifierProvider` stayed empty until ProfileScreen mounted, so stats/vendor enrichment lagged behind `authProvider` even though login already called get-profile for identity.
+- **Rule:** After session adopt/restore, fire-and-forget `prefetchProfileData(ref)` → `ProfileNotifier.refreshProfileData()`; clear with `resetProfileData(ref)` on logout; one shared refresh method for prefetch, save, and pull-to-refresh — flag redundant on-mount fetches before removing.
+- **Where it applies:** `profile_provider.dart`, `auth_provider.dart`, profile screens.
+
+### 2026-07-11 — Reset enriched profile on forced 401 logout
+- **What happened:** Token-refresh failure in `dio_provider` cleared auth storage and invalidated `authProvider` but left `profileNotifierProvider` warm with the previous user's stats until explicit logout.
+- **Rule:** Any forced session clear (401 refresh failed, logout, delete account) must call `resetProfileData(ref)` alongside `ref.invalidate(authProvider)`; `TokenRefreshInterceptor.onRefreshFailed` only — not on retried 401s that refresh succeeds.
+- **Where it applies:** `dio_provider.dart`, `auth_provider.dart`, `profile_provider.dart`.
+
+### 2026-07-11 — Side-effects fired from inside build() see the provider as Loading
+- **What happened:** `Auth.build()`'s restore fold called `prefetchProfileData(ref)` before `build()` returned; `refreshProfileData` immediately did `ref.read(authProvider).valueOrNull`, which on a first build is `AsyncLoading` with no previous value → null user → the prefetch reset profile state instead of loading it (proven with a minimal Riverpod repro). The existing prefetch test only covered `adoptSession`, which sets `state` before prefetching, so it stayed green.
+- **Rule:** Never fire, from inside a provider's `build()`, a side-effect that synchronously reads that same provider's async state — on first build `valueOrNull` is null (invalidate-rebuilds keep the previous value, masking the bug). Either pass the value explicitly into the side-effect or defer it past build completion (`Future(() => ...)`). For first-build-only side-effects, a notifier instance field works: riverpod 2.x reuses the instance across `ref.invalidate` rebuilds (see `Auth._restoredOnce`). Test the cold-start/restore path, not just the adopt path.
+- **Where it applies:** `auth_provider.dart` prefetch wiring; any cross-provider side-effect launched from a `build()` method.
+
+### 2026-07-12 — Epoch guard on every await in keepAlive notifiers
+- **What happened:** `ProfileNotifier._sessionEpoch` guarded only `refreshProfileData()`; `saveProfile()` had multiple post-await `state =` writes and could repopulate profile state after `resetProfileData` mid-save.
+- **Rule:** In keepAlive notifiers using `_sessionEpoch`, capture `epoch` at method entry and compare after **every** `await` before any `state` write or `ref.invalidate` — including multi-step flows (`saveProfile`, not just single-fetch methods). Add a mid-invalidate race test per flow.
+- **Where it applies:** `ProfileNotifier` and any keepAlive `@Riverpod` notifier cleared via `ref.invalidate`.
+
+### 2026-07-12 — No mount-time refresh when auth prefetch already runs
+- **What happened:** `ProfileScreen` called `refreshProfileData()` on mount while cold-start/adopt prefetch already loaded the same data — redundant double-fetch on tab open.
+- **Rule:** One shared refresh entry point per resource; if auth adopt/restore prefetches enriched profile, screens read `profileNotifierProvider` and rely on pull-to-refresh for explicit reload — don't re-fetch on mount. Verify `isLoading && profile == null` still shows skeleton while prefetch is in flight.
+- **Where it applies:** `profile_screen.dart`, any tab that mirrors a global prefetch.

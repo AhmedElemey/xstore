@@ -4,6 +4,24 @@ import '../../domain/entities/user_entity.dart';
 
 part 'user_model.freezed.dart';
 
+/// Extracts the user object from GET/PUT `/api/auth/get-profile` and
+/// `/api/auth/update-profile` responses.
+///
+/// CONFIRMED live API (2026-07-11): `{ "user": { ... }, "store": ..., ... }`.
+/// Login/register return `{ "token", "refreshToken" }` only — no user object;
+/// do not use this helper on those responses.
+Map<String, dynamic> parseProfileUserJson(Map<String, dynamic> data) {
+  final wrapped = data['user'];
+  if (wrapped is Map) {
+    return Map<String, dynamic>.from(wrapped);
+  }
+  // Safety net: raw user-at-top-level (mock / legacy routes).
+  if (data.containsKey('id') || data.containsKey('email')) {
+    return data;
+  }
+  throw const FormatException('Missing user in profile response');
+}
+
 /// API/auth DTO. Persisted via [toJson] / [UserModel.fromJson].
 @Freezed(fromJson: false, toJson: false)
 class UserModel with _$UserModel {
@@ -71,13 +89,22 @@ class UserModel with _$UserModel {
       return null;
     }
 
+    String? optString(String key, {String? altKey}) {
+      String? pick(dynamic v) {
+        if (v == null) return null;
+        final s = v is String ? v : v.toString();
+        final trimmed = s.trim();
+        return trimmed.isEmpty ? null : trimmed;
+      }
+
+      return pick(json[key]) ?? (altKey != null ? pick(json[altKey]) : null);
+    }
+
     return UserModel(
       // CONFIRMED: `id` is a JSON number on the real backend, not a string.
       id: json['id']?.toString() ?? '',
       // Backward compat: new backend sends fullNameEn/fullNameAr, not name.
-      name: (json['name'] as String?) ??
-          (json['fullNameEn'] as String?) ??
-          '',
+      name: optString('name') ?? optString('fullNameEn') ?? '',
       email: json['email'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
@@ -89,15 +116,20 @@ class UserModel with _$UserModel {
       totalSales: json['totalSales'] as int?,
       // CONFIRMED: real response sends `creationDate`, not `joinedAt`.
       joinedAt: parseDate('joinedAt', altKey: 'creationDate'),
-      location: json['location'] as String?,
-      storeName: json['storeName'] as String?,
+      location: optString('location'),
+      // Localized store name keys before legacy storeName; use
+      // UserEntity.displayStoreName(isArabic) at runtime for locale.
+      storeName: optString('storeNameEn') ??
+          optString('storeNameAr') ??
+          optString('storeName'),
       storeSlug: json['storeSlug'] as String?,
       storeCategory: json['storeCategory'] as String?,
       storeDescription: json['storeDescription'] as String?,
       storeLogoUrl: json['storeLogoUrl'] as String?,
       storeCity: json['storeCity'] as String?,
       storeWilaya: json['storeWilaya'] as String?,
-      whatsappNumber: json['whatsappNumber'] as String?,
+      // update-profile writes whatsAppNumber; get-profile may return either key.
+      whatsappNumber: optString('whatsappNumber', altKey: 'whatsAppNumber'),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       governorate: json['governorate'] as String?,
@@ -106,15 +138,16 @@ class UserModel with _$UserModel {
       bio: json['bio'] as String?,
       // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`.
       dateOfBirth: parseDate('dateOfBirth', altKey: 'birthDate'),
-      instagramHandle: json['instagramHandle'] as String?,
+      // update-profile writes instagramPage; get-profile may return either key.
+      instagramHandle: optString('instagramHandle', altKey: 'instagramPage'),
       facebookPage: json['facebookPage'] as String?,
       token: json['token'] as String?,
       refreshToken: json['refreshToken'] as String?,
       isNewUser: json['isNewUser'] as bool? ?? false,
-      fullNameEn: json['fullNameEn'] as String?,
-      fullNameAr: json['fullNameAr'] as String?,
-      storeNameEn: json['storeNameEn'] as String?,
-      storeNameAr: json['storeNameAr'] as String?,
+      fullNameEn: optString('fullNameEn'),
+      fullNameAr: optString('fullNameAr'),
+      storeNameEn: optString('storeNameEn'),
+      storeNameAr: optString('storeNameAr'),
       storeDescriptionEn: json['storeDescriptionEn'] as String?,
       storeDescriptionAr: json['storeDescriptionAr'] as String?,
       storeCategoryId: json['storeCategoryId'] as int?,
