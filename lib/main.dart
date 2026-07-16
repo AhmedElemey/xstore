@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/config/app_flavor.dart';
+import 'core/firebase/fcm_token.dart';
 import 'core/firebase/firebase_options.dart';
 
 /// Shared startup used by all flavor entry points.
@@ -22,6 +25,8 @@ Future<void> bootstrap(AppFlavor flavor) async {
     appleProvider:
         flavor.isDev ? AppleProvider.debug : AppleProvider.appAttest,
   );
+  // App open: fetch + persist the FCM token without blocking startup.
+  unawaited(refreshAndStoreFcmToken());
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

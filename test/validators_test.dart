@@ -5,25 +5,6 @@ import 'package:xstore/core/utils/validators.dart';
 void main() {
   final l10n = AppLocalizationsEn();
 
-  group('loginEmailOrPhone', () {
-    test('null-safe empty', () {
-      expect(Validators.loginEmailOrPhone(l10n, ''), isNotNull);
-      expect(Validators.loginEmailOrPhone(l10n, '   '), isNotNull);
-    });
-
-    test('valid email', () {
-      expect(Validators.loginEmailOrPhone(l10n, 'a@b.co'), isNull);
-    });
-
-    test('valid long phone digits', () {
-      expect(Validators.loginEmailOrPhone(l10n, '+1 234 567 8901'), isNull);
-    });
-
-    test('invalid short digits', () {
-      expect(Validators.loginEmailOrPhone(l10n, '12345'), isNotNull);
-    });
-  });
-
   group('loginPassword', () {
     test('empty', () {
       expect(Validators.loginPassword(l10n, ''), isNotNull);

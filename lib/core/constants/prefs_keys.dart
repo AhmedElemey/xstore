@@ -5,8 +5,10 @@ abstract final class PrefsKeys {
   static const exploreRecentSearches = 'explore_recent_searches';
   static const onboardingComplete = 'onboarding_complete';
   static const guestMode = 'guest_mode';
-  static const rememberedEmail = 'remembered_email';
+  static const rememberedPhone = 'remembered_phone';
   static const profilePushNotifications = 'profile_push_notifications';
   static const profileEmailUpdates = 'profile_email_updates';
   static const profileAppLanguage = 'profile_app_language';
+  static const fcmToken = 'xstore_fcm_token';
+  static const socialAuthCredentials = 'xstore_social_auth_credentials';
 }

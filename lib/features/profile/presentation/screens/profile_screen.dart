@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/profile_state.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu_blocks.dart';
 import '../widgets/profile_sheets.dart';
@@ -34,8 +37,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     _scroll = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureProfileLoaded();
       ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
     });
+  }
+
+  /// Cold-start prefetch covers the normal path; this only runs when profile
+  /// state is still empty and no fetch is in flight (prefetch missed/reset).
+  void _ensureProfileLoaded() {
+    final s = ref.read(profileNotifierProvider);
+    if (s.profile == null && !s.isLoading && s.error == null) {
+      unawaited(
+        ref.read(profileNotifierProvider.notifier).refreshProfileData(),
+      );
+    }
+  }
+
+  /// Full-page error only when enriched profile failed and auth has no identity
+  /// to render (token-only stub). After login/restore, auth already carries the
+  /// user from get-profile — show the tab with an inline retry banner instead.
+  bool _showFullPageProfileError(UserEntity user, ProfileState profileState) {
+    return profileState.error != null &&
+        profileState.profile == null &&
+        user.id.isEmpty;
   }
 
   @override
@@ -79,7 +103,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             if (profileState.isLoading && profile == null)
               const SliverFillRemaining(child: ProfileSkeleton())
-            else if (profileState.error != null && profile == null)
+            else if (_showFullPageProfileError(user, profileState))
               SliverFillRemaining(
                 child: ErrorStateWidget(
                   message: resolveAppError(context, profileState.error),

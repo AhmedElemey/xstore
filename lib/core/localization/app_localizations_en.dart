@@ -2449,6 +2449,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailAddressRequired => 'Email Address *';
 
   @override
+  String get emailAddressOptional =>
+      'Email Address (optional — for password recovery)';
+
+  @override
   String get locationCityRequired => 'Location / City *';
 
   @override

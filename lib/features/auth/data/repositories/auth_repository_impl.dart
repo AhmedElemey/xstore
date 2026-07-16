@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -284,18 +285,20 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Unit>> logout() async {
+    // Remote and social sign-outs are best-effort — local cleanup below is
+    // what actually signs the user out, and must run even if they fail
+    // (expired token, offline, unconfigured Facebook SDK throwing).
     try {
-      // Best-effort — local state is always cleared below regardless of
-      // whether the remote call succeeds (e.g. token already expired).
-      try {
-        await _remote.logout();
-      } catch (_) {
-        // Ignore: local cleanup below is what actually signs the user out.
-      }
+      await _remote.logout();
+    } catch (_) {}
+    try {
       await _social.signOutSocial();
+    } catch (_) {}
+    try {
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: PrefsKeys.authRefreshToken);
       await _secureStorage.delete(key: _userKey);
+      await _secureStorage.delete(key: PrefsKeys.socialAuthCredentials);
       return const Right(unit);
     } catch (e) {
       return Left(Failure.cache(e.toString()));
@@ -306,7 +309,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, SocialAuthResult>> signInWithGoogle() async {
     try {
       final result = await _social.signInWithGoogle();
+      await _persistSocialCredentials(result);
       final model = await _exchangeSocialToken(result);
+      if (model == null) return Right(result);
       await _persistUser(model);
       return Right(result.copyWith(isNewUser: model.isNewUser));
     } on SocialAuthCancelledException catch (e) {
@@ -330,7 +335,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, SocialAuthResult>> signInWithApple() async {
     try {
       final result = await _social.signInWithApple();
+      await _persistSocialCredentials(result);
       final model = await _exchangeSocialToken(result);
+      if (model == null) return Right(result);
       await _persistUser(model);
       return Right(result.copyWith(isNewUser: model.isNewUser));
     } on SocialAuthCancelledException catch (e) {
@@ -354,7 +361,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, SocialAuthResult>> signInWithFacebook() async {
     try {
       final result = await _social.signInWithFacebook();
+      await _persistSocialCredentials(result);
       final model = await _exchangeSocialToken(result);
+      if (model == null) return Right(result);
       await _persistUser(model);
       return Right(result.copyWith(isNewUser: model.isNewUser));
     } on SocialAuthCancelledException catch (e) {
@@ -504,7 +513,44 @@ class AuthRepositoryImpl implements AuthRepository {
     await _secureStorage.write(key: _userKey, value: jsonEncode(map));
   }
 
-  Future<UserModel> _exchangeSocialToken(SocialAuthResult result) async {
+  /// Local-only for now: the backend social endpoint isn't live yet, so keep
+  /// the full provider credential set for later registration and debugging.
+  /// Best-effort — a storage failure must never abort the sign-in flow.
+  Future<void> _persistSocialCredentials(SocialAuthResult result) async {
+    try {
+      final firebaseIdToken = MockConfig.useMock
+          ? 'mock-firebase-id-token'
+          : await _firebaseAuth.currentUser?.getIdToken();
+      await _secureStorage.write(
+        key: PrefsKeys.socialAuthCredentials,
+        value: jsonEncode({
+          'provider': result.provider.name,
+          'uid': result.uid,
+          'email': result.email,
+          'displayName': result.displayName,
+          'photoUrl': result.photoUrl,
+          'accessToken': result.accessToken,
+          'idToken': result.idToken,
+          'firebaseIdToken': firebaseIdToken,
+          'savedAt': DateTime.now().toIso8601String(),
+        }),
+      );
+      if (kDebugMode) {
+        debugPrint(
+          'Social credentials saved locally '
+          '(${result.provider.name}, ${result.email})',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('Failed to save social credentials: $e');
+    }
+  }
+
+  /// Null while the backend social route is not deployed (404) — the social
+  /// sign-in then proceeds as a local-only session: the notifier persists the
+  /// Firebase-derived user via authProvider.setUser, and Firebase's own
+  /// isNewUser flag drives role selection.
+  Future<UserModel?> _exchangeSocialToken(SocialAuthResult result) async {
     final firebaseIdToken = await _requireFirebaseIdToken();
     return _remote.loginWithSocialToken(
       provider: result.provider.name,

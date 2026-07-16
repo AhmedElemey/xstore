@@ -37,7 +37,8 @@ abstract final class ApiEndpoints {
   static const String register = '/auth/register';
 
   // TODO(backend): no social/phone token-exchange routes exist yet.
-  static const String socialLogin = '/auth/social';
+  // socialLogin matches the spec handed to backend: POST /api/auth/social.
+  static const String socialLogin = '$_api/auth/social';
   static const String phoneLogin = '/auth/phone';
 
   /// Legacy orders module — not on the confirmed `/api` contract; the hosted

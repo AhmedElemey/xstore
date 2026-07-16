@@ -6,6 +6,7 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
+import '../../../../core/network/legacy_route_options.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/register_params.dart';
@@ -52,7 +53,9 @@ abstract interface class AuthRemoteDataSource {
   Future<void> logout();
 
   /// Exchanges a Firebase ID token (verified server-side) for a backend session.
-  Future<UserModel> loginWithSocialToken({
+  /// Returns null while the backend route is not deployed yet (404) — callers
+  /// fall back to a local-only session.
+  Future<UserModel?> loginWithSocialToken({
     required String provider,
     required String idToken,
   });
@@ -139,7 +142,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {
           'fullNameEn': params.fullNameEn,
           'fullNameAr': params.fullNameAr,
-          'email': params.email,
+          // Email is optional (phone is the account identifier); the live
+          // backend registers fine without the key, so omit it when blank.
+          if (params.email.trim().isNotEmpty) 'email': params.email.trim(),
           'phoneNumber': params.phoneNumber,
           'password': params.password,
           'confirmPassword': params.confirmPassword,
@@ -163,7 +168,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {
           'fullNameEn': params.fullNameEn,
           'fullNameAr': params.fullNameAr,
-          'email': params.email,
+          // See registerConsumer — email is optional, omit when blank.
+          if (params.email.trim().isNotEmpty) 'email': params.email.trim(),
           'phoneNumber': params.phoneNumber,
           'password': params.password,
           'confirmPassword': params.confirmPassword,
@@ -369,7 +375,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithSocialToken({
+  Future<UserModel?> loginWithSocialToken({
     required String provider,
     required String idToken,
   }) async {
@@ -386,7 +392,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'provider': provider,
           'idToken': idToken,
         },
+        options: LegacyRouteOptions.allowNotFound(),
       );
+      // Route not deployed yet — signal the caller to use a local session.
+      if (LegacyRouteOptions.isNotFound(response)) return null;
       final data = response.data;
       if (data == null) {
         throw const ServerException('Empty response');

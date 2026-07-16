@@ -78,7 +78,7 @@ final getStoreCategoryByIdUseCaseProvider =
 typedef GetStoreCategoryByIdUseCaseRef
     = AutoDisposeProviderRef<GetStoreCategoryByIdUseCase>;
 String _$allStoreCategoriesHash() =>
-    r'148ef967c8c1485e627a6c0da272d51a54b6321e';
+    r'8190cce14775d7d45f399f5b43f1ff275f676aa6';
 
 /// See also [allStoreCategories].
 @ProviderFor(allStoreCategories)

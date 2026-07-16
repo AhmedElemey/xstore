@@ -10,8 +10,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/constants/prefs_keys.dart';
-import '../../../../core/router/app_router.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import 'profile_dependencies.dart';
@@ -106,37 +104,43 @@ class ProfileNotifier extends _$ProfileNotifier {
 
     final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    if (epoch != _sessionEpoch) return;
-    final push = prefs.getBool(PrefsKeys.profilePushNotifications) ?? true;
-    final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
-    final themeMode = ref.read(appThemeModeProvider);
+    try {
+      final prefs = await ref.read(sharedPreferencesProvider.future);
+      if (epoch != _sessionEpoch) return;
+      final push = prefs.getBool(PrefsKeys.profilePushNotifications) ?? true;
+      final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
+      final themeMode = ref.read(appThemeModeProvider);
 
-    final result = await ref.read(getProfileUseCaseProvider).call(sessionUser);
-    if (epoch != _sessionEpoch) return;
-    result.fold(
-      (f) {
-        state = state.copyWith(isLoading: false, error: f.toString());
-      },
-      (profile) {
-        if (kDebugMode) {
-          debugPrint(
-            '[ProfileNotifier] refreshProfileData OK — '
-            'orders=${profile.ordersCount} '
-            'wishlist=${profile.wishlistCount} '
-            'role=${profile.user.role.name}',
-          );
-        }
-        state = state
-            .applyFromProfile(
-              profile,
-              isDarkMode: _isDarkTheme(themeMode),
-              pushNotificationsEnabled: push,
-              emailUpdatesEnabled: email,
-            )
-            .copyWith(isLoading: false);
-      },
-    );
+      final result =
+          await ref.read(getProfileUseCaseProvider).call(sessionUser);
+      if (epoch != _sessionEpoch) return;
+      result.fold(
+        (f) {
+          state = state.copyWith(isLoading: false, error: f.toString());
+        },
+        (profile) {
+          if (kDebugMode) {
+            debugPrint(
+              '[ProfileNotifier] refreshProfileData OK — '
+              'orders=${profile.ordersCount} '
+              'wishlist=${profile.wishlistCount} '
+              'role=${profile.user.role.name}',
+            );
+          }
+          state = state
+              .applyFromProfile(
+                profile,
+                isDarkMode: _isDarkTheme(themeMode),
+                pushNotificationsEnabled: push,
+                emailUpdatesEnabled: email,
+              )
+              .copyWith(isLoading: false);
+        },
+      );
+    } catch (e) {
+      if (epoch != _sessionEpoch) return;
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
 
   void updateField(String field, dynamic value) {
@@ -411,13 +415,11 @@ class ProfileNotifier extends _$ProfileNotifier {
     state = state.copyWith(emailUpdatesEnabled: enabled);
   }
 
-  Future<void> logout() async {
-    await ref.read(logoutUseCaseProvider).call();
-    resetProfileData(ref);
-    ref.invalidate(authProvider);
-    ref.read(goRouterProvider).go(AppRoutes.login);
-  }
-
+  // Session teardown lives in Auth.logout — a notifier must not
+  // ref.invalidate() itself (riverpod's debug assert kills the method
+  // mid-way), which is what resetProfileData(ref) did from here. Auth's ref
+  // invalidates this provider legally, and the router redirect on the auth
+  // change handles navigation to login.
   Future<void> deleteAccount() async {
     final remote = await ref.read(deleteAccountUseCaseProvider).call();
     await remote.fold(
@@ -425,11 +427,7 @@ class ProfileNotifier extends _$ProfileNotifier {
         state = state.copyWith(error: f.toString());
       },
       (_) async {
-        await ref.read(logoutUseCaseProvider).call();
-        resetProfileData(ref);
-        ref.invalidate(authProvider);
-        ref.invalidateSelf();
-        ref.read(goRouterProvider).go(AppRoutes.login);
+        await ref.read(authProvider.notifier).logout();
       },
     );
   }

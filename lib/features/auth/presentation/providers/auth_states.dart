@@ -7,7 +7,7 @@ part 'auth_states.freezed.dart';
 @freezed
 class LoginState with _$LoginState {
   const factory LoginState({
-    @Default('') String email,
+    @Default('') String phone,
     @Default('') String password,
     @Default(false) bool rememberMe,
     @Default(false) bool isPasswordVisible,

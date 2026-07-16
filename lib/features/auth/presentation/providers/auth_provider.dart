@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/firebase/fcm_token.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
@@ -200,6 +203,7 @@ class Auth extends _$Auth {
       (_) => AsyncData(user),
       (_) => AsyncData(user),
     );
+    unawaited(refreshAndStoreFcmToken());
     prefetchProfileData(ref);
   }
 
@@ -208,6 +212,7 @@ class Auth extends _$Auth {
   void adoptSession(UserEntity user) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
+    unawaited(refreshAndStoreFcmToken());
     prefetchProfileData(ref);
   }
 }
@@ -226,7 +231,7 @@ class LoginNotifier extends _$LoginNotifier {
     return const LoginState();
   }
 
-  void updateEmail(String v) => state = state.copyWith(email: v, error: null);
+  void updatePhone(String v) => state = state.copyWith(phone: v, error: null);
 
   void updatePassword(String v) => state = state.copyWith(password: v, error: null);
 
@@ -240,14 +245,12 @@ class LoginNotifier extends _$LoginNotifier {
   void clearError() => state = state.copyWith(error: null);
 
   bool validate(AppLocalizations l10n) {
-    final id = state.email.trim();
-    final pass = state.password;
-    final idErr = Validators.loginEmailOrPhone(l10n, id);
-    if (idErr != null) {
-      state = state.copyWith(error: idErr);
+    final phoneErr = Validators.egyptPhone(l10n, state.phone);
+    if (phoneErr != null) {
+      state = state.copyWith(error: phoneErr);
       return false;
     }
-    final passErr = Validators.loginPassword(l10n, pass);
+    final passErr = Validators.loginPassword(l10n, state.password);
     if (passErr != null) {
       state = state.copyWith(error: passErr);
       return false;
@@ -260,7 +263,8 @@ class LoginNotifier extends _$LoginNotifier {
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(loginUseCaseProvider).call(
           LoginParams(
-            emailOrPhone: state.email.trim(),
+            // Backend `emailOrPhone` field; the app authenticates by phone.
+            emailOrPhone: AppValidators.normalizeEgyptLocal(state.phone),
             password: state.password,
             rememberMe: state.rememberMe,
           ),
@@ -444,8 +448,12 @@ class RegisterNotifier extends _$RegisterNotifier {
         );
         if (fnAr != null) errors['fullNameAr'] = fnAr;
 
-        final em = Validators.registerEmail(l10n, state.email);
-        if (em != null) errors['email'] = em;
+        // Email is optional (auth is phone-based; backend registers without
+        // it) — validate the format only when the user typed one.
+        if (state.email.trim().isNotEmpty) {
+          final em = Validators.registerEmail(l10n, state.email);
+          if (em != null) errors['email'] = em;
+        }
 
         final ph = Validators.registerPhoneEgypt(
           l10n,

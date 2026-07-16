@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -55,6 +56,19 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
       final user = userCredential.user;
       if (user == null) throw const SocialAuthException('Google sign-in failed');
+      if (kDebugMode) {
+        // One debugPrint per field: tokens stay on single logcat lines (<4KB)
+        // so they can be copy-pasted for backend verification testing.
+        final firebaseIdToken = await user.getIdToken();
+        debugPrint('── Google sign-in credential ──');
+        debugPrint('email: ${user.email}');
+        debugPrint('displayName: ${user.displayName}');
+        debugPrint('photoUrl: ${user.photoURL}');
+        debugPrint('firebaseUid: ${user.uid}');
+        debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
+        debugPrint('google idToken: ${googleAuth.idToken}');
+        debugPrint('firebase idToken (backend verifies this): $firebaseIdToken');
+      }
       return SocialAuthResult(
         provider: SocialProvider.google,
         uid: user.uid,

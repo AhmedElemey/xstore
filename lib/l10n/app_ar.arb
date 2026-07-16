@@ -1057,6 +1057,7 @@
   "storeNameArRequired": "اسم المتجر (بالعربية) *",
   "storeDescriptionArRequired": "وصف المتجر (بالعربية) *",
   "emailAddressRequired": "البريد الإلكتروني *",
+  "emailAddressOptional": "البريد الإلكتروني (اختياري — لاستعادة كلمة المرور)",
   "locationCityRequired": "المدينة *",
   "locationHintAlgiers": "مثال: القاهرة",
   "secureYourAccount": "أمّن حسابك",

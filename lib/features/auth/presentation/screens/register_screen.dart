@@ -430,7 +430,7 @@ class _StepPersonal extends StatelessWidget {
           builder: (context, val, _) {
             final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val.text.trim());
             return AuthTextField(
-              label: context.l10n.emailAddressRequired,
+              label: context.l10n.emailAddressOptional,
               controller: email,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),

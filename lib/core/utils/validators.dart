@@ -3,22 +3,8 @@ import '../localization/app_localizations.dart';
 /// Shared form validation helpers. Return localized user-facing strings via [AppLocalizations].
 abstract final class Validators {
   static final RegExp _emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-  static final RegExp _nonDigit = RegExp(r'\D');
   static final RegExp _fullNameLetters = RegExp(r'^[a-zA-Z\s]+$');
   static final RegExp _egyptMobileLocal = RegExp(r'^01[0125]\d{8}$');
-
-  static bool isLoginEmailOrPhoneValid(String trimmed) {
-    if (_emailRegex.hasMatch(trimmed)) return true;
-    final digits = trimmed.replaceAll(_nonDigit, '');
-    return digits.length >= 10;
-  }
-
-  static String? loginEmailOrPhone(AppLocalizations l10n, String value) {
-    final id = value.trim();
-    if (id.isEmpty) return l10n.validationEmailOrPhoneRequired;
-    if (!isLoginEmailOrPhoneValid(id)) return l10n.validEmailOrPhone;
-    return null;
-  }
 
   static String? loginPassword(AppLocalizations l10n, String value) {
     if (value.isEmpty) return l10n.validationLoginPasswordRequired;

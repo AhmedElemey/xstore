@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 
 Future<void> _saveAvatarAfterPick({
@@ -105,7 +106,7 @@ Future<void> showProfileLogoutSheet({
                 child: FilledButton(
                   onPressed: () async {
                     Navigator.pop(ctx);
-                    await ref.read(profileNotifierProvider.notifier).logout();
+                    await ref.read(authProvider.notifier).logout();
                   },
                   child: Text(context.l10n.logOut),
                 ),

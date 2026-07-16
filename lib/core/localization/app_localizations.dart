@@ -4796,6 +4796,12 @@ abstract class AppLocalizations {
   /// **'Email Address *'**
   String get emailAddressRequired;
 
+  /// No description provided for @emailAddressOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address (optional — for password recovery)'**
+  String get emailAddressOptional;
+
   /// No description provided for @locationCityRequired.
   ///
   /// In en, this message translates to:

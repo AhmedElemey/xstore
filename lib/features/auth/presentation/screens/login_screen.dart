@@ -37,9 +37,9 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
   final _phone = TextEditingController();
+  final _password = TextEditingController();
+  final _sheetPhone = TextEditingController();
   late AnimationController _shakeController;
 
   @override
@@ -49,43 +49,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRememberedEmail());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRememberedPhone());
   }
 
-  Future<void> _loadRememberedEmail() async {
+  Future<void> _loadRememberedPhone() async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    final saved = prefs.getString(PrefsKeys.rememberedEmail);
+    final saved = prefs.getString(PrefsKeys.rememberedPhone);
     if (saved != null && saved.isNotEmpty && mounted) {
-      _email.text = saved;
-      ref.read(loginNotifierProvider.notifier).updateEmail(saved);
+      _phone.text = saved;
+      ref.read(loginNotifierProvider.notifier).updatePhone(saved);
       ref.read(loginNotifierProvider.notifier).setRememberMe(true);
+    }
+  }
+
+  Future<void> _persistRememberedPhone(bool remember, String phone) async {
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    if (remember) {
+      await prefs.setString(PrefsKeys.rememberedPhone, phone);
+    } else {
+      await prefs.remove(PrefsKeys.rememberedPhone);
     }
   }
 
   @override
   void dispose() {
-    _email.dispose();
-    _password.dispose();
     _phone.dispose();
+    _password.dispose();
+    _sheetPhone.dispose();
     _shakeController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     final n = ref.read(loginNotifierProvider.notifier);
-    n.updateEmail(_email.text.trim());
+    n.updatePhone(_phone.text.trim());
     n.updatePassword(_password.text);
     await n.login(context.l10n);
     if (!mounted) return;
     final loginState = ref.read(loginNotifierProvider);
     final authState = ref.read(authProvider);
     if (loginState.error == null && authState.valueOrNull != null) {
+      await _persistRememberedPhone(loginState.rememberMe, loginState.phone);
+      if (!mounted) return;
       context.go(AppRoutes.home);
     }
   }
 
   Future<void> _openPhoneLoginSheet() async {
-    _phone.clear();
+    _sheetPhone.clear();
     ref.read(phoneAuthProvider.notifier).reset();
     await showModalBottomSheet<void>(
       context: context,
@@ -125,7 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   ),
                   const Gap(AppSpacing.lg),
                   PhoneInputField(
-                    controller: _phone,
+                    controller: _sheetPhone,
                     errorText: hasError ? state.phoneError : null,
                     onChanged: (v) => notifier.updatePhone(v, context.l10n),
                   ),
@@ -187,10 +198,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
 
     final l10n = context.l10n;
-    final emailFormatError = Validators.loginEmailOrPhone(l10n, login.email.trim());
+    final phoneFormatError = Validators.egyptPhone(l10n, login.phone.trim());
     final passwordFormatError = Validators.loginPassword(l10n, login.password);
     final notifierAuthError = login.error != null &&
-        login.error != emailFormatError &&
+        login.error != phoneFormatError &&
         login.error != passwordFormatError;
 
     return Scaffold(
@@ -245,21 +256,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               context.push(AppRoutes.register),
                         ),
                         const Gap(AppSpacing.xl),
-                        AuthTextField(
-                          label: context.l10n.email,
-                          hint: context.l10n.enterEmailHint,
-                          controller: _email,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          prefixIcon: const Icon(LucideIcons.mail),
+                        PhoneInputField(
+                          controller: _phone,
                           errorText:
-                              login.error != null && login.error == emailFormatError
+                              login.error != null && login.error == phoneFormatError
                                   ? login.error
                                   : null,
                           onChanged: (v) =>
-                              ref.read(loginNotifierProvider.notifier).updateEmail(v),
-                          validator: (v) =>
-                              Validators.loginEmailOrPhone(context.l10n, v ?? ''),
+                              ref.read(loginNotifierProvider.notifier).updatePhone(v),
                         ),
                         const Gap(AppSpacing.lg),
                         AuthTextField(

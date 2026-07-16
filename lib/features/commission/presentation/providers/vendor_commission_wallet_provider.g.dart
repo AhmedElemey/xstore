@@ -7,7 +7,7 @@ part of 'vendor_commission_wallet_provider.dart';
 // **************************************************************************
 
 String _$vendorCommissionWalletHash() =>
-    r'd972ebe3ac43c9b26e223600e22259926bbfefaa';
+    r'4861d397ee83503ea4616f672ccfb3339a3d92de';
 
 /// See also [vendorCommissionWallet].
 @ProviderFor(vendorCommissionWallet)

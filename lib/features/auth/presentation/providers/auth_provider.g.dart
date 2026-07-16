@@ -388,7 +388,7 @@ final verifyOtpUseCaseProvider = AutoDisposeProvider<VerifyOtpUseCase>.internal(
 );
 
 typedef VerifyOtpUseCaseRef = AutoDisposeProviderRef<VerifyOtpUseCase>;
-String _$authHash() => r'd83304c3c7a7fffc97010ca23d8be945b1c8e0ea';
+String _$authHash() => r'f39045d3272b10860c3e0147cfec877363d69a49';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -402,7 +402,7 @@ final authProvider = AsyncNotifierProvider<Auth, UserEntity?>.internal(
 );
 
 typedef _$Auth = AsyncNotifier<UserEntity?>;
-String _$loginNotifierHash() => r'ab8575c6963e7349777990be78ee72abf3f206c6';
+String _$loginNotifierHash() => r'107cb1f9390eea7e75a518f258079a81044be084';
 
 /// See also [LoginNotifier].
 @ProviderFor(LoginNotifier)
@@ -418,7 +418,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'de77e58a856a985da118188b15e1666dfc14a556';
+String _$registerNotifierHash() => r'c3029d914060f047054098de71de444e8a5f5e18';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

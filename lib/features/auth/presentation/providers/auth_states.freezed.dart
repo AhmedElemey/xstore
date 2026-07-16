@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$LoginState {
-  String get email => throw _privateConstructorUsedError;
+  String get phone => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
   bool get rememberMe => throw _privateConstructorUsedError;
   bool get isPasswordVisible => throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ abstract class $LoginStateCopyWith<$Res> {
       _$LoginStateCopyWithImpl<$Res, LoginState>;
   @useResult
   $Res call(
-      {String email,
+      {String phone,
       String password,
       bool rememberMe,
       bool isPasswordVisible,
@@ -56,7 +56,7 @@ class _$LoginStateCopyWithImpl<$Res, $Val extends LoginState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? phone = null,
     Object? password = null,
     Object? rememberMe = null,
     Object? isPasswordVisible = null,
@@ -64,9 +64,9 @@ class _$LoginStateCopyWithImpl<$Res, $Val extends LoginState>
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
+      phone: null == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _value.password
@@ -101,7 +101,7 @@ abstract class _$$LoginStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String email,
+      {String phone,
       String password,
       bool rememberMe,
       bool isPasswordVisible,
@@ -120,7 +120,7 @@ class __$$LoginStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? phone = null,
     Object? password = null,
     Object? rememberMe = null,
     Object? isPasswordVisible = null,
@@ -128,9 +128,9 @@ class __$$LoginStateImplCopyWithImpl<$Res>
     Object? error = freezed,
   }) {
     return _then(_$LoginStateImpl(
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
+      phone: null == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _value.password
@@ -160,7 +160,7 @@ class __$$LoginStateImplCopyWithImpl<$Res>
 
 class _$LoginStateImpl implements _LoginState {
   const _$LoginStateImpl(
-      {this.email = '',
+      {this.phone = '',
       this.password = '',
       this.rememberMe = false,
       this.isPasswordVisible = false,
@@ -169,7 +169,7 @@ class _$LoginStateImpl implements _LoginState {
 
   @override
   @JsonKey()
-  final String email;
+  final String phone;
   @override
   @JsonKey()
   final String password;
@@ -187,7 +187,7 @@ class _$LoginStateImpl implements _LoginState {
 
   @override
   String toString() {
-    return 'LoginState(email: $email, password: $password, rememberMe: $rememberMe, isPasswordVisible: $isPasswordVisible, isLoading: $isLoading, error: $error)';
+    return 'LoginState(phone: $phone, password: $password, rememberMe: $rememberMe, isPasswordVisible: $isPasswordVisible, isLoading: $isLoading, error: $error)';
   }
 
   @override
@@ -195,7 +195,7 @@ class _$LoginStateImpl implements _LoginState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$LoginStateImpl &&
-            (identical(other.email, email) || other.email == email) &&
+            (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.password, password) ||
                 other.password == password) &&
             (identical(other.rememberMe, rememberMe) ||
@@ -208,7 +208,7 @@ class _$LoginStateImpl implements _LoginState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, email, password, rememberMe,
+  int get hashCode => Object.hash(runtimeType, phone, password, rememberMe,
       isPasswordVisible, isLoading, error);
 
   @JsonKey(ignore: true)
@@ -220,7 +220,7 @@ class _$LoginStateImpl implements _LoginState {
 
 abstract class _LoginState implements LoginState {
   const factory _LoginState(
-      {final String email,
+      {final String phone,
       final String password,
       final bool rememberMe,
       final bool isPasswordVisible,
@@ -228,7 +228,7 @@ abstract class _LoginState implements LoginState {
       final String? error}) = _$LoginStateImpl;
 
   @override
-  String get email;
+  String get phone;
   @override
   String get password;
   @override

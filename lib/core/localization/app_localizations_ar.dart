@@ -2446,6 +2446,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emailAddressRequired => 'البريد الإلكتروني *';
 
   @override
+  String get emailAddressOptional =>
+      'البريد الإلكتروني (اختياري — لاستعادة كلمة المرور)';
+
+  @override
   String get locationCityRequired => 'المدينة *';
 
   @override

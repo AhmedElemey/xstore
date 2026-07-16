@@ -75,7 +75,7 @@ final getGovernmentByIdUseCaseProvider =
 
 typedef GetGovernmentByIdUseCaseRef
     = AutoDisposeProviderRef<GetGovernmentByIdUseCase>;
-String _$allGovernmentsHash() => r'f2ba8dd2c9d6d2c4ee23b5c8487f9db665ae5524';
+String _$allGovernmentsHash() => r'5789b98a7ce8f7583f922e9316e19bd85f8927fd';
 
 /// See also [allGovernments].
 @ProviderFor(allGovernments)

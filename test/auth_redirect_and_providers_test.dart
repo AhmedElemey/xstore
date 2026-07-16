@@ -248,7 +248,7 @@ void main() {
       await container.read(authProvider.future);
 
       container.read(loginNotifierProvider.notifier)
-        ..updateEmail('buyer@test.com')
+        ..updatePhone('01012345678')
         ..updatePassword('secret12');
       await container.read(loginNotifierProvider.notifier).login(l10n);
 
