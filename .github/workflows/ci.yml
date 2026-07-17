@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
@@ -80,9 +80,15 @@ jobs:
       - name: Run code generation (freezed / riverpod / json)
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # Informational only: the repo predates `dart format` enforcement
+      # (~427 legacy files differ). Exit 0 with a ::warning:: annotation —
+      # a raw exit 1 (even with continue-on-error) renders as a red error
+      # on the run page and reads like a real failure.
       - name: Verify formatting (informational)
-        continue-on-error: true
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          if ! dart format --output=none --set-exit-if-changed .; then
+            echo "::warning::dart format found unformatted files (informational - not enforced)."
+          fi
 
       - name: Analyze
         run: flutter analyze
@@ -101,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
@@ -129,7 +135,7 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Select Xcode 16.2 (Swift 6 — required by FBSDKLoginKit)
         run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
