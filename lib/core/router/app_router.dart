@@ -15,8 +15,11 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../../features/auth/presentation/providers/phone_auth_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
+import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
+import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
+import '../../features/delivery/presentation/screens/courier_deliveries_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/listing/presentation/screens/add_listing_screen.dart';
@@ -169,15 +172,58 @@ List<StatefulShellBranch> _vendorShellBranches() => [
       ),
     ];
 
+List<StatefulShellBranch> _courierShellBranches() => [
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.deliveries,
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const CourierDeliveriesScreen(),
+            ),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.courierCash,
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const CourierCashScreen(),
+            ),
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: AppRoutes.profile,
+            pageBuilder: (context, state) => fadeScaleTransition(
+              context,
+              state,
+              const ProfileScreen(),
+            ),
+          ),
+        ],
+      ),
+    ];
+
 @Riverpod(keepAlive: true)
 GoRouter goRouter(GoRouterRef ref) {
   final refresh = ref.watch(routerNotifierProvider);
-  // Only rebuild the route tree when vendor vs consumer tabs change — not on every
+  // Only rebuild the route tree when the role's tab set changes — not on every
   // auth refresh, or login would recreate GoRouter and reset to [initialLocation].
-  final isVendor = ref.watch(
-    authProvider.select((auth) => auth.valueOrNull?.isVendor == true),
+  final role = ref.watch(
+    authProvider.select((auth) => auth.valueOrNull?.role ?? UserRole.consumer),
   );
-  final shellBranches = isVendor ? _vendorShellBranches() : _consumerShellBranches();
+  final shellBranches = switch (role) {
+    UserRole.vendor => _vendorShellBranches(),
+    UserRole.courier => _courierShellBranches(),
+    UserRole.consumer => _consumerShellBranches(),
+  };
 
   return GoRouter(
     initialLocation: AppRoutes.splash,

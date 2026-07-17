@@ -2,10 +2,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_entity.freezed.dart';
 
-/// Role used for routing (vendor shell vs consumer shell).
+/// Role used for routing (vendor shell vs consumer shell vs courier shell).
+///
+/// [courier] accounts are created by the platform owner (no self-registration
+/// path); they collect COD cash from buyers and hand it over to xStore.
 enum UserRole {
   vendor,
   consumer,
+  courier,
 }
 
 @freezed
@@ -59,6 +63,8 @@ class UserEntity with _$UserEntity {
   }) = _UserEntity;
 
   bool get isVendor => role == UserRole.vendor;
+
+  bool get isCourier => role == UserRole.courier;
 
   /// Resolves the bilingual full name for the current app language, falling
   /// back to legacy [name] when the En/Ar variant is unset.

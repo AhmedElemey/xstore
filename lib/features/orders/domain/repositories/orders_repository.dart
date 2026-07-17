@@ -16,6 +16,13 @@ abstract interface class OrdersRepository {
     required int pageSize,
   });
 
+  /// Orders assigned to a platform courier ("Delivered by xStore").
+  Future<Either<Failure, List<OrderEntity>>> getCourierOrders({
+    required String courierId,
+    required int page,
+    required int pageSize,
+  });
+
   Future<Either<Failure, OrderEntity>> getOrderDetail({
     required String orderId,
     required String? consumerId,

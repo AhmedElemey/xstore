@@ -1,4 +1,5 @@
 import '../../features/auth/data/models/user_model.dart';
+import '../utils/validators.dart';
 import '../../features/auth/domain/entities/consumer_register_params.dart';
 import '../../features/auth/domain/entities/register_params.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
@@ -30,6 +31,18 @@ const mockVendorUser = UserEntity(
   governorate: 'Cairo',
   town: 'Nasr City',
   detailAddress: '12 Tahrir Street, Floor 3',
+);
+
+/// Owner-created delivery account (couriers cannot self-register).
+const mockCourierUser = UserEntity(
+  id: 'courier_001',
+  name: 'Mostafa El-Sayed',
+  email: 'mostafa.courier@xstore.com',
+  phoneNumber: '+201055500003',
+  role: UserRole.courier,
+  isVerified: true,
+  joinedAt: null,
+  location: 'Cairo, Egypt',
 );
 
 const mockConsumerUser = UserEntity(
@@ -75,6 +88,25 @@ UserModel mockVendorUserModel({
       token: 'mock-token-vendor',
     );
 
+UserModel mockCourierUserModel({
+  String? email,
+  String? name,
+  String? phoneNumber,
+}) =>
+    UserModel(
+      id: mockCourierUser.id,
+      name: name ?? mockCourierUser.name,
+      email: email ?? mockCourierUser.email,
+      phoneNumber: phoneNumber ?? mockCourierUser.phoneNumber,
+      avatarUrl: MockImages.avatar(4),
+      role: UserRole.courier,
+      isVerified: true,
+      joinedAt: DateTime(2026, 6, 1),
+      location: mockCourierUser.location,
+      token: 'mock-token-courier',
+      refreshToken: 'mock-refresh-token-courier',
+    );
+
 UserModel mockConsumerUserModel({
   String? email,
   String? name,
@@ -116,11 +148,30 @@ final mockConsumerProfileDisplay = (
   location: mockConsumerUser.location ?? '',
 );
 
+/// The login UI is phone-first (identifiers reach the datasource as
+/// normalized 11-digit local numbers), so each mock role also matches its
+/// seed user's phone. Email/keyword forms are kept for tests and direct calls.
+bool _matchesMockPhone(String identifier, UserEntity user) =>
+    AppValidators.normalizeEgyptLocal(identifier) ==
+    AppValidators.normalizeEgyptLocal(user.phoneNumber);
+
 bool mockLoginIsVendor(String emailOrPhone) {
   final e = emailOrPhone.toLowerCase().trim();
   return e.contains('vendor') ||
       e.contains('seller') ||
-      e == 'ahmed@xstore.com';
+      e == 'ahmed@xstore.com' ||
+      _matchesMockPhone(e, mockVendorUser);
+}
+
+/// Mock-mode courier sign-in: the mock courier's phone (01055500003 — the
+/// only form the phone-first login screen lets through) or any identifier
+/// mentioning courier/driver. Backend has no courier auth yet, so this is
+/// the only way to run the app as a driver.
+bool mockLoginIsCourier(String emailOrPhone) {
+  final e = emailOrPhone.toLowerCase().trim();
+  return e.contains('courier') ||
+      e.contains('driver') ||
+      _matchesMockPhone(e, mockCourierUser);
 }
 
 UserModel userModelFromRegisterParams(RegisterParams p, {String? id}) {

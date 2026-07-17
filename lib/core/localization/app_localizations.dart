@@ -5779,6 +5779,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable them in Settings?'**
   String get enableLocationServices;
+
+  /// No description provided for @navDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries'**
+  String get navDeliveries;
+
+  /// No description provided for @navCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get navCash;
+
+  /// No description provided for @courierDeliveriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Deliveries'**
+  String get courierDeliveriesTitle;
+
+  /// No description provided for @courierActiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get courierActiveSection;
+
+  /// No description provided for @courierHistorySection.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get courierHistorySection;
+
+  /// No description provided for @courierEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No deliveries assigned'**
+  String get courierEmptyTitle;
+
+  /// No description provided for @courierEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery tasks assigned to you by xStore will show up here.'**
+  String get courierEmptyBody;
+
+  /// No description provided for @courierPickUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up'**
+  String get courierPickUpAction;
+
+  /// No description provided for @courierDeliverAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get courierDeliverAction;
+
+  /// No description provided for @courierCollectAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount}'**
+  String courierCollectAmount(String amount);
+
+  /// No description provided for @courierPrepaidChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepaid — nothing to collect'**
+  String get courierPrepaidChip;
+
+  /// No description provided for @courierFailAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get courierFailAction;
+
+  /// No description provided for @courierFailReasonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why did the delivery fail?'**
+  String get courierFailReasonTitle;
+
+  /// No description provided for @courierFailReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. buyer unreachable, refused at the door'**
+  String get courierFailReasonHint;
+
+  /// No description provided for @courierFailReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please give a short reason'**
+  String get courierFailReasonRequired;
+
+  /// No description provided for @courierDeliverConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delivery'**
+  String get courierDeliverConfirmTitle;
+
+  /// No description provided for @courierDeliverConfirmCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount} from the buyer, then confirm.'**
+  String courierDeliverConfirmCod(String amount);
+
+  /// No description provided for @courierDeliverConfirmPrepaid.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is prepaid — hand over the parcel and confirm.'**
+  String get courierDeliverConfirmPrepaid;
+
+  /// No description provided for @courierCashInHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash in hand'**
+  String get courierCashInHand;
+
+  /// No description provided for @courierCashScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get courierCashScreenTitle;
+
+  /// No description provided for @courierCashExplainer.
+  ///
+  /// In en, this message translates to:
+  /// **'COD cash you collect stays with you until you hand it over to xStore. Keep it under {amount}.'**
+  String courierCashExplainer(String amount);
+
+  /// No description provided for @courierHandoverDueBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash limit reached — deposit your collected COD with xStore before taking new deliveries.'**
+  String get courierHandoverDueBanner;
+
+  /// No description provided for @courierCashEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not holding any cash. Delivered COD orders will appear here.'**
+  String get courierCashEmpty;
+
+  /// No description provided for @courierCollectedListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected orders'**
+  String get courierCollectedListTitle;
+
+  /// No description provided for @courierNavigateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Directions in Google Maps'**
+  String get courierNavigateHint;
+
+  /// No description provided for @loginAsCourierDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in as delivery driver (demo)'**
+  String get loginAsCourierDemo;
 }
 
 class _AppLocalizationsDelegate

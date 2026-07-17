@@ -483,15 +483,18 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// login/register responses only carry `{token, refreshToken}` — no user
-  /// fields at all (confirmed against a live backend; the datasource no
-  /// longer has a mock path for these, so this always runs). Persists the
-  /// token first (so it's sent via X-Auth-Token) and fetches the real user
-  /// via get-profile, merging the token pair back in.
+  /// Live login/register responses only carry `{token, refreshToken}` — no
+  /// user fields at all (confirmed against a live backend), so the identity
+  /// is fetched via get-profile. Persists the token first (so it's sent via
+  /// X-Auth-Token), merging the token pair back in. Mock login is the one
+  /// path that already returns a full identity (non-empty id) — skip the
+  /// profile round-trip for it, since a mock token would 401 on the live
+  /// get-profile route.
   Future<UserModel> _resolveFullUser(UserModel loginResult) async {
     if (loginResult.token != null && loginResult.token!.isNotEmpty) {
       await _secureStorage.write(key: _tokenKey, value: loginResult.token);
     }
+    if (loginResult.id.isNotEmpty) return loginResult;
     final profile = await _remote.fetchProfile();
     return profile.copyWith(
       token: loginResult.token,

@@ -26,10 +26,15 @@ class ProfileMenuBlocks extends ConsumerWidget {
   const ProfileMenuBlocks({
     super.key,
     required this.isVendor,
+    this.isCourier = false,
     required this.onLogout,
   });
 
   final bool isVendor;
+
+  /// Couriers get delivery shortcuts instead of the consumer shopping block
+  /// (their role is blocked from cart/wishlist/orders by the route guard).
+  final bool isCourier;
   final Future<void> Function() onLogout;
 
   Future<void> _rateApp(BuildContext context) async {
@@ -111,7 +116,24 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     onTap: () => context.push(AppRoutes.earnings),
                   ),
                 ]
-              : [
+              : isCourier
+                  ? [
+                      // Shell-branch tabs — switch with go, never push
+                      // (see StatefulShellRoute lesson).
+                      ProfileMenuTile(
+                        icon: LucideIcons.truck,
+                        iconBackground: AppColors.primary,
+                        label: context.l10n.navDeliveries,
+                        onTap: () => context.go(AppRoutes.deliveries),
+                      ),
+                      ProfileMenuTile(
+                        icon: LucideIcons.wallet,
+                        iconBackground: AppColors.success,
+                        label: context.l10n.navCash,
+                        onTap: () => context.go(AppRoutes.courierCash),
+                      ),
+                    ]
+                  : [
                   ProfileMenuTile(
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.primary,

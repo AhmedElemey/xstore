@@ -10,7 +10,7 @@ Base path assumed: `/admin` (admin-authenticated). Currency is EGP, payment is C
 - `src/index.html` — shell (sidebar, topbar, content container)
 - `src/styles.css` — design tokens + all styles
 - `src/app.js` — views, drawers, forms, and the in-memory demo data (`VENDORS`, `VLISTINGS`,
-  `VCOMM`, `ORDERS`, `DISPUTES`, `CUSTOMERS`, `CATS`, `COUPONS`, `BANNERS`, `TEAM`)
+  `VCOMM`, `ORDERS`, `COURIERS`, `DISPUTES`, `CUSTOMERS`, `CATS`, `COUPONS`, `BANNERS`, `TEAM`)
 
 Each in-memory constant in `app.js` maps 1:1 to a GET endpoint below. Replace the constant
 with the response and the views render unchanged.
@@ -43,6 +43,18 @@ with the response and the views render unchanged.
 ### Orders  (`orders()`, `orderDrawer()`)
 - `GET /admin/orders?status=` · `GET /admin/orders/{id}`
 - `POST /admin/orders/{id}/cancel`
+
+### Delivery — couriers  (`couriers()`, `courierDrawer()`, `assignCourierDrawer()`)
+- `GET  /admin/couriers` → list of Courier (see shape below)
+- `POST /admin/couriers` `{ name, phone, zone }` — **owner-created account** with role
+  `courier` (no self-registration path in the app; response should include the credentials
+  flow, e.g. an invite SMS or temp password)
+- `POST /admin/couriers/{id}/duty` `{ active: bool }` — on/off duty
+- `POST /admin/couriers/{id}/cash-handover` `{ amountEgp }` — record COD cash deposited by
+  the courier; subtract from `cashInHandEgp` (floor 0)
+- `POST /admin/orders/{id}/assign-courier` `{ courierId }` — only for `confirmed|processing`
+  orders without a courier; reject when the courier is off duty or at the cash cap
+- App-side run list (already consumed by the Flutter app): `GET /orders/courier/{courierId}`
 
 ### Disputes  (`disputes()`, `disputeDrawer()`)
 - `GET /admin/disputes?status=`
@@ -118,7 +130,28 @@ with the response and the views render unchanged.
   "vendorId": "v_123",
   "status": "delivered",       // pending|confirmed|processing|shipped|delivered|cancelled
   "payment": "cod",
+  "courierId": "c_001",        // null = vendor self-delivery ("Delivered by xStore" pilot)
   "items": [ { "title": "iPhone 13 Pro 256GB", "qty": 1, "unitPrice": 48999 } ]
+}
+```
+
+### Courier  ("Delivered by xStore" pilot)
+Mirrors the Flutter entity `CourierCashWallet`
+(`lib/features/delivery/domain/entities/courier_cash_wallet.dart`): COD the courier collected
+and hasn't deposited yet. At/above `cashCapEgp` the courier must not receive new COD orders.
+```json
+{
+  "id": "c_001",
+  "name": "Mostafa El-Sayed",
+  "phone": "+20 105 550 0003",
+  "zone": "Cairo — Nasr City & Heliopolis",
+  "status": "active",          // active | off (off duty)
+  "cashInHandEgp": 3850.0,
+  "cashCapEgp": 5000.0,        // maps to kCourierCashHandoverThresholdEgp (client const today)
+  "tasksToday": 6,
+  "delivered30d": 118,
+  "failed30d": 7,
+  "joined": "2026-06"
 }
 ```
 

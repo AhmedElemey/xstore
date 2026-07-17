@@ -7,6 +7,7 @@ class StubOrdersRepository implements OrdersRepository {
   StubOrdersRepository({
     FutureOrEitherConsumerOrders? getConsumerOrdersResult,
     FutureOrEitherVendorOrders? getVendorOrdersResult,
+    FutureOrEitherCourierOrders? getCourierOrdersResult,
     FutureOrEitherOrderStats? getVendorStatsResult,
     Either<Failure, OrderEntity> Function(String orderId)? confirmOrderResult,
   })  : _getConsumer =
@@ -17,6 +18,10 @@ class StubOrdersRepository implements OrdersRepository {
             getVendorOrdersResult ??
                 (({required vendorId, required page, required pageSize}) =>
                     Left(Failure.network('stub vendor orders'))),
+        _getCourier =
+            getCourierOrdersResult ??
+                (({required courierId, required page, required pageSize}) =>
+                    Left(Failure.network('stub courier orders'))),
         _getStats =
             getVendorStatsResult ??
                 (({required vendorId}) => Left(Failure.network('stub stats'))),
@@ -26,6 +31,7 @@ class StubOrdersRepository implements OrdersRepository {
 
   final FutureOrEitherConsumerOrders _getConsumer;
   final FutureOrEitherVendorOrders _getVendor;
+  final FutureOrEitherCourierOrders _getCourier;
   final FutureOrEitherOrderStats _getStats;
   final Either<Failure, OrderEntity> Function(String orderId) _confirm;
 
@@ -49,6 +55,18 @@ class StubOrdersRepository implements OrdersRepository {
   }) async =>
       Future.value(_getVendor(
         vendorId: vendorId,
+        page: page,
+        pageSize: pageSize,
+      ));
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>> getCourierOrders({
+    required String courierId,
+    required int page,
+    required int pageSize,
+  }) async =>
+      Future.value(_getCourier(
+        courierId: courierId,
         page: page,
         pageSize: pageSize,
       ));
@@ -117,6 +135,13 @@ typedef FutureOrEitherConsumerOrders = Either<Failure, List<OrderEntity>>
 typedef FutureOrEitherVendorOrders = Either<Failure, List<OrderEntity>>
     Function({
   required String vendorId,
+  required int page,
+  required int pageSize,
+});
+
+typedef FutureOrEitherCourierOrders = Either<Failure, List<OrderEntity>>
+    Function({
+  required String courierId,
   required int page,
   required int pageSize,
 });

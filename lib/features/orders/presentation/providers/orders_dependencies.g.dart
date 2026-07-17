@@ -74,6 +74,24 @@ final getVendorOrdersUseCaseProvider =
 
 typedef GetVendorOrdersUseCaseRef
     = AutoDisposeProviderRef<GetVendorOrdersUseCase>;
+String _$getCourierOrdersUseCaseHash() =>
+    r'ec363cf95eb6587ab589f6173a23c0b433abce48';
+
+/// See also [getCourierOrdersUseCase].
+@ProviderFor(getCourierOrdersUseCase)
+final getCourierOrdersUseCaseProvider =
+    AutoDisposeProvider<GetCourierOrdersUseCase>.internal(
+  getCourierOrdersUseCase,
+  name: r'getCourierOrdersUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getCourierOrdersUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetCourierOrdersUseCaseRef
+    = AutoDisposeProviderRef<GetCourierOrdersUseCase>;
 String _$getOrderDetailUseCaseHash() =>
     r'4ff5f22edf4f05702d58262f55544e4eb2f065bd';
 

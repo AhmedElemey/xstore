@@ -77,6 +77,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final identifier = params.emailOrPhone.trim();
     final password = params.password;
 
+    if (MockConfig.useMock) {
+      // Identifier-routed fake sessions (any password). Courier is the only
+      // role the backend cannot mint yet — this is the supported way to run
+      // the app as a driver until courier auth ships server-side.
+      final model = mockLoginIsCourier(identifier)
+          ? mockCourierUserModel()
+          : mockLoginIsVendor(identifier)
+              ? mockVendorUserModel()
+              : mockConsumerUserModel();
+      return MockConfig.simulate(model);
+    }
+
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiLogin,

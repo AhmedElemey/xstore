@@ -7,6 +7,7 @@ import '../../domain/repositories/orders_repository.dart';
 import '../../domain/usecases/cancel_order_usecase.dart';
 import '../../domain/usecases/confirm_order_usecase.dart';
 import '../../domain/usecases/get_consumer_orders_usecase.dart';
+import '../../domain/usecases/get_courier_orders_usecase.dart';
 import '../../domain/usecases/get_order_detail_usecase.dart';
 import '../../domain/usecases/get_vendor_order_stats_usecase.dart';
 import '../../domain/usecases/get_vendor_orders_usecase.dart';
@@ -37,6 +38,13 @@ GetConsumerOrdersUseCase getConsumerOrdersUseCase(
 @riverpod
 GetVendorOrdersUseCase getVendorOrdersUseCase(GetVendorOrdersUseCaseRef ref) {
   return GetVendorOrdersUseCase(ref.watch(ordersRepositoryProvider));
+}
+
+@riverpod
+GetCourierOrdersUseCase getCourierOrdersUseCase(
+  GetCourierOrdersUseCaseRef ref,
+) {
+  return GetCourierOrdersUseCase(ref.watch(ordersRepositoryProvider));
 }
 
 @riverpod

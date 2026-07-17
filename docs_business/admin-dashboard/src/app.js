@@ -13,6 +13,8 @@ function ic(n){const p={
  cog:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12a7 7 0 0 0-.1-1.3l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2.2-1.3L14 2h-4l-.3 2.5a7 7 0 0 0-2.2 1.3l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.3l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2.2 1.3L10 22h4l.3-2.5a7 7 0 0 0 2.2-1.3l2.4 1 2-3.4-2-1.6A7 7 0 0 0 19 12z',
  search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
  menu:'M3 6h18M3 12h18M3 18h18',
+ truck:'M1 4h14v12H1zM15 9h4l3 3v4h-7M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+ cash:'M2 7h20v10H2zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5M5.5 12h.01M18.5 12h.01',
  bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
  help:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01'
  }[n]||'';
@@ -95,9 +97,17 @@ const PENDING=[
  {t:'Wooden Building Blocks',v:'Maadi Toy Box',vok:false,cat:'Toys',sub:'Educational',cond:'New',brand:'—',price:320,cmp:0,stock:40,loc:'Cairo',ship:30,emoji:'🧱',submitted:'2d ago',
   desc:'50-piece non-toxic natural beech-wood set. Encourages motor skills and creativity. Ages 3+.',
   specs:{'Age range':'3+',Material:'Beech wood',Pieces:'50',Battery:'None'},imgs:['🧱','🧸']}];
+/* platform couriers ("Delivered by xStore" pilot) — owner-created accounts (role: courier).
+   `cash` mirrors the app's CourierCashWallet: COD collected, not yet handed over.
+   `cap` maps to kCourierCashHandoverThresholdEgp (client constant until a backend config endpoint exists). */
+const COURIERS=[
+ {n:'Mostafa El-Sayed',phone:'+20 105 550 0003',zone:'Cairo — Nasr City & Heliopolis',status:'active',cash:3850,cap:5000,today:6,delivered30:118,failed30:7,joined:'Jun 2026'},
+ {n:'Hassan Farouk',phone:'+20 101 888 2244',zone:'Giza — Dokki & Mohandessin',status:'active',cash:5200,cap:5000,today:4,delivered30:96,failed30:9,joined:'Jun 2026'},
+ {n:'Mahmoud Adel',phone:'+20 102 777 5566',zone:'Cairo — Maadi',status:'off',cash:0,cap:5000,today:0,delivered30:74,failed30:4,joined:'Jul 2026'}];
+const cashDue=c=>c.cash>=c.cap;
 const ORDERS=[
- {id:'XS-2026-4471',buyer:'Ahmed Hassan',phone:'+20 100 111 2233',addr:'12 Tahrir St, Dokki, Giza',vendor:'Cairo Tech Hub',status:'delivered',items:[['iPhone 13 Pro 256GB',1,48999]]},
- {id:'XS-2026-4470',buyer:'Sara Mostafa',phone:'+20 101 222 3344',addr:'8 Nile Corniche, Maadi, Cairo',vendor:'Zamalek Boutique',status:'shipped',items:[['Handmade Linen Abaya',2,1250]]},
+ {id:'XS-2026-4471',buyer:'Ahmed Hassan',phone:'+20 100 111 2233',addr:'12 Tahrir St, Dokki, Giza',vendor:'Cairo Tech Hub',status:'delivered',courier:'Mostafa El-Sayed',items:[['iPhone 13 Pro 256GB',1,48999]]},
+ {id:'XS-2026-4470',buyer:'Sara Mostafa',phone:'+20 101 222 3344',addr:'8 Nile Corniche, Maadi, Cairo',vendor:'Zamalek Boutique',status:'shipped',courier:'Mostafa El-Sayed',items:[['Handmade Linen Abaya',2,1250]]},
  {id:'XS-2026-4469',buyer:'Karim Fouad',phone:'+20 102 333 4455',addr:'25 Gameat Ad Dowal, Mohandessin, Giza',vendor:'Giza Gadgets',status:'processing',items:[['Wireless Earbuds Pro',1,1899]]},
  {id:'XS-2026-4468',buyer:'Mona Adel',phone:'+20 103 444 5566',addr:'14 Sidi Gaber, Alexandria',vendor:'Alexandria Beauty Bar',status:'confirmed',items:[['Vitamin-C Serum 30ml',2,480]]},
  {id:'XS-2026-4467',buyer:'Youssef Ali',phone:'+20 104 555 6677',addr:'3 Makram Ebeid, Nasr City, Cairo',vendor:'Cairo Tech Hub',status:'pending',items:[['Smart Watch Series 8',1,15499]]},
@@ -215,16 +225,24 @@ function categories(){
    <div class="card"><div class="c-body"><div class="cat-grid">${cards}</div></div></div>`;
 }
 
+/* which orders can still be handed to a platform courier */
+const courierAssignable=o=>!o.courier&&['confirmed','processing'].indexOf(o.status)>-1;
+function deliveryCell(o,i){
+ if(o.courier) return `<span class="badge-s b-indigo" title="Delivered by xStore">🚚 ${o.courier.split(' ')[0]}</span>`;
+ if(courierAssignable(o)) return `<button class="btn btn-g btn-sm" onclick="assignCourierDrawer(${i})">Assign</button>`;
+ return '<span class="muted" style="font-size:12px">Vendor</span>';
+}
 function orders(){
  const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td><td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
    <td class="muted">${o.vendor}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
+   <td>${deliveryCell(o,i)}</td>
    <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td><td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${i})">View</button></td></tr>`).join('');
- return `<div class="page-head"><div><h2>Orders</h2><p>Every order across the marketplace · payment: Cash on Delivery</p></div>
+ return `<div class="page-head"><div><h2>Orders</h2><p>Every order across the marketplace · payment: Cash on Delivery · 🚚 = Delivered by xStore</p></div>
    <div class="tabs" id="ordTabs"><span class="chip active">All</span><span class="chip">Pending</span><span class="chip">Processing</span><span class="chip">Shipped</span><span class="chip">Delivered</span><span class="chip">Cancelled</span></div></div>
    <div class="grid g-4" style="margin-bottom:18px">
      ${kpi('box','3,482','Total orders','','up','#2E5C6E')}${kpi('chart','EGP 356','Avg order value','+3%','up','#3F7A5C')}
      ${kpi('alert','12%','COD refusal rate','watch','down','#C68A2E')}${kpi('shield','98.1%','Fulfillment rate','+1%','up','#356F80')}</div>
-   <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Vendor</th><th>Total</th><th>Payment</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+   <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Vendor</th><th>Total</th><th>Payment</th><th>Delivery</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function disputes(){
@@ -247,6 +265,96 @@ function customers(){
    <div class="tabs" style="margin-bottom:18px"><span class="chip active">👤 Customers</span><span class="chip" data-jump="vendors">🏢 Business (vendors)</span></div>
    <div class="grid g-3" style="margin-bottom:18px">${kpi('users','41,208','Total customers','+7%','up','#2E5C6E')}${kpi('chart','2.4','Orders per customer','+0.2','up','#C68A2E')}${kpi('box','63%','Repeat rate','+4%','up','#3F7A5C')}</div>
    <div class="card"><table><thead><tr><th>User</th><th>City</th><th>Account type</th><th>Orders</th><th>Lifetime spend</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---------- delivery (courier pilot) ---------- */
+function couriers(){
+ const held=COURIERS.reduce((s,c)=>s+c.cash,0);
+ const today=COURIERS.reduce((s,c)=>s+c.today,0);
+ const del30=COURIERS.reduce((s,c)=>s+c.delivered30,0);
+ const fail30=COURIERS.reduce((s,c)=>s+c.failed30,0);
+ const failRate=del30+fail30?Math.round(fail30/(del30+fail30)*100):0;
+ const rows=COURIERS.map((c,i)=>{
+   const due=cashDue(c);
+   const st=c.status==='active'?['b-green','Active']:['b-grey','Off duty'];
+   const cashCell=due
+     ?`<span class="money" style="color:#B4472E">${EGP(c.cash)}</span> <span class="badge-s b-red">Cap reached</span>`
+     :`<span class="money">${EGP(c.cash)}</span>`;
+   return `<tr data-status="${c.status}"><td><div class="u" style="cursor:pointer" onclick="courierDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>${c.phone}</small></div></div></td>
+     <td class="muted">${c.zone}</td>
+     <td><span class="badge-s ${st[0]}"><span class="dotb" style="background:currentColor"></span>${st[1]}</span></td>
+     <td>${c.today}</td><td>${c.delivered30} <small class="muted">/ ${c.failed30} failed</small></td>
+     <td>${cashCell}</td>
+     <td class="r"><button class="btn btn-g btn-sm" onclick="courierDrawer(${i})">Details</button>${c.cash>0?`<button class="btn btn-ok btn-sm" onclick="courierDrawer(${i})">Collect cash</button>`:''}</td></tr>`}).join('');
+ const info=`<div class="card mt"><div class="c-body" style="font-size:12.5px;line-height:1.7;color:var(--text-2)">
+   <b style="color:var(--text)">How "Delivered by xStore" works</b>
+   <p style="margin-top:6px">Couriers are <b>owner-created accounts</b> (role: courier — no self-registration). They pick parcels up from the vendor, collect COD at the door, and the cash stays in their <b>cash-in-hand wallet</b> until deposited with xStore. Vendors on courier-delivered orders are paid net of commission — no owed-balance chasing.</p>
+   <p style="margin-top:8px">Each courier has a cash cap (<b>${EGP(5000)}</b>). At/above the cap they must deposit before taking new COD orders — record it here with <b>Collect cash</b>.</p>
+   <p style="margin-top:8px">Backend: <code>POST /admin/couriers</code> (create account) · <code>POST /orders/{id}/assign-courier</code> · <code>GET /orders/courier/{id}</code> (app run list) · <code>POST /admin/couriers/{id}/cash-handover</code>. Cap maps to <code>kCourierCashHandoverThresholdEgp</code>.</p></div></div>`;
+ return `<div class="page-head"><div><h2>Delivery — Couriers</h2><p>Platform couriers collecting COD ("Delivered by xStore" pilot) · assign orders from the <a data-jump="orders" style="color:var(--primary);cursor:pointer">Orders</a> page</p></div>
+   <div style="display:flex;gap:10px;align-items:center"><div class="tabs" style="margin:0"><span class="chip active">All</span><span class="chip">Active</span><span class="chip">Off duty</span></div>
+   <button class="btn btn-p" onclick="openCourierForm()">+ Add courier</button></div></div>
+   <div class="grid g-4" style="margin-bottom:18px">
+     ${kpi('truck',String(COURIERS.filter(c=>c.status==='active').length),'Active couriers','','up','#2E5C6E')}
+     ${kpi('cash',EGP(held),'COD cash with couriers',COURIERS.filter(cashDue).length?'collect':'ok',COURIERS.filter(cashDue).length?'down':'up','#C68A2E')}
+     ${kpi('box',String(today),'Tasks today','','up','#3F7A5C')}
+     ${kpi('alert',failRate+'%','Failed deliveries (30d)','watch','down','#B4472E')}</div>
+   <div class="card"><table><thead><tr><th>Courier</th><th>Zone</th><th>Status</th><th>Today</th><th>Delivered (30d)</th><th>Cash in hand</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>${info}`;
+}
+function courierDrawer(i){
+ const c=COURIERS[i],due=cashDue(c);
+ const st=c.status==='active'?['b-green','Active']:['b-grey','Off duty'];
+ const cashBlock=c.cash>0
+   ?`<div class="form-row" style="margin-top:10px"><label>Cash received from courier (EGP)</label><input id="hoAmt" inputmode="numeric" value="${c.cash}"></div>
+     <div style="display:flex;gap:8px"><button class="btn btn-ok" style="flex:1;justify-content:center" onclick="recordHandover(${i})">Record handover</button></div>`
+   :'<div style="padding:12px 14px;background:var(--success-bg);color:#2C6347;border-radius:11px;font-size:13px;font-weight:600;margin-top:10px">✓ No cash with this courier.</div>';
+ openDrawer('Courier — '+c.n,
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Platform courier · role: courier</div></div></div>'
+   +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🚚 Courier</span><span class="badge-s '+st[0]+'">'+st[1]+'</span>'+(due?'<span class="badge-s b-red">Cash cap reached</span>':'')+'</div>'
+   +secH('Profile')
+   +kv('Phone',c.phone)+kv('Zone',c.zone)+kv('Joined',c.joined)+kv('Tasks today',c.today)+kv('Delivered (30d)',c.delivered30)+kv('Failed (30d)',c.failed30)
+   +secH('Cash in hand')
+   +kv('Holding now','<span style="color:'+(due?'#B4472E':'inherit')+'">'+EGP(c.cash)+'</span>')+kv('Handover cap',EGP(c.cap))
+   +(due?'<div style="margin-top:10px;padding:10px 12px;background:var(--error-bg);color:#8A3A24;border-radius:9px;font-size:12.5px"><b>Cap reached</b> — no new COD orders until the cash is deposited.</div>':'')
+   +cashBlock,
+   '<button class="btn btn-g" style="flex:1;justify-content:center" onclick="courierDuty('+i+')">'+(c.status==='active'?'Set off duty':'Set on duty')+'</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>');
+}
+function recordHandover(i){
+ const c=COURIERS[i];
+ const amt=parseFloat(document.getElementById('hoAmt').value);
+ if(isNaN(amt)||amt<=0){toast('Enter a valid amount');document.getElementById('hoAmt').focus();return;}
+ c.cash=Math.max(0,Math.round((c.cash-amt)*100)/100);
+ toast(c.cash===0?'Handover recorded — courier settled ✓':'Handover recorded — '+EGP(c.cash)+' still with courier');
+ closeDrawer();go('couriers');refreshCourierBadge();
+}
+function courierDuty(i){
+ const c=COURIERS[i];c.status=c.status==='active'?'off':'active';
+ toast(c.n+(c.status==='active'?' is on duty ✓':' set off duty'));
+ closeDrawer();go('couriers');
+}
+function refreshCourierBadge(){
+ const n=COURIERS.filter(cashDue).length;
+ const b=document.querySelector('#nav a[data-view=couriers] .badge');
+ if(b){if(n>0)b.textContent=n;else b.remove();}
+}
+function openCourierForm(){formDrawer('Add courier (owner-created account)',
+ [{label:'Full name',ph:'Courier name',required:true},{label:'Phone',ph:'+20 1xx xxx xxxx',required:true},{label:'Zone',ph:'e.g. Cairo — Maadi',required:true}],
+ 'Create courier',v=>{COURIERS.push({n:v[0],phone:v[1],zone:v[2],status:'active',cash:0,cap:5000,today:0,delivered30:0,failed30:0,joined:'Jul 2026'});toast('Courier "'+v[0]+'" created ✓ — share the login with them');closeDrawer();go('couriers');});}
+function assignCourierDrawer(i){
+ const o=ORDERS[i];
+ const rows=COURIERS.map((c,ci)=>{
+   const off=c.status!=='active',due=cashDue(c);
+   const right=off?'<span class="badge-s b-grey">Off duty</span>'
+     :due?'<span class="badge-s b-red">Cash cap</span>'
+     :`<button class="btn btn-p btn-sm" onclick="assignCourier(${i},${ci})">Assign</button>`;
+   return `<div class="list-row">${avatar(c.n,'50')}<div style="flex:1"><b>${c.n}</b><small class="muted">${c.zone} · ${c.today} tasks today · holding ${EGP(c.cash)}</small></div>${right}</div>`;}).join('');
+ openDrawer('Assign courier — '+o.id,
+   '<p class="muted" style="font-size:12.5px;margin-bottom:10px">Order will switch to <b>Delivered by xStore</b>: the courier collects '+EGP(orderTotal(o))+' COD and the vendor is paid net of commission. Couriers at their cash cap must deposit first.</p>'+rows);
+}
+function assignCourier(i,ci){
+ ORDERS[i].courier=COURIERS[ci].n;COURIERS[ci].today++;
+ toast('Order assigned to '+COURIERS[ci].n+' ✓');
+ closeDrawer();go('orders');
 }
 
 function coupons(){
@@ -286,7 +394,7 @@ function analytics(){
 }
 
 function settings(){
- const toggles=[['Require admin approval before products go live',true],['Require admin approval for new vendors',true],['Cash on Delivery enabled',true],['Online payment gateway (Paymob/Fawry)',false],['Guest browsing (no login)',false],['Allow vendor-level coupons',false]];
+ const toggles=[['Require admin approval before products go live',true],['Require admin approval for new vendors',true],['Cash on Delivery enabled',true],['Delivered by xStore — platform couriers collect COD (pilot)',true],['Online payment gateway (Paymob/Fawry)',false],['Guest browsing (no login)',false],['Allow vendor-level coupons',false]];
  const rows=toggles.map(t=>`<div class="list-row"><div style="flex:1"><b>${t[0]}</b></div><div class="switch ${t[1]?'':'off'}" onclick="this.classList.toggle('off')"></div></div>`).join('');
  return `<div class="page-head"><div><h2>Settings</h2><p>Marketplace rules &amp; launch configuration</p></div></div>
    <div class="split"><div class="card"><div class="c-head"><h3>Marketplace policies</h3></div><div class="c-body" style="padding-top:4px">${rows}</div></div>
@@ -295,8 +403,8 @@ function settings(){
      <button class="btn btn-g mt" style="width:100%;justify-content:center" onclick="openInviteForm()">+ Invite team member</button></div></div></div>`;
 }
 
-const VIEWS={overview,analytics,moderation,vendors,categories,orders,disputes,customers,coupons,content,settings};
-const TITLES={overview:'Dashboard',analytics:'Analytics',moderation:'Product Moderation',vendors:'Vendors',categories:'Categories',orders:'Orders',disputes:'Disputes',customers:'Users',coupons:'Coupons',content:'Content & Banners',settings:'Settings'};
+const VIEWS={overview,analytics,moderation,vendors,categories,orders,couriers,disputes,customers,coupons,content,settings};
+const TITLES={overview:'Dashboard',analytics:'Analytics',moderation:'Product Moderation',vendors:'Vendors',categories:'Categories',orders:'Orders',couriers:'Delivery',disputes:'Disputes',customers:'Users',coupons:'Coupons',content:'Content & Banners',settings:'Settings'};
 
 /* ---------- responsive sidebar (off-canvas below 1050px) ---------- */
 function syncOverlay(){
@@ -340,12 +448,15 @@ function orderDrawer(i){
    ?'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:var(--error)"></span><span style="color:var(--error)">Cancelled</span></div>'
    :steps.map((s,x)=>'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:'+(x<=cur?'var(--success)':'var(--line)')+'"></span><span style="'+(x<=cur?'':'color:var(--text-3)')+'">'+s+'</span></div>').join('');
  const canCancel=['pending','confirmed','processing'].indexOf(o.status)>-1;
+ const assignBtn=courierAssignable(o)
+   ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer();assignCourierDrawer('+i+')">Assign courier</button>':'';
  openDrawer('Order '+o.id,
    kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',o.buyer)+kv('Phone',o.phone)+kv('Vendor (business)',o.vendor)+kv('Payment','Cash on Delivery')
+   +kv('Delivery',o.courier?'🚚 Delivered by xStore — '+o.courier:'Vendor self-delivery')
    +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+o.addr+'</p>'
    +secH('Items')+items+kv('<b>Total</b>','<b>'+EGP(orderTotal(o))+'</b>')
    +secH('Fulfilment timeline')+tl,
-   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to vendor\');closeDrawer()">Contact vendor</button>'
+   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to vendor\');closeDrawer()">Contact vendor</button>'+assignBtn
    +(canCancel?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Order cancelled\');closeDrawer()">Cancel order</button>':'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'));
 }
 function userDrawer(i){
@@ -602,11 +713,11 @@ function deleteCoupon(i){const c=COUPONS[i][0];COUPONS.splice(i,1);toast('Coupon
 function deleteBanner(i){BANNERS.splice(i,1);toast('Banner deleted');go('content');}
 
 /* ---------- filter chips ---------- */
-const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out'];
+const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out','off'];
 function onChip(chip){
  const g=chip.closest('.tabs'); if(g) g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c===chip));
  const label=chip.innerText.replace(/\s*\(\d+\)/,'').trim();
- let key=label.toLowerCase(); if(key==='in review') key='review'; if(key==='out of stock') key='out';
+ let key=label.toLowerCase(); if(key==='in review') key='review'; if(key==='out of stock') key='out'; if(key==='off duty') key='off';
  const view=document.getElementById('content');
  const rows=[...view.querySelectorAll('tr[data-status]')];
  const cards=[...view.querySelectorAll('.mod[data-status]')];

@@ -48,6 +48,24 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
+  Future<Either<Failure, List<OrderEntity>>> getCourierOrders({
+    required String courierId,
+    required int page,
+    required int pageSize,
+  }) async {
+    try {
+      final rows = await _remote.getCourierOrders(
+        courierId: courierId,
+        page: page,
+        pageSize: pageSize,
+      );
+      return Right(rows.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, OrderEntity>> getOrderDetail({
     required String orderId,
     required String? consumerId,

@@ -128,16 +128,24 @@
   "commissionWalletWarnBody": "عليك {amount} كرسوم منصة. ادفعها قبل أن تصل إلى {limit} وإلا سيتم إيقاف الإعلانات الجديدة.",
   "@commissionWalletWarnBody": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "limit": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
     }
   },
   "commissionWalletPausedTitle": "تم إيقاف الإعلانات الجديدة",
   "commissionWalletPausedBody": "عليك {amount} كرسوم منصة، تجاوزت حد {limit}. ادفعها لتتمكن من نشر إعلانات جديدة.",
   "@commissionWalletPausedBody": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "limit": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
     }
   },
   "commissionWalletBlockedSubmit": "الإعلانات الجديدة متوقفة حتى تدفع رسوم المنصة المستحقة.",
@@ -1274,5 +1282,52 @@
         "type": "String"
       }
     }
-  }
+  },
+  "navDeliveries": "التوصيلات",
+  "navCash": "النقدية",
+  "courierDeliveriesTitle": "توصيلاتي",
+  "courierActiveSection": "نشطة",
+  "courierHistorySection": "السجل",
+  "courierEmptyTitle": "لا توجد توصيلات مسندة",
+  "courierEmptyBody": "ستظهر هنا مهام التوصيل المسندة إليك من إكس ستور.",
+  "courierPickUpAction": "تم الاستلام",
+  "courierDeliverAction": "تم التسليم",
+  "courierCollectAmount": "حصّل {amount}",
+  "@courierCollectAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPrepaidChip": "مدفوع مسبقًا — لا يوجد تحصيل",
+  "courierFailAction": "فشل التوصيل",
+  "courierFailReasonTitle": "ما سبب فشل التوصيل؟",
+  "courierFailReasonHint": "مثال: تعذر الوصول للمشتري، رفض الاستلام",
+  "courierFailReasonRequired": "يرجى كتابة سبب مختصر",
+  "courierDeliverConfirmTitle": "تأكيد التسليم",
+  "courierDeliverConfirmCod": "حصّل {amount} من المشتري ثم أكّد.",
+  "@courierDeliverConfirmCod": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierDeliverConfirmPrepaid": "هذا الطلب مدفوع مسبقًا — سلّم الطرد ثم أكّد.",
+  "courierCashInHand": "النقدية بحوزتك",
+  "courierCashScreenTitle": "النقدية",
+  "courierCashExplainer": "نقدية الدفع عند الاستلام تبقى معك حتى تسليمها لإكس ستور. حافظ عليها أقل من {amount}.",
+  "@courierCashExplainer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierHandoverDueBanner": "وصلت للحد الأقصى للنقدية — سلّم المبالغ المحصّلة لإكس ستور قبل قبول توصيلات جديدة.",
+  "courierCashEmpty": "لا توجد نقدية بحوزتك. ستظهر هنا طلبات الدفع عند الاستلام بعد تسليمها.",
+  "courierCollectedListTitle": "الطلبات المحصّلة",
+  "courierNavigateHint": "الاتجاهات في خرائط جوجل",
+  "loginAsCourierDemo": "الدخول كمندوب توصيل (تجريبي)"
 }

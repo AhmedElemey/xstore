@@ -43,41 +43,55 @@ class XstoreBottomNav extends ConsumerWidget {
       authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
     );
     final isVendor = role == UserRole.vendor;
-    final cartCount = isVendor
-        ? 0
-        : ref.watch(cartProvider.select((s) => s.itemCount));
+    final cartCount = role == UserRole.consumer
+        ? ref.watch(cartProvider.select((s) => s.itemCount))
+        : 0;
 
-    final labels = isVendor
-        ? [
-            context.l10n.navHome,
-            context.l10n.navExplore,
-            context.l10n.navAddListing,
-            context.l10n.incomingOrders,
-            context.l10n.navProfile,
-          ]
-        : [
-            context.l10n.navHome,
-            context.l10n.navExplore,
-            context.l10n.navWishlist,
-            context.l10n.navOrders,
-            context.l10n.navProfile,
-          ];
+    // Tab sets mirror the shell branches per role in app_router.dart —
+    // keep both lists in sync when adding a tab.
+    final labels = switch (role) {
+      UserRole.vendor => [
+          context.l10n.navHome,
+          context.l10n.navExplore,
+          context.l10n.navAddListing,
+          context.l10n.incomingOrders,
+          context.l10n.navProfile,
+        ],
+      UserRole.courier => [
+          context.l10n.navDeliveries,
+          context.l10n.navCash,
+          context.l10n.navProfile,
+        ],
+      UserRole.consumer => [
+          context.l10n.navHome,
+          context.l10n.navExplore,
+          context.l10n.navWishlist,
+          context.l10n.navOrders,
+          context.l10n.navProfile,
+        ],
+    };
 
-    final icons = isVendor
-        ? [
-            LucideIcons.home,
-            LucideIcons.search,
-            LucideIcons.plusCircle,
-            LucideIcons.list,
-            LucideIcons.user,
-          ]
-        : [
-            LucideIcons.home,
-            LucideIcons.search,
-            LucideIcons.heart,
-            LucideIcons.package,
-            LucideIcons.user,
-          ];
+    final icons = switch (role) {
+      UserRole.vendor => [
+          LucideIcons.home,
+          LucideIcons.search,
+          LucideIcons.plusCircle,
+          LucideIcons.list,
+          LucideIcons.user,
+        ],
+      UserRole.courier => [
+          LucideIcons.truck,
+          LucideIcons.wallet,
+          LucideIcons.user,
+        ],
+      UserRole.consumer => [
+          LucideIcons.home,
+          LucideIcons.search,
+          LucideIcons.heart,
+          LucideIcons.package,
+          LucideIcons.user,
+        ],
+    };
 
     return Container(
       decoration: BoxDecoration(
@@ -98,7 +112,7 @@ class XstoreBottomNav extends ConsumerWidget {
             height: 56,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: List.generate(5, (index) {
+              children: List.generate(labels.length, (index) {
                 final selected = shell.currentIndex == index;
                 final accentMid = isVendor && index == 2;
                 final inactiveColor = accentMid && !selected
@@ -127,8 +141,9 @@ class XstoreBottomNav extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               NotificationIconBadge(
-                                count:
-                                    !isVendor && index == 1 ? cartCount : 0,
+                                count: role == UserRole.consumer && index == 1
+                                    ? cartCount
+                                    : 0,
                                 child: Transform.scale(
                                   scale: 1.0 + (t * 0.12),
                                   child: Icon(

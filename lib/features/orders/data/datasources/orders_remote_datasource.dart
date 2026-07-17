@@ -25,6 +25,13 @@ abstract interface class OrdersRemoteDataSource {
     required int pageSize,
   });
 
+  /// Orders assigned to a platform courier ("Delivered by xStore").
+  Future<List<OrderModel>> getCourierOrders({
+    required String courierId,
+    required int page,
+    required int pageSize,
+  });
+
   Future<OrderModel?> getOrderById(String orderId);
 
   Future<OrderStatsEntity> getVendorOrderStats({required String vendorId});
@@ -218,6 +225,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     String? wilaya,
     String? street,
     String? notes,
+    String? courierId,
     String? courierName,
   }) {
     final subtotal = total >= 500 ? total - 500 : total;
@@ -249,7 +257,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       discount: 0,
       total: total,
       trackingNumber: trackingNumber,
-      courierName: trackingNumber != null ? (courierName ?? 'xStore Logistics') : null,
+      courierId: courierId,
+      courierName: courierName ??
+          (trackingNumber != null ? 'xStore Logistics' : null),
       trackingLocation: status == OrderStatus.shipped
           ? 'In transit — Algiers hub'
           : null,
@@ -319,6 +329,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         payment: PaymentMethod.cibCard,
         city: 'Constantine',
         wilaya: 'Constantine',
+        courierId: mockCourierUser.id,
+        courierName: mockCourierUser.name,
       ),
       _vendorOrderTemplate(
         id: 'XS-2024-V004',
@@ -335,6 +347,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         payment: PaymentMethod.cashOnDelivery,
         city: 'Annaba',
         wilaya: 'Annaba',
+        courierId: mockCourierUser.id,
+        courierName: mockCourierUser.name,
       ),
       _vendorOrderTemplate(
         id: 'XS-2024-V005',
@@ -368,6 +382,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         wilaya: 'Oran',
         deliveredAt: now.subtract(const Duration(days: 2)),
         createdAt: now.subtract(const Duration(days: 10)),
+        courierId: mockCourierUser.id,
+        courierName: mockCourierUser.name,
       ),
       _vendorOrderTemplate(
         id: 'XS-2024-V007',
@@ -464,6 +480,36 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     } on DioException catch (e) {
       if (_isOrdersRouteMissing(e)) return const [];
       throw ServerException(e.message ?? 'Failed to fetch vendor orders');
+    }
+  }
+
+  @override
+  Future<List<OrderModel>> getCourierOrders({
+    required String courierId,
+    required int page,
+    required int pageSize,
+  }) async {
+    if (MockConfig.useMock) {
+      final mine = [..._consumerOrders, ..._vendorOrders]
+          .where((e) => e.courierId == courierId)
+          .toList();
+      return MockConfig.simulate(_page(mine, page, pageSize));
+    }
+    try {
+      final response = await _dio.get<List<dynamic>>(
+        ApiEndpoints.ordersCourier(courierId),
+        queryParameters: {'page': page, 'pageSize': pageSize},
+        options: _legacyOptions,
+      );
+      if (LegacyRouteOptions.isNotFound(response)) return const [];
+      final list = response.data ?? const [];
+      return list
+          .whereType<Map>()
+          .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
+          .toList();
+    } on DioException catch (e) {
+      if (_isOrdersRouteMissing(e)) return const [];
+      throw ServerException(e.message ?? 'Failed to fetch courier orders');
     }
   }
 
@@ -823,6 +869,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       discount: (data['discount'] as num?)?.toDouble() ?? 0,
       total: (data['total'] as num?)?.toDouble() ?? 0,
       trackingNumber: data['trackingNumber'] as String?,
+      courierId: data['courierId']?.toString(),
       courierName: data['courierName'] as String?,
       trackingLocation: data['trackingLocation'] as String?,
       estimatedDelivery: DateTime.tryParse(
@@ -885,6 +932,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         'discount': order.discount,
         'total': order.total,
         'trackingNumber': order.trackingNumber,
+        'courierId': order.courierId,
         'courierName': order.courierName,
         'trackingLocation': order.trackingLocation,
         'estimatedDelivery': order.estimatedDelivery?.toIso8601String(),

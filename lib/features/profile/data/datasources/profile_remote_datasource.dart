@@ -131,7 +131,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       phoneNumber:
           session.phoneNumber.isNotEmpty ? session.phoneNumber : base.phoneNumber,
       avatarUrl: session.avatarUrl ?? MockImages.avatar(2),
-      role: UserRole.consumer,
+      // Keep the session's role: this branch also serves courier sessions
+      // (mock driver login) — forcing consumer here would silently downgrade
+      // them on every profile refresh.
+      role: session.role,
       isVerified: session.isVerified,
       joinedAt: session.joinedAt ?? DateTime(2024, 1, 10),
       location: session.location ?? base.location,

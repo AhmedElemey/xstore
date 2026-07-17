@@ -658,6 +658,10 @@ mixin _$OrderEntity {
   double get discount => throw _privateConstructorUsedError;
   double get total => throw _privateConstructorUsedError;
   String? get trackingNumber => throw _privateConstructorUsedError;
+
+  /// Platform courier assigned to deliver this order ("Delivered by
+  /// xStore"). Null = vendor self-delivery (default flow).
+  String? get courierId => throw _privateConstructorUsedError;
   String? get courierName => throw _privateConstructorUsedError;
   String? get trackingLocation => throw _privateConstructorUsedError;
   DateTime? get estimatedDelivery => throw _privateConstructorUsedError;
@@ -702,6 +706,7 @@ abstract class $OrderEntityCopyWith<$Res> {
       double discount,
       double total,
       String? trackingNumber,
+      String? courierId,
       String? courierName,
       String? trackingLocation,
       DateTime? estimatedDelivery,
@@ -750,6 +755,7 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
     Object? discount = null,
     Object? total = null,
     Object? trackingNumber = freezed,
+    Object? courierId = freezed,
     Object? courierName = freezed,
     Object? trackingLocation = freezed,
     Object? estimatedDelivery = freezed,
@@ -843,6 +849,10 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
           ? _value.trackingNumber
           : trackingNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      courierId: freezed == courierId
+          ? _value.courierId
+          : courierId // ignore: cast_nullable_to_non_nullable
+              as String?,
       courierName: freezed == courierName
           ? _value.courierName
           : courierName // ignore: cast_nullable_to_non_nullable
@@ -928,6 +938,7 @@ abstract class _$$OrderEntityImplCopyWith<$Res>
       double discount,
       double total,
       String? trackingNumber,
+      String? courierId,
       String? courierName,
       String? trackingLocation,
       DateTime? estimatedDelivery,
@@ -975,6 +986,7 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
     Object? discount = null,
     Object? total = null,
     Object? trackingNumber = freezed,
+    Object? courierId = freezed,
     Object? courierName = freezed,
     Object? trackingLocation = freezed,
     Object? estimatedDelivery = freezed,
@@ -1068,6 +1080,10 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
           ? _value.trackingNumber
           : trackingNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      courierId: freezed == courierId
+          ? _value.courierId
+          : courierId // ignore: cast_nullable_to_non_nullable
+              as String?,
       courierName: freezed == courierName
           ? _value.courierName
           : courierName // ignore: cast_nullable_to_non_nullable
@@ -1140,6 +1156,7 @@ class _$OrderEntityImpl implements _OrderEntity {
       required this.discount,
       required this.total,
       this.trackingNumber,
+      this.courierId,
       this.courierName,
       this.trackingLocation,
       this.estimatedDelivery,
@@ -1203,6 +1220,11 @@ class _$OrderEntityImpl implements _OrderEntity {
   final double total;
   @override
   final String? trackingNumber;
+
+  /// Platform courier assigned to deliver this order ("Delivered by
+  /// xStore"). Null = vendor self-delivery (default flow).
+  @override
+  final String? courierId;
   @override
   final String? courierName;
   @override
@@ -1228,7 +1250,7 @@ class _$OrderEntityImpl implements _OrderEntity {
 
   @override
   String toString() {
-    return 'OrderEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
+    return 'OrderEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, courierId: $courierId, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
   }
 
   @override
@@ -1271,6 +1293,8 @@ class _$OrderEntityImpl implements _OrderEntity {
             (identical(other.total, total) || other.total == total) &&
             (identical(other.trackingNumber, trackingNumber) ||
                 other.trackingNumber == trackingNumber) &&
+            (identical(other.courierId, courierId) ||
+                other.courierId == courierId) &&
             (identical(other.courierName, courierName) ||
                 other.courierName == courierName) &&
             (identical(other.trackingLocation, trackingLocation) ||
@@ -1317,6 +1341,7 @@ class _$OrderEntityImpl implements _OrderEntity {
         discount,
         total,
         trackingNumber,
+        courierId,
         courierName,
         trackingLocation,
         estimatedDelivery,
@@ -1359,6 +1384,7 @@ abstract class _OrderEntity implements OrderEntity {
       required final double discount,
       required final double total,
       final String? trackingNumber,
+      final String? courierId,
       final String? courierName,
       final String? trackingLocation,
       final DateTime? estimatedDelivery,
@@ -1411,6 +1437,11 @@ abstract class _OrderEntity implements OrderEntity {
   double get total;
   @override
   String? get trackingNumber;
+  @override
+
+  /// Platform courier assigned to deliver this order ("Delivered by
+  /// xStore"). Null = vendor self-delivery (default flow).
+  String? get courierId;
   @override
   String? get courierName;
   @override

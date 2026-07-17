@@ -49,6 +49,8 @@ abstract final class ApiEndpoints {
   static String ordersConsumer(String consumerId) =>
       '$orders/consumer/$consumerId';
   static String ordersVendor(String vendorId) => '$orders/vendor/$vendorId';
+  static String ordersCourier(String courierId) =>
+      '$orders/courier/$courierId';
   static String ordersVendorStats(String vendorId) =>
       '$orders/vendor/$vendorId/stats';
   static String orderById(String orderId) => '$orders/$orderId';

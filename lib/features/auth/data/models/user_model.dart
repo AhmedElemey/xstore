@@ -75,8 +75,14 @@ class UserModel with _$UserModel {
       // alongside the older `role`/`isVendor` shapes for resilience.
       final r = (json['roleName'] as String?) ?? (json['role'] as String?);
       if (r != null) {
-        if (r.toLowerCase() == UserRole.vendor.name) return UserRole.vendor;
-        if (r.toLowerCase() == UserRole.consumer.name) return UserRole.consumer;
+        final lower = r.toLowerCase();
+        if (lower == UserRole.vendor.name) return UserRole.vendor;
+        if (lower == UserRole.consumer.name) return UserRole.consumer;
+        // Owner-created delivery accounts; backend naming unconfirmed, so
+        // accept both "Courier" and "Delivery" until the contract is probed.
+        if (lower == UserRole.courier.name || lower == 'delivery') {
+          return UserRole.courier;
+        }
       }
       final legacy = json['isVendor'] as bool? ?? false;
       return legacy ? UserRole.vendor : UserRole.consumer;

@@ -128,16 +128,24 @@
   "commissionWalletWarnBody": "You owe {amount} in platform fees. Pay it off before it reaches {limit} or new listings will be paused.",
   "@commissionWalletWarnBody": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "limit": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
     }
   },
   "commissionWalletPausedTitle": "New listings are paused",
   "commissionWalletPausedBody": "You owe {amount} in platform fees, over the {limit} limit. Pay it off to publish new listings again.",
   "@commissionWalletPausedBody": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "limit": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
     }
   },
   "commissionWalletBlockedSubmit": "New listings are paused until you pay off your platform fees.",
@@ -1056,7 +1064,7 @@
   "storeNameArRequired": "Store Name (Arabic) *",
   "storeDescriptionArRequired": "Store Description (Arabic) *",
   "emailAddressRequired": "Email Address *",
-  "emailAddressOptional": "Email Address (optional \u2014 for password recovery)",
+  "emailAddressOptional": "Email Address (optional — for password recovery)",
   "locationCityRequired": "Location / City *",
   "locationHintAlgiers": "e.g. Algiers",
   "secureYourAccount": "Secure your account",
@@ -1274,5 +1282,52 @@
         "type": "String"
       }
     }
-  }
+  },
+  "navDeliveries": "Deliveries",
+  "navCash": "Cash",
+  "courierDeliveriesTitle": "My Deliveries",
+  "courierActiveSection": "Active",
+  "courierHistorySection": "History",
+  "courierEmptyTitle": "No deliveries assigned",
+  "courierEmptyBody": "Delivery tasks assigned to you by xStore will show up here.",
+  "courierPickUpAction": "Picked up",
+  "courierDeliverAction": "Delivered",
+  "courierCollectAmount": "Collect {amount}",
+  "@courierCollectAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPrepaidChip": "Prepaid — nothing to collect",
+  "courierFailAction": "Failed",
+  "courierFailReasonTitle": "Why did the delivery fail?",
+  "courierFailReasonHint": "e.g. buyer unreachable, refused at the door",
+  "courierFailReasonRequired": "Please give a short reason",
+  "courierDeliverConfirmTitle": "Confirm delivery",
+  "courierDeliverConfirmCod": "Collect {amount} from the buyer, then confirm.",
+  "@courierDeliverConfirmCod": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierDeliverConfirmPrepaid": "This order is prepaid — hand over the parcel and confirm.",
+  "courierCashInHand": "Cash in hand",
+  "courierCashScreenTitle": "Cash",
+  "courierCashExplainer": "COD cash you collect stays with you until you hand it over to xStore. Keep it under {amount}.",
+  "@courierCashExplainer": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierHandoverDueBanner": "Cash limit reached — deposit your collected COD with xStore before taking new deliveries.",
+  "courierCashEmpty": "You're not holding any cash. Delivered COD orders will appear here.",
+  "courierCollectedListTitle": "Collected orders",
+  "courierNavigateHint": "Directions in Google Maps",
+  "loginAsCourierDemo": "Sign in as delivery driver (demo)"
 }

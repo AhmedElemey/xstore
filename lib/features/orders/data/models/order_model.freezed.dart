@@ -283,6 +283,7 @@ mixin _$OrderModel {
   double get discount => throw _privateConstructorUsedError;
   double get total => throw _privateConstructorUsedError;
   String? get trackingNumber => throw _privateConstructorUsedError;
+  String? get courierId => throw _privateConstructorUsedError;
   String? get courierName => throw _privateConstructorUsedError;
   String? get trackingLocation => throw _privateConstructorUsedError;
   DateTime? get estimatedDelivery => throw _privateConstructorUsedError;
@@ -327,6 +328,7 @@ abstract class $OrderModelCopyWith<$Res> {
       double discount,
       double total,
       String? trackingNumber,
+      String? courierId,
       String? courierName,
       String? trackingLocation,
       DateTime? estimatedDelivery,
@@ -375,6 +377,7 @@ class _$OrderModelCopyWithImpl<$Res, $Val extends OrderModel>
     Object? discount = null,
     Object? total = null,
     Object? trackingNumber = freezed,
+    Object? courierId = freezed,
     Object? courierName = freezed,
     Object? trackingLocation = freezed,
     Object? estimatedDelivery = freezed,
@@ -468,6 +471,10 @@ class _$OrderModelCopyWithImpl<$Res, $Val extends OrderModel>
           ? _value.trackingNumber
           : trackingNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      courierId: freezed == courierId
+          ? _value.courierId
+          : courierId // ignore: cast_nullable_to_non_nullable
+              as String?,
       courierName: freezed == courierName
           ? _value.courierName
           : courierName // ignore: cast_nullable_to_non_nullable
@@ -553,6 +560,7 @@ abstract class _$$OrderModelImplCopyWith<$Res>
       double discount,
       double total,
       String? trackingNumber,
+      String? courierId,
       String? courierName,
       String? trackingLocation,
       DateTime? estimatedDelivery,
@@ -600,6 +608,7 @@ class __$$OrderModelImplCopyWithImpl<$Res>
     Object? discount = null,
     Object? total = null,
     Object? trackingNumber = freezed,
+    Object? courierId = freezed,
     Object? courierName = freezed,
     Object? trackingLocation = freezed,
     Object? estimatedDelivery = freezed,
@@ -693,6 +702,10 @@ class __$$OrderModelImplCopyWithImpl<$Res>
           ? _value.trackingNumber
           : trackingNumber // ignore: cast_nullable_to_non_nullable
               as String?,
+      courierId: freezed == courierId
+          ? _value.courierId
+          : courierId // ignore: cast_nullable_to_non_nullable
+              as String?,
       courierName: freezed == courierName
           ? _value.courierName
           : courierName // ignore: cast_nullable_to_non_nullable
@@ -765,6 +778,7 @@ class _$OrderModelImpl implements _OrderModel {
       required this.discount,
       required this.total,
       this.trackingNumber,
+      this.courierId,
       this.courierName,
       this.trackingLocation,
       this.estimatedDelivery,
@@ -829,6 +843,8 @@ class _$OrderModelImpl implements _OrderModel {
   @override
   final String? trackingNumber;
   @override
+  final String? courierId;
+  @override
   final String? courierName;
   @override
   final String? trackingLocation;
@@ -853,7 +869,7 @@ class _$OrderModelImpl implements _OrderModel {
 
   @override
   String toString() {
-    return 'OrderModel(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
+    return 'OrderModel(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, consumerAvatar: $consumerAvatar, vendorId: $vendorId, vendorName: $vendorName, vendorStoreName: $vendorStoreName, vendorAvatar: $vendorAvatar, vendorRating: $vendorRating, items: $items, status: $status, paymentMethod: $paymentMethod, isPaid: $isPaid, deliveryAddress: $deliveryAddress, subtotal: $subtotal, shippingCost: $shippingCost, discount: $discount, total: $total, trackingNumber: $trackingNumber, courierId: $courierId, courierName: $courierName, trackingLocation: $trackingLocation, estimatedDelivery: $estimatedDelivery, cancelReason: $cancelReason, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt, confirmedAt: $confirmedAt, shippedAt: $shippedAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt)';
   }
 
   @override
@@ -896,6 +912,8 @@ class _$OrderModelImpl implements _OrderModel {
             (identical(other.total, total) || other.total == total) &&
             (identical(other.trackingNumber, trackingNumber) ||
                 other.trackingNumber == trackingNumber) &&
+            (identical(other.courierId, courierId) ||
+                other.courierId == courierId) &&
             (identical(other.courierName, courierName) ||
                 other.courierName == courierName) &&
             (identical(other.trackingLocation, trackingLocation) ||
@@ -942,6 +960,7 @@ class _$OrderModelImpl implements _OrderModel {
         discount,
         total,
         trackingNumber,
+        courierId,
         courierName,
         trackingLocation,
         estimatedDelivery,
@@ -984,6 +1003,7 @@ abstract class _OrderModel implements OrderModel {
       required final double discount,
       required final double total,
       final String? trackingNumber,
+      final String? courierId,
       final String? courierName,
       final String? trackingLocation,
       final DateTime? estimatedDelivery,
@@ -1036,6 +1056,8 @@ abstract class _OrderModel implements OrderModel {
   double get total;
   @override
   String? get trackingNumber;
+  @override
+  String? get courierId;
   @override
   String? get courierName;
   @override

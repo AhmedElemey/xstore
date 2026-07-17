@@ -388,7 +388,7 @@ final verifyOtpUseCaseProvider = AutoDisposeProvider<VerifyOtpUseCase>.internal(
 );
 
 typedef VerifyOtpUseCaseRef = AutoDisposeProviderRef<VerifyOtpUseCase>;
-String _$authHash() => r'f39045d3272b10860c3e0147cfec877363d69a49';
+String _$authHash() => r'7144e21a97bbecd814f1dced6ecfa58976c9d539';
 
 /// See also [Auth].
 @ProviderFor(Auth)

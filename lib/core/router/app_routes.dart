@@ -42,6 +42,9 @@ abstract final class AppRoutes {
   static const storeHours = '/store-hours';
   static const listingAdd = '/listing/add';
   static const listingMy = '/listing/my';
+  /// Courier shell tabs ("Delivered by xStore" pilot).
+  static const deliveries = '/deliveries';
+  static const courierCash = '/courier-cash';
 
   static String chatThread(String threadId) => '/chat/$threadId';
 }
@@ -69,6 +72,13 @@ bool isConsumerRestrictedRoute(String location) {
       location == AppRoutes.checkout ||
       location == AppRoutes.wishlist ||
       location == AppRoutes.orders;
+}
+
+/// Courier-only areas: the delivery run and collected-cash wallet.
+/// Guarded centrally in `computeXStoreAuthRedirect`.
+bool isCourierRestrictedRoute(String location) {
+  return location.startsWith(AppRoutes.deliveries) ||
+      location == AppRoutes.courierCash;
 }
 
 /// Browse-only areas open to guests (no account needed to look around the

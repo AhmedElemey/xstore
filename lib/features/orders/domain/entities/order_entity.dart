@@ -84,6 +84,9 @@ class OrderEntity with _$OrderEntity {
     required double discount,
     required double total,
     String? trackingNumber,
+    /// Platform courier assigned to deliver this order ("Delivered by
+    /// xStore"). Null = vendor self-delivery (default flow).
+    String? courierId,
     String? courierName,
     String? trackingLocation,
     DateTime? estimatedDelivery,

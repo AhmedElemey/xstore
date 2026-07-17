@@ -2964,4 +2964,92 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enableLocationServices => 'تفعيلها من الإعدادات؟';
+
+  @override
+  String get navDeliveries => 'التوصيلات';
+
+  @override
+  String get navCash => 'النقدية';
+
+  @override
+  String get courierDeliveriesTitle => 'توصيلاتي';
+
+  @override
+  String get courierActiveSection => 'نشطة';
+
+  @override
+  String get courierHistorySection => 'السجل';
+
+  @override
+  String get courierEmptyTitle => 'لا توجد توصيلات مسندة';
+
+  @override
+  String get courierEmptyBody =>
+      'ستظهر هنا مهام التوصيل المسندة إليك من إكس ستور.';
+
+  @override
+  String get courierPickUpAction => 'تم الاستلام';
+
+  @override
+  String get courierDeliverAction => 'تم التسليم';
+
+  @override
+  String courierCollectAmount(String amount) {
+    return 'حصّل $amount';
+  }
+
+  @override
+  String get courierPrepaidChip => 'مدفوع مسبقًا — لا يوجد تحصيل';
+
+  @override
+  String get courierFailAction => 'فشل التوصيل';
+
+  @override
+  String get courierFailReasonTitle => 'ما سبب فشل التوصيل؟';
+
+  @override
+  String get courierFailReasonHint => 'مثال: تعذر الوصول للمشتري، رفض الاستلام';
+
+  @override
+  String get courierFailReasonRequired => 'يرجى كتابة سبب مختصر';
+
+  @override
+  String get courierDeliverConfirmTitle => 'تأكيد التسليم';
+
+  @override
+  String courierDeliverConfirmCod(String amount) {
+    return 'حصّل $amount من المشتري ثم أكّد.';
+  }
+
+  @override
+  String get courierDeliverConfirmPrepaid =>
+      'هذا الطلب مدفوع مسبقًا — سلّم الطرد ثم أكّد.';
+
+  @override
+  String get courierCashInHand => 'النقدية بحوزتك';
+
+  @override
+  String get courierCashScreenTitle => 'النقدية';
+
+  @override
+  String courierCashExplainer(String amount) {
+    return 'نقدية الدفع عند الاستلام تبقى معك حتى تسليمها لإكس ستور. حافظ عليها أقل من $amount.';
+  }
+
+  @override
+  String get courierHandoverDueBanner =>
+      'وصلت للحد الأقصى للنقدية — سلّم المبالغ المحصّلة لإكس ستور قبل قبول توصيلات جديدة.';
+
+  @override
+  String get courierCashEmpty =>
+      'لا توجد نقدية بحوزتك. ستظهر هنا طلبات الدفع عند الاستلام بعد تسليمها.';
+
+  @override
+  String get courierCollectedListTitle => 'الطلبات المحصّلة';
+
+  @override
+  String get courierNavigateHint => 'الاتجاهات في خرائط جوجل';
+
+  @override
+  String get loginAsCourierDemo => 'الدخول كمندوب توصيل (تجريبي)';
 }

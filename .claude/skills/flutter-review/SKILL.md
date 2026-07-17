@@ -241,3 +241,18 @@ Rules for the log:
 - **What happened:** `AuthRepositoryImpl.logout()` awaited `signOutSocial()` (Firebase+Google+Facebook `Future.wait`) before the secure-storage deletes; the unconfigured Facebook SDK (placeholder app ID) made it throw, the deletes were skipped, and `restoreSession` re-hydrated the "logged-out" user — logout appeared to do nothing. The method's own comment promised local cleanup "always" runs, but only the remote call was guarded.
 - **Rule:** In sign-out flows, every external/best-effort step (remote API, provider SDK sign-outs) gets its own try/catch; local session clearing runs unconditionally and is the source of truth. When a comment claims "always", verify the control flow actually guarantees it.
 - **Where it applies:** `auth_repository_impl.dart` logout, forced 401 cleanup in `dio_provider`, any future account-deletion flow.
+
+### 2026-07-17 — Adding a UserRole member touches four coupled places
+- **What happened:** Adding `UserRole.courier` required coordinated changes: shell branches in `app_router.dart`, tab labels/icons in `xstore_bottom_nav.dart` (now length-driven, no hardcoded 5), and role-aware redirect fallbacks in `computeXStoreAuthRedirect` — `/home`/`/explore` only exist inside the consumer/vendor shells, so any redirect returning `AppRoutes.home` sends a courier to a "no route" error page.
+- **Rule:** A new role = new shell branch list + matching nav tab list (kept in sync, both switch on `UserRole`) + a role-aware "home" target in every redirect fallback + restricting the role's tabs from other roles and vice versa. Grep `AppRoutes.home` in redirect logic whenever shell membership changes.
+- **Where it applies:** `lib/core/router/`, `xstore_bottom_nav.dart`, any future role or shell-tab change.
+
+### 2026-07-17 — Mock login matchers must key on phone digits
+- **What happened:** A mock courier login matched identifiers containing "courier"/"driver", but the login UI is phone-first — the field validates an 11-digit Egyptian mobile and `LoginNotifier` sends `normalizeEgyptLocal(state.phone)` (digits only), so a keyword/email matcher was unreachable from the real screen.
+- **Rule:** Any identifier-routed mock behavior in auth must match what the UI actually transmits: normalized phone digits (compare via `AppValidators.normalizeEgyptLocal` against the seed user's phone). Keep keyword forms only as test conveniences. Trace notifier → datasource before choosing a matcher key.
+- **Where it applies:** `mock_users.dart` login matchers, any future identifier-based dev/demo shortcut in the auth flow.
+
+### 2026-07-17 — Sliver lists below the fold aren't built in widget tests
+- **What happened:** A test expected 3 `DeliveryOrderCard`s but found 2 — the third lived in a lazily-built `SliverList` section below the 600px test viewport, so it was never constructed.
+- **Rule:** In widget tests over lazy lists (SliverList/ListView.builder), assert only what fits the viewport, then `tester.scrollUntilVisible(...)` before asserting off-screen items — don't shrink the data to dodge it unless section ordering itself is under test.
+- **Where it applies:** All widget tests over scrollable feature screens.

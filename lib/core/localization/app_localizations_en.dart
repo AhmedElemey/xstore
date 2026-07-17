@@ -2973,4 +2973,93 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enableLocationServices => 'Enable them in Settings?';
+
+  @override
+  String get navDeliveries => 'Deliveries';
+
+  @override
+  String get navCash => 'Cash';
+
+  @override
+  String get courierDeliveriesTitle => 'My Deliveries';
+
+  @override
+  String get courierActiveSection => 'Active';
+
+  @override
+  String get courierHistorySection => 'History';
+
+  @override
+  String get courierEmptyTitle => 'No deliveries assigned';
+
+  @override
+  String get courierEmptyBody =>
+      'Delivery tasks assigned to you by xStore will show up here.';
+
+  @override
+  String get courierPickUpAction => 'Picked up';
+
+  @override
+  String get courierDeliverAction => 'Delivered';
+
+  @override
+  String courierCollectAmount(String amount) {
+    return 'Collect $amount';
+  }
+
+  @override
+  String get courierPrepaidChip => 'Prepaid — nothing to collect';
+
+  @override
+  String get courierFailAction => 'Failed';
+
+  @override
+  String get courierFailReasonTitle => 'Why did the delivery fail?';
+
+  @override
+  String get courierFailReasonHint =>
+      'e.g. buyer unreachable, refused at the door';
+
+  @override
+  String get courierFailReasonRequired => 'Please give a short reason';
+
+  @override
+  String get courierDeliverConfirmTitle => 'Confirm delivery';
+
+  @override
+  String courierDeliverConfirmCod(String amount) {
+    return 'Collect $amount from the buyer, then confirm.';
+  }
+
+  @override
+  String get courierDeliverConfirmPrepaid =>
+      'This order is prepaid — hand over the parcel and confirm.';
+
+  @override
+  String get courierCashInHand => 'Cash in hand';
+
+  @override
+  String get courierCashScreenTitle => 'Cash';
+
+  @override
+  String courierCashExplainer(String amount) {
+    return 'COD cash you collect stays with you until you hand it over to xStore. Keep it under $amount.';
+  }
+
+  @override
+  String get courierHandoverDueBanner =>
+      'Cash limit reached — deposit your collected COD with xStore before taking new deliveries.';
+
+  @override
+  String get courierCashEmpty =>
+      'You\'re not holding any cash. Delivered COD orders will appear here.';
+
+  @override
+  String get courierCollectedListTitle => 'Collected orders';
+
+  @override
+  String get courierNavigateHint => 'Directions in Google Maps';
+
+  @override
+  String get loginAsCourierDemo => 'Sign in as delivery driver (demo)';
 }

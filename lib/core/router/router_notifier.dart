@@ -21,10 +21,12 @@ RouterNotifier routerNotifier(RouterNotifierRef ref) {
 }
 
 /// Redirect guard: unauthenticated users, post-login leave auth screens,
-/// role guards both ways — consumers blocked from vendor areas (listings,
-/// vendor orders, store tooling) and vendors blocked from the buying flow
-/// (cart, checkout, wishlist, consumer orders). Guests ([isGuest]) may
-/// browse [isGuestAccessibleRoute] areas; anything else routes to login.
+/// role guards all ways — consumers blocked from vendor areas (listings,
+/// vendor orders, store tooling), vendors and couriers blocked from the
+/// buying flow (cart, checkout, wishlist, consumer orders), non-couriers
+/// blocked from the delivery run. Couriers home to [AppRoutes.deliveries].
+/// Guests ([isGuest]) may browse [isGuestAccessibleRoute] areas; anything
+/// else routes to login.
 String? computeXStoreAuthRedirect({
   required AsyncValue<UserEntity?> auth,
   required bool needsRoleSelection,
@@ -56,17 +58,30 @@ String? computeXStoreAuthRedirect({
         // stays reachable so cold start doesn't loop.
         return isAuthRoute ? null : AppRoutes.login;
       }
+      // Couriers land on their run, not the marketplace home — /home and
+      // /explore only exist inside the consumer/vendor shells, so a courier
+      // reaching them would hit "no route" instead of a screen.
+      final roleHome =
+          user.isCourier ? AppRoutes.deliveries : AppRoutes.home;
       if (isAuthRoute) {
         if (loc == AppRoutes.register && holdRegisterForVendorSuccess) {
           return null;
         }
+        return roleHome;
+      }
+      if (user.isCourier &&
+          (loc == AppRoutes.home || loc == AppRoutes.explore)) {
+        return AppRoutes.deliveries;
+      }
+      if (isCourierRestrictedRoute(loc) && !user.isCourier) {
         return AppRoutes.home;
       }
       if (isVendorRestrictedRoute(loc) && !user.isVendor) {
-        return AppRoutes.home;
+        return roleHome;
       }
-      if (isConsumerRestrictedRoute(loc) && user.isVendor) {
-        return AppRoutes.home;
+      if (isConsumerRestrictedRoute(loc) &&
+          user.role != UserRole.consumer) {
+        return roleHome;
       }
       return null;
     },

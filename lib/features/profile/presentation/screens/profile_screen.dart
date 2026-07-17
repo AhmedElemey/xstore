@@ -207,6 +207,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: ProfileMenuBlocks(
                   isVendor: isVendor,
+                  isCourier: user.isCourier,
                   onLogout: () => showProfileLogoutSheet(context: context, ref: ref),
                 ),
               ),

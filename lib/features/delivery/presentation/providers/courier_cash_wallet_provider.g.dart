@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'profile_provider.dart';
+part of 'courier_cash_wallet_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileNotifierHash() => r'0c768084d89aa92ff2a5d4b68849420e28e61f03';
+String _$courierCashWalletHash() => r'ef7b2e89fa87a24d6a71be26cf5287a3c3d321ba';
 
-/// See also [ProfileNotifier].
-@ProviderFor(ProfileNotifier)
-final profileNotifierProvider =
-    NotifierProvider<ProfileNotifier, ProfileState>.internal(
-  ProfileNotifier.new,
-  name: r'profileNotifierProvider',
+/// See also [courierCashWallet].
+@ProviderFor(courierCashWallet)
+final courierCashWalletProvider =
+    AutoDisposeFutureProvider<CourierCashWallet>.internal(
+  courierCashWallet,
+  name: r'courierCashWalletProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$profileNotifierHash,
+      : _$courierCashWalletHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$ProfileNotifier = Notifier<ProfileState>;
+typedef CourierCashWalletRef = AutoDisposeFutureProviderRef<CourierCashWallet>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
