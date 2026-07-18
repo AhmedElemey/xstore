@@ -1329,5 +1329,31 @@
   "courierCashEmpty": "You're not holding any cash. Delivered COD orders will appear here.",
   "courierCollectedListTitle": "Collected orders",
   "courierNavigateHint": "Directions in Google Maps",
-  "loginAsCourierDemo": "Sign in as delivery driver (demo)"
+  "loginAsCourierDemo": "Sign in as delivery driver (demo)",
+  "loginAsCourier": "Login as delivery",
+  "courierLoginTitle": "Delivery sign in",
+  "courierLoginSubtitle": "For xStore couriers. Accounts are created by the platform — contact us if you don't have one.",
+  "courierModePassword": "Password",
+  "courierModeOtp": "OTP",
+  "courierSendCode": "Send code",
+  "courierOtpFieldLabel": "6-digit code",
+  "courierOtpHint": "123456",
+  "courierOtpSentDemo": "Demo code: 123456",
+  "courierOtpInvalid": "Incorrect code — try again",
+  "courierVerifyAndLogin": "Verify & sign in",
+  "courierOtpLiveUnavailable": "OTP sign-in becomes available once delivery accounts go live on the backend.",
+  "courierResendCode": "Resend code",
+  "courierPickupLabel": "Pickup",
+  "courierDropoffLabel": "Drop-off",
+  "courierItemsSummary": "{count, plural, =1{1 item} other{{count} items}} · {total}",
+  "@courierItemsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

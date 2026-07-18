@@ -9,8 +9,8 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/widgets/order_status_badge.dart';
 import '../../domain/courier_order_flow.dart';
 
-/// One delivery task on the courier's run: where to pick up, where to drop
-/// off, and how much cash to collect at the door.
+/// One delivery task on the courier's run: a pickup→drop-off route, who to
+/// hand over to, what to collect at the door, and the next action.
 class DeliveryOrderCard extends StatelessWidget {
   const DeliveryOrderCard({
     super.key,
@@ -25,16 +25,10 @@ class DeliveryOrderCard extends StatelessWidget {
   final VoidCallback? onDelivered;
   final VoidCallback? onFailed;
 
-  /// Google Maps directions to the buyer's door. The order carries a plain
-  /// text address (no lat/lng on the wire yet), so navigate by query —
-  /// Maps geocodes it and starts routing.
-  Uri _mapsDirectionsUri(OrderAddress address) => Uri.https(
+  Uri _mapsDirectionsUri(OrderAddress a) => Uri.https(
         'www.google.com',
         '/maps/dir/',
-        {
-          'api': '1',
-          'destination': '${address.street}, ${address.city}',
-        },
+        {'api': '1', 'destination': '${a.street}, ${a.city}'},
       );
 
   @override
@@ -59,60 +53,62 @@ class DeliveryOrderCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  order.formattedOrderId,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      order.formattedOrderId,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      context.formatShortDate(order.createdAt),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: context.textSecondary),
+                    ),
+                  ],
                 ),
               ),
               OrderStatusBadge(status: order.status, compact: true),
             ],
           ),
+          const SizedBox(height: AppSpacing.md),
+          _RouteStops(
+            order: order,
+            onNavigate: () => launchUrl(
+              _mapsDirectionsUri(address),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
-          _InfoLine(
-            icon: LucideIcons.store,
-            text: order.vendorStoreName,
-          ),
-          const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
               Expanded(
-                child: InkWell(
-                  onTap: () => launchUrl(
-                    _mapsDirectionsUri(address),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                  child: _InfoLine(
-                    icon: LucideIcons.mapPin,
-                    text: '${address.street}, ${address.city}',
-                  ),
-                ),
-              ),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                tooltip: context.l10n.courierNavigateHint,
-                icon: Icon(
-                  LucideIcons.navigation,
-                  size: 18,
-                  color: context.primaryColor,
-                ),
-                onPressed: () => launchUrl(
-                  _mapsDirectionsUri(address),
-                  mode: LaunchMode.externalApplication,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoLine(
-                  icon: LucideIcons.user,
-                  text: order.consumerName,
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.user,
+                      size: 15,
+                      color: context.textSecondary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        order.consumerName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: context.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               IconButton(
@@ -127,6 +123,33 @@ class DeliveryOrderCard extends StatelessWidget {
               ),
             ],
           ),
+          if (order.items.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.package,
+                  size: 15,
+                  color: context.textSecondary,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(
+                    context.l10n.courierItemsSummary(
+                      order.items.length,
+                      context.formatCurrency(order.total),
+                    ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: context.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
           _CollectChip(codAmount: codAmount, status: order.status),
           if (action != CourierOrderAction.none) ...[
@@ -163,30 +186,90 @@ class DeliveryOrderCard extends StatelessWidget {
   }
 }
 
-class _InfoLine extends StatelessWidget {
-  const _InfoLine({required this.icon, required this.text});
+/// Pickup (vendor store) → drop-off (buyer address) as a two-stop route with
+/// a connector line; the drop-off stop opens Google Maps directions.
+class _RouteStops extends StatelessWidget {
+  const _RouteStops({required this.order, required this.onNavigate});
 
-  final IconData icon;
-  final String text;
+  final OrderEntity order;
+  final VoidCallback onNavigate;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 15, color: context.textSecondary),
-        const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: context.textSecondary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+    final address = order.deliveryAddress;
+    final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: context.textSecondary,
+          letterSpacing: 0.4,
+        );
+    final valueStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: context.textPrimary,
+          fontWeight: FontWeight.w600,
+        );
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Column(
+            children: [
+              Icon(LucideIcons.store, size: 16, color: context.textSecondary),
+              Expanded(
+                child: Container(
+                  width: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 3),
+                  decoration: BoxDecoration(
+                    color: context.borderColor,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              ),
+              Icon(LucideIcons.mapPin, size: 16, color: context.primaryColor),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.courierPickupLabel.toUpperCase(),
+                  style: labelStyle,
+                ),
+                Text(
+                  order.vendorStoreName,
+                  style: valueStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  context.l10n.courierDropoffLabel.toUpperCase(),
+                  style: labelStyle,
+                ),
+                InkWell(
+                  onTap: onNavigate,
+                  child: Text(
+                    '${address.street}, ${address.city}',
+                    style: valueStyle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            tooltip: context.l10n.courierNavigateHint,
+            icon: Icon(
+              LucideIcons.navigation,
+              size: 18,
+              color: context.primaryColor,
+            ),
+            onPressed: onNavigate,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -222,12 +305,16 @@ class _CollectChip extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: AppSpacing.xs),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
           ),
         ],
       ),

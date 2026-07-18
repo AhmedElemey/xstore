@@ -49,6 +49,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
 
   Future<void> _load() async {
     final p = await SharedPreferences.getInstance();
+    if (!mounted) return;
     bool g(String k, bool d) => p.getBool(k) ?? d;
     setState(() {
       _p = p;

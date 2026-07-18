@@ -11,8 +11,15 @@ part 'checkout_provider.g.dart';
 
 @riverpod
 class Checkout extends _$Checkout {
+  // Set when this autoDispose notifier is torn down (screen popped) so an
+  // in-flight placeOrder doesn't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   @override
   CheckoutState build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     return CheckoutState(
       savedAddresses: [
         const OrderAddress(
@@ -178,6 +185,9 @@ class Checkout extends _$Checkout {
       cardCvv: pay == PaymentMethod.cibCard ? state.cardCvv : null,
     );
     final order = await cartNotifier.placeOrder(params);
+    // The order is placed either way; only skip the state write if the
+    // checkout screen (and this notifier) is already gone.
+    if (_disposed) return order;
     state = state.copyWith(
       isPlacingOrder: false,
       placedOrderId: order?.id,

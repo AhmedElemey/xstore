@@ -55,7 +55,7 @@ Rules for the log:
 ### 2026-07-11 — State writes after await in Riverpod notifiers
 - **What happened:** Auth flow notifiers (e.g. `LoginNotifier.login`) assign `state = ...` after `await` with no disposal guard; if the user navigates away mid-request, the autoDispose notifier is disposed and the assignment throws an unhandled StateError.
 - **Rule:** Guard post-await state writes. In `@riverpod` codegen Notifier classes: `_disposed` flag reset in `build()` + `ref.onDispose(() => _disposed = true)`. In `StateNotifier` subclasses: use the built-in `mounted` getter (state_notifier 1.0.0, line 152 — it exists, despite it being commonly believed to be State-only). Caveat for keepAlive notifiers cleared via `ref.invalidate`: riverpod 2.x reuses the same notifier instance across rebuilds (verified empirically), so a `_disposed` flag reset in `build()` reopens the gate for a fetch still in flight — use a monotonic epoch bumped in `ref.onDispose` and compared per call instead (see `ProfileNotifier._sessionEpoch`).
-- **Where it applies:** Every async method in `@riverpod` Notifier and `StateNotifier` classes that writes `state` after an await.
+- **Where it applies:** Every async method in `@riverpod` Notifier and `StateNotifier` classes that writes `state` after an await. 2026-07-18: audit found only auth/profile hardened; product_detail, product_reviews, explore, checkout, order_detail, listing_form, my_listings, vendor_orders, vendor_order_detail were then guarded the same way — apply the pattern to every NEW notifier from day one.
 
 ### 2026-07-11 — StateNotifier with Timer needs a dispose override
 - **What happened:** `PhoneAuthNotifier` (StateNotifier) started a `Timer.periodic` resend cooldown but had no `dispose()` override; a disposal during the 60s cooldown would leave the timer firing into a disposed notifier.
@@ -108,9 +108,9 @@ Rules for the log:
 - **Where it applies:** All Dio `Options(validateStatus: ...)` overrides; currently `legacy_route_options.dart` used by orders, store-hours, and profile datasources.
 
 ### 2026-07-11 — Verify review-hook claims against package source
-- **What happened:** The automated review hook flagged `if (!mounted)` in a StateNotifier as a runtime error, claiming StateNotifier has no `mounted`; checking `~/.pub-cache/.../state_notifier.dart` proved the property exists and the flag was a false positive.
-- **Rule:** When a review claim is about an API's existence or signature, verify against the actual package source in the pub cache before rewriting correct code.
-- **Where it applies:** All hook/reviewer feedback that asserts framework or package API facts.
+- **What happened:** The automated review hook flagged `if (!mounted)` in a StateNotifier as a runtime error, claiming StateNotifier has no `mounted`; checking `~/.pub-cache/.../state_notifier.dart` proved the property exists (state_notifier 1.0.0 line 152) and the flag was a false positive. It recurred 2026-07-18, plus a second misread: the hook called `if (!mounted) return result.isRight();` "inconsistent" while every sibling method used the identical pattern — it only saw the partial edit.
+- **Rule:** When a review claim is about an API's existence/signature, verify against the package source in the pub cache; when it claims inconsistency or bypassed logic, re-read the full file — hooks judge partial snippets. Only rewrite after the claim survives verification.
+- **Where it applies:** All hook/reviewer feedback that asserts framework/package API facts or cross-method consistency.
 
 ### 2026-07-11 — Surface API error bodies on 401
 - **What happened:** Login 401 from `{"error":"Invalid email or password."}` was mapped to Dio's generic status-code boilerplate in the UI because `mapDioException` only read `e.message`, not the response body.
@@ -252,7 +252,27 @@ Rules for the log:
 - **Rule:** Any identifier-routed mock behavior in auth must match what the UI actually transmits: normalized phone digits (compare via `AppValidators.normalizeEgyptLocal` against the seed user's phone). Keep keyword forms only as test conveniences. Trace notifier → datasource before choosing a matcher key.
 - **Where it applies:** `mock_users.dart` login matchers, any future identifier-based dev/demo shortcut in the auth flow.
 
+### 2026-07-18 — Controllers created in show-dialog/sheet helper functions are never disposed
+- **What happened:** A full memory audit found 10+ `TextEditingController`s created inside `show*Sheet`/dialog helper functions (checkout add-address sheet, order card reject/ship/review flows, order action buttons, cart quantity prompt, store-hours message sheet) with zero disposals — every open leaks the controllers.
+- **Rule:** A controller created outside a `State` (in a `showDialog`/`showModalBottomSheet` helper) must be disposed after the sheet/dialog future resolves (`await show...; ctrl.dispose();`), or the sheet content must be a StatefulWidget owning its controllers. Grep helper functions for `TextEditingController(` during review.
+- **Where it applies:** All `show*` helper functions and dialog builders in `presentation/widgets` and screens.
+
+### 2026-07-18 — Static datasource caches survive logout
+- **What happened:** `orders_remote_datasource.dart` keeps `static _consumerCache`/`_vendorCache` (and cart keeps `static _items`) that are never cleared on logout — a second account on the same device can read the previous user's orders from the warm cache.
+- **Rule:** Datasource-level caches must be instance fields on autoDispose-scoped providers, or be explicitly cleared in the logout/forced-401 path alongside `resetProfileData`. No user-scoped data in `static` fields.
+- **Where it applies:** `orders_remote_datasource.dart`, `cart_remote_datasource.dart`, any future datasource cache.
+
+### 2026-07-18 — Family providers without autoDispose accumulate one instance per argument
+- **What happened:** `vendorOrderDetailProvider` was a plain `StateNotifierProvider.family` — every order id ever opened kept its notifier and fetched order in memory for the rest of the session.
+- **Rule:** `.family` providers for screen-scoped state must be `.autoDispose.family` (or codegen `@riverpod`, which defaults to autoDispose). A keepAlive family is a per-argument cache and must be a deliberate, commented decision.
+- **Where it applies:** All `.family` providers, especially detail-screen notifiers keyed by entity id.
+
 ### 2026-07-17 — Sliver lists below the fold aren't built in widget tests
 - **What happened:** A test expected 3 `DeliveryOrderCard`s but found 2 — the third lived in a lazily-built `SliverList` section below the 600px test viewport, so it was never constructed.
 - **Rule:** In widget tests over lazy lists (SliverList/ListView.builder), assert only what fits the viewport, then `tester.scrollUntilVisible(...)` before asserting off-screen items — don't shrink the data to dodge it unless section ordering itself is under test.
 - **Where it applies:** All widget tests over scrollable feature screens.
+
+### 2026-07-18 — Count strings need ICU plurals from the start
+- **What happened:** The delivery card's items summary rendered "1 items" — the arb key used a plain `{count} items` interpolation instead of a plural.
+- **Rule:** Any l10n string containing a count uses ICU plural syntax in BOTH locales from the first draft — Arabic needs its own categories (`=1`, `=2`, `few`, `other`), not a copy of the English two-form plural.
+- **Where it applies:** All new arb keys with numeric placeholders.

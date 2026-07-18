@@ -5,6 +5,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../data/datasources/orders_remote_datasource.dart';
 import '../../domain/entities/order_entity.dart';
 import 'orders_dependencies.dart';
 
@@ -34,7 +35,20 @@ class OrdersState with _$OrdersState {
 @Riverpod(keepAlive: true)
 class OrdersNotifier extends _$OrdersNotifier {
   @override
-  OrdersState build() => const OrdersState();
+  OrdersState build() {
+    // keepAlive state must not outlive the session that fetched it: drop the
+    // previous user's orders (and the mock fixtures) whenever the signed-in
+    // user changes or signs out.
+    ref.listen<AsyncValue<UserEntity?>>(authProvider, (prev, next) {
+      if (next.isLoading) return;
+      if (prev?.valueOrNull?.id == next.valueOrNull?.id) return;
+      Future.microtask(() {
+        OrdersRemoteDataSourceImpl.clearSessionCache();
+        state = const OrdersState();
+      });
+    });
+    return const OrdersState();
+  }
 
   UserEntity? get _user => ref.read(authProvider).valueOrNull;
 

@@ -5,6 +5,8 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const register = '/register';
   static const socialRoleSelect = '/social-role-select';
+  /// Dedicated sign-in for platform couriers (phone + password / OTP).
+  static const courierLogin = '/courier-login';
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
   static const otp = '/otp';

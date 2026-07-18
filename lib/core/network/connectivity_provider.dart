@@ -30,6 +30,7 @@ class IsOnlineNotifier extends StateNotifier<bool> {
       return;
     }
 
+    if (!mounted) return;
     _apply(initial);
 
     try {
@@ -40,6 +41,7 @@ class IsOnlineNotifier extends StateNotifier<bool> {
   }
 
   void _apply(List<ConnectivityResult> results) {
+    if (!mounted) return;
     state = results.any((r) => r != ConnectivityResult.none);
   }
 

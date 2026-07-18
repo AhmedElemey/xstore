@@ -405,10 +405,12 @@ class OrderCard extends ConsumerWidget {
         ],
       ),
     );
+    final reason = ctrl.text.trim();
+    ctrl.dispose();
     if (ok == true && context.mounted) {
       await notifier.rejectOrder(
         order.id,
-        ctrl.text.trim().isEmpty ? '—' : ctrl.text.trim(),
+        reason.isEmpty ? '—' : reason,
       );
       if (!context.mounted) return;
       _errSnack(context, ref);
@@ -499,6 +501,8 @@ class OrderCard extends ConsumerWidget {
         );
       },
     );
+    trackCtrl.dispose();
+    courierCtrl.dispose();
     if (context.mounted) _errSnack(context, ref);
   }
 
@@ -571,7 +575,7 @@ class OrderCard extends ConsumerWidget {
           },
         );
       },
-    );
+    ).whenComplete(text.dispose);
   }
 
   Future<String?> _cancelReasonDialog(BuildContext context) async {

@@ -184,28 +184,31 @@ class CartVendorGroupBlock extends ConsumerWidget {
     final ctrl = TextEditingController(text: '${item.quantity}');
     final v = await showAnimatedDialog<int>(
       context: context,
-      child: AlertDialog(
-        title: Text(context.l10n.quantity),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+      child: Builder(
+        builder: (dialogContext) => AlertDialog(
+          title: Text(dialogContext.l10n.quantity),
+          content: TextField(
+            controller: ctrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(dialogContext.l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                final parsed = int.tryParse(ctrl.text.trim());
+                Navigator.pop(dialogContext, parsed);
+              },
+              child: Text(dialogContext.l10n.save),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final parsed = int.tryParse(ctrl.text.trim());
-              Navigator.pop(context, parsed);
-            },
-            child: Text(context.l10n.save),
-          ),
-        ],
       ),
     );
+    ctrl.dispose();
     if (v == null || !context.mounted) return;
     final q = v.clamp(1, item.maxQuantity);
     if (q != item.quantity) {

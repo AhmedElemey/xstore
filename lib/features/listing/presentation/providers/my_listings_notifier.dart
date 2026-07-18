@@ -9,8 +9,15 @@ part 'my_listings_notifier.g.dart';
 /// Vendor “My Listings” screen: fetch, filter, sort, optimistic updates.
 @riverpod
 class MyListingsNotifier extends _$MyListingsNotifier {
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   @override
   MyListingsState build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     Future.microtask(fetchListings);
     return const MyListingsState(isLoading: true);
   }
@@ -27,8 +34,10 @@ class MyListingsNotifier extends _$MyListingsNotifier {
   }
 
   Future<void> fetchListings() async {
+    if (_disposed) return;
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(getMyListingsUseCaseProvider).call();
+    if (_disposed) return;
     result.fold(
       (f) => state = state.copyWith(
         isLoading: false,
@@ -132,6 +141,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
           status: nextStatus,
         );
 
+    if (_disposed) return;
     result.fold(
       (f) => state = _withComputed(
         beforeMutation.copyWith(error: f.toString()),
@@ -151,6 +161,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
     state = _withComputed(snapshot.copyWith(listings: pruned, error: null));
 
     final result = await ref.read(deleteListingUseCaseProvider).call(id);
+    if (_disposed) return;
     result.match(
       (failure) {
         state = _withComputed(snapshot.copyWith(error: failure.toString()));

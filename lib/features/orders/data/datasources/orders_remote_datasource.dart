@@ -86,6 +86,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   static List<OrderModel>? _consumerCache;
   static List<OrderModel>? _vendorCache;
 
+  /// Drops the mock in-memory order fixtures. Called on logout/user switch so
+  /// session data never survives into the next account (mock mode only —
+  /// live mode always fetches from the API).
+  static void clearSessionCache() {
+    _consumerCache = null;
+    _vendorCache = null;
+  }
+
   List<OrderModel> get _consumerOrders {
     _consumerCache ??= _seedConsumerOrders();
     return _consumerCache!;

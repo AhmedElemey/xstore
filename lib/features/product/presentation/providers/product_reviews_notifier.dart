@@ -12,19 +12,28 @@ part 'product_reviews_notifier.g.dart';
 class ProductReviewsNotifier extends _$ProductReviewsNotifier {
   static const _pageSize = 20;
 
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   @override
   ProductReviewsState build(String listingId) {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     Future.microtask(refresh);
     return const ProductReviewsState(isLoading: true);
   }
 
   Future<void> refresh() async {
+    if (_disposed) return;
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(getProductReviewsUseCaseProvider).call(
           productId: listingId,
           page: 0,
           pageSize: _pageSize,
         );
+    if (_disposed) return;
     result.fold(
       (failure) =>
           state = state.copyWith(isLoading: false, error: failure.toString()),
@@ -46,6 +55,7 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
           page: next,
           pageSize: _pageSize,
         );
+    if (_disposed) return;
     result.fold(
       (failure) => state =
           state.copyWith(isLoadingMore: false, error: failure.toString()),
@@ -72,6 +82,7 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
               reviewId: editingReviewId,
               params: params,
             );
+    if (_disposed) return false;
     return result.fold(
       (failure) {
         state = state.copyWith(isSubmitting: false, error: failure.toString());
@@ -89,6 +100,7 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
     final result = await ref
         .read(deleteReviewUseCaseProvider)
         .call(listingId: listingId, reviewId: reviewId);
+    if (_disposed) return;
     result.fold(
       (failure) => state = state.copyWith(error: failure.toString()),
       (_) => state = state.copyWith(

@@ -3062,4 +3062,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginAsCourierDemo => 'Sign in as delivery driver (demo)';
+
+  @override
+  String get loginAsCourier => 'Login as delivery';
+
+  @override
+  String get courierLoginTitle => 'Delivery sign in';
+
+  @override
+  String get courierLoginSubtitle =>
+      'For xStore couriers. Accounts are created by the platform — contact us if you don\'t have one.';
+
+  @override
+  String get courierModePassword => 'Password';
+
+  @override
+  String get courierModeOtp => 'OTP';
+
+  @override
+  String get courierSendCode => 'Send code';
+
+  @override
+  String get courierOtpFieldLabel => '6-digit code';
+
+  @override
+  String get courierOtpHint => '123456';
+
+  @override
+  String get courierOtpSentDemo => 'Demo code: 123456';
+
+  @override
+  String get courierOtpInvalid => 'Incorrect code — try again';
+
+  @override
+  String get courierVerifyAndLogin => 'Verify & sign in';
+
+  @override
+  String get courierOtpLiveUnavailable =>
+      'OTP sign-in becomes available once delivery accounts go live on the backend.';
+
+  @override
+  String get courierResendCode => 'Resend code';
+
+  @override
+  String get courierPickupLabel => 'Pickup';
+
+  @override
+  String get courierDropoffLabel => 'Drop-off';
+
+  @override
+  String courierItemsSummary(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 · $total';
+  }
 }

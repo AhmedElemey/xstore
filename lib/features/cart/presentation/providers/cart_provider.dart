@@ -7,6 +7,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/domain/entities/order_item_entity.dart';
+import '../../data/datasources/cart_remote_datasource.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import '../../domain/entities/place_order_params.dart';
@@ -79,7 +80,10 @@ class Cart extends _$Cart {
       if (next.isLoading) return;
       final user = next.valueOrNull;
       if (user == null) {
-        Future.microtask(() => state = const CartState());
+        Future.microtask(() {
+          CartRemoteDataSourceImpl.clearSessionCache();
+          state = const CartState();
+        });
       } else if (!user.isVendor) {
         Future.microtask(() => fetchCart());
       }

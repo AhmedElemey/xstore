@@ -1329,5 +1329,31 @@
   "courierCashEmpty": "لا توجد نقدية بحوزتك. ستظهر هنا طلبات الدفع عند الاستلام بعد تسليمها.",
   "courierCollectedListTitle": "الطلبات المحصّلة",
   "courierNavigateHint": "الاتجاهات في خرائط جوجل",
-  "loginAsCourierDemo": "الدخول كمندوب توصيل (تجريبي)"
+  "loginAsCourierDemo": "الدخول كمندوب توصيل (تجريبي)",
+  "loginAsCourier": "الدخول كمندوب توصيل",
+  "courierLoginTitle": "تسجيل دخول المندوب",
+  "courierLoginSubtitle": "لمناديب إكس ستور. الحسابات يتم إنشاؤها بواسطة المنصة — تواصل معنا إن لم يكن لديك حساب.",
+  "courierModePassword": "كلمة المرور",
+  "courierModeOtp": "رمز التحقق",
+  "courierSendCode": "إرسال الرمز",
+  "courierOtpFieldLabel": "الرمز المكوّن من 6 أرقام",
+  "courierOtpHint": "123456",
+  "courierOtpSentDemo": "الرمز التجريبي: 123456",
+  "courierOtpInvalid": "رمز غير صحيح — حاول مرة أخرى",
+  "courierVerifyAndLogin": "تحقق وسجّل الدخول",
+  "courierOtpLiveUnavailable": "سيتوفر الدخول برمز التحقق عند تفعيل حسابات المناديب في الخادم.",
+  "courierResendCode": "إعادة إرسال الرمز",
+  "courierPickupLabel": "الاستلام من",
+  "courierDropoffLabel": "التسليم إلى",
+  "courierItemsSummary": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} · {total}",
+  "@courierItemsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

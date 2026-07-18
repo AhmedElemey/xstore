@@ -11,8 +11,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
-import '../../../../core/mock/mock_config.dart';
-import '../../../../core/mock/mock_users.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
@@ -95,17 +93,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (!mounted) return;
       context.go(AppRoutes.home);
     }
-  }
-
-  /// Mock-mode shortcut: fills the demo courier's credentials and submits.
-  /// Only reachable when [MockConfig.useMock] renders its button — the live
-  /// backend has no courier accounts yet.
-  Future<void> _loginAsDemoCourier() async {
-    _phone.text = AppValidators.normalizeEgyptLocal(
-      mockCourierUser.phoneNumber,
-    );
-    _password.text = 'demo-driver';
-    await _submit();
   }
 
   Future<void> _openPhoneLoginSheet() async {
@@ -377,23 +364,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           textColor: context.textPrimary,
                         ),
                         const Gap(AppSpacing.md),
-                        const SocialLoginRow(),
-                        if (MockConfig.useMock) ...[
-                          const Gap(AppSpacing.md),
-                          SocialButton(
-                            onTap: login.isLoading ? null : _loginAsDemoCourier,
-                            isLoading: false,
-                            icon: Icon(
-                              LucideIcons.truck,
-                              size: 22,
-                              color: context.primaryColor,
-                            ),
-                            label: context.l10n.loginAsCourierDemo,
-                            borderColor: context.borderColor,
-                            bgColor: AppColors.transparent,
-                            textColor: context.textPrimary,
+                        SocialButton(
+                          onTap: () => context.push(AppRoutes.courierLogin),
+                          isLoading: false,
+                          icon: Icon(
+                            LucideIcons.truck,
+                            size: 22,
+                            color: context.primaryColor,
                           ),
-                        ],
+                          label: context.l10n.loginAsCourier,
+                          borderColor: context.borderColor,
+                          bgColor: AppColors.transparent,
+                          textColor: context.textPrimary,
+                        ),
+                        const Gap(AppSpacing.md),
+                        const SocialLoginRow(),
                         const Gap(AppSpacing.md),
                         Center(
                           child: TextButton(

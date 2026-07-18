@@ -136,4 +136,9 @@ Future<void> showCheckoutAddAddressSheet(
       );
     },
   );
+  nameCtrl.dispose();
+  phoneCtrl.dispose();
+  streetCtrl.dispose();
+  cityCtrl.dispose();
+  postalCtrl.dispose();
 }

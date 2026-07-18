@@ -21,6 +21,9 @@ Dio dio(DioRef ref) {
       baseUrl: ApiEndpoints.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 20),
+      // Without this an upload that stalls mid-send (flaky mobile data)
+      // hangs until the OS gives up instead of failing fast.
+      sendTimeout: const Duration(seconds: 20),
       // CONFIRMED against a live backend: the static Basic license key is
       // required on EVERY request (public and authenticated alike) — it is
       // NOT replaced by per-user auth. Set once here instead of per-call.

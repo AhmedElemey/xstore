@@ -18,9 +18,18 @@ part 'explore_provider.g.dart';
 class Explore extends _$Explore {
   Timer? _debounce;
 
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   @override
   ExploreState build() {
-    ref.onDispose(() => _debounce?.cancel());
+    _disposed = false;
+    ref.onDispose(() {
+      _disposed = true;
+      _debounce?.cancel();
+    });
     return const ExploreState();
   }
 
@@ -50,6 +59,7 @@ class Explore extends _$Explore {
       return;
     }
     final result = await ref.read(getSuggestionsUseCaseProvider).call(q);
+    if (_disposed) return;
     result.fold(
       (_) {},
       (s) => state = state.copyWith(suggestions: s),
@@ -70,6 +80,7 @@ class Explore extends _$Explore {
   Future<void> search(String q) async {
     state = state.copyWith(isSearching: true, page: 1);
     await _persistRecent(q);
+    if (_disposed) return;
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: q,
           page: 1,
@@ -77,6 +88,7 @@ class Explore extends _$Explore {
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
         );
+    if (_disposed) return;
     result.fold(
       (_) {
         state = state.copyWith(isSearching: false, results: []);
@@ -105,6 +117,7 @@ class Explore extends _$Explore {
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
         );
+    if (_disposed) return;
     result.fold(
       (_) => state = state.copyWith(isLoadingMore: false),
       (list) {

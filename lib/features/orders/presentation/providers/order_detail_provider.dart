@@ -26,8 +26,15 @@ class OrderDetailState with _$OrderDetailState {
 
 @riverpod
 class OrderDetailNotifier extends _$OrderDetailNotifier {
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   @override
   OrderDetailState build(String orderId) {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     return OrderDetailState(orderId: orderId);
   }
 
@@ -48,6 +55,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
           vendorId: _vendorId,
           isVendorSession: _isVendor,
         );
+    if (_disposed) return;
     result.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
       (o) => state = state.copyWith(isLoading: false, order: o),
@@ -156,6 +164,10 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
   }
 
   void _finalizeMutation(Either<Failure, OrderEntity> result, OrderEntity prev) {
+    // Every mutation awaits its use case before calling this; if the screen
+    // was popped mid-request the notifier is disposed — skip the state write
+    // (the orders list refetches on mount, so the missed invalidate is fine).
+    if (_disposed) return;
     result.fold(
       (f) => state = state.copyWith(
         isActioning: false,

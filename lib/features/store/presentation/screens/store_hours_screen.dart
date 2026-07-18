@@ -171,22 +171,23 @@ Future<void> _showMessageSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => Padding(
+    builder: (sheetContext) => Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+        bottom: MediaQuery.viewInsetsOf(sheetContext).bottom + AppSpacing.lg,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(context.l10n.closedMessageTitle),
+          Text(sheetContext.l10n.closedMessageTitle),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: controller,
             maxLength: 60,
-            decoration: InputDecoration(hintText: context.l10n.closedMessageHint),
+            decoration:
+                InputDecoration(hintText: sheetContext.l10n.closedMessageHint),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -195,9 +196,9 @@ Future<void> _showMessageSheet(
                 child: OutlinedButton(
                   onPressed: () {
                     notifier.updateTemporaryMessage('');
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
-                  child: Text(context.l10n.clearAllFilters),
+                  child: Text(sheetContext.l10n.clearAllFilters),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -205,9 +206,9 @@ Future<void> _showMessageSheet(
                 child: FilledButton(
                   onPressed: () {
                     notifier.updateTemporaryMessage(controller.text);
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                   },
-                  child: Text(context.l10n.save),
+                  child: Text(sheetContext.l10n.save),
                 ),
               ),
             ],
@@ -216,5 +217,6 @@ Future<void> _showMessageSheet(
       ),
     ),
   );
+  controller.dispose();
 }
 

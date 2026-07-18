@@ -3052,4 +3052,64 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get loginAsCourierDemo => 'الدخول كمندوب توصيل (تجريبي)';
+
+  @override
+  String get loginAsCourier => 'الدخول كمندوب توصيل';
+
+  @override
+  String get courierLoginTitle => 'تسجيل دخول المندوب';
+
+  @override
+  String get courierLoginSubtitle =>
+      'لمناديب إكس ستور. الحسابات يتم إنشاؤها بواسطة المنصة — تواصل معنا إن لم يكن لديك حساب.';
+
+  @override
+  String get courierModePassword => 'كلمة المرور';
+
+  @override
+  String get courierModeOtp => 'رمز التحقق';
+
+  @override
+  String get courierSendCode => 'إرسال الرمز';
+
+  @override
+  String get courierOtpFieldLabel => 'الرمز المكوّن من 6 أرقام';
+
+  @override
+  String get courierOtpHint => '123456';
+
+  @override
+  String get courierOtpSentDemo => 'الرمز التجريبي: 123456';
+
+  @override
+  String get courierOtpInvalid => 'رمز غير صحيح — حاول مرة أخرى';
+
+  @override
+  String get courierVerifyAndLogin => 'تحقق وسجّل الدخول';
+
+  @override
+  String get courierOtpLiveUnavailable =>
+      'سيتوفر الدخول برمز التحقق عند تفعيل حسابات المناديب في الخادم.';
+
+  @override
+  String get courierResendCode => 'إعادة إرسال الرمز';
+
+  @override
+  String get courierPickupLabel => 'الاستلام من';
+
+  @override
+  String get courierDropoffLabel => 'التسليم إلى';
+
+  @override
+  String courierItemsSummary(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج',
+      few: '$count منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+    );
+    return '$_temp0 · $total';
+  }
 }

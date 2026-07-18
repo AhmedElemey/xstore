@@ -236,7 +236,9 @@ class OrderActionButtons extends ConsumerWidget {
         ],
       ),
     );
-    if (ok == true) return ctrl.text.trim().isEmpty ? '—' : ctrl.text.trim();
+    final reason = ctrl.text.trim();
+    ctrl.dispose();
+    if (ok == true) return reason.isEmpty ? '—' : reason;
     return null;
   }
 
@@ -316,6 +318,8 @@ class OrderActionButtons extends ConsumerWidget {
         },
       ),
     );
+    trackCtrl.dispose();
+    courierCtrl.dispose();
     if (context.mounted) _err(context, ref, id);
   }
 
@@ -433,6 +437,6 @@ class OrderActionButtons extends ConsumerWidget {
           );
         },
       ),
-    );
+    ).whenComplete(text.dispose);
   }
 }

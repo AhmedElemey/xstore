@@ -167,13 +167,15 @@ class Notifications extends _$Notifications {
       notifications: [],
       hasMore: true,
     );
-    final listR =
-        await ref.read(getNotificationsUseCaseProvider).call(
-              role: role,
-              page: 0,
-              pageSize: _pageSize,
-            );
-    final countR = await ref.read(notificationsRepositoryProvider).unreadCount(role);
+    // Independent requests — fetch in parallel instead of serially.
+    final (listR, countR) = await (
+      ref.read(getNotificationsUseCaseProvider).call(
+            role: role,
+            page: 0,
+            pageSize: _pageSize,
+          ),
+      ref.read(notificationsRepositoryProvider).unreadCount(role),
+    ).wait;
     listR.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
       (list) {

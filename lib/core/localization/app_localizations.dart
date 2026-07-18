@@ -5935,6 +5935,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in as delivery driver (demo)'**
   String get loginAsCourierDemo;
+
+  /// No description provided for @loginAsCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Login as delivery'**
+  String get loginAsCourier;
+
+  /// No description provided for @courierLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery sign in'**
+  String get courierLoginTitle;
+
+  /// No description provided for @courierLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For xStore couriers. Accounts are created by the platform — contact us if you don\'t have one.'**
+  String get courierLoginSubtitle;
+
+  /// No description provided for @courierModePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get courierModePassword;
+
+  /// No description provided for @courierModeOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP'**
+  String get courierModeOtp;
+
+  /// No description provided for @courierSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get courierSendCode;
+
+  /// No description provided for @courierOtpFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get courierOtpFieldLabel;
+
+  /// No description provided for @courierOtpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'123456'**
+  String get courierOtpHint;
+
+  /// No description provided for @courierOtpSentDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo code: 123456'**
+  String get courierOtpSentDemo;
+
+  /// No description provided for @courierOtpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect code — try again'**
+  String get courierOtpInvalid;
+
+  /// No description provided for @courierVerifyAndLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify & sign in'**
+  String get courierVerifyAndLogin;
+
+  /// No description provided for @courierOtpLiveUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP sign-in becomes available once delivery accounts go live on the backend.'**
+  String get courierOtpLiveUnavailable;
+
+  /// No description provided for @courierResendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get courierResendCode;
+
+  /// No description provided for @courierPickupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get courierPickupLabel;
+
+  /// No description provided for @courierDropoffLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-off'**
+  String get courierDropoffLabel;
+
+  /// No description provided for @courierItemsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} · {total}'**
+  String courierItemsSummary(int count, String total);
 }
 
 class _AppLocalizationsDelegate

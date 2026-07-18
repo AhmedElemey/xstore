@@ -12,6 +12,11 @@ part 'product_detail_notifier.g.dart';
 
 @riverpod
 class ProductDetail extends _$ProductDetail {
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   ProductDetailState _fromEntity(ProductDetailEntity e) {
     return ProductDetailState(
       listing: e.listing,
@@ -48,15 +53,18 @@ class ProductDetail extends _$ProductDetail {
   }
 
   Future<ProductDetailEntity> _enriched(String listingId, ProductDetailEntity entity) async {
-    final similarResult = await ref.read(getSimilarProductsUseCaseProvider).call(
-          productId: listingId,
-          category: entity.listing.categoryLabel,
-        );
-    final reviewsResult = await ref.read(getProductReviewsUseCaseProvider).call(
-          productId: listingId,
-          page: 0,
-          pageSize: 3,
-        );
+    // Independent requests — fetch in parallel instead of serially.
+    final (similarResult, reviewsResult) = await (
+      ref.read(getSimilarProductsUseCaseProvider).call(
+            productId: listingId,
+            category: entity.listing.categoryLabel,
+          ),
+      ref.read(getProductReviewsUseCaseProvider).call(
+            productId: listingId,
+            page: 0,
+            pageSize: 3,
+          ),
+    ).wait;
 
     final simList = similarResult.fold((_) => <ProductDetailEntity>[], (l) => l);
     final deals = simList.map((p) {
@@ -95,6 +103,8 @@ class ProductDetail extends _$ProductDetail {
 
   @override
   Future<ProductDetailState> build(String listingId) async {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     final entity = await _fetchEntity(listingId);
     final merged = await _enriched(listingId, entity);
     return _fromEntity(merged);
@@ -104,11 +114,13 @@ class ProductDetail extends _$ProductDetail {
     if (id != listingId) return;
     final previous = state.valueOrNull;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final next = await AsyncValue.guard(() async {
       final entity = await _fetchEntity(id);
       final merged = await _enriched(id, entity);
       return _mergeWithPrevious(merged, previous);
     });
+    if (_disposed) return;
+    state = next;
   }
 
   void incrementQuantity() {
@@ -129,9 +141,13 @@ class ProductDetail extends _$ProductDetail {
     final v = state.valueOrNull;
     final listing = v?.listing;
     if (listing == null) return;
+    // Grab the (keepAlive) cart notifier before any await: the add still
+    // completes even if this screen-scoped notifier is disposed mid-flow.
+    final cart = ref.read(cartProvider.notifier);
     state = AsyncData(v!.copyWith(isAddingToCart: true));
     await Future<void>.delayed(const Duration(milliseconds: 100));
-    await ref.read(cartProvider.notifier).addListingEntity(listing, v.quantity);
+    await cart.addListingEntity(listing, v.quantity);
+    if (_disposed) return;
     state = AsyncData(v.copyWith(isAddingToCart: false));
   }
 

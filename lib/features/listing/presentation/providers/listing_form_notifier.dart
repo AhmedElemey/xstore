@@ -29,10 +29,17 @@ const _currencyCode = 'EGP';
 class ListingFormNotifier extends _$ListingFormNotifier {
   final ImagePicker _picker = ImagePicker();
 
+  // Set when this autoDispose notifier is torn down (screen popped) so
+  // in-flight requests don't write state to a disposed notifier — that
+  // throws an unhandled StateError.
+  var _disposed = false;
+
   String get currencyCode => _currencyCode;
 
   @override
   ListingFormState build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     Future.microtask(_loadDraft);
     return const ListingFormState();
   }
@@ -40,6 +47,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   Future<void> _loadDraft() async {
     try {
       final prefs = await ref.read(sharedPreferencesProvider.future);
+      if (_disposed) return;
       final raw = prefs.getString(_draftKey);
       if (raw == null || raw.isEmpty) {
         return;
@@ -105,8 +113,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   }
 
   Future<void> saveDraft() async {
+    // Snapshot before awaiting: reading `state` after dispose throws too.
+    final snapshot = _stateToJson(state);
     final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setString(_draftKey, jsonEncode(_stateToJson(state)));
+    await prefs.setString(_draftKey, jsonEncode(snapshot));
   }
 
   void addPhotoPath(String path) {
@@ -137,16 +147,14 @@ class ListingFormNotifier extends _$ListingFormNotifier {
 
   Future<void> pickFromCamera() async {
     final file = await _picker.pickImage(source: ImageSource.camera);
-    if (file != null) {
-      addPhoto(File(file.path));
-    }
+    if (_disposed || file == null) return;
+    addPhoto(File(file.path));
   }
 
   Future<void> pickFromGallery() async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
-    if (file != null) {
-      addPhoto(File(file.path));
-    }
+    if (_disposed || file == null) return;
+    addPhoto(File(file.path));
   }
 
   void updateField(String field, Object? value) {
@@ -378,6 +386,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         imageUrls: const [],
       );
 
+      if (_disposed) return false;
       var success = false;
       result.fold(
         (failure) {
@@ -396,6 +405,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
       );
       return success;
     } catch (e) {
+      if (_disposed) return false;
       state = state.copyWith(
         isSubmitting: false,
         errors: {...state.errors, 'submit': e.toString()},
@@ -408,6 +418,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   Future<AsyncValue<void>> submitAsync(AppLocalizations l10n) async {
     return AsyncValue.guard(() async {
       final ok = await submit(l10n);
+      if (_disposed) return;
       if (!ok) {
         final msg = state.errors['submit'] ??
             (state.errors.isNotEmpty ? state.errors.values.first : null) ??
@@ -450,6 +461,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   Future<void> _completePublishSuccess() async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.remove(_draftKey);
+    if (_disposed) return;
     state = const ListingFormState();
     ref.invalidate(myListingsNotifierProvider);
   }

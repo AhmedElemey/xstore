@@ -55,6 +55,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
           vendorId: vendorId,
           isVendorSession: true,
         );
+    if (!mounted) return;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,
@@ -69,6 +70,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
 
   Future<bool> confirmOrder() async {
     final ok = await ref.read(vendorOrdersProvider.notifier).confirmOrder(orderId);
+    if (!mounted) return ok;
     if (ok) {
       ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
@@ -78,6 +80,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
 
   Future<bool> rejectOrder(String reason) async {
     final ok = await ref.read(vendorOrdersProvider.notifier).rejectOrder(orderId, reason);
+    if (!mounted) return ok;
     if (ok) {
       ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
@@ -87,6 +90,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
 
   Future<bool> markProcessing() async {
     final ok = await ref.read(vendorOrdersProvider.notifier).markProcessing(orderId);
+    if (!mounted) return ok;
     if (ok) {
       ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
@@ -96,6 +100,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
 
   Future<bool> markShipped(ShippingInfo info) async {
     final ok = await ref.read(vendorOrdersProvider.notifier).markShipped(orderId, info);
+    if (!mounted) return ok;
     if (ok) {
       ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
@@ -108,7 +113,9 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
   }
 }
 
-final vendorOrderDetailProvider = StateNotifierProvider.family<
+// autoDispose: screen-scoped — without it every visited order detail keeps
+// its notifier (and fetched order) alive for the rest of the app session.
+final vendorOrderDetailProvider = StateNotifierProvider.autoDispose.family<
     VendorOrderDetailNotifier, VendorOrderDetailState, String>(
   (ref, orderId) => VendorOrderDetailNotifier(ref, orderId),
 );

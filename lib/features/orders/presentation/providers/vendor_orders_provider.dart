@@ -112,6 +112,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           page: 1,
           pageSize: _vendorPageSize,
         );
+    if (!mounted) return;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,
@@ -142,6 +143,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           page: nextPage,
           pageSize: _vendorPageSize,
         );
+    if (!mounted) return;
     result.fold(
       (failure) => state = state.copyWith(
         isLoadingMore: false,
@@ -178,6 +180,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.confirmed);
     final result = await ref.read(confirmOrderUseCaseProvider).call(orderId);
+    if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
@@ -196,6 +199,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         .toList();
     for (final id in pending) {
       if (await confirmOrder(id)) ok++;
+      if (!mounted) break;
     }
     return ok;
   }
@@ -212,6 +216,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           orderId: orderId,
           reason: reason,
         );
+    if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
@@ -226,6 +231,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.processing);
     final result = await ref.read(markProcessingUseCaseProvider).call(orderId);
+    if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();
@@ -263,6 +269,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
           orderId: orderId,
           shippingInfo: info,
         );
+    if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
       _recompute();

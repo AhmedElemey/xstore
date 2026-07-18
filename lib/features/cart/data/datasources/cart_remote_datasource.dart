@@ -55,6 +55,15 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   static CouponEntity? _coupon;
   static String? _couponCodeInput;
 
+  /// Drops the mock in-memory cart. Called on logout/user switch so cart
+  /// contents never survive into the next account (mock mode only — live
+  /// mode always fetches from the API).
+  static void clearSessionCache() {
+    _items.clear();
+    _coupon = null;
+    _couponCodeInput = null;
+  }
+
   String _vendorIdForListing(String listingId) {
     const v2 = {'listing_003', 'listing_016', 'listing_002'};
     return v2.contains(listingId) ? 'vendor_002' : 'vendor_001';
