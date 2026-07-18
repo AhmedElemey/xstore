@@ -276,3 +276,13 @@ Rules for the log:
 - **What happened:** The delivery card's items summary rendered "1 items" — the arb key used a plain `{count} items` interpolation instead of a plural.
 - **Rule:** Any l10n string containing a count uses ICU plural syntax in BOTH locales from the first draft — Arabic needs its own categories (`=1`, `=2`, `few`, `other`), not a copy of the English two-form plural.
 - **Where it applies:** All new arb keys with numeric placeholders.
+
+### 2026-07-18 — Web bootstrap dies before runApp; app is un-runnable on `flutter run -d web-server`
+- **What happened:** A screenshot-capture session found the app renders a permanently blank canvas on web: `bootstrap()` awaits `Firebase.initializeApp(options: DefaultFirebaseOptions.forFlavor(...))` and `forFlavor` throws `UnsupportedError('Web Firebase options are not configured yet.')` under `kIsWeb`, so `runApp` is never reached. No visible error — just an empty `flt-scene-host`, while the DDC console logs a single DartError. Also: `google_sign_in_web` asserts at startup because no `google-signin-client_id` meta tag exists for web.
+- **Rule:** Startup code must not `await` a call that is known to throw on a supported run target before `runApp`. Either register real web Firebase options, or branch on `kIsWeb` (skip AppCheck/FCM, supply web options) so mock-mode web runs. When debugging "blank canvas" on Flutter web, check `flt-scene-host` children and page errors first — a pre-runApp throw looks identical to a slow load.
+- **Where it applies:** `lib/main.dart` bootstrap, `lib/core/firebase/firebase_options.dart`, any CI/tooling that runs the app with `-d web-server` (mock QA, screenshot jobs).
+
+### 2026-07-18 — Vendor Incoming Orders list never renders: infinite-height constraint crash
+- **What happened:** On `/vendor-orders` (mobile web viewport 390x844, MOCK=true) the header stats and "Needs Action — 8 orders" group render, but every order card fails layout with `BoxConstraints forces an infinite height` (box.dart:2251 assertions, then "Unexpected null value" and endless mouse_tracker asserts). The list area is permanently blank even though data is present.
+- **Rule:** A widget inside a scrollable must not demand infinite height (e.g. unbounded `Column`/`Expanded` inside a sliver child, or `ListView` inside a `Column` without constraints). Reproduce vendor screens at a phone-sized viewport before merging; assertion spam from mouse_tracker after a layout throw is a symptom, not the cause — find the first `BoxConstraints`/`RenderBox` error above it.
+- **Where it applies:** vendor incoming-orders screen widgets (order group list/cards), any sliver-based list screen.

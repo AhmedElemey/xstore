@@ -490,6 +490,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               controller: _storeDescription,
               maxLines: 4,
               decoration: InputDecoration(
+                labelText: context.l10n.storeDescriptionRequired,
                 prefixIcon: const Icon(LucideIcons.fileText),
                 border: const OutlineInputBorder(),
               ),
@@ -510,24 +511,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   .updateField('storeDescriptionAr', v),
             ),
             const Gap(AppSpacing.md),
-            TextField(
-              controller: _storeCity,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(LucideIcons.mapPin),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('storeCity', v),
-            ),
-            const Gap(AppSpacing.md),
-            TextField(
-              controller: _storeWilaya,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(LucideIcons.map),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (v) =>
-                  ref.read(profileNotifierProvider.notifier).updateField('storeWilaya', v),
-            ),
+            // TextField(
+            //   controller: _storeCity,
+            //   decoration: InputDecoration(
+            //     prefixIcon: const Icon(LucideIcons.mapPin),
+            //     border: const OutlineInputBorder(),
+            //   ),
+            //   onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('storeCity', v),
+            // ),
+            // const Gap(AppSpacing.md),
+            // TextField(
+            //   controller: _storeWilaya,
+            //   decoration: InputDecoration(
+            //     prefixIcon: const Icon(LucideIcons.map),
+            //     border: const OutlineInputBorder(),
+            //   ),
+            //   onChanged: (v) =>
+            //       ref.read(profileNotifierProvider.notifier).updateField('storeWilaya', v),
+            // ),
             const Gap(AppSpacing.md),
             PhoneInputField(
               controller: _whatsapp,

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xStore &mdash; Design Review</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --border: #e2e2e6;
+    --text: #1c1c1f;
+    --text-muted: #6b6b74;
+    --accent: #b3261e;
+    --accent-soft: #fdecea;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  header.page-header {
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .intro {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 720px;
+    margin: 0;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .meta-pill {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .issues {
+    background: var(--accent-soft);
+    border: 1px solid #f3c7c3;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+  }
+
+  .issues h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    color: var(--accent);
+  }
+
+  .issues .issues-sub {
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .issues ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .issues li {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  .issues li:last-child {
+    margin-bottom: 0;
+  }
+
+  .module {
+    margin-bottom: 48px;
+  }
+
+  .module h2 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+
+  .module-count {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .module-desc {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 10px 0 20px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    position: relative;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .card img {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    border-bottom: 1px solid var(--border);
+    background: #eeeeef;
+  }
+
+  .card-num {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+
+  .card-caption {
+    display: block;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  footer.page-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-header">
+    <h1>xStore &mdash; Design Review</h1>
+    <p class="intro">
+      This package contains 44 screens across 5 modules of the xStore Flutter marketplace app
+      (Egypt, EGP, roles: consumer / vendor / courier), captured on 2026-07-18 from the dev build
+      running in mock-data mode.
+    </p>
+    <div class="meta-row">
+      <span class="meta-pill">44 screens</span>
+      <span class="meta-pill">5 modules</span>
+      <span class="meta-pill">390&times;844 @2x</span>
+      <span class="meta-pill">Captured 2026-07-18</span>
+      <span class="meta-pill">Dev build &middot; mock data</span>
+    </div>
+  </header>
+
+  <section class="issues">
+    <h2>Known issues to review</h2>
+    <p class="issues-sub">Please review these first &mdash; they are visible in the screenshots below and are already tracked, not new findings.</p>
+    <ol>
+        <li>
+          <strong>Vendor &mdash; Incoming Orders.</strong> The order list area renders empty due to a layout crash (infinite-height constraint). The header stats still render, but no order cards appear. This screenshot captures the real broken state, not a placeholder.
+        </li>
+        <li>
+          <strong>Vendor &mdash; My Listings (empty state).</strong> The floating “+ New Listing” button overlaps and clips the “Add Your First Listing” call-to-action.
+        </li>
+        <li>
+          <strong>Mock data &mdash; market mismatch.</strong> Several screens show Algerian cities, addresses, and names (Algiers, Constantine, “12 Rue Didouche Mourad”) in what should be an Egypt-market app. The vendor profile even reads “Algiers, Egypt.”
+        </li>
+        <li>
+          <strong>Consumer &mdash; Order Detail.</strong> A delivered order shows a “Processing &mdash; Pending” step sitting between two already-completed timeline steps.
+        </li>
+        <li>
+          <strong>Notifications &mdash; empty state copy.</strong> The empty-state text reads “Your all notifications will appear here,” which reads as a grammar error.
+        </li>
+        <li>
+          <strong>Vendor &mdash; bottom navigation.</strong> The tab label truncates to “Incoming Ord&hellip;” at the standard 390px width.
+        </li>
+        <li>
+          <strong>Order Detail &mdash; footer overlap.</strong> The “Cancel Order” footer button slightly overlaps the scrollable content above it.
+        </li>
+    </ol>
+  </section>
+
+    <section class="module">
+      <h2>Auth <span class="module-count">(9 screens)</span></h2>
+      <p class="module-desc">Onboarding, login, registration, and courier sign-in flows.</p>
+      <div class="grid">
+        <a class="card" href="screenshots/01-auth/courier-login.png" target="_blank" rel="noopener">
+          <span class="card-num">01</span>
+          <img src="screenshots/01-auth/courier-login.png" alt="Courier Login" loading="lazy" width="320">
+          <span class="card-caption">Courier Login</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/forgot-password.png" target="_blank" rel="noopener">
+          <span class="card-num">02</span>
+          <img src="screenshots/01-auth/forgot-password.png" alt="Forgot Password" loading="lazy" width="320">
+          <span class="card-caption">Forgot Password</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/login.png" target="_blank" rel="noopener">
+          <span class="card-num">03</span>
+          <img src="screenshots/01-auth/login.png" alt="Login" loading="lazy" width="320">
+          <span class="card-caption">Login</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/onboarding-slide-1.png" target="_blank" rel="noopener">
+          <span class="card-num">04</span>
+          <img src="screenshots/01-auth/onboarding-slide-1.png" alt="Onboarding Slide 1" loading="lazy" width="320">
+          <span class="card-caption">Onboarding Slide 1</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/onboarding-slide-2.png" target="_blank" rel="noopener">
+          <span class="card-num">05</span>
+          <img src="screenshots/01-auth/onboarding-slide-2.png" alt="Onboarding Slide 2" loading="lazy" width="320">
+          <span class="card-caption">Onboarding Slide 2</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/onboarding-slide-3.png" target="_blank" rel="noopener">
+          <span class="card-num">06</span>
+          <img src="screenshots/01-auth/onboarding-slide-3.png" alt="Onboarding Slide 3" loading="lazy" width="320">
+          <span class="card-caption">Onboarding Slide 3</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/register-vendor.png" target="_blank" rel="noopener">
+          <span class="card-num">07</span>
+          <img src="screenshots/01-auth/register-vendor.png" alt="Register Vendor" loading="lazy" width="320">
+          <span class="card-caption">Register Vendor</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/register.png" target="_blank" rel="noopener">
+          <span class="card-num">08</span>
+          <img src="screenshots/01-auth/register.png" alt="Register" loading="lazy" width="320">
+          <span class="card-caption">Register</span>
+        </a>
+        <a class="card" href="screenshots/01-auth/splash.png" target="_blank" rel="noopener">
+          <span class="card-num">09</span>
+          <img src="screenshots/01-auth/splash.png" alt="Splash" loading="lazy" width="320">
+          <span class="card-caption">Splash</span>
+        </a>
+      </div>
+    </section>
+    <section class="module">
+      <h2>Guest Browsing <span class="module-count">(7 screens)</span></h2>
+      <p class="module-desc">Unauthenticated browsing — home, explore, product, seller, and static pages.</p>
+      <div class="grid">
+        <a class="card" href="screenshots/02-guest/explore.png" target="_blank" rel="noopener">
+          <span class="card-num">10</span>
+          <img src="screenshots/02-guest/explore.png" alt="Explore" loading="lazy" width="320">
+          <span class="card-caption">Explore</span>
+        </a>
+        <a class="card" href="screenshots/02-guest/help.png" target="_blank" rel="noopener">
+          <span class="card-num">11</span>
+          <img src="screenshots/02-guest/help.png" alt="Help" loading="lazy" width="320">
+          <span class="card-caption">Help</span>
+        </a>
+        <a class="card" href="screenshots/02-guest/home.png" target="_blank" rel="noopener">
+          <span class="card-num">12</span>
+          <img src="screenshots/02-guest/home.png" alt="Home" loading="lazy" width="320">
+          <span class="card-caption">Home</span>
+        </a>
+        <a class="card" href="screenshots/02-guest/privacy.png" target="_blank" rel="noopener">
+          <span class="card-num">13</span>
+          <img src="screenshots/02-guest/privacy.png" alt="Privacy" loading="lazy" width="320">
+          <span class="card-caption">Privacy</span>
+        </a>
+        <a class="card" href="screenshots/02-guest/product.png" target="_blank" rel="noopener">
+          <span class="card-num">14</span>
+          <img src="screenshots/02-guest/product.png" alt="Product" loading="lazy" width="320">
+          <span class="card-caption">Product</span>
+        </a>
+        <a class="card" href="screenshots/02-guest/seller.png" target="_blank" rel="noopener">
+          <span class="card-num">15</span>
+          <img src="screenshots/02-guest/seller.png" alt="Seller" loading="lazy" width="320">
+          <span class="card-caption">Seller</span>
+        </a>
+        <a class="card" href="screenshots/02-guest/terms.png" target="_blank" rel="noopener">
+          <span class="card-num">16</span>
+          <img src="screenshots/02-guest/terms.png" alt="Terms" loading="lazy" width="320">
+          <span class="card-caption">Terms</span>
+        </a>
+      </div>
+    </section>
+    <section class="module">
+      <h2>Consumer <span class="module-count">(16 screens)</span></h2>
+      <p class="module-desc">Signed-in buyer flows — shopping, cart, checkout, orders, and account.</p>
+      <div class="grid">
+        <a class="card" href="screenshots/03-consumer/addresses.png" target="_blank" rel="noopener">
+          <span class="card-num">17</span>
+          <img src="screenshots/03-consumer/addresses.png" alt="Addresses" loading="lazy" width="320">
+          <span class="card-caption">Addresses</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/cart.png" target="_blank" rel="noopener">
+          <span class="card-num">18</span>
+          <img src="screenshots/03-consumer/cart.png" alt="Cart" loading="lazy" width="320">
+          <span class="card-caption">Cart</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/checkout.png" target="_blank" rel="noopener">
+          <span class="card-num">19</span>
+          <img src="screenshots/03-consumer/checkout.png" alt="Checkout" loading="lazy" width="320">
+          <span class="card-caption">Checkout</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/explore.png" target="_blank" rel="noopener">
+          <span class="card-num">20</span>
+          <img src="screenshots/03-consumer/explore.png" alt="Explore" loading="lazy" width="320">
+          <span class="card-caption">Explore</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/home.png" target="_blank" rel="noopener">
+          <span class="card-num">21</span>
+          <img src="screenshots/03-consumer/home.png" alt="Home" loading="lazy" width="320">
+          <span class="card-caption">Home</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/notification-settings.png" target="_blank" rel="noopener">
+          <span class="card-num">22</span>
+          <img src="screenshots/03-consumer/notification-settings.png" alt="Notification Settings" loading="lazy" width="320">
+          <span class="card-caption">Notification Settings</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/notifications.png" target="_blank" rel="noopener">
+          <span class="card-num">23</span>
+          <img src="screenshots/03-consumer/notifications.png" alt="Notifications" loading="lazy" width="320">
+          <span class="card-caption">Notifications</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/order-detail.png" target="_blank" rel="noopener">
+          <span class="card-num">24</span>
+          <img src="screenshots/03-consumer/order-detail.png" alt="Order Detail" loading="lazy" width="320">
+          <span class="card-caption">Order Detail</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/orders.png" target="_blank" rel="noopener">
+          <span class="card-num">25</span>
+          <img src="screenshots/03-consumer/orders.png" alt="Orders" loading="lazy" width="320">
+          <span class="card-caption">Orders</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/payment-methods.png" target="_blank" rel="noopener">
+          <span class="card-num">26</span>
+          <img src="screenshots/03-consumer/payment-methods.png" alt="Payment Methods" loading="lazy" width="320">
+          <span class="card-caption">Payment Methods</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/product-reviews.png" target="_blank" rel="noopener">
+          <span class="card-num">27</span>
+          <img src="screenshots/03-consumer/product-reviews.png" alt="Product Reviews" loading="lazy" width="320">
+          <span class="card-caption">Product Reviews</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/product.png" target="_blank" rel="noopener">
+          <span class="card-num">28</span>
+          <img src="screenshots/03-consumer/product.png" alt="Product" loading="lazy" width="320">
+          <span class="card-caption">Product</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/profile-edit.png" target="_blank" rel="noopener">
+          <span class="card-num">29</span>
+          <img src="screenshots/03-consumer/profile-edit.png" alt="Profile Edit" loading="lazy" width="320">
+          <span class="card-caption">Profile Edit</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/profile.png" target="_blank" rel="noopener">
+          <span class="card-num">30</span>
+          <img src="screenshots/03-consumer/profile.png" alt="Profile" loading="lazy" width="320">
+          <span class="card-caption">Profile</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/settings.png" target="_blank" rel="noopener">
+          <span class="card-num">31</span>
+          <img src="screenshots/03-consumer/settings.png" alt="Settings" loading="lazy" width="320">
+          <span class="card-caption">Settings</span>
+        </a>
+        <a class="card" href="screenshots/03-consumer/wishlist.png" target="_blank" rel="noopener">
+          <span class="card-num">32</span>
+          <img src="screenshots/03-consumer/wishlist.png" alt="Wishlist" loading="lazy" width="320">
+          <span class="card-caption">Wishlist</span>
+        </a>
+      </div>
+    </section>
+    <section class="module">
+      <h2>Vendor <span class="module-count">(9 screens)</span></h2>
+      <p class="module-desc">Seller-side flows — listings, orders, earnings, analytics, and store settings.</p>
+      <div class="grid">
+        <a class="card" href="screenshots/04-vendor/add-listing.png" target="_blank" rel="noopener">
+          <span class="card-num">33</span>
+          <img src="screenshots/04-vendor/add-listing.png" alt="Add Listing" loading="lazy" width="320">
+          <span class="card-caption">Add Listing</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/analytics.png" target="_blank" rel="noopener">
+          <span class="card-num">34</span>
+          <img src="screenshots/04-vendor/analytics.png" alt="Analytics" loading="lazy" width="320">
+          <span class="card-caption">Analytics</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/earnings.png" target="_blank" rel="noopener">
+          <span class="card-num">35</span>
+          <img src="screenshots/04-vendor/earnings.png" alt="Earnings" loading="lazy" width="320">
+          <span class="card-caption">Earnings</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/home.png" target="_blank" rel="noopener">
+          <span class="card-num">36</span>
+          <img src="screenshots/04-vendor/home.png" alt="Home" loading="lazy" width="320">
+          <span class="card-caption">Home</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/my-listings.png" target="_blank" rel="noopener">
+          <span class="card-num">37</span>
+          <img src="screenshots/04-vendor/my-listings.png" alt="My Listings" loading="lazy" width="320">
+          <span class="card-caption">My Listings</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/profile.png" target="_blank" rel="noopener">
+          <span class="card-num">38</span>
+          <img src="screenshots/04-vendor/profile.png" alt="Profile" loading="lazy" width="320">
+          <span class="card-caption">Profile</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/store-hours.png" target="_blank" rel="noopener">
+          <span class="card-num">39</span>
+          <img src="screenshots/04-vendor/store-hours.png" alt="Store Hours" loading="lazy" width="320">
+          <span class="card-caption">Store Hours</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/vendor-order-detail.png" target="_blank" rel="noopener">
+          <span class="card-num">40</span>
+          <img src="screenshots/04-vendor/vendor-order-detail.png" alt="Vendor Order Detail" loading="lazy" width="320">
+          <span class="card-caption">Vendor Order Detail</span>
+        </a>
+        <a class="card" href="screenshots/04-vendor/vendor-orders.png" target="_blank" rel="noopener">
+          <span class="card-num">41</span>
+          <img src="screenshots/04-vendor/vendor-orders.png" alt="Vendor Orders" loading="lazy" width="320">
+          <span class="card-caption">Vendor Orders</span>
+        </a>
+      </div>
+    </section>
+    <section class="module">
+      <h2>Courier <span class="module-count">(3 screens)</span></h2>
+      <p class="module-desc">Delivery-role flows — assigned deliveries, cash collection, and profile.</p>
+      <div class="grid">
+        <a class="card" href="screenshots/05-courier/courier-cash.png" target="_blank" rel="noopener">
+          <span class="card-num">42</span>
+          <img src="screenshots/05-courier/courier-cash.png" alt="Courier Cash" loading="lazy" width="320">
+          <span class="card-caption">Courier Cash</span>
+        </a>
+        <a class="card" href="screenshots/05-courier/deliveries.png" target="_blank" rel="noopener">
+          <span class="card-num">43</span>
+          <img src="screenshots/05-courier/deliveries.png" alt="Deliveries" loading="lazy" width="320">
+          <span class="card-caption">Deliveries</span>
+        </a>
+        <a class="card" href="screenshots/05-courier/profile.png" target="_blank" rel="noopener">
+          <span class="card-num">44</span>
+          <img src="screenshots/05-courier/profile.png" alt="Profile" loading="lazy" width="320">
+          <span class="card-caption">Profile</span>
+        </a>
+      </div>
+    </section>
+
+  <footer class="page-footer">
+    xStore design review &middot; 44 screens &middot; generated 2026-07-18
+  </footer>
+</div>
+
+</body>
+</html>
