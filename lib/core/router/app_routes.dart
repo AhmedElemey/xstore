@@ -47,6 +47,9 @@ abstract final class AppRoutes {
   /// Courier shell tabs ("Delivered by xStore" pilot).
   static const deliveries = '/deliveries';
   static const courierCash = '/courier-cash';
+  /// Consumer package delivery ("send anything" pilot).
+  static const sendPackage = '/send-package';
+  static const myPackages = '/my-packages';
 
   static String chatThread(String threadId) => '/chat/$threadId';
 }
@@ -69,11 +72,17 @@ bool isVendorRestrictedRoute(String location) {
 ///
 /// `/order/:id` is deliberately NOT here — vendors open it too, via
 /// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
+///
+/// Package delivery requests are consumer-only: the sender is always a
+/// consumer account; couriers see assigned packages in their own tab and
+/// vendors ship marketplace orders instead.
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||
       location == AppRoutes.wishlist ||
-      location == AppRoutes.orders;
+      location == AppRoutes.orders ||
+      location == AppRoutes.sendPackage ||
+      location == AppRoutes.myPackages;
 }
 
 /// Courier-only areas: the delivery run and collected-cash wallet.

@@ -3112,4 +3112,168 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0 · $total';
   }
+
+  @override
+  String get courierCollectFromCustomer => 'حصّل من العميل';
+
+  @override
+  String get courierCollectFromSender => 'حصّل من المُرسل عند الاستلام';
+
+  @override
+  String get courierIdentityLocked => 'تظهر بيانات العميل بعد تأكيد الطلب';
+
+  @override
+  String get courierPackagesSection => 'الطرود';
+
+  @override
+  String courierPackagesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count طرد',
+      few: '$count طرود',
+      two: 'طردان',
+      one: 'طرد واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierPackagePickupConfirmTitle => 'تحصيل النقود واستلام الطرد';
+
+  @override
+  String courierPackagePickupConfirmBody(String amount) {
+    return 'حصّل $amount نقدًا من المُرسل ثم استلم الطرد.';
+  }
+
+  @override
+  String get courierPackagePickUpAction => 'تم التحصيل والاستلام';
+
+  @override
+  String get courierPkgStatusSubmitted => 'جديد';
+
+  @override
+  String get courierPkgStatusPriced => 'مُسعّر';
+
+  @override
+  String get courierPkgStatusConfirmed => 'جاهز للاستلام';
+
+  @override
+  String get courierPkgStatusPickedUp => 'بحوزتك';
+
+  @override
+  String get courierPkgStatusDelivered => 'تم التسليم';
+
+  @override
+  String get courierPkgStatusCancelled => 'ملغي';
+
+  @override
+  String get sendPackageTitle => 'إرسال طرد';
+
+  @override
+  String get sendPackagePickupSection => 'الاستلام من';
+
+  @override
+  String get sendPackageSenderName => 'اسم المُرسل';
+
+  @override
+  String get sendPackageDropoffSection => 'التسليم إلى';
+
+  @override
+  String get sendPackageRecipientName => 'اسم المُستلم';
+
+  @override
+  String get sendPackageNoteLabel => 'ماذا تُرسل؟';
+
+  @override
+  String get sendPackageNoteHint => 'مثال: ظرف مستندات، صندوق صغير';
+
+  @override
+  String get sendPackageSubmit => 'طلب التوصيل';
+
+  @override
+  String get sendPackagePricingNote =>
+      'سنقوم بتسعير التوصيل ونرسل لك السعر للموافقة — تدفع للمندوب نقدًا عند الاستلام.';
+
+  @override
+  String get sendPackageSubmitted => 'تم إرسال الطلب — سنرسل لك السعر قريبًا';
+
+  @override
+  String get sendPackageFieldRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get myPackagesTitle => 'طرودي';
+
+  @override
+  String get myPackagesEmptyTitle => 'لا توجد طرود بعد';
+
+  @override
+  String get myPackagesEmptyBody =>
+      'أرسل أي شيء داخل المدينة — مندوب xStore يستلمه ويوصّله.';
+
+  @override
+  String get packageWaitingPricing => 'في انتظار تسعير التوصيل من xStore';
+
+  @override
+  String packagePayCashAtPickup(String price) {
+    return 'ادفع $price نقدًا عندما يستلم المندوب الطرد';
+  }
+
+  @override
+  String get packageConfirmDialogTitle => 'تأكيد طلب التوصيل';
+
+  @override
+  String packageConfirmDialogBody(String price) {
+    return 'ستدفع $price نقدًا للمندوب عند الاستلام. تأكيد الطلب؟';
+  }
+
+  @override
+  String get packageConfirmAction => 'تأكيد — الدفع عند الاستلام';
+
+  @override
+  String get packageConfirmedSnack => 'تم تأكيد الطلب — جارٍ تعيين مندوب';
+
+  @override
+  String get packageConfirmedHint => 'المندوب في الطريق لاستلام طردك';
+
+  @override
+  String get packageCancelDialogTitle => 'إلغاء هذا الطلب؟';
+
+  @override
+  String get packageCancelDialogBody => 'سيتم إلغاء طلب التوصيل الخاص بك.';
+
+  @override
+  String get packageCancelDialogKeep => 'الاحتفاظ به';
+
+  @override
+  String get packageCancelAction => 'إلغاء الطلب';
+
+  @override
+  String get packageCancelledBySender => 'أُلغي بواسطة المُرسل';
+
+  @override
+  String packageCancelReasonLine(String reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get packageStatusSubmitted => 'قيد المراجعة';
+
+  @override
+  String get packageStatusPriced => 'السعر جاهز';
+
+  @override
+  String get packageStatusConfirmed => 'مؤكد';
+
+  @override
+  String get packageStatusPickedUp => 'تم الاستلام';
+
+  @override
+  String get packageStatusDelivered => 'تم التسليم';
+
+  @override
+  String get packageStatusCancelled => 'ملغي';
+
+  @override
+  String get menuMyPackages => 'طرودي';
 }

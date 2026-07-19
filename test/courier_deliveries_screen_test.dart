@@ -8,13 +8,17 @@ import 'package:fpdart/fpdart.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/delivery/domain/entities/delivery_request.dart';
+import 'package:xstore/features/delivery/presentation/providers/delivery_request_dependencies.dart';
 import 'package:xstore/features/delivery/presentation/screens/courier_deliveries_screen.dart';
 import 'package:xstore/features/delivery/presentation/widgets/delivery_order_card.dart';
+import 'package:xstore/features/delivery/presentation/widgets/package_delivery_card.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/shared/widgets/empty_state_widget.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
+import 'helpers/stub_delivery_request_repository.dart';
 import 'helpers/stub_orders_repository.dart';
 
 OrderEntity _order({
@@ -73,7 +77,11 @@ Widget _app(List<Override> overrides) => ProviderScope(
       ),
     );
 
-List<Override> _overrides(List<OrderEntity> orders) => [
+List<Override> _overrides(
+  List<OrderEntity> orders, {
+  List<DeliveryRequestEntity> packages = const [],
+}) =>
+    [
       authProvider.overrideWith(() => FakeAuth(mockCourierUser)),
       ordersRepositoryProvider.overrideWithValue(
         StubOrdersRepository(
@@ -81,6 +89,11 @@ List<Override> _overrides(List<OrderEntity> orders) => [
                   {required courierId, required page, required pageSize}) =>
               Right(page == 1 ? orders : const []),
         ),
+      ),
+      // Zero-latency package store: keeps the mock datasource's simulated
+      // network Timer (and its demo seeds) out of these scenarios.
+      deliveryRequestRepositoryProvider.overrideWithValue(
+        StubDeliveryRequestRepository(courierPackages: packages),
       ),
     ];
 
@@ -140,5 +153,70 @@ void main() {
 
     expect(find.byType(EmptyStateWidget), findsOneWidget);
     expect(find.text('No deliveries assigned'), findsOneWidget);
+  });
+
+  testWidgets('customer identity is masked until the order is confirmed',
+      (tester) async {
+    await tester.pumpWidget(_app(_overrides([
+      _order(id: 'task_pending', status: OrderStatus.pending),
+    ])));
+    await tester.pumpAndSettle();
+
+    // Pending order (History section, not yet actionable): name and call
+    // button are hidden behind the privacy placeholder.
+    expect(
+      find.text('Customer details unlock after confirmation'),
+      findsOneWidget,
+    );
+    expect(find.text('Test Buyer'), findsNothing);
+    expect(find.byIcon(LucideIcons.phone), findsNothing);
+  });
+
+  testWidgets('confirmed order shows the labeled collect-from-customer row',
+      (tester) async {
+    await tester.pumpWidget(_app(_overrides([
+      _order(id: 'task_pickup', status: OrderStatus.confirmed, total: 600),
+    ])));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Collect from customer'), findsOneWidget);
+    expect(find.textContaining('600'), findsWidgets);
+    // Identity unlocked once confirmed.
+    expect(find.text('Test Buyer'), findsOneWidget);
+    expect(find.byIcon(LucideIcons.phone), findsOneWidget);
+  });
+
+  testWidgets(
+      'confirmed package task shows sender cash row and pick-up flow '
+      'moves it to deliver', (tester) async {
+    await tester.pumpWidget(_app(_overrides(
+      const [],
+      packages: [
+        testPackageRequest(
+          id: 'pkg_ready',
+          status: DeliveryRequestStatus.confirmed,
+          courierId: 'courier_001',
+        ),
+      ],
+    )));
+    await tester.pumpAndSettle();
+
+    // Packages section renders the task with the admin-set price to collect
+    // from the sender at pickup; identity is visible (status >= confirmed).
+    expect(find.text('Packages'), findsOneWidget);
+    expect(find.byType(PackageDeliveryCard), findsOneWidget);
+    expect(find.text('Collect from sender at pickup'), findsOneWidget);
+    expect(find.textContaining('80'), findsWidgets);
+    expect(find.text('Sender Person'), findsOneWidget);
+
+    // Pick-up goes through a cash-amount confirmation dialog.
+    await tester.tap(find.text('Cash collected — picked up'));
+    await tester.pumpAndSettle();
+    expect(find.text('Collect cash & pick up'), findsOneWidget);
+    await tester.tap(find.text('Cash collected — picked up').last);
+    await tester.pumpAndSettle();
+
+    // Optimistic update: the task is now at the deliver stage.
+    expect(find.text('Delivered'), findsOneWidget);
   });
 }

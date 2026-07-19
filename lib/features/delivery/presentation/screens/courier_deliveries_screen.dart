@@ -8,10 +8,14 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/courier_order_flow.dart';
+import '../../domain/delivery_request_flow.dart';
+import '../../domain/entities/delivery_request.dart';
 import '../providers/courier_cash_wallet_provider.dart';
 import '../providers/courier_deliveries_provider.dart';
+import '../providers/courier_packages_provider.dart';
 import '../widgets/delivery_fail_sheet.dart';
 import '../widgets/delivery_order_card.dart';
+import '../widgets/package_delivery_card.dart';
 
 /// Courier home tab: today's run. Active pick-ups/drop-offs on top,
 /// finished tasks below, cash-in-hand summary in the header.
@@ -31,9 +35,10 @@ class _CourierDeliveriesScreenState
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ref.read(courierDeliveriesProvider.notifier).fetchOrders(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(courierDeliveriesProvider.notifier).fetchOrders();
+      ref.read(courierPackagesProvider.notifier).fetchPackages();
+    });
   }
 
   @override
@@ -79,6 +84,37 @@ class _CourierDeliveriesScreenState
         .markDelivered(order.id);
   }
 
+  /// Cash changes hands here: confirm the exact amount to collect from the
+  /// sender before marking the package as picked up.
+  Future<void> _confirmPackagePickedUp(DeliveryRequestEntity request) async {
+    final amount = cashToCollectFromSender(request);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.courierPackagePickupConfirmTitle),
+        content: Text(
+          dialogContext.l10n.courierPackagePickupConfirmBody(
+            dialogContext.formatCurrency(amount),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(dialogContext.l10n.courierPackagePickUpAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await ref
+        .read(courierPackagesProvider.notifier)
+        .markPickedUp(request.id);
+  }
+
   void _showFailSheet(OrderEntity order) {
     showModalBottomSheet<void>(
       context: context,
@@ -94,17 +130,25 @@ class _CourierDeliveriesScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(courierDeliveriesProvider);
+    final packagesState = ref.watch(courierPackagesProvider);
     final active = state.activeOrders;
     final finished = state.finishedOrders;
+    final activePackages = packagesState.activePackages;
+    final finishedPackages = packagesState.finishedPackages;
+    final isEmpty = state.orders.isEmpty &&
+        packagesState.packages.isEmpty &&
+        state.error == null &&
+        packagesState.error == null;
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.courierDeliveriesTitle)),
       body: RefreshIndicator(
-        onRefresh: () {
+        onRefresh: () async {
           ref.invalidate(courierCashWalletProvider);
-          return ref
-              .read(courierDeliveriesProvider.notifier)
-              .refreshOrders();
+          await Future.wait([
+            ref.read(courierDeliveriesProvider.notifier).refreshOrders(),
+            ref.read(courierPackagesProvider.notifier).refreshPackages(),
+          ]);
         },
         child: state.isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -122,7 +166,16 @@ class _CourierDeliveriesScreenState
                             .fetchOrders(),
                       ),
                     ),
-                  if (state.orders.isEmpty && state.error == null)
+                  if (packagesState.error != null)
+                    SliverToBoxAdapter(
+                      child: _InlineError(
+                        message: packagesState.error!,
+                        onRetry: () => ref
+                            .read(courierPackagesProvider.notifier)
+                            .fetchPackages(),
+                      ),
+                    ),
+                  if (isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: EmptyStateWidget(
@@ -130,6 +183,15 @@ class _CourierDeliveriesScreenState
                         subtitle: context.l10n.courierEmptyBody,
                       ),
                     ),
+                  if (activePackages.isNotEmpty) ...[
+                    _sectionHeader(
+                      context,
+                      context.l10n.courierPackagesSection,
+                      trailing: context.l10n
+                          .courierPackagesCount(activePackages.length),
+                    ),
+                    _packageList(activePackages, withActions: true),
+                  ],
                   if (active.isNotEmpty) ...[
                     _sectionHeader(
                       context,
@@ -137,12 +199,20 @@ class _CourierDeliveriesScreenState
                     ),
                     _orderList(active, withActions: true),
                   ],
-                  if (finished.isNotEmpty) ...[
+                  if (finished.isNotEmpty ||
+                      finishedPackages.isNotEmpty) ...[
                     _sectionHeader(
                       context,
                       context.l10n.courierHistorySection,
                     ),
-                    _orderList(finished, withActions: false),
+                    if (finished.isNotEmpty)
+                      _orderList(finished, withActions: false),
+                    if (finished.isNotEmpty && finishedPackages.isNotEmpty)
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: AppSpacing.sm),
+                      ),
+                    if (finishedPackages.isNotEmpty)
+                      _packageList(finishedPackages, withActions: false),
                   ],
                   if (state.isLoadingMore)
                     const SliverToBoxAdapter(
@@ -160,7 +230,8 @@ class _CourierDeliveriesScreenState
     );
   }
 
-  Widget _sectionHeader(BuildContext context, String title) {
+  Widget _sectionHeader(BuildContext context, String title,
+      {String? trailing}) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -169,13 +240,53 @@ class _CourierDeliveriesScreenState
           AppSpacing.lg,
           AppSpacing.sm,
         ),
-        child: Text(
-          title,
-          style: Theme.of(context)
-              .textTheme
-              .titleSmall
-              ?.copyWith(fontWeight: FontWeight.w700),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            if (trailing != null)
+              Text(
+                trailing,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: context.textSecondary),
+              ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _packageList(
+    List<DeliveryRequestEntity> packages, {
+    required bool withActions,
+  }) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      sliver: SliverList.separated(
+        itemCount: packages.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final request = packages[index];
+          return PackageDeliveryCard(
+            request: request,
+            onPickedUp:
+                withActions ? () => _confirmPackagePickedUp(request) : null,
+            onDelivered: withActions
+                ? () => ref
+                    .read(courierPackagesProvider.notifier)
+                    .markDelivered(request.id)
+                : null,
+          );
+        },
       ),
     );
   }

@@ -141,6 +141,12 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     onTap: () => context.push(AppRoutes.orders),
                   ),
                   ProfileMenuTile(
+                    icon: LucideIcons.package,
+                    iconBackground: AppColors.warning,
+                    label: context.l10n.menuMyPackages,
+                    onTap: () => context.push(AppRoutes.myPackages),
+                  ),
+                  ProfileMenuTile(
                     icon: LucideIcons.heart,
                     iconBackground: AppColors.accent,
                     label: context.l10n.menuWishlist,

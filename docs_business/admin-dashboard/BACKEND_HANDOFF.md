@@ -56,6 +56,32 @@ with the response and the views render unchanged.
   orders without a courier; reject when the courier is off duty or at the cash cap
 - App-side run list (already consumed by the Flutter app): `GET /orders/courier/{courierId}`
 
+### Delivery Requests — package pilot  (`packages()`, `pkgDrawer()`, `assignPkgCourierDrawer()`)
+Consumer point-to-point "send a package" flow. The customer submits a pickup + destination,
+**admin sets the price**, the customer confirms (committing to pay the courier **in cash at
+pickup** — the app never holds money), admin assigns a courier, the courier collects the cash
+at pickup and delivers. Lifecycle: `submitted → priced → confirmed → pickedUp → delivered`
+(`cancelled` allowed from `submitted`/`priced`).
+
+- `POST /delivery-requests` `{ pickup, dropoff, packageNote }` — **called by the consumer app**;
+  server sets `consumerId` from the token, status `submitted`, `price` null.
+- `GET  /admin/delivery-requests?status=` · `GET /admin/delivery-requests/{id}` — admin queue.
+- `GET  /delivery-requests/mine` — consumer's own requests (app "My Packages").
+- `PUT  /admin/delivery-requests/{id}/price` `{ priceEgp }` — **admin only**; `submitted|priced
+  → priced`. Re-pricing a `priced` request is allowed (customer hasn't confirmed yet).
+- `POST /delivery-requests/{id}/confirm` — **consumer only**; `priced → confirmed`. This is the
+  "customer pays" step (payment is cash-at-pickup, so no gateway call — just the commitment).
+- `POST /admin/delivery-requests/{id}/assign-courier` `{ courierId }` — `confirmed` only; reject
+  when the courier is off duty or at the cash cap (same rule as order assignment).
+- `POST /delivery-requests/{id}/pickup` — **courier only**; `confirmed → pickedUp`. **On this
+  transition the `priceEgp` must be added to the assigned courier's `cashInHandEgp`** (same
+  ledger as COD; counts toward the handover cap). Cash changes hands here, not at drop-off.
+- `POST /delivery-requests/{id}/deliver` — **courier only**; `pickedUp → delivered`.
+- `POST /delivery-requests/{id}/cancel` `{ reason }` — consumer or admin; `submitted|priced` only.
+
+> Mock pricing reference the prototype shows the admin (backend need not replicate): `60` base
+> `+ 20` when pickup and dropoff cities differ. The real price is whatever the admin types.
+
 ### Disputes  (`disputes()`, `disputeDrawer()`)
 - `GET /admin/disputes?status=`
 - `POST /admin/disputes/{id}/resolve` body `{ resolution: "refund"|"partial"|"reject" }`
@@ -152,6 +178,28 @@ and hasn't deposited yet. At/above `cashCapEgp` the courier must not receive new
   "delivered30d": 118,
   "failed30d": 7,
   "joined": "2026-06"
+}
+```
+
+### DeliveryRequest  (package pilot)
+Mirrors the Flutter entity `DeliveryRequestEntity`
+(`lib/features/delivery/domain/entities/delivery_request.dart`). `price` is null until the admin
+sets it; `courierId` is null until assignment (on `confirm` in the mock, but the real assign step
+is admin-driven). Cash is collected from the **sender at pickup**, not the recipient at drop-off.
+```json
+{
+  "id": "pkg_001",
+  "consumerId": "u_456",
+  "customer": "Sara Ahmed",      // sender; HIDDEN from the courier app until status >= confirmed
+  "phone": "+20 106 000 0002",
+  "pickup":  { "name": "Sara Ahmed", "phone": "…", "street": "15 Abbas El Akkad St", "city": "Nasr City" },
+  "dropoff": { "name": "Laila Hassan", "phone": "…", "street": "8 El Merghany St", "city": "Heliopolis" },
+  "packageNote": "Envelope with signed contract — handle with care",
+  "priceEgp": 80.0,              // null until admin prices it
+  "status": "confirmed",         // submitted|priced|confirmed|pickedUp|delivered|cancelled
+  "courierId": "c_001",          // null until assigned
+  "cancelReason": null,
+  "createdAt": "2026-07-19T10:00:00Z"
 }
 ```
 

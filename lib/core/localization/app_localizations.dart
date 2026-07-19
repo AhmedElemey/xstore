@@ -6031,6 +6031,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 item} other{{count} items}} · {total}'**
   String courierItemsSummary(int count, String total);
+
+  /// No description provided for @courierCollectFromCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect from customer'**
+  String get courierCollectFromCustomer;
+
+  /// No description provided for @courierCollectFromSender.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect from sender at pickup'**
+  String get courierCollectFromSender;
+
+  /// No description provided for @courierIdentityLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer details unlock after confirmation'**
+  String get courierIdentityLocked;
+
+  /// No description provided for @courierPackagesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Packages'**
+  String get courierPackagesSection;
+
+  /// No description provided for @courierPackagesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 package} other{{count} packages}}'**
+  String courierPackagesCount(int count);
+
+  /// No description provided for @courierPackagePickupConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect cash & pick up'**
+  String get courierPackagePickupConfirmTitle;
+
+  /// No description provided for @courierPackagePickupConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {amount} in cash from the sender, then take the package.'**
+  String courierPackagePickupConfirmBody(String amount);
+
+  /// No description provided for @courierPackagePickUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash collected — picked up'**
+  String get courierPackagePickUpAction;
+
+  /// No description provided for @courierPkgStatusSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get courierPkgStatusSubmitted;
+
+  /// No description provided for @courierPkgStatusPriced.
+  ///
+  /// In en, this message translates to:
+  /// **'Priced'**
+  String get courierPkgStatusPriced;
+
+  /// No description provided for @courierPkgStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for pickup'**
+  String get courierPkgStatusConfirmed;
+
+  /// No description provided for @courierPkgStatusPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'With you'**
+  String get courierPkgStatusPickedUp;
+
+  /// No description provided for @courierPkgStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get courierPkgStatusDelivered;
+
+  /// No description provided for @courierPkgStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get courierPkgStatusCancelled;
+
+  /// No description provided for @sendPackageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a Package'**
+  String get sendPackageTitle;
+
+  /// No description provided for @sendPackagePickupSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup from'**
+  String get sendPackagePickupSection;
+
+  /// No description provided for @sendPackageSenderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender name'**
+  String get sendPackageSenderName;
+
+  /// No description provided for @sendPackageDropoffSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver to'**
+  String get sendPackageDropoffSection;
+
+  /// No description provided for @sendPackageRecipientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient name'**
+  String get sendPackageRecipientName;
+
+  /// No description provided for @sendPackageNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you sending?'**
+  String get sendPackageNoteLabel;
+
+  /// No description provided for @sendPackageNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. an envelope of documents, a small box'**
+  String get sendPackageNoteHint;
+
+  /// No description provided for @sendPackageSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Request delivery'**
+  String get sendPackageSubmit;
+
+  /// No description provided for @sendPackagePricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll price your delivery and send it back for your approval — you pay the courier in cash at pickup.'**
+  String get sendPackagePricingNote;
+
+  /// No description provided for @sendPackageSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent — we\'ll send you the price shortly'**
+  String get sendPackageSubmitted;
+
+  /// No description provided for @sendPackageFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get sendPackageFieldRequired;
+
+  /// No description provided for @myPackagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Packages'**
+  String get myPackagesTitle;
+
+  /// No description provided for @myPackagesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No package deliveries yet'**
+  String get myPackagesEmptyTitle;
+
+  /// No description provided for @myPackagesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Send anything across the city — an xStore courier picks it up and delivers it.'**
+  String get myPackagesEmptyBody;
+
+  /// No description provided for @packageWaitingPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for xStore to price this delivery'**
+  String get packageWaitingPricing;
+
+  /// No description provided for @packagePayCashAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {price} in cash when the courier picks up'**
+  String packagePayCashAtPickup(String price);
+
+  /// No description provided for @packageConfirmDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Place delivery order'**
+  String get packageConfirmDialogTitle;
+
+  /// No description provided for @packageConfirmDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll pay {price} in cash to the courier at pickup. Place the order?'**
+  String packageConfirmDialogBody(String price);
+
+  /// No description provided for @packageConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm — pay at pickup'**
+  String get packageConfirmAction;
+
+  /// No description provided for @packageConfirmedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Order placed — a courier is being assigned'**
+  String get packageConfirmedSnack;
+
+  /// No description provided for @packageConfirmedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier on the way to pick up your package'**
+  String get packageConfirmedHint;
+
+  /// No description provided for @packageCancelDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this request?'**
+  String get packageCancelDialogTitle;
+
+  /// No description provided for @packageCancelDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your delivery request will be cancelled.'**
+  String get packageCancelDialogBody;
+
+  /// No description provided for @packageCancelDialogKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get packageCancelDialogKeep;
+
+  /// No description provided for @packageCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get packageCancelAction;
+
+  /// No description provided for @packageCancelledBySender.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by sender'**
+  String get packageCancelledBySender;
+
+  /// No description provided for @packageCancelReasonLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String packageCancelReasonLine(String reason);
+
+  /// No description provided for @packageStatusSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get packageStatusSubmitted;
+
+  /// No description provided for @packageStatusPriced.
+  ///
+  /// In en, this message translates to:
+  /// **'Price ready'**
+  String get packageStatusPriced;
+
+  /// No description provided for @packageStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get packageStatusConfirmed;
+
+  /// No description provided for @packageStatusPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up'**
+  String get packageStatusPickedUp;
+
+  /// No description provided for @packageStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get packageStatusDelivered;
+
+  /// No description provided for @packageStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get packageStatusCancelled;
+
+  /// No description provided for @menuMyPackages.
+  ///
+  /// In en, this message translates to:
+  /// **'My packages'**
+  String get menuMyPackages;
 }
 
 class _AppLocalizationsDelegate

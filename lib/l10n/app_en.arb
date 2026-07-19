@@ -1355,5 +1355,88 @@
         "type": "String"
       }
     }
-  }
+  },
+  "courierCollectFromCustomer": "Collect from customer",
+  "courierCollectFromSender": "Collect from sender at pickup",
+  "courierIdentityLocked": "Customer details unlock after confirmation",
+  "courierPackagesSection": "Packages",
+  "courierPackagesCount": "{count, plural, =1{1 package} other{{count} packages}}",
+  "@courierPackagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierPackagePickupConfirmTitle": "Collect cash & pick up",
+  "courierPackagePickupConfirmBody": "Collect {amount} in cash from the sender, then take the package.",
+  "@courierPackagePickupConfirmBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackagePickUpAction": "Cash collected — picked up",
+  "courierPkgStatusSubmitted": "New",
+  "courierPkgStatusPriced": "Priced",
+  "courierPkgStatusConfirmed": "Ready for pickup",
+  "courierPkgStatusPickedUp": "With you",
+  "courierPkgStatusDelivered": "Delivered",
+  "courierPkgStatusCancelled": "Cancelled",
+  "sendPackageTitle": "Send a Package",
+  "sendPackagePickupSection": "Pickup from",
+  "sendPackageSenderName": "Sender name",
+  "sendPackageDropoffSection": "Deliver to",
+  "sendPackageRecipientName": "Recipient name",
+  "sendPackageNoteLabel": "What are you sending?",
+  "sendPackageNoteHint": "e.g. an envelope of documents, a small box",
+  "sendPackageSubmit": "Request delivery",
+  "sendPackagePricingNote": "We'll price your delivery and send it back for your approval — you pay the courier in cash at pickup.",
+  "sendPackageSubmitted": "Request sent — we'll send you the price shortly",
+  "sendPackageFieldRequired": "This field is required",
+  "myPackagesTitle": "My Packages",
+  "myPackagesEmptyTitle": "No package deliveries yet",
+  "myPackagesEmptyBody": "Send anything across the city — an xStore courier picks it up and delivers it.",
+  "packageWaitingPricing": "Waiting for xStore to price this delivery",
+  "packagePayCashAtPickup": "Pay {price} in cash when the courier picks up",
+  "@packagePayCashAtPickup": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "packageConfirmDialogTitle": "Place delivery order",
+  "packageConfirmDialogBody": "You'll pay {price} in cash to the courier at pickup. Place the order?",
+  "@packageConfirmDialogBody": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "packageConfirmAction": "Confirm — pay at pickup",
+  "packageConfirmedSnack": "Order placed — a courier is being assigned",
+  "packageConfirmedHint": "Courier on the way to pick up your package",
+  "packageCancelDialogTitle": "Cancel this request?",
+  "packageCancelDialogBody": "Your delivery request will be cancelled.",
+  "packageCancelDialogKeep": "Keep it",
+  "packageCancelAction": "Cancel request",
+  "packageCancelledBySender": "Cancelled by sender",
+  "packageCancelReasonLine": "Reason: {reason}",
+  "@packageCancelReasonLine": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "packageStatusSubmitted": "Under review",
+  "packageStatusPriced": "Price ready",
+  "packageStatusConfirmed": "Confirmed",
+  "packageStatusPickedUp": "Picked up",
+  "packageStatusDelivered": "Delivered",
+  "packageStatusCancelled": "Cancelled",
+  "menuMyPackages": "My packages"
 }

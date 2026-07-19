@@ -3120,4 +3120,173 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0 · $total';
   }
+
+  @override
+  String get courierCollectFromCustomer => 'Collect from customer';
+
+  @override
+  String get courierCollectFromSender => 'Collect from sender at pickup';
+
+  @override
+  String get courierIdentityLocked =>
+      'Customer details unlock after confirmation';
+
+  @override
+  String get courierPackagesSection => 'Packages';
+
+  @override
+  String courierPackagesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count packages',
+      one: '1 package',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get courierPackagePickupConfirmTitle => 'Collect cash & pick up';
+
+  @override
+  String courierPackagePickupConfirmBody(String amount) {
+    return 'Collect $amount in cash from the sender, then take the package.';
+  }
+
+  @override
+  String get courierPackagePickUpAction => 'Cash collected — picked up';
+
+  @override
+  String get courierPkgStatusSubmitted => 'New';
+
+  @override
+  String get courierPkgStatusPriced => 'Priced';
+
+  @override
+  String get courierPkgStatusConfirmed => 'Ready for pickup';
+
+  @override
+  String get courierPkgStatusPickedUp => 'With you';
+
+  @override
+  String get courierPkgStatusDelivered => 'Delivered';
+
+  @override
+  String get courierPkgStatusCancelled => 'Cancelled';
+
+  @override
+  String get sendPackageTitle => 'Send a Package';
+
+  @override
+  String get sendPackagePickupSection => 'Pickup from';
+
+  @override
+  String get sendPackageSenderName => 'Sender name';
+
+  @override
+  String get sendPackageDropoffSection => 'Deliver to';
+
+  @override
+  String get sendPackageRecipientName => 'Recipient name';
+
+  @override
+  String get sendPackageNoteLabel => 'What are you sending?';
+
+  @override
+  String get sendPackageNoteHint =>
+      'e.g. an envelope of documents, a small box';
+
+  @override
+  String get sendPackageSubmit => 'Request delivery';
+
+  @override
+  String get sendPackagePricingNote =>
+      'We\'ll price your delivery and send it back for your approval — you pay the courier in cash at pickup.';
+
+  @override
+  String get sendPackageSubmitted =>
+      'Request sent — we\'ll send you the price shortly';
+
+  @override
+  String get sendPackageFieldRequired => 'This field is required';
+
+  @override
+  String get myPackagesTitle => 'My Packages';
+
+  @override
+  String get myPackagesEmptyTitle => 'No package deliveries yet';
+
+  @override
+  String get myPackagesEmptyBody =>
+      'Send anything across the city — an xStore courier picks it up and delivers it.';
+
+  @override
+  String get packageWaitingPricing =>
+      'Waiting for xStore to price this delivery';
+
+  @override
+  String packagePayCashAtPickup(String price) {
+    return 'Pay $price in cash when the courier picks up';
+  }
+
+  @override
+  String get packageConfirmDialogTitle => 'Place delivery order';
+
+  @override
+  String packageConfirmDialogBody(String price) {
+    return 'You\'ll pay $price in cash to the courier at pickup. Place the order?';
+  }
+
+  @override
+  String get packageConfirmAction => 'Confirm — pay at pickup';
+
+  @override
+  String get packageConfirmedSnack =>
+      'Order placed — a courier is being assigned';
+
+  @override
+  String get packageConfirmedHint =>
+      'Courier on the way to pick up your package';
+
+  @override
+  String get packageCancelDialogTitle => 'Cancel this request?';
+
+  @override
+  String get packageCancelDialogBody =>
+      'Your delivery request will be cancelled.';
+
+  @override
+  String get packageCancelDialogKeep => 'Keep it';
+
+  @override
+  String get packageCancelAction => 'Cancel request';
+
+  @override
+  String get packageCancelledBySender => 'Cancelled by sender';
+
+  @override
+  String packageCancelReasonLine(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get packageStatusSubmitted => 'Under review';
+
+  @override
+  String get packageStatusPriced => 'Price ready';
+
+  @override
+  String get packageStatusConfirmed => 'Confirmed';
+
+  @override
+  String get packageStatusPickedUp => 'Picked up';
+
+  @override
+  String get packageStatusDelivered => 'Delivered';
+
+  @override
+  String get packageStatusCancelled => 'Cancelled';
+
+  @override
+  String get menuMyPackages => 'My packages';
 }

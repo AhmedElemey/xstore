@@ -7,7 +7,7 @@ part of 'my_listings_notifier.dart';
 // **************************************************************************
 
 String _$myListingsNotifierHash() =>
-    r'f361308fe050a573417e51f909c1fa043c30ded9';
+    r'02c3c9d67b53c8cc01994d65bf8a841e9facdf85';
 
 /// Vendor “My Listings” screen: fetch, filter, sort, optimistic updates.
 ///

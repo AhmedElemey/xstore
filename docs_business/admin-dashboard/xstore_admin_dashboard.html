@@ -157,6 +157,12 @@
   .kv{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
   .kv span{color:var(--text-2)} .kv b{text-align:right}
 
+  /* Delivery requests (consumer package pilot) */
+  .pkg-in{width:74px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit}
+  .hint{display:block;font-size:11.5px;color:var(--text-3);margin-top:4px;font-weight:400}
+  .route b{font-weight:600}
+  .route small{color:var(--text-3);display:block;font-size:12px}
+
   /* ---------- responsive (keep last: these must override the base rules above) ---------- */
   .menu-btn{display:none}
   @media(max-width:1050px){
@@ -195,6 +201,7 @@
     .toast{left:16px;right:16px;bottom:16px;text-align:center}
     .drawer{width:100vw;max-width:100vw}
   }
+
 </style>
 </head>
 <body>
@@ -212,6 +219,7 @@
       <a data-view="categories"><i data-ic="tag"></i><span>Categories</span></a>
       <a data-view="orders"><i data-ic="box"></i><span>Orders</span></a>
       <a data-view="couriers"><i data-ic="truck"></i><span>Delivery</span><span class="badge">1</span></a>
+      <a data-view="packages"><i data-ic="send"></i><span>Delivery Requests</span><span class="badge">1</span></a>
       <a data-view="disputes"><i data-ic="alert"></i><span>Disputes</span><span class="badge">6</span></a>
       <div class="nav-group">Growth</div>
       <a data-view="customers"><i data-ic="users"></i><span>Users</span></a>
@@ -259,6 +267,7 @@ function ic(n){const p={
  search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
  menu:'M3 6h18M3 12h18M3 18h18',
  truck:'M1 4h14v12H1zM15 9h4l3 3v4h-7M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+ send:'M22 2L11 13M22 2l-7 20-4-9-9-4z',
  cash:'M2 7h20v10H2zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5M5.5 12h.01M18.5 12h.01',
  bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
  help:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01'
@@ -350,6 +359,22 @@ const COURIERS=[
  {n:'Hassan Farouk',phone:'+20 101 888 2244',zone:'Giza — Dokki & Mohandessin',status:'active',cash:5200,cap:5000,today:4,delivered30:96,failed30:9,joined:'Jun 2026'},
  {n:'Mahmoud Adel',phone:'+20 102 777 5566',zone:'Cairo — Maadi',status:'off',cash:0,cap:5000,today:0,delivered30:74,failed30:4,joined:'Jul 2026'}];
 const cashDue=c=>c.cash>=c.cap;
+/* consumer package delivery requests ("send a package" pilot).
+   pkg_001…pkg_004 mirror the Flutter mock seeds in
+   lib/features/delivery/data/datasources/delivery_request_datasource.dart;
+   pricing reference = EGP 60 base + EGP 20 cross-city (mockPackagePrice).
+   The customer pays the courier in cash at pickup — no COD at the door. */
+const PKGS=[
+ {id:'pkg_001',customer:'Sara Khelifi',phone:'+20 125 550 0002',pickup:{street:'15 Abbas El Akkad St',city:'Nasr City'},drop:{name:'Laila Hassan',phone:'+20 115 550 0010',street:'8 El Merghany St',city:'Heliopolis'},note:'Envelope with signed contract — handle with care',submitted:'2 min ago',status:'submitted',price:null,courier:null},
+ {id:'pkg_002',customer:'Sara Khelifi',phone:'+20 125 550 0002',pickup:{street:'15 Abbas El Akkad St',city:'Nasr City'},drop:{name:'Omar Fathy',phone:'+20 115 550 0011',street:'22 Gameat El Dewal St',city:'Mohandessin'},note:'Small box of homemade sweets',submitted:'30 min ago',status:'priced',price:80,courier:null},
+ {id:'pkg_003',customer:'Sara Khelifi',phone:'+20 125 550 0002',pickup:{street:'15 Abbas El Akkad St',city:'Nasr City'},drop:{name:'Nour El-Din',phone:'+20 115 550 0012',street:'5 Makram Ebeid St',city:'Nasr City'},note:'Spare laptop charger',submitted:'2h ago',status:'confirmed',price:60,courier:'Mostafa El-Sayed'},
+ {id:'pkg_004',customer:'Sara Khelifi',phone:'+20 125 550 0002',pickup:{street:'15 Abbas El Akkad St',city:'Nasr City'},drop:{name:'Hana Mahmoud',phone:'+20 115 550 0013',street:'12 Baghdad St',city:'Heliopolis'},note:'Birthday gift, fragile',submitted:'4h ago',status:'pickedup',price:80,courier:'Mostafa El-Sayed'},
+ {id:'pkg_005',customer:'Ahmed Hassan',phone:'+20 100 111 2233',pickup:{street:'12 Tahrir St',city:'Dokki'},drop:{name:'Tarek Nabil',phone:'+20 111 222 0044',street:'9 Abbas El Akkad St',city:'Nasr City'},note:'House keys in a padded envelope',submitted:'Yesterday',status:'delivered',price:80,courier:'Mostafa El-Sayed'},
+ {id:'pkg_006',customer:'Mona Adel',phone:'+20 103 444 5566',pickup:{street:'14 Sidi Gaber',city:'Alexandria'},drop:{name:'Rana Fathy',phone:'+20 111 222 0055',street:'30 El Geish Rd',city:'Alexandria'},note:'Documents folder',submitted:'Yesterday',status:'cancelled',price:60,courier:null}];
+const PSTAT={submitted:['b-grey','Submitted'],priced:['b-blue','Priced'],confirmed:['b-indigo','Confirmed'],pickedup:['b-amber','Picked up'],delivered:['b-green','Delivered'],cancelled:['b-red','Cancelled']};
+const pkgCross=p=>p.pickup.city.trim().toLowerCase()!==p.drop.city.trim().toLowerCase();
+const pkgSuggest=p=>60+(pkgCross(p)?20:0);
+let PKG_EDIT=-1; /* index of the priced request currently being re-priced inline */
 const ORDERS=[
  {id:'XS-2026-4471',buyer:'Ahmed Hassan',phone:'+20 100 111 2233',addr:'12 Tahrir St, Dokki, Giza',vendor:'Cairo Tech Hub',status:'delivered',courier:'Mostafa El-Sayed',items:[['iPhone 13 Pro 256GB',1,48999]]},
  {id:'XS-2026-4470',buyer:'Sara Mostafa',phone:'+20 101 222 3344',addr:'8 Nile Corniche, Maadi, Cairo',vendor:'Zamalek Boutique',status:'shipped',courier:'Mostafa El-Sayed',items:[['Handmade Linen Abaya',2,1250]]},
@@ -602,6 +627,115 @@ function assignCourier(i,ci){
  closeDrawer();go('orders');
 }
 
+/* ---------- delivery requests (consumer package pilot) ---------- */
+function pkgActions(p,i){
+ const sug=pkgSuggest(p);
+ const priceHint=`<small class="hint">Suggested ${EGP(sug)} — 60 base${pkgCross(p)?' + 20 cross-city':''}</small>`;
+ if(p.status==='submitted'||(p.status==='priced'&&PKG_EDIT===i))
+   return `<div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+     <input class="pkg-in" id="pkgPr-${i}" inputmode="numeric" value="${p.price!=null?p.price:sug}">
+     <button class="btn btn-p btn-sm" onclick="setPkgPrice(${i})">${p.status==='submitted'?'Set price':'Save'}</button>
+     ${p.status==='submitted'
+       ?`<button class="btn btn-no btn-sm" onclick="cancelPkg(${i})" title="Cancel request">✕</button>`
+       :`<button class="btn btn-g btn-sm" onclick="PKG_EDIT=-1;go('packages')">Back</button>`}</div>${priceHint}`;
+ if(p.status==='priced')
+   return `<button class="btn btn-g btn-sm" onclick="pkgEditPrice(${i})">Edit price</button><button class="btn btn-no btn-sm" onclick="cancelPkg(${i})">✕ Cancel</button><small class="hint">Waiting for the customer to confirm ${EGP(p.price)}</small>`;
+ if(p.status==='confirmed')
+   return (p.courier
+     ?`<span class="badge-s b-indigo" title="Assigned courier">🚚 ${p.courier.split(' ')[0]}</span> <button class="btn btn-g btn-sm" onclick="assignPkgCourierDrawer(${i})">Reassign</button>`
+     :`<button class="btn btn-p btn-sm" onclick="assignPkgCourierDrawer(${i})">Assign courier</button>`)
+     +`<small class="hint">Courier collects ${EGP(p.price)} in cash at pickup</small>`;
+ if(p.status==='pickedup'||p.status==='delivered')
+   return `<span class="badge-s b-indigo" title="Assigned courier">🚚 ${p.courier.split(' ')[0]}</span> <button class="btn btn-g btn-sm" onclick="pkgDrawer(${i})">View</button><small class="hint">💵 Cash collected at pickup: ${EGP(p.price)}</small>`;
+ return `<button class="btn btn-g btn-sm" onclick="pkgDrawer(${i})">View</button>`;
+}
+function packages(){
+ const need=PKGS.filter(p=>p.status==='submitted').length;
+ const wait=PKGS.filter(p=>p.status==='priced').length;
+ const transit=PKGS.filter(p=>p.status==='confirmed'||p.status==='pickedup').length;
+ const done=PKGS.filter(p=>p.status==='delivered').length;
+ const rows=PKGS.map((p,i)=>`<tr data-status="${p.status}">
+   <td><b style="cursor:pointer" onclick="pkgDrawer(${i})">${p.id}</b></td>
+   <td><div class="u" style="cursor:pointer" onclick="pkgDrawer(${i})">${avatar(p.customer,'50')}<div><b>${p.customer}</b><small>${p.phone}</small></div></div></td>
+   <td class="route"><b>${p.pickup.city} → ${p.drop.city}${pkgCross(p)?' <span class="badge-s b-amber" style="padding:1px 7px">cross-city</span>':''}</b><small>${p.pickup.street} → ${p.drop.street} (${p.drop.name})</small></td>
+   <td class="muted" style="max-width:200px;white-space:normal">${p.note}</td>
+   <td class="muted">${p.submitted}</td>
+   <td class="money">${p.price!=null?EGP(p.price):'—'}</td>
+   <td><span class="badge-s ${PSTAT[p.status][0]}">${PSTAT[p.status][1]}</span></td>
+   <td class="r">${pkgActions(p,i)}</td></tr>`).join('');
+ const info=`<div class="card mt"><div class="c-body" style="font-size:12.5px;line-height:1.7;color:var(--text-2)">
+   <b style="color:var(--text)">How package delivery requests work</b>
+   <p style="margin-top:6px">A customer submits a pickup + destination. <b>You set the price</b> (reference: <b>EGP 60</b> base + <b>EGP 20</b> cross-city surcharge). The customer confirms and pays the courier <b>in cash at pickup</b>, then your assigned courier delivers the package. Lifecycle: <b>submitted → priced → confirmed → picked up → delivered</b>; cancelling is possible while submitted / priced.</p>
+   <p style="margin-top:8px">Pickup cash goes into the courier's <b>cash-in-hand wallet</b> — the same ledger as COD, counting toward the ${EGP(5000)} cap. Collect it from <a data-jump="couriers" style="color:var(--primary);cursor:pointer">Delivery</a> → Collect cash.</p>
+   <p style="margin-top:8px">Backend: <code>POST /delivery-requests</code> · <code>PUT /admin/delivery-requests/{id}/price</code> · <code>POST /delivery-requests/{id}/confirm</code> · <code>POST /admin/delivery-requests/{id}/assign-courier</code> · <code>POST /delivery-requests/{id}/pickup</code> / <code>…/deliver</code> · <code>POST /delivery-requests/{id}/cancel</code>.</p></div></div>`;
+ return `<div class="page-head"><div><h2>Delivery Requests</h2><p>Consumer package delivery ("send a package" pilot) · you set the price, the customer pays the courier <b>in cash at pickup</b></p></div>
+   <div class="tabs"><span class="chip active">All</span><span class="chip">Submitted</span><span class="chip">Priced</span><span class="chip">Confirmed</span><span class="chip">Picked up</span><span class="chip">Delivered</span><span class="chip">Cancelled</span></div></div>
+   <div class="grid g-4" style="margin-bottom:18px">
+     ${kpi('alert',String(need),'Awaiting your price',need?'price now':'clear',need?'down':'up','#C68A2E')}
+     ${kpi('users',String(wait),'Awaiting customer confirmation','','up','#356F80')}
+     ${kpi('truck',String(transit),'In transit (confirmed + picked up)','','up','#2E5C6E')}
+     ${kpi('box',String(done),'Delivered (30d)','','up','#3F7A5C')}</div>
+   <div class="card"><table><thead><tr><th>Request</th><th>Customer</th><th>Route</th><th>Package</th><th>Submitted</th><th>Price</th><th>Status</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>${info}`;
+}
+function setPkgPrice(i){
+ const p=PKGS[i];
+ const amt=parseFloat(document.getElementById('pkgPr-'+i).value);
+ if(isNaN(amt)||amt<=0){toast('Enter a valid price');document.getElementById('pkgPr-'+i).focus();return;}
+ const first=p.status==='submitted';
+ p.price=Math.round(amt*100)/100;p.status='priced';PKG_EDIT=-1;
+ toast(first?p.id+' priced at '+EGP(p.price)+' — customer asked to confirm ✓':'Price updated to '+EGP(p.price)+' — customer notified ✓');
+ go('packages');refreshPkgBadge();
+}
+function pkgEditPrice(i){PKG_EDIT=i;go('packages');}
+function cancelPkg(i){
+ const p=PKGS[i];
+ if(p.status!=='submitted'&&p.status!=='priced'){toast('Only submitted / priced requests can be cancelled');return;}
+ p.status='cancelled';PKG_EDIT=-1;
+ toast(p.id+' cancelled — customer notified');
+ go('packages');refreshPkgBadge();
+}
+function refreshPkgBadge(){
+ const n=PKGS.filter(p=>p.status==='submitted').length;
+ const b=document.querySelector('#nav a[data-view=packages] .badge');
+ if(b){if(n>0)b.textContent=n;else b.remove();}
+}
+function assignPkgCourierDrawer(i){
+ const p=PKGS[i];
+ const rows=COURIERS.map((c,ci)=>{
+   const off=c.status!=='active',due=cashDue(c);
+   const right=off?'<span class="badge-s b-grey">Off duty</span>'
+     :due?'<span class="badge-s b-red">Cash cap</span>'
+     :`<button class="btn btn-p btn-sm" onclick="assignPkgCourier(${i},${ci})">Assign</button>`;
+   return `<div class="list-row">${avatar(c.n,'50')}<div style="flex:1"><b>${c.n}</b><small class="muted">${c.zone} · ${c.today} tasks today · holding ${EGP(c.cash)}</small></div>${right}</div>`;}).join('');
+ openDrawer('Assign courier — '+p.id,
+   '<p class="muted" style="font-size:12.5px;margin-bottom:10px">Pickup <b>'+p.pickup.street+', '+p.pickup.city+'</b> → '+p.drop.street+', '+p.drop.city+'. The courier collects <b>'+EGP(p.price)+'</b> in cash from '+p.customer+' at pickup — it stays in their cash-in-hand wallet until deposited. Couriers off duty or at their cash cap can\'t take the job.</p>'+rows);
+}
+function assignPkgCourier(i,ci){
+ PKGS[i].courier=COURIERS[ci].n;COURIERS[ci].today++;
+ toast(PKGS[i].id+' assigned to '+COURIERS[ci].n+' ✓');
+ closeDrawer();go('packages');
+}
+function pkgDrawer(i){
+ const p=PKGS[i];
+ const steps=['Submitted','Priced','Confirmed','Picked up','Delivered'];
+ const cur=steps.indexOf(PSTAT[p.status][1]);
+ const tl=p.status==='cancelled'
+   ?'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:var(--error)"></span><span style="color:var(--error)">Cancelled'+(p.price!=null?' (was priced at '+EGP(p.price)+')':'')+'</span></div>'
+   :steps.map((s,x)=>'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:'+(x<=cur?'var(--success)':'var(--line)')+'"></span><span style="'+(x<=cur?'':'color:var(--text-3)')+'">'+s+(s==='Picked up'&&x<=cur?' — '+EGP(p.price)+' cash collected':'')+'</span></div>').join('');
+ openDrawer('Request '+p.id,
+   kv('Status',PSTAT[p.status][1])+kv('Customer',p.customer)+kv('Phone',p.phone)
+   +kv('Price',p.price!=null?EGP(p.price):'— not set yet')
+   +kv('Payment','Cash to courier at pickup')
+   +(p.courier?kv('Courier','🚚 '+p.courier):'')
+   +secH('Pickup')+'<p class="muted" style="font-size:13px">'+p.pickup.street+', '+p.pickup.city+'</p>'
+   +secH('Drop-off')+'<p class="muted" style="font-size:13px">'+p.drop.street+', '+p.drop.city+' — '+p.drop.name+' ('+p.drop.phone+')</p>'
+   +secH('Package')+'<p class="muted" style="font-size:13px">'+p.note+'</p>'
+   +secH('Timeline')+tl,
+   (p.status==='confirmed'?'<button class="btn btn-p" style="flex:1;justify-content:center" onclick="closeDrawer();assignPkgCourierDrawer('+i+')">'+(p.courier?'Reassign courier':'Assign courier')+'</button>':'')
+   +((p.status==='submitted'||p.status==='priced')?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="closeDrawer();cancelPkg('+i+')">Cancel request</button>':'')
+   +'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>');
+}
+
 function coupons(){
  const C=COUPONS;
  const rows=C.map((c,i)=>`<tr><td><b>${c[0]}</b></td><td class="muted">${c[1]}</td><td><span class="badge-s b-indigo">${c[2]}</span></td><td>${c[3]} used</td><td><span class="badge-s ${c[4]?'b-green':'b-grey'}">${c[4]?'Active':'Ended'}</span></td><td class="r" style="white-space:nowrap"><button class="btn btn-g btn-sm" onclick="editCoupon(${i})">Edit</button> <button class="btn btn-no btn-sm" onclick="deleteCoupon(${i})">Delete</button></td></tr>`).join('');
@@ -648,8 +782,8 @@ function settings(){
      <button class="btn btn-g mt" style="width:100%;justify-content:center" onclick="openInviteForm()">+ Invite team member</button></div></div></div>`;
 }
 
-const VIEWS={overview,analytics,moderation,vendors,categories,orders,couriers,disputes,customers,coupons,content,settings};
-const TITLES={overview:'Dashboard',analytics:'Analytics',moderation:'Product Moderation',vendors:'Vendors',categories:'Categories',orders:'Orders',couriers:'Delivery',disputes:'Disputes',customers:'Users',coupons:'Coupons',content:'Content & Banners',settings:'Settings'};
+const VIEWS={overview,analytics,moderation,vendors,categories,orders,couriers,packages,disputes,customers,coupons,content,settings};
+const TITLES={overview:'Dashboard',analytics:'Analytics',moderation:'Product Moderation',vendors:'Vendors',categories:'Categories',orders:'Orders',couriers:'Delivery',packages:'Delivery Requests',disputes:'Disputes',customers:'Users',coupons:'Coupons',content:'Content & Banners',settings:'Settings'};
 
 /* ---------- responsive sidebar (off-canvas below 1050px) ---------- */
 function syncOverlay(){
@@ -958,11 +1092,11 @@ function deleteCoupon(i){const c=COUPONS[i][0];COUPONS.splice(i,1);toast('Coupon
 function deleteBanner(i){BANNERS.splice(i,1);toast('Banner deleted');go('content');}
 
 /* ---------- filter chips ---------- */
-const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out','off'];
+const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out','off','submitted','priced','pickedup'];
 function onChip(chip){
  const g=chip.closest('.tabs'); if(g) g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c===chip));
  const label=chip.innerText.replace(/\s*\(\d+\)/,'').trim();
- let key=label.toLowerCase(); if(key==='in review') key='review'; if(key==='out of stock') key='out'; if(key==='off duty') key='off';
+ let key=label.toLowerCase(); if(key==='in review') key='review'; if(key==='out of stock') key='out'; if(key==='off duty') key='off'; if(key==='picked up') key='pickedup';
  const view=document.getElementById('content');
  const rows=[...view.querySelectorAll('tr[data-status]')];
  const cards=[...view.querySelectorAll('.mod[data-status]')];
@@ -1004,6 +1138,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();close
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
 /* boot */
 go('overview');
+
 </script>
 </body>
 </html>

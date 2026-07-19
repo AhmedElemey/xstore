@@ -1355,5 +1355,88 @@
         "type": "String"
       }
     }
-  }
+  },
+  "courierCollectFromCustomer": "حصّل من العميل",
+  "courierCollectFromSender": "حصّل من المُرسل عند الاستلام",
+  "courierIdentityLocked": "تظهر بيانات العميل بعد تأكيد الطلب",
+  "courierPackagesSection": "الطرود",
+  "courierPackagesCount": "{count, plural, =1{طرد واحد} =2{طردان} few{{count} طرود} other{{count} طرد}}",
+  "@courierPackagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courierPackagePickupConfirmTitle": "تحصيل النقود واستلام الطرد",
+  "courierPackagePickupConfirmBody": "حصّل {amount} نقدًا من المُرسل ثم استلم الطرد.",
+  "@courierPackagePickupConfirmBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackagePickUpAction": "تم التحصيل والاستلام",
+  "courierPkgStatusSubmitted": "جديد",
+  "courierPkgStatusPriced": "مُسعّر",
+  "courierPkgStatusConfirmed": "جاهز للاستلام",
+  "courierPkgStatusPickedUp": "بحوزتك",
+  "courierPkgStatusDelivered": "تم التسليم",
+  "courierPkgStatusCancelled": "ملغي",
+  "sendPackageTitle": "إرسال طرد",
+  "sendPackagePickupSection": "الاستلام من",
+  "sendPackageSenderName": "اسم المُرسل",
+  "sendPackageDropoffSection": "التسليم إلى",
+  "sendPackageRecipientName": "اسم المُستلم",
+  "sendPackageNoteLabel": "ماذا تُرسل؟",
+  "sendPackageNoteHint": "مثال: ظرف مستندات، صندوق صغير",
+  "sendPackageSubmit": "طلب التوصيل",
+  "sendPackagePricingNote": "سنقوم بتسعير التوصيل ونرسل لك السعر للموافقة — تدفع للمندوب نقدًا عند الاستلام.",
+  "sendPackageSubmitted": "تم إرسال الطلب — سنرسل لك السعر قريبًا",
+  "sendPackageFieldRequired": "هذا الحقل مطلوب",
+  "myPackagesTitle": "طرودي",
+  "myPackagesEmptyTitle": "لا توجد طرود بعد",
+  "myPackagesEmptyBody": "أرسل أي شيء داخل المدينة — مندوب xStore يستلمه ويوصّله.",
+  "packageWaitingPricing": "في انتظار تسعير التوصيل من xStore",
+  "packagePayCashAtPickup": "ادفع {price} نقدًا عندما يستلم المندوب الطرد",
+  "@packagePayCashAtPickup": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "packageConfirmDialogTitle": "تأكيد طلب التوصيل",
+  "packageConfirmDialogBody": "ستدفع {price} نقدًا للمندوب عند الاستلام. تأكيد الطلب؟",
+  "@packageConfirmDialogBody": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "packageConfirmAction": "تأكيد — الدفع عند الاستلام",
+  "packageConfirmedSnack": "تم تأكيد الطلب — جارٍ تعيين مندوب",
+  "packageConfirmedHint": "المندوب في الطريق لاستلام طردك",
+  "packageCancelDialogTitle": "إلغاء هذا الطلب؟",
+  "packageCancelDialogBody": "سيتم إلغاء طلب التوصيل الخاص بك.",
+  "packageCancelDialogKeep": "الاحتفاظ به",
+  "packageCancelAction": "إلغاء الطلب",
+  "packageCancelledBySender": "أُلغي بواسطة المُرسل",
+  "packageCancelReasonLine": "السبب: {reason}",
+  "@packageCancelReasonLine": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "packageStatusSubmitted": "قيد المراجعة",
+  "packageStatusPriced": "السعر جاهز",
+  "packageStatusConfirmed": "مؤكد",
+  "packageStatusPickedUp": "تم الاستلام",
+  "packageStatusDelivered": "تم التسليم",
+  "packageStatusCancelled": "ملغي",
+  "menuMyPackages": "طرودي"
 }

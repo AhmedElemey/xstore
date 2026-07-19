@@ -5,33 +5,36 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../orders/domain/entities/order_entity.dart';
-import '../../../orders/presentation/widgets/order_status_badge.dart';
-import '../../domain/courier_order_flow.dart';
 import '../../domain/delivery_request_flow.dart';
+import '../../domain/entities/delivery_request.dart';
 import 'courier_card_sections.dart';
 
-/// One delivery task on the courier's run: a pickup→drop-off route, who to
-/// hand over to, what to collect at the door, and the next action.
-class DeliveryOrderCard extends StatelessWidget {
-  const DeliveryOrderCard({
+/// One point-to-point package task on the courier's run: sender's address →
+/// recipient's address, the cash to collect from the sender at pickup, and
+/// the next action. Cash changes hands at PICKUP (admin-priced, the app
+/// never holds money), so the collect row is prominent at that stage and
+/// navigation targets the pickup address first.
+class PackageDeliveryCard extends StatelessWidget {
+  const PackageDeliveryCard({
     super.key,
-    required this.order,
+    required this.request,
     this.onPickedUp,
     this.onDelivered,
-    this.onFailed,
   });
 
-  final OrderEntity order;
+  final DeliveryRequestEntity request;
   final VoidCallback? onPickedUp;
   final VoidCallback? onDelivered;
-  final VoidCallback? onFailed;
 
   @override
   Widget build(BuildContext context) {
-    final action = courierNextAction(order.status);
-    final codAmount = codAmountToCollect(order);
-    final address = order.deliveryAddress;
+    final action = courierPackageNextAction(request.status);
+    final cashAmount = cashToCollectFromSender(request);
+    final atPickupStage = action == CourierPackageAction.collectAndPickUp;
+    // Heading to the sender first; once the parcel is on board, to the
+    // recipient.
+    final navigationTarget =
+        atPickupStage ? request.pickup : request.dropoff;
 
     return Container(
       decoration: BoxDecoration(
@@ -53,7 +56,7 @@ class DeliveryOrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      order.formattedOrderId,
+                      request.id,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -61,7 +64,7 @@ class DeliveryOrderCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      context.formatShortDate(order.createdAt),
+                      context.formatShortDate(request.createdAt),
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
@@ -70,77 +73,71 @@ class DeliveryOrderCard extends StatelessWidget {
                   ],
                 ),
               ),
-              OrderStatusBadge(status: order.status, compact: true),
+              _PackageStatusChip(status: request.status),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           CourierRouteStops(
-            pickupValue: order.vendorStoreName,
-            dropoffValue: '${address.street}, ${address.city}',
+            pickupIcon: LucideIcons.package,
+            pickupValue:
+                '${request.pickup.street}, ${request.pickup.city}',
+            dropoffValue:
+                '${request.dropoff.street}, ${request.dropoff.city}',
             onNavigate: () => launchUrl(
-              courierMapsDirectionsUri(address),
+              courierMapsDirectionsUri(navigationTarget),
               mode: LaunchMode.externalApplication,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
+          // Sender identity — masked until the request is confirmed.
           CourierIdentityRow(
-            visible: courierSeesOrderCustomerIdentity(order.status),
-            name: order.consumerName,
-            phone: order.consumerPhone,
+            visible: courierSeesCustomerIdentity(request.status),
+            name: request.pickup.fullName,
+            phone: request.pickup.phone,
           ),
-          if (order.items.isNotEmpty) ...[
+          if (request.packageNote.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xs),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
-                  LucideIcons.package,
+                  LucideIcons.stickyNote,
                   size: 15,
                   color: context.textSecondary,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    context.l10n.courierItemsSummary(
-                      order.items.length,
-                      context.formatCurrency(order.total),
-                    ),
+                    request.packageNote,
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
                         ?.copyWith(color: context.textSecondary),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ],
-          const SizedBox(height: AppSpacing.sm),
-          if (codAmount > 0)
+          if (cashAmount > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
             CourierCollectRow(
-              label: context.l10n.courierCollectFromCustomer,
-              amountText: context.formatCurrency(codAmount),
-            )
-          else
-            const _PrepaidChip(),
-          if (action != CourierOrderAction.none) ...[
+              label: context.l10n.courierCollectFromSender,
+              amountText: context.formatCurrency(cashAmount),
+              prominent: atPickupStage,
+            ),
+          ],
+          if (action != CourierPackageAction.none) ...[
             const SizedBox(height: AppSpacing.md),
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                if (onFailed != null)
-                  TextButton(
-                    onPressed: onFailed,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                    ),
-                    child: Text(context.l10n.courierFailAction),
-                  ),
-                const Spacer(),
-                if (action == CourierOrderAction.pickUp)
+                if (atPickupStage)
                   FilledButton.icon(
                     onPressed: onPickedUp,
-                    icon: const Icon(LucideIcons.packageCheck, size: 16),
-                    label: Text(context.l10n.courierPickUpAction),
+                    icon: const Icon(LucideIcons.banknote, size: 16),
+                    label: Text(context.l10n.courierPackagePickUpAction),
                   )
                 else
                   FilledButton.icon(
@@ -157,13 +154,41 @@ class DeliveryOrderCard extends StatelessWidget {
   }
 }
 
-/// Zero-cash variant: nothing to collect at the door.
-class _PrepaidChip extends StatelessWidget {
-  const _PrepaidChip();
+class _PackageStatusChip extends StatelessWidget {
+  const _PackageStatusChip({required this.status});
+
+  final DeliveryRequestStatus status;
 
   @override
   Widget build(BuildContext context) {
-    const color = AppColors.success;
+    final l10n = context.l10n;
+    final (label, color) = switch (status) {
+      DeliveryRequestStatus.submitted => (
+          l10n.courierPkgStatusSubmitted,
+          context.textSecondary,
+        ),
+      DeliveryRequestStatus.priced => (
+          l10n.courierPkgStatusPriced,
+          context.textSecondary,
+        ),
+      DeliveryRequestStatus.confirmed => (
+          l10n.courierPkgStatusConfirmed,
+          AppColors.warning,
+        ),
+      DeliveryRequestStatus.pickedUp => (
+          l10n.courierPkgStatusPickedUp,
+          context.primaryColor,
+        ),
+      DeliveryRequestStatus.delivered => (
+          l10n.courierPkgStatusDelivered,
+          AppColors.success,
+        ),
+      DeliveryRequestStatus.cancelled => (
+          l10n.courierPkgStatusCancelled,
+          AppColors.error,
+        ),
+    };
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -173,23 +198,12 @@ class _PrepaidChip extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.sm),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(LucideIcons.creditCard, size: 15, color: color),
-          const SizedBox(width: AppSpacing.xs),
-          Flexible(
-            child: Text(
-              context.l10n.courierPrepaidChip,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
             ),
-          ),
-        ],
       ),
     );
   }
