@@ -82,6 +82,79 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, String?>> sendLoginOtp(String phoneNumber) async {
+    try {
+      final otp = await _remote.sendLoginOtp(phoneNumber);
+      return Right(otp);
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on UnauthorizedException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> loginWithOtp({
+    required String phoneNumber,
+    required String otpToken,
+  }) async {
+    try {
+      final model = await _resolveFullUser(
+        await _remote.loginWithOtp(
+          phoneNumber: phoneNumber,
+          otpToken: otpToken,
+          // No remember-me toggle on the phone-login sheet; keep the session
+          // alive by requesting a refresh token.
+          rememberMe: true,
+        ),
+      );
+      await _persistUser(model);
+      return Right(model.toEntity());
+    } on AuthException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on UnauthorizedException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> loginWithGoogle({
+    required String idToken,
+    required UserRole role,
+  }) async {
+    try {
+      final model = await _resolveFullUser(
+        await _remote.loginWithGoogle(
+          idToken: idToken,
+          asVendor: role == UserRole.vendor,
+        ),
+      );
+      await _persistUser(model);
+      return Right(model.toEntity());
+    } on AuthException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on UnauthorizedException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, UserEntity>> register(RegisterParams params) async {
     try {
       final model = await _remote.register(params);
@@ -308,12 +381,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, SocialAuthResult>> signInWithGoogle() async {
     try {
+      // Google only obtains the identity token here; the backend session is
+      // minted later by [loginWithGoogle] once the user picks a role (the two
+      // Google endpoints are role-specific and auto-create the account).
       final result = await _social.signInWithGoogle();
       await _persistSocialCredentials(result);
-      final model = await _exchangeSocialToken(result);
-      if (model == null) return Right(result);
-      await _persistUser(model);
-      return Right(result.copyWith(isNewUser: model.isNewUser));
+      return Right(result);
     } on SocialAuthCancelledException catch (e) {
       return Left(Failure.socialAuthCancelled(e.message));
     } on SocialAuthException catch (e) {

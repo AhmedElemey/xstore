@@ -40,6 +40,9 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         email: 'mockuser@gmail.com',
         displayName: 'Mock Google User',
         photoUrl: MockImages.avatar(10),
+        // Non-null so the role screen's completeSocialRegistration proceeds
+        // to the (mocked) backend Google login under MOCK=true.
+        idToken: 'mock-google-id-token',
         isNewUser: false,
       );
     }

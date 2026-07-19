@@ -35,6 +35,9 @@ import '../../domain/usecases/facebook_sign_in_usecase.dart';
 import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/send_otp_usecase.dart';
 import '../../domain/usecases/verify_otp_usecase.dart';
+import '../../domain/usecases/send_login_otp_usecase.dart';
+import '../../domain/usecases/login_with_otp_usecase.dart';
+import '../../domain/usecases/google_login_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import 'auth_states.dart';
 import 'guest_mode_provider.dart';
@@ -165,6 +168,21 @@ SendOtpUseCase sendOtpUseCase(SendOtpUseCaseRef ref) {
 @riverpod
 VerifyOtpUseCase verifyOtpUseCase(VerifyOtpUseCaseRef ref) {
   return VerifyOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+SendLoginOtpUseCase sendLoginOtpUseCase(SendLoginOtpUseCaseRef ref) {
+  return SendLoginOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+LoginWithOtpUseCase loginWithOtpUseCase(LoginWithOtpUseCaseRef ref) {
+  return LoginWithOtpUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+GoogleLoginUseCase googleLoginUseCase(GoogleLoginUseCaseRef ref) {
+  return GoogleLoginUseCase(ref.watch(authRepositoryProvider));
 }
 
 @Riverpod(keepAlive: true)
@@ -448,9 +466,11 @@ class RegisterNotifier extends _$RegisterNotifier {
         );
         if (fnAr != null) errors['fullNameAr'] = fnAr;
 
-        // Email is optional (auth is phone-based; backend registers without
-        // it) — validate the format only when the user typed one.
-        if (state.email.trim().isNotEmpty) {
+        // Email is now REQUIRED by the backend for both consumer and vendor
+        // register (an empty/missing email 400s server-side).
+        if (state.email.trim().isEmpty) {
+          errors['email'] = l10n.validationEmailRequired;
+        } else {
           final em = Validators.registerEmail(l10n, state.email);
           if (em != null) errors['email'] = em;
         }
@@ -526,6 +546,10 @@ class RegisterNotifier extends _$RegisterNotifier {
         if (state.storeCityId == null || state.storeGovernmentId == null) {
           errors['storeLocation'] = l10n.validationStoreCityWilayaRequired;
         }
+        // The vendor-register endpoint requires a store image (multipart).
+        if (state.storeLogoPath == null || state.storeLogoPath!.trim().isEmpty) {
+          errors['storeLogo'] = l10n.validationStoreLogoRequired;
+        }
         return errors;
       default:
         return errors;
@@ -580,6 +604,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                 storeCityId: state.storeCityId!,
                 storeGovernmentId: state.storeGovernmentId!,
                 whatsappNumber: state.whatsappNumber,
+                profileImagePath: state.storeLogoPath ?? '',
               ),
             )
         : await ref.read(registerConsumerUseCaseProvider).call(

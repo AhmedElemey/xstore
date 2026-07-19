@@ -55,7 +55,26 @@ abstract interface class AuthRepository {
   Future<Either<Failure, String?>> sendPhoneOtpBackend(String phoneNumber);
   Future<Either<Failure, Unit>> verifyPhoneOtpBackend(String otpToken);
 
+  /// Passwordless login for an existing account. [sendLoginOtp] Right payload
+  /// is the debug OTP echoed by the backend, if present (null once a real SMS
+  /// gateway exists); a 404 surfaces as "No account found with this phone
+  /// number.". [loginWithOtp] resolves the full profile and persists the session.
+  Future<Either<Failure, String?>> sendLoginOtp(String phoneNumber);
+  Future<Either<Failure, UserEntity>> loginWithOtp({
+    required String phoneNumber,
+    required String otpToken,
+  });
+
   Future<Either<Failure, SocialAuthResult>> signInWithGoogle();
+
+  /// Exchanges a Google identity token for a backend session via the
+  /// role-specific endpoint (auto-creates the account if none exists), then
+  /// resolves the full profile and persists the session.
+  Future<Either<Failure, UserEntity>> loginWithGoogle({
+    required String idToken,
+    required UserRole role,
+  });
+
   Future<Either<Failure, SocialAuthResult>> signInWithApple();
   Future<Either<Failure, SocialAuthResult>> signInWithFacebook();
   Future<Either<Failure, Unit>> signOutSocial();

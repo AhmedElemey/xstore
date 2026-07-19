@@ -52,6 +52,24 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> logout();
 
+  /// Passwordless login for an existing account. [sendLoginOtp] returns the
+  /// debug OTP echoed by the backend (null once a real SMS gateway exists);
+  /// [loginWithOtp] returns a token-only model (resolve via [fetchProfile]).
+  Future<String?> sendLoginOtp(String phoneNumber);
+  Future<UserModel> loginWithOtp({
+    required String phoneNumber,
+    required String otpToken,
+    required bool rememberMe,
+  });
+
+  /// Google sign-in via the role-specific backend route. [idToken] is the
+  /// Google identity token; [asVendor] picks the vendor vs consumer endpoint.
+  /// Auto-creates the account if none exists. Returns a token-only model.
+  Future<UserModel> loginWithGoogle({
+    required String idToken,
+    required bool asVendor,
+  });
+
   /// Exchanges a Firebase ID token (verified server-side) for a backend session.
   /// Returns null while the backend route is not deployed yet (404) — callers
   /// fall back to a local-only session.
@@ -93,7 +111,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiLogin,
         data: {
-          'emailOrPhone': identifier,
+          // CONFIRMED live: the backend expects `phoneNumber` (an 11-digit
+          // Egyptian local number). The app authenticates by phone; the
+          // LoginParams field is named emailOrPhone for historical reasons.
+          'phoneNumber': identifier,
           'password': password,
           'rememberMe': params.rememberMe,
         },
@@ -154,13 +175,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {
           'fullNameEn': params.fullNameEn,
           'fullNameAr': params.fullNameAr,
-          // Email is optional (phone is the account identifier); the live
-          // backend registers fine without the key, so omit it when blank.
-          if (params.email.trim().isNotEmpty) 'email': params.email.trim(),
+          // CONFIRMED live: email is now REQUIRED and must be a valid address
+          // (an empty/missing key 400s). Callers validate it before this call.
+          'email': params.email.trim(),
           'phoneNumber': params.phoneNumber,
           'password': params.password,
           'confirmPassword': params.confirmPassword,
-          'dateOfBirth': params.dateOfBirth?.toIso8601String(),
+          // A birth DATE — send `YYYY-MM-DD` (every backend example uses that),
+          // not a full ISO timestamp. Omit the key entirely when not provided.
+          if (params.dateOfBirth != null)
+            'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
         },
         options: ApiAuthHeaders.public(),
       );
@@ -172,29 +196,47 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
+  /// A birth date is date-only on the wire (`YYYY-MM-DD`); a full ISO timestamp
+  /// is rejected by the backend's date binding.
+  static String _dateOnlyIso(DateTime d) => d.toIso8601String().split('T').first;
+
   @override
   Future<UserModel> registerVendor(VendorRegisterParams params) async {
+    if (params.profileImagePath.trim().isEmpty) {
+      // The endpoint mandates a file; fail with a clear message rather than a
+      // confusing multipart error. The UI validates this before calling.
+      throw const ServerException('A store image is required.');
+    }
     try {
+      // CONFIRMED live: vendor register is multipart/form-data and REQUIRES a
+      // `profileImage` file (JSON 400s: "The ProfileImage field is required.").
+      final formData = FormData.fromMap({
+        'fullNameEn': params.fullNameEn,
+        'fullNameAr': params.fullNameAr,
+        // Email is required here too (same contract as consumer register).
+        'email': params.email.trim(),
+        'phoneNumber': params.phoneNumber,
+        'password': params.password,
+        'confirmPassword': params.confirmPassword,
+        if (params.dateOfBirth != null)
+          'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
+        'storeNameEn': params.storeNameEn,
+        'storeNameAr': params.storeNameAr,
+        'storeDescriptionEn': params.storeDescriptionEn,
+        'storeDescriptionAr': params.storeDescriptionAr,
+        'storeCategoryId': params.storeCategoryId,
+        'storeCityId': params.storeCityId,
+        'storeGovernmentId': params.storeGovernmentId,
+        'whatsappNumber': params.whatsappNumber,
+        'profileImage': await MultipartFile.fromFile(
+          params.profileImagePath,
+          // image_picker returns POSIX-style paths on iOS/Android.
+          filename: params.profileImagePath.split('/').last,
+        ),
+      });
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.vendorRegister,
-        data: {
-          'fullNameEn': params.fullNameEn,
-          'fullNameAr': params.fullNameAr,
-          // See registerConsumer — email is optional, omit when blank.
-          if (params.email.trim().isNotEmpty) 'email': params.email.trim(),
-          'phoneNumber': params.phoneNumber,
-          'password': params.password,
-          'confirmPassword': params.confirmPassword,
-          'dateOfBirth': params.dateOfBirth?.toIso8601String(),
-          'storeNameEn': params.storeNameEn,
-          'storeNameAr': params.storeNameAr,
-          'storeDescriptionEn': params.storeDescriptionEn,
-          'storeDescriptionAr': params.storeDescriptionAr,
-          'storeCategoryId': params.storeCategoryId,
-          'storeCityId': params.storeCityId,
-          'storeGovernmentId': params.storeGovernmentId,
-          'whatsappNumber': params.whatsappNumber,
-        },
+        data: formData,
         options: ApiAuthHeaders.public(),
       );
       final data = response.data;
@@ -381,6 +423,79 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ApiEndpoints.apiLogout,
         options: ApiAuthHeaders.authenticated(),
       );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<String?> sendLoginOtp(String phoneNumber) async {
+    if (MockConfig.useMock) return MockConfig.simulate('123456');
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.sendLoginOtp,
+        data: {'phoneNumber': phoneNumber},
+        options: ApiAuthHeaders.public(),
+      );
+      return response.data?['otp'] as String?;
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<UserModel> loginWithOtp({
+    required String phoneNumber,
+    required String otpToken,
+    required bool rememberMe,
+  }) async {
+    if (MockConfig.useMock) {
+      final model = mockLoginIsCourier(phoneNumber)
+          ? mockCourierUserModel()
+          : mockLoginIsVendor(phoneNumber)
+              ? mockVendorUserModel()
+              : mockConsumerUserModel(phoneNumber: phoneNumber);
+      return MockConfig.simulate(model);
+    }
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.loginWithOtp,
+        data: {
+          'phoneNumber': phoneNumber,
+          'otpToken': otpToken,
+          'rememberMe': rememberMe,
+        },
+        options: ApiAuthHeaders.public(),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty response');
+      return _tokenOnlyModel(data, email: '');
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<UserModel> loginWithGoogle({
+    required String idToken,
+    required bool asVendor,
+  }) async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(
+        asVendor ? mockVendorUserModel() : mockConsumerUserModel(),
+      );
+    }
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        asVendor
+            ? ApiEndpoints.googleVendorLogin
+            : ApiEndpoints.googleConsumerLogin,
+        data: {'idToken': idToken},
+        options: ApiAuthHeaders.public(),
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty response');
+      return _tokenOnlyModel(data, email: '');
     } on DioException catch (e) {
       throw mapDioException(e);
     }

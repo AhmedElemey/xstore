@@ -147,4 +147,22 @@ class StubAuthRepository implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> verifyOtp(VerifyOtpParams params) async =>
       Left(Failure.phoneAuth('stub'));
+
+  @override
+  Future<Either<Failure, String?>> sendLoginOtp(String phoneNumber) async =>
+      Left(Failure.server('stub'));
+
+  @override
+  Future<Either<Failure, UserEntity>> loginWithOtp({
+    required String phoneNumber,
+    required String otpToken,
+  }) async =>
+      Left(Failure.server('stub'));
+
+  @override
+  Future<Either<Failure, UserEntity>> loginWithGoogle({
+    required String idToken,
+    required UserRole role,
+  }) async =>
+      Left(Failure.socialAuth('stub'));
 }

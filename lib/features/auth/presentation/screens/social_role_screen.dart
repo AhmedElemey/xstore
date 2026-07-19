@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/social_auth_provider.dart';
@@ -102,11 +104,25 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
                     XstoreButton(
                       label: 'Continue',
                       isLoading: social.isAnyLoading,
-                      onPressed: _selectedRole == null
+                      onPressed: _selectedRole == null || social.isAnyLoading
                           ? null
                           : () => ref
                               .read(socialAuthProvider.notifier)
                               .completeSocialRegistration(_selectedRole!),
+                    ),
+                    const Gap(AppSpacing.sm),
+                    Center(
+                      child: TextButton(
+                        onPressed: social.isAnyLoading
+                            ? null
+                            : () {
+                                ref
+                                    .read(socialAuthProvider.notifier)
+                                    .cancelSocialRegistration();
+                                context.go(AppRoutes.login);
+                              },
+                        child: Text(context.l10n.cancel),
+                      ),
                     ),
                   ],
                 ),

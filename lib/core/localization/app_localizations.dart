@@ -4946,6 +4946,12 @@ abstract class AppLocalizations {
   /// **'Store Logo (optional)'**
   String get storeLogoOptional;
 
+  /// No description provided for @storeLogoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Logo *'**
+  String get storeLogoRequired;
+
   /// No description provided for @cityRequired.
   ///
   /// In en, this message translates to:
@@ -5593,6 +5599,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid email'**
   String get validationEmailInvalid;
+
+  /// No description provided for @validationEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get validationEmailRequired;
+
+  /// No description provided for @validationStoreLogoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a store image to continue'**
+  String get validationStoreLogoRequired;
 
   /// No description provided for @validationRegisterPhoneInvalid.
   ///

@@ -2530,6 +2530,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeLogoOptional => 'Store Logo (optional)';
 
   @override
+  String get storeLogoRequired => 'Store Logo *';
+
+  @override
   String get cityRequired => 'City *';
 
   @override
@@ -2876,6 +2879,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validationEmailInvalid => 'Enter a valid email';
+
+  @override
+  String get validationEmailRequired => 'Email is required';
+
+  @override
+  String get validationStoreLogoRequired => 'Add a store image to continue';
 
   @override
   String get validationRegisterPhoneInvalid => 'Enter a valid phone number';

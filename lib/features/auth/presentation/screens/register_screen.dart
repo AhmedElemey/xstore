@@ -430,7 +430,7 @@ class _StepPersonal extends StatelessWidget {
           builder: (context, val, _) {
             final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val.text.trim());
             return AuthTextField(
-              label: context.l10n.emailAddressOptional,
+              label: context.l10n.emailAddressRequired,
               controller: email,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),
@@ -790,8 +790,13 @@ class _StepStore extends ConsumerWidget {
         ),
         const Gap(AppSpacing.lg),
         Text(
-          context.l10n.storeLogoOptional,
-          style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
+          context.l10n.storeLogoRequired,
+          style: AppTypography.bodySmall.copyWith(
+            fontWeight: FontWeight.w600,
+            color: s.stepErrors.containsKey('storeLogo')
+                ? AppColors.error
+                : context.textPrimary,
+          ),
         ),
         const Gap(AppSpacing.spacing10),
         Center(
@@ -829,6 +834,15 @@ class _StepStore extends ConsumerWidget {
             ),
           ),
         ),
+        if (s.stepErrors.containsKey('storeLogo')) ...[
+          const Gap(AppSpacing.sm),
+          Center(
+            child: Text(
+              s.stepErrors['storeLogo']!,
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            ),
+          ),
+        ],
         const Gap(AppSpacing.lg),
         if (s.stepErrors.containsKey('storeLocation'))
           Text(

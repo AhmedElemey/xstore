@@ -47,7 +47,9 @@ String? computeXStoreAuthRedirect({
   return auth.when(
     data: (user) {
       final loggedIn = user != null;
-      if (loggedIn && needsRoleSelection && loc != AppRoutes.socialRoleSelect) {
+      // Google sign-in sets this before a session exists (the role picks the
+      // backend endpoint), so route to the role screen logged-in or not.
+      if (needsRoleSelection && loc != AppRoutes.socialRoleSelect) {
         return AppRoutes.socialRoleSelect;
       }
       if (loggedIn && !needsRoleSelection && loc == AppRoutes.socialRoleSelect) {

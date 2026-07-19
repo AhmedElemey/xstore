@@ -58,7 +58,21 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       clearError: true,
     );
     final result = await ref.read(googleSignInUseCaseProvider).call();
-    await result.fold(_handleFailure, _handleSuccess);
+    await result.fold(_handleFailure, _handleGoogleSuccess);
+  }
+
+  /// Google sign-in yields only the identity token; the actual backend session
+  /// is created after the user picks a role (the endpoints are role-specific
+  /// and auto-create the account) — always route through the role screen.
+  Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
+    state = state.copyWith(
+      isGoogleLoading: false,
+      isAppleLoading: false,
+      isFacebookLoading: false,
+      clearError: true,
+      pendingSocialResult: result,
+      needsRoleSelection: true,
+    );
   }
 
   Future<void> signInWithApple() async {
@@ -88,19 +102,54 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   Future<void> completeSocialRegistration(UserRole role) async {
     final pending = state.pendingSocialResult;
     if (pending == null) return;
-    await ref.read(authProvider.notifier).setUser(pending.toUserEntity(role));
-    state = state.copyWith(
-      isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: false,
-      clearError: true,
-      clearPending: true,
-      needsRoleSelection: false,
+    final idToken = pending.idToken;
+    if (idToken == null || idToken.isEmpty) {
+      state = state.copyWith(
+        error: 'Google sign-in failed — no identity token. Please try again.',
+        needsRoleSelection: false,
+        clearPending: true,
+      );
+      return;
+    }
+    state = state.copyWith(isGoogleLoading: true, clearError: true);
+    final result = await ref
+        .read(googleLoginUseCaseProvider)
+        .call(idToken: idToken, role: role);
+    if (!mounted) return;
+    result.fold(
+      (failure) {
+        state = state.copyWith(isGoogleLoading: false, error: failure.toString());
+      },
+      (user) {
+        state = state.copyWith(
+          isGoogleLoading: false,
+          clearError: true,
+          clearPending: true,
+          needsRoleSelection: false,
+        );
+        // Session already persisted by the repository; adopt it synchronously
+        // so the router moves off the role screen to home.
+        ref.read(authProvider.notifier).adoptSession(user);
+      },
     );
   }
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  /// Abandons a pending Google sign-in (user backed out of role selection)
+  /// before any backend session was created, so the router stops forcing the
+  /// role screen. The caller navigates back to login.
+  void cancelSocialRegistration() {
+    state = state.copyWith(
+      clearPending: true,
+      needsRoleSelection: false,
+      clearError: true,
+      isGoogleLoading: false,
+      isAppleLoading: false,
+      isFacebookLoading: false,
+    );
   }
 
   Future<void> _handleFailure(failure) async {

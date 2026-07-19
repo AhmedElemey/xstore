@@ -30,7 +30,10 @@ mixin _$VendorRegisterParams {
   int get storeCategoryId => throw _privateConstructorUsedError;
   int get storeCityId => throw _privateConstructorUsedError;
   int get storeGovernmentId => throw _privateConstructorUsedError;
-  String get whatsappNumber => throw _privateConstructorUsedError;
+  String get whatsappNumber =>
+      throw _privateConstructorUsedError; // Local file path of the store/profile image. The live vendor-register
+// endpoint is multipart and rejects the request without it.
+  String get profileImagePath => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $VendorRegisterParamsCopyWith<VendorRegisterParams> get copyWith =>
@@ -58,7 +61,8 @@ abstract class $VendorRegisterParamsCopyWith<$Res> {
       int storeCategoryId,
       int storeCityId,
       int storeGovernmentId,
-      String whatsappNumber});
+      String whatsappNumber,
+      String profileImagePath});
 }
 
 /// @nodoc
@@ -90,6 +94,7 @@ class _$VendorRegisterParamsCopyWithImpl<$Res,
     Object? storeCityId = null,
     Object? storeGovernmentId = null,
     Object? whatsappNumber = null,
+    Object? profileImagePath = null,
   }) {
     return _then(_value.copyWith(
       fullNameEn: null == fullNameEn
@@ -152,6 +157,10 @@ class _$VendorRegisterParamsCopyWithImpl<$Res,
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
               as String,
+      profileImagePath: null == profileImagePath
+          ? _value.profileImagePath
+          : profileImagePath // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -179,7 +188,8 @@ abstract class _$$VendorRegisterParamsImplCopyWith<$Res>
       int storeCategoryId,
       int storeCityId,
       int storeGovernmentId,
-      String whatsappNumber});
+      String whatsappNumber,
+      String profileImagePath});
 }
 
 /// @nodoc
@@ -208,6 +218,7 @@ class __$$VendorRegisterParamsImplCopyWithImpl<$Res>
     Object? storeCityId = null,
     Object? storeGovernmentId = null,
     Object? whatsappNumber = null,
+    Object? profileImagePath = null,
   }) {
     return _then(_$VendorRegisterParamsImpl(
       fullNameEn: null == fullNameEn
@@ -270,6 +281,10 @@ class __$$VendorRegisterParamsImplCopyWithImpl<$Res>
           ? _value.whatsappNumber
           : whatsappNumber // ignore: cast_nullable_to_non_nullable
               as String,
+      profileImagePath: null == profileImagePath
+          ? _value.profileImagePath
+          : profileImagePath // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -292,7 +307,8 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
       required this.storeCategoryId,
       required this.storeCityId,
       required this.storeGovernmentId,
-      required this.whatsappNumber});
+      required this.whatsappNumber,
+      required this.profileImagePath});
 
   @override
   final String fullNameEn;
@@ -324,10 +340,14 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
   final int storeGovernmentId;
   @override
   final String whatsappNumber;
+// Local file path of the store/profile image. The live vendor-register
+// endpoint is multipart and rejects the request without it.
+  @override
+  final String profileImagePath;
 
   @override
   String toString() {
-    return 'VendorRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber)';
+    return 'VendorRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, profileImagePath: $profileImagePath)';
   }
 
   @override
@@ -363,7 +383,9 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
             (identical(other.storeGovernmentId, storeGovernmentId) ||
                 other.storeGovernmentId == storeGovernmentId) &&
             (identical(other.whatsappNumber, whatsappNumber) ||
-                other.whatsappNumber == whatsappNumber));
+                other.whatsappNumber == whatsappNumber) &&
+            (identical(other.profileImagePath, profileImagePath) ||
+                other.profileImagePath == profileImagePath));
   }
 
   @override
@@ -383,7 +405,8 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
       storeCategoryId,
       storeCityId,
       storeGovernmentId,
-      whatsappNumber);
+      whatsappNumber,
+      profileImagePath);
 
   @JsonKey(ignore: true)
   @override
@@ -410,7 +433,8 @@ abstract class _VendorRegisterParams implements VendorRegisterParams {
       required final int storeCategoryId,
       required final int storeCityId,
       required final int storeGovernmentId,
-      required final String whatsappNumber}) = _$VendorRegisterParamsImpl;
+      required final String whatsappNumber,
+      required final String profileImagePath}) = _$VendorRegisterParamsImpl;
 
   @override
   String get fullNameEn;
@@ -442,6 +466,9 @@ abstract class _VendorRegisterParams implements VendorRegisterParams {
   int get storeGovernmentId;
   @override
   String get whatsappNumber;
+  @override // Local file path of the store/profile image. The live vendor-register
+// endpoint is multipart and rejects the request without it.
+  String get profileImagePath;
   @override
   @JsonKey(ignore: true)
   _$$VendorRegisterParamsImplCopyWith<_$VendorRegisterParamsImpl>

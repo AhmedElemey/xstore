@@ -388,6 +388,57 @@ final verifyOtpUseCaseProvider = AutoDisposeProvider<VerifyOtpUseCase>.internal(
 );
 
 typedef VerifyOtpUseCaseRef = AutoDisposeProviderRef<VerifyOtpUseCase>;
+String _$sendLoginOtpUseCaseHash() =>
+    r'e6025345e5b49a993511ca6ee2a7999008faed15';
+
+/// See also [sendLoginOtpUseCase].
+@ProviderFor(sendLoginOtpUseCase)
+final sendLoginOtpUseCaseProvider =
+    AutoDisposeProvider<SendLoginOtpUseCase>.internal(
+  sendLoginOtpUseCase,
+  name: r'sendLoginOtpUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$sendLoginOtpUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef SendLoginOtpUseCaseRef = AutoDisposeProviderRef<SendLoginOtpUseCase>;
+String _$loginWithOtpUseCaseHash() =>
+    r'631a2c809e0d3c9d198c2e351760c2e33be89706';
+
+/// See also [loginWithOtpUseCase].
+@ProviderFor(loginWithOtpUseCase)
+final loginWithOtpUseCaseProvider =
+    AutoDisposeProvider<LoginWithOtpUseCase>.internal(
+  loginWithOtpUseCase,
+  name: r'loginWithOtpUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$loginWithOtpUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef LoginWithOtpUseCaseRef = AutoDisposeProviderRef<LoginWithOtpUseCase>;
+String _$googleLoginUseCaseHash() =>
+    r'ea2455c50785cdb2d63362fdcda85d7fd265eb05';
+
+/// See also [googleLoginUseCase].
+@ProviderFor(googleLoginUseCase)
+final googleLoginUseCaseProvider =
+    AutoDisposeProvider<GoogleLoginUseCase>.internal(
+  googleLoginUseCase,
+  name: r'googleLoginUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$googleLoginUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
 String _$authHash() => r'7144e21a97bbecd814f1dced6ecfa58976c9d539';
 
 /// See also [Auth].
@@ -418,7 +469,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'c3029d914060f047054098de71de444e8a5f5e18';
+String _$registerNotifierHash() => r'a8cbf98cda5e6e43c7620ea2f66d4e5f1d9bbf79';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

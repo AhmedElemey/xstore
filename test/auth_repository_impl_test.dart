@@ -49,6 +49,8 @@ class _RecordingRemote implements AuthRemoteDataSource {
   String? lastSocialIdToken;
   String? lastPhoneIdToken;
   String? lastPhoneNumber;
+  String? lastGoogleIdToken;
+  bool? lastGoogleAsVendor;
 
   ConsumerRegisterParams? lastConsumerRegisterParams;
   VendorRegisterParams? lastVendorRegisterParams;
@@ -158,6 +160,28 @@ class _RecordingRemote implements AuthRemoteDataSource {
     lastPhoneNumber = phoneNumber;
     return phoneResponse;
   }
+
+  @override
+  Future<String?> sendLoginOtp(String phoneNumber) =>
+      throw UnimplementedError();
+
+  @override
+  Future<UserModel> loginWithOtp({
+    required String phoneNumber,
+    required String otpToken,
+    required bool rememberMe,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<UserModel> loginWithGoogle({
+    required String idToken,
+    required bool asVendor,
+  }) async {
+    lastGoogleIdToken = idToken;
+    lastGoogleAsVendor = asVendor;
+    return asVendor ? mockVendorUserModel() : mockConsumerUserModel();
+  }
 }
 
 class _FakeSocial implements SocialAuthDatasource {
@@ -235,14 +259,24 @@ void main() {
 
   group('AuthRepositoryImpl Firebase → backend session bridge', () {
     test(
-      'signInWithGoogle exchanges Firebase ID token and persists backend token',
+      'signInWithGoogle defers the exchange; loginWithGoogle mints the session',
       () async {
-        final result = await repository.signInWithGoogle();
+        // Google sign-in only fetches the identity token now — no exchange,
+        // no persisted session until the user picks a role.
+        final signIn = await repository.signInWithGoogle();
+        expect(signIn.isRight(), isTrue);
+        expect(remote.lastGoogleIdToken, isNull);
+        expect(await readStoredToken(), isNull);
 
-        expect(result.isRight(), isTrue);
-        expect(remote.lastSocialProvider, 'google');
-        expect(remote.lastSocialIdToken, 'firebase-id-token-test');
-        expect(await readStoredToken(), 'mock-token-consumer');
+        // The role screen then calls loginWithGoogle with the chosen role.
+        final login = await repository.loginWithGoogle(
+          idToken: 'google-id-token',
+          role: UserRole.vendor,
+        );
+        expect(login.isRight(), isTrue);
+        expect(remote.lastGoogleIdToken, 'google-id-token');
+        expect(remote.lastGoogleAsVendor, isTrue);
+        expect(await readStoredToken(), 'mock-token-vendor');
       },
       skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
     );
@@ -362,6 +396,7 @@ void main() {
           storeCityId: 1,
           storeGovernmentId: 1,
           whatsappNumber: '01098765432',
+          profileImagePath: '/tmp/store.jpg',
         ),
       );
 

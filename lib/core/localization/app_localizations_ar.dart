@@ -2525,6 +2525,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get storeLogoOptional => 'لوجو المتجر (اختياري)';
 
   @override
+  String get storeLogoRequired => 'لوجو المتجر *';
+
+  @override
   String get cityRequired => 'المدينة *';
 
   @override
@@ -2869,6 +2872,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationEmailInvalid => 'اكتب بريد إلكتروني صحيح';
+
+  @override
+  String get validationEmailRequired => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get validationStoreLogoRequired => 'أضف صورة للمتجر للمتابعة';
 
   @override
   String get validationRegisterPhoneInvalid => 'اكتب رقم موبايل صحيح';

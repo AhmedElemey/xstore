@@ -20,5 +20,8 @@ class VendorRegisterParams with _$VendorRegisterParams {
     required int storeCityId,
     required int storeGovernmentId,
     required String whatsappNumber,
+    // Local file path of the store/profile image. The live vendor-register
+    // endpoint is multipart and rejects the request without it.
+    required String profileImagePath,
   }) = _VendorRegisterParams;
 }

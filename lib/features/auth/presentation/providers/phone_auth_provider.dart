@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
-import '../../domain/entities/send_otp_params.dart';
-import '../../domain/entities/verify_otp_params.dart';
 import 'auth_provider.dart';
 
 class PhoneAuthState {
@@ -100,41 +98,30 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
       return false;
     }
     state = state.copyWith(isSendingOtp: true, clearPhoneError: true);
-    final params = SendOtpParams(
-      phoneNumber: state.phoneNumber,
-      e164Number: AppValidators.toE164Egypt(state.phoneNumber),
-    );
-    final result = await ref.read(sendOtpUseCaseProvider).call(params);
+    // Backend-native passwordless login OTP (existing accounts only). A 404
+    // "No account found with this phone number." surfaces as phoneError.
+    final result =
+        await ref.read(sendLoginOtpUseCaseProvider).call(state.phoneNumber);
     if (!mounted) return false;
-    return await result.fold<Future<bool>>(
-      (failure) async {
+    return result.fold(
+      (failure) {
         state = state.copyWith(
           isSendingOtp: false,
           phoneError: failure.toString(),
         );
         return false;
       },
-      (ok) async {
-        if (ok.autoVerified) {
-          state = state.copyWith(
-            isSendingOtp: false,
-            verificationId: ok.verificationId,
-            resendToken: ok.resendToken,
-            expiresAt: ok.expiresAt,
-            clearPhoneError: true,
-            debugOtp: ok.debugOtp,
-          );
-          return verifyOtp(autoVerified: true);
-        }
+      (otp) {
         state = state.copyWith(
           isSendingOtp: false,
-          verificationId: ok.verificationId,
-          resendToken: ok.resendToken,
-          expiresAt: ok.expiresAt,
+          // No verificationId in the backend OTP flow; use the phone as a
+          // sentinel so the /otp route guard (verificationId != null) passes.
+          verificationId: state.phoneNumber,
+          expiresAt: DateTime.now().add(const Duration(seconds: 60)),
           resendCooldown: 60,
           canResend: false,
           clearPhoneError: true,
-          debugOtp: ok.debugOtp,
+          debugOtp: otp,
         );
         _startResendCooldown();
         return true;
@@ -147,18 +134,14 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
     state = state.copyWith(otpCode: digits, clearOtpError: true);
   }
 
-  Future<bool> verifyOtp({bool autoVerified = false}) async {
-    if (!autoVerified &&
-        (state.verificationId == null || state.otpCode.length != 6)) {
+  Future<bool> verifyOtp() async {
+    if (state.verificationId == null || state.otpCode.length != 6) {
       return false;
     }
     state = state.copyWith(isVerifyingOtp: true, clearOtpError: true);
-    final result = await ref.read(verifyOtpUseCaseProvider).call(
-          VerifyOtpParams(
-            verificationId: state.verificationId ?? '',
-            otpCode: autoVerified ? '' : state.otpCode,
-            phoneNumber: state.phoneNumber,
-          ),
+    final result = await ref.read(loginWithOtpUseCaseProvider).call(
+          phoneNumber: state.phoneNumber,
+          otpToken: state.otpCode,
         );
     if (!mounted) return false;
     return result.fold((failure) {
@@ -167,13 +150,11 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
         otpError: failure.toString(),
       );
       return false;
-    }, (user) async {
-      await ref.read(authProvider.notifier).setUser(user);
-      if (!mounted) return true;
-      state = state.copyWith(
-        isVerifyingOtp: false,
-        isNewUser: user.isNewUser,
-      );
+    }, (user) {
+      // Session already persisted by the repository; adoptSession updates auth
+      // synchronously so the router redirects to home without a storage reload.
+      state = state.copyWith(isVerifyingOtp: false, isNewUser: user.isNewUser);
+      ref.read(authProvider.notifier).adoptSession(user);
       return true;
     });
   }

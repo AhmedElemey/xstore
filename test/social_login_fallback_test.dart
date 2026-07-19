@@ -9,15 +9,24 @@ import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dar
 import 'package:xstore/features/auth/data/models/user_model.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 
 class _FakeRemote extends Fake implements AuthRemoteDataSource {
   UserModel? socialResponse;
+  UserModel? googleResponse;
   @override
   Future<UserModel?> loginWithSocialToken({
     required String provider,
     required String idToken,
   }) async =>
       socialResponse;
+
+  @override
+  Future<UserModel> loginWithGoogle({
+    required String idToken,
+    required bool asVendor,
+  }) async =>
+      googleResponse!;
 }
 
 class _FakeSocial extends Fake implements SocialAuthDatasource {
@@ -103,18 +112,18 @@ void main() {
     );
   });
 
-  group('social sign-in while backend route returns 404', () {
-    test('succeeds with a local session and keeps Firebase isNewUser', () async {
-      remote.socialResponse = null; // datasource maps 404 → null
-
+  group('Google sign-in (role-deferred backend exchange)', () {
+    test(
+        'signInWithGoogle returns the identity result without minting a '
+        'session (role screen exchanges later)', () async {
       final either = await repo.signInWithGoogle();
 
       final result = either.getOrElse((f) => fail('expected Right, got $f'));
       expect(result.isNewUser, isTrue);
       expect(result.email, 'user@gmail.com');
-      // No backend session must be persisted from a 404 fallback.
+      // No backend session yet — that happens in loginWithGoogle.
       expect(storage.store.containsKey(PrefsKeys.authToken), isFalse);
-      // Provider credentials are still saved locally for later registration.
+      // Provider credentials are still saved locally.
       expect(storage.store[PrefsKeys.socialAuthCredentials], contains('google'));
       expect(
         storage.store[PrefsKeys.socialAuthCredentials],
@@ -122,17 +131,17 @@ void main() {
       );
     });
 
-    test('backend response, once live, overrides isNewUser and persists', () async {
-      remote.socialResponse =
-          mockConsumerUserModel(email: 'user@gmail.com').copyWith(
-        isNewUser: false,
-        token: 'backend-token',
+    test('loginWithGoogle mints and persists the backend session', () async {
+      remote.googleResponse = mockConsumerUserModel(email: 'user@gmail.com')
+          .copyWith(token: 'backend-token');
+
+      final either = await repo.loginWithGoogle(
+        idToken: 'google-id-token',
+        role: UserRole.consumer,
       );
 
-      final either = await repo.signInWithGoogle();
-
       final result = either.getOrElse((f) => fail('expected Right, got $f'));
-      expect(result.isNewUser, isFalse);
+      expect(result.email, 'user@gmail.com');
       expect(storage.store[PrefsKeys.authToken], 'backend-token');
     });
   });

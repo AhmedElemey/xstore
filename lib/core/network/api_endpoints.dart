@@ -96,6 +96,20 @@ abstract final class ApiEndpoints {
   static const String verifyEmail = '$_api/auth/verify-email';
   static const String verifyPhone = '$_api/auth/verify-phone';
 
+  /// Passwordless login: request an SMS OTP for an EXISTING account, then
+  /// exchange it for a session. CONFIRMED live: [sendLoginOtp] returns
+  /// `{message, otp}` (the OTP is echoed while no real SMS gateway is wired),
+  /// 404s for an unknown phone; [loginWithOtp] returns `{token, refreshToken}`.
+  static const String sendLoginOtp = '$_api/auth/send-login-otp';
+  static const String loginWithOtp = '$_api/auth/login-with-otp';
+
+  /// Google sign-in, split by the role to create/sign in as. Body is
+  /// `{"idToken": "<google identity token>"}` (the Google ID token from
+  /// google_sign_in — NOT a Firebase token). Auto-creates the account if none
+  /// exists. CONFIRMED live (401 "Invalid Google identity token" on a bad token).
+  static const String googleConsumerLogin = '$_api/auth/google/consumer/login';
+  static const String googleVendorLogin = '$_api/auth/google/vendor/login';
+
   // Reference data (GET only — write ops are admin-only, not used by this app)
   static const String cities = '$_api/cities';
   static const String governments = '$_api/governments';
