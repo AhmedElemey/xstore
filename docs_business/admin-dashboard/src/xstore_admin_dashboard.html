@@ -202,6 +202,28 @@
     .drawer{width:100vw;max-width:100vw}
   }
 
+/* ============ Phase 1: live-backend wiring UI ============ */
+.conn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--card,#fff);color:var(--text-2);font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer}
+.conn:hover{border-color:var(--primary)}
+.conn .conn-dot{width:8px;height:8px;border-radius:50%;background:var(--text-3)}
+.conn.on{border-color:var(--success);color:var(--success)}
+.conn.on .conn-dot{background:var(--success);box-shadow:0 0 0 3px var(--success-bg)}
+@media(max-width:640px){.conn span:not(.conn-dot){display:none}.conn{padding:0 9px}}
+
+.cbar{margin-bottom:14px;padding:9px 14px;border-radius:9px;font-size:12.5px;font-weight:600}
+.cbar a{cursor:pointer;text-decoration:underline;color:inherit}
+.cbar-live{background:var(--success-bg);color:var(--success)}
+.cbar-warn{background:var(--warning-bg);color:var(--warning)}
+.cbar-info{background:var(--line-soft);color:var(--text-2)}
+
+.conn-msg{font-size:12.5px;color:var(--error);min-height:16px;margin-top:8px}
+
+.cat{position:relative}
+.cat-del{position:absolute;top:8px;right:8px;width:22px;height:22px;border:none;border-radius:6px;background:var(--error-bg);color:var(--error);font-size:12px;cursor:pointer;line-height:1;display:none}
+.cat:hover .cat-del{display:block}
+.cat-note{grid-column:1/-1;padding:22px;text-align:center;color:var(--text-3);font-size:13px}
+.cat-note.cat-err{color:var(--error)}
+
 </style>
 </head>
 <body>
@@ -238,6 +260,7 @@
       <h1 id="topTitle">Dashboard</h1>
       <div class="search"><i data-ic="search"></i><input id="searchInput" placeholder="Search this page…"></div>
       <div class="top-actions">
+        <button class="conn" id="connBtn" onclick="openConnect()" title="Connect to the live backend"><span class="conn-dot"></span><span id="connLabel">Prototype</span></button>
         <div class="icon-btn"><i data-ic="bell"></i><span class="dot"></span></div>
         <div class="icon-btn hide-sm"><i data-ic="help"></i></div>
         <div class="avatar" style="background:var(--primary)">A</div>
@@ -251,6 +274,129 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ============================================================
+   xStore Admin — API client  (Phase 1)
+   ------------------------------------------------------------
+   Wires the dashboard to the *existing* backend endpoints only.
+   What is covered today:
+     - POST /api/auth/login            (admin sign-in)
+     - GET/POST/PUT/DELETE /api/categories   (full CRUD)
+     - GET /api/users                  (read-only list; see TODO*)
+     - GET /api/listings               (read-only list)
+   Everything else the dashboard shows still runs on sample data
+   until the backend adds the endpoints — see
+   docs_business/admin-dashboard/BACKEND_ENDPOINTS_TODO.md
+   (*UserDto currently has no Id/role/status, so vendor
+    approve/reject cannot be wired yet.)
+
+   Connection is opt-in: with no base URL set, the dashboard runs
+   in prototype mode. The Connect dialog stores the base URL + JWT
+   in localStorage.
+   ============================================================ */
+const Api = (() => {
+  const LS_BASE = 'xstore_api_base';
+  const LS_TOKEN = 'xstore_admin_token';
+
+  // Leave empty so the shipped page defaults to prototype mode.
+  // Set it here, or via the Connect dialog, to go live.
+  const DEFAULT_BASE = '';
+
+  const getBase = () => (localStorage.getItem(LS_BASE) || DEFAULT_BASE).replace(/\/+$/, '');
+  const setBase = b => { const v = (b || '').trim().replace(/\/+$/, ''); v ? localStorage.setItem(LS_BASE, v) : localStorage.removeItem(LS_BASE); };
+  const getToken = () => localStorage.getItem(LS_TOKEN) || '';
+  const setToken = t => { t ? localStorage.setItem(LS_TOKEN, t) : localStorage.removeItem(LS_TOKEN); };
+  const isConnected = () => !!getBase();
+  const isAuthed = () => !!getBase() && !!getToken();
+
+  class ApiError extends Error { constructor(message, status) { super(message); this.name = 'ApiError'; this.status = status; } }
+
+  // Prefix relative asset URLs (e.g. "/uploads/..") with the API base.
+  const resolveUrl = u => (!u ? u : /^https?:\/\//i.test(u) ? u : getBase() + '/' + String(u).replace(/^\/+/, ''));
+
+  async function request(path, { method = 'GET', body, form, auth = true } = {}) {
+    const base = getBase();
+    if (!base) throw new ApiError('Not connected. Open Connect to set the API base URL.', 0);
+
+    const headers = {};
+    let payload;
+    if (form) {
+      payload = form;                       // FormData — let the browser set the boundary
+    } else if (body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+      payload = JSON.stringify(body);
+    }
+    if (auth && getToken()) headers['Authorization'] = 'Bearer ' + getToken();
+
+    let res;
+    try {
+      res = await fetch(base + path, { method, headers, body: payload });
+    } catch (e) {
+      throw new ApiError('Network error — is the API reachable, HTTPS, and is CORS enabled for this origin?', 0);
+    }
+
+    const text = await res.text();
+    let data = null;
+    if (text) { try { data = JSON.parse(text); } catch { data = text; } }
+
+    if (!res.ok) {
+      if (res.status === 401) setToken('');   // expired/invalid — force re-auth
+      const msg = (data && (data.error || data.message)) || ('Request failed (' + res.status + ')');
+      throw new ApiError(msg, res.status);
+    }
+
+    // Success bodies: most endpoints return the raw payload (Ok(result.Data)),
+    // but some return the Result envelope — unwrap it if present.
+    if (data && typeof data === 'object' && 'isSuccess' in data && 'data' in data) return data.data;
+    return data;
+  }
+
+  return {
+    ApiError, getBase, setBase, getToken, setToken, isConnected, isAuthed, resolveUrl,
+
+    async login(phoneNumber, password) {
+      const data = await request('/api/auth/login', {
+        method: 'POST', auth: false,
+        body: { phoneNumber, password, rememberMe: true }
+      });
+      const token = data && data.token;
+      if (!token) throw new ApiError('Signed in but no token was returned.', 0);
+      setToken(token);
+      return token;
+    },
+    logout() { setToken(''); },
+
+    /* -------- Categories (fully supported) -------- */
+    getCategories() { return request('/api/categories', { auth: false }); },
+    createCategory({ nameEn, nameAr, isActive = true, parentId = null, image = null }) {
+      const fd = new FormData();
+      fd.append('NameEn', nameEn);
+      fd.append('NameAr', nameAr);
+      fd.append('IsActive', isActive);
+      if (parentId != null) fd.append('ParentId', parentId);
+      if (image) fd.append('Image', image);
+      return request('/api/categories', { method: 'POST', form: fd });
+    },
+    setCategoryStatus(id, isActive) {
+      return request('/api/categories/' + id + '/status', { method: 'PUT', body: { isActive } });
+    },
+    deleteCategory(id) { return request('/api/categories/' + id, { method: 'DELETE' }); },
+
+    /* -------- Read-only lists -------- */
+    getUsers({ role, vendorStatus, page = 1, pageSize = 50 } = {}) {
+      const q = new URLSearchParams();
+      if (role) q.set('Role', role);
+      if (vendorStatus) q.set('VendorStatus', vendorStatus);
+      q.set('Page', page); q.set('PageSize', pageSize);
+      return request('/api/users?' + q.toString());
+    },
+    getListings({ page = 1, pageSize = 50 } = {}) {
+      const q = new URLSearchParams();
+      q.set('Page', page); q.set('PageSize', pageSize);
+      return request('/api/listings?' + q.toString());
+    },
+  };
+})();
+
 /* ---------- tiny icon set ---------- */
 function ic(n){const p={
  grid:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
@@ -487,12 +633,15 @@ function vendors(){
 }
 
 function categories(){
- const cards=CATS.map((c,i)=>`<div class="cat"><div class="ci">${c[1]}</div>
-   <div class="cmeta"><b>${c[0]}</b><small>${c[2]} subcategories · ${c[3]} live products</small></div>
-   <div class="switch ${c[4]?'':'off'}" onclick="this.classList.toggle('off');toast('${c[0]} '+(this.classList.contains('off')?'hidden':'visible'))"></div></div>`).join('');
- return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy (10 categories · 31 subcategories) — powers <b>GET /categories</b></p></div>
+ const live=Api.isConnected()&&Api.isAuthed();
+ const grid=live
+   ?`<div id="catGrid" class="cat-grid"><div class="cat-note">Loading categories…</div></div>`
+   :`<div class="cat-grid">${CATS.map((c,i)=>`<div class="cat"><div class="ci">${c[1]}</div>
+       <div class="cmeta"><b>${c[0]}</b><small>${c[2]} subcategories · ${c[3]} live products</small></div>
+       <div class="switch ${c[4]?'':'off'}" onclick="this.classList.toggle('off');toast('${c[0]} '+(this.classList.contains('off')?'hidden':'visible'))"></div></div>`).join('')}</div>`;
+ return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy — powers <b>GET /api/categories</b></p></div>
    <button class="btn btn-p" onclick="openCategoryForm()">+ Add category</button></div>
-   <div class="card"><div class="c-body"><div class="cat-grid">${cards}</div></div></div>`;
+   <div class="card"><div class="c-body">${grid}</div></div>`;
 }
 
 /* which orders can still be handed to a platform courier */
@@ -793,14 +942,108 @@ function syncOverlay(){
 function toggleSidebar(){document.querySelector('.sidebar').classList.toggle('open');syncOverlay();}
 function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');syncOverlay();}
 
+/* ---------- backend wiring (Phase 1) ---------- */
+let currentView='overview';
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* which views the backend can actually serve today */
+const BACKEND_STATUS={
+ categories:'live',
+ overview:'partial',moderation:'partial',vendors:'partial',customers:'partial',
+ analytics:'none',orders:'none',couriers:'none',packages:'none',disputes:'none',coupons:'none',content:'none',settings:'none'
+};
+/* async loaders that replace sample data with live data once connected */
+const LIVE_HOOKS={categories:loadCategoriesLive};
+
+function connectionBanner(v){
+ const live=Api.isConnected()&&Api.isAuthed();
+ const st=BACKEND_STATUS[v]||'none';
+ if(live&&st==='live')    return '<div class="cbar cbar-live">● Live data from the backend</div>';
+ if(live&&st==='partial') return '<div class="cbar cbar-warn">Partial backend — some fields or actions still use sample data</div>';
+ if(live&&st==='none')    return '<div class="cbar cbar-warn">No backend endpoint yet — this screen shows sample data</div>';
+ if(!live&&st==='live')   return '<div class="cbar cbar-info">Prototype — <a onclick="openConnect()">connect to the live API</a> to manage real data</div>';
+ return '';
+}
+
 /* ---------- router ---------- */
 function go(v){
- document.getElementById('content').innerHTML=VIEWS[v]();
+ currentView=v;
+ document.getElementById('content').innerHTML=connectionBanner(v)+VIEWS[v]();
  document.getElementById('topTitle').textContent=TITLES[v];
  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
  const s=document.getElementById('searchInput'); if(s) s.value='';
  closeSidebar();
  window.scrollTo(0,0);
+ if(Api.isConnected()&&Api.isAuthed()&&LIVE_HOOKS[v]){ try{ LIVE_HOOKS[v](); }catch(e){ console.error(e); } }
+}
+
+/* ---------- connect / admin sign-in ---------- */
+function updateConnIndicator(){
+ const b=document.getElementById('connBtn'); if(!b) return;
+ const live=Api.isConnected()&&Api.isAuthed();
+ b.classList.toggle('on',live);
+ const l=document.getElementById('connLabel'); if(l) l.textContent=live?'Live':'Prototype';
+}
+function openConnect(){
+ const base=Api.getBase(), authed=Api.isConnected()&&Api.isAuthed();
+ const body=
+  '<p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:14px">Connect to the live xStore backend. The API must have <b>CORS</b> enabled for this origin and be served over <b>HTTPS</b>. Sign in with an <b>administrator</b> account.</p>'
+  +secH('API base URL')
+  +'<div class="form-row"><input id="apiBase" value="'+esc(base)+'" placeholder="https://api.xstore.eg"></div>'
+  +secH('Admin sign-in')
+  +'<div class="form-row"><input id="apiPhone" placeholder="Phone number"></div>'
+  +'<div class="form-row"><input id="apiPass" type="password" placeholder="Password"></div>'
+  +'<div id="connMsg" class="conn-msg"></div>'
+  +(authed?'<p class="muted" style="font-size:12.5px;margin-top:10px">● Currently connected.</p>':'');
+ const actions='<button class="btn btn-p" style="flex:1;justify-content:center" onclick="connectSubmit()">'+(authed?'Reconnect':'Connect & sign in')+'</button>'
+  +(base?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="doDisconnect()">Disconnect</button>':'');
+ openDrawer(authed?'Connected':'Connect to API',body,actions);
+}
+async function connectSubmit(){
+ const base=document.getElementById('apiBase').value.trim();
+ const phone=document.getElementById('apiPhone').value.trim();
+ const pass=document.getElementById('apiPass').value;
+ const msg=document.getElementById('connMsg');
+ if(!base){msg.textContent='Enter the API base URL.';return;}
+ if(!phone||!pass){msg.textContent='Enter the admin phone and password.';return;}
+ Api.setBase(base); msg.textContent='Signing in…';
+ try{
+  await Api.login(phone,pass);
+  updateConnIndicator(); closeDrawer(); toast('Connected to the live API ✓'); go(currentView);
+ }catch(e){ msg.textContent=e.message; updateConnIndicator(); }
+}
+function doDisconnect(){ Api.logout(); Api.setBase(''); updateConnIndicator(); closeDrawer(); toast('Disconnected — prototype mode'); go(currentView); }
+
+/* ---------- live categories ---------- */
+async function loadCategoriesLive(){
+ const grid=document.getElementById('catGrid'); if(!grid) return;
+ grid.innerHTML='<div class="cat-note">Loading categories…</div>';
+ try{
+  const cats=await Api.getCategories();
+  if(!Array.isArray(cats)||!cats.length){ grid.innerHTML='<div class="cat-note">No categories yet — use “+ Add category”.</div>'; return; }
+  grid.innerHTML=cats.map(liveCatCard).join('');
+ }catch(e){
+  grid.innerHTML='<div class="cat-note cat-err">Couldn’t load categories: '+esc(e.message)+' <button class="btn btn-g btn-sm" onclick="loadCategoriesLive()">Retry</button></div>';
+ }
+}
+function liveCatCard(c){
+ const name=c.nameEn||c.nameAr||'Untitled';
+ const icon=c.imageUrl?'<img src="'+esc(Api.resolveUrl(c.imageUrl))+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">':'📦';
+ const sub=(c.children&&c.children.length)?c.children.length+' subcategories':'—';
+ return '<div class="cat" data-id="'+c.id+'"><div class="ci">'+icon+'</div>'
+  +'<div class="cmeta"><b>'+esc(name)+'</b><small>'+esc(c.nameAr||'')+(c.nameAr?' · ':'')+sub+'</small></div>'
+  +'<div class="switch '+(c.isActive?'':'off')+'" title="Toggle visibility" onclick="catToggleLive('+c.id+',this)"></div>'
+  +'<button class="cat-del" title="Delete category" onclick="catDeleteLive('+c.id+',this)">✕</button></div>';
+}
+async function catToggleLive(id,el){
+ const makeActive=el.classList.contains('off');   // currently hidden -> activating
+ el.classList.toggle('off');
+ try{ await Api.setCategoryStatus(id,makeActive); toast('Category '+(makeActive?'visible':'hidden')+' ✓'); }
+ catch(e){ el.classList.toggle('off'); toast('Failed: '+e.message); }
+}
+async function catDeleteLive(id,el){
+ if(!confirm('Delete this category? This cannot be undone.')) return;
+ try{ await Api.deleteCategory(id); const card=el.closest('.cat'); if(card) card.remove(); toast('Category deleted ✓'); }
+ catch(e){ toast('Failed: '+e.message); }
 }
 document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
 
@@ -1055,9 +1298,18 @@ function formDrawer(title,fields,submitLabel,onSubmit,values){
  };
  openDrawer(title,body,'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" onclick="_submitForm()">'+submitLabel+'</button>');
 }
-function openCategoryForm(){formDrawer('Add category',
- [{label:'Category name',ph:'e.g. Groceries',required:true},{label:'Icon (emoji)',ph:'🛒'},{label:'Subcategories (comma-separated)',ph:'Fruits, Dairy, Bakery'}],
- 'Add category',v=>{const subs=v[2]?v[2].split(',').filter(x=>x.trim()).length:0;CATS.push([v[0],v[1]||'📦',subs,0,true]);toast('Category "'+v[0]+'" added ✓');closeDrawer();go('categories');});}
+function openCategoryForm(){
+ if(Api.isConnected()&&Api.isAuthed()){
+  return formDrawer('Add category',
+   [{label:'Name (English)',ph:'e.g. Groceries',required:true},{label:'Name (Arabic)',ph:'مثال: بقالة',required:true}],
+   'Add category',async v=>{
+    try{ await Api.createCategory({nameEn:v[0],nameAr:v[1]}); toast('Category "'+v[0]+'" added ✓'); closeDrawer(); go('categories'); }
+    catch(e){ toast('Failed: '+e.message); }
+   });
+ }
+ formDrawer('Add category',
+  [{label:'Category name',ph:'e.g. Groceries',required:true},{label:'Icon (emoji)',ph:'🛒'},{label:'Subcategories (comma-separated)',ph:'Fruits, Dairy, Bakery'}],
+  'Add category',v=>{const subs=v[2]?v[2].split(',').filter(x=>x.trim()).length:0;CATS.push([v[0],v[1]||'📦',subs,0,true]);toast('Category "'+v[0]+'" added ✓');closeDrawer();go('categories');});}
 function openCouponForm(){formDrawer('New coupon',
  [{label:'Code',ph:'SUMMER25',required:true},{label:'Offer description',ph:'25% off orders over EGP 500',required:true},{label:'Scope',type:'select',options:['Platform','Seasonal']}],
  'Create coupon',v=>{COUPONS.push([v[0].toUpperCase(),v[1],v[2],0,true]);toast('Coupon "'+v[0].toUpperCase()+'" created ✓');closeDrawer();go('coupons');});}
@@ -1137,6 +1389,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();close
 
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
 /* boot */
+updateConnIndicator();
 go('overview');
 
 </script>
