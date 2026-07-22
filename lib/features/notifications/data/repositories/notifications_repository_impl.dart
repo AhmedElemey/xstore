@@ -1,10 +1,12 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/paginated_result.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/notifications_repository.dart';
 import '../datasources/notifications_remote_datasource.dart';
+import '../models/register_device_token_request.dart';
 
 class NotificationsRepositoryImpl implements NotificationsRepository {
   NotificationsRepositoryImpl(this._remote);
@@ -12,7 +14,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   final NotificationsRemoteDataSource _remote;
 
   @override
-  Future<Either<Failure, List<NotificationEntity>>> getNotifications({
+  Future<Either<Failure, PaginatedResult<NotificationEntity>>> getNotifications({
     required UserRole role,
     required int page,
     required int pageSize,
@@ -71,6 +73,30 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   ) async {
     try {
       await _remote.deleteNotification(notificationId);
+      return const Right(unit);
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> registerDeviceToken(String token) async {
+    try {
+      await _remote.registerDeviceToken(
+        RegisterDeviceTokenRequest(token: token),
+      );
+      return const Right(unit);
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> unregisterDeviceToken(String token) async {
+    try {
+      await _remote.unregisterDeviceToken(
+        RegisterDeviceTokenRequest(token: token),
+      );
       return const Right(unit);
     } catch (e) {
       return Left(Failure.server(e.toString()));

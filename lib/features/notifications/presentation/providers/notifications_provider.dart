@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/network/paginated_result.dart';
 import '../../domain/entities/notification_entity.dart';
 import 'notifications_dependencies.dart';
 import 'notifications_state.dart';
@@ -13,7 +14,7 @@ part 'notifications_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 class Notifications extends _$Notifications {
-  static const _pageSize = 10;
+  static const _pageSize = 20;
 
   final Map<String, Timer> _deleteTimers = {};
 
@@ -178,16 +179,16 @@ class Notifications extends _$Notifications {
     ).wait;
     listR.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
-      (list) {
+      (page) {
         countR.fold(
           (fc) =>
               state = state.copyWith(isLoading: false, error: fc.toString()),
           (count) {
             state = state.copyWith(
               isLoading: false,
-              notifications: list,
+              notifications: page.items,
               unreadCount: count,
-              hasMore: list.length >= _pageSize,
+              hasMore: page.hasNextPage(0),
               page: 0,
             );
             _applyFilterAndGroups();
@@ -209,13 +210,13 @@ class Notifications extends _$Notifications {
         );
     r.fold(
       (f) => state = state.copyWith(isLoadingMore: false, error: f.toString()),
-      (more) {
-        final merged = [...state.notifications, ...more];
+      (page) {
+        final merged = [...state.notifications, ...page.items];
         state = state.copyWith(
           isLoadingMore: false,
           notifications: merged,
           page: nextPage,
-          hasMore: more.length >= _pageSize,
+          hasMore: page.hasNextPage(nextPage),
         );
         _applyFilterAndGroups();
       },

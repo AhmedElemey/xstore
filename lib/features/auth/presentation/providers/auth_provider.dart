@@ -4,7 +4,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/firebase/fcm_token.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
@@ -39,6 +38,7 @@ import '../../domain/usecases/send_login_otp_usecase.dart';
 import '../../domain/usecases/login_with_otp_usecase.dart';
 import '../../domain/usecases/google_login_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
+import '../../../notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'auth_states.dart';
 import 'guest_mode_provider.dart';
 
@@ -199,15 +199,22 @@ class Auth extends _$Auth {
     final result = await repo.restoreSession();
     final firstRestore = !_restoredOnce;
     _restoredOnce = true;
+    if (firstRestore) {
+      ref.read(fcmDeviceTokenSyncProvider);
+    }
     return result.fold((_) => null, (user) {
       // build() hasn't returned yet, so authProvider still reads as Loading —
       // pass the user in; a plain prefetch here would see null and no-op.
-      if (firstRestore) prefetchProfileData(ref, user: user);
+      if (firstRestore) {
+        prefetchProfileData(ref, user: user);
+        syncFcmDeviceTokenWithBackend(ref, user: user);
+      }
       return user;
     });
   }
 
   Future<void> logout() async {
+    unregisterFcmDeviceTokenOnLogout(ref);
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
     ref.invalidateSelf();
@@ -221,7 +228,7 @@ class Auth extends _$Auth {
       (_) => AsyncData(user),
       (_) => AsyncData(user),
     );
-    unawaited(refreshAndStoreFcmToken());
+    syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
   }
 
@@ -230,7 +237,7 @@ class Auth extends _$Auth {
   void adoptSession(UserEntity user) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
-    unawaited(refreshAndStoreFcmToken());
+    syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
   }
 }

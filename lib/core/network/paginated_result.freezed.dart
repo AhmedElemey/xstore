@@ -20,6 +20,7 @@ mixin _$PaginatedResult<T> {
   int get page => throw _privateConstructorUsedError;
   int get pageSize => throw _privateConstructorUsedError;
   int get totalCount => throw _privateConstructorUsedError;
+  int get totalPages => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $PaginatedResultCopyWith<T, PaginatedResult<T>> get copyWith =>
@@ -32,7 +33,8 @@ abstract class $PaginatedResultCopyWith<T, $Res> {
           PaginatedResult<T> value, $Res Function(PaginatedResult<T>) then) =
       _$PaginatedResultCopyWithImpl<T, $Res, PaginatedResult<T>>;
   @useResult
-  $Res call({List<T> items, int page, int pageSize, int totalCount});
+  $Res call(
+      {List<T> items, int page, int pageSize, int totalCount, int totalPages});
 }
 
 /// @nodoc
@@ -52,6 +54,7 @@ class _$PaginatedResultCopyWithImpl<T, $Res, $Val extends PaginatedResult<T>>
     Object? page = null,
     Object? pageSize = null,
     Object? totalCount = null,
+    Object? totalPages = null,
   }) {
     return _then(_value.copyWith(
       items: null == items
@@ -70,6 +73,10 @@ class _$PaginatedResultCopyWithImpl<T, $Res, $Val extends PaginatedResult<T>>
           ? _value.totalCount
           : totalCount // ignore: cast_nullable_to_non_nullable
               as int,
+      totalPages: null == totalPages
+          ? _value.totalPages
+          : totalPages // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -82,7 +89,8 @@ abstract class _$$PaginatedResultImplCopyWith<T, $Res>
       __$$PaginatedResultImplCopyWithImpl<T, $Res>;
   @override
   @useResult
-  $Res call({List<T> items, int page, int pageSize, int totalCount});
+  $Res call(
+      {List<T> items, int page, int pageSize, int totalCount, int totalPages});
 }
 
 /// @nodoc
@@ -100,6 +108,7 @@ class __$$PaginatedResultImplCopyWithImpl<T, $Res>
     Object? page = null,
     Object? pageSize = null,
     Object? totalCount = null,
+    Object? totalPages = null,
   }) {
     return _then(_$PaginatedResultImpl<T>(
       items: null == items
@@ -118,6 +127,10 @@ class __$$PaginatedResultImplCopyWithImpl<T, $Res>
           ? _value.totalCount
           : totalCount // ignore: cast_nullable_to_non_nullable
               as int,
+      totalPages: null == totalPages
+          ? _value.totalPages
+          : totalPages // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -129,7 +142,8 @@ class _$PaginatedResultImpl<T> implements _PaginatedResult<T> {
       {required final List<T> items,
       required this.page,
       required this.pageSize,
-      required this.totalCount})
+      required this.totalCount,
+      this.totalPages = 0})
       : _items = items;
 
   final List<T> _items;
@@ -146,10 +160,13 @@ class _$PaginatedResultImpl<T> implements _PaginatedResult<T> {
   final int pageSize;
   @override
   final int totalCount;
+  @override
+  @JsonKey()
+  final int totalPages;
 
   @override
   String toString() {
-    return 'PaginatedResult<$T>(items: $items, page: $page, pageSize: $pageSize, totalCount: $totalCount)';
+    return 'PaginatedResult<$T>(items: $items, page: $page, pageSize: $pageSize, totalCount: $totalCount, totalPages: $totalPages)';
   }
 
   @override
@@ -162,12 +179,19 @@ class _$PaginatedResultImpl<T> implements _PaginatedResult<T> {
             (identical(other.pageSize, pageSize) ||
                 other.pageSize == pageSize) &&
             (identical(other.totalCount, totalCount) ||
-                other.totalCount == totalCount));
+                other.totalCount == totalCount) &&
+            (identical(other.totalPages, totalPages) ||
+                other.totalPages == totalPages));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType,
-      const DeepCollectionEquality().hash(_items), page, pageSize, totalCount);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_items),
+      page,
+      pageSize,
+      totalCount,
+      totalPages);
 
   @JsonKey(ignore: true)
   @override
@@ -182,7 +206,8 @@ abstract class _PaginatedResult<T> implements PaginatedResult<T> {
       {required final List<T> items,
       required final int page,
       required final int pageSize,
-      required final int totalCount}) = _$PaginatedResultImpl<T>;
+      required final int totalCount,
+      final int totalPages}) = _$PaginatedResultImpl<T>;
 
   @override
   List<T> get items;
@@ -192,6 +217,8 @@ abstract class _PaginatedResult<T> implements PaginatedResult<T> {
   int get pageSize;
   @override
   int get totalCount;
+  @override
+  int get totalPages;
   @override
   @JsonKey(ignore: true)
   _$$PaginatedResultImplCopyWith<T, _$PaginatedResultImpl<T>> get copyWith =>

@@ -4,10 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../auth/domain/entities/user_entity.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/notifications_provider.dart';
-import '../providers/notifications_state.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class NotificationFilterTabs extends ConsumerWidget {
@@ -15,6 +12,10 @@ class NotificationFilterTabs extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Commented out — backend only supports role=ALL currently (see
+    // notifications_remote_datasource.dart _roleParam). Re-enable once
+    // backend implements per-role filtering.
+    /*
     final role = ref.watch(
       authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
     );
@@ -100,6 +101,8 @@ class NotificationFilterTabs extends ConsumerWidget {
         },
       ),
     );
+    */
+    return const SizedBox.shrink();
   }
 }
 

@@ -37,7 +37,11 @@ Rules for the log:
 
 <!-- Newest entries at the bottom. Do not delete this section; append below. -->
 
-### 2026-07-11 — Log initialized
+### 2026-07-23 — Notification wire enums are int ordinals, not strings
+- **What happened:** Live seed-account notifications send `type`/`priority` as JSON integers; the parser assumed camelCase enum name strings and silently mapped every item to `systemAnnouncement`/`normal`. Ordinal guessing was rejected — safe fallback until the C# enum declaration is confirmed.
+- **Rule:** For backend enums, never infer int→member mapping from seed data; handle numeric wire values with an explicit fallback + comment, and use type-checked `_optString`/`_optInt`/`_optDouble` instead of `as` casts in notification (and similar) parsers. Skip malformed list items per-row so one bad row doesn't empty the feed.
+- **Where it applies:** `notifications_remote_datasource.dart` and any future wire-enum parsing.
+
 - **What happened:** Learning loop created; no incidents recorded yet.
 - **Rule:** Every review finding or user correction must be appended here before the task is considered complete.
 - **Where it applies:** All Dart code in this repo.
