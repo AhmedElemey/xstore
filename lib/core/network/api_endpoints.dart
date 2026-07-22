@@ -91,6 +91,11 @@ abstract final class ApiEndpoints {
       '$_api/auth/verify-forget-password-otp';
   static const String getProfile = '$_api/auth/get-profile';
   static const String updateProfile = '$_api/auth/update-profile';
+  // Multipart avatar upload. ASSUMPTION — exact route not yet confirmed
+  // against the backend/Postman collection; kept auth-scoped under
+  // /api/auth/* to match get-profile / update-profile (token identifies
+  // the user). Correct this single constant once the real path is known.
+  static const String uploadAvatar = '$_api/auth/avatar';
   static const String sendEmailOtp = '$_api/auth/send-email-otp';
   static const String sendPhoneOtp = '$_api/auth/send-phone-otp';
   static const String verifyEmail = '$_api/auth/verify-email';

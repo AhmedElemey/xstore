@@ -306,13 +306,47 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return MockConfig.simulate(MockImages.avatar(99));
     }
     try {
-      // NOT in the confirmed backend contract — no image-upload route
-      // exists in the xStoreEcommerce API yet (same gap as listing images).
-      await _dio.post<void>('${ApiEndpoints.users}/$userId/avatar');
-      return MockImages.avatar(99);
+      // Multipart upload of the picked image. Field name `profileImage`
+      // mirrors the only CONFIRMED image field in this backend (vendor
+      // register — see auth_remote_datasource). The route is token-scoped
+      // (the X-Auth-Token interceptor identifies the user), so `userId` is
+      // not sent — it stays on the signature in case the route ever becomes
+      // user-scoped. Returns the stored avatar URL, which the caller then
+      // persists via update-profile's `avatarUrl`.
+      final formData = FormData.fromMap({
+        'profileImage': await MultipartFile.fromFile(
+          filePath,
+          // image_picker returns POSIX-style paths on iOS/Android.
+          filename: filePath.split('/').last,
+        ),
+      });
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.uploadAvatar,
+        data: formData,
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final url = _avatarUrlFromResponse(response.data);
+      if (url == null || url.isEmpty) {
+        throw const ServerException('Avatar upload returned no URL.');
+      }
+      return url;
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error');
+      throw mapDioException(e);
     }
+  }
+
+  /// Reads the uploaded avatar URL from tolerant response shapes: a bare
+  /// `{avatarUrl|url|imageUrl}`, or a `{user:{avatarUrl}}` profile wrapper.
+  String? _avatarUrlFromResponse(Map<String, dynamic>? data) {
+    if (data == null) return null;
+    final direct = data['avatarUrl'] ?? data['url'] ?? data['imageUrl'];
+    if (direct is String && direct.isNotEmpty) return direct;
+    final user = data['user'];
+    if (user is Map) {
+      final nested = user['avatarUrl'];
+      if (nested is String && nested.isNotEmpty) return nested;
+    }
+    return null;
   }
 
   @override
