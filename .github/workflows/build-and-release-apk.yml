@@ -4,8 +4,8 @@
 #
 # TRIGGERS
 # -----------------------------------------------------------------------------
-# - push to main: builds the DEV flavor automatically (skips docs-only pushes).
-# - workflow_dispatch: manual run with a flavor choice (use this for PROD).
+# - push to main: builds the PROD flavor automatically (skips docs-only pushes).
+# - workflow_dispatch: manual run with a flavor choice (dev or prod).
 # The version-bump commit is pushed with [skip ci] and the default GITHUB_TOKEN,
 # so it never retriggers this workflow (or CI).
 #
@@ -86,8 +86,8 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      # Push events carry no inputs — default them to the dev flavor.
-      BUILD_FLAVOR: ${{ inputs.flavor || 'dev' }}
+      # Push events carry no inputs — default them to the prod flavor.
+      BUILD_FLAVOR: ${{ inputs.flavor || 'prod' }}
       BUILD_RUN_NUMBER: ${{ github.run_number }}
       BUILD_SHA: ${{ github.sha }}
       RELEASE_REPO: ${{ github.repository }}
