@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -16,8 +18,11 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../domain/entities/profile_entity.dart';
+import '../../domain/repositories/profile_repository.dart';
 import '../providers/profile_dependencies.dart';
+import '../providers/profile_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../store/presentation/widgets/store_hours_summary_card.dart';
 
@@ -85,7 +90,15 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
       _error = null;
     });
     final repo = ref.read(profileRepositoryProvider);
-    final profRes = await repo.getVendorStoreProfile(widget.sellerId);
+    final authUser = ref.read(authProvider).valueOrNull;
+    final isOwnStore = authUser != null &&
+        authUser.id.isNotEmpty &&
+        authUser.id == widget.sellerId &&
+        authUser.hasStore;
+
+    final profRes = isOwnStore
+        ? await _loadOwnStoreProfile(repo, authUser)
+        : await repo.getVendorStoreProfile(widget.sellerId);
     final failed = profRes.fold(
       (f) {
         if (mounted) {
@@ -104,6 +117,35 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     if (failed) return;
     _page = 0;
     await _fetchPage(0, replace: true);
+  }
+
+  /// Own store: get-profile carries `store.storeLogoUrl`; the legacy
+  /// `/users/{id}/store` route does not exist on the live backend yet.
+  Future<Either<Failure, ProfileEntity>> _loadOwnStoreProfile(
+    ProfileRepository repo,
+    UserEntity sessionUser,
+  ) async {
+    final cached = ref.read(profileNotifierProvider).profile;
+    if (cached != null) return Right(cached);
+    return repo.getProfile(sessionUser);
+  }
+
+  static String? _nonEmptyUrl(String? url) {
+    final trimmed = url?.trim();
+    return trimmed != null && trimmed.isNotEmpty ? trimmed : null;
+  }
+
+  static Widget _storeBannerFallback(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary,
+            AppColors.profileHeaderGradientEnd,
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -172,11 +214,14 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final name = u.storeName ?? u.name;
     final joined = u.joinedAt;
     final joinedLine = joined != null ? DateFormat('MMM y').format(joined) : '';
-    final banner = MockImages.banner(widget.sellerId.hashCode);
+    final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
+    final banner = storePhoto ?? MockImages.banner(widget.sellerId.hashCode);
     final desc = u.storeDescription ?? '';
     final authUser = ref.watch(authProvider).valueOrNull;
-    final isOwnStore = authUser?.role == UserRole.vendor &&
-        authUser?.id == widget.sellerId;
+    final isOwnStore = authUser != null &&
+        authUser.id.isNotEmpty &&
+        authUser.id == widget.sellerId &&
+        authUser.hasStore;
     final storeHoursState =
         isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
     final isOpen = storeHoursState?.isStoreOpen ?? false;
@@ -204,19 +249,11 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        banner,
+                      AppCachedNetworkImage(
+                        imageUrl: banner,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary,
-                                AppColors.profileHeaderGradientEnd,
-                              ],
-                            ),
-                          ),
-                        ),
+                        errorWidget: (_, __, ___) =>
+                            _storeBannerFallback(context),
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -239,10 +276,11 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                           children: [
                             CircleAvatar(
                               radius: 35,
-                              backgroundImage: u.storeLogoUrl != null
-                                  ? NetworkImage(u.storeLogoUrl!)
+                              backgroundColor: AppColors.primary,
+                              backgroundImage: storePhoto != null
+                                  ? AppNetworkImage.cached(storePhoto)
                                   : null,
-                              child: u.storeLogoUrl == null
+                              child: storePhoto == null
                                   ? Text(
                                       name.isNotEmpty ? name[0].toUpperCase() : '?',
                                       style: AppTypography.titleLarge.copyWith(

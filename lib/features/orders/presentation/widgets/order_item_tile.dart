@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/order_item_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -32,7 +32,7 @@ class OrderItemTile extends StatelessWidget {
               width: 60,
               height: 60,
               child: item.listingImage.isNotEmpty
-                  ? CachedNetworkImage(
+                  ? AppCachedNetworkImage(
                       imageUrl: item.listingImage,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(

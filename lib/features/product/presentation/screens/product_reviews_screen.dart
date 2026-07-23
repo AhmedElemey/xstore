@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -9,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/utils/require_login.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/review_entity.dart';
@@ -162,7 +162,7 @@ class _ReviewCard extends StatelessWidget {
                 radius: 18,
                 backgroundImage:
                     review.userAvatar != null && review.userAvatar!.isNotEmpty
-                        ? CachedNetworkImageProvider(review.userAvatar!)
+                        ? AppNetworkImage.cached(review.userAvatar!)
                         : null,
                 child: review.userAvatar == null || review.userAvatar!.isEmpty
                     ? Text(

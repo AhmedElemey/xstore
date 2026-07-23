@@ -83,8 +83,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       return const Scaffold(body: ProfileSkeleton());
     }
 
-    final isVendor = user.role == UserRole.vendor;
     final u = profile?.user ?? user;
+    final isVendor = u.hasStore;
+    final sellerId = u.id.isNotEmpty ? u.id : user.id;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -168,7 +169,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     AppSpacing.md,
                   ),
                   child: ProfileStatsRow(
-                    role: user.role,
+                    role: isVendor ? UserRole.vendor : user.role,
                     sales: profile?.user.totalSales,
                     rating: profile?.user.rating,
                     responsePercent: profile?.responseRatePercent,
@@ -195,9 +196,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: VendorStoreCard(
                       profile: profile,
-                      onManageStore: () => context.push(
-                        '${AppRoutes.sellerProfile}/${u.id}',
-                      ),
+                      onManageStore: sellerId.isEmpty
+                          ? null
+                          : () => context.push(AppRoutes.sellerPath(sellerId)),
                     ),
                   ),
                 ),

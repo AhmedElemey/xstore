@@ -104,9 +104,16 @@ class LoggingInterceptor extends Interceptor {
   dynamic _redact(dynamic data) {
     if (data is Map) {
       return data.map((key, value) {
-        final isSensitive = _redactedHeaderKeys.contains(key.toString().toLowerCase()) ||
-            _redactedBodyKeys.contains(key.toString().toLowerCase());
-        return MapEntry(key, isSensitive ? '***REDACTED***' : _redact(value));
+        final keyLower = key.toString().toLowerCase();
+        final isSensitive = _redactedHeaderKeys.contains(keyLower) ||
+            _redactedBodyKeys.contains(keyLower);
+        // Debug-only: show the session token in the headers block for
+        // backend verification; still redact Authorization (license key).
+        final skipRedact = kDebugMode && keyLower == 'x-auth-token';
+        return MapEntry(
+          key,
+          (isSensitive && !skipRedact) ? '***REDACTED***' : _redact(value),
+        );
       });
     }
     if (data is List) {

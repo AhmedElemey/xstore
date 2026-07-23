@@ -13,6 +13,7 @@ import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
+import '../../domain/entities/update_profile_request.dart';
 import '../models/profile_model.dart';
 
 abstract interface class ProfileRemoteDataSource {
@@ -21,7 +22,10 @@ abstract interface class ProfileRemoteDataSource {
   /// Buyer-facing store head + stats (no auth).
   Future<ProfileModel> getVendorStoreProfile(String sellerId);
 
-  Future<UserModel> updateProfile(UserEntity updated);
+  Future<UserModel> updateProfile(
+    UpdateProfileRequest request, {
+    required UserEntity sessionUser,
+  });
 
   Future<String> updateAvatar({required String userId, required String filePath});
 
@@ -37,43 +41,118 @@ abstract interface class ProfileRemoteDataSource {
 
 /// PUT `/api/auth/update-profile` body keys.
 ///
-/// Write aliases confirmed in this repo: [whatsAppNumber], [instagramPage].
-/// Other keys match live get-profile / [UserModel.fromJson] field names
-/// (e.g. [birthDate] on the wire vs internal `dateOfBirth`).
-Map<String, dynamic> updateProfileRequestBody(UserEntity updated) {
+/// Matches backend `UpdateProfileRequest` (camelCase JSON). Email/phone are
+/// omitted — the backend contract marks them commented-out. [UserImage] and
+/// [StoreImage] files are attached in [updateProfileFormData].
+String? _optTrimmed(String? value) {
+  if (value == null) return null;
+  final trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
+String? _birthDateWire(DateTime? date) {
+  if (date == null) return null;
+  final y = date.year.toString().padLeft(4, '0');
+  final m = date.month.toString().padLeft(2, '0');
+  final d = date.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
+}
+
+/// Wire map for PUT `/api/auth/update-profile` (camelCase JSON fields).
+/// Exposed for unit tests; live calls use [updateProfileFormData].
+Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
   return {
-    'fullNameEn': updated.fullNameEn ?? updated.name,
-    'fullNameAr': updated.fullNameAr ?? updated.name,
-    'email': updated.email,
-    'phoneNumber': updated.phoneNumber,
-    // Always present so an explicit null clears the avatar on the server.
-    'avatarUrl': updated.avatarUrl,
-    if (updated.bio != null) 'bio': updated.bio,
-    if (updated.location != null) 'location': updated.location,
-    if (updated.dateOfBirth != null)
-      'birthDate': updated.dateOfBirth!.toIso8601String(),
-    if (updated.storeNameEn != null) 'storeNameEn': updated.storeNameEn,
-    if (updated.storeNameAr != null) 'storeNameAr': updated.storeNameAr,
-    if (updated.storeDescriptionEn != null)
-      'storeDescriptionEn': updated.storeDescriptionEn,
-    if (updated.storeDescriptionAr != null)
-      'storeDescriptionAr': updated.storeDescriptionAr,
-    if (updated.storeCategory != null) 'storeCategory': updated.storeCategory,
-    if (updated.storeCategoryId != null)
-      'storeCategoryId': updated.storeCategoryId,
-    if (updated.storeCity != null) 'storeCity': updated.storeCity,
-    if (updated.storeWilaya != null) 'storeWilaya': updated.storeWilaya,
-    if (updated.latitude != null) 'latitude': updated.latitude,
-    if (updated.longitude != null) 'longitude': updated.longitude,
-    if (updated.governorate != null) 'governorate': updated.governorate,
-    if (updated.town != null) 'town': updated.town,
-    if (updated.detailAddress != null) 'detailAddress': updated.detailAddress,
-    if (updated.whatsappNumber != null)
-      'whatsAppNumber': updated.whatsappNumber,
-    if (updated.instagramHandle != null)
-      'instagramPage': updated.instagramHandle,
-    if (updated.facebookPage != null) 'facebookPage': updated.facebookPage,
+    if (_optTrimmed(request.fullNameEn) != null)
+      'fullNameEn': _optTrimmed(request.fullNameEn),
+    if (_optTrimmed(request.fullNameAr) != null)
+      'fullNameAr': _optTrimmed(request.fullNameAr),
+    'userImageUrl': request.userImageUrl,
+    'storeImageUrl': request.storeImageUrl,
+    if (_optTrimmed(request.storeNameEn) != null)
+      'storeNameEn': _optTrimmed(request.storeNameEn),
+    if (_optTrimmed(request.storeNameAr) != null)
+      'storeNameAr': _optTrimmed(request.storeNameAr),
+    if (_optTrimmed(request.storeDescriptionEn) != null)
+      'storeDescriptionEn': _optTrimmed(request.storeDescriptionEn),
+    if (_optTrimmed(request.storeDescriptionAr) != null)
+      'storeDescriptionAr': _optTrimmed(request.storeDescriptionAr),
+    if (_optTrimmed(request.whatsAppNumber) != null)
+      'whatsAppNumber': _optTrimmed(request.whatsAppNumber),
+    if (_optTrimmed(request.instagramPage) != null)
+      'instagramPage': _optTrimmed(request.instagramPage),
+    if (_optTrimmed(request.facebookPage) != null)
+      'facebookPage': _optTrimmed(request.facebookPage),
+    if (_optTrimmed(request.detailedAddressByGoogleMaps) != null)
+      'detailedAddressByGoogleMaps':
+          _optTrimmed(request.detailedAddressByGoogleMaps),
+    if (_optTrimmed(request.detailedAddressByUser) != null)
+      'detailedAddressByUser': _optTrimmed(request.detailedAddressByUser),
+    if (_optTrimmed(request.cityByGoogleMaps) != null)
+      'cityByGoogleMaps': _optTrimmed(request.cityByGoogleMaps),
+    if (_optTrimmed(request.governmentByGoogleMaps) != null)
+      'governmentByGoogleMaps': _optTrimmed(request.governmentByGoogleMaps),
+    if (request.lat != null) 'lat': request.lat,
+    if (request.lng != null) 'lng': request.lng,
+    if (request.storeCategoryId != null)
+      'storeCategoryId': request.storeCategoryId,
+    if (request.cityId != null) 'cityId': request.cityId,
+    if (request.governmentId != null) 'governmentId': request.governmentId,
+    if (request.birthDate != null)
+      'birthDate': _birthDateWire(request.birthDate),
   };
+}
+
+Future<FormData> updateProfileFormData(UpdateProfileRequest request) async {
+  final map = Map<String, dynamic>.from(updateProfileWireFields(request));
+  final userImagePath = request.userImagePath?.trim();
+  if (userImagePath != null && userImagePath.isNotEmpty) {
+    map['userImage'] = await MultipartFile.fromFile(
+      userImagePath,
+      filename: userImagePath.split('/').last,
+    );
+  }
+  final storeImagePath = request.storeImagePath?.trim();
+  if (storeImagePath != null && storeImagePath.isNotEmpty) {
+    map['storeImage'] = await MultipartFile.fromFile(
+      storeImagePath,
+      filename: storeImagePath.split('/').last,
+    );
+  }
+  return FormData.fromMap(map);
+}
+
+UserEntity _entityFromUpdateRequest(
+  UpdateProfileRequest request,
+  UserEntity session,
+) {
+  return session.copyWith(
+    name: request.fullNameEn ?? session.name,
+    fullNameEn: request.fullNameEn ?? session.fullNameEn,
+    fullNameAr: request.fullNameAr ?? session.fullNameAr,
+    avatarUrl: request.userImageUrl,
+    storeLogoUrl: request.storeImageUrl,
+    storeNameEn: request.storeNameEn ?? session.storeNameEn,
+    storeNameAr: request.storeNameAr ?? session.storeNameAr,
+    storeName: request.storeNameEn ?? session.storeName,
+    storeDescriptionEn:
+        request.storeDescriptionEn ?? session.storeDescriptionEn,
+    storeDescriptionAr:
+        request.storeDescriptionAr ?? session.storeDescriptionAr,
+    storeDescription: request.storeDescriptionEn ?? session.storeDescription,
+    whatsappNumber: request.whatsAppNumber ?? session.whatsappNumber,
+    instagramHandle: request.instagramPage ?? session.instagramHandle,
+    facebookPage: request.facebookPage ?? session.facebookPage,
+    location: request.detailedAddressByGoogleMaps ?? session.location,
+    detailAddress: request.detailedAddressByUser ?? session.detailAddress,
+    town: request.cityByGoogleMaps ?? session.town,
+    governorate: request.governmentByGoogleMaps ?? session.governorate,
+    latitude: request.lat ?? session.latitude,
+    longitude: request.lng ?? session.longitude,
+    storeCategoryId: request.storeCategoryId ?? session.storeCategoryId,
+    storeCityId: request.cityId ?? session.storeCityId,
+    storeGovernmentId: request.governmentId ?? session.storeGovernmentId,
+    dateOfBirth: request.birthDate ?? session.dateOfBirth,
+  );
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -119,6 +198,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       storeLogoUrl: session.storeLogoUrl,
       storeCity: session.storeCity ?? base.storeCity,
       storeWilaya: session.storeWilaya ?? base.storeWilaya,
+      storeId: session.storeId ?? base.storeId,
       whatsappNumber: session.whatsappNumber ?? base.whatsappNumber,
     );
   }
@@ -182,6 +262,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       storeCategoryId: user.storeCategoryId,
       storeCityId: user.storeCityId,
       storeGovernmentId: user.storeGovernmentId,
+      storeId: user.storeId,
     );
   }
 
@@ -261,11 +342,19 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty profile');
-      final user = UserModel.fromJson(parseProfileUserJson(data));
+      final wire = parseProfileResponse(data);
+      final user = userModelFromProfileResponse(
+        data,
+        fallbackUserId: sessionUser.id,
+      );
       // ASSUMPTION: get-profile returns identity fields only — no confirmed
       // backend source yet for orders/wishlist/store stats. Default to 0
       // until a real source exists (Phase 2, once listings/orders land).
-      return ProfileModel(user: user);
+      return ProfileModel(
+        user: user,
+        isEmailVerificationRequired: wire.isEmailVerificationRequired,
+        isPhoneVerificationRequired: wire.isPhoneVerificationRequired,
+      );
     } on FormatException {
       throw const ServerException('Empty profile');
     } on DioException catch (e) {
@@ -274,22 +363,37 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateProfile(UserEntity updated) async {
+  Future<UserModel> updateProfile(
+    UpdateProfileRequest request, {
+    required UserEntity sessionUser,
+  }) async {
     if (MockConfig.useMock) {
+      var merged = _entityFromUpdateRequest(request, sessionUser);
+      final userImagePath = request.userImagePath?.trim();
+      if (userImagePath != null && userImagePath.isNotEmpty) {
+        merged = merged.copyWith(avatarUrl: MockImages.avatar(98));
+      }
+      final storeImagePath = request.storeImagePath?.trim();
+      if (storeImagePath != null && storeImagePath.isNotEmpty) {
+        merged = merged.copyWith(storeLogoUrl: MockImages.avatar(99));
+      }
       final model = await MockConfig.simulate(
-        _mockUserModelFromEntity(updated),
+        _mockUserModelFromEntity(merged),
       );
       return model;
     }
     try {
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.updateProfile,
-        data: updateProfileRequestBody(updated),
+        data: await updateProfileFormData(request),
         options: ApiAuthHeaders.authenticated(),
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
-      return UserModel.fromJson(parseProfileUserJson(data));
+      return userModelFromProfileResponse(
+        data,
+        fallbackUserId: sessionUser.id,
+      );
     } on FormatException {
       throw const ServerException('Empty response');
     } on DioException catch (e) {

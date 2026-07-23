@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -6,7 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/network/image_cache_manager.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
@@ -224,9 +223,8 @@ class NotificationTile extends StatelessWidget {
                     if (thumb)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(AppSpacing.sm),
-                        child: CachedNetworkImage(
+                        child: AppCachedNetworkImage(
                           imageUrl: img,
-                          cacheManager: AppImageCacheManager.instance,
                           width: AppSpacing.x4l,
                           height: AppSpacing.x4l,
                           fit: BoxFit.cover,

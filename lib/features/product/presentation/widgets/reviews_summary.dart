@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -7,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/product_review_entity.dart';
 
 class ReviewsSummary extends StatefulWidget {
@@ -179,7 +179,7 @@ class _ReviewTile extends StatelessWidget {
                 radius: 18,
                 backgroundImage: review.userAvatarUrl != null &&
                         review.userAvatarUrl!.isNotEmpty
-                    ? CachedNetworkImageProvider(review.userAvatarUrl!)
+                    ? AppNetworkImage.cached(review.userAvatarUrl!)
                     : null,
                 child: review.userAvatarUrl == null ||
                         review.userAvatarUrl!.isEmpty

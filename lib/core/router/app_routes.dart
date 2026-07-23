@@ -41,6 +41,7 @@ abstract final class AppRoutes {
   static const privacy = '/privacy';
   static const product = '/product';
   static const sellerProfile = '/seller';
+  static String sellerPath(String sellerId) => '$sellerProfile/$sellerId';
   static const storeHours = '/store-hours';
   static const listingAdd = '/listing/add';
   static const listingMy = '/listing/my';

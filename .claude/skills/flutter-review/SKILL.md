@@ -37,10 +37,27 @@ Rules for the log:
 
 <!-- Newest entries at the bottom. Do not delete this section; append below. -->
 
-### 2026-07-23 — Google backend login needs serverClientId for valid idToken aud
+### 2026-07-23 — UserImage and StoreImage are separate on update-profile
+- **What happened:** Profile avatar picker was wired to `StoreImage`/`storeImageUrl`, conflating the user's profile photo with the vendor store logo.
+- **Rule:** `UpdateProfileRequest` carries both pairs: `userImageUrl`/`userImagePath` → `UserImage`/`userImageUrl` (profile avatar picker, removal clears user only) and `storeImageUrl`/`storeImagePath` → `StoreImage`/`storeImageUrl` (store logo). Always send both URL keys on the wire; attach each file under its own multipart field name.
+- **Where it applies:** `update_profile_request.dart`, `profile_state.dart` `toUpdateProfileRequest()`, `profile_remote_datasource.dart` `updateProfileFormData`.
+
+- **What happened:** Save still routed through `UserEntity.toEditedUser()` and a separate avatar-upload call instead of the confirmed `UpdateProfileRequest` DTO with inline `StoreImage` multipart.
+- **Rule:** Profile edit builds `UpdateProfileRequest` from `ProfileState.toUpdateProfileRequest()`; repository/usecase/datasource accept that type; wire via `updateProfileFormData` (`storeImage` file + camelCase fields). Drop the pre-save avatar upload — one multipart PUT handles image + fields.
+- **Where it applies:** `update_profile_request.dart`, `profile_state.dart`, `profile_provider.dart` `saveProfile`, `profile_remote_datasource.dart`.
+
+- **What happened:** Edit-profile save still sent legacy keys (`avatarUrl`, `latitude`, `email`, `bio`) instead of the confirmed `UpdateProfileRequest` shape (`storeImageUrl`, `lat`/`lng`, `detailedAddressByGoogleMaps`, `cityId`, date-only `birthDate`).
+- **Rule:** Build update-profile bodies from the C# `UpdateProfileRequest` contract — omit commented-out email/phone; map entity location fields to `detailedAddressByGoogleMaps`/`detailedAddressByUser`/`cityByGoogleMaps`/`governmentByGoogleMaps`; wire IDs as `cityId`/`governmentId`; send `storeImageUrl` (always, null to clear); format `birthDate` as `YYYY-MM-DD`. Populate `editLocation` on GPS detect for the Google address field.
+- **Where it applies:** `profile_state.dart` `toUpdateProfileRequest()`, `update_profile_request.dart`, `profile_remote_datasource.dart` `updateProfileWireFields`/`updateProfileFormData`, `profile_provider.dart` `saveProfile`.
+
 - **What happened:** Live `POST /api/auth/google/consumer/login` returned 401 `"Invalid Google identity token."` even though Google sign-in succeeded — `GoogleSignIn()` had no `serverClientId`, so the ID token's audience was the Android/iOS OAuth client, not the Web client the backend verifies.
 - **Rule:** When exchanging a Google ID token with a backend, always construct `GoogleSignIn(serverClientId: DefaultFirebaseOptions.googleWebClientId)` (the OAuth Web client from `google-services.json`, client_type 3). Send `googleAuth.idToken` to the role-specific endpoint — never the Firebase ID token.
 - **Where it applies:** `social_auth_datasource.dart`, any future Google Sign-In wiring.
+
+### 2026-07-23 — Google backend login sends clientId in POST body
+- **What happened:** Backend Google login needed the OAuth Web client ID in the request payload, not only as the ID token audience via `serverClientId`.
+- **Rule:** `loginWithGoogle` must POST both `idToken` and `clientId` (same value as `DefaultFirebaseOptions.googleWebClientId` / `GoogleSignIn.serverClientId`) so token minting and backend verification stay aligned.
+- **Where it applies:** `auth_remote_datasource.dart` `loginWithGoogle`, `firebase_options.dart` `googleWebClientId`.
 
 ### 2026-07-23 — FCM sync must not read authProvider inside Auth.build()
 - **What happened:** Cold start with no persisted session called `syncFcmDeviceTokenWithBackend(ref, user: null)` from inside `Auth.build()`; line 28 synchronously `ref.read(authProvider)` while auth was still building → Riverpod self-dependency assert. Same class of bug as the prefetch lesson — `Right(null)` restore still entered the `firstRestore` block.
@@ -325,3 +342,18 @@ Rules for the log:
 - **What happened:** `ProfileRemoteDataSource.updateAvatar` did `_dio.post('/users/{id}/avatar')` with no body against a route its own comment admitted didn't exist, then returned a fake `MockImages.avatar(99)` URL — so changing the profile image always errored, and the provider aborts the whole save on that failure (`saveProfile` returns early on avatar failure). Fixed to send the picked file as `FormData` multipart with field `profileImage` (the only confirmed image field in this backend — vendor register), route centralized in `ApiEndpoints.uploadAvatar`, response parsed tolerantly, errors via `mapDioException`.
 - **Rule:** An image-upload datasource method MUST attach the file as a `MultipartFile` in `FormData` (field `profileImage` for this backend) and map errors via `mapDioException` — never ship a stub POST that ignores `filePath` or hits a route commented as non-existent. Before claiming a "missing auth header" defect, check `dio_provider`'s interceptor: `X-Auth-Token` (and the Basic license key) are injected centrally on every request, so per-call `ApiAuthHeaders.authenticated()` is intent-only, not the auth mechanism.
 - **Where it applies:** `profile_remote_datasource.dart` `updateAvatar`, any future file-upload datasource (listing images), and any auth-defect diagnosis.
+
+### 2026-07-23 — Network image loads bypass Dio auth
+- **What happened:** Backend-hosted photos 401'd in the UI because `CachedNetworkImage`/`NetworkImage`/`Image.network` fetch over plain HTTP clients — they never inherit `dio_provider`'s default `Authorization: Basic …` header.
+- **Rule:** All remote image display goes through `AppCachedNetworkImage` / `AppNetworkImage.cached` / `AppNetworkImage.network` (or `AppNetworkImageHeaders.httpHeaders` explicitly). `AppImageCacheManager` injects the same Basic license key on cache fetches. Do not call raw `CachedNetworkImage`/`Image.network` for backend URLs.
+- **Where it applies:** `image_cache_manager.dart`, `app_cached_network_image.dart`, any new avatar/product/banner thumbnail.
+
+### 2026-07-23 — get-profile nests store under `store`, not on `user`
+- **What happened:** Live get-profile returns user identity and store details in separate objects; vendor UI gated on `role == vendor` missed vendors when role wasn't echoed on the user object, and store fields on the nested `store` key were never merged into `UserModel`.
+- **Rule:** Parse profile responses with `parseProfileResponse` / `userModelFromProfileResponse`: merge `store` into flat user keys (`nameEn`→`storeNameEn`, `lat`/`lng`, address fields, `storeId`), surface `isEmailVerificationRequired`/`isPhoneVerificationRequired` on `ProfileEntity`, and treat vendor profile UI as `user.hasStore` (`storeId != null`) — not role alone.
+- **Where it applies:** `user_model.dart`, `profile_remote_datasource.dart`, `auth_remote_datasource.dart`, `profile_screen.dart`.
+
+### 2026-07-23 — Empty user id breaks `/seller/:sellerId` navigation
+- **What happened:** Live get-profile omits `user.id`; tapping "Manage store" pushed `/seller/` (empty segment) → GoRouter "no routes for location `/seller`".
+- **Rule:** Never push `AppRoutes.sellerProfile` without a non-empty id — use `AppRoutes.sellerPath(id)` and resolve id from profile user, auth session, then JWT (`userIdFromJwt`) on login/restore. Disable the CTA when id is still unknown.
+- **Where it applies:** `profile_screen.dart`, `jwt_payload.dart`, `auth_repository_impl.dart` `_resolveFullUser`/`restoreSession`, `userModelFromProfileResponse`.

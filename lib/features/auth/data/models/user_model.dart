@@ -1,25 +1,114 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/user_entity.dart';
+import '../../../../core/utils/jwt_payload.dart';
 
 part 'user_model.freezed.dart';
 
-/// Extracts the user object from GET/PUT `/api/auth/get-profile` and
-/// `/api/auth/update-profile` responses.
+/// Parsed GET/PUT profile wrapper (`user` + optional `store` + verification flags).
+class ProfileResponseWire {
+  const ProfileResponseWire({
+    required this.userJson,
+    this.isEmailVerificationRequired = false,
+    this.isPhoneVerificationRequired = false,
+    this.hasStore = false,
+  });
+
+  final Map<String, dynamic> userJson;
+  final bool isEmailVerificationRequired;
+  final bool isPhoneVerificationRequired;
+  final bool hasStore;
+}
+
+/// Maps the nested `store` object onto flat user keys [UserModel.fromJson] expects.
+void mergeStoreJsonIntoUser(
+  Map<String, dynamic> user,
+  Map<String, dynamic> store,
+) {
+  void put(String key, dynamic value) {
+    if (value == null) return;
+    user[key] = value;
+  }
+
+  put('storeId', store['id']);
+  put('storeNameEn', store['nameEn']);
+  put('storeNameAr', store['nameAr']);
+  put('storeDescriptionEn', store['descriptionEn']);
+  put('storeDescriptionAr', store['descriptionAr']);
+  put('whatsAppNumber', store['whatsAppNumber']);
+  put('storeCityId', store['cityId']);
+  put('storeGovernmentId', store['governmentId']);
+  put('storeCategoryId', store['storeCategoryId']);
+  put('storeLogoUrl', store['storeLogoUrl']);
+  put('storeCategory', store['storeCategoryNameEn']);
+  put('instagramPage', store['instagramPage']);
+  put('facebookPage', store['facebookPage']);
+  put('latitude', store['lat']);
+  put('longitude', store['lng']);
+  put('location', store['detailedAddressByGoogleMaps']);
+  put('detailAddress', store['detailedAddressByUser']);
+  put('town', store['cityByGoogleMaps']);
+  put('governorate', store['governmentByGoogleMaps']);
+}
+
+/// Parses GET/PUT `/api/auth/get-profile` and `/api/auth/update-profile` responses.
 ///
-/// CONFIRMED live API (2026-07-11): `{ "user": { ... }, "store": ..., ... }`.
+/// CONFIRMED live API: `{ "user": { ... }, "store": { ... } | null,
+/// "isEmailVerificationRequired", "isPhoneVerificationRequired" }`.
 /// Login/register return `{ "token", "refreshToken" }` only — no user object;
 /// do not use this helper on those responses.
-Map<String, dynamic> parseProfileUserJson(Map<String, dynamic> data) {
+ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
   final wrapped = data['user'];
+  late final Map<String, dynamic> userJson;
   if (wrapped is Map) {
-    return Map<String, dynamic>.from(wrapped);
+    userJson = Map<String, dynamic>.from(wrapped);
+  } else if (data.containsKey('id') || data.containsKey('email')) {
+    // Safety net: raw user-at-top-level (mock / legacy routes).
+    userJson = Map<String, dynamic>.from(data);
+  } else {
+    throw const FormatException('Missing user in profile response');
   }
-  // Safety net: raw user-at-top-level (mock / legacy routes).
-  if (data.containsKey('id') || data.containsKey('email')) {
-    return data;
+
+  final storeRaw = data['store'];
+  final hasStore = storeRaw is Map;
+  if (hasStore) {
+    mergeStoreJsonIntoUser(userJson, Map<String, dynamic>.from(storeRaw));
+    userJson.putIfAbsent('role', () => UserRole.vendor.name);
+    userJson.putIfAbsent('roleName', () => 'Vendor');
   }
-  throw const FormatException('Missing user in profile response');
+
+  return ProfileResponseWire(
+    userJson: userJson,
+    isEmailVerificationRequired:
+        data['isEmailVerificationRequired'] as bool? ?? false,
+    isPhoneVerificationRequired:
+        data['isPhoneVerificationRequired'] as bool? ?? false,
+    hasStore: hasStore,
+  );
+}
+
+/// Builds a [UserModel] from a profile wrapper, optionally preserving session id.
+UserModel userModelFromProfileResponse(
+  Map<String, dynamic> data, {
+  String? fallbackUserId,
+  String? fallbackToken,
+}) {
+  final wire = parseProfileResponse(data);
+  final userJson = wire.userJson;
+  if (userJson['id'] == null || userJson['id'].toString().isEmpty) {
+    final resolvedId = (fallbackUserId != null && fallbackUserId.isNotEmpty)
+        ? fallbackUserId
+        : userIdFromJwt(fallbackToken);
+    if (resolvedId != null && resolvedId.isNotEmpty) {
+      userJson['id'] = resolvedId;
+    }
+  }
+  return UserModel.fromJson(userJson);
+}
+
+/// Extracts the merged user map from a profile response wrapper.
+Map<String, dynamic> parseProfileUserJson(Map<String, dynamic> data) {
+  return parseProfileResponse(data).userJson;
 }
 
 /// API/auth DTO. Persisted via [toJson] / [UserModel.fromJson].
@@ -66,6 +155,7 @@ class UserModel with _$UserModel {
     int? storeCategoryId,
     int? storeCityId,
     int? storeGovernmentId,
+    int? storeId,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -136,8 +226,10 @@ class UserModel with _$UserModel {
       storeWilaya: json['storeWilaya'] as String?,
       // update-profile writes whatsAppNumber; get-profile may return either key.
       whatsappNumber: optString('whatsappNumber', altKey: 'whatsAppNumber'),
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
+      latitude: (json['latitude'] as num?)?.toDouble() ??
+          (json['lat'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble() ??
+          (json['lng'] as num?)?.toDouble(),
       governorate: json['governorate'] as String?,
       town: json['town'] as String?,
       detailAddress: json['detailAddress'] as String?,
@@ -157,8 +249,10 @@ class UserModel with _$UserModel {
       storeDescriptionEn: json['storeDescriptionEn'] as String?,
       storeDescriptionAr: json['storeDescriptionAr'] as String?,
       storeCategoryId: json['storeCategoryId'] as int?,
-      storeCityId: json['storeCityId'] as int?,
-      storeGovernmentId: json['storeGovernmentId'] as int?,
+      storeCityId: json['storeCityId'] as int? ?? json['cityId'] as int?,
+      storeGovernmentId:
+          json['storeGovernmentId'] as int? ?? json['governmentId'] as int?,
+      storeId: (json['storeId'] as num?)?.toInt(),
     );
   }
 }
@@ -203,6 +297,7 @@ extension UserModelX on UserModel {
         storeCategoryId: storeCategoryId,
         storeCityId: storeCityId,
         storeGovernmentId: storeGovernmentId,
+        storeId: storeId,
       );
 
   Map<String, dynamic> toJson() => {
@@ -250,5 +345,6 @@ extension UserModelX on UserModel {
         if (storeCategoryId != null) 'storeCategoryId': storeCategoryId,
         if (storeCityId != null) 'storeCityId': storeCityId,
         if (storeGovernmentId != null) 'storeGovernmentId': storeGovernmentId,
+        if (storeId != null) 'storeId': storeId,
       };
 }

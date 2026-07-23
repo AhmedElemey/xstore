@@ -56,6 +56,7 @@ mixin _$UserModel {
   int? get storeCategoryId => throw _privateConstructorUsedError;
   int? get storeCityId => throw _privateConstructorUsedError;
   int? get storeGovernmentId => throw _privateConstructorUsedError;
+  int? get storeId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserModelCopyWith<UserModel> get copyWith =>
@@ -107,7 +108,8 @@ abstract class $UserModelCopyWith<$Res> {
       String? storeDescriptionAr,
       int? storeCategoryId,
       int? storeCityId,
-      int? storeGovernmentId});
+      int? storeGovernmentId,
+      int? storeId});
 }
 
 /// @nodoc
@@ -163,6 +165,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
+    Object? storeId = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -325,6 +328,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.storeGovernmentId
           : storeGovernmentId // ignore: cast_nullable_to_non_nullable
               as int?,
+      storeId: freezed == storeId
+          ? _value.storeId
+          : storeId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -377,7 +384,8 @@ abstract class _$$UserModelImplCopyWith<$Res>
       String? storeDescriptionAr,
       int? storeCategoryId,
       int? storeCityId,
-      int? storeGovernmentId});
+      int? storeGovernmentId,
+      int? storeId});
 }
 
 /// @nodoc
@@ -431,6 +439,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
+    Object? storeId = freezed,
   }) {
     return _then(_$UserModelImpl(
       id: null == id
@@ -593,6 +602,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.storeGovernmentId
           : storeGovernmentId // ignore: cast_nullable_to_non_nullable
               as int?,
+      storeId: freezed == storeId
+          ? _value.storeId
+          : storeId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -640,7 +653,8 @@ class _$UserModelImpl implements _UserModel {
       this.storeDescriptionAr,
       this.storeCategoryId,
       this.storeCityId,
-      this.storeGovernmentId});
+      this.storeGovernmentId,
+      this.storeId});
 
   @override
   final String id;
@@ -727,10 +741,12 @@ class _$UserModelImpl implements _UserModel {
   final int? storeCityId;
   @override
   final int? storeGovernmentId;
+  @override
+  final int? storeId;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId)';
+    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, storeId: $storeId)';
   }
 
   @override
@@ -809,7 +825,8 @@ class _$UserModelImpl implements _UserModel {
             (identical(other.storeCityId, storeCityId) ||
                 other.storeCityId == storeCityId) &&
             (identical(other.storeGovernmentId, storeGovernmentId) ||
-                other.storeGovernmentId == storeGovernmentId));
+                other.storeGovernmentId == storeGovernmentId) &&
+            (identical(other.storeId, storeId) || other.storeId == storeId));
   }
 
   @override
@@ -854,7 +871,8 @@ class _$UserModelImpl implements _UserModel {
         storeDescriptionAr,
         storeCategoryId,
         storeCityId,
-        storeGovernmentId
+        storeGovernmentId,
+        storeId
       ]);
 
   @JsonKey(ignore: true)
@@ -905,7 +923,8 @@ abstract class _UserModel implements UserModel {
       final String? storeDescriptionAr,
       final int? storeCategoryId,
       final int? storeCityId,
-      final int? storeGovernmentId}) = _$UserModelImpl;
+      final int? storeGovernmentId,
+      final int? storeId}) = _$UserModelImpl;
 
   @override
   String get id;
@@ -987,6 +1006,8 @@ abstract class _UserModel implements UserModel {
   int? get storeCityId;
   @override
   int? get storeGovernmentId;
+  @override
+  int? get storeId;
   @override
   @JsonKey(ignore: true)
   _$$UserModelImplCopyWith<_$UserModelImpl> get copyWith =>

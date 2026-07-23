@@ -5,6 +5,7 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:xstore/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
+import 'package:xstore/features/profile/domain/entities/update_profile_request.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
 
 // UserModel.fromJson wire-alias coverage (storeName precedence, whatsApp/
@@ -42,24 +43,96 @@ void main() {
     });
   });
 
-  group('updateProfileRequestBody', () {
-    test('sends avatarUrl null when avatar removal is requested', () {
+  group('updateProfileWireFields', () {
+    test('sends userImageUrl null when avatar removal is requested', () {
       const user = UserEntity(
         id: '1',
         name: 'Vendor',
         email: 'v@test.com',
         phoneNumber: '010',
         avatarUrl: 'https://cdn.example/avatar.jpg',
+        storeLogoUrl: 'https://cdn.example/store.jpg',
       );
       final state = ProfileState(
         profile: ProfileEntity(user: user),
         avatarRemoved: true,
       );
 
-      final body = updateProfileRequestBody(state.toEditedUser());
+      final body = updateProfileWireFields(state.toUpdateProfileRequest());
 
-      expect(body.containsKey('avatarUrl'), isTrue);
-      expect(body['avatarUrl'], isNull);
+      expect(body.containsKey('userImageUrl'), isTrue);
+      expect(body['userImageUrl'], isNull);
+      expect(body['storeImageUrl'], 'https://cdn.example/store.jpg');
+      expect(body.containsKey('email'), isFalse);
+      expect(body.containsKey('phoneNumber'), isFalse);
+    });
+
+    test('sends storeImageUrl null when store logo removal is requested', () {
+      const user = UserEntity(
+        id: '1',
+        name: 'Vendor',
+        email: 'v@test.com',
+        phoneNumber: '010',
+        storeLogoUrl: 'https://cdn.example/store.jpg',
+        storeId: 1,
+      );
+      final state = ProfileState(
+        profile: ProfileEntity(user: user),
+        storeLogoRemoved: true,
+      );
+
+      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+
+      expect(body.containsKey('storeImageUrl'), isTrue);
+      expect(body['storeImageUrl'], isNull);
+    });
+
+    test('maps edit state to UpdateProfileRequest wire keys', () {
+      const user = UserEntity(
+        id: '1',
+        name: 'Vendor',
+        email: 'v@test.com',
+        phoneNumber: '010',
+        role: UserRole.vendor,
+        storeCategoryId: 3,
+        storeCityId: 10,
+        storeGovernmentId: 2,
+      );
+      final state = ProfileState(
+        profile: ProfileEntity(user: user),
+        editName: 'Ahmed',
+        editFullNameAr: 'أحمد',
+        editLocation: '12 Abbas El Akkad, Nasr City',
+        editDetailAddress: 'Building 5, floor 2',
+        editTown: 'Nasr City',
+        editGovernorate: 'Cairo',
+        editLatitude: '30.044400',
+        editLongitude: '31.235700',
+        editDateOfBirth: DateTime(1990, 3, 20),
+        editStoreName: 'Tech Hub',
+        editWhatsapp: '01012345678',
+        editInstagram: 'techhub',
+        editFacebook: 'techhub.eg',
+      );
+
+      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+
+      expect(body['fullNameEn'], 'Ahmed');
+      expect(body['fullNameAr'], 'أحمد');
+      expect(body['storeNameEn'], 'Tech Hub');
+      expect(body['detailedAddressByGoogleMaps'], '12 Abbas El Akkad, Nasr City');
+      expect(body['detailedAddressByUser'], 'Building 5, floor 2');
+      expect(body['cityByGoogleMaps'], 'Nasr City');
+      expect(body['governmentByGoogleMaps'], 'Cairo');
+      expect(body['lat'], closeTo(30.0444, 0.0001));
+      expect(body['lng'], closeTo(31.2357, 0.0001));
+      expect(body['storeCategoryId'], 3);
+      expect(body['cityId'], 10);
+      expect(body['governmentId'], 2);
+      expect(body['birthDate'], '1990-03-20');
+      expect(body['whatsAppNumber'], '01012345678');
+      expect(body['instagramPage'], 'techhub');
+      expect(body['facebookPage'], 'techhub.eg');
     });
   });
 
@@ -70,33 +143,34 @@ void main() {
         final ds = ProfileRemoteDataSourceImpl(Dio());
         final repo = ProfileRepositoryImpl(ds);
 
-        const dob = '1990-03-20T00:00:00.000';
-        final updated = UserEntity(
+        const session = UserEntity(
           id: 'vendor_1',
           name: 'Ahmed Vendor',
           email: 'vendor@test.com',
           phoneNumber: '01012345678',
           role: UserRole.vendor,
-          location: 'Cairo',
-          bio: 'Electronics seller',
-          dateOfBirth: DateTime.parse(dob),
-          storeCategory: 'Electronics',
-          storeCity: 'Cairo',
-          storeWilaya: 'Cairo',
-          latitude: 30.0444,
-          longitude: 31.2357,
-          governorate: 'Cairo',
-          town: 'Nasr City',
-          detailAddress: '12 Abbas El Akkad',
+        );
+
+        final request = UpdateProfileRequest(
           fullNameEn: 'Ahmed Vendor',
           fullNameAr: 'أحمد',
           storeNameEn: 'Tech Hub',
           storeNameAr: 'متجر',
+          storeDescriptionEn: 'Electronics seller',
+          detailedAddressByGoogleMaps: '12 Abbas El Akkad',
+          detailedAddressByUser: '12 Abbas El Akkad',
+          cityByGoogleMaps: 'Nasr City',
+          governmentByGoogleMaps: 'Cairo',
+          lat: 30.0444,
+          lng: 31.2357,
+          storeCategoryId: 1,
+          birthDate: DateTime.parse('1990-03-20'),
         );
 
-        final saveResult = await repo.updateProfile(updated);
+        final saveResult =
+            await repo.updateProfile(request, sessionUser: session);
         expect(saveResult.isRight(), isTrue);
-        final saved = saveResult.getOrElse((_) => updated);
+        final saved = saveResult.getOrElse((_) => session);
 
         final fetchResult = await repo.getProfile(saved);
         expect(fetchResult.isRight(), isTrue);
@@ -105,17 +179,14 @@ void main() {
         );
         final u = profile.user;
 
-        expect(u.location, 'Cairo');
-        expect(u.bio, 'Electronics seller');
-        expect(u.dateOfBirth, DateTime.parse(dob));
-        expect(u.storeCategory, 'Electronics');
-        expect(u.storeCity, 'Cairo');
-        expect(u.storeWilaya, 'Cairo');
+        expect(u.location, '12 Abbas El Akkad');
+        expect(u.detailAddress, '12 Abbas El Akkad');
+        expect(u.dateOfBirth, DateTime.parse('1990-03-20'));
+        expect(u.storeCity, isNull);
+        expect(u.town, 'Nasr City');
+        expect(u.governorate, 'Cairo');
         expect(u.latitude, 30.0444);
         expect(u.longitude, 31.2357);
-        expect(u.governorate, 'Cairo');
-        expect(u.town, 'Nasr City');
-        expect(u.detailAddress, '12 Abbas El Akkad');
         expect(u.storeNameEn, 'Tech Hub');
         expect(u.storeNameAr, 'متجر');
       },

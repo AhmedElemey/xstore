@@ -9,6 +9,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -297,7 +298,7 @@ class _SellerSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: order.vendorAvatar.isNotEmpty
-                      ? NetworkImage(order.vendorAvatar)
+                      ? AppNetworkImage.network(order.vendorAvatar)
                       : null,
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -362,7 +363,7 @@ class _BuyerSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: order.consumerAvatar.isNotEmpty
-                      ? NetworkImage(order.consumerAvatar)
+                      ? AppNetworkImage.network(order.consumerAvatar)
                       : null,
                   child: order.consumerAvatar.isEmpty
                       ? Text(

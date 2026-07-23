@@ -6,6 +6,7 @@ import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../domain/entities/profile_entity.dart';
+import '../../domain/entities/update_profile_request.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_datasource.dart';
 
@@ -39,9 +40,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> updateProfile(UserEntity updated) async {
+  Future<Either<Failure, UserEntity>> updateProfile(
+    UpdateProfileRequest request, {
+    required UserEntity sessionUser,
+  }) async {
     try {
-      final model = await _remote.updateProfile(updated);
+      final model = await _remote.updateProfile(
+        request,
+        sessionUser: sessionUser,
+      );
       return Right(model.toEntity());
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/firebase/firebase_options.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
@@ -25,7 +26,7 @@ abstract interface class AuthRemoteDataSource {
   /// `{token, refreshToken}` — no user fields. Call this immediately after
   /// (with the token already persisted, so it's sent via X-Auth-Token) to
   /// get the actual user. Response shape: `{"user": {...}, "store": ...}`.
-  Future<UserModel> fetchProfile();
+  Future<UserModel> fetchProfile({String? authToken});
 
   Future<void> changePassword({
     required String currentPassword,
@@ -266,7 +267,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> fetchProfile() async {
+  Future<UserModel> fetchProfile({String? authToken}) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.getProfile,
@@ -274,8 +275,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty profile response');
-      final userJson = parseProfileUserJson(data);
-      return UserModel.fromJson(userJson);
+      return userModelFromProfileResponse(
+        data,
+        fallbackToken: authToken,
+      );
     } on FormatException {
       throw const ServerException('Empty profile response');
     } on DioException catch (e) {
@@ -490,7 +493,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         asVendor
             ? ApiEndpoints.googleVendorLogin
             : ApiEndpoints.googleConsumerLogin,
-        data: {'idToken': idToken},
+        data: {
+          'idToken': idToken,
+          'clientId': DefaultFirebaseOptions.googleWebClientId,
+        },
         options: ApiAuthHeaders.public(),
       );
       final data = response.data;

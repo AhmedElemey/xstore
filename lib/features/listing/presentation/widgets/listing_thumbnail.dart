@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 
 /// Rounded listing image — network URL or local file path.
 class ListingThumbnail extends StatelessWidget {
@@ -52,7 +52,7 @@ class ListingThumbnail extends StatelessWidget {
     final isRemote =
         imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
     if (isRemote) {
-      return CachedNetworkImage(
+      return AppCachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
         placeholder: (_, __) => ColoredBox(color: placeholderBg),

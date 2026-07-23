@@ -14,7 +14,9 @@
 # MAIL_USERNAME   Gmail address used as SMTP login and "From" address
 #                 (e.g. you@gmail.com)
 # MAIL_PASSWORD   Gmail App Password (16-char token) — NOT your Gmail password
-# MAIL_TO         Recipient email address for build notifications
+# MAIL_TO         Primary recipient email address for build notifications
+#                 (mohamedmax728@gmail.com and Mohammedelbakly8@gmail.com are
+#                 also notified on every release — see Send email notification)
 #
 # GITHUB_TOKEN is provided automatically by GitHub Actions and is sufficient
 # for creating releases in this repository. No Personal Access Token required.
@@ -200,6 +202,17 @@ jobs:
             echo "::error::Missing MAIL_USERNAME, MAIL_PASSWORD, or MAIL_TO secrets."
             exit 1
           fi
+          RECIPIENTS=(
+            "$MAIL_TO"
+            "mohamedmax728@gmail.com"
+            "Mohammedelbakly8@gmail.com"
+            "rehab.mhmd2@gmail.com "
+          )
+          TO_HEADER=$(IFS=, ; echo "${RECIPIENTS[*]}")
+          MAIL_RCPT_ARGS=()
+          for rcpt in "${RECIPIENTS[@]}"; do
+            MAIL_RCPT_ARGS+=(--mail-rcpt "$rcpt")
+          done
           SUBJECT="xStore ${BUILD_FLAVOR} APK - Build #${BUILD_RUN_NUMBER}"
           BODY="xStore APK build completed successfully.
 
@@ -213,7 +226,7 @@ jobs:
           Download the APK from the release assets on the page above."
           {
             echo "From: ${MAIL_USERNAME}"
-            echo "To: ${MAIL_TO}"
+            echo "To: ${TO_HEADER}"
             echo "Subject: ${SUBJECT}"
             echo "Content-Type: text/plain; charset=utf-8"
             echo
@@ -222,6 +235,6 @@ jobs:
             --url "smtps://smtp.gmail.com:465" \
             --ssl-reqd \
             --mail-from "$MAIL_USERNAME" \
-            --mail-rcpt "$MAIL_TO" \
+            "${MAIL_RCPT_ARGS[@]}" \
             --user "${MAIL_USERNAME}:${MAIL_PASSWORD}" \
             --upload-file -

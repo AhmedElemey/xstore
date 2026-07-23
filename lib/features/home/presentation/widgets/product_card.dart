@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -6,7 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/network/image_cache_manager.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -99,8 +98,7 @@ class _ProductImage extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget image;
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      image = CachedNetworkImage(
-        cacheManager: AppImageCacheManager.instance,
+      image = AppCachedNetworkImage(
         imageUrl: imageUrl!,
         fit: BoxFit.cover,
         alignment: Alignment.center,

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
@@ -7,7 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/network/image_cache_manager.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -53,9 +52,8 @@ class ProductListCard extends StatelessWidget {
                             image: true,
                             label:
                                 '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
-                            child: CachedNetworkImage(
+                            child: AppCachedNetworkImage(
                               imageUrl: item.imageUrl!,
-                              cacheManager: AppImageCacheManager.instance,
                               fit: BoxFit.cover,
                               placeholder: (_, __) =>
                                   ColoredBox(color: context.textDisabled),

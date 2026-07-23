@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -7,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
@@ -50,7 +50,7 @@ class SellerCard extends ConsumerWidget {
                       radius: AppSpacing.x2l,
                       backgroundColor: theme.colorScheme.surfaceContainerHighest,
                       backgroundImage: seller.avatarUrl.isNotEmpty
-                          ? CachedNetworkImageProvider(seller.avatarUrl)
+                          ? AppNetworkImage.cached(seller.avatarUrl)
                           : null,
                       child: seller.avatarUrl.isEmpty
                           ? const Icon(LucideIcons.store)

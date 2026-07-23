@@ -23,6 +23,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../datasources/phone_auth_datasource.dart';
 import '../datasources/social_auth_datasource.dart';
+import '../../../../core/utils/jwt_payload.dart';
 import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -55,7 +56,15 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Right(null);
       }
       final map = jsonDecode(jsonStr) as Map<String, dynamic>;
-      final model = UserModel.fromJson(map);
+      var model = UserModel.fromJson(map);
+      if (model.id.isEmpty) {
+        final token = await _secureStorage.read(key: _tokenKey);
+        final id = userIdFromJwt(token);
+        if (id != null) {
+          model = model.copyWith(id: id);
+          await _persistUser(model);
+        }
+      }
       return Right(model.toEntity());
     } catch (e) {
       return Left(Failure.cache(e.toString()));
@@ -548,6 +557,7 @@ class AuthRepositoryImpl implements AuthRepository {
         storeCategoryId: user.storeCategoryId,
         storeCityId: user.storeCityId,
         storeGovernmentId: user.storeGovernmentId,
+        storeId: user.storeId,
       );
       await _persistUser(model);
       return const Right(unit);
@@ -568,11 +578,16 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.write(key: _tokenKey, value: loginResult.token);
     }
     if (loginResult.id.isNotEmpty) return loginResult;
-    final profile = await _remote.fetchProfile();
-    return profile.copyWith(
+    final profile = await _remote.fetchProfile(authToken: loginResult.token);
+    var merged = profile.copyWith(
       token: loginResult.token,
       refreshToken: loginResult.refreshToken,
     );
+    if (merged.id.isEmpty) {
+      final id = userIdFromJwt(loginResult.token);
+      if (id != null) merged = merged.copyWith(id: id);
+    }
+    return merged;
   }
 
   Future<void> _persistUser(UserModel model) async {

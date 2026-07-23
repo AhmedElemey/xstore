@@ -78,7 +78,8 @@ class _RecordingRemote implements AuthRemoteDataSource {
   Future<UserModel> register(_) => throw UnimplementedError();
 
   @override
-  Future<UserModel> fetchProfile() async => consumerRegisterResponse;
+  Future<UserModel> fetchProfile({String? authToken}) async =>
+      consumerRegisterResponse;
 
   @override
   Future<UserModel> registerConsumer(ConsumerRegisterParams params) async {
@@ -245,6 +246,7 @@ void main() {
           provider: SocialProvider.google,
           uid: 'google-uid',
           email: 'user@gmail.com',
+          idToken: 'google-id-token',
           isNewUser: false,
         ),
       ),
@@ -468,13 +470,17 @@ void main() {
     });
 
     test(
-      'signInWithGoogle succeeds without injected FirebaseAuth when MOCK=true',
+      'signInWithGoogle returns Google idToken without backend exchange when MOCK=true',
       () async {
         final result = await defaultRepository.signInWithGoogle();
 
         expect(result.isRight(), isTrue);
-        expect(remote.lastSocialIdToken, 'mock-firebase-id-token');
-        expect(await storage.read(key: PrefsKeys.authToken), 'mock-token-consumer');
+        expect(remote.lastGoogleIdToken, isNull);
+        expect(remote.lastSocialIdToken, isNull);
+        result.fold((_) => fail('expected Right'), (social) {
+          expect(social.idToken, 'mock-google-id-token');
+        });
+        expect(await storage.read(key: PrefsKeys.authToken), isNull);
       },
       skip: MockConfig.useMock ? false : 'Requires MOCK=true (default)',
     );

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/features/auth/data/models/user_model.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 
 void main() {
   group('UserModel.fromJson profile wire aliases', () {
@@ -87,9 +88,9 @@ void main() {
     });
   });
 
-  group('parseProfileUserJson', () {
+  group('parseProfileResponse', () {
     test('unwraps live get-profile wrapper shape', () {
-      final userJson = parseProfileUserJson({
+      final wire = parseProfileResponse({
         'user': {
           'id': 22,
           'email': 'probe@test.local',
@@ -98,8 +99,73 @@ void main() {
         'store': null,
         'isEmailVerificationRequired': true,
       });
-      expect(userJson['id'], 22);
-      expect(userJson['email'], 'probe@test.local');
+      expect(wire.userJson['id'], 22);
+      expect(wire.userJson['email'], 'probe@test.local');
+      expect(wire.isEmailVerificationRequired, isTrue);
+      expect(wire.hasStore, isFalse);
+    });
+
+    test('merges nested store object onto user fields', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'fullNameEn': 'Updated Name',
+          'fullNameAr': 'الاسم المحدث',
+          'email': 'vendor@test.com',
+          'phoneNumber': '01112345678',
+          'avatarUrl':
+              'http://example.com/uploads/avatars/e4a956c2-3804-4465-9c1f-ef8ab35d0714.jpg',
+          'birthDate': '1985-05-15T00:00:00',
+          'creationDate': '2026-07-13T01:03:04.7636173',
+        },
+        'store': {
+          'id': 1,
+          'nameEn': 'Store Name Updated',
+          'nameAr': 'اسم المتجر المعدل',
+          'descriptionEn': 'Store Description Updated',
+          'descriptionAr': 'وصف المتجر المعدل',
+          'whatsAppNumber': '01012345677',
+          'cityId': 2,
+          'governmentId': 2,
+          'storeCategoryId': 2,
+          'storeLogoUrl':
+              'http://example.com/uploads/avatars/65db2fb1-66ae-412b-8892-9d5f6e0a8e6f.jpg',
+          'storeCategoryNameEn': 'Fashion',
+          'storeCategoryNameAr': 'أزياء',
+          'instagramPage': 'https://instagram.com/store1',
+          'facebookPage': 'https://facebook.com/store1',
+          'lat': 5.221,
+          'lng': 6.213,
+          'detailedAddressByGoogleMaps': '123 Main St, Cairo, Egypt',
+          'detailedAddressByUser': '456 User Rd, Apt 7',
+          'cityByGoogleMaps': 'Cairo',
+          'governmentByGoogleMaps': 'Cairo Governorate',
+        },
+        'isEmailVerificationRequired': false,
+        'isPhoneVerificationRequired': false,
+      });
+
+      expect(model.name, 'Updated Name');
+      expect(model.fullNameAr, 'الاسم المحدث');
+      expect(model.storeId, 1);
+      expect(model.storeNameEn, 'Store Name Updated');
+      expect(model.storeName, 'Store Name Updated');
+      expect(model.storeDescriptionEn, 'Store Description Updated');
+      expect(model.whatsappNumber, '01012345677');
+      expect(model.storeCityId, 2);
+      expect(model.storeGovernmentId, 2);
+      expect(model.storeCategoryId, 2);
+      expect(model.storeLogoUrl, contains('65db2fb1'));
+      expect(model.storeCategory, 'Fashion');
+      expect(model.instagramHandle, 'https://instagram.com/store1');
+      expect(model.facebookPage, 'https://facebook.com/store1');
+      expect(model.latitude, 5.221);
+      expect(model.longitude, 6.213);
+      expect(model.location, '123 Main St, Cairo, Egypt');
+      expect(model.detailAddress, '456 User Rd, Apt 7');
+      expect(model.town, 'Cairo');
+      expect(model.governorate, 'Cairo Governorate');
+      expect(model.role, UserRole.vendor);
+      expect(model.storeId, isNotNull);
     });
 
     test('falls back to raw user object when wrapper is absent', () {
@@ -113,7 +179,7 @@ void main() {
 
     test('throws when neither wrapper nor user fields are present', () {
       expect(
-        () => parseProfileUserJson({'store': null}),
+        () => parseProfileResponse({'store': null}),
         throwsFormatException,
       );
     });

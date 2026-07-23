@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../domain/entities/profile_entity.dart';
+import '../../domain/entities/update_profile_request.dart';
 
 part 'profile_state.freezed.dart';
 
@@ -23,6 +24,8 @@ class ProfileState with _$ProfileState {
     @Default('') String editBio,
     File? editAvatarFile,
     @Default(false) bool avatarRemoved,
+    File? editStoreLogoFile,
+    @Default(false) bool storeLogoRemoved,
     @Default('') String editStoreName,
     @Default('') String editStoreNameAr,
     @Default('') String editStoreCategory,
@@ -91,6 +94,8 @@ extension ProfileStateX on ProfileState {
       editFacebook: u.facebookPage ?? '',
       editAvatarFile: null,
       avatarRemoved: false,
+      editStoreLogoFile: null,
+      storeLogoRemoved: false,
       isDarkMode: isDarkMode,
       pushNotificationsEnabled: pushNotificationsEnabled,
       emailUpdatesEnabled: emailUpdatesEnabled,
@@ -99,54 +104,47 @@ extension ProfileStateX on ProfileState {
     );
   }
 
-  UserEntity toEditedUser() {
+  UpdateProfileRequest toUpdateProfileRequest() {
     final u = user;
     if (u == null) {
       throw StateError('No profile loaded');
     }
-    // When [avatarRemoved] is true, avatarUrl is null so update-profile sends
-    // an explicit null and the server clears the stored avatar.
-    return u.copyWith(
-      name: editName.trim(),
-      email: editEmail.trim(),
-      phoneNumber: editPhone.trim(),
-      avatarUrl: avatarRemoved ? null : u.avatarUrl,
-      location: editLocation.trim().isEmpty ? null : editLocation.trim(),
-      bio: editBio.trim().isEmpty ? null : editBio.trim(),
-      storeName: editStoreName.trim().isEmpty ? null : editStoreName.trim(),
-      storeCategory:
-          editStoreCategory.trim().isEmpty ? null : editStoreCategory.trim(),
-      storeDescription: editStoreDescription.trim().isEmpty
-          ? null
-          : editStoreDescription.trim(),
-      storeCity: editStoreCity.trim().isEmpty ? null : editStoreCity.trim(),
-      // Bilingual fields sent to /api/auth/update-profile.
-      fullNameEn: editName.trim().isEmpty ? null : editName.trim(),
-      fullNameAr: editFullNameAr.trim().isEmpty ? null : editFullNameAr.trim(),
-      storeNameEn:
-          editStoreName.trim().isEmpty ? null : editStoreName.trim(),
-      storeNameAr:
-          editStoreNameAr.trim().isEmpty ? null : editStoreNameAr.trim(),
-      storeDescriptionEn: editStoreDescription.trim().isEmpty
-          ? null
-          : editStoreDescription.trim(),
-      storeDescriptionAr: editStoreDescriptionAr.trim().isEmpty
-          ? null
-          : editStoreDescriptionAr.trim(),
-      storeWilaya:
-          editStoreWilaya.trim().isEmpty ? null : editStoreWilaya.trim(),
-      whatsappNumber:
-          editWhatsapp.trim().isEmpty ? null : editWhatsapp.trim(),
-      latitude: editLatitude.trim().isEmpty ? null : double.tryParse(editLatitude.trim()),
-      longitude: editLongitude.trim().isEmpty ? null : double.tryParse(editLongitude.trim()),
-      governorate: editGovernorate.trim().isEmpty ? null : editGovernorate.trim(),
-      town: editTown.trim().isEmpty ? null : editTown.trim(),
-      detailAddress: editDetailAddress.trim().isEmpty ? null : editDetailAddress.trim(),
-      dateOfBirth: editDateOfBirth,
-      instagramHandle:
-          editInstagram.trim().isEmpty ? null : editInstagram.trim(),
-      facebookPage:
-          editFacebook.trim().isEmpty ? null : editFacebook.trim(),
+
+    String? trim(String value) {
+      final t = value.trim();
+      return t.isEmpty ? null : t;
+    }
+
+    double? parseCoord(String value) {
+      final t = value.trim();
+      if (t.isEmpty) return null;
+      return double.tryParse(t);
+    }
+
+    return UpdateProfileRequest(
+      fullNameEn: trim(editName),
+      fullNameAr: trim(editFullNameAr),
+      userImageUrl: avatarRemoved ? null : u.avatarUrl,
+      storeImageUrl: storeLogoRemoved ? null : u.storeLogoUrl,
+      storeNameEn: trim(editStoreName),
+      storeNameAr: trim(editStoreNameAr),
+      storeDescriptionEn: trim(editStoreDescription),
+      storeDescriptionAr: trim(editStoreDescriptionAr),
+      whatsAppNumber: trim(editWhatsapp),
+      instagramPage: trim(editInstagram),
+      facebookPage: trim(editFacebook),
+      detailedAddressByGoogleMaps: trim(editLocation),
+      detailedAddressByUser: trim(editDetailAddress),
+      cityByGoogleMaps: trim(editTown),
+      governmentByGoogleMaps: trim(editGovernorate),
+      userImagePath: editAvatarFile?.path,
+      storeImagePath: editStoreLogoFile?.path,
+      lat: parseCoord(editLatitude),
+      lng: parseCoord(editLongitude),
+      storeCategoryId: u.storeCategoryId,
+      cityId: u.storeCityId,
+      governmentId: u.storeGovernmentId,
+      birthDate: editDateOfBirth,
     );
   }
 }

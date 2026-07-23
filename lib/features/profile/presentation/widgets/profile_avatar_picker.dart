@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 
 /// Circular avatar with optional camera badge; supports network URL, file, or initials fallback.
 class ProfileAvatarPicker extends StatelessWidget {
@@ -97,7 +97,7 @@ class _AvatarBody extends StatelessWidget {
     }
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return ClipOval(
-        child: CachedNetworkImage(
+        child: AppCachedNetworkImage(
           imageUrl: imageUrl!,
           width: diameter,
           height: diameter,

@@ -10,6 +10,7 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/domain/repositories/auth_repository.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/notifications/presentation/providers/fcm_device_token_sync_provider.dart';
+import 'package:xstore/features/profile/domain/entities/update_profile_request.dart';
 import 'package:xstore/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_dependencies.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
@@ -41,9 +42,12 @@ class _DelayedUpdateProfileUseCase extends UpdateProfileUseCase {
   _DelayedUpdateProfileUseCase(super.repository);
 
   @override
-  Future<Either<Failure, UserEntity>> call(UserEntity updated) async {
+  Future<Either<Failure, UserEntity>> call(
+    UpdateProfileRequest request, {
+    required UserEntity sessionUser,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    return super.call(updated);
+    return super.call(request, sessionUser: sessionUser);
   }
 }
 

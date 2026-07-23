@@ -60,9 +60,13 @@ class UserEntity with _$UserEntity {
     int? storeCategoryId,
     int? storeCityId,
     int? storeGovernmentId,
+    int? storeId,
   }) = _UserEntity;
 
-  bool get isVendor => role == UserRole.vendor;
+  /// True when get-profile returned a non-null `store` object.
+  bool get hasStore => storeId != null;
+
+  bool get isVendor => role == UserRole.vendor || hasStore;
 
   bool get isCourier => role == UserRole.courier;
 

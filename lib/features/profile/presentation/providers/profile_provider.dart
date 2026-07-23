@@ -72,7 +72,9 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editInstagram.trim() == (u.instagramHandle ?? '').trim() &&
       s.editFacebook.trim() == (u.facebookPage ?? '').trim() &&
       s.editAvatarFile == null &&
-      !s.avatarRemoved;
+      !s.avatarRemoved &&
+      s.editStoreLogoFile == null &&
+      !s.storeLogoRemoved;
 }
 
 @Riverpod(keepAlive: true)
@@ -225,12 +227,14 @@ class ProfileNotifier extends _$ProfileNotifier {
     state = state.copyWith(isDetectingLocation: true, locationError: null, locationAction: null);
     try {
       final result = await LocationService().getCurrentLocation();
+      final googleAddress = result.detailAddress ?? '';
       final next = state.copyWith(
         editLatitude: LocationService.formatCoordinate(result.latitude),
         editLongitude: LocationService.formatCoordinate(result.longitude),
         editGovernorate: result.governorate ?? '',
         editTown: result.town ?? '',
-        editDetailAddress: result.detailAddress ?? '',
+        editLocation: googleAddress,
+        editDetailAddress: googleAddress,
         isDetectingLocation: false,
         locationError: null,
         locationAction: null,
@@ -313,6 +317,34 @@ class ProfileNotifier extends _$ProfileNotifier {
     );
   }
 
+  Future<bool> pickStoreLogo(ImageSource source) async {
+    final picker = ImagePicker();
+    final x = await picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+    if (x == null) return false;
+    state = state.copyWith(
+      editStoreLogoFile: File(x.path),
+      storeLogoRemoved: false,
+      hasChanges: true,
+    );
+    return true;
+  }
+
+  void markStoreLogoRemoved() {
+    final cleared = state.copyWith(
+      editStoreLogoFile: null,
+      storeLogoRemoved: true,
+    );
+    final u = cleared.user;
+    state = cleared.copyWith(
+      hasChanges: u != null && !_profileEditEqualsUser(cleared, u),
+    );
+  }
+
   Future<void> saveProfile() async {
     final u0 = state.user;
     if (u0 == null) return;
@@ -337,32 +369,11 @@ class ProfileNotifier extends _$ProfileNotifier {
 
     final epoch = _sessionEpoch;
     state = state.copyWith(isUpdating: true, error: null, fieldErrors: {});
-    var nextUser = state.toEditedUser();
-    final avatarPath = state.editAvatarFile?.path;
 
-    if (avatarPath != null && avatarPath.isNotEmpty) {
-      final avatarRes = await ref.read(updateAvatarUseCaseProvider).call(
-            userId: u0.id,
-            filePath: avatarPath,
-          );
-      if (epoch != _sessionEpoch) return;
-      final avatarFailed = avatarRes.fold(
-        (f) {
-          state = state.copyWith(
-            isUpdating: false,
-            error: f.toString(),
-          );
-          return true;
-        },
-        (url) {
-          nextUser = nextUser.copyWith(avatarUrl: url);
-          return false;
-        },
-      );
-      if (avatarFailed) return;
-    }
-
-    final res = await ref.read(updateProfileUseCaseProvider).call(nextUser);
+    final res = await ref.read(updateProfileUseCaseProvider).call(
+          state.toUpdateProfileRequest(),
+          sessionUser: u0,
+        );
     if (epoch != _sessionEpoch) return;
     UserEntity? updatedUser;
     final profileFailed = res.fold(
@@ -392,7 +403,11 @@ class ProfileNotifier extends _$ProfileNotifier {
 
     ref.invalidate(authProvider);
     if (epoch != _sessionEpoch) return;
-    state = state.copyWith(isUpdating: false, editAvatarFile: null);
+    state = state.copyWith(
+      isUpdating: false,
+      editAvatarFile: null,
+      editStoreLogoFile: null,
+    );
     await refreshProfileData();
   }
 

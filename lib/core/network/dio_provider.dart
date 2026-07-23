@@ -44,6 +44,12 @@ Dio dio(DioRef ref) {
         final token = await secureStorage.read(key: PrefsKeys.authToken);
         if (token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
+          if (kDebugMode) {
+            debugPrint(
+              '── request header (${options.method} ${options.path}) ──',
+            );
+            debugPrint('X-Auth-Token: ${options.headers['X-Auth-Token']}');
+          }
         }
         handler.next(options);
       },

@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../entities/update_profile_request.dart';
 import '../repositories/profile_repository.dart';
 
 class UpdateProfileUseCase {
@@ -9,7 +10,10 @@ class UpdateProfileUseCase {
 
   final ProfileRepository _repository;
 
-  Future<Either<Failure, UserEntity>> call(UserEntity updated) {
-    return _repository.updateProfile(updated);
+  Future<Either<Failure, UserEntity>> call(
+    UpdateProfileRequest request, {
+    required UserEntity sessionUser,
+  }) {
+    return _repository.updateProfile(request, sessionUser: sessionUser);
   }
 }

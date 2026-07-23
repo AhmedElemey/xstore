@@ -4,13 +4,17 @@ import '../../../../core/error/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../entities/profile_entity.dart';
+import '../entities/update_profile_request.dart';
 
 abstract interface class ProfileRepository {
   Future<Either<Failure, ProfileEntity>> getProfile(UserEntity sessionUser);
 
   Future<Either<Failure, ProfileEntity>> getVendorStoreProfile(String sellerId);
 
-  Future<Either<Failure, UserEntity>> updateProfile(UserEntity updated);
+  Future<Either<Failure, UserEntity>> updateProfile(
+    UpdateProfileRequest request, {
+    required UserEntity sessionUser,
+  });
 
   Future<Either<Failure, String>> updateAvatar({
     required String userId,

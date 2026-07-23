@@ -15,5 +15,7 @@ class ProfileEntity with _$ProfileEntity {
     @Default(0) int storeSaveCount,
     @Default(0) int storeActiveListings,
     @Default(0) int responseRatePercent,
+    @Default(false) bool isEmailVerificationRequired,
+    @Default(false) bool isPhoneVerificationRequired,
   }) = _ProfileEntity;
 }

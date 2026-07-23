@@ -102,6 +102,23 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   Future<void> completeSocialRegistration(UserRole role) async {
     final pending = state.pendingSocialResult;
     if (pending == null) return;
+
+    // Apple/Facebook new users still use a local session until the generic
+    // social backend route ships. Google uses the Google OAuth idToken (not a
+    // Firebase ID token) against the role-specific backend login endpoints.
+    if (pending.provider != SocialProvider.google) {
+      await ref.read(authProvider.notifier).setUser(pending.toUserEntity(role));
+      state = state.copyWith(
+        isGoogleLoading: false,
+        isAppleLoading: false,
+        isFacebookLoading: false,
+        clearError: true,
+        clearPending: true,
+        needsRoleSelection: false,
+      );
+      return;
+    }
+
     final idToken = pending.idToken;
     if (idToken == null || idToken.isEmpty) {
       state = state.copyWith(

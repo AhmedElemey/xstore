@@ -1,7 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/network/image_cache_manager.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/cart_item_entity.dart';
@@ -65,9 +64,8 @@ class CartItemCard extends StatelessWidget {
                         child: SizedBox(
                           width: AppSpacing.x4l + AppSpacing.x2l,
                           height: AppSpacing.x4l + AppSpacing.x2l,
-                          child: CachedNetworkImage(
+                          child: AppCachedNetworkImage(
                             imageUrl: item.listingImage,
-                            cacheManager: AppImageCacheManager.instance,
                             fit: BoxFit.cover,
                             placeholder: (_, __) => ColoredBox(
                               color: context.backgroundColor,

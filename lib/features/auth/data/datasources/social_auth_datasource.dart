@@ -56,9 +56,16 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         throw const SocialAuthCancelledException('Google sign-in cancelled');
       }
       final googleAuth = await googleUser.authentication;
+      final googleIdToken = googleAuth.idToken;
+      if (googleIdToken == null || googleIdToken.isEmpty) {
+        throw const SocialAuthException(
+          'Google sign-in failed — no identity token returned. '
+          'Ensure serverClientId is configured.',
+        );
+      }
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        idToken: googleIdToken,
       );
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
       final user = userCredential.user;
@@ -73,7 +80,7 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         debugPrint('photoUrl: ${user.photoURL}');
         debugPrint('firebaseUid: ${user.uid}');
         debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
-        debugPrint('google idToken (backend verifies this): ${googleAuth.idToken}');
+        debugPrint('google idToken (backend verifies this): $googleIdToken');
         debugPrint('firebase idToken: $firebaseIdToken');
       }
       return SocialAuthResult(
@@ -83,7 +90,7 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         displayName: user.displayName,
         photoUrl: user.photoURL,
         accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        idToken: googleIdToken,
         isNewUser: userCredential.additionalUserInfo?.isNewUser ?? false,
       );
     } on FirebaseAuthException catch (e) {

@@ -11,7 +11,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
@@ -258,6 +257,55 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
   }
 
+  Future<void> _storeLogoSheet() async {
+    await showAnimatedBottomSheet<void>(
+      context: context,
+      builder: (ctx) => Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(LucideIcons.camera),
+                title: Text(context.l10n.takePhoto),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(profileNotifierProvider.notifier)
+                      .pickStoreLogo(ImageSource.camera);
+                  if (mounted) setState(() {});
+                },
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.image),
+                title: Text(context.l10n.chooseFromGallery),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(profileNotifierProvider.notifier)
+                      .pickStoreLogo(ImageSource.gallery);
+                  if (mounted) setState(() {});
+                },
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.trash2),
+                title: Text(context.l10n.removePhoto),
+                onTap: () {
+                  ref.read(profileNotifierProvider.notifier).markStoreLogoRemoved();
+                  Navigator.pop(ctx);
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _save() async {
     _pushFieldsToNotifier();
     await ref.read(profileNotifierProvider.notifier).saveProfile();
@@ -332,7 +380,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     final s = ref.watch(profileNotifierProvider);
     final u = s.user;
-    final isVendor = u?.role == UserRole.vendor;
+    final isVendor = u?.hasStore ?? false;
 
     if (!_synced && u != null) {
       _synced = true;
@@ -454,6 +502,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             const Gap(AppSpacing.x2l),
             Text(context.l10n.storeInformation, style: AppTypography.titleMedium),
             const Gap(AppSpacing.md),
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    context.l10n.storeLogoRequired,
+                    style: AppTypography.labelLarge,
+                  ),
+                  const Gap(AppSpacing.sm),
+                  ProfileAvatarPicker(
+                    name: _storeName.text.isNotEmpty ? _storeName.text : (u?.name ?? ''),
+                    imageUrl: s.storeLogoRemoved ? null : u?.storeLogoUrl,
+                    imageFile: s.editStoreLogoFile,
+                    diameter: 100,
+                    onTap: _storeLogoSheet,
+                  ),
+                ],
+              ),
+            ),
+            const Gap(AppSpacing.lg),
             TextField(
               controller: _storeName,
               decoration: InputDecoration(

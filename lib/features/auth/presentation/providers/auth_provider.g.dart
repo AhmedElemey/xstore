@@ -439,7 +439,7 @@ final googleLoginUseCaseProvider =
 );
 
 typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
-String _$authHash() => r'af9dbeb35fdf3671ab8d4353221f70ab7188ccb6';
+String _$authHash() => r'b8551e5ac703c1cf148f857cb0d25fbf6972c879';
 
 /// See also [Auth].
 @ProviderFor(Auth)

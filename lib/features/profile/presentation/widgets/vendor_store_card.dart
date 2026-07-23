@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/profile_entity.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -205,12 +206,12 @@ class _StoreLogo extends StatelessWidget {
     if (logoUrl != null && logoUrl!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.sm + AppSpacing.xs),
-        child: Image.network(
-          logoUrl!,
+        child: AppCachedNetworkImage(
+          imageUrl: logoUrl!,
           width: 50,
           height: 50,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _gradientBox(initials),
+          errorWidget: (_, __, ___) => _gradientBox(initials),
         ),
       );
     }

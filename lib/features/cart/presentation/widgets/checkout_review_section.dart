@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
@@ -64,7 +64,7 @@ class CheckoutReviewSection extends ConsumerWidget {
                   child: SizedBox(
                     width: AppSpacing.x3l + AppSpacing.sm,
                     height: AppSpacing.x3l + AppSpacing.sm,
-                    child: CachedNetworkImage(
+                    child: AppCachedNetworkImage(
                       imageUrl: it.listingImage,
                       fit: BoxFit.cover,
                     ),

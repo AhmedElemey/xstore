@@ -58,6 +58,7 @@ mixin _$UserEntity {
   int? get storeCategoryId => throw _privateConstructorUsedError;
   int? get storeCityId => throw _privateConstructorUsedError;
   int? get storeGovernmentId => throw _privateConstructorUsedError;
+  int? get storeId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $UserEntityCopyWith<UserEntity> get copyWith =>
@@ -108,7 +109,8 @@ abstract class $UserEntityCopyWith<$Res> {
       String? storeDescriptionAr,
       int? storeCategoryId,
       int? storeCityId,
-      int? storeGovernmentId});
+      int? storeGovernmentId,
+      int? storeId});
 }
 
 /// @nodoc
@@ -162,6 +164,7 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
+    Object? storeId = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -316,6 +319,10 @@ class _$UserEntityCopyWithImpl<$Res, $Val extends UserEntity>
           ? _value.storeGovernmentId
           : storeGovernmentId // ignore: cast_nullable_to_non_nullable
               as int?,
+      storeId: freezed == storeId
+          ? _value.storeId
+          : storeId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -366,7 +373,8 @@ abstract class _$$UserEntityImplCopyWith<$Res>
       String? storeDescriptionAr,
       int? storeCategoryId,
       int? storeCityId,
-      int? storeGovernmentId});
+      int? storeGovernmentId,
+      int? storeId});
 }
 
 /// @nodoc
@@ -418,6 +426,7 @@ class __$$UserEntityImplCopyWithImpl<$Res>
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
+    Object? storeId = freezed,
   }) {
     return _then(_$UserEntityImpl(
       id: null == id
@@ -572,6 +581,10 @@ class __$$UserEntityImplCopyWithImpl<$Res>
           ? _value.storeGovernmentId
           : storeGovernmentId // ignore: cast_nullable_to_non_nullable
               as int?,
+      storeId: freezed == storeId
+          ? _value.storeId
+          : storeId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -617,7 +630,8 @@ class _$UserEntityImpl extends _UserEntity {
       this.storeDescriptionAr,
       this.storeCategoryId,
       this.storeCityId,
-      this.storeGovernmentId})
+      this.storeGovernmentId,
+      this.storeId})
       : super._();
 
   @override
@@ -704,10 +718,12 @@ class _$UserEntityImpl extends _UserEntity {
   final int? storeCityId;
   @override
   final int? storeGovernmentId;
+  @override
+  final int? storeId;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId)';
+    return 'UserEntity(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, storeId: $storeId)';
   }
 
   @override
@@ -783,7 +799,8 @@ class _$UserEntityImpl extends _UserEntity {
             (identical(other.storeCityId, storeCityId) ||
                 other.storeCityId == storeCityId) &&
             (identical(other.storeGovernmentId, storeGovernmentId) ||
-                other.storeGovernmentId == storeGovernmentId));
+                other.storeGovernmentId == storeGovernmentId) &&
+            (identical(other.storeId, storeId) || other.storeId == storeId));
   }
 
   @override
@@ -826,7 +843,8 @@ class _$UserEntityImpl extends _UserEntity {
         storeDescriptionAr,
         storeCategoryId,
         storeCityId,
-        storeGovernmentId
+        storeGovernmentId,
+        storeId
       ]);
 
   @JsonKey(ignore: true)
@@ -875,7 +893,8 @@ abstract class _UserEntity extends UserEntity {
       final String? storeDescriptionAr,
       final int? storeCategoryId,
       final int? storeCityId,
-      final int? storeGovernmentId}) = _$UserEntityImpl;
+      final int? storeGovernmentId,
+      final int? storeId}) = _$UserEntityImpl;
   const _UserEntity._() : super._();
 
   @override
@@ -957,6 +976,8 @@ abstract class _UserEntity extends UserEntity {
   int? get storeCityId;
   @override
   int? get storeGovernmentId;
+  @override
+  int? get storeId;
   @override
   @JsonKey(ignore: true)
   _$$UserEntityImplCopyWith<_$UserEntityImpl> get copyWith =>

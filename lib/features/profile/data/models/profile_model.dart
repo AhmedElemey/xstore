@@ -12,6 +12,8 @@ class ProfileModel {
     this.storeSaveCount = 0,
     this.storeActiveListings = 0,
     this.responseRatePercent = 0,
+    this.isEmailVerificationRequired = false,
+    this.isPhoneVerificationRequired = false,
   });
 
   final UserModel user;
@@ -22,6 +24,8 @@ class ProfileModel {
   final int storeSaveCount;
   final int storeActiveListings;
   final int responseRatePercent;
+  final bool isEmailVerificationRequired;
+  final bool isPhoneVerificationRequired;
 
   ProfileEntity toEntity() => ProfileEntity(
         user: user.toEntity(),
@@ -32,5 +36,7 @@ class ProfileModel {
         storeSaveCount: storeSaveCount,
         storeActiveListings: storeActiveListings,
         responseRatePercent: responseRatePercent,
+        isEmailVerificationRequired: isEmailVerificationRequired,
+        isPhoneVerificationRequired: isPhoneVerificationRequired,
       );
 }

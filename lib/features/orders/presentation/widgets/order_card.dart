@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +11,7 @@ import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class OrderCard extends ConsumerWidget {
@@ -74,7 +74,7 @@ class OrderCard extends ConsumerWidget {
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: order.consumerAvatar.isNotEmpty
-                            ? NetworkImage(order.consumerAvatar)
+                            ? AppNetworkImage.network(order.consumerAvatar)
                             : null,
                         child: order.consumerAvatar.isEmpty
                             ? Text(
@@ -119,7 +119,7 @@ class OrderCard extends ConsumerWidget {
                         width: 60,
                         height: 60,
                         child: first.listingImage.isNotEmpty
-                            ? CachedNetworkImage(
+                            ? AppCachedNetworkImage(
                                 imageUrl: first.listingImage,
                                 fit: BoxFit.cover,
                               )

@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -100,7 +100,7 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
               child: Semantics(
                 image: true,
                 label: _photoLabel(context, i, urls.length),
-                child: CachedNetworkImage(
+                child: AppCachedNetworkImage(
                   imageUrl: urls[i],
                   fit: BoxFit.cover,
                   width: double.infinity,
@@ -188,7 +188,7 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                           child: Semantics(
                             image: true,
                             label: _photoLabel(context, i, urls.length),
-                            child: CachedNetworkImage(
+                            child: AppCachedNetworkImage(
                               imageUrl: urls[i],
                               fit: BoxFit.cover,
                               errorWidget: (_, __, ___) =>

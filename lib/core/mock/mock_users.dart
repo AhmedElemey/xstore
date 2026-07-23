@@ -25,6 +25,7 @@ const mockVendorUser = UserEntity(
       'Premium electronics at the best prices in Egypt. All products are genuine and come with full warranty.',
   storeCity: 'Algiers',
   storeWilaya: 'Alger',
+  storeId: 1,
   whatsappNumber: '+20 105 551 2345',
   latitude: 30.044400,
   longitude: 31.235700,
