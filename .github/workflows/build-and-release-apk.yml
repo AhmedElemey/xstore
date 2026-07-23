@@ -206,11 +206,14 @@ jobs:
             "$MAIL_TO"
             "mohamedmax728@gmail.com"
             "Mohammedelbakly8@gmail.com"
-            "rehab.mhmd2@gmail.com "
+            "rehab.mhmd2@gmail.com"
           )
           TO_HEADER=$(IFS=, ; echo "${RECIPIENTS[*]}")
           MAIL_RCPT_ARGS=()
           for rcpt in "${RECIPIENTS[@]}"; do
+            rcpt="${rcpt#"${rcpt%%[![:space:]]*}"}"
+            rcpt="${rcpt%"${rcpt##*[![:space:]]}"}"
+            [ -n "$rcpt" ] || continue
             MAIL_RCPT_ARGS+=(--mail-rcpt "$rcpt")
           done
           SUBJECT="xStore ${BUILD_FLAVOR} APK - Build #${BUILD_RUN_NUMBER}"
