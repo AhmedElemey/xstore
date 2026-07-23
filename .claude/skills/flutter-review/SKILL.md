@@ -37,6 +37,16 @@ Rules for the log:
 
 <!-- Newest entries at the bottom. Do not delete this section; append below. -->
 
+### 2026-07-23 — Google backend login needs serverClientId for valid idToken aud
+- **What happened:** Live `POST /api/auth/google/consumer/login` returned 401 `"Invalid Google identity token."` even though Google sign-in succeeded — `GoogleSignIn()` had no `serverClientId`, so the ID token's audience was the Android/iOS OAuth client, not the Web client the backend verifies.
+- **Rule:** When exchanging a Google ID token with a backend, always construct `GoogleSignIn(serverClientId: DefaultFirebaseOptions.googleWebClientId)` (the OAuth Web client from `google-services.json`, client_type 3). Send `googleAuth.idToken` to the role-specific endpoint — never the Firebase ID token.
+- **Where it applies:** `social_auth_datasource.dart`, any future Google Sign-In wiring.
+
+### 2026-07-23 — FCM sync must not read authProvider inside Auth.build()
+- **What happened:** Cold start with no persisted session called `syncFcmDeviceTokenWithBackend(ref, user: null)` from inside `Auth.build()`; line 28 synchronously `ref.read(authProvider)` while auth was still building → Riverpod self-dependency assert. Same class of bug as the prefetch lesson — `Right(null)` restore still entered the `firstRestore` block.
+- **Rule:** Gate cold-start prefetch/FCM sync on `user != null`, always pass the session user from `Auth.build()`, and when a side-effect must read auth without an explicit user defer past build with `Future(() => ref.read(authProvider)...)` — never read auth synchronously from a callback still inside `build()`.
+- **Where it applies:** `auth_provider.dart` restore fold, `fcm_device_token_sync_provider.dart`, any future post-auth side-effect wired from `build()`.
+
 ### 2026-07-23 — Notification wire enums are int ordinals, not strings
 - **What happened:** Live seed-account notifications send `type`/`priority` as JSON integers; the parser assumed camelCase enum name strings and silently mapped every item to `systemAnnouncement`/`normal`. Ordinal guessing was rejected — safe fallback until the C# enum declaration is confirmed.
 - **Rule:** For backend enums, never infer int→member mapping from seed data; handle numeric wire values with an explicit fallback + comment, and use type-checked `_optString`/`_optInt`/`_optDouble` instead of `as` casts in notification (and similar) parsers. Skip malformed list items per-row so one bad row doesn't empty the feed.

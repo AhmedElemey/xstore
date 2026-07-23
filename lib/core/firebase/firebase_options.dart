@@ -28,6 +28,13 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, Tar
 import '../config/app_flavor.dart';
 
 class DefaultFirebaseOptions {
+  /// OAuth 2.0 Web client ID (client_type 3 in `google-services.json`). Pass
+  /// this as [GoogleSignIn.serverClientId] so the returned Google ID token's
+  /// `aud` matches what the xStore backend verifies — without it the token is
+  /// minted for the Android/iOS client and `/api/auth/google/*/login` 401s.
+  static const googleWebClientId =
+      '304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com';
+
   /// Flavor-blind accessor (kept for backward compatibility). Returns the
   /// PROD app for the current platform. Prefer [forFlavor].
   static FirebaseOptions get currentPlatform => _forPlatform(isDev: false);

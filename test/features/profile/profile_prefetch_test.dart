@@ -9,6 +9,7 @@ import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/domain/repositories/auth_repository.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'package:xstore/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_dependencies.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
@@ -27,6 +28,12 @@ class _RestoredSessionAuthRepo extends Fake implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity?>> restoreSession() async =>
       const Right(_user);
+}
+
+class _EmptySessionAuthRepo extends Fake implements AuthRepository {
+  @override
+  Future<Either<Failure, UserEntity?>> restoreSession() async =>
+      const Right(null);
 }
 
 /// Delays update-profile so tests can invalidate mid-save (logout reset).
@@ -83,6 +90,25 @@ void main() {
       expect(profileState.profile, isNull);
     },
     skip: MockConfig.useMock ? false : skipReason,
+  );
+
+  test(
+    'cold start without persisted session completes without Riverpod self-dependency',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWith(
+            (ref) => _EmptySessionAuthRepo(),
+          ),
+          fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final restored = await container.read(authProvider.future);
+      expect(restored, isNull);
+      await Future<void>.delayed(Duration.zero);
+    },
   );
 
   test(

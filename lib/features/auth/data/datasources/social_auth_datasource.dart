@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/firebase/firebase_options.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../domain/entities/social_auth_result.dart';
@@ -25,7 +26,10 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              serverClientId: DefaultFirebaseOptions.googleWebClientId,
+            );
 
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
@@ -69,8 +73,8 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         debugPrint('photoUrl: ${user.photoURL}');
         debugPrint('firebaseUid: ${user.uid}');
         debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
-        debugPrint('google idToken: ${googleAuth.idToken}');
-        debugPrint('firebase idToken (backend verifies this): $firebaseIdToken');
+        debugPrint('google idToken (backend verifies this): ${googleAuth.idToken}');
+        debugPrint('firebase idToken: $firebaseIdToken');
       }
       return SocialAuthResult(
         provider: SocialProvider.google,

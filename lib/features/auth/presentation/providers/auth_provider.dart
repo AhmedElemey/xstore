@@ -204,8 +204,8 @@ class Auth extends _$Auth {
     }
     return result.fold((_) => null, (user) {
       // build() hasn't returned yet, so authProvider still reads as Loading —
-      // pass the user in; a plain prefetch here would see null and no-op.
-      if (firstRestore) {
+      // pass the user in; reading auth back here throws (self-dependency).
+      if (firstRestore && user != null) {
         prefetchProfileData(ref, user: user);
         syncFcmDeviceTokenWithBackend(ref, user: user);
       }

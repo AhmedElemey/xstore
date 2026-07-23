@@ -25,7 +25,10 @@ Future<void> _syncFcmDeviceTokenWithBackend(
   Ref ref, {
   UserEntity? user,
 }) async {
-  final sessionUser = user ?? ref.read(authProvider).valueOrNull;
+  // When [user] is omitted, defer the auth read so callers inside
+  // Auth.build() don't hit Riverpod's self-dependency assert.
+  final sessionUser = user ??
+      await Future(() => ref.read(authProvider).valueOrNull);
   if (sessionUser == null) return;
 
   if (!await requestFcmNotificationPermission()) return;
