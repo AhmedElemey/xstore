@@ -139,13 +139,6 @@ const DISPUTES=[
  {id:'XS-2026-4344',buyer:'Hany Wael',vendor:'Heliopolis Sportswear',reason:'Wrong size shipped',val:890,status:'review',note:'Vendor shipped M instead of L. Vendor has offered a free exchange.',sug:'Partial refund or exchange'},
  {id:'XS-2026-4322',buyer:'Rana Fathy',vendor:'Zamalek Boutique',reason:'Refund not received',val:1250,status:'review',note:'Return accepted 9 days ago, refund still pending from the vendor.',sug:'Refund buyer'},
  {id:'XS-2026-4290',buyer:'Sameh Adel',vendor:'Maadi Toy Box',reason:'Late delivery',val:320,status:'open',note:'Delivered 6 days late; buyer requests partial compensation.',sug:'Partial refund'}];
-const CUSTOMERS=[
- {n:'Ahmed Hassan',city:'Cairo',orders:23,spend:142300,joined:'Nov 2025',phone:'+20 100 111 2233'},
- {n:'Sara Mostafa',city:'Giza',orders:18,spend:64200,joined:'Dec 2025',phone:'+20 101 222 3344'},
- {n:'Karim Fouad',city:'Cairo',orders:11,spend:38900,joined:'Jan 2026',phone:'+20 102 333 4455'},
- {n:'Mona Adel',city:'Alexandria',orders:31,spend:98750,joined:'Oct 2025',phone:'+20 103 444 5566'},
- {n:'Youssef Ali',city:'Cairo',orders:7,spend:51600,joined:'Mar 2026',phone:'+20 104 555 6677'},
- {n:'Nour Ibrahim',city:'Giza',orders:14,spend:42100,joined:'Feb 2026',phone:'+20 105 666 7788'}];
 
 /* ---------- view builders ---------- */
 const kpi=(ico,val,label,trend,dir,c)=>`<div class="card kpi"><div class="k-top"><div class="k-ico" style="background:${c}22;color:${c}">${ic(ico)}</div><span class="trend ${dir}">${trend}</span></div><div class="k-val">${val}</div><div class="k-label">${label}</div></div>`;
@@ -218,28 +211,24 @@ function productDrawer(i){
    `<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="decide(${i},'approve');closeDrawer()">Approve</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="decide(${i},'changes');closeDrawer()">Request changes</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="decide(${i},'reject');closeDrawer()">Reject</button>`);
 }
 
+/* Vendors tab — live GET /api/users?role=VENDOR + PUT approve/reject
+   (rows loaded by loadVendors; status tabs filter server-side via onChip). */
 function vendors(){
- const rows=VENDORS.map((v,i)=>{const st=v.status==='active'?'b-green':v.status==='pending'?'b-amber':'b-red';
-   const act=v.status==='pending'?`<button class="btn btn-ok btn-sm" onclick="vdecide(${i},'approve')">Approve</button><button class="btn btn-no btn-sm" onclick="vdecide(${i},'reject')">Reject</button>`
-     :v.status==='suspended'?`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'reinstate')">Reinstate</button>`
-     :`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'suspend')">Suspend</button>`;
-   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${v.n}'s listings">${avatar(v.n)}<div><b>${v.n}</b><small>${v.owner} · ${v.city}</small></div></div></td>
-     <td><span class="badge-s b-indigo">🏢 Business</span></td>
-     <td><span class="badge-s ${st}"><span class="dotb" style="background:currentColor"></span>${v.status[0].toUpperCase()+v.status.slice(1)}</span></td>
-     <td><a style="cursor:pointer;color:var(--primary);font-weight:600" onclick="openVendorProducts(${i})">${v.products||'—'}</a></td><td class="money">${v.gmv?EGP(v.gmv):'—'}</td><td>${v.rating?'⭐ '+v.rating:'—'}</td>
-     <td class="r"><button class="btn btn-g btn-sm" onclick="openVendorProducts(${i})">Listings</button><button class="btn btn-g btn-sm" onclick="vendorDrawer(${i})">Details</button>${act}</td></tr>`}).join('');
+ vendorsState.keyword='';vendorsState.vendorStatus='';vendorsState.statusLabel='All';vendorsState.page=1;vendorsState.items=null;
+ const tabs=VENDOR_STATUS_TABS.map((t,i)=>`<span class="chip${i===0?' active':''}">${t[0]}</span>`).join('');
  return `<div class="page-head"><div><h2>Vendors</h2><p><b>Business</b> accounts — sellers on the marketplace (role: vendor). Individual buyers are under <a data-jump="customers" style="color:var(--primary);cursor:pointer">Users</a>.</p></div>
-   <div class="tabs"><span class="chip active">All</span><span class="chip">Pending</span><span class="chip">Active</span><span class="chip">Suspended</span></div></div>
-   <div class="card"><table><thead><tr><th>Vendor</th><th>Account type</th><th>Status</th><th>Products</th><th>GMV</th><th>Rating</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+   <div class="tabs" data-remote="vendors">${tabs}</div></div>
+   <div class="toolbar"><div class="search search-mini">${ic('search')}<input id="vSearch" placeholder="Search vendors by store, owner, phone…" oninput="onVendorsSearch(this.value)"></div></div>
+   <div class="card"><div id="vendorsHost">${stateLoading('Loading vendors…')}</div></div>`;
 }
 
+/* Categories tab — live GET /api/categories + create/update (multipart),
+   status toggle and delete (cards loaded by loadCategories). */
 function categories(){
- const cards=CATS.map((c,i)=>`<div class="cat"><div class="ci">${c[1]}</div>
-   <div class="cmeta"><b>${c[0]}</b><small>${c[2]} subcategories · ${c[3]} live products</small></div>
-   <div class="switch ${c[4]?'':'off'}" onclick="this.classList.toggle('off');toast('${c[0]} '+(this.classList.contains('off')?'hidden':'visible'))"></div></div>`).join('');
- return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy (10 categories · 31 subcategories) — powers <b>GET /categories</b></p></div>
+ catState.items=null;
+ return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy — <b>GET /api/categories</b>. Add, edit, show/hide and delete all sync to the backend.</p></div>
    <button class="btn btn-p" onclick="openCategoryForm()">+ Add category</button></div>
-   <div class="card"><div class="c-body"><div class="cat-grid">${cards}</div></div></div>`;
+   <div id="catHost">${stateLoading('Loading categories…')}</div>`;
 }
 
 /* which orders can still be handed to a platform courier */
@@ -272,16 +261,15 @@ function disputes(){
    <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Vendor</th><th>Reason</th><th>Value</th><th>Status</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
+/* Users tab — live GET /api/users?role=CONSUMER (rows loaded by loadUsers). */
 function customers(){
- const rows=CUSTOMERS.map((c,i)=>`<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>role: consumer</small></div></div></td><td class="muted">${c.city}</td>
-   <td><span class="badge-s b-blue">👤 Customer</span></td>
-   <td>${c.orders}</td><td class="money">${EGP(c.spend)}</td><td><span class="badge-s b-green">Active</span></td>
-   <td class="r"><button class="btn btn-g btn-sm" onclick="userDrawer(${i})">Profile</button></td></tr>`).join('');
+ usersState.keyword='';usersState.page=1;usersState.items=null;usersState.error='';
  return `<div class="page-head"><div><h2>Users</h2><p>Individual <b>customer</b> accounts — normal buyers (role: consumer). <b>Business</b> accounts are managed under <a data-jump="vendors" style="color:var(--primary);cursor:pointer">Vendors</a>.</p></div>
-   <button class="btn btn-g">Export CSV</button></div>
+   <button class="btn btn-g" onclick="exportUsersCsv()">Export CSV</button></div>
    <div class="tabs" style="margin-bottom:18px"><span class="chip active">👤 Customers</span><span class="chip" data-jump="vendors">🏢 Business (vendors)</span></div>
-   <div class="grid g-3" style="margin-bottom:18px">${kpi('users','41,208','Total customers','+7%','up','#2E5C6E')}${kpi('chart','2.4','Orders per customer','+0.2','up','#C68A2E')}${kpi('box','63%','Repeat rate','+4%','up','#3F7A5C')}</div>
-   <div class="card"><table><thead><tr><th>User</th><th>City</th><th>Account type</th><th>Orders</th><th>Lifetime spend</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+   <div class="grid g-3" style="margin-bottom:18px">${kpi('users','<span id="uTotal">—</span>','Total customers','live','up','#2E5C6E')}${kpi('chart','2.4','Orders per customer','+0.2','up','#C68A2E')}${kpi('box','63%','Repeat rate','+4%','up','#3F7A5C')}</div>
+   <div class="toolbar"><div class="search search-mini">${ic('search')}<input id="uSearch" placeholder="Search customers by name, phone, email…" oninput="onUsersSearch(this.value)"></div></div>
+   <div class="card"><div id="usersHost">${stateLoading('Loading customers…')}</div></div>`;
 }
 
 /* ---------- delivery (courier pilot) ---------- */
@@ -548,7 +536,10 @@ function go(v){
  const s=document.getElementById('searchInput'); if(s) s.value='';
  closeSidebar();
  window.scrollTo(0,0);
+ if(AFTER[v]) AFTER[v]();          // views backed by live data load after render
 }
+/* post-render loaders for live-data views (see LIVE API section below) */
+const AFTER={customers:loadUsers,vendors:loadVendors,categories:loadCategories};
 document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
 
 /* ---------- toast + moderation ---------- */
@@ -584,15 +575,6 @@ function orderDrawer(i){
    +secH('Fulfilment timeline')+tl,
    '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to vendor\');closeDrawer()">Contact vendor</button>'+assignBtn
    +(canCancel?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Order cancelled\');closeDrawer()">Cancel order</button>':'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'));
-}
-function userDrawer(i){
- const c=CUSTOMERS[i];
- openDrawer(c.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
-   +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> <span class="badge-s b-green">Active</span></div>'
-   +secH('Account')
-   +kv('City',c.city)+kv('Phone',c.phone)+kv('Joined',c.joined)+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
-   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to customer\');closeDrawer()">Message</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Customer suspended\');closeDrawer()">Suspend</button>');
 }
 function disputeDrawer(i){
  const d=DISPUTES[i];
@@ -802,9 +784,104 @@ function formDrawer(title,fields,submitLabel,onSubmit,values){
  };
  openDrawer(title,body,'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" onclick="_submitForm()">'+submitLabel+'</button>');
 }
-function openCategoryForm(){formDrawer('Add category',
- [{label:'Category name',ph:'e.g. Groceries',required:true},{label:'Icon (emoji)',ph:'🛒'},{label:'Subcategories (comma-separated)',ph:'Fruits, Dairy, Bakery'}],
- 'Add category',v=>{const subs=v[2]?v[2].split(',').filter(x=>x.trim()).length:0;CATS.push([v[0],v[1]||'📦',subs,0,true]);toast('Category "'+v[0]+'" added ✓');closeDrawer();go('categories');});}
+/* ============================================================
+   Categories (live) — Postman "Categories" folder
+     GET    /api/categories
+     POST   /api/categories            (multipart: nameEn,nameAr,isActive,image)
+     PUT    /api/categories            (multipart: id,nameEn,nameAr,isActive,image)
+     PUT    /api/categories/{id}/status  (json: {isActive})
+     DELETE /api/categories/{id}
+   ============================================================ */
+const catState={items:null};
+async function loadCategories(){
+ const host=document.getElementById('catHost'); if(!host)return;
+ host.innerHTML=stateLoading('Loading categories…');
+ try{
+   const data=await apiFetch('/api/categories');
+   catState.items=Array.isArray(data)?data:readPage(data,200).items;
+   renderCategories();
+ }catch(e){ if(e.status===401)return; host.innerHTML=stateError(e.message,'loadCategories()'); }
+}
+function mapCategory(c){
+ let img=_fne(c.imageUrl,c.image,c.imagePath,c.iconUrl);
+ if(img&&!/^https?:\/\//i.test(String(img))) img=API.base.replace(/\/+$/,'')+'/'+String(img).replace(/^\/+/,'');
+ return{
+   id:_fne(c.id,c.categoryId,c._id),
+   nameEn:_fne(c.nameEn,c.name,c.nameAr)||'Untitled',
+   nameAr:_fne(c.nameAr,c.nameEn)||'',
+   image:img,
+   active:c.isActive===undefined||c.isActive===null?true:!!c.isActive,
+   products:_numOr(c.productsCount,c.listingsCount,c.liveProducts,c.products),
+   subs:_numOr(c.subcategoriesCount,c.subCategoriesCount,c.subcategories)
+ };
+}
+function renderCategories(){
+ const host=document.getElementById('catHost'); if(!host)return;
+ const items=catState.items||[];
+ if(!items.length){host.innerHTML='<div class="card"><div class="c-body">'+stateEmpty('No categories yet — add your first one.')+'</div></div>';return;}
+ const cards=items.map((c,i)=>{const m=mapCategory(c);
+   const thumb=m.image
+     ?'<img class="ci-img" src="'+esc(m.image)+'" alt="" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'ci\',textContent:\'📦\'}))">'
+     :'<div class="ci">'+esc((m.nameEn[0]||'📦').toUpperCase())+'</div>';
+   const meta=[m.products!=null?m.products+' products':null,m.subs!=null?m.subs+' subcategories':null].filter(Boolean).join(' · ')||'—';
+   return '<div class="cat">'+thumb
+     +'<div class="cmeta"><b>'+esc(m.nameEn)+'</b><small>'+(m.nameAr?'<bdi>'+esc(m.nameAr)+'</bdi> · ':'')+meta+'</small></div>'
+     +'<div class="cat-actions">'
+     +'<div class="switch '+(m.active?'':'off')+'" title="Show / hide" onclick="toggleCategory('+i+')"></div>'
+     +'<button class="btn btn-g btn-sm" onclick="openCategoryForm('+i+')">Edit</button>'
+     +'<button class="btn btn-no btn-sm" onclick="deleteCategory('+i+')">Delete</button>'
+     +'</div></div>';
+ }).join('');
+ host.innerHTML='<div class="card"><div class="c-body"><div class="cat-grid">'+cards+'</div></div></div>';
+}
+async function toggleCategory(i){
+ const c=(catState.items||[])[i]; if(!c)return; const m=mapCategory(c);
+ if(!m.id){toast('Missing category id');return;}
+ const next=!m.active;
+ try{
+   await apiFetch('/api/categories/'+encodeURIComponent(m.id)+'/status',{method:'PUT',body:{isActive:next}});
+   c.isActive=next; renderCategories();
+   toast('“'+m.nameEn+'” '+(next?'visible':'hidden'));
+ }catch(e){ if(e.status===401)return; toast('Status update failed: '+(e.message||'error')); renderCategories(); }
+}
+async function deleteCategory(i){
+ const c=(catState.items||[])[i]; if(!c)return; const m=mapCategory(c);
+ if(!m.id){toast('Missing category id');return;}
+ if(!confirm('Delete category “'+m.nameEn+'”? This cannot be undone.'))return;
+ try{
+   await apiFetch('/api/categories/'+encodeURIComponent(m.id),{method:'DELETE'});
+   toast('Category “'+m.nameEn+'” deleted'); loadCategories();
+ }catch(e){ if(e.status===401)return; toast('Delete failed: '+(e.message||'error')); }
+}
+function openCategoryForm(i){
+ const editing=(i!==undefined&&i!==null);
+ const m=editing?mapCategory(catState.items[i]):{nameEn:'',nameAr:'',active:true};
+ openDrawer(editing?'Edit category':'Add category',
+   '<div class="form-row"><label>Name (English) *</label><input id="catEn" value="'+esc(m.nameEn)+'" placeholder="Electronics"></div>'
+   +'<div class="form-row"><label>Name (Arabic) *</label><input id="catAr" dir="rtl" value="'+esc(m.nameAr)+'" placeholder="إلكترونيات"></div>'
+   +'<div class="form-row"><label>Image '+(editing?'<span class="muted" style="font-weight:400">(leave empty to keep current)</span>':'<span class="muted" style="font-weight:400">(jpg, png, webp)</span>')+'</label><input id="catImg" type="file" accept="image/jpeg,image/png,image/webp"></div>'
+   +'<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;margin-top:4px"><input id="catActive" type="checkbox" '+(m.active?'checked':'')+'> Active (visible to shoppers)</label>',
+   '<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" id="catSaveBtn" onclick="saveCategory('+(editing?i:'null')+')">'+(editing?'Save changes':'Add category')+'</button>');
+}
+async function saveCategory(i){
+ const editing=(i!==null&&i!==undefined);
+ const en=document.getElementById('catEn').value.trim();
+ const ar=document.getElementById('catAr').value.trim();
+ const active=document.getElementById('catActive').checked;
+ const fileEl=document.getElementById('catImg'); const file=fileEl&&fileEl.files&&fileEl.files[0];
+ if(!en||!ar){toast('Enter both English and Arabic names');return;}
+ if(!editing&&!file){toast('Pick a category image');return;}   // image is required on create
+ const btn=document.getElementById('catSaveBtn'); if(btn){btn.disabled=true;btn.textContent='Saving…';}
+ const fd=new FormData();
+ fd.append('nameEn',en); fd.append('nameAr',ar); fd.append('isActive',active?'true':'false');
+ if(file) fd.append('image',file);
+ try{
+   if(editing){ fd.append('id',mapCategory(catState.items[i]).id); await apiFetch('/api/categories',{method:'PUT',body:fd}); }
+   else { await apiFetch('/api/categories',{method:'POST',body:fd}); }
+   toast(editing?'Category updated ✓':'Category “'+en+'” added ✓');
+   closeDrawer(); loadCategories();
+ }catch(e){ if(e.status===401)return; toast((editing?'Update':'Create')+' failed: '+(e.message||'error')); if(btn){btn.disabled=false;btn.textContent=editing?'Save changes':'Add category';} }
+}
 function openCouponForm(){formDrawer('New coupon',
  [{label:'Code',ph:'SUMMER25',required:true},{label:'Offer description',ph:'25% off orders over EGP 500',required:true},{label:'Scope',type:'select',options:['Platform','Seasonal']}],
  'Create coupon',v=>{COUPONS.push([v[0].toUpperCase(),v[1],v[2],0,true]);toast('Coupon "'+v[0].toUpperCase()+'" created ✓');closeDrawer();go('coupons');});}
@@ -842,6 +919,7 @@ function deleteBanner(i){BANNERS.splice(i,1);toast('Banner deleted');go('content
 const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out','off','submitted','priced','pickedup'];
 function onChip(chip){
  const g=chip.closest('.tabs'); if(g) g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c===chip));
+ if(g&&g.dataset.remote){ onRemoteChip(g.dataset.remote,chip); return; } // live-data tabs filter server-side
  const label=chip.innerText.replace(/\s*\(\d+\)/,'').trim();
  let key=label.toLowerCase(); if(key==='in review') key='review'; if(key==='out of stock') key='out'; if(key==='off duty') key='off'; if(key==='picked up') key='pickedup';
  const view=document.getElementById('content');
@@ -872,6 +950,266 @@ function searchRows(q){
  els.forEach(el=>{el.style.display=(!q||el.innerText.toLowerCase().indexOf(q)>-1)?'':'none';});
 }
 
+/* ============================================================
+   LIVE API INTEGRATION — "Users" folder of the Admin Dashboard
+   Postman collection: xStoreEcommerce Admin Dashboard
+     GET  /api/users?keyword&role&isVerified&vendorStatus&page&pageSize
+     PUT  /api/users/{id}/approve   (vendor approval)
+     PUT  /api/users/{id}/reject    (vendor rejection)
+   Auth: static Basic license key on EVERY request +, once signed in,
+   the per-user JWT in an X-Auth-Token header (POST /api/auth/login).
+   Paginated envelope: {items, totalCount, page, pageSize, totalPages}.
+   ============================================================ */
+const API_LICENSE='Basic MTEzMTk3Njg6NjAtZGF5ZnJlZXRyaWFs';           // 60-day trial license key (public, sent on every request)
+const API_DEFAULT_BASE='https://xstoreegy-001-site1.jtempurl.com';   // hosted backend; override via the login screen's "change API server"
+const API={
+ get base(){return localStorage.getItem('xs_admin_base')||API_DEFAULT_BASE;},
+ set base(v){v?localStorage.setItem('xs_admin_base',v):localStorage.removeItem('xs_admin_base');},
+ get token(){return localStorage.getItem('xs_admin_token')||'';},
+ set token(v){v?localStorage.setItem('xs_admin_token',v):localStorage.removeItem('xs_admin_token');}
+};
+class ApiError extends Error{constructor(status,msg){super(msg);this.status=status;}}
+
+async function apiFetch(path,{method='GET',query,body,noAuthRedirect=false}={}){
+ let url;
+ try{url=new URL(API.base.replace(/\/+$/,'')+path);}catch(_){throw new ApiError(0,'Invalid API base URL.');}
+ if(query)Object.entries(query).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,v);});
+ const headers={'Authorization':API_LICENSE};
+ if(API.token)headers['X-Auth-Token']=API.token;
+ let payload;
+ if(body instanceof FormData){payload=body;}                              // let the browser set multipart Content-Type + boundary
+ else if(body!==undefined){headers['Content-Type']='application/json';payload=JSON.stringify(body);}
+ let res;
+ try{res=await fetch(url.toString(),{method,headers,body:payload});}
+ catch(_){throw new ApiError(0,'Network error — is the API reachable at '+API.base+'? (CORS or server down)');}
+ const text=await res.text();
+ let data=null; if(text){try{data=JSON.parse(text);}catch(_){data=text;}}
+ if(res.status===401&&!noAuthRedirect){API.token='';renderLogin('Your session expired — please sign in again.');throw new ApiError(401,'Unauthorized');}
+ if(!res.ok)throw new ApiError(res.status,serverMsg(data)||('Request failed ('+res.status+').'));
+ return data;
+}
+function serverMsg(d){
+ if(!d)return'';
+ if(typeof d==='string')return d;
+ return (d.error&&d.error.message)||(typeof d.error==='string'?d.error:'')||d.message||d.title||'';
+}
+
+/* ---------- login gate ---------- */
+function renderLogin(msg){
+ let g=document.getElementById('gate');
+ if(!g){g=document.createElement('div');g.id='gate';g.className='gate';document.body.appendChild(g);}
+ g.innerHTML=
+   '<form class="gate-card" onsubmit="doLogin(event)">'
+   +'<div class="logo">x</div><h2>xStore Admin</h2><p>Sign in to manage the marketplace.</p>'
+   +'<div class="gate-err" id="lgErr">'+(msg?esc(msg):'')+'</div>'
+   +'<div class="form-row"><label>Phone number</label><input id="lgPhone" inputmode="tel" autocomplete="username" placeholder="01012345678"></div>'
+   +'<div class="form-row"><label>Password</label><input id="lgPass" type="password" autocomplete="current-password" placeholder="••••••"></div>'
+   +'<button class="btn btn-p" id="lgBtn" type="submit" style="width:100%;justify-content:center;margin-top:6px">Sign in</button>'
+   +'<div style="margin-top:14px;font-size:12px;color:var(--text-3)">Advanced: <a id="lgBaseToggle" style="color:var(--primary);cursor:pointer">change API server</a></div>'
+   +'<div class="form-row" id="lgBaseRow" style="display:none;margin-top:10px"><label>API base URL</label><input id="lgBase" value="'+esc(API.base)+'"></div>'
+   +'</form>';
+ g.style.display='flex';
+ document.getElementById('lgBaseToggle').onclick=()=>{const r=document.getElementById('lgBaseRow');r.style.display=r.style.display==='none'?'flex':'none';};
+ document.getElementById('lgPhone').focus();
+}
+function hideLogin(){const g=document.getElementById('gate');if(g)g.style.display='none';}
+async function doLogin(ev){
+ if(ev)ev.preventDefault();
+ const phone=document.getElementById('lgPhone').value.trim();
+ const pass=document.getElementById('lgPass').value;
+ const baseEl=document.getElementById('lgBase');
+ if(baseEl&&baseEl.value.trim())API.base=baseEl.value.trim();
+ const err=document.getElementById('lgErr'),btn=document.getElementById('lgBtn');
+ err.textContent='';
+ if(!phone||!pass){err.textContent='Enter your phone number and password.';return;}
+ btn.disabled=true;btn.textContent='Signing in…';
+ try{
+   const data=await apiFetch('/api/auth/login',{method:'POST',noAuthRedirect:true,body:{phoneNumber:phone,password:pass,rememberMe:true}});
+   const token=data&&(data.token||data.accessToken);
+   if(!token)throw new ApiError(0,'Server did not return a token.');
+   API.token=token; hideLogin(); go('customers'); toast('Signed in ✓');
+ }catch(e){ err.textContent=e.message||'Sign in failed.'; }
+ finally{ btn.disabled=false; btn.textContent='Sign in'; }
+}
+function logout(){API.token='';renderLogin('Signed out.');}
+
+/* ---------- shared helpers (live views) ---------- */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const _fne=(...a)=>{for(const x of a){if(x!==undefined&&x!==null&&String(x).trim()!=='')return x;}return'';};
+const _numOr=(...a)=>{for(const x of a){const n=Number(x);if(x!==undefined&&x!==null&&x!==''&&Number.isFinite(n))return n;}return null;};
+const _num=v=>{const n=Number(v);return Number.isFinite(n)?n:null;};
+function stateLoading(msg){return '<div class="state"><span class="spin"></span><b>'+esc(msg||'Loading…')+'</b></div>';}
+function stateEmpty(msg){return '<div class="state">'+ic('users')+'<b>Nothing to show</b><span>'+esc(msg||'No records found.')+'</span></div>';}
+function stateError(msg,retry){return '<div class="state">'+ic('alert')+'<b>Couldn’t load data</b><span>'+esc(msg||'Something went wrong.')+'</span><div style="margin-top:14px"><button class="btn btn-p btn-sm" onclick="'+retry+'">Retry</button></div></div>';}
+function readPage(data,pageSize){
+ // Confirmed xStore envelope {items,totalCount,page,pageSize,totalPages}; tolerant to aliases / bare array.
+ let items=[],total=0,totalPages=1;
+ if(Array.isArray(data)){items=data;total=data.length;}
+ else if(data&&typeof data==='object'){
+   items=data.items||data.results||data.data||data.users||[];
+   if(!Array.isArray(items))items=[];
+   total=_num(data.totalCount)??_num(data.total)??items.length;
+   totalPages=_num(data.totalPages)??Math.max(1,Math.ceil(total/(pageSize||20)));
+ }
+ return{items,total,totalPages};
+}
+function pager(kind){
+ const st=kind==='users'?usersState:vendorsState;
+ const fn=kind==='users'?'gotoUsersPage':'gotoVendorsPage';
+ const from=st.total===0?0:(st.page-1)*st.pageSize+1, to=Math.min(st.page*st.pageSize,st.total);
+ return '<div class="pager"><span>'+from+'–'+to+' of '+st.total.toLocaleString('en-US')+'</span>'
+   +'<div class="pg-btns">'
+   +'<button class="btn btn-g btn-sm" '+(st.page<=1?'disabled':'')+' onclick="'+fn+'('+(st.page-1)+')">← Prev</button>'
+   +'<span>Page '+st.page+' / '+Math.max(1,st.totalPages)+'</span>'
+   +'<button class="btn btn-g btn-sm" '+(st.page>=st.totalPages?'disabled':'')+' onclick="'+fn+'('+(st.page+1)+')">Next →</button>'
+   +'</div></div>';
+}
+function onRemoteChip(kind,chip){
+ const label=chip.innerText.trim();
+ if(kind==='vendors'){
+   const t=VENDOR_STATUS_TABS.find(x=>x[0]===label);
+   vendorsState.vendorStatus=t?t[1]:''; vendorsState.statusLabel=label; vendorsState.page=1; loadVendors();
+ }
+}
+
+/* ---------- Users (consumers) ---------- */
+const usersState={role:'CONSUMER',keyword:'',isVerified:'',vendorStatus:'',page:1,pageSize:20,total:0,totalPages:1,items:null,error:''};
+let _uSearchT;
+function onUsersSearch(v){clearTimeout(_uSearchT);_uSearchT=setTimeout(()=>{usersState.keyword=v.trim();usersState.page=1;loadUsers();},350);}
+function gotoUsersPage(p){if(p<1||p>usersState.totalPages||p===usersState.page)return;usersState.page=p;loadUsers();}
+async function loadUsers(){
+ const host=document.getElementById('usersHost'); if(!host)return;
+ host.innerHTML=stateLoading('Loading customers…');
+ try{
+   const data=await apiFetch('/api/users',{query:{keyword:usersState.keyword,role:usersState.role,isVerified:usersState.isVerified,vendorStatus:usersState.vendorStatus,page:usersState.page,pageSize:usersState.pageSize}});
+   const p=readPage(data,usersState.pageSize);
+   usersState.items=p.items; usersState.total=p.total; usersState.totalPages=p.totalPages;
+   renderUsers();
+ }catch(e){ if(e.status===401)return; host.innerHTML=stateError(e.message,'loadUsers()'); }
+}
+function mapUser(u){
+ // Tolerant mapping — adjust these key lists if the /api/users item shape differs.
+ const email=_fne(u.email), phone=_fne(u.phoneNumber,u.phone,u.whatsAppNumber)||'—';
+ const orders=_numOr(u.ordersCount,u.totalOrders,u.orders), spend=_numOr(u.totalSpent,u.lifetimeSpend,u.totalSpend);
+ return{
+   id:_fne(u.id,u.userId,u._id,u.uuid),
+   name:_fne(u.fullNameEn,u.fullName,u.name,u.nameEn,u.fullNameAr,email,u.phoneNumber)||'Unknown',
+   sub:email||phone||('role: '+_fne(u.role,'consumer')),
+   city:_fne(u.city,u.storeCity,u.governorate,u.town,u.location)||'—',
+   phone, email, role:_fne(u.role,'consumer'), verified:!!u.isVerified,
+   orders:orders==null?'—':orders, spend:spend==null?'—':EGP(spend),
+   joined:_fne(u.joinedAt,u.createdAt,u.joinDate)||'—'
+ };
+}
+function renderUsers(){
+ const host=document.getElementById('usersHost'); if(!host)return;
+ const items=usersState.items||[];
+ const tot=document.getElementById('uTotal'); if(tot)tot.textContent=usersState.total.toLocaleString('en-US');
+ if(!items.length){host.innerHTML=stateEmpty(usersState.keyword?'No customers match “'+esc(usersState.keyword)+'”.':'No customer accounts found.');return;}
+ const rows=items.map((u,i)=>{const m=mapUser(u);
+   return '<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="remoteUserDrawer('+i+')">'+avatar(m.name,'50')+'<div><b>'+esc(m.name)+'</b><small>'+esc(m.sub)+'</small></div></div></td>'
+     +'<td class="muted">'+esc(m.city)+'</td><td><span class="badge-s b-blue">👤 Customer</span></td>'
+     +'<td>'+m.orders+'</td><td class="money">'+m.spend+'</td>'
+     +'<td><span class="badge-s '+(m.verified?'b-green':'b-grey')+'">'+(m.verified?'✓ Verified':'Unverified')+'</span></td>'
+     +'<td class="r"><button class="btn btn-g btn-sm" onclick="remoteUserDrawer('+i+')">Profile</button></td></tr>';
+ }).join('');
+ host.innerHTML='<table><thead><tr><th>User</th><th>City</th><th>Account type</th><th>Orders</th><th>Lifetime spend</th><th>Status</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>'+pager('users');
+}
+function remoteUserDrawer(i){
+ const u=(usersState.items||[])[i]; if(!u)return; const m=mapUser(u);
+ openDrawer(m.name,
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(m.name,'50')+'<div><b style="font-size:16px">'+esc(m.name)+'</b><div class="muted" style="font-size:12.5px">Customer · role: '+esc(m.role)+'</div></div></div>'
+   +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> '+(m.verified?'<span class="badge-s b-green">✓ Verified</span>':'<span class="badge-s b-grey">Unverified</span>')+'</div>'
+   +secH('Account')
+   +kv('City',esc(m.city))+kv('Phone',esc(m.phone))+(m.email?kv('Email',esc(m.email)):'')+kv('Joined',esc(m.joined))+kv('Total orders',m.orders)+kv('Lifetime spend',m.spend)+(m.id?kv('User ID',esc(m.id)):''),
+   '<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>');
+}
+function exportUsersCsv(){
+ const items=usersState.items||[];
+ if(!items.length){toast('Nothing to export yet');return;}
+ const head=['Name','City','Phone','Email','Orders','Role'];
+ const body=items.map(u=>{const m=mapUser(u);return [m.name,m.city,m.phone,m.email,m.orders,m.role];});
+ const csv=[head,...body].map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+ a.download='xstore-customers-page'+usersState.page+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+ toast('Exported '+items.length+' customers (current page)');
+}
+
+/* ---------- Vendors (approve / reject) ---------- */
+// vendorStatus wire codes — Postman "GET All Users" filters pending with vendorStatus=0.
+const VENDOR_STATUS_TABS=[['All',''],['Pending','0'],['Active','1'],['Rejected','2'],['Suspended','3']];
+const VSTATUS={0:['b-amber','Pending'],1:['b-green','Active'],2:['b-red','Rejected'],3:['b-grey','Suspended']};
+const vendorsState={keyword:'',vendorStatus:'',statusLabel:'All',page:1,pageSize:20,total:0,totalPages:1,items:null};
+let _vSearchT;
+function onVendorsSearch(v){clearTimeout(_vSearchT);_vSearchT=setTimeout(()=>{vendorsState.keyword=v.trim();vendorsState.page=1;loadVendors();},350);}
+function gotoVendorsPage(p){if(p<1||p>vendorsState.totalPages||p===vendorsState.page)return;vendorsState.page=p;loadVendors();}
+async function loadVendors(){
+ const host=document.getElementById('vendorsHost'); if(!host)return;
+ host.innerHTML=stateLoading('Loading vendors…');
+ try{
+   const data=await apiFetch('/api/users',{query:{keyword:vendorsState.keyword,role:'VENDOR',vendorStatus:vendorsState.vendorStatus,page:vendorsState.page,pageSize:vendorsState.pageSize}});
+   const p=readPage(data,vendorsState.pageSize);
+   vendorsState.items=p.items; vendorsState.total=p.total; vendorsState.totalPages=p.totalPages;
+   renderVendors();
+ }catch(e){ if(e.status===401)return; host.innerHTML=stateError(e.message,'loadVendors()'); }
+}
+function mapVendor(v){
+ let stt; const sv=v.vendorStatus;
+ if(sv==null||sv===''){stt=['b-grey','—'];}
+ else if(typeof sv==='number'||/^\d+$/.test(String(sv))){stt=VSTATUS[Number(sv)]||['b-grey','Status '+sv];}
+ else{const k=String(sv).toLowerCase(); stt=k.includes('pend')?VSTATUS[0]:(k.includes('active')||k.includes('approv'))?VSTATUS[1]:k.includes('reject')?VSTATUS[2]:k.includes('suspend')?VSTATUS[3]:['b-grey',String(sv)];}
+ return{
+   id:_fne(v.id,v.userId,v._id),
+   store:_fne(v.storeNameEn,v.storeName,v.storeNameAr,v.fullNameEn,v.fullName,v.name)||'Unnamed store',
+   owner:_fne(v.fullNameEn,v.fullName,v.ownerName,v.nameEn)||'—',
+   city:_fne(v.storeCity,v.city,v.governorate,v.town)||'—',
+   phone:_fne(v.phoneNumber,v.whatsAppNumber,v.phone)||'—',
+   email:_fne(v.email),
+   category:_fne(v.storeCategory,v.storeCategoryName,v.category)||'—',
+   verified:!!v.isVerified, products:_numOr(v.productsCount,v.listingsCount,v.products), rating:_numOr(v.rating),
+   joined:_fne(v.joinedAt,v.createdAt)||'—', st:stt, isPending:stt[1]==='Pending'
+ };
+}
+function renderVendors(){
+ const host=document.getElementById('vendorsHost'); if(!host)return;
+ const items=vendorsState.items||[];
+ if(!items.length){host.innerHTML=stateEmpty(vendorsState.keyword?'No vendors match “'+esc(vendorsState.keyword)+'”.':'No vendors with status “'+esc(vendorsState.statusLabel)+'”.');return;}
+ const rows=items.map((v,i)=>{const m=mapVendor(v);
+   const act=m.isPending?'<button class="btn btn-ok btn-sm" onclick="approveVendor('+i+')">Approve</button><button class="btn btn-no btn-sm" onclick="rejectVendor('+i+')">Reject</button>':'';
+   return '<tr data-status="'+esc((m.st[1]||'').toLowerCase())+'"><td><div class="u" style="cursor:pointer" onclick="remoteVendorDrawer('+i+')">'+avatar(m.store)+'<div><b>'+esc(m.store)+'</b><small>'+esc(m.owner)+' · '+esc(m.city)+'</small></div></div></td>'
+     +'<td><span class="badge-s b-indigo">🏢 Business</span></td>'
+     +'<td><span class="badge-s '+m.st[0]+'"><span class="dotb" style="background:currentColor"></span>'+esc(m.st[1])+'</span>'+(m.verified?' <span class="badge-s b-green">✓</span>':'')+'</td>'
+     +'<td>'+(m.products==null?'—':m.products)+'</td><td>'+(m.rating==null?'—':'⭐ '+m.rating)+'</td>'
+     +'<td class="r"><button class="btn btn-g btn-sm" onclick="remoteVendorDrawer('+i+')">Details</button>'+act+'</td></tr>';
+ }).join('');
+ host.innerHTML='<table><thead><tr><th>Vendor</th><th>Account type</th><th>Status</th><th>Products</th><th>Rating</th><th class="r">Action</th></tr></thead><tbody>'+rows+'</tbody></table>'+pager('vendors');
+}
+function remoteVendorDrawer(i){
+ const v=(vendorsState.items||[])[i]; if(!v)return; const m=mapVendor(v);
+ const act=m.isPending
+   ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="approveVendor('+i+')">Approve vendor</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="rejectVendor('+i+')">Reject</button>'
+   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
+ openDrawer('Vendor — '+m.store,
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(m.store)+'<div><b style="font-size:16px">'+esc(m.store)+'</b><div class="muted" style="font-size:12.5px">'+esc(m.owner)+' · '+esc(m.city)+'</div></div></div>'
+   +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🏢 Business</span><span class="badge-s '+m.st[0]+'">'+esc(m.st[1])+'</span>'+(m.verified?'<span class="badge-s b-green">✓ verified</span>':'<span class="badge-s b-amber">unverified</span>')+'</div>'
+   +secH('Business profile')
+   +kv('Owner',esc(m.owner))+kv('Category',esc(m.category))+kv('Location',esc(m.city))+kv('Joined',esc(m.joined))+kv('Products',m.products==null?'—':m.products)+kv('Rating',m.rating==null?'—':'⭐ '+m.rating)
+   +secH('Contact')+kv('Phone',esc(m.phone))+(m.email?kv('Email',esc(m.email)):'')+(m.id?kv('User ID',esc(m.id)):''),
+   act);
+}
+function approveVendor(i){vendorDecision(i,'approve');}
+function rejectVendor(i){vendorDecision(i,'reject');}
+async function vendorDecision(i,action){
+ const v=(vendorsState.items||[])[i]; if(!v)return; const m=mapVendor(v);
+ if(!m.id){toast('Missing vendor id — cannot '+action);return;}
+ if(action==='reject'&&!confirm('Reject vendor “'+m.store+'”? They will be notified.'))return;
+ try{
+   await apiFetch('/api/users/'+encodeURIComponent(m.id)+'/'+action,{method:'PUT'});
+   toast(action==='approve'?'Vendor approved — now selling ✓':'Vendor rejected — notified');
+   closeDrawer(); loadVendors();
+ }catch(e){ if(e.status===401)return; toast((action==='approve'?'Approve':'Reject')+' failed: '+(e.message||'error')); }
+}
+
 /* ---------- delegated clicks (wires every CTA) ---------- */
 document.addEventListener('click',e=>{
  const jump=e.target.closest('[data-jump]'); if(jump){go(jump.dataset.jump);return;}
@@ -883,5 +1221,5 @@ document.getElementById('searchInput').addEventListener('input',e=>searchRows(e.
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeSidebar();}});
 
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
-/* boot */
-go('overview');
+/* boot — gate the console behind sign-in (live API needs the JWT) */
+if(API.token){ go('overview'); } else { renderLogin(); }
