@@ -353,6 +353,11 @@ Rules for the log:
 - **Rule:** Parse profile responses with `parseProfileResponse` / `userModelFromProfileResponse`: merge `store` into flat user keys (`nameEn`→`storeNameEn`, `lat`/`lng`, address fields, `storeId`), surface `isEmailVerificationRequired`/`isPhoneVerificationRequired` on `ProfileEntity`, and treat vendor profile UI as `user.hasStore` (`storeId != null`) — not role alone.
 - **Where it applies:** `user_model.dart`, `profile_remote_datasource.dart`, `auth_remote_datasource.dart`, `profile_screen.dart`.
 
+### 2026-07-24 — Google Sign-In works in debug but fails in release APK
+- **What happened:** `google-services.json` only listed the debug keystore SHA-1 (`5e451d…`); release APKs signed with `android/app/release.keystore` (or the CI/root keystore) got `DEVELOPER_ERROR` / no Google ID token. Debug `flutter run` uses the debug keystore so social login and Google-backed register appeared fine.
+- **Rule:** Every release signing key (local `key.properties` keystore AND the CI `KEYSTORE_BASE64` secret — they may differ) must have SHA-1 **and** SHA-256 registered in Firebase for both `com.xstore.app` and `com.xstore.app.dev`, then re-download/commit `google-services.json` and rebuild the release APK. Run `task signing:report` or `./gradlew :app:signingReport` to list fingerprints; never assume the debug SHA covers release.
+- **Where it applies:** `android/app/google-services.json`, `android/app/src/dev/google-services.json`, Firebase console / `firebase apps:android:sha:create`, CI release workflow.
+
 ### 2026-07-23 — Empty user id breaks `/seller/:sellerId` navigation
 - **What happened:** Live get-profile omits `user.id`; tapping "Manage store" pushed `/seller/` (empty segment) → GoRouter "no routes for location `/seller`".
 - **Rule:** Never push `AppRoutes.sellerProfile` without a non-empty id — use `AppRoutes.sellerPath(id)` and resolve id from profile user, auth session, then JWT (`userIdFromJwt`) on login/restore. Disable the CTA when id is still unknown.

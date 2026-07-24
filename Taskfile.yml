@@ -56,6 +56,11 @@ tasks:
       - task: build:dev
       - task: build:prod
 
+  signing:report:
+    desc: Print debug + release SHA-1/SHA-256 (add release fingerprints to Firebase)
+    cmds:
+      - cd android && ./gradlew :app:signingReport
+
   release:apk:
     desc: Bump the build number, then build release APKs for dev and prod (LOCAL — no GitHub, no email)
     cmds:

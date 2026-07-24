@@ -14,11 +14,27 @@
       },
       "oauth_client": [
         {
+          "client_id": "304127266125-7u5r9810c0gdu1r1g0psf8tnb43un3ei.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xstore.app",
+            "certificate_hash": "b8d839065799ca439f56a2625c2a289769df72d0"
+          }
+        },
+        {
           "client_id": "304127266125-7vnhdr4kuolsdoon5pfmt26eka8flf15.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.xstore.app",
             "certificate_hash": "5e451d8e22a82da693d74c185ae50d4476f9aee5"
+          }
+        },
+        {
+          "client_id": "304127266125-f1p2ef0u801pln0cbnhhk2d4lofq4ebq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xstore.app",
+            "certificate_hash": "1d9895ba268767b3588cc1c28ce63db1a80c5fe5"
           }
         },
         {
@@ -58,11 +74,27 @@
       },
       "oauth_client": [
         {
+          "client_id": "304127266125-1jtr1bnutthffoeqjvpkn1pu3j0nfqn3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xstore.app.dev",
+            "certificate_hash": "b8d839065799ca439f56a2625c2a289769df72d0"
+          }
+        },
+        {
           "client_id": "304127266125-2qh5ei431canta6bcko1nto1hafl4kq8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.xstore.app.dev",
             "certificate_hash": "5e451d8e22a82da693d74c185ae50d4476f9aee5"
+          }
+        },
+        {
+          "client_id": "304127266125-h3p4jm98dl95rdgli4vc8imoir0hipg4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xstore.app.dev",
+            "certificate_hash": "1d9895ba268767b3588cc1c28ce63db1a80c5fe5"
           }
         },
         {

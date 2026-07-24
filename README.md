@@ -156,7 +156,7 @@ Concrete steps vary by Firebase/Meta/Google Cloud projects; at minimum you must:
 ### Google Sign-In
 
 1. Register iOS/Android OAuth client IDs for your Firebase (or GCP) project.
-2. Android: configure SHA-1/256 in Firebase and download `google-services.json` under `android/app/`.
+2. Android: add **both** the debug keystore SHA-1/256 (used by `flutter run`) **and** every **release** keystore SHA-1/256 (local `android/key.properties` + the CI `KEYSTORE_BASE64` secret — they may be different keys) in Firebase, then download/commit `google-services.json` under `android/app/` and `android/app/src/dev/`. Run `task signing:report` to print fingerprints. **Rebuild the release APK** after updating the file — the config is baked in at build time.
 3. iOS: add the reversed client ID URL scheme from `GoogleService-Info.plist` under **URL Types** (`ios/Runner/Info.plist`).
 4. Ensure **`CFBundleURLSchemes`** lists your OAuth scheme (see Flutter [Google Sign-In integration](https://pub.dev/packages/google_sign_in)).
 
