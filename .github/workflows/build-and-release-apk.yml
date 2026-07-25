@@ -207,6 +207,7 @@ jobs:
             "mohamedmax728@gmail.com"
             "Mohammedelbakly8@gmail.com"
             "rehab.mhmd2@gmail.com"
+            "amlmhmd253@gmail.com"
           )
           TO_HEADER=$(IFS=, ; echo "${RECIPIENTS[*]}")
           MAIL_RCPT_ARGS=()

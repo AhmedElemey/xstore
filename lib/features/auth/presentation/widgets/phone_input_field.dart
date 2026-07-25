@@ -15,12 +15,17 @@ class PhoneInputField extends StatelessWidget {
     required this.onChanged,
     this.errorText,
     this.enabled = true,
+    this.readOnly = false,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String? errorText;
   final bool enabled;
+
+  /// Display-only: keeps the value visible (unlike [enabled] = false, which
+  /// greys it out) but blocks editing and hides the clear button.
+  final bool readOnly;
 
   String _normalizeEgyptInput(String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -73,6 +78,7 @@ class PhoneInputField extends StatelessWidget {
                   onChanged(normalized);
                 },
                 enabled: enabled,
+                readOnly: readOnly,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
@@ -95,7 +101,7 @@ class PhoneInputField extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 
-                  suffixIcon: controller.text.isNotEmpty
+                  suffixIcon: (!readOnly && controller.text.isNotEmpty)
                       ? IconButton(
                           onPressed: () {
                             controller.clear();
