@@ -27,15 +27,6 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
-  static const List<String> _storeCategoryOptions = [
-    'Fashion',
-    'Electronics',
-    'Home',
-    'Beauty',
-    'Sports',
-    'Other',
-  ];
-
   final _name = TextEditingController();
   final _fullNameAr = TextEditingController();
   final _email = TextEditingController();
@@ -152,46 +143,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     n.updateGovernorate(_governorate.text);
     n.updateTown(_town.text);
     n.updateDetailAddress(_detailAddress.text);
-  }
-
-  Future<void> _pickCategory() async {
-    await showAnimatedBottomSheet<void>(
-      context: context,
-      builder: (ctx) => Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-        child: SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Text(
-                  context.l10n.storeCategoryLabel,
-                  style: AppTypography.titleMedium,
-                ),
-              ),
-              for (final c in _storeCategoryOptions)
-                ListTile(
-                  title: Text(c),
-                  trailing: _category == c ? const Icon(Icons.check) : null,
-                  onTap: () {
-                    setState(() {
-                      _category = c;
-                      _storeCategory.text = c;
-                    });
-                    ref
-                        .read(profileNotifierProvider.notifier)
-                        .updateField('storeCategory', c);
-                    Navigator.pop(ctx);
-                  },
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Future<void> _pickDob() async {
@@ -450,21 +401,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ref.read(profileNotifierProvider.notifier).updateField('fullNameAr', v),
           ),
           const Gap(AppSpacing.md),
+          // Email is identity on the backend and has no update-profile field —
+          // shown read-only so an edit can't be silently discarded on save.
           TextField(
             controller: _email,
+            readOnly: true,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               prefixIcon: const Icon(LucideIcons.mail),
+              suffixIcon: const Icon(LucideIcons.lock, size: 18),
               border: const OutlineInputBorder(),
             ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('email', v),
           ),
           const Gap(AppSpacing.md),
+          // Phone is the account identifier; update-profile can't change it.
           PhoneInputField(
             controller: _phone,
-            onChanged: (v) => ref
-                .read(profileNotifierProvider.notifier)
-                .updateField('phone', v.replaceAll(RegExp(r'\D'), '')),
+            readOnly: true,
+            onChanged: (_) {},
           ),
           const Gap(AppSpacing.md),
           TextField(
@@ -487,16 +441,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
           ),
           const Gap(AppSpacing.md),
+          // Bio has no update-profile field on the backend — read-only so the
+          // edit isn't silently dropped on save.
           TextField(
             controller: _bio,
+            readOnly: true,
             maxLines: 3,
-            maxLength: 150,
             decoration: InputDecoration(
               hintText: context.l10n.bioHint,
               prefixIcon: const Icon(LucideIcons.alignLeft),
+              suffixIcon: const Icon(LucideIcons.lock, size: 18),
               border: const OutlineInputBorder(),
             ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('bio', v),
           ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
@@ -542,15 +498,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   .updateField('storeNameAr', v),
             ),
             const Gap(AppSpacing.md),
+            // Category change needs a backend category-id picker (as in
+            // registration); the label-only picker never persisted, so it's
+            // shown read-only until that picker is wired.
             TextField(
               readOnly: true,
               controller: _storeCategory,
               decoration: InputDecoration(
                 prefixIcon: const Icon(LucideIcons.tags),
-                suffixIcon: const Icon(LucideIcons.chevronDown),
+                suffixIcon: const Icon(LucideIcons.lock, size: 18),
                 border: const OutlineInputBorder(),
               ),
-              onTap: _pickCategory,
             ),
             const Gap(AppSpacing.md),
             TextField(

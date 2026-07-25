@@ -107,12 +107,9 @@ class LoggingInterceptor extends Interceptor {
         final keyLower = key.toString().toLowerCase();
         final isSensitive = _redactedHeaderKeys.contains(keyLower) ||
             _redactedBodyKeys.contains(keyLower);
-        // Debug-only: show the session token in the headers block for
-        // backend verification; still redact Authorization (license key).
-        final skipRedact = kDebugMode && keyLower == 'x-auth-token';
         return MapEntry(
           key,
-          (isSensitive && !skipRedact) ? '***REDACTED***' : _redact(value),
+          isSensitive ? '***REDACTED***' : _redact(value),
         );
       });
     }
