@@ -189,6 +189,8 @@ void main() {
         expect(u.longitude, 31.2357);
         expect(u.storeNameEn, 'Tech Hub');
         expect(u.storeNameAr, 'متجر');
+        expect(u.storeDescriptionEn, 'Electronics seller');
+        expect(u.storeDescription, 'Electronics seller');
       },
       skip: MockConfig.useMock ? false : 'Requires --dart-define=MOCK=true',
     );

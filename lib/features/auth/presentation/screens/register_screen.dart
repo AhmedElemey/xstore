@@ -79,13 +79,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _pickDob(RegisterNotifier n, RegisterState s) async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastDate = today.subtract(const Duration(days: 1));
+    var initialDate = s.dateOfBirth ?? DateTime(now.year - 20, now.month, now.day);
+    if (initialDate.isAfter(lastDate)) {
+      initialDate = lastDate;
+    }
+    if (initialDate.isBefore(DateTime(1940))) {
+      initialDate = DateTime(1940);
+    }
     final d = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year - 20),
+      initialDate: initialDate,
       firstDate: DateTime(1940),
-      lastDate: now,
+      lastDate: lastDate,
     );
-    if (d != null) n.updateField(dateOfBirth: d);
+    if (d != null) n.updateField(dateOfBirth: DateTime(d.year, d.month, d.day));
   }
 
   Future<void> _confirmExit() async {

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../error/exceptions.dart';
+import 'app_error_messages.dart';
 
 /// Maps a [DioException] to an [AppException], shared across datasources.
 ///
@@ -21,6 +22,9 @@ AppException mapDioException(DioException e) {
       final serverMessage = _serverErrorMessage(e.response?.data);
       if (code == 401 || code == 403) {
         return UnauthorizedException(serverMessage ?? e.message);
+      }
+      if (code == 429) {
+        return const ServerException(rateLimitErrorCode);
       }
       if (code == 400 || code == 422) {
         final message =

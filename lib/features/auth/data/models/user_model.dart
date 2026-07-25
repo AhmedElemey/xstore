@@ -178,11 +178,29 @@ class UserModel with _$UserModel {
       return legacy ? UserRole.vendor : UserRole.consumer;
     }
 
-    DateTime? parseDate(String? key, {String? altKey}) {
+    DateTime? parseDate(String? key, {String? altKey, bool dateOnly = false}) {
       final v = json[key] ?? (altKey != null ? json[altKey] : null);
       if (v == null) return null;
-      if (v is String) return DateTime.tryParse(v);
-      return null;
+      if (v is! String) return null;
+      final trimmed = v.trim();
+      if (trimmed.isEmpty) return null;
+      if (dateOnly) {
+        // Backend sends date-only `YYYY-MM-DD` or ISO timestamps — always
+        // treat the calendar date literally, not shifted by timezone.
+        final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})').firstMatch(trimmed);
+        if (m != null) {
+          return DateTime(
+            int.parse(m.group(1)!),
+            int.parse(m.group(2)!),
+            int.parse(m.group(3)!),
+          );
+        }
+      }
+      final parsed = DateTime.tryParse(trimmed);
+      if (parsed == null) return null;
+      return dateOnly
+          ? DateTime(parsed.year, parsed.month, parsed.day)
+          : parsed;
     }
 
     String? optString(String key, {String? altKey}) {
@@ -220,7 +238,11 @@ class UserModel with _$UserModel {
           optString('storeName'),
       storeSlug: json['storeSlug'] as String?,
       storeCategory: json['storeCategory'] as String?,
-      storeDescription: json['storeDescription'] as String?,
+      // Localized keys before legacy storeDescription; profile GET nests
+      // descriptionEn/Ar on store (merged to storeDescriptionEn/Ar).
+      storeDescription: optString('storeDescriptionEn') ??
+          optString('storeDescriptionAr') ??
+          optString('storeDescription'),
       storeLogoUrl: json['storeLogoUrl'] as String?,
       storeCity: json['storeCity'] as String?,
       storeWilaya: json['storeWilaya'] as String?,
@@ -235,7 +257,7 @@ class UserModel with _$UserModel {
       detailAddress: json['detailAddress'] as String?,
       bio: json['bio'] as String?,
       // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`.
-      dateOfBirth: parseDate('dateOfBirth', altKey: 'birthDate'),
+      dateOfBirth: parseDate('dateOfBirth', altKey: 'birthDate', dateOnly: true),
       // update-profile writes instagramPage; get-profile may return either key.
       instagramHandle: optString('instagramHandle', altKey: 'instagramPage'),
       facebookPage: json['facebookPage'] as String?,
@@ -246,8 +268,8 @@ class UserModel with _$UserModel {
       fullNameAr: optString('fullNameAr'),
       storeNameEn: optString('storeNameEn'),
       storeNameAr: optString('storeNameAr'),
-      storeDescriptionEn: json['storeDescriptionEn'] as String?,
-      storeDescriptionAr: json['storeDescriptionAr'] as String?,
+      storeDescriptionEn: optString('storeDescriptionEn'),
+      storeDescriptionAr: optString('storeDescriptionAr'),
       storeCategoryId: json['storeCategoryId'] as int?,
       storeCityId: json['storeCityId'] as int? ?? json['cityId'] as int?,
       storeGovernmentId:

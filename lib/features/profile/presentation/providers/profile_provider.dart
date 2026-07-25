@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/constants/prefs_keys.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import 'profile_dependencies.dart';
@@ -39,6 +40,12 @@ void resetProfileData(Ref ref) {
   ref.invalidate(profileNotifierProvider);
 }
 
+bool _sameCalendarDate(DateTime? a, DateTime? b) {
+  if (a == null && b == null) return true;
+  if (a == null || b == null) return false;
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
 bool _isDarkTheme(ThemeMode mode) {
   if (mode == ThemeMode.dark) return true;
   if (mode == ThemeMode.light) return false;
@@ -52,12 +59,12 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editEmail.trim() == u.email.trim() &&
       s.editPhone.trim() == u.phoneNumber.trim() &&
       s.editLocation.trim() == (u.location ?? '').trim() &&
-      s.editBio.trim() == (u.bio ?? '').trim() &&
       s.editFullNameAr.trim() == (u.fullNameAr ?? '').trim() &&
       s.editStoreName.trim() == (u.storeName ?? '').trim() &&
       s.editStoreNameAr.trim() == (u.storeNameAr ?? '').trim() &&
       s.editStoreCategory.trim() == (u.storeCategory ?? '').trim() &&
-      s.editStoreDescription.trim() == (u.storeDescription ?? '').trim() &&
+      s.editStoreDescription.trim() ==
+          (u.storeDescriptionEn ?? u.storeDescription ?? '').trim() &&
       s.editStoreDescriptionAr.trim() ==
           (u.storeDescriptionAr ?? '').trim() &&
       s.editStoreCity.trim() == (u.storeCity ?? '').trim() &&
@@ -68,7 +75,7 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editGovernorate.trim() == (u.governorate ?? '').trim() &&
       s.editTown.trim() == (u.town ?? '').trim() &&
       s.editDetailAddress.trim() == (u.detailAddress ?? '').trim() &&
-      s.editDateOfBirth == u.dateOfBirth &&
+      _sameCalendarDate(s.editDateOfBirth, u.dateOfBirth) &&
       s.editInstagram.trim() == (u.instagramHandle ?? '').trim() &&
       s.editFacebook.trim() == (u.facebookPage ?? '').trim() &&
       s.editAvatarFile == null &&
@@ -86,9 +93,23 @@ class ProfileNotifier extends _$ProfileNotifier {
   // instance and build() would reset the flag, reopening the gate.
   var _sessionEpoch = 0;
 
+  /// Coalesces concurrent tab-open / prefetch / edit-screen refreshes.
+  Future<void>? _inFlightRefresh;
+
+  /// Skips back-to-back get-profile calls (login prefetch + profile tab, etc.).
+  DateTime? _lastRefreshAt;
+  static const _minRefreshInterval = Duration(seconds: 30);
+
+  /// After HTTP 429, block automatic retries until this time.
+  DateTime? _rateLimitedUntil;
+  static const _rateLimitCooldown = Duration(minutes: 1);
+
   @override
   ProfileState build() {
-    ref.onDispose(() => _sessionEpoch++);
+    ref.onDispose(() {
+      _sessionEpoch++;
+      _inFlightRefresh = null;
+    });
     return const ProfileState();
   }
 
@@ -97,13 +118,61 @@ class ProfileNotifier extends _$ProfileNotifier {
   ///
   /// [user] overrides the `authProvider` read for callers holding the session
   /// user while `authProvider` is still Loading (see [prefetchProfileData]).
-  Future<void> refreshProfileData({UserEntity? user}) async {
+  ///
+  /// Pass [force: true] for pull-to-refresh and post-save reloads.
+  Future<void> refreshProfileData({UserEntity? user, bool force = false}) async {
     final sessionUser = user ?? ref.read(authProvider).valueOrNull;
     if (sessionUser == null) {
       state = const ProfileState();
       return;
     }
 
+    final now = DateTime.now();
+    if (!force &&
+        _rateLimitedUntil != null &&
+        now.isBefore(_rateLimitedUntil!)) {
+      if (kDebugMode) {
+        debugPrint(
+          '[ProfileNotifier] refresh skipped — rate limited until '
+          '$_rateLimitedUntil',
+        );
+      }
+      return;
+    }
+
+    if (!force &&
+        state.profile != null &&
+        _lastRefreshAt != null &&
+        now.difference(_lastRefreshAt!) < _minRefreshInterval) {
+      if (kDebugMode) {
+        debugPrint(
+          '[ProfileNotifier] refresh skipped — last refresh '
+          '${now.difference(_lastRefreshAt!).inSeconds}s ago',
+        );
+      }
+      return;
+    }
+
+    final existing = _inFlightRefresh;
+    if (existing != null) {
+      if (kDebugMode) {
+        debugPrint('[ProfileNotifier] refresh coalesced — awaiting in-flight');
+      }
+      return existing;
+    }
+
+    final future = _refreshProfileDataImpl(sessionUser);
+    _inFlightRefresh = future;
+    try {
+      await future;
+    } finally {
+      if (identical(_inFlightRefresh, future)) {
+        _inFlightRefresh = null;
+      }
+    }
+  }
+
+  Future<void> _refreshProfileDataImpl(UserEntity sessionUser) async {
     final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -118,7 +187,12 @@ class ProfileNotifier extends _$ProfileNotifier {
       if (epoch != _sessionEpoch) return;
       result.fold(
         (f) {
-          state = state.copyWith(isLoading: false, error: f.toString());
+          final message = f.toString();
+          if (message == rateLimitErrorCode) {
+            _rateLimitedUntil =
+                DateTime.now().add(_rateLimitCooldown);
+          }
+          state = state.copyWith(isLoading: false, error: message);
         },
         (profile) {
           if (kDebugMode) {
@@ -129,6 +203,8 @@ class ProfileNotifier extends _$ProfileNotifier {
               'role=${profile.user.role.name}',
             );
           }
+          _lastRefreshAt = DateTime.now();
+          _rateLimitedUntil = null;
           state = state
               .applyFromProfile(
                 profile,
@@ -162,9 +238,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         break;
       case 'location':
         next = next.copyWith(editLocation: value as String);
-        break;
-      case 'bio':
-        next = next.copyWith(editBio: value as String);
         break;
       case 'storeName':
         next = next.copyWith(editStoreName: value as String);
@@ -370,8 +443,30 @@ class ProfileNotifier extends _$ProfileNotifier {
     final epoch = _sessionEpoch;
     state = state.copyWith(isUpdating: true, error: null, fieldErrors: {});
 
+    final request = state.toUpdateProfileRequest();
+    if (kDebugMode) {
+      debugPrint(
+        '[ProfileNotifier] saveProfile — '
+        'fullNameEn=${request.fullNameEn} fullNameAr=${request.fullNameAr} '
+        'birthDate=${request.birthDate} '
+        'storeNameEn=${request.storeNameEn} storeNameAr=${request.storeNameAr} '
+        'storeDescriptionEn=${request.storeDescriptionEn} '
+        'storeDescriptionAr=${request.storeDescriptionAr} '
+        'whatsAppNumber=${request.whatsAppNumber} '
+        'instagramPage=${request.instagramPage} facebookPage=${request.facebookPage} '
+        'detailedAddressByGoogleMaps=${request.detailedAddressByGoogleMaps} '
+        'detailedAddressByUser=${request.detailedAddressByUser} '
+        'cityByGoogleMaps=${request.cityByGoogleMaps} '
+        'governmentByGoogleMaps=${request.governmentByGoogleMaps} '
+        'lat=${request.lat} lng=${request.lng} '
+        'cityId=${request.cityId} governmentId=${request.governmentId} '
+        'storeCategoryId=${request.storeCategoryId} '
+        'userImageUrl=${request.userImageUrl} storeImageUrl=${request.storeImageUrl}',
+      );
+    }
+
     final res = await ref.read(updateProfileUseCaseProvider).call(
-          state.toUpdateProfileRequest(),
+          request,
           sessionUser: u0,
         );
     if (epoch != _sessionEpoch) return;
@@ -408,7 +503,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       editAvatarFile: null,
       editStoreLogoFile: null,
     );
-    await refreshProfileData();
+    await refreshProfileData(force: true);
   }
 
   Future<void> toggleDarkMode(bool enabled) async {

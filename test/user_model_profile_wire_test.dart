@@ -44,13 +44,22 @@ void main() {
       expect(model.instagramHandle, 'handle');
     });
 
-    test('reads birthDate as dateOfBirth', () {
+    test('reads birthDate as dateOfBirth (calendar date, not timezone-shifted)', () {
       final model = UserModel.fromJson({
         'id': 1,
         'email': 'c@test.com',
         'birthDate': '1990-05-15T00:00:00.000Z',
       });
-      expect(model.dateOfBirth, DateTime.parse('1990-05-15T00:00:00.000Z'));
+      expect(model.dateOfBirth, DateTime(1990, 5, 15));
+    });
+
+    test('reads date-only birthDate wire format', () {
+      final model = UserModel.fromJson({
+        'id': 1,
+        'email': 'c@test.com',
+        'birthDate': '1990-03-20',
+      });
+      expect(model.dateOfBirth, DateTime(1990, 3, 20));
     });
 
     test('prefers storeNameEn over legacy storeName when all are set', () {
@@ -72,6 +81,45 @@ void main() {
         'storeNameEn': 'English Shop',
       });
       expect(model.storeName, 'English Shop');
+    });
+
+    test('empty legacy storeDescription falls through to storeDescriptionEn', () {
+      final model = UserModel.fromJson({
+        'id': 1,
+        'email': 'v@test.com',
+        'storeDescription': '',
+        'storeDescriptionEn': 'English description',
+      });
+      expect(model.storeDescription, 'English description');
+    });
+
+    test('reads storeDescriptionEn then storeDescriptionAr when legacy absent', () {
+      final en = UserModel.fromJson({
+        'id': 1,
+        'email': 'v@test.com',
+        'storeDescriptionEn': 'About our shop',
+      });
+      expect(en.storeDescription, 'About our shop');
+
+      final ar = UserModel.fromJson({
+        'id': 2,
+        'email': 'v2@test.com',
+        'storeDescriptionAr': 'وصف المتجر',
+      });
+      expect(ar.storeDescription, 'وصف المتجر');
+    });
+
+    test('prefers storeDescriptionEn over legacy storeDescription when all set', () {
+      final model = UserModel.fromJson({
+        'id': 1,
+        'email': 'v@test.com',
+        'storeDescription': 'Legacy desc',
+        'storeDescriptionEn': 'Updated desc',
+        'storeDescriptionAr': 'وصف',
+      });
+      expect(model.storeDescription, 'Updated desc');
+      expect(model.storeDescriptionEn, 'Updated desc');
+      expect(model.storeDescriptionAr, 'وصف');
     });
 
     test('whitespace-only alias values are treated as absent', () {
@@ -150,6 +198,8 @@ void main() {
       expect(model.storeNameEn, 'Store Name Updated');
       expect(model.storeName, 'Store Name Updated');
       expect(model.storeDescriptionEn, 'Store Description Updated');
+      expect(model.storeDescription, 'Store Description Updated');
+      expect(model.storeDescriptionAr, 'وصف المتجر المعدل');
       expect(model.whatsappNumber, '01012345677');
       expect(model.storeCityId, 2);
       expect(model.storeGovernmentId, 2);

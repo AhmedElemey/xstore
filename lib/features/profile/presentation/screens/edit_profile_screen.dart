@@ -10,6 +10,7 @@ import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/profile_provider.dart';
@@ -42,7 +43,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _phone = TextEditingController();
   final _location = TextEditingController();
   final _dobText = TextEditingController();
-  final _bio = TextEditingController();
   final _storeName = TextEditingController();
   final _storeNameAr = TextEditingController();
   final _storeCategory = TextEditingController();
@@ -66,9 +66,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileNotifierProvider.notifier).refreshProfileData();
-    });
+    // Profile data is prefetched on login/restore and read from
+    // profileNotifierProvider — no mount-time get-profile here (429 risk).
   }
 
   @override
@@ -79,7 +78,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _phone.dispose();
     _location.dispose();
     _dobText.dispose();
-    _bio.dispose();
     _storeName.dispose();
     _storeNameAr.dispose();
     _storeCategory.dispose();
@@ -107,7 +105,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _dobText.text = s.editDateOfBirth != null
         ? DateFormat.yMMMd().format(s.editDateOfBirth!)
         : '';
-    _bio.text = s.editBio;
     _storeName.text = s.editStoreName;
     _storeNameAr.text = s.editStoreNameAr;
     _category = s.editStoreCategory;
@@ -135,7 +132,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     n.updateField('email', _email.text);
     n.updateField('phone', _phone.text);
     n.updateField('location', _location.text);
-    n.updateField('bio', _bio.text);
     n.updateField('storeName', _storeName.text);
     n.updateField('storeNameAr', _storeNameAr.text);
     n.updateField('storeCategory', _category);
@@ -196,18 +192,28 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _pickDob() async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastDate = today.subtract(const Duration(days: 1));
+    var initialDate = _dob ?? DateTime(now.year - 18, now.month, now.day);
+    if (initialDate.isAfter(lastDate)) {
+      initialDate = lastDate;
+    }
+    if (initialDate.isBefore(DateTime(1950))) {
+      initialDate = DateTime(1950);
+    }
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dob ?? DateTime(now.year - 18),
+      initialDate: initialDate,
       firstDate: DateTime(1950),
-      lastDate: now,
+      lastDate: lastDate,
     );
     if (picked == null) return;
+    final dateOnly = DateTime(picked.year, picked.month, picked.day);
     setState(() {
-      _dob = picked;
-      _dobText.text = DateFormat.yMMMd().format(picked);
+      _dob = dateOnly;
+      _dobText.text = DateFormat.yMMMd().format(dateOnly);
     });
-    ref.read(profileNotifierProvider.notifier).updateField('dateOfBirth', picked);
+    ref.read(profileNotifierProvider.notifier).updateField('dateOfBirth', dateOnly);
   }
 
   Future<void> _avatarSheet() async {
@@ -322,6 +328,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<ProfileState>(profileNotifierProvider, (prev, next) async {
+      if (prev?.isLoading == true &&
+          !next.isLoading &&
+          !next.isUpdating &&
+          !next.hasChanges &&
+          next.user != null &&
+          mounted) {
+        setState(() => _syncFromState(next));
+      }
       if (prev?.isDetectingLocation == true &&
           !next.isDetectingLocation &&
           next.locationError == null &&
@@ -485,18 +499,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
-          ),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _bio,
-            maxLines: 3,
-            maxLength: 150,
-            decoration: InputDecoration(
-              hintText: context.l10n.bioHint,
-              prefixIcon: const Icon(LucideIcons.alignLeft),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('bio', v),
           ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
@@ -682,6 +684,7 @@ String _errorText(BuildContext context, String key) {
     'locationPermissionDenied' => context.l10n.locationPermissionDenied,
     'locationPermissionPermanent' => context.l10n.locationPermissionPermanent,
     'locationServiceDisabled' => context.l10n.locationServiceDisabled,
+    rateLimitErrorCode => resolveAppError(context, key),
     _ => key,
   };
 }

@@ -25,7 +25,6 @@ mixin _$ProfileState {
   String get editEmail => throw _privateConstructorUsedError;
   String get editPhone => throw _privateConstructorUsedError;
   String get editLocation => throw _privateConstructorUsedError;
-  String get editBio => throw _privateConstructorUsedError;
   File? get editAvatarFile => throw _privateConstructorUsedError;
   bool get avatarRemoved => throw _privateConstructorUsedError;
   File? get editStoreLogoFile => throw _privateConstructorUsedError;
@@ -76,7 +75,6 @@ abstract class $ProfileStateCopyWith<$Res> {
       String editEmail,
       String editPhone,
       String editLocation,
-      String editBio,
       File? editAvatarFile,
       bool avatarRemoved,
       File? editStoreLogoFile,
@@ -131,7 +129,6 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? editEmail = null,
     Object? editPhone = null,
     Object? editLocation = null,
-    Object? editBio = null,
     Object? editAvatarFile = freezed,
     Object? avatarRemoved = null,
     Object? editStoreLogoFile = freezed,
@@ -197,10 +194,6 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
       editLocation: null == editLocation
           ? _value.editLocation
           : editLocation // ignore: cast_nullable_to_non_nullable
-              as String,
-      editBio: null == editBio
-          ? _value.editBio
-          : editBio // ignore: cast_nullable_to_non_nullable
               as String,
       editAvatarFile: freezed == editAvatarFile
           ? _value.editAvatarFile
@@ -348,7 +341,6 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       String editEmail,
       String editPhone,
       String editLocation,
-      String editBio,
       File? editAvatarFile,
       bool avatarRemoved,
       File? editStoreLogoFile,
@@ -402,7 +394,6 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? editEmail = null,
     Object? editPhone = null,
     Object? editLocation = null,
-    Object? editBio = null,
     Object? editAvatarFile = freezed,
     Object? avatarRemoved = null,
     Object? editStoreLogoFile = freezed,
@@ -468,10 +459,6 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
       editLocation: null == editLocation
           ? _value.editLocation
           : editLocation // ignore: cast_nullable_to_non_nullable
-              as String,
-      editBio: null == editBio
-          ? _value.editBio
-          : editBio // ignore: cast_nullable_to_non_nullable
               as String,
       editAvatarFile: freezed == editAvatarFile
           ? _value.editAvatarFile
@@ -602,7 +589,6 @@ class _$ProfileStateImpl implements _ProfileState {
       this.editEmail = '',
       this.editPhone = '',
       this.editLocation = '',
-      this.editBio = '',
       this.editAvatarFile,
       this.avatarRemoved = false,
       this.editStoreLogoFile,
@@ -659,9 +645,6 @@ class _$ProfileStateImpl implements _ProfileState {
   @override
   @JsonKey()
   final String editLocation;
-  @override
-  @JsonKey()
-  final String editBio;
   @override
   final File? editAvatarFile;
   @override
@@ -750,7 +733,7 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   String toString() {
-    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editBio: $editBio, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
+    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
   }
 
   @override
@@ -774,7 +757,6 @@ class _$ProfileStateImpl implements _ProfileState {
                 other.editPhone == editPhone) &&
             (identical(other.editLocation, editLocation) ||
                 other.editLocation == editLocation) &&
-            (identical(other.editBio, editBio) || other.editBio == editBio) &&
             (identical(other.editAvatarFile, editAvatarFile) ||
                 other.editAvatarFile == editAvatarFile) &&
             (identical(other.avatarRemoved, avatarRemoved) ||
@@ -846,7 +828,6 @@ class _$ProfileStateImpl implements _ProfileState {
         editEmail,
         editPhone,
         editLocation,
-        editBio,
         editAvatarFile,
         avatarRemoved,
         editStoreLogoFile,
@@ -895,7 +876,6 @@ abstract class _ProfileState implements ProfileState {
       final String editEmail,
       final String editPhone,
       final String editLocation,
-      final String editBio,
       final File? editAvatarFile,
       final bool avatarRemoved,
       final File? editStoreLogoFile,
@@ -943,8 +923,6 @@ abstract class _ProfileState implements ProfileState {
   String get editPhone;
   @override
   String get editLocation;
-  @override
-  String get editBio;
   @override
   File? get editAvatarFile;
   @override

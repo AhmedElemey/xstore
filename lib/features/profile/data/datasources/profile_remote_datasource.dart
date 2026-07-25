@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
@@ -100,6 +101,99 @@ Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
     if (request.birthDate != null)
       'birthDate': _birthDateWire(request.birthDate),
   };
+}
+
+void _debugLogProfileFields({
+  required String tag,
+  Map<String, dynamic>? wireFields,
+  Map<String, dynamic>? responseData,
+  UserModel? parsed,
+}) {
+  if (!kDebugMode) return;
+
+  dynamic readNested(Map<String, dynamic>? data, String path) {
+    if (data == null) return null;
+    dynamic cur = data;
+    for (final part in path.split('.')) {
+      if (cur is! Map) return null;
+      cur = cur[part];
+    }
+    return cur;
+  }
+
+  bool valuesMatch(dynamic sent, dynamic got) {
+    if (got == null) return sent == null;
+    final s = sent.toString().trim();
+    final g = got.toString().trim();
+    if (s == g) return true;
+    if (s.length >= 10 && g.length >= 10 && s.substring(0, 10) == g.substring(0, 10)) {
+      return true;
+    }
+    final sd = double.tryParse(s);
+    final gd = double.tryParse(g);
+    if (sd != null && gd != null) return (sd - gd).abs() < 0.0001;
+    return false;
+  }
+
+  /// PUT wire key → get-profile response path (user.* or store.*).
+  const fieldMap = <String, String>{
+    'fullNameEn': 'user.fullNameEn',
+    'fullNameAr': 'user.fullNameAr',
+    'birthDate': 'user.birthDate',
+    'userImageUrl': 'user.avatarUrl',
+    'storeNameEn': 'store.nameEn',
+    'storeNameAr': 'store.nameAr',
+    'storeDescriptionEn': 'store.descriptionEn',
+    'storeDescriptionAr': 'store.descriptionAr',
+    'storeImageUrl': 'store.storeLogoUrl',
+    'whatsAppNumber': 'store.whatsAppNumber',
+    'instagramPage': 'store.instagramPage',
+    'facebookPage': 'store.facebookPage',
+    'detailedAddressByGoogleMaps': 'store.detailedAddressByGoogleMaps',
+    'detailedAddressByUser': 'store.detailedAddressByUser',
+    'cityByGoogleMaps': 'store.cityByGoogleMaps',
+    'governmentByGoogleMaps': 'store.governmentByGoogleMaps',
+    'lat': 'store.lat',
+    'lng': 'store.lng',
+    'storeCategoryId': 'store.storeCategoryId',
+    'cityId': 'store.cityId',
+    'governmentId': 'store.governmentId',
+  };
+
+  debugPrint('── profile $tag ──');
+  if (wireFields != null) {
+    final sentKeys = wireFields.keys
+        .where((k) => k != 'userImage' && k != 'storeImage')
+        .toList();
+    debugPrint('PUT wire keys (${sentKeys.length}): $sentKeys');
+    for (final fileKey in ['userImage', 'storeImage']) {
+      if (wireFields.containsKey(fileKey)) {
+        debugPrint('PUT file: $fileKey attached');
+      }
+    }
+  }
+
+  if (wireFields != null &&
+      responseData != null &&
+      responseData.isNotEmpty) {
+    debugPrint('── field sync (sent → response raw) ──');
+    for (final entry in fieldMap.entries) {
+      if (!wireFields.containsKey(entry.key)) continue;
+      final sent = wireFields[entry.key];
+      final got = readNested(responseData, entry.value);
+      final synced = valuesMatch(sent, got);
+      debugPrint(
+        '  ${synced ? "✓" : "✗"} ${entry.key}: sent=$sent → got=$got',
+      );
+    }
+  }
+
+  if (parsed != null) {
+    debugPrint(
+      'parsed model: name=${parsed.name} dateOfBirth=${parsed.dateOfBirth} '
+      'storeDescriptionEn=${parsed.storeDescriptionEn} storeNameEn=${parsed.storeNameEn}',
+    );
+  }
 }
 
 Future<FormData> updateProfileFormData(UpdateProfileRequest request) async {
@@ -347,6 +441,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         data,
         fallbackUserId: sessionUser.id,
       );
+      _debugLogProfileFields(
+        tag: 'GET get-profile',
+        responseData: data,
+        parsed: user,
+      );
       // ASSUMPTION: get-profile returns identity fields only — no confirmed
       // backend source yet for orders/wishlist/store stats. Default to 0
       // until a real source exists (Phase 2, once listings/orders land).
@@ -383,6 +482,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return model;
     }
     try {
+      final wireFields = updateProfileWireFields(request);
+      _debugLogProfileFields(tag: 'PUT update-profile (request)', wireFields: wireFields);
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.updateProfile,
         data: await updateProfileFormData(request),
@@ -390,10 +491,17 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
-      return userModelFromProfileResponse(
+      final parsed = userModelFromProfileResponse(
         data,
         fallbackUserId: sessionUser.id,
       );
+      _debugLogProfileFields(
+        tag: 'PUT update-profile (response ${response.statusCode})',
+        wireFields: wireFields,
+        responseData: data,
+        parsed: parsed,
+      );
+      return parsed;
     } on FormatException {
       throw const ServerException('Empty response');
     } on DioException catch (e) {

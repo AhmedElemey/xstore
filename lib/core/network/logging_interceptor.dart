@@ -102,6 +102,16 @@ class LoggingInterceptor extends Interceptor {
   }
 
   dynamic _redact(dynamic data) {
+    if (data is FormData) {
+      final fields = <String, dynamic>{};
+      for (final entry in data.fields) {
+        fields[entry.key] = entry.value;
+      }
+      for (final file in data.files) {
+        fields[file.key] = '<file:${file.value.filename}>';
+      }
+      return fields;
+    }
     if (data is Map) {
       return data.map((key, value) {
         final keyLower = key.toString().toLowerCase();

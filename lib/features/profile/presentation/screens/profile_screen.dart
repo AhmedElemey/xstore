@@ -69,7 +69,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _onRefresh() async {
-    await ref.read(profileNotifierProvider.notifier).refreshProfileData();
+    await ref
+        .read(profileNotifierProvider.notifier)
+        .refreshProfileData(force: true);
   }
 
   @override

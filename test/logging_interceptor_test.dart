@@ -69,6 +69,27 @@ void main() {
     expect(output, contains('***REDACTED***'));
   });
 
+  test('onRequest expands FormData fields for debug logging', () {
+    final options = RequestOptions(
+      path: '/api/auth/update-profile',
+      method: 'PUT',
+      data: FormData.fromMap({
+        'birthDate': '1990-03-20',
+        'storeDescriptionEn': 'Test desc',
+        'userImage': MultipartFile.fromString('x', filename: 'a.jpg'),
+      }),
+    );
+
+    interceptor.onRequest(options, RequestInterceptorHandler());
+
+    final output = logs.join('\n');
+    expect(output, contains('birthDate'));
+    expect(output, contains('1990-03-20'));
+    expect(output, contains('storeDescriptionEn'));
+    expect(output, contains('Test desc'));
+    expect(output, contains('<file:a.jpg>'));
+  });
+
   test('onError redacts sensitive fields in the error response body', () {
     final requestOptions = RequestOptions(path: '/auth/social', method: 'POST');
     final err = DioException(
