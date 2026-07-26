@@ -403,7 +403,11 @@ class RegisterNotifier extends _$RegisterNotifier {
     if (email != null) next = next.copyWith(email: email);
     if (phoneNumber != null) next = next.copyWith(phoneNumber: phoneNumber);
     if (countryCode != null) next = next.copyWith(countryCode: countryCode);
-    if (dateOfBirth != null) next = next.copyWith(dateOfBirth: dateOfBirth);
+    if (dateOfBirth != null) {
+      final d = Validators.calendarDate(dateOfBirth);
+      if (Validators.isBirthDateAfterToday(d)) return;
+      next = next.copyWith(dateOfBirth: d);
+    }
     if (location != null) next = next.copyWith(location: location);
     if (storeName != null) {
       next = next.copyWith(
@@ -436,6 +440,33 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
     if (whatsappNumber != null) next = next.copyWith(whatsappNumber: whatsappNumber);
     state = next.copyWith(stepErrors: {}, error: null);
+  }
+
+  /// Sets the governorate (`storeCityId`) + city (`storeGovernmentId`) pair from
+  /// the location cascade. Unlike [updateField], this assigns both explicitly so
+  /// changing the governorate can clear the dependent city (passing null).
+  void updateStoreLocation({int? storeCityId, int? storeGovernmentId}) {
+    state = state.copyWith(
+      storeCityId: storeCityId,
+      storeGovernmentId: storeGovernmentId,
+      stepErrors: {},
+      error: null,
+    );
+  }
+
+  /// Validates and stores a picked birth date; keeps existing step errors when invalid.
+  void applyDateOfBirth(DateTime date, AppLocalizations l10n) {
+    final dateOnly = Validators.calendarDate(date);
+    final err = Validators.dateOfBirth(
+      l10n,
+      dateOnly,
+      enforceMinimumAge: true,
+    );
+    if (err != null) {
+      state = state.copyWith(stepErrors: {...state.stepErrors, 'dob': err});
+      return;
+    }
+    updateField(dateOfBirth: dateOnly);
   }
 
   void clearStepErrors() => state = state.copyWith(stepErrors: {});
@@ -488,18 +519,20 @@ class RegisterNotifier extends _$RegisterNotifier {
         );
         if (ph != null) errors['phone'] = ph;
 
-        final loc = Validators.nonEmptyLine(
-          l10n,
-          state.location,
-          (l) => l.validationCityRequired,
-        );
-        if (loc != null) errors['location'] = loc;
+        // Single user location — governorate + city are picked via the
+        // step-2 cascade (all roles); vendors reuse this same pair as the
+        // store location, so step 4 no longer asks again.
+        if (state.storeCityId == null || state.storeGovernmentId == null) {
+          errors['storeLocation'] = l10n.validationStoreCityWilayaRequired;
+        }
 
         if (state.dateOfBirth != null) {
-          final age = DateTime.now().difference(state.dateOfBirth!).inDays ~/ 365;
-          if (age < 18) {
-            errors['dob'] = l10n.validationAgeMinimum18;
-          }
+          final dobErr = Validators.dateOfBirth(
+            l10n,
+            state.dateOfBirth,
+            enforceMinimumAge: true,
+          );
+          if (dobErr != null) errors['dob'] = dobErr;
         }
         return errors;
       case 3:
@@ -550,9 +583,6 @@ class RegisterNotifier extends _$RegisterNotifier {
         } else if (descAr.length > 300) {
           errors['storeDescriptionAr'] = l10n.validationStoreDescriptionMax;
         }
-        if (state.storeCityId == null || state.storeGovernmentId == null) {
-          errors['storeLocation'] = l10n.validationStoreCityWilayaRequired;
-        }
         // The vendor-register endpoint requires a store image (multipart).
         if (state.storeLogoPath == null || state.storeLogoPath!.trim().isEmpty) {
           errors['storeLogo'] = l10n.validationStoreLogoRequired;
@@ -590,7 +620,21 @@ class RegisterNotifier extends _$RegisterNotifier {
     state = state.copyWith(showVendorSuccessOverlay: false);
   }
 
-  Future<void> _executeRegister() async {
+  Future<void> _executeRegister(AppLocalizations l10n) async {
+    final dobErr = Validators.dateOfBirth(
+      l10n,
+      state.dateOfBirth,
+      enforceMinimumAge: true,
+    );
+    if (dobErr != null) {
+      state = state.copyWith(
+        isLoading: false,
+        currentStep: 2,
+        stepErrors: {'dob': dobErr},
+      );
+      return;
+    }
+
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
     final role = state.selectedRole ?? UserRole.consumer;
     final result = role == UserRole.vendor
@@ -622,6 +666,8 @@ class RegisterNotifier extends _$RegisterNotifier {
                 phoneNumber: state.phoneNumber,
                 password: state.password,
                 confirmPassword: state.confirmPassword,
+                cityId: state.storeCityId!,
+                governmentId: state.storeGovernmentId!,
                 dateOfBirth: state.dateOfBirth,
               ),
             );
@@ -649,7 +695,7 @@ class RegisterNotifier extends _$RegisterNotifier {
         state = state.copyWith(stepErrors: e3);
         return;
       }
-      await _executeRegister();
+      await _executeRegister(l10n);
       return;
     }
     if (role == UserRole.vendor && state.currentStep == 4) {
@@ -658,7 +704,7 @@ class RegisterNotifier extends _$RegisterNotifier {
         state = state.copyWith(stepErrors: all);
         return;
       }
-      await _executeRegister();
+      await _executeRegister(l10n);
     }
   }
 }

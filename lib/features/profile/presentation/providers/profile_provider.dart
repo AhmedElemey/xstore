@@ -17,6 +17,7 @@ import 'profile_dependencies.dart';
 import 'profile_state.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../core/utils/location_service.dart';
+import '../../../../core/utils/validators.dart';
 
 part 'profile_provider.g.dart';
 
@@ -69,6 +70,8 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
           (u.storeDescriptionAr ?? '').trim() &&
       s.editStoreCity.trim() == (u.storeCity ?? '').trim() &&
       s.editStoreWilaya.trim() == (u.storeWilaya ?? '').trim() &&
+      s.editStoreCityId == u.storeCityId &&
+      s.editStoreGovernmentId == u.storeGovernmentId &&
       s.editWhatsapp.trim() == (u.whatsappNumber ?? '').trim() &&
       s.editLatitude.trim() == ((u.latitude == null) ? '' : u.latitude!.toStringAsFixed(6)) &&
       s.editLongitude.trim() == ((u.longitude == null) ? '' : u.longitude!.toStringAsFixed(6)) &&
@@ -341,6 +344,21 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
   }
 
+  /// Sets the governorate (`cityId`) + city (`governmentId`) pair from the
+  /// location cascade; both are assigned explicitly so a governorate change can
+  /// clear the dependent city (null).
+  void updateStoreLocation(int? cityId, int? governmentId) {
+    final next = state.copyWith(
+      editStoreCityId: cityId,
+      editStoreGovernmentId: governmentId,
+    );
+    final u = next.user;
+    state = next.copyWith(
+      hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true,
+      fieldErrors: {},
+    );
+  }
+
   void updateLatitude(String value) => updateField('latitude', value);
   void updateLongitude(String value) => updateField('longitude', value);
   void updateGovernorate(String value) => updateField('governorate', value);
@@ -437,6 +455,11 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
     if (lng.isNotEmpty && !LocationService.isValidLongitude(lng)) {
       state = state.copyWith(isUpdating: false, error: 'invalidLongitude');
+      return;
+    }
+    if (state.editDateOfBirth != null &&
+        Validators.isBirthDateAfterToday(state.editDateOfBirth)) {
+      state = state.copyWith(isUpdating: false, error: 'birthDateBeforeToday');
       return;
     }
 

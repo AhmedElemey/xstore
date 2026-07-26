@@ -75,9 +75,17 @@ final getGovernmentByIdUseCaseProvider =
 
 typedef GetGovernmentByIdUseCaseRef
     = AutoDisposeProviderRef<GetGovernmentByIdUseCase>;
-String _$allGovernmentsHash() => r'5789b98a7ce8f7583f922e9316e19bd85f8927fd';
+String _$allGovernmentsHash() => r'aed4902042ddb27da925c8595236281f3532a3a9';
 
-/// See also [allGovernments].
+/// Full government (governorate) list for dropdowns.
+///
+/// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
+/// the values are cached for the app session (re-entering the register/store
+/// forms reads the cache instead of re-fetching). A failed fetch is left
+/// unpinned, so leaving and returning retries the request rather than serving a
+/// cached error.
+///
+/// Copied from [allGovernments].
 @ProviderFor(allGovernments)
 final allGovernmentsProvider =
     AutoDisposeFutureProvider<List<GovernmentEntity>>.internal(

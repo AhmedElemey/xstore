@@ -78,9 +78,16 @@ final getStoreCategoryByIdUseCaseProvider =
 typedef GetStoreCategoryByIdUseCaseRef
     = AutoDisposeProviderRef<GetStoreCategoryByIdUseCase>;
 String _$allStoreCategoriesHash() =>
-    r'8190cce14775d7d45f399f5b43f1ff275f676aa6';
+    r'12d1c60b5fe7626925f0766b816d68010792ad10';
 
-/// See also [allStoreCategories].
+/// Full store-category list for the registration store-setup dropdown.
+///
+/// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
+/// the values are cached for the app session (re-entering the register flow
+/// reads the cache instead of re-fetching). A failed fetch is left unpinned, so
+/// leaving and returning retries the request rather than serving a cached error.
+///
+/// Copied from [allStoreCategories].
 @ProviderFor(allStoreCategories)
 final allStoreCategoriesProvider =
     AutoDisposeFutureProvider<List<StoreCategoryEntity>>.internal(

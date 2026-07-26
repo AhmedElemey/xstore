@@ -374,3 +374,33 @@ Rules for the log:
 - **What happened:** Live get-profile omits `user.id`; tapping "Manage store" pushed `/seller/` (empty segment) → GoRouter "no routes for location `/seller`".
 - **Rule:** Never push `AppRoutes.sellerProfile` without a non-empty id — use `AppRoutes.sellerPath(id)` and resolve id from profile user, auth session, then JWT (`userIdFromJwt`) on login/restore. Disable the CTA when id is still unknown.
 - **Where it applies:** `profile_screen.dart`, `jwt_payload.dart`, `auth_repository_impl.dart` `_resolveFullUser`/`restoreSession`, `userModelFromProfileResponse`.
+
+### 2026-07-26 — Cache reference-data providers via keepAlive-on-success, not keepAlive:true
+- **What happened:** Registration reference lists (`allCities`/`allGovernments`/`allStoreCategories`) were plain autoDispose `@riverpod`, so leaving and re-opening the register flow re-hit the network for all three every time.
+- **Rule:** For static reference-data list providers, keep them `@riverpod` (autoDispose) and call `ref.keepAlive()` inside the SUCCESS branch of the fold — caches values for the app session while leaving failures unpinned so re-entry retries. Prefer this over `@Riverpod(keepAlive: true)`, which would also cache an AsyncError permanently (dropdowns break with no retry).
+- **Where it applies:** `city_dependencies.dart`, `government_dependencies.dart`, `store_category_dependencies.dart`, any future lookup/reference list provider.
+
+### 2026-07-26 — cities/governments hierarchy is inverted vs Egypt real-world
+- **What happened:** Building a governorate→city cascade picker, live probe showed the backend's `cities` endpoint holds top-level governorates (Cairo, Alexandria; their `governmentId` is 0/unset) and the `governments` endpoint holds districts within a city (Nasr City, Maadi, Zamalek) linked upward via `Government.cityId`. So the real parent is `City` and the child is `Government` — the reverse of the field names. A cascade can ONLY filter child-by-parent, i.e. pick a City (governorate) first, then filter Governments by `cityId`.
+- **Rule:** For the location cascade, popup 1 = `allCities` → writes `cityId`/`storeCityId` (labeled "Governorate/المحافظة"); popup 2 = `allGovernments` filtered by `cityId == chosen` → writes `governmentId`/`storeGovernmentId` (labeled "City/المدينة"). Never try to filter cities by a government (cities carry no usable government link). Shared picker: `lib/shared/widgets/location_cascade_field.dart` (used by register + edit profile). Changing a governorate resets the dependent city to null — use a dedicated `updateStoreLocation(cityId, governmentId)` notifier method, not the null-means-untouched `updateField`.
+- **Where it applies:** `location_cascade_field.dart`, register `RegisterNotifier.updateStoreLocation`, `ProfileNotifier.updateStoreLocation`, `profile_state.dart` (`editStoreCityId`/`editStoreGovernmentId` now drive `toUpdateProfileRequest`, so payload tests must set the edit state, not the user entity).
+
+### 2026-07-26 — One shared user location; consumer register omits location by default
+- **What happened:** The government→city cascade was first added only to the vendor store step + profile store section, but the personal "Location / City" field (register step 2, all roles) was free-text and — critically — NOT sent on the wire at all (consumer register only posts name/email/phone/password/DOB; the personal `location` string only fed the dead legacy `register` path). Backend has ONE structured `cityId`/`governmentId` pair, so two cascades would conflict.
+- **Rule:** Treat city+government as ONE user-level location: the step-2 cascade (all roles) drives `storeCityId`/`storeGovernmentId`, the vendor store step does NOT ask again, and the requirement lives in step-2 validation (`storeLocation` key), not step 4. Consumer register must explicitly add `cityId`/`governmentId` to `ConsumerRegisterParams` + the POST body (extra unbound fields are ignored by the backend, so it's safe — flag as needs-confirmation). In edit profile the single cascade lives in the general all-roles area, not inside `if (isVendor)`. Before wiring a UI field, trace whether its value actually reaches the wire — several register fields are collected but never sent.
+- **Where it applies:** `register_screen.dart` (_StepPersonal cascade, _StepStore no location), `auth_provider.dart` validation + consumer submit, `consumer_register_params.dart`, `auth_remote_datasource.dart` registerConsumer body, `edit_profile_screen.dart`.
+
+### 2026-07-26 — Reference-data pageSize max is 100
+- **What happened:** `allGovernments` / `allCities` / `allStoreCategories` requested `pageSize: 200`; live API returned 400 — `'Page Size' must be between 1 and 100`.
+- **Rule:** Never pass `pageSize > 100` to paginated reference-data endpoints. For "fetch all" dropdown providers use 100 (the API max); if a table can exceed 100 rows, loop pages with `PaginatedResult.hasNextPage` instead of raising page size.
+- **Where it applies:** `government_dependencies.dart`, `city_dependencies.dart`, `store_category_dependencies.dart`, any future paginated list fetch.
+
+### 2026-07-26 — Birth date must not be after today
+- **What happened:** User asked to enforce birth dates app-wide; picker/validators initially used "strictly before today" (yesterday max) but the intended rule is **no dates after today** (today and past are OK).
+- **Rule:** Centralize in `Validators.isBirthDateAfterToday` / `isSelectableBirthDate` / `latestBirthDate()` (= today). Picker uses `selectableDayPredicate`; registration validates on pick + submit (with optional min-age), profile on save. Future dates always rejected.
+- **Where it applies:** `validators.dart`, `birth_date_picker.dart`, `register_screen.dart`, `edit_profile_screen.dart`, `auth_provider.dart`, `profile_provider.dart`.
+
+### 2026-07-26 — Birth-date picker needs selectableDayPredicate
+- **What happened:** `showDatePicker` with `lastDate: yesterday` alone still let users tap today on some platforms; registration felt unenforced. Later clarified: block dates **after** today only (today is allowed).
+- **Rule:** Shared `pickBirthDate` sets `lastDate: todayCalendarDate()`, `selectableDayPredicate: isSelectableBirthDate` (today or earlier). Reject future dates in validators via `isBirthDateAfterToday` — not "strictly before today".
+- **Where it applies:** `birth_date_picker.dart`, `validators.dart`, register + edit-profile DOB fields.

@@ -72,6 +72,60 @@ void main() {
     });
   });
 
+  group('dateOfBirth', () {
+    final today = DateTime(2026, 7, 26);
+    final yesterday = DateTime(2026, 7, 25);
+
+    test('null is valid', () {
+      expect(Validators.dateOfBirth(l10n, null, now: today), isNull);
+    });
+
+    test('yesterday is valid', () {
+      expect(
+        Validators.dateOfBirth(l10n, yesterday, now: today),
+        isNull,
+      );
+    });
+
+    test('today is valid', () {
+      expect(
+        Validators.dateOfBirth(l10n, today, now: today),
+        isNull,
+      );
+    });
+
+    test('future is rejected', () {
+      expect(
+        Validators.dateOfBirth(l10n, DateTime(2027, 1, 1), now: today),
+        l10n.validationBirthDateBeforeToday,
+      );
+    });
+
+    test('under 18 when enforced', () {
+      expect(
+        Validators.dateOfBirth(
+          l10n,
+          DateTime(2010, 1, 1),
+          now: today,
+          enforceMinimumAge: true,
+        ),
+        l10n.validationAgeMinimum18,
+      );
+    });
+
+    test('18+ when enforced', () {
+      expect(
+        Validators.dateOfBirth(
+          l10n,
+          DateTime(2000, 1, 1),
+          now: today,
+          enforceMinimumAge: true,
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('parseMoneyInput', () {
     test('commas stripped', () {
       expect(Validators.parseMoneyInput('1,234.50'), closeTo(1234.50, 0.001));

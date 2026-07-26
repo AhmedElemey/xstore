@@ -11,6 +11,10 @@ class ConsumerRegisterParams with _$ConsumerRegisterParams {
     required String phoneNumber,
     required String password,
     required String confirmPassword,
+    // Single user location captured by the register step-2 cascade. See
+    // LocationCascadeField for the inverted city/government naming.
+    required int cityId,
+    required int governmentId,
     DateTime? dateOfBirth,
   }) = _ConsumerRegisterParams;
 }

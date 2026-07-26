@@ -31,10 +31,19 @@ GetCityByIdUseCase getCityByIdUseCase(GetCityByIdUseCaseRef ref) {
 }
 
 /// Full city list for dropdowns. Small reference table — a single
-/// page-size-200 fetch avoids re-implementing pagination in every screen.
+/// page-size-100 fetch (API max) avoids re-implementing pagination in every screen.
+///
+/// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
+/// the values are cached for the app session (re-entering the register/store
+/// forms reads the cache instead of re-fetching). A failed fetch is left
+/// unpinned, so leaving and returning retries the request rather than serving a
+/// cached error.
 @riverpod
 Future<List<CityEntity>> allCities(AllCitiesRef ref) async {
   final result =
-      await ref.watch(getCitiesUseCaseProvider).call(page: 1, pageSize: 200);
-  return result.fold((failure) => throw failure, (r) => r.items);
+      await ref.watch(getCitiesUseCaseProvider).call(page: 1, pageSize: 100);
+  return result.fold((failure) => throw failure, (r) {
+    ref.keepAlive();
+    return r.items;
+  });
 }

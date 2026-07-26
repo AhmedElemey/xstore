@@ -72,6 +72,59 @@ abstract final class Validators {
     return null;
   }
 
+  /// Calendar date in local time (time stripped).
+  static DateTime calendarDate(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  static DateTime todayCalendarDate([DateTime? now]) {
+    final n = now ?? DateTime.now();
+    return DateTime(n.year, n.month, n.day);
+  }
+
+  /// Latest selectable birth date — today (blocks only future dates).
+  static DateTime latestBirthDate([DateTime? now]) => todayCalendarDate(now);
+
+  static DateTime clampBirthDatePickerInitial(
+    DateTime? selected, {
+    required DateTime fallback,
+    required DateTime firstDate,
+    DateTime? now,
+  }) {
+    var initial = selected ?? fallback;
+    final last = latestBirthDate(now);
+    if (initial.isAfter(last)) initial = last;
+    if (initial.isBefore(firstDate)) initial = firstDate;
+    return initial;
+  }
+
+  static bool isBirthDateAfterToday(DateTime? date, [DateTime? now]) {
+    if (date == null) return false;
+    return calendarDate(date).isAfter(todayCalendarDate(now));
+  }
+
+  /// Whether [date] is selectable in the birth-date calendar (today or earlier).
+  static bool isSelectableBirthDate(DateTime date, [DateTime? now]) =>
+      !isBirthDateAfterToday(date, now);
+
+  /// Optional [dateOfBirth]. When set, must not be after today; optionally
+  /// enforces minimum age (registration).
+  static String? dateOfBirth(
+    AppLocalizations l10n,
+    DateTime? date, {
+    DateTime? now,
+    bool enforceMinimumAge = false,
+  }) {
+    if (date == null) return null;
+    if (isBirthDateAfterToday(date, now)) {
+      return l10n.validationBirthDateBeforeToday;
+    }
+    if (enforceMinimumAge) {
+      final age =
+          todayCalendarDate(now).difference(calendarDate(date)).inDays ~/ 365;
+      if (age < 18) return l10n.validationAgeMinimum18;
+    }
+    return null;
+  }
+
   static double? parseMoneyInput(String raw) =>
       double.tryParse(raw.replaceAll(RegExp(r','), ''));
 

@@ -5498,6 +5498,36 @@ abstract class AppLocalizations {
   /// **'e.g. Cairo, Giza, Alexandria'**
   String get governorateHint;
 
+  /// No description provided for @governorateAndCityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Government & City'**
+  String get governorateAndCityLabel;
+
+  /// No description provided for @locationCascadeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select government & city'**
+  String get locationCascadeHint;
+
+  /// No description provided for @selectGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select government'**
+  String get selectGovernorate;
+
+  /// No description provided for @selectCityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select city'**
+  String get selectCityLabel;
+
+  /// No description provided for @noCitiesForGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'No cities available for this government'**
+  String get noCitiesForGovernorate;
+
   /// No description provided for @townCity.
   ///
   /// In en, this message translates to:
@@ -5629,6 +5659,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You must be at least 18 years old'**
   String get validationAgeMinimum18;
+
+  /// No description provided for @validationBirthDateBeforeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth cannot be after today'**
+  String get validationBirthDateBeforeToday;
 
   /// No description provided for @validationPasswordMinEight.
   ///

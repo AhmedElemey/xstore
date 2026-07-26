@@ -2825,6 +2825,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get governorateHint => 'e.g. Cairo, Giza, Alexandria';
 
   @override
+  String get governorateAndCityLabel => 'Government & City';
+
+  @override
+  String get locationCascadeHint => 'Select government & city';
+
+  @override
+  String get selectGovernorate => 'Select government';
+
+  @override
+  String get selectCityLabel => 'Select city';
+
+  @override
+  String get noCitiesForGovernorate =>
+      'No cities available for this government';
+
+  @override
   String get townCity => 'Town / City';
 
   @override
@@ -2894,6 +2910,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validationAgeMinimum18 => 'You must be at least 18 years old';
+
+  @override
+  String get validationBirthDateBeforeToday =>
+      'Date of birth cannot be after today';
 
   @override
   String get validationPasswordMinEight =>

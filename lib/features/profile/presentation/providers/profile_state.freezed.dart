@@ -35,7 +35,12 @@ mixin _$ProfileState {
   String get editStoreDescription => throw _privateConstructorUsedError;
   String get editStoreDescriptionAr => throw _privateConstructorUsedError;
   String get editStoreCity => throw _privateConstructorUsedError;
-  String get editStoreWilaya => throw _privateConstructorUsedError;
+  String get editStoreWilaya =>
+      throw _privateConstructorUsedError; // Governorate (backend cityId) + city/district (backend governmentId) pair,
+// captured via the location cascade. See LocationCascadeField for the
+// inverted-naming note.
+  int? get editStoreCityId => throw _privateConstructorUsedError;
+  int? get editStoreGovernmentId => throw _privateConstructorUsedError;
   String get editWhatsapp => throw _privateConstructorUsedError;
   String get editLatitude => throw _privateConstructorUsedError;
   String get editLongitude => throw _privateConstructorUsedError;
@@ -86,6 +91,8 @@ abstract class $ProfileStateCopyWith<$Res> {
       String editStoreDescriptionAr,
       String editStoreCity,
       String editStoreWilaya,
+      int? editStoreCityId,
+      int? editStoreGovernmentId,
       String editWhatsapp,
       String editLatitude,
       String editLongitude,
@@ -140,6 +147,8 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? editStoreDescriptionAr = null,
     Object? editStoreCity = null,
     Object? editStoreWilaya = null,
+    Object? editStoreCityId = freezed,
+    Object? editStoreGovernmentId = freezed,
     Object? editWhatsapp = null,
     Object? editLatitude = null,
     Object? editLongitude = null,
@@ -239,6 +248,14 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
           ? _value.editStoreWilaya
           : editStoreWilaya // ignore: cast_nullable_to_non_nullable
               as String,
+      editStoreCityId: freezed == editStoreCityId
+          ? _value.editStoreCityId
+          : editStoreCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      editStoreGovernmentId: freezed == editStoreGovernmentId
+          ? _value.editStoreGovernmentId
+          : editStoreGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
       editWhatsapp: null == editWhatsapp
           ? _value.editWhatsapp
           : editWhatsapp // ignore: cast_nullable_to_non_nullable
@@ -352,6 +369,8 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       String editStoreDescriptionAr,
       String editStoreCity,
       String editStoreWilaya,
+      int? editStoreCityId,
+      int? editStoreGovernmentId,
       String editWhatsapp,
       String editLatitude,
       String editLongitude,
@@ -405,6 +424,8 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? editStoreDescriptionAr = null,
     Object? editStoreCity = null,
     Object? editStoreWilaya = null,
+    Object? editStoreCityId = freezed,
+    Object? editStoreGovernmentId = freezed,
     Object? editWhatsapp = null,
     Object? editLatitude = null,
     Object? editLongitude = null,
@@ -504,6 +525,14 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
           ? _value.editStoreWilaya
           : editStoreWilaya // ignore: cast_nullable_to_non_nullable
               as String,
+      editStoreCityId: freezed == editStoreCityId
+          ? _value.editStoreCityId
+          : editStoreCityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      editStoreGovernmentId: freezed == editStoreGovernmentId
+          ? _value.editStoreGovernmentId
+          : editStoreGovernmentId // ignore: cast_nullable_to_non_nullable
+              as int?,
       editWhatsapp: null == editWhatsapp
           ? _value.editWhatsapp
           : editWhatsapp // ignore: cast_nullable_to_non_nullable
@@ -600,6 +629,8 @@ class _$ProfileStateImpl implements _ProfileState {
       this.editStoreDescriptionAr = '',
       this.editStoreCity = '',
       this.editStoreWilaya = '',
+      this.editStoreCityId,
+      this.editStoreGovernmentId,
       this.editWhatsapp = '',
       this.editLatitude = '',
       this.editLongitude = '',
@@ -676,6 +707,13 @@ class _$ProfileStateImpl implements _ProfileState {
   @override
   @JsonKey()
   final String editStoreWilaya;
+// Governorate (backend cityId) + city/district (backend governmentId) pair,
+// captured via the location cascade. See LocationCascadeField for the
+// inverted-naming note.
+  @override
+  final int? editStoreCityId;
+  @override
+  final int? editStoreGovernmentId;
   @override
   @JsonKey()
   final String editWhatsapp;
@@ -733,7 +771,7 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   String toString() {
-    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
+    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editStoreCityId: $editStoreCityId, editStoreGovernmentId: $editStoreGovernmentId, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
   }
 
   @override
@@ -779,6 +817,10 @@ class _$ProfileStateImpl implements _ProfileState {
                 other.editStoreCity == editStoreCity) &&
             (identical(other.editStoreWilaya, editStoreWilaya) ||
                 other.editStoreWilaya == editStoreWilaya) &&
+            (identical(other.editStoreCityId, editStoreCityId) ||
+                other.editStoreCityId == editStoreCityId) &&
+            (identical(other.editStoreGovernmentId, editStoreGovernmentId) ||
+                other.editStoreGovernmentId == editStoreGovernmentId) &&
             (identical(other.editWhatsapp, editWhatsapp) ||
                 other.editWhatsapp == editWhatsapp) &&
             (identical(other.editLatitude, editLatitude) ||
@@ -839,6 +881,8 @@ class _$ProfileStateImpl implements _ProfileState {
         editStoreDescriptionAr,
         editStoreCity,
         editStoreWilaya,
+        editStoreCityId,
+        editStoreGovernmentId,
         editWhatsapp,
         editLatitude,
         editLongitude,
@@ -887,6 +931,8 @@ abstract class _ProfileState implements ProfileState {
       final String editStoreDescriptionAr,
       final String editStoreCity,
       final String editStoreWilaya,
+      final int? editStoreCityId,
+      final int? editStoreGovernmentId,
       final String editWhatsapp,
       final String editLatitude,
       final String editLongitude,
@@ -945,6 +991,12 @@ abstract class _ProfileState implements ProfileState {
   String get editStoreCity;
   @override
   String get editStoreWilaya;
+  @override // Governorate (backend cityId) + city/district (backend governmentId) pair,
+// captured via the location cascade. See LocationCascadeField for the
+// inverted-naming note.
+  int? get editStoreCityId;
+  @override
+  int? get editStoreGovernmentId;
   @override
   String get editWhatsapp;
   @override

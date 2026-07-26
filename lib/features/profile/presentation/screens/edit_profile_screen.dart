@@ -12,12 +12,15 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../widgets/profile_avatar_picker.dart';
 import '../widgets/vendor_location_section.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/birth_date_picker.dart';
+import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../../shared/widgets/skeletons/edit_profile_skeleton.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -192,23 +195,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _pickDob() async {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final lastDate = today.subtract(const Duration(days: 1));
-    var initialDate = _dob ?? DateTime(now.year - 18, now.month, now.day);
-    if (initialDate.isAfter(lastDate)) {
-      initialDate = lastDate;
-    }
-    if (initialDate.isBefore(DateTime(1950))) {
-      initialDate = DateTime(1950);
-    }
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
+    final dateOnly = await pickBirthDate(
+      context,
+      selected: _dob,
+      fallback: DateTime(now.year - 18, now.month, now.day),
       firstDate: DateTime(1950),
-      lastDate: lastDate,
     );
-    if (picked == null) return;
-    final dateOnly = DateTime(picked.year, picked.month, picked.day);
+    if (dateOnly == null) return;
     setState(() {
       _dob = dateOnly;
       _dobText.text = DateFormat.yMMMd().format(dateOnly);
@@ -314,6 +307,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _save() async {
     _pushFieldsToNotifier();
+    final dobErr = Validators.dateOfBirth(context.l10n, _dob);
+    if (dobErr != null) {
+      AppSnackbar.error(context, dobErr);
+      return;
+    }
     await ref.read(profileNotifierProvider.notifier).saveProfile();
     if (!mounted) return;
     final err = ref.read(profileNotifierProvider).error;
@@ -500,6 +498,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
           ),
+          const Gap(AppSpacing.md),
+          // Single user location (governorate + city) for all roles; vendors
+          // reuse this same pair as the store location.
+          LocationCascadeField(
+            cityId: s.editStoreCityId,
+            governmentId: s.editStoreGovernmentId,
+            onChanged: (cityId, governmentId) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateStoreLocation(cityId, governmentId),
+          ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
             Text(context.l10n.storeInformation, style: AppTypography.titleMedium),
@@ -579,25 +587,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   .read(profileNotifierProvider.notifier)
                   .updateField('storeDescriptionAr', v),
             ),
-            const Gap(AppSpacing.md),
-            // TextField(
-            //   controller: _storeCity,
-            //   decoration: InputDecoration(
-            //     prefixIcon: const Icon(LucideIcons.mapPin),
-            //     border: const OutlineInputBorder(),
-            //   ),
-            //   onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('storeCity', v),
-            // ),
-            // const Gap(AppSpacing.md),
-            // TextField(
-            //   controller: _storeWilaya,
-            //   decoration: InputDecoration(
-            //     prefixIcon: const Icon(LucideIcons.map),
-            //     border: const OutlineInputBorder(),
-            //   ),
-            //   onChanged: (v) =>
-            //       ref.read(profileNotifierProvider.notifier).updateField('storeWilaya', v),
-            // ),
             const Gap(AppSpacing.md),
             PhoneInputField(
               controller: _whatsapp,
@@ -681,6 +670,7 @@ String _errorText(BuildContext context, String key) {
   return switch (key) {
     'invalidLatitude' => context.l10n.invalidLatitude,
     'invalidLongitude' => context.l10n.invalidLongitude,
+    'birthDateBeforeToday' => context.l10n.validationBirthDateBeforeToday,
     'locationPermissionDenied' => context.l10n.locationPermissionDenied,
     'locationPermissionPermanent' => context.l10n.locationPermissionPermanent,
     'locationServiceDisabled' => context.l10n.locationServiceDisabled,

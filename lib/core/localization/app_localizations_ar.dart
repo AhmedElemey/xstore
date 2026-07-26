@@ -2818,6 +2818,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get governorateHint => 'مثلاً القاهرة، الجيزة، الإسكندرية';
 
   @override
+  String get governorateAndCityLabel => 'المحافظة والمدينة';
+
+  @override
+  String get locationCascadeHint => 'اختر المحافظة والمدينة';
+
+  @override
+  String get selectGovernorate => 'اختر المحافظة';
+
+  @override
+  String get selectCityLabel => 'اختر المدينة';
+
+  @override
+  String get noCitiesForGovernorate => 'لا توجد مدن متاحة لهذه المحافظة';
+
+  @override
   String get townCity => 'المدينة / الحي';
 
   @override
@@ -2887,6 +2902,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationAgeMinimum18 => 'لازم يكون عندك 18 سنة على الأقل';
+
+  @override
+  String get validationBirthDateBeforeToday =>
+      'تاريخ الميلاد ما ينفعش يكون بعد النهاردة';
 
   @override
   String get validationPasswordMinEight =>

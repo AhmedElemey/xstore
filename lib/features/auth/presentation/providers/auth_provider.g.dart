@@ -469,7 +469,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'a8cbf98cda5e6e43c7620ea2f66d4e5f1d9bbf79';
+String _$registerNotifierHash() => r'22fdac3431feea1e7f9bdf952a878fde06122431';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

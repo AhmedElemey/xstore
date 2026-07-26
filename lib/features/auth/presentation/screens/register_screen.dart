@@ -14,12 +14,10 @@ import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
-import '../../../cities/domain/entities/city_entity.dart';
-import '../../../cities/presentation/providers/city_dependencies.dart';
-import '../../../governments/domain/entities/government_entity.dart';
-import '../../../governments/presentation/providers/government_dependencies.dart';
+import '../../../../shared/widgets/birth_date_picker.dart';
 import '../../../store_categories/domain/entities/store_category_entity.dart';
 import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
+import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -43,7 +41,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _fullNameAr = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
-  final _location = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
   final _storeName = TextEditingController();
@@ -66,7 +63,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _fullNameAr.dispose();
     _email.dispose();
     _phone.dispose();
-    _location.dispose();
     _password.dispose();
     _confirm.dispose();
     _storeName.dispose();
@@ -78,23 +74,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _pickDob(RegisterNotifier n, RegisterState s) async {
+    final l10n = context.l10n;
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final lastDate = today.subtract(const Duration(days: 1));
-    var initialDate = s.dateOfBirth ?? DateTime(now.year - 20, now.month, now.day);
-    if (initialDate.isAfter(lastDate)) {
-      initialDate = lastDate;
-    }
-    if (initialDate.isBefore(DateTime(1940))) {
-      initialDate = DateTime(1940);
-    }
-    final d = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
+    final d = await pickBirthDate(
+      context,
+      selected: s.dateOfBirth,
+      fallback: DateTime(now.year - 20, now.month, now.day),
       firstDate: DateTime(1940),
-      lastDate: lastDate,
     );
-    if (d != null) n.updateField(dateOfBirth: DateTime(d.year, d.month, d.day));
+    if (!mounted || d == null) return;
+    n.applyDateOfBirth(d, l10n);
   }
 
   Future<void> _confirmExit() async {
@@ -274,7 +263,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           fullNameAr: _fullNameAr,
           email: _email,
           phone: _phone,
-          location: _location,
           onPickDob: () => _pickDob(n, s),
         );
       case 3:
@@ -383,7 +371,6 @@ class _StepPersonal extends StatelessWidget {
     required this.fullNameAr,
     required this.email,
     required this.phone,
-    required this.location,
     required this.onPickDob,
   });
 
@@ -393,7 +380,6 @@ class _StepPersonal extends StatelessWidget {
   final TextEditingController fullNameAr;
   final TextEditingController email;
   final TextEditingController phone;
-  final TextEditingController location;
   final VoidCallback onPickDob;
 
   @override
@@ -469,13 +455,14 @@ class _StepPersonal extends StatelessWidget {
           errorText: s.stepErrors['dob'],
         ),
         const Gap(AppSpacing.inputContentPaddingH),
-        AuthTextField(
-          label: context.l10n.locationCityRequired,
-          hint: context.l10n.locationHintAlgiers,
-          controller: location,
-          prefixIcon: const Icon(LucideIcons.mapPin),
-          errorText: s.stepErrors['location'],
-          onChanged: (v) => n.updateField(location: v),
+        LocationCascadeField(
+          cityId: s.storeCityId,
+          governmentId: s.storeGovernmentId,
+          errorText: s.stepErrors['storeLocation'],
+          onChanged: (cityId, governmentId) => n.updateStoreLocation(
+            storeCityId: cityId,
+            storeGovernmentId: governmentId,
+          ),
         ),
       ],
     );
@@ -853,40 +840,6 @@ class _StepStore extends ConsumerWidget {
           ),
         ],
         const Gap(AppSpacing.lg),
-        if (s.stepErrors.containsKey('storeLocation'))
-          Text(
-            s.stepErrors['storeLocation']!,
-            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
-          ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _lookupDropdown<CityEntity>(
-                context: context,
-                async: ref.watch(allCitiesProvider),
-                value: s.storeCityId,
-                idOf: (e) => e.id,
-                labelOf: (e) => e.name.resolve(isArabic),
-                hint: context.l10n.cityRequired,
-                onChanged: (v) => n.updateField(storeCityId: v),
-              ),
-            ),
-            const Gap(AppSpacing.md),
-            Expanded(
-              child: _lookupDropdown<GovernmentEntity>(
-                context: context,
-                async: ref.watch(allGovernmentsProvider),
-                value: s.storeGovernmentId,
-                idOf: (e) => e.id,
-                labelOf: (e) => e.name.resolve(isArabic),
-                hint: context.l10n.wilayaRequired,
-                onChanged: (v) => n.updateField(storeGovernmentId: v),
-              ),
-            ),
-          ],
-        ),
-        const Gap(AppSpacing.inputContentPaddingH),
         PhoneInputField(
           controller: whatsapp,
           onChanged: (v) => n.updateField(

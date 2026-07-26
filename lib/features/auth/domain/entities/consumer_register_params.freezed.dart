@@ -21,7 +21,11 @@ mixin _$ConsumerRegisterParams {
   String get email => throw _privateConstructorUsedError;
   String get phoneNumber => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
-  String get confirmPassword => throw _privateConstructorUsedError;
+  String get confirmPassword =>
+      throw _privateConstructorUsedError; // Single user location captured by the register step-2 cascade. See
+// LocationCascadeField for the inverted city/government naming.
+  int get cityId => throw _privateConstructorUsedError;
+  int get governmentId => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -42,6 +46,8 @@ abstract class $ConsumerRegisterParamsCopyWith<$Res> {
       String phoneNumber,
       String password,
       String confirmPassword,
+      int cityId,
+      int governmentId,
       DateTime? dateOfBirth});
 }
 
@@ -65,6 +71,8 @@ class _$ConsumerRegisterParamsCopyWithImpl<$Res,
     Object? phoneNumber = null,
     Object? password = null,
     Object? confirmPassword = null,
+    Object? cityId = null,
+    Object? governmentId = null,
     Object? dateOfBirth = freezed,
   }) {
     return _then(_value.copyWith(
@@ -92,6 +100,14 @@ class _$ConsumerRegisterParamsCopyWithImpl<$Res,
           ? _value.confirmPassword
           : confirmPassword // ignore: cast_nullable_to_non_nullable
               as String,
+      cityId: null == cityId
+          ? _value.cityId
+          : cityId // ignore: cast_nullable_to_non_nullable
+              as int,
+      governmentId: null == governmentId
+          ? _value.governmentId
+          : governmentId // ignore: cast_nullable_to_non_nullable
+              as int,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
           : dateOfBirth // ignore: cast_nullable_to_non_nullable
@@ -116,6 +132,8 @@ abstract class _$$ConsumerRegisterParamsImplCopyWith<$Res>
       String phoneNumber,
       String password,
       String confirmPassword,
+      int cityId,
+      int governmentId,
       DateTime? dateOfBirth});
 }
 
@@ -138,6 +156,8 @@ class __$$ConsumerRegisterParamsImplCopyWithImpl<$Res>
     Object? phoneNumber = null,
     Object? password = null,
     Object? confirmPassword = null,
+    Object? cityId = null,
+    Object? governmentId = null,
     Object? dateOfBirth = freezed,
   }) {
     return _then(_$ConsumerRegisterParamsImpl(
@@ -165,6 +185,14 @@ class __$$ConsumerRegisterParamsImplCopyWithImpl<$Res>
           ? _value.confirmPassword
           : confirmPassword // ignore: cast_nullable_to_non_nullable
               as String,
+      cityId: null == cityId
+          ? _value.cityId
+          : cityId // ignore: cast_nullable_to_non_nullable
+              as int,
+      governmentId: null == governmentId
+          ? _value.governmentId
+          : governmentId // ignore: cast_nullable_to_non_nullable
+              as int,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
           : dateOfBirth // ignore: cast_nullable_to_non_nullable
@@ -183,6 +211,8 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
       required this.phoneNumber,
       required this.password,
       required this.confirmPassword,
+      required this.cityId,
+      required this.governmentId,
       this.dateOfBirth});
 
   @override
@@ -197,12 +227,18 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
   final String password;
   @override
   final String confirmPassword;
+// Single user location captured by the register step-2 cascade. See
+// LocationCascadeField for the inverted city/government naming.
+  @override
+  final int cityId;
+  @override
+  final int governmentId;
   @override
   final DateTime? dateOfBirth;
 
   @override
   String toString() {
-    return 'ConsumerRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth)';
+    return 'ConsumerRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, cityId: $cityId, governmentId: $governmentId, dateOfBirth: $dateOfBirth)';
   }
 
   @override
@@ -221,13 +257,25 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
                 other.password == password) &&
             (identical(other.confirmPassword, confirmPassword) ||
                 other.confirmPassword == confirmPassword) &&
+            (identical(other.cityId, cityId) || other.cityId == cityId) &&
+            (identical(other.governmentId, governmentId) ||
+                other.governmentId == governmentId) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, fullNameEn, fullNameAr, email,
-      phoneNumber, password, confirmPassword, dateOfBirth);
+  int get hashCode => Object.hash(
+      runtimeType,
+      fullNameEn,
+      fullNameAr,
+      email,
+      phoneNumber,
+      password,
+      confirmPassword,
+      cityId,
+      governmentId,
+      dateOfBirth);
 
   @JsonKey(ignore: true)
   @override
@@ -245,6 +293,8 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
       required final String phoneNumber,
       required final String password,
       required final String confirmPassword,
+      required final int cityId,
+      required final int governmentId,
       final DateTime? dateOfBirth}) = _$ConsumerRegisterParamsImpl;
 
   @override
@@ -259,6 +309,11 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
   String get password;
   @override
   String get confirmPassword;
+  @override // Single user location captured by the register step-2 cascade. See
+// LocationCascadeField for the inverted city/government naming.
+  int get cityId;
+  @override
+  int get governmentId;
   @override
   DateTime? get dateOfBirth;
   @override

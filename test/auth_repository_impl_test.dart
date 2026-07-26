@@ -372,6 +372,8 @@ void main() {
           phoneNumber: '01012345678',
           password: 'Password1!',
           confirmPassword: 'Password1!',
+          cityId: 1,
+          governmentId: 2,
         ),
       );
 

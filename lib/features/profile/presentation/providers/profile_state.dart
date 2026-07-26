@@ -32,6 +32,11 @@ class ProfileState with _$ProfileState {
     @Default('') String editStoreDescriptionAr,
     @Default('') String editStoreCity,
     @Default('') String editStoreWilaya,
+    // Governorate (backend cityId) + city/district (backend governmentId) pair,
+    // captured via the location cascade. See LocationCascadeField for the
+    // inverted-naming note.
+    int? editStoreCityId,
+    int? editStoreGovernmentId,
     @Default('') String editWhatsapp,
     @Default('') String editLatitude,
     @Default('') String editLongitude,
@@ -79,6 +84,8 @@ extension ProfileStateX on ProfileState {
       editStoreDescriptionAr: u.storeDescriptionAr ?? '',
       editStoreCity: u.storeCity ?? '',
       editStoreWilaya: u.storeWilaya ?? '',
+      editStoreCityId: u.storeCityId,
+      editStoreGovernmentId: u.storeGovernmentId,
       editWhatsapp: u.whatsappNumber ?? '',
       editLatitude: u.latitude == null ? '' : u.latitude!.toStringAsFixed(6),
       editLongitude: u.longitude == null ? '' : u.longitude!.toStringAsFixed(6),
@@ -141,8 +148,8 @@ extension ProfileStateX on ProfileState {
       lat: parseCoord(editLatitude),
       lng: parseCoord(editLongitude),
       storeCategoryId: u.storeCategoryId,
-      cityId: u.storeCityId,
-      governmentId: u.storeGovernmentId,
+      cityId: editStoreCityId,
+      governmentId: editStoreGovernmentId,
       birthDate: editDateOfBirth,
     );
   }
