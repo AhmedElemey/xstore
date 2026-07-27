@@ -112,27 +112,18 @@ List<StatefulShellBranch> _consumerShellBranches() => [
       ),
     ];
 
+// Vendor tabs: Incoming Orders · Add Listing · Delivery Requests · Profile.
+// (No Home/Explore — vendors manage their store, not browse the marketplace.)
+// Order MUST match the vendor labels/icons in xstore_bottom_nav.dart.
 List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.home,
+            path: AppRoutes.vendorOrders,
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const HomeScreen(),
-            ),
-          ),
-        ],
-      ),
-      StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.explore,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ExploreScreen(),
+              const VendorOrdersScreen(),
             ),
           ),
         ],
@@ -152,11 +143,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.vendorOrders,
+            path: AppRoutes.vendorDeliveryRequests,
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const VendorOrdersScreen(),
+              const MyPackageRequestsScreen(),
             ),
           ),
         ],

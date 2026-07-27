@@ -18,6 +18,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8790", "--directory", "docs_business/admin-dashboard/src"],
       "port": 8790
+    },
+    {
+      "name": "admin-dashboard-canonical",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "/Users/ahmedtaha/XStoreAdminDashboard"],
+      "port": 8123
     }
   ]
 }

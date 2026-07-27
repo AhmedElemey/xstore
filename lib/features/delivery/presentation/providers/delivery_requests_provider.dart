@@ -44,9 +44,13 @@ class DeliveryRequestsNotifier extends StateNotifier<DeliveryRequestsState> {
 
   final Ref ref;
 
+  /// The requester behind the "send a package" flow — a consumer OR a vendor
+  /// (both raise the same request; the backend labels who asked). Any other
+  /// role has no requester context.
   UserEntity? get _consumer {
     final user = ref.read(authProvider).valueOrNull;
-    return user?.role == UserRole.consumer ? user : null;
+    final role = user?.role;
+    return role == UserRole.consumer || role == UserRole.vendor ? user : null;
   }
 
   Future<void> fetchRequests() async {

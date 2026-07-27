@@ -112,8 +112,15 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     if (!mounted) return;
     if (ok) {
       AppSnackbar.success(context, context.l10n.sendPackageSubmitted);
-      // Replace the form with the requests list so back returns to profile.
-      context.pushReplacement(AppRoutes.myPackages);
+      // Return to the requests list that pushed this form — the consumer's
+      // /my-packages OR the vendor's Delivery Requests tab (both watch the
+      // provider, which just prepended the new request). Fall back to the
+      // consumer list if the form was somehow opened as a root.
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go(AppRoutes.myPackages);
+      }
     } else {
       final error = ref.read(deliveryRequestsProvider).error;
       AppSnackbar.error(context, error ?? context.l10n.errorGeneric);

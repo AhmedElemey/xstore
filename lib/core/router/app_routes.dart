@@ -48,9 +48,12 @@ abstract final class AppRoutes {
   /// Courier shell tabs ("Delivered by xStore" pilot).
   static const deliveries = '/deliveries';
   static const courierCash = '/courier-cash';
-  /// Consumer package delivery ("send anything" pilot).
+  /// Package delivery ("send anything" pilot). [sendPackage]/[myPackages] are
+  /// the consumer's stack routes (reached from profile); [vendorDeliveryRequests]
+  /// is the vendor's shell-branch tab showing the same requests list.
   static const sendPackage = '/send-package';
   static const myPackages = '/my-packages';
+  static const vendorDeliveryRequests = '/vendor-delivery-requests';
 
   static String chatThread(String threadId) => '/chat/$threadId';
 }
@@ -62,6 +65,7 @@ bool isVendorRestrictedRoute(String location) {
   return location.startsWith('/listing') ||
       location.startsWith(AppRoutes.vendorOrders) ||
       location == AppRoutes.incomingOrders ||
+      location == AppRoutes.vendorDeliveryRequests ||
       location == AppRoutes.storeHours ||
       location == AppRoutes.earnings ||
       location == AppRoutes.analytics;
@@ -74,15 +78,21 @@ bool isVendorRestrictedRoute(String location) {
 /// `/order/:id` is deliberately NOT here — vendors open it too, via
 /// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
 ///
-/// Package delivery requests are consumer-only: the sender is always a
-/// consumer account; couriers see assigned packages in their own tab and
-/// vendors ship marketplace orders instead.
+/// Consumer-only shopping areas (cart/checkout/wishlist/orders). Package
+/// delivery requests are NOT here — they're open to vendors too (see
+/// [isRequesterRestrictedRoute]).
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||
       location == AppRoutes.wishlist ||
-      location == AppRoutes.orders ||
-      location == AppRoutes.sendPackage ||
+      location == AppRoutes.orders;
+}
+
+/// Package delivery requests ("send a package"): open to the two requester
+/// roles — consumer AND vendor — and closed to couriers/admin. Guarded
+/// centrally in `computeXStoreAuthRedirect`.
+bool isRequesterRestrictedRoute(String location) {
+  return location == AppRoutes.sendPackage ||
       location == AppRoutes.myPackages;
 }
 

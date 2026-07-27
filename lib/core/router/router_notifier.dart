@@ -52,38 +52,51 @@ String? computeXStoreAuthRedirect({
       if (needsRoleSelection && loc != AppRoutes.socialRoleSelect) {
         return AppRoutes.socialRoleSelect;
       }
-      if (loggedIn && !needsRoleSelection && loc == AppRoutes.socialRoleSelect) {
-        return AppRoutes.home;
-      }
       if (!loggedIn) {
         if (isGuest && isGuestAccessibleRoute(loc)) return null;
         // Guests may still open auth screens to sign in for real; splash
         // stays reachable so cold start doesn't loop.
         return isAuthRoute ? null : AppRoutes.login;
       }
-      // Couriers land on their run, not the marketplace home — /home and
-      // /explore only exist inside the consumer/vendor shells, so a courier
-      // reaching them would hit "no route" instead of a screen.
-      final roleHome =
-          user.isCourier ? AppRoutes.deliveries : AppRoutes.home;
+      // Each role's "home" must be a route that exists in THAT role's shell.
+      // Couriers land on their run and vendors on incoming orders — /home and
+      // /explore live only in the consumer shell, so sending a courier/vendor
+      // there would hit "no route" instead of a screen.
+      final roleHome = switch (user.role) {
+        UserRole.courier => AppRoutes.deliveries,
+        UserRole.vendor => AppRoutes.vendorOrders,
+        UserRole.consumer => AppRoutes.home,
+      };
+      // Role selection finished — leave the role screen for the role's home.
+      if (!needsRoleSelection && loc == AppRoutes.socialRoleSelect) {
+        return roleHome;
+      }
       if (isAuthRoute) {
         if (loc == AppRoutes.register && holdRegisterForVendorSuccess) {
           return null;
         }
         return roleHome;
       }
-      if (user.isCourier &&
+      // Couriers and vendors have no Home/Explore tab — bounce those deep links
+      // to the role's home instead of a "no route" error.
+      if (user.role != UserRole.consumer &&
           (loc == AppRoutes.home || loc == AppRoutes.explore)) {
-        return AppRoutes.deliveries;
+        return roleHome;
       }
       if (isCourierRestrictedRoute(loc) && !user.isCourier) {
-        return AppRoutes.home;
+        return roleHome;
       }
       if (isVendorRestrictedRoute(loc) && !user.isVendor) {
         return roleHome;
       }
       if (isConsumerRestrictedRoute(loc) &&
           user.role != UserRole.consumer) {
+        return roleHome;
+      }
+      // "Send a package" is open to the two requester roles (consumer + vendor).
+      if (isRequesterRestrictedRoute(loc) &&
+          user.role != UserRole.consumer &&
+          user.role != UserRole.vendor) {
         return roleHome;
       }
       return null;
