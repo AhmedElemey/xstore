@@ -144,10 +144,8 @@ class CourierDeliveriesNotifier extends StateNotifier<CourierDeliveriesState> {
         updatedAt: now,
       ),
     );
-    final result = await ref.read(markShippedUseCaseProvider).call(
-          orderId: orderId,
-          shippingInfo: ShippingInfo(courierName: _user?.name),
-        );
+    final result =
+        await ref.read(ordersRepositoryProvider).courierPickupOrder(orderId);
     if (!mounted) return false;
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -172,7 +170,7 @@ class CourierDeliveriesNotifier extends StateNotifier<CourierDeliveriesState> {
       ),
     );
     final result =
-        await ref.read(markDeliveredUseCaseProvider).call(orderId);
+        await ref.read(ordersRepositoryProvider).courierDeliverOrder(orderId);
     if (!mounted) return false;
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -198,10 +196,9 @@ class CourierDeliveriesNotifier extends StateNotifier<CourierDeliveriesState> {
         updatedAt: now,
       ),
     );
-    final result = await ref.read(cancelOrderUseCaseProvider).call(
+    final result = await ref.read(ordersRepositoryProvider).courierFailOrder(
           orderId: orderId,
           reason: reason,
-          isVendorSession: false,
         );
     if (!mounted) return false;
     return result.fold((failure) {

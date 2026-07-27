@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/delivery/domain/courier_order_flow.dart';
 import 'package:xstore/features/delivery/presentation/providers/courier_cash_wallet_provider.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
@@ -66,9 +67,14 @@ void main() {
         authProvider.overrideWith(() => FakeAuth(mockCourierUser)),
         ordersRepositoryProvider.overrideWithValue(
           StubOrdersRepository(
+            // Mock-mode path: full order set, provider filters client-side.
             getCourierOrdersResult: (
                     {required courierId, required page, required pageSize}) =>
                 Right(page == 1 ? orders : const []),
+            // Live-mode path: backend returns the pre-filtered delivered-COD
+            // set. Both paths must yield the same wallet.
+            getCashInHandResult: () =>
+                Right(orders.where(holdsCollectedCash).toList()),
           ),
         ),
       ],
@@ -103,6 +109,13 @@ void main() {
                         ),
                       ]
                     : const []),
+            getCashInHandResult: () => Right([
+              _order(
+                id: 'o1',
+                status: OrderStatus.delivered,
+                total: kCourierCashHandoverThresholdEgp,
+              ),
+            ]),
           ),
         ),
       ],

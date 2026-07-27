@@ -8,6 +8,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/delivery/domain/courier_order_flow.dart';
 import 'package:xstore/features/delivery/domain/entities/delivery_request.dart';
 import 'package:xstore/features/delivery/presentation/providers/delivery_request_dependencies.dart';
 import 'package:xstore/features/delivery/presentation/screens/courier_deliveries_screen.dart';
@@ -88,6 +89,10 @@ List<Override> _overrides(
           getCourierOrdersResult: (
                   {required courierId, required page, required pageSize}) =>
               Right(page == 1 ? orders : const []),
+          // Live-mode wallet path: backend returns the pre-filtered
+          // delivered-COD set the courier still holds cash for.
+          getCashInHandResult: () =>
+              Right(orders.where(holdsCollectedCash).toList()),
         ),
       ),
       // Zero-latency package store: keeps the mock datasource's simulated

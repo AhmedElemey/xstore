@@ -64,5 +64,31 @@ void main() {
         'The server could not save your changes. Please try again later.',
       );
     });
+
+    test('409 surfaces ASP.NET ProblemDetails title (delivery guard message)',
+        () {
+      final err = DioException(
+        requestOptions: RequestOptions(path: '/api/delivery-requests/x/pickup'),
+        response: Response(
+          requestOptions:
+              RequestOptions(path: '/api/delivery-requests/x/pickup'),
+          statusCode: 409,
+          data: {
+            'status': 409,
+            'title': "Invalid transition from 'PickedUp' for request x.",
+            'type': 'https://httpstatuses.io/409',
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      final mapped = mapDioException(err);
+
+      expect(mapped, isA<ServerException>());
+      expect(
+        mapped.message,
+        "Invalid transition from 'PickedUp' for request x.",
+      );
+    });
   });
 }

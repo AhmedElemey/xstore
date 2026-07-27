@@ -176,6 +176,54 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
+  Future<Either<Failure, OrderEntity>> courierPickupOrder(
+    String orderId,
+  ) async {
+    try {
+      final row = await _remote.courierPickup(orderId);
+      return Right(row.toEntity());
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, OrderEntity>> courierDeliverOrder(
+    String orderId,
+  ) async {
+    try {
+      final row = await _remote.courierDeliver(orderId);
+      return Right(row.toEntity());
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, OrderEntity>> courierFailOrder({
+    required String orderId,
+    required String reason,
+  }) async {
+    try {
+      final row = await _remote.courierFail(orderId: orderId, reason: reason);
+      return Right(row.toEntity());
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>>
+      getCourierCashInHandOrders() async {
+    try {
+      final rows = await _remote.getCourierCashInHandOrders();
+      return Right(rows.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> registerCheckoutOrder(OrderEntity order) async {
     try {
       await _remote.registerPlacedConsumerOrder(OrderModelX.fromEntity(order));

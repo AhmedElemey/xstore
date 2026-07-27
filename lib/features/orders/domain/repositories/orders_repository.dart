@@ -56,6 +56,24 @@ abstract interface class OrdersRepository {
 
   Future<Either<Failure, OrderEntity>> markDelivered(String orderId);
 
+  // ---- Courier COD run ----
+
+  /// Courier collected the parcel from the vendor (→ shipped).
+  Future<Either<Failure, OrderEntity>> courierPickupOrder(String orderId);
+
+  /// Courier delivered and collected COD (→ delivered).
+  Future<Either<Failure, OrderEntity>> courierDeliverOrder(String orderId);
+
+  /// Buyer refused / unreachable (→ cancelled with reason).
+  Future<Either<Failure, OrderEntity>> courierFailOrder({
+    required String orderId,
+    required String reason,
+  });
+
+  /// The delivered COD orders the courier still holds cash for (complete set,
+  /// not paginated).
+  Future<Either<Failure, List<OrderEntity>>> getCourierCashInHandOrders();
+
   /// Persists a newly placed consumer order (mock checkout).
   Future<Either<Failure, Unit>> registerCheckoutOrder(OrderEntity order);
 }
