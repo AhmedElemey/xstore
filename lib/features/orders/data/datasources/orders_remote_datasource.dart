@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
+import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/legacy_route_options.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
@@ -57,6 +59,25 @@ abstract interface class OrdersRemoteDataSource {
   });
 
   Future<OrderModel> markDelivered(String orderId);
+
+  // ---- Courier COD run (delivery backend, `/api/courier/*`) ----
+  // Distinct from the vendor markShipped/markDelivered above: courier pick-up
+  // (confirmed/processing → shipped) and drop-off (shipped → delivered) are
+  // token-scoped courier actions on the delivery backend.
+
+  Future<OrderModel> courierPickup(String orderId);
+
+  Future<OrderModel> courierDeliver(String orderId);
+
+  Future<OrderModel> courierFail({
+    required String orderId,
+    required String reason,
+  });
+
+  /// Delivered COD orders the courier still holds cash for (not yet handed
+  /// over). The backend returns the complete set in one response, so summing
+  /// the result client-side is accurate (not one page of many).
+  Future<List<OrderModel>> getCourierCashInHandOrders();
 
   /// Inserts a consumer order after checkout (mock persistence).
   Future<void> registerPlacedConsumerOrder(OrderModel order);
@@ -504,20 +525,20 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
     try {
+      // Delivery backend returns the courier's full assigned set in one array
+      // (token-scoped, no server-side paging) — slice it client-side so the
+      // notifier's page/loadMore contract still holds and rows don't duplicate.
       final response = await _dio.get<List<dynamic>>(
-        ApiEndpoints.ordersCourier(courierId),
-        queryParameters: {'page': page, 'pageSize': pageSize},
-        options: _legacyOptions,
+        ApiEndpoints.courierOrders,
+        options: ApiAuthHeaders.authenticated(),
       );
-      if (LegacyRouteOptions.isNotFound(response)) return const [];
-      final list = response.data ?? const [];
-      return list
+      final all = (response.data ?? const [])
           .whereType<Map>()
           .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
           .toList();
+      return _page(all, page, pageSize);
     } on DioException catch (e) {
-      if (_isOrdersRouteMissing(e)) return const [];
-      throw ServerException(e.message ?? 'Failed to fetch courier orders');
+      throw mapDioException(e);
     }
   }
 
@@ -792,6 +813,99 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return _orderFromApiMap(data);
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to mark order delivered');
+    }
+  }
+
+  @override
+  Future<OrderModel> courierPickup(String orderId) =>
+      _courierTransition(
+        orderId,
+        path: ApiEndpoints.courierOrderPickup(orderId),
+        mockPatch: (o, now) => o.copyWith(
+          status: OrderStatus.shipped,
+          shippedAt: now,
+          updatedAt: now,
+        ),
+        failMessage: 'Failed to pick up order',
+      );
+
+  @override
+  Future<OrderModel> courierDeliver(String orderId) =>
+      _courierTransition(
+        orderId,
+        path: ApiEndpoints.courierOrderDeliver(orderId),
+        mockPatch: (o, now) => o.copyWith(
+          status: OrderStatus.delivered,
+          deliveredAt: now,
+          updatedAt: now,
+        ),
+        failMessage: 'Failed to mark order delivered',
+      );
+
+  @override
+  Future<OrderModel> courierFail({
+    required String orderId,
+    required String reason,
+  }) =>
+      _courierTransition(
+        orderId,
+        path: ApiEndpoints.courierOrderFail(orderId),
+        body: {'reason': reason},
+        mockPatch: (o, now) => o.copyWith(
+          status: OrderStatus.cancelled,
+          cancelReason: reason,
+          cancelledAt: now,
+          updatedAt: now,
+        ),
+        failMessage: 'Failed to mark order failed',
+      );
+
+  Future<OrderModel> _courierTransition(
+    String orderId, {
+    required String path,
+    required OrderModel Function(OrderModel, DateTime) mockPatch,
+    required String failMessage,
+    Map<String, dynamic>? body,
+  }) async {
+    if (MockConfig.useMock) {
+      final row = await getOrderById(orderId);
+      if (row == null) throw StateError('order');
+      final next = mockPatch(row, DateTime.now());
+      _replace(next);
+      return MockConfig.simulate(next);
+    }
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        path,
+        data: body,
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      if (data == null) throw ServerException(failMessage);
+      return _orderFromApiMap(data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<List<OrderModel>> getCourierCashInHandOrders() async {
+    // Mock mode computes the wallet in the provider (it has the courier id and
+    // the seeded orders), so this live-only path returns nothing under mock.
+    if (MockConfig.useMock) return const [];
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.courierCashWallet,
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final orders = (response.data?['deliveredCodOrders'] as List<dynamic>?) ??
+          const [];
+      return orders
+          .whereType<Map>()
+          .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
+          .toList();
+    } on DioException catch (e) {
+      throw mapDioException(e);
     }
   }
 

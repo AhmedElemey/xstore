@@ -38,8 +38,9 @@ AppException mapDioException(DioException e) {
 }
 
 /// Reads a human-readable message from common xStore API error bodies:
-/// `{"error": "..."}`, `{"message": "..."}`, or
-/// `{"error": {"message": "..."}}`.
+/// `{"error": "..."}`, `{"message": "..."}`, `{"error": {"message": "..."}}`,
+/// or an ASP.NET ProblemDetails `{"title": "...", "detail": "..."}` (how the
+/// delivery backend returns guard failures on 404/409/403).
 String? _serverErrorMessage(Object? data) {
   if (data is! Map) return null;
   final error = data['error'];
@@ -50,6 +51,16 @@ String? _serverErrorMessage(Object? data) {
   }
   final message = data['message'];
   if (message is String && message.isNotEmpty) return message;
+  // ProblemDetails: prefer the specific `detail`, else the `title`. Skip the
+  // generic validation title so the 400/422 branch's field errors win.
+  final detail = data['detail'];
+  if (detail is String && detail.isNotEmpty) return detail;
+  final title = data['title'];
+  if (title is String &&
+      title.isNotEmpty &&
+      title != 'One or more validation errors occurred.') {
+    return title;
+  }
   return null;
 }
 

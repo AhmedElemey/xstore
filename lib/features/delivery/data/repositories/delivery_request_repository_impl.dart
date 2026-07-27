@@ -1,23 +1,32 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/delivery_request.dart';
 import '../../domain/repositories/delivery_request_repository.dart';
-import '../datasources/delivery_request_datasource.dart';
+import '../datasources/delivery_request_remote_datasource.dart';
 
 class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
   DeliveryRequestRepositoryImpl(this._dataSource);
 
-  final DeliveryRequestMockDataSource _dataSource;
+  final DeliveryRequestDataSource _dataSource;
 
-  /// Maps datasource throws to typed failures: [StateError] carries the
-  /// not-found / invalid-transition messages, anything else is unexpected.
+  /// Maps datasource throws to typed failures. The mock throws [StateError]
+  /// for not-found / invalid-transition; the remote throws mapped
+  /// [AppException]s (via `mapDioException`) — a 409 invalid transition arrives
+  /// as [ServerException] carrying the backend's message.
   Future<Either<Failure, T>> _guard<T>(Future<T> Function() run) async {
     try {
       return Right(await run());
     } on StateError catch (e) {
       return Left(Failure.validation(e.message));
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on UnauthorizedException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on AppException catch (e) {
+      return Left(Failure.server(e.message));
     } catch (e) {
       return Left(Failure.server(e.toString()));
     }

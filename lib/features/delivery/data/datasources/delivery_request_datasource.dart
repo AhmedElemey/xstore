@@ -2,6 +2,7 @@ import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/delivery_request.dart';
+import 'delivery_request_remote_datasource.dart';
 
 /// ADMIN PRICING SIMULATION — the single place the mock formula lives.
 ///
@@ -32,7 +33,7 @@ double mockPackagePrice(OrderAddress pickup, OrderAddress dropoff) {
 /// provider that owns it (see `deliveryRequestDataSourceProvider`), so a
 /// logout that rebuilds the provider drops the previous user's data — never
 /// use static fields for user-scoped caches.
-class DeliveryRequestMockDataSource {
+class DeliveryRequestMockDataSource implements DeliveryRequestDataSource {
   DeliveryRequestMockDataSource({
     this.adminPricingDelay = kMockAdminPricingDelay,
   }) {
@@ -179,6 +180,7 @@ class DeliveryRequestMockDataSource {
     }
   }
 
+  @override
   Future<List<DeliveryRequestEntity>> getMyRequests(String consumerId) {
     _autoPriceStaleSubmitted();
     final mine = _requests.where((r) => r.consumerId == consumerId).toList()
@@ -186,6 +188,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(mine);
   }
 
+  @override
   Future<DeliveryRequestEntity> createRequest({
     required String consumerId,
     required String consumerName,
@@ -212,6 +215,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(request);
   }
 
+  @override
   Future<DeliveryRequestEntity> confirmRequest(String id) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -229,6 +233,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(next);
   }
 
+  @override
   Future<DeliveryRequestEntity> cancelRequest(String id, String reason) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -247,6 +252,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(next);
   }
 
+  @override
   Future<List<DeliveryRequestEntity>> getCourierPackages(String courierId) {
     _autoPriceStaleSubmitted();
     const courierVisible = {
@@ -262,6 +268,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(assigned);
   }
 
+  @override
   Future<DeliveryRequestEntity> markPickedUp(String id) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -277,6 +284,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(next);
   }
 
+  @override
   Future<DeliveryRequestEntity> markDelivered(String id) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();

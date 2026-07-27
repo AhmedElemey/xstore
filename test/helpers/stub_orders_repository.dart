@@ -10,7 +10,10 @@ class StubOrdersRepository implements OrdersRepository {
     FutureOrEitherCourierOrders? getCourierOrdersResult,
     FutureOrEitherOrderStats? getVendorStatsResult,
     Either<Failure, OrderEntity> Function(String orderId)? confirmOrderResult,
-  })  : _getConsumer =
+    Either<Failure, List<OrderEntity>> Function()? getCashInHandResult,
+  })  : _getCashInHand = getCashInHandResult ??
+            (() => Left(Failure.network('stub cash-in-hand'))),
+        _getConsumer =
             getConsumerOrdersResult ??
                 (({required consumerId, required page, required pageSize}) =>
                     Left(Failure.network('stub consumer orders'))),
@@ -34,6 +37,7 @@ class StubOrdersRepository implements OrdersRepository {
   final FutureOrEitherCourierOrders _getCourier;
   final FutureOrEitherOrderStats _getStats;
   final Either<Failure, OrderEntity> Function(String orderId) _confirm;
+  final Either<Failure, List<OrderEntity>> Function() _getCashInHand;
 
   @override
   Future<Either<Failure, List<OrderEntity>>> getConsumerOrders({
@@ -119,6 +123,30 @@ class StubOrdersRepository implements OrdersRepository {
   @override
   Future<Either<Failure, OrderEntity>> markDelivered(String orderId) async =>
       Left(Failure.server('stub'));
+
+  @override
+  Future<Either<Failure, OrderEntity>> courierPickupOrder(
+    String orderId,
+  ) async =>
+      Left(Failure.server('stub'));
+
+  @override
+  Future<Either<Failure, OrderEntity>> courierDeliverOrder(
+    String orderId,
+  ) async =>
+      Left(Failure.server('stub'));
+
+  @override
+  Future<Either<Failure, OrderEntity>> courierFailOrder({
+    required String orderId,
+    required String reason,
+  }) async =>
+      Left(Failure.server('stub'));
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>>
+      getCourierCashInHandOrders() async =>
+          Future.value(_getCashInHand());
 
   @override
   Future<Either<Failure, Unit>> registerCheckoutOrder(OrderEntity order) async =>

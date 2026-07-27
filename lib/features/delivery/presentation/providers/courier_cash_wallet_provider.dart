@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/mock/mock_config.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
@@ -15,12 +16,10 @@ part 'courier_cash_wallet_provider.g.dart';
 /// placeholder pattern as the commission thresholds).
 const double kCourierCashHandoverThresholdEgp = 5000.0;
 
-/// No backend "cash in hand" aggregate endpoint exists yet — this pages
-/// through the courier's orders and sums client-side, mirroring
-/// `vendorCommissionWalletProvider`.
+/// Mock-mode page size for the client-side scan (no mock wallet endpoint).
 const int _walletOrderScanPageSize = 200;
 
-/// Safety cap so a pathological backend response can't loop forever.
+/// Safety cap so a pathological mock response can't loop forever.
 const int _walletOrderScanMaxPages = 10;
 
 @riverpod
@@ -35,24 +34,35 @@ Future<CourierCashWallet> courierCashWallet(CourierCashWalletRef ref) async {
     return empty;
   }
 
-  final useCase = ref.watch(getCourierOrdersUseCaseProvider);
-
-  // Page through ALL orders — a single page would silently understate a
-  // money figure (see review lesson on paginated financial aggregates).
-  // Fail-open on a page failure: keep whatever was summed so far.
   final delivered = <OrderEntity>[];
-  for (var page = 1; page <= _walletOrderScanMaxPages; page++) {
-    final result = await useCase(
-      courierId: user.id,
-      page: page,
-      pageSize: _walletOrderScanPageSize,
-    );
+
+  if (MockConfig.useMock) {
+    // No mock wallet endpoint — page through ALL of the courier's orders and
+    // filter client-side. Fail-open: keep whatever was summed so far.
+    final useCase = ref.watch(getCourierOrdersUseCaseProvider);
+    for (var page = 1; page <= _walletOrderScanMaxPages; page++) {
+      final result = await useCase(
+        courierId: user.id,
+        page: page,
+        pageSize: _walletOrderScanPageSize,
+      );
+      final orders = result.fold<List<OrderEntity>?>((_) => null, (o) => o);
+      if (orders == null) break;
+      delivered.addAll(orders.where(holdsCollectedCash));
+      if (orders.length < _walletOrderScanPageSize) break;
+    }
+  } else {
+    // Live: the backend returns the courier's complete delivered-COD set (cash
+    // still in hand) in one response, so summing it is authoritative — no
+    // page-cap risk. Surface a fetch failure as an error state (a misleading
+    // "0 EGP owed" is worse for a money figure than a retry prompt).
+    final result =
+        await ref.watch(ordersRepositoryProvider).getCourierCashInHandOrders();
     final orders = result.fold<List<OrderEntity>?>((_) => null, (o) => o);
-    if (orders == null) break;
-
-    delivered.addAll(orders.where(holdsCollectedCash));
-
-    if (orders.length < _walletOrderScanPageSize) break;
+    if (orders == null) {
+      throw Exception(result.fold((f) => f.toString(), (_) => 'Unknown error'));
+    }
+    delivered.addAll(orders);
   }
 
   delivered.sort(

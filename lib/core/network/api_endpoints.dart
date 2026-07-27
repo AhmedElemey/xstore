@@ -151,4 +151,30 @@ abstract final class ApiEndpoints {
   static String apiListingDetail(String id) => '$apiListings/$id';
   static String apiListingSimilar(String id, {int count = 6}) =>
       '$apiListings/$id/similar?count=$count';
+
+  // Delivery (consumer "send a package" flow). Backend derives the caller
+  // (consumer / courier) from the token, so the collection routes are
+  // token-scoped (`/mine`, `/courier/mine`) rather than id-parameterised.
+  static const String deliveryRequests = '$_api/delivery-requests';
+  static const String deliveryRequestsMine = '$deliveryRequests/mine';
+  static const String deliveryRequestsCourierMine =
+      '$deliveryRequests/courier/mine';
+  static String deliveryRequestConfirm(String id) =>
+      '$deliveryRequests/$id/confirm';
+  static String deliveryRequestCancel(String id) =>
+      '$deliveryRequests/$id/cancel';
+  static String deliveryRequestPickup(String id) =>
+      '$deliveryRequests/$id/pickup';
+  static String deliveryRequestDeliver(String id) =>
+      '$deliveryRequests/$id/deliver';
+
+  // Courier COD-order run + cash wallet. Token-scoped (the backend derives the
+  // courier from the auth token), so no courierId in the path — these REPLACE
+  // the legacy `/orders/courier/*` routes for the courier session only; the
+  // vendor/consumer order routes above are untouched.
+  static const String courierOrders = '$_api/courier/orders';
+  static const String courierCashWallet = '$_api/courier/cash-wallet';
+  static String courierOrderPickup(String id) => '$courierOrders/$id/pickup';
+  static String courierOrderDeliver(String id) => '$courierOrders/$id/deliver';
+  static String courierOrderFail(String id) => '$courierOrders/$id/fail';
 }
