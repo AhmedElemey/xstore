@@ -139,7 +139,8 @@ void main() {
             needsRoleSelection: false,
             matchedLocation: loc,
           ),
-          AppRoutes.home,
+          // Vendors have no /home tab anymore — their home is incoming orders.
+          AppRoutes.vendorOrders,
           reason: 'vendor should be redirected from $loc',
         );
       }

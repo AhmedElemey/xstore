@@ -51,10 +51,9 @@ class XstoreBottomNav extends ConsumerWidget {
     // keep both lists in sync when adding a tab.
     final labels = switch (role) {
       UserRole.vendor => [
-          context.l10n.navHome,
-          context.l10n.navExplore,
           context.l10n.navAddListing,
           context.l10n.incomingOrders,
+          context.l10n.menuMyPackages,
           context.l10n.navProfile,
         ],
       UserRole.courier => [
@@ -73,10 +72,9 @@ class XstoreBottomNav extends ConsumerWidget {
 
     final icons = switch (role) {
       UserRole.vendor => [
-          LucideIcons.home,
-          LucideIcons.search,
           LucideIcons.plusCircle,
           LucideIcons.list,
+          LucideIcons.send,
           LucideIcons.user,
         ],
       UserRole.courier => [
@@ -114,7 +112,8 @@ class XstoreBottomNav extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: List.generate(labels.length, (index) {
                 final selected = shell.currentIndex == index;
-                final accentMid = isVendor && index == 2;
+                // Add Listing (vendor tab 0) is the accent call-to-action.
+                final accentMid = isVendor && index == 0;
                 final inactiveColor = accentMid && !selected
                     ? AppColors.accent
                     : context.textSecondary;

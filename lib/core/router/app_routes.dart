@@ -48,9 +48,12 @@ abstract final class AppRoutes {
   /// Courier shell tabs ("Delivered by xStore" pilot).
   static const deliveries = '/deliveries';
   static const courierCash = '/courier-cash';
-  /// Consumer package delivery ("send anything" pilot).
+  /// Package delivery ("send anything" pilot). [sendPackage]/[myPackages] are
+  /// the consumer's stack routes (reached from profile); [vendorDeliveryRequests]
+  /// is the vendor's shell-branch tab showing the same requests list.
   static const sendPackage = '/send-package';
   static const myPackages = '/my-packages';
+  static const vendorDeliveryRequests = '/vendor-delivery-requests';
 
   static String chatThread(String threadId) => '/chat/$threadId';
 }
@@ -62,6 +65,7 @@ bool isVendorRestrictedRoute(String location) {
   return location.startsWith('/listing') ||
       location.startsWith(AppRoutes.vendorOrders) ||
       location == AppRoutes.incomingOrders ||
+      location == AppRoutes.vendorDeliveryRequests ||
       location == AppRoutes.storeHours ||
       location == AppRoutes.earnings ||
       location == AppRoutes.analytics;

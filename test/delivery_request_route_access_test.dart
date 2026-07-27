@@ -40,4 +40,33 @@ void main() {
       expect(isConsumerRestrictedRoute(AppRoutes.sendPackage), isFalse);
     });
   });
+
+  group('vendor nav: no Home/Explore, has Delivery Requests tab', () {
+    test('vendor delivery-requests tab is reachable by the vendor', () {
+      expect(_redirect(UserRole.vendor, AppRoutes.vendorDeliveryRequests),
+          isNull);
+    });
+
+    test('non-vendors are redirected off the vendor tab route', () {
+      expect(_redirect(UserRole.consumer, AppRoutes.vendorDeliveryRequests),
+          isNotNull);
+      expect(_redirect(UserRole.courier, AppRoutes.vendorDeliveryRequests),
+          isNotNull);
+    });
+
+    test('vendor is bounced off /home and /explore to incoming orders', () {
+      // /home and /explore no longer exist in the vendor shell.
+      expect(_redirect(UserRole.vendor, AppRoutes.home), AppRoutes.vendorOrders);
+      expect(
+          _redirect(UserRole.vendor, AppRoutes.explore), AppRoutes.vendorOrders);
+    });
+
+    test('courier still bounces off /home to their run', () {
+      expect(_redirect(UserRole.courier, AppRoutes.home), AppRoutes.deliveries);
+    });
+
+    test('consumer keeps /home', () {
+      expect(_redirect(UserRole.consumer, AppRoutes.home), isNull);
+    });
+  });
 }

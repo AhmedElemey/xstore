@@ -102,14 +102,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     trailingBadgeCount: pendingVendorOrders,
                     onTap: () => context.push(AppRoutes.vendorOrders),
                   ),
-                  // Vendors can raise a delivery request too (same "send a
-                  // package" flow as consumers) — e.g. to dispatch a sold item.
-                  ProfileMenuTile(
-                    icon: LucideIcons.send,
-                    iconBackground: AppColors.warning,
-                    label: context.l10n.menuMyPackages,
-                    onTap: () => context.push(AppRoutes.myPackages),
-                  ),
                   ProfileMenuTile(
                     
                     icon: LucideIcons.barChart2,
