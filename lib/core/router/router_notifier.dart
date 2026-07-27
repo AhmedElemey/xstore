@@ -86,6 +86,12 @@ String? computeXStoreAuthRedirect({
           user.role != UserRole.consumer) {
         return roleHome;
       }
+      // "Send a package" is open to the two requester roles (consumer + vendor).
+      if (isRequesterRestrictedRoute(loc) &&
+          user.role != UserRole.consumer &&
+          user.role != UserRole.vendor) {
+        return roleHome;
+      }
       return null;
     },
     loading: () => null,
