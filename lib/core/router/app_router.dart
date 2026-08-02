@@ -39,6 +39,7 @@ import '../../features/notifications/presentation/screens/notification_settings_
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
 import '../../features/store/presentation/screens/store_hours_screen.dart';
+import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/coming_soon_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
@@ -231,6 +232,9 @@ GoRouter goRouter(GoRouterRef ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
+    errorBuilder: (context, state) => AppErrorScreen(
+      onRetry: () => context.go(AppRoutes.home),
+    ),
     redirect: (context, state) => computeXStoreAuthRedirect(
       auth: ref.read(authProvider),
       needsRoleSelection: ref.read(socialAuthProvider).needsRoleSelection,

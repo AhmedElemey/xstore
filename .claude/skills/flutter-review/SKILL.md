@@ -404,3 +404,8 @@ Rules for the log:
 - **What happened:** `showDatePicker` with `lastDate: yesterday` alone still let users tap today on some platforms; registration felt unenforced. Later clarified: block dates **after** today only (today is allowed).
 - **Rule:** Shared `pickBirthDate` sets `lastDate: todayCalendarDate()`, `selectableDayPredicate: isSelectableBirthDate` (today or earlier). Reject future dates in validators via `isBirthDateAfterToday` — not "strictly before today".
 - **Where it applies:** `birth_date_picker.dart`, `validators.dart`, register + edit-profile DOB fields.
+
+### 2026-08-02 — No Flutter/Dart SDK in this remote Claude Code session
+- **What happened:** Adding a go_router `errorBuilder` + `AppErrorScreen`, `flutter analyze`/`flutter test` were unavailable — `flutter`/`dart` are not on PATH and no SDK is installed anywhere on disk in this container (only the `windows/flutter`, `linux/flutter` etc. build-plugin folders exist, not an SDK).
+- **Rule:** Before promising to run `flutter analyze`/`flutter test`, check `which flutter dart` first. If absent, review the diff manually against existing conventions (grep for the same pattern elsewhere, check const-ness of default params, etc.) and say explicitly to the user that automated verification couldn't run — never claim analyze/test passed without having run them. Re-check per session; a different container may have the SDK.
+- **Where it applies:** All Dart changes in this remote execution environment.

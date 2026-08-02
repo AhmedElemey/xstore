@@ -284,9 +284,9 @@ function content(){
  return `<div class="page-head"><div><h2>Content &amp; Banners</h2><p>Merchandise the app home feed and send push broadcasts</p></div><button class="btn btn-p" onclick="openBannerForm()">+ New banner</button></div>
    <div class="split"><div class="card"><div class="c-head"><h3>Home banners</h3></div><div class="c-body" style="display:flex;flex-direction:column;gap:12px">${rows}</div></div>
    <div class="card"><div class="c-head"><h3>Push broadcast</h3></div><div class="c-body">
-     <div class="form-row"><label>Title</label><input placeholder="Flash sale ends tonight!"></div>
-     <div class="form-row"><label>Audience</label><select><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
-     <div class="form-row"><label>Message</label><input placeholder="Up to 40% off electronics…"></div>
+     <div class="form-row"><label>Title</label><input id="pbTitle" placeholder="Flash sale ends tonight!"></div>
+     <div class="form-row"><label>Audience</label><select id="pbAud"><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
+     <div class="form-row"><label>Message</label><input id="pbMsg" placeholder="Up to 40% off electronics…"></div>
      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="sendBroadcast()">Send push</button></div></div></div>`;
 }
 
@@ -324,7 +324,14 @@ function closeSidebar(){document.querySelector('.sidebar').classList.remove('ope
 
 /* ---------- router ---------- */
 function go(v){
- document.getElementById('content').innerHTML=VIEWS[v]();
+ try{
+  document.getElementById('content').innerHTML=VIEWS[v]();
+ }catch(err){
+  console.error('[admin] view "'+v+'" failed to render',err);
+  document.getElementById('content').innerHTML=errorCard('This page hit an error',
+   'Something went wrong while loading this view.'+(err&&err.message?' ('+err.message+')':''),
+   "go('"+v+"')");
+ }
  document.getElementById('topTitle').textContent=TITLES[v];
  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
  const s=document.getElementById('searchInput'); if(s) s.value='';
@@ -428,6 +435,11 @@ const LSTAT={live:['b-green','Live'],pending:['b-amber','Pending'],out:['b-red',
 const emptyCard=(ico,title,sub)=>`<div class="card"><div class="c-body" style="text-align:center;padding:48px 24px">
    <div style="font-size:40px;margin-bottom:10px">${ico}</div><b style="font-size:15px">${title}</b>
    <p class="muted" style="font-size:13px;margin-top:4px">${sub}</p></div></div>`;
+/* full-view error state — same shape as emptyCard, used by the error boundary below */
+const errorCard=(title,sub,retryCall)=>`<div class="card"><div class="c-body" style="text-align:center;padding:48px 24px">
+   <div style="font-size:40px;margin-bottom:10px">⚠️</div><b style="font-size:15px;color:var(--error)">${title}</b>
+   <p class="muted" style="font-size:13px;margin-top:4px">${sub}</p>
+   ${retryCall?'<button class="btn btn-p" style="margin-top:16px" onclick="'+retryCall+'">Try again</button>':''}</div></div>`;
 function vendorProducts(i,tab){
  tab=tab||'listings';
  const v=VENDORS[i];
@@ -690,5 +702,22 @@ document.getElementById('searchInput').addEventListener('input',e=>searchRows(e.
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeSidebar();}});
 
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
+
+/* ---------- global error boundary ---------- */
+/* Safety net for bugs outside a view render (e.g. a button handler throwing) —
+   go() already handles errors while rendering a view; this catches everything else. */
+function showErrorScreen(detail){
+ try{
+  const content=document.getElementById('content');
+  if(!content||content.querySelector('.js-error-screen')) return;
+  closeDrawer(); closeSidebar();
+  content.innerHTML='<div class="js-error-screen"><div class="page-head"><div><h2>Something went wrong</h2><p>The dashboard hit an unexpected error.</p></div></div>'
+   +errorCard('Unexpected error','This page ran into a problem it couldn\'t recover from — reloading usually fixes it.'+(detail?' ('+detail+')':''),'location.reload()')
+   +'</div>';
+ }catch(e){/* error boundary itself must never throw */}
+}
+window.addEventListener('error',e=>showErrorScreen(e.message));
+window.addEventListener('unhandledrejection',e=>showErrorScreen((e.reason&&e.reason.message)||String(e.reason)));
+
 /* boot */
 go('overview');
