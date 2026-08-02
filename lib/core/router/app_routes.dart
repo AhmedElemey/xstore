@@ -73,17 +73,11 @@ bool isVendorRestrictedRoute(String location) {
 ///
 /// `/order/:id` is deliberately NOT here — vendors open it too, via
 /// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
-///
-/// Package delivery requests are consumer-only: the sender is always a
-/// consumer account; couriers see assigned packages in their own tab and
-/// vendors ship marketplace orders instead.
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||
       location == AppRoutes.wishlist ||
-      location == AppRoutes.orders ||
-      location == AppRoutes.sendPackage ||
-      location == AppRoutes.myPackages;
+      location == AppRoutes.orders;
 }
 
 /// Courier-only areas: the delivery run and collected-cash wallet.
@@ -91,6 +85,14 @@ bool isConsumerRestrictedRoute(String location) {
 bool isCourierRestrictedRoute(String location) {
   return location.startsWith(AppRoutes.deliveries) ||
       location == AppRoutes.courierCash;
+}
+
+/// Package delivery request routes ("send anything" pilot): open to both
+/// consumers and vendors as senders. Couriers do this work rather than
+/// request it, so they're excluded via a direct role check in
+/// `computeXStoreAuthRedirect` instead of a role-restricted-route list.
+bool isPackageRequestRoute(String location) {
+  return location == AppRoutes.sendPackage || location == AppRoutes.myPackages;
 }
 
 /// Browse-only areas open to guests (no account needed to look around the

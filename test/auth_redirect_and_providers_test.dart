@@ -34,6 +34,14 @@ UserEntity _vendor() => UserEntity(
       role: UserRole.vendor,
     );
 
+UserEntity _courier() => UserEntity(
+      id: 'cr1',
+      name: 'Cour',
+      email: 'cr@test.com',
+      phoneNumber: '01088888888',
+      role: UserRole.courier,
+    );
+
 PlaceOrderParams _dummyCheckout(String consumerId) => PlaceOrderParams(
       consumerId: consumerId,
       items: const [],
@@ -225,6 +233,33 @@ void main() {
           ),
           isNull,
           reason: '${user.role} should be allowed at $loc',
+        );
+      }
+    });
+
+    test(
+        'package delivery requests are open to consumers and vendors, '
+        'blocked for couriers', () {
+      for (final loc in [AppRoutes.sendPackage, AppRoutes.myPackages]) {
+        for (final user in [_consumer(), _vendor()]) {
+          expect(
+            computeXStoreAuthRedirect(
+              auth: AsyncValue.data(user),
+              needsRoleSelection: false,
+              matchedLocation: loc,
+            ),
+            isNull,
+            reason: '${user.role} should be allowed at $loc',
+          );
+        }
+        expect(
+          computeXStoreAuthRedirect(
+            auth: AsyncValue.data(_courier()),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          AppRoutes.deliveries,
+          reason: 'courier should be redirected from $loc to their run',
         );
       }
     });

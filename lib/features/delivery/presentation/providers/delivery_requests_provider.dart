@@ -38,24 +38,29 @@ class DeliveryRequestsState {
   }
 }
 
-/// Consumer-side package delivery requests (list + lifecycle actions).
+/// Package delivery requests for the signed-in requester — a consumer or a
+/// vendor — (list + lifecycle actions). Couriers use the separate courier
+/// packages provider instead.
 class DeliveryRequestsNotifier extends StateNotifier<DeliveryRequestsState> {
   DeliveryRequestsNotifier(this.ref) : super(const DeliveryRequestsState());
 
   final Ref ref;
 
-  UserEntity? get _consumer {
+  UserEntity? get _requester {
     final user = ref.read(authProvider).valueOrNull;
-    return user?.role == UserRole.consumer ? user : null;
+    if (user == null) return null;
+    return user.role == UserRole.consumer || user.role == UserRole.vendor
+        ? user
+        : null;
   }
 
   Future<void> fetchRequests() async {
-    final consumer = _consumer;
-    if (consumer == null) return;
+    final requester = _requester;
+    if (requester == null) return;
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref
         .read(deliveryRequestRepositoryProvider)
-        .getMyRequests(consumer.id);
+        .getMyRequests(requester.id);
     if (!mounted) return;
     result.fold(
       (failure) => state =
@@ -74,14 +79,14 @@ class DeliveryRequestsNotifier extends StateNotifier<DeliveryRequestsState> {
     required OrderAddress dropoff,
     required String packageNote,
   }) async {
-    final consumer = _consumer;
-    if (consumer == null) return false;
+    final requester = _requester;
+    if (requester == null) return false;
     state = state.copyWith(isSubmitting: true, error: null);
     final result =
         await ref.read(deliveryRequestRepositoryProvider).createRequest(
-              consumerId: consumer.id,
-              consumerName: consumer.name,
-              consumerPhone: consumer.phoneNumber,
+              requesterId: requester.id,
+              requesterName: requester.name,
+              requesterPhone: requester.phoneNumber,
               pickup: pickup,
               dropoff: dropoff,
               packageNote: packageNote,
@@ -100,7 +105,7 @@ class DeliveryRequestsNotifier extends StateNotifier<DeliveryRequestsState> {
     });
   }
 
-  /// Consumer accepts the admin's price ("pay cash to courier at pickup").
+  /// Requester accepts the admin's price ("pay cash to courier at pickup").
   Future<bool> confirmRequest(String id) async {
     final snapshot = state.requests;
     final now = DateTime.now();

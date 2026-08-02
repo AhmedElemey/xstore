@@ -17,9 +17,9 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$DeliveryRequestEntity {
   String get id => throw _privateConstructorUsedError;
-  String get consumerId => throw _privateConstructorUsedError;
-  String get consumerName => throw _privateConstructorUsedError;
-  String get consumerPhone => throw _privateConstructorUsedError;
+  String get requesterId => throw _privateConstructorUsedError;
+  String get requesterName => throw _privateConstructorUsedError;
+  String get requesterPhone => throw _privateConstructorUsedError;
   OrderAddress get pickup => throw _privateConstructorUsedError;
   OrderAddress get dropoff => throw _privateConstructorUsedError;
   String get packageNote => throw _privateConstructorUsedError;
@@ -51,9 +51,9 @@ abstract class $DeliveryRequestEntityCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String consumerId,
-      String consumerName,
-      String consumerPhone,
+      String requesterId,
+      String requesterName,
+      String requesterPhone,
       OrderAddress pickup,
       OrderAddress dropoff,
       String packageNote,
@@ -87,9 +87,9 @@ class _$DeliveryRequestEntityCopyWithImpl<$Res,
   @override
   $Res call({
     Object? id = null,
-    Object? consumerId = null,
-    Object? consumerName = null,
-    Object? consumerPhone = null,
+    Object? requesterId = null,
+    Object? requesterName = null,
+    Object? requesterPhone = null,
     Object? pickup = null,
     Object? dropoff = null,
     Object? packageNote = null,
@@ -109,17 +109,17 @@ class _$DeliveryRequestEntityCopyWithImpl<$Res,
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      consumerId: null == consumerId
-          ? _value.consumerId
-          : consumerId // ignore: cast_nullable_to_non_nullable
+      requesterId: null == requesterId
+          ? _value.requesterId
+          : requesterId // ignore: cast_nullable_to_non_nullable
               as String,
-      consumerName: null == consumerName
-          ? _value.consumerName
-          : consumerName // ignore: cast_nullable_to_non_nullable
+      requesterName: null == requesterName
+          ? _value.requesterName
+          : requesterName // ignore: cast_nullable_to_non_nullable
               as String,
-      consumerPhone: null == consumerPhone
-          ? _value.consumerPhone
-          : consumerPhone // ignore: cast_nullable_to_non_nullable
+      requesterPhone: null == requesterPhone
+          ? _value.requesterPhone
+          : requesterPhone // ignore: cast_nullable_to_non_nullable
               as String,
       pickup: null == pickup
           ? _value.pickup
@@ -204,9 +204,9 @@ abstract class _$$DeliveryRequestEntityImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String consumerId,
-      String consumerName,
-      String consumerPhone,
+      String requesterId,
+      String requesterName,
+      String requesterPhone,
       OrderAddress pickup,
       OrderAddress dropoff,
       String packageNote,
@@ -240,9 +240,9 @@ class __$$DeliveryRequestEntityImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? consumerId = null,
-    Object? consumerName = null,
-    Object? consumerPhone = null,
+    Object? requesterId = null,
+    Object? requesterName = null,
+    Object? requesterPhone = null,
     Object? pickup = null,
     Object? dropoff = null,
     Object? packageNote = null,
@@ -262,17 +262,17 @@ class __$$DeliveryRequestEntityImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      consumerId: null == consumerId
-          ? _value.consumerId
-          : consumerId // ignore: cast_nullable_to_non_nullable
+      requesterId: null == requesterId
+          ? _value.requesterId
+          : requesterId // ignore: cast_nullable_to_non_nullable
               as String,
-      consumerName: null == consumerName
-          ? _value.consumerName
-          : consumerName // ignore: cast_nullable_to_non_nullable
+      requesterName: null == requesterName
+          ? _value.requesterName
+          : requesterName // ignore: cast_nullable_to_non_nullable
               as String,
-      consumerPhone: null == consumerPhone
-          ? _value.consumerPhone
-          : consumerPhone // ignore: cast_nullable_to_non_nullable
+      requesterPhone: null == requesterPhone
+          ? _value.requesterPhone
+          : requesterPhone // ignore: cast_nullable_to_non_nullable
               as String,
       pickup: null == pickup
           ? _value.pickup
@@ -335,9 +335,9 @@ class __$$DeliveryRequestEntityImplCopyWithImpl<$Res>
 class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
   const _$DeliveryRequestEntityImpl(
       {required this.id,
-      required this.consumerId,
-      required this.consumerName,
-      required this.consumerPhone,
+      required this.requesterId,
+      required this.requesterName,
+      required this.requesterPhone,
       required this.pickup,
       required this.dropoff,
       required this.packageNote,
@@ -355,11 +355,11 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
   @override
   final String id;
   @override
-  final String consumerId;
+  final String requesterId;
   @override
-  final String consumerName;
+  final String requesterName;
   @override
-  final String consumerPhone;
+  final String requesterPhone;
   @override
   final OrderAddress pickup;
   @override
@@ -393,7 +393,7 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
 
   @override
   String toString() {
-    return 'DeliveryRequestEntity(id: $id, consumerId: $consumerId, consumerName: $consumerName, consumerPhone: $consumerPhone, pickup: $pickup, dropoff: $dropoff, packageNote: $packageNote, price: $price, status: $status, courierId: $courierId, cancelReason: $cancelReason, createdAt: $createdAt, updatedAt: $updatedAt, pricedAt: $pricedAt, confirmedAt: $confirmedAt, pickedUpAt: $pickedUpAt, deliveredAt: $deliveredAt)';
+    return 'DeliveryRequestEntity(id: $id, requesterId: $requesterId, requesterName: $requesterName, requesterPhone: $requesterPhone, pickup: $pickup, dropoff: $dropoff, packageNote: $packageNote, price: $price, status: $status, courierId: $courierId, cancelReason: $cancelReason, createdAt: $createdAt, updatedAt: $updatedAt, pricedAt: $pricedAt, confirmedAt: $confirmedAt, pickedUpAt: $pickedUpAt, deliveredAt: $deliveredAt)';
   }
 
   @override
@@ -402,12 +402,12 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
         (other.runtimeType == runtimeType &&
             other is _$DeliveryRequestEntityImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.consumerId, consumerId) ||
-                other.consumerId == consumerId) &&
-            (identical(other.consumerName, consumerName) ||
-                other.consumerName == consumerName) &&
-            (identical(other.consumerPhone, consumerPhone) ||
-                other.consumerPhone == consumerPhone) &&
+            (identical(other.requesterId, requesterId) ||
+                other.requesterId == requesterId) &&
+            (identical(other.requesterName, requesterName) ||
+                other.requesterName == requesterName) &&
+            (identical(other.requesterPhone, requesterPhone) ||
+                other.requesterPhone == requesterPhone) &&
             (identical(other.pickup, pickup) || other.pickup == pickup) &&
             (identical(other.dropoff, dropoff) || other.dropoff == dropoff) &&
             (identical(other.packageNote, packageNote) ||
@@ -436,9 +436,9 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      consumerId,
-      consumerName,
-      consumerPhone,
+      requesterId,
+      requesterName,
+      requesterPhone,
       pickup,
       dropoff,
       packageNote,
@@ -464,9 +464,9 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
 abstract class _DeliveryRequestEntity implements DeliveryRequestEntity {
   const factory _DeliveryRequestEntity(
       {required final String id,
-      required final String consumerId,
-      required final String consumerName,
-      required final String consumerPhone,
+      required final String requesterId,
+      required final String requesterName,
+      required final String requesterPhone,
       required final OrderAddress pickup,
       required final OrderAddress dropoff,
       required final String packageNote,
@@ -484,11 +484,11 @@ abstract class _DeliveryRequestEntity implements DeliveryRequestEntity {
   @override
   String get id;
   @override
-  String get consumerId;
+  String get requesterId;
   @override
-  String get consumerName;
+  String get requesterName;
   @override
-  String get consumerPhone;
+  String get requesterPhone;
   @override
   OrderAddress get pickup;
   @override

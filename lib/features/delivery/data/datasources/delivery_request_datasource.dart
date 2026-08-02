@@ -71,27 +71,42 @@ class DeliveryRequestMockDataSource {
       street: '15 Abbas El Akkad St',
       city: 'Nasr City',
     );
+    final vendorSenderAddr = addr(
+      name: mockVendorUser.name,
+      phone: mockVendorUser.phoneNumber,
+      street: '3 Talaat Harb St',
+      city: 'Downtown Cairo',
+    );
 
     DeliveryRequestEntity request({
       required DeliveryRequestStatus status,
       required OrderAddress dropoff,
       required String note,
       required Duration age,
+      String requesterId = '',
+      String requesterName = '',
+      String requesterPhone = '',
+      OrderAddress? pickup,
       String? courierId,
       Duration? pickedUpAge,
     }) {
+      final senderPickup = pickup ?? senderAddr;
       final createdAt = now.subtract(age);
       final priced = status != DeliveryRequestStatus.submitted;
-      final price = priced ? mockPackagePrice(senderAddr, dropoff) : null;
+      final price = priced ? mockPackagePrice(senderPickup, dropoff) : null;
       final confirmed = status == DeliveryRequestStatus.confirmed ||
           status == DeliveryRequestStatus.pickedUp ||
           status == DeliveryRequestStatus.delivered;
       return DeliveryRequestEntity(
         id: _nextId(),
-        consumerId: mockConsumerUser.id,
-        consumerName: mockConsumerUser.name,
-        consumerPhone: mockConsumerUser.phoneNumber,
-        pickup: senderAddr,
+        requesterId:
+            requesterId.isEmpty ? mockConsumerUser.id : requesterId,
+        requesterName:
+            requesterName.isEmpty ? mockConsumerUser.name : requesterName,
+        requesterPhone: requesterPhone.isEmpty
+            ? mockConsumerUser.phoneNumber
+            : requesterPhone,
+        pickup: senderPickup,
         dropoff: dropoff,
         packageNote: note,
         price: price,
@@ -159,6 +174,23 @@ class DeliveryRequestMockDataSource {
         courierId: mockCourierUser.id,
         pickedUpAge: const Duration(hours: 1),
       ),
+      // Vendor-submitted request — a store shipping a return parcel back to
+      // a supplier. Demonstrates the requester can be a vendor account too.
+      request(
+        status: DeliveryRequestStatus.priced,
+        requesterId: mockVendorUser.id,
+        requesterName: mockVendorUser.name,
+        requesterPhone: mockVendorUser.phoneNumber,
+        pickup: vendorSenderAddr,
+        dropoff: addr(
+          name: 'Supplier Returns Desk',
+          phone: '+201155500014',
+          street: '40 El Haram St',
+          city: 'Giza',
+        ),
+        note: 'Defective unit return — supplier RMA #4471',
+        age: const Duration(hours: 1),
+      ),
     ]);
   }
 
@@ -179,17 +211,17 @@ class DeliveryRequestMockDataSource {
     }
   }
 
-  Future<List<DeliveryRequestEntity>> getMyRequests(String consumerId) {
+  Future<List<DeliveryRequestEntity>> getMyRequests(String requesterId) {
     _autoPriceStaleSubmitted();
-    final mine = _requests.where((r) => r.consumerId == consumerId).toList()
+    final mine = _requests.where((r) => r.requesterId == requesterId).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return MockConfig.simulate(mine);
   }
 
   Future<DeliveryRequestEntity> createRequest({
-    required String consumerId,
-    required String consumerName,
-    required String consumerPhone,
+    required String requesterId,
+    required String requesterName,
+    required String requesterPhone,
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
@@ -198,9 +230,9 @@ class DeliveryRequestMockDataSource {
     final now = DateTime.now();
     final request = DeliveryRequestEntity(
       id: _nextId(),
-      consumerId: consumerId,
-      consumerName: consumerName,
-      consumerPhone: consumerPhone,
+      requesterId: requesterId,
+      requesterName: requesterName,
+      requesterPhone: requesterPhone,
       pickup: pickup,
       dropoff: dropoff,
       packageNote: packageNote,

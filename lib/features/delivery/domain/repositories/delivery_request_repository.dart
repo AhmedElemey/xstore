@@ -5,23 +5,23 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../entities/delivery_request.dart';
 
 abstract interface class DeliveryRequestRepository {
-  /// The consumer's requests, newest first.
+  /// The requester's (consumer or vendor) requests, newest first.
   Future<Either<Failure, List<DeliveryRequestEntity>>> getMyRequests(
-    String consumerId,
+    String requesterId,
   );
 
   /// Submits a new request (status starts at `submitted`; the admin prices
   /// it afterwards).
   Future<Either<Failure, DeliveryRequestEntity>> createRequest({
-    required String consumerId,
-    required String consumerName,
-    required String consumerPhone,
+    required String requesterId,
+    required String requesterName,
+    required String requesterPhone,
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
   });
 
-  /// Consumer accepts the admin's price (`priced` → `confirmed`); the pilot
+  /// Requester accepts the admin's price (`priced` → `confirmed`); the pilot
   /// assigns the courier at this point.
   Future<Either<Failure, DeliveryRequestEntity>> confirmRequest(String id);
 

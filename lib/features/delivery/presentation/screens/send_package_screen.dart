@@ -17,10 +17,10 @@ import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/delivery_requests_provider.dart';
 
-/// Consumer form: request a courier to move a package from a pickup address
-/// to a drop-off address. COD-at-pickup — the admin prices the request and
-/// the sender pays the courier in cash when the package is collected; the
-/// app never holds money.
+/// Request form (consumer or vendor): request a courier to move a package
+/// from a pickup address to a drop-off address. COD-at-pickup — the admin
+/// prices the request and the sender pays the courier in cash when the
+/// package is collected; the app never holds money.
 class SendPackageScreen extends ConsumerStatefulWidget {
   const SendPackageScreen({super.key});
 
@@ -52,8 +52,9 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
   @override
   void initState() {
     super.initState();
-    // Sender defaults to the signed-in consumer (route is login-gated, but
-    // valueOrNull keeps this null-safe if auth is mid-refresh).
+    // Sender defaults to the signed-in requester, consumer or vendor (route
+    // is login-gated, but valueOrNull keeps this null-safe if auth is
+    // mid-refresh).
     final user = ref.read(authProvider).valueOrNull;
     if (user != null) {
       _senderNameCtrl.text = user.name;
