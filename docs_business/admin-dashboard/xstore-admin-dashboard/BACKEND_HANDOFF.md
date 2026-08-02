@@ -37,6 +37,9 @@ with the response and the views render unchanged.
 
 ### Vendor detail page  (`vendorProducts()` — tabs: Listings / Orders / Commission)
 - **Listings** — `GET /admin/vendors/{id}/products` → list of Listing
+  - `POST /admin/products/{id}/approve` · `.../reject` — same product-moderation endpoints as above (a vendor-page listing *is* a product)
+  - `POST /admin/products/{id}/unpublish` — pull a **live** listing off the store (status leaves `live`, does not return to `pending`)
+  - `POST /admin/products/{id}/nudge-restock` — send the vendor a restock reminder for an **out** (out-of-stock) listing
 - **Orders** — `GET /admin/vendors/{id}/orders` → list of Order (buyer, items, total, status)
 - **Commission** — see the Commission wallet section below
 
@@ -51,6 +54,7 @@ with the response and the views render unchanged.
 ### Users / Customers  (`customers()`, `userDrawer()`)
 - `GET /admin/users?role=consumer` · `GET /admin/users/{id}`
 - `POST /admin/users/{id}/suspend`
+- `POST /admin/users/{id}/message` body `{ message }` — send a direct message/notification to the customer
 
 ### Categories  (`categories()`, `openCategoryForm()`)
 - `GET /categories` (server-driven taxonomy) · `POST /admin/categories`
@@ -102,7 +106,7 @@ with the response and the views render unchanged.
   "price": 48999,
   "compareAt": 52999,          // 0 / null if none
   "stock": 7,
-  "status": "live",            // live | pending | out (out of stock)
+  "status": "live",            // live | pending | out (out of stock) | unpublished
   "sold30d": 42,
   "rating": 4.7
 }
@@ -161,3 +165,8 @@ Alert level (server or client): `outstanding >= pause` → **paused**; else `>= 
   the filter chips keep working.
 - Money is rendered with `EGP(n)`; send raw numbers (EGP, no formatting).
 - Actions currently call `toast(...)`; swap those for `fetch()` calls and re-render on success.
+- **Listings and Users are wired** (`apiCall()` in `app.js`): they call the real endpoints above.
+  Until the backend exists, failed/unreachable calls are caught and fall through to the same
+  local demo behavior (state mutated in-memory, toast shown) so the prototype keeps working
+  standalone — check the browser console for `[admin] … failed — demo fallback` to see which
+  calls are actually hitting a server. Every other view is still 100% simulated.
