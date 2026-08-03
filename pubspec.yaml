@@ -68,6 +68,7 @@ dependencies:
   geolocator: ^13.0.0
   geocoding: ^3.0.0
   connectivity_plus: ^7.1.1
+  flutter_image_compress: ^2.5.1
 
 dev_dependencies:
   flutter_test:

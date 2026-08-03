@@ -29,7 +29,7 @@ class ListingRepositoryImpl implements ListingRepository {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    List<String> imageUrls = const [],
+    List<String> imagePaths = const [],
   }) async {
     try {
       final model = await _remote.createListing(
@@ -48,7 +48,7 @@ class ListingRepositoryImpl implements ListingRepository {
         shippingCost: shippingCost,
         location: location,
         attributes: attributes,
-        imageUrls: imageUrls,
+        imagePaths: imagePaths,
       );
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -92,7 +92,7 @@ class ListingRepositoryImpl implements ListingRepository {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    required List<String> imageUrls,
+    required List<String> imagePaths,
     required ListingStatus status,
   }) async {
     try {
@@ -113,7 +113,7 @@ class ListingRepositoryImpl implements ListingRepository {
         shippingCost: shippingCost,
         location: location,
         attributes: attributes,
-        imageUrls: imageUrls,
+        imagePaths: imagePaths,
         status: status,
       );
       return Right(model.toEntity());
@@ -131,6 +131,37 @@ class ListingRepositoryImpl implements ListingRepository {
     try {
       await _remote.deleteListing(id);
       return const Right(unit);
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ListingEntity>> resubmitListing({
+    required String id,
+    required double newPrice,
+  }) async {
+    try {
+      final model = await _remote.resubmitListing(id: id, newPrice: newPrice);
+      return Right(model.toEntity());
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ListingEntity>> deactivateListing(String id) async {
+    try {
+      final model = await _remote.deactivateListing(id);
+      return Right(model.toEntity());
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
     } on ServerException catch (e) {

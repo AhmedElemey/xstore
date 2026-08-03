@@ -43,6 +43,7 @@ _$ListingModelImpl _$$ListingModelImplFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as String),
           ) ??
           const <String, String>{},
+      rejectionReason: json['rejectionReason'] as String?,
     );
 
 Map<String, dynamic> _$$ListingModelImplToJson(_$ListingModelImpl instance) =>
@@ -74,4 +75,5 @@ Map<String, dynamic> _$$ListingModelImplToJson(_$ListingModelImpl instance) =>
       'shippingCost': instance.shippingCost,
       'location': instance.location,
       'attributes': instance.attributes,
+      'rejectionReason': instance.rejectionReason,
     };

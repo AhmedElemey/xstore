@@ -3872,6 +3872,54 @@ abstract class AppLocalizations {
   /// **'Rejected'**
   String get rejected;
 
+  /// No description provided for @resubmitListing.
+  ///
+  /// In en, this message translates to:
+  /// **'Resubmit'**
+  String get resubmitListing;
+
+  /// No description provided for @resubmitListingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resubmit listing'**
+  String get resubmitListingTitle;
+
+  /// No description provided for @rejectionReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for rejection'**
+  String get rejectionReasonLabel;
+
+  /// No description provided for @rejectionReasonUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason was provided.'**
+  String get rejectionReasonUnavailable;
+
+  /// No description provided for @resubmitPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New price'**
+  String get resubmitPriceLabel;
+
+  /// No description provided for @resubmitInvalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price'**
+  String get resubmitInvalidPrice;
+
+  /// No description provided for @resubmitSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Resubmit for review'**
+  String get resubmitSubmit;
+
+  /// No description provided for @resubmitSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing resubmitted for review'**
+  String get resubmitSuccess;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:

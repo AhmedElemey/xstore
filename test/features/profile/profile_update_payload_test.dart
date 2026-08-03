@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/mock/mock_config.dart';
@@ -8,9 +10,55 @@ import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
 import 'package:xstore/features/profile/domain/entities/update_profile_request.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
 
+class _CapturingInterceptor extends Interceptor {
+  RequestOptions? captured;
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    captured = options;
+    handler.resolve(
+      Response(
+        requestOptions: options,
+        statusCode: 200,
+        data: <String, dynamic>{'url': '/uploads/avatars/example.jpg'},
+      ),
+    );
+  }
+}
+
 // UserModel.fromJson wire-alias coverage (storeName precedence, whatsApp/
 // instagram aliases) lives in test/user_model_profile_wire_test.dart.
 void main() {
+  group('ProfileRemoteDataSource updateAvatar', () {
+    test(
+      'POSTs multipart to the generic uploads endpoint with field `file`',
+      () async {
+        final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
+        final interceptor = _CapturingInterceptor();
+        dio.interceptors.add(interceptor);
+        final datasource = ProfileRemoteDataSourceImpl(dio);
+
+        final tmp = await Directory.systemTemp.createTemp('avatar_test');
+        addTearDown(() => tmp.delete(recursive: true));
+        final photo = File('${tmp.path}/avatar.jpg')
+          ..writeAsBytesSync(const [0, 1, 2, 3]);
+
+        final url = await datasource.updateAvatar(
+          userId: '1',
+          filePath: photo.path,
+        );
+
+        final options = interceptor.captured!;
+        expect(options.method, 'POST');
+        expect(options.path, '/api/uploads/avatar');
+        final formData = options.data as FormData;
+        expect(formData.files, hasLength(1));
+        expect(formData.files.single.key, 'file');
+        expect(url, '/uploads/avatars/example.jpg');
+      },
+    );
+  });
+
   group('UserEntity.displayStoreName', () {
     const entity = UserEntity(
       id: '1',

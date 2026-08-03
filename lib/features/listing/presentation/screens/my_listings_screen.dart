@@ -24,6 +24,7 @@ import '../widgets/listing_filter_tabs.dart';
 import '../widgets/listing_options_sheet.dart';
 import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
+import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
@@ -126,6 +127,30 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
   }
 
+  Future<void> _openResubmitSheet(ListingEntity listing) async {
+    final ok = await showAnimatedBottomSheet<bool>(
+      context: context,
+      builder: (ctx) => Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: ResubmitListingSheet(
+          listing: listing,
+          onSubmit: (newPrice) => ref
+              .read(myListingsNotifierProvider.notifier)
+              .resubmitListing(listing.id, newPrice),
+        ),
+      ),
+    );
+    if (!mounted || ok != true) {
+      // Failure already surfaces via the screen's existing ref.listen on
+      // state.error (same pattern pause/resume relies on) — no need to
+      // toast it again here.
+      return;
+    }
+    AppSnackbar.success(context, context.l10n.resubmitSuccess);
+  }
+
   void _showOptions(ListingEntity listing) {
     showAnimatedBottomSheet<void>(
       context: context,
@@ -158,6 +183,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             );
           },
           onDelete: () => _confirmDelete(listing),
+          onResubmit: () => _openResubmitSheet(listing),
         ),
       ),
     );

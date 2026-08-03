@@ -1908,6 +1908,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rejected => 'Rejected';
 
   @override
+  String get resubmitListing => 'Resubmit';
+
+  @override
+  String get resubmitListingTitle => 'Resubmit listing';
+
+  @override
+  String get rejectionReasonLabel => 'Reason for rejection';
+
+  @override
+  String get rejectionReasonUnavailable => 'No reason was provided.';
+
+  @override
+  String get resubmitPriceLabel => 'New price';
+
+  @override
+  String get resubmitInvalidPrice => 'Enter a valid price';
+
+  @override
+  String get resubmitSubmit => 'Resubmit for review';
+
+  @override
+  String get resubmitSuccess => 'Listing resubmitted for review';
+
+  @override
   String get retry => 'Retry';
 
   @override

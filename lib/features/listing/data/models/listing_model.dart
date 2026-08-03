@@ -51,6 +51,15 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
       ? (m['attributes'] as Map)
           .map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''))
       : <String, String>{};
+  // UNCONFIRMED wire key — no example response in the Postman collection
+  // for a rejected listing. Try the likely candidates (admin's write key
+  // is `rejectionReason` per PUT Reject Listing) and fall back to null.
+  final rawReason = m['rejectionReason'] ??
+      m['rejectReason'] ??
+      m['adminRejectionReason'] ??
+      m['reason'];
+  m['rejectionReason'] =
+      (rawReason is String && rawReason.trim().isNotEmpty) ? rawReason : null;
   // CONFIRMED: `status` is a JSON number (e.g. 2), not a string — coerce
   // before the String-typed model field parses it. See
   // _listingStatusFromDto for the ordinal mapping.
@@ -200,6 +209,7 @@ class ListingModel with _$ListingModel {
     @Default(0.0) double shippingCost,
     @Default('') String location,
     @Default(<String, String>{}) Map<String, String> attributes,
+    String? rejectionReason,
   }) = _ListingModel;
 
   factory ListingModel.fromJson(Map<String, dynamic> json) =>
@@ -275,6 +285,7 @@ extension ListingModelX on ListingModel {
         shippingCost: shippingCost,
         location: location,
         attributes: attributes,
+        rejectionReason: rejectionReason,
       );
 }
 

@@ -25,7 +25,7 @@ class CreateListingUseCase {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    List<String> imageUrls = const [],
+    List<String> imagePaths = const [],
   }) {
     return _repository.createListing(
       titleEn: titleEn,
@@ -43,7 +43,7 @@ class CreateListingUseCase {
       shippingCost: shippingCost,
       location: location,
       attributes: attributes,
-      imageUrls: imageUrls,
+      imagePaths: imagePaths,
     );
   }
 }

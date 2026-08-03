@@ -47,7 +47,12 @@ mixin _$ListingEntity {
   bool get shippingAvailable => throw _privateConstructorUsedError;
   double get shippingCost => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
-  Map<String, String> get attributes => throw _privateConstructorUsedError;
+  Map<String, String> get attributes =>
+      throw _privateConstructorUsedError; // Only meaningful when status == rejected; admin's stated reason from
+// Admin Listings > Reject Listing. Field name on the GET/my-listings
+// wire response is unconfirmed (no example response in the Postman
+// collection) — parsed tolerantly, see listing_model.dart.
+  String? get rejectionReason => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ListingEntityCopyWith<ListingEntity> get copyWith =>
@@ -87,7 +92,8 @@ abstract class $ListingEntityCopyWith<$Res> {
       bool shippingAvailable,
       double shippingCost,
       String location,
-      Map<String, String> attributes});
+      Map<String, String> attributes,
+      String? rejectionReason});
 }
 
 /// @nodoc
@@ -130,6 +136,7 @@ class _$ListingEntityCopyWithImpl<$Res, $Val extends ListingEntity>
     Object? shippingCost = null,
     Object? location = null,
     Object? attributes = null,
+    Object? rejectionReason = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -240,6 +247,10 @@ class _$ListingEntityCopyWithImpl<$Res, $Val extends ListingEntity>
           ? _value.attributes
           : attributes // ignore: cast_nullable_to_non_nullable
               as Map<String, String>,
+      rejectionReason: freezed == rejectionReason
+          ? _value.rejectionReason
+          : rejectionReason // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -279,7 +290,8 @@ abstract class _$$ListingEntityImplCopyWith<$Res>
       bool shippingAvailable,
       double shippingCost,
       String location,
-      Map<String, String> attributes});
+      Map<String, String> attributes,
+      String? rejectionReason});
 }
 
 /// @nodoc
@@ -320,6 +332,7 @@ class __$$ListingEntityImplCopyWithImpl<$Res>
     Object? shippingCost = null,
     Object? location = null,
     Object? attributes = null,
+    Object? rejectionReason = freezed,
   }) {
     return _then(_$ListingEntityImpl(
       id: null == id
@@ -430,6 +443,10 @@ class __$$ListingEntityImplCopyWithImpl<$Res>
           ? _value._attributes
           : attributes // ignore: cast_nullable_to_non_nullable
               as Map<String, String>,
+      rejectionReason: freezed == rejectionReason
+          ? _value.rejectionReason
+          : rejectionReason // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -464,7 +481,8 @@ class _$ListingEntityImpl implements _ListingEntity {
       this.shippingAvailable = false,
       this.shippingCost = 0.0,
       this.location = '',
-      final Map<String, String> attributes = const <String, String>{}})
+      final Map<String, String> attributes = const <String, String>{},
+      this.rejectionReason})
       : _imageUrls = imageUrls,
         _attributes = attributes;
 
@@ -556,9 +574,16 @@ class _$ListingEntityImpl implements _ListingEntity {
     return EqualUnmodifiableMapView(_attributes);
   }
 
+// Only meaningful when status == rejected; admin's stated reason from
+// Admin Listings > Reject Listing. Field name on the GET/my-listings
+// wire response is unconfirmed (no example response in the Postman
+// collection) — parsed tolerantly, see listing_model.dart.
+  @override
+  final String? rejectionReason;
+
   @override
   String toString() {
-    return 'ListingEntity(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount, vendorId: $vendorId, titleEn: $titleEn, titleAr: $titleAr, descriptionEn: $descriptionEn, descriptionAr: $descriptionAr, compareAtPrice: $compareAtPrice, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, stockQuantity: $stockQuantity, shippingAvailable: $shippingAvailable, shippingCost: $shippingCost, location: $location, attributes: $attributes)';
+    return 'ListingEntity(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount, vendorId: $vendorId, titleEn: $titleEn, titleAr: $titleAr, descriptionEn: $descriptionEn, descriptionAr: $descriptionAr, compareAtPrice: $compareAtPrice, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, stockQuantity: $stockQuantity, shippingAvailable: $shippingAvailable, shippingCost: $shippingCost, location: $location, attributes: $attributes, rejectionReason: $rejectionReason)';
   }
 
   @override
@@ -612,7 +637,9 @@ class _$ListingEntityImpl implements _ListingEntity {
             (identical(other.location, location) ||
                 other.location == location) &&
             const DeepCollectionEquality()
-                .equals(other._attributes, _attributes));
+                .equals(other._attributes, _attributes) &&
+            (identical(other.rejectionReason, rejectionReason) ||
+                other.rejectionReason == rejectionReason));
   }
 
   @override
@@ -644,7 +671,8 @@ class _$ListingEntityImpl implements _ListingEntity {
         shippingAvailable,
         shippingCost,
         location,
-        const DeepCollectionEquality().hash(_attributes)
+        const DeepCollectionEquality().hash(_attributes),
+        rejectionReason
       ]);
 
   @JsonKey(ignore: true)
@@ -682,7 +710,8 @@ abstract class _ListingEntity implements ListingEntity {
       final bool shippingAvailable,
       final double shippingCost,
       final String location,
-      final Map<String, String> attributes}) = _$ListingEntityImpl;
+      final Map<String, String> attributes,
+      final String? rejectionReason}) = _$ListingEntityImpl;
 
   @override
   String get id;
@@ -741,6 +770,11 @@ abstract class _ListingEntity implements ListingEntity {
   String get location;
   @override
   Map<String, String> get attributes;
+  @override // Only meaningful when status == rejected; admin's stated reason from
+// Admin Listings > Reject Listing. Field name on the GET/my-listings
+// wire response is unconfirmed (no example response in the Postman
+// collection) — parsed tolerantly, see listing_model.dart.
+  String? get rejectionReason;
   @override
   @JsonKey(ignore: true)
   _$$ListingEntityImplCopyWith<_$ListingEntityImpl> get copyWith =>

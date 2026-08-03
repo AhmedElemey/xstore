@@ -91,11 +91,6 @@ abstract final class ApiEndpoints {
       '$_api/auth/verify-forget-password-otp';
   static const String getProfile = '$_api/auth/get-profile';
   static const String updateProfile = '$_api/auth/update-profile';
-  // Multipart avatar upload. ASSUMPTION — exact route not yet confirmed
-  // against the backend/Postman collection; kept auth-scoped under
-  // /api/auth/* to match get-profile / update-profile (token identifies
-  // the user). Correct this single constant once the real path is known.
-  static const String uploadAvatar = '$_api/auth/avatar';
   static const String sendEmailOtp = '$_api/auth/send-email-otp';
   static const String sendPhoneOtp = '$_api/auth/send-phone-otp';
   static const String verifyEmail = '$_api/auth/verify-email';
@@ -117,9 +112,18 @@ abstract final class ApiEndpoints {
 
   // Reference data (GET only — write ops are admin-only, not used by this app)
   static const String cities = '$_api/cities';
-  static const String governments = '$_api/governments';
+  // CONFIRMED (Postman collection): the folder is labeled "Governments"
+  // but the route itself is /api/governorates, not /api/governments.
+  static const String governments = '$_api/governorates';
   static const String storeCategories = '$_api/storecategories';
   static const String catalogCategories = '$_api/categories';
+  static const String banners = '$_api/banners';
+
+  /// Generic upload endpoint. CONFIRMED (Postman collection): multipart
+  /// POST, file field key `file`, entityType path segment is one of
+  /// `listing`/`avatar`/`banner`. Replaces the old `/api/auth/avatar`
+  /// guess, which was never confirmed against the backend.
+  static String apiUpload(String entityType) => '$_api/uploads/$entityType';
 
   // Wishlist (all authenticated / user-scoped)
   static const String wishlist = '$_api/wishlist';
@@ -151,4 +155,18 @@ abstract final class ApiEndpoints {
   static String apiListingDetail(String id) => '$apiListings/$id';
   static String apiListingSimilar(String id, {int count = 6}) =>
       '$apiListings/$id/similar?count=$count';
+  static String apiListingResubmit(String id) => '$apiListings/$id/resubmit';
+  // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
+  // Used for pause — sidesteps the multipart image-wipe risk that the
+  // generic PUT /api/listings update carries (see ListingRemoteDataSource
+  // `_listingFormData`). No equivalent "activate"/"resume" route exists
+  // in the collection, so resume still goes through the generic update.
+  static String apiListingDeactivate(String id) => '$apiListings/$id/deactivate';
+  // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
+  // Used for "Delete listing" — the collection has no DELETE endpoint for
+  // listings at all, only /cancel and /deactivate. /deactivate is already
+  // pause's endpoint (reusing it for delete would make a "deleted"
+  // listing reappear as merely paused-and-resumable), so /cancel is the
+  // closer semantic match for a listing the vendor wants gone for good.
+  static String apiListingCancel(String id) => '$apiListings/$id/cancel';
 }

@@ -5,8 +5,10 @@ import '../../data/datasources/listing_remote_datasource.dart';
 import '../../data/repositories/listing_repository_impl.dart';
 import '../../domain/repositories/listing_repository.dart';
 import '../../domain/usecases/create_listing_usecase.dart';
+import '../../domain/usecases/deactivate_listing_usecase.dart';
 import '../../domain/usecases/delete_listing_usecase.dart';
 import '../../domain/usecases/get_my_listings_usecase.dart';
+import '../../domain/usecases/resubmit_listing_usecase.dart';
 import '../../domain/usecases/update_listing_usecase.dart';
 
 part 'listing_dependencies.g.dart';
@@ -39,4 +41,16 @@ UpdateListingUseCase updateListingUseCase(UpdateListingUseCaseRef ref) {
 @riverpod
 DeleteListingUseCase deleteListingUseCase(DeleteListingUseCaseRef ref) {
   return DeleteListingUseCase(ref.watch(listingRepositoryProvider));
+}
+
+@riverpod
+ResubmitListingUseCase resubmitListingUseCase(ResubmitListingUseCaseRef ref) {
+  return ResubmitListingUseCase(ref.watch(listingRepositoryProvider));
+}
+
+@riverpod
+DeactivateListingUseCase deactivateListingUseCase(
+  DeactivateListingUseCaseRef ref,
+) {
+  return DeactivateListingUseCase(ref.watch(listingRepositoryProvider));
 }

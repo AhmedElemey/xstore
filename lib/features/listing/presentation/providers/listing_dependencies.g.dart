@@ -106,5 +106,41 @@ final deleteListingUseCaseProvider =
 );
 
 typedef DeleteListingUseCaseRef = AutoDisposeProviderRef<DeleteListingUseCase>;
+String _$resubmitListingUseCaseHash() =>
+    r'a9234aebd8180455153066a9482d6ba89124e560';
+
+/// See also [resubmitListingUseCase].
+@ProviderFor(resubmitListingUseCase)
+final resubmitListingUseCaseProvider =
+    AutoDisposeProvider<ResubmitListingUseCase>.internal(
+  resubmitListingUseCase,
+  name: r'resubmitListingUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$resubmitListingUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef ResubmitListingUseCaseRef
+    = AutoDisposeProviderRef<ResubmitListingUseCase>;
+String _$deactivateListingUseCaseHash() =>
+    r'dd50f384b9a2edb271db5006edf18037f4dd3d38';
+
+/// See also [deactivateListingUseCase].
+@ProviderFor(deactivateListingUseCase)
+final deactivateListingUseCaseProvider =
+    AutoDisposeProvider<DeactivateListingUseCase>.internal(
+  deactivateListingUseCase,
+  name: r'deactivateListingUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$deactivateListingUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef DeactivateListingUseCaseRef
+    = AutoDisposeProviderRef<DeactivateListingUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
