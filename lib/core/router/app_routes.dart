@@ -10,6 +10,9 @@ abstract final class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
   static const otp = '/otp';
+  /// Full-page fallback shown for any HTTP 5xx API response — see
+  /// `serverErrorProvider`.
+  static const serverError = '/server-error';
   static const home = '/home';
   static const explore = '/explore';
   static const cart = '/cart';

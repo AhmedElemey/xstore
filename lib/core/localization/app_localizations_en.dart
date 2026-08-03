@@ -3028,6 +3028,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enableLocationServices => 'Enable them in Settings?';
 
   @override
+  String get locationPermissionRationaleTitle => 'Use Your Location?';
+
+  @override
+  String get locationPermissionRationaleBody =>
+      'xStore uses your location to help fill in your address automatically. You can change this anytime from your profile.';
+
+  @override
+  String get locationPermissionAllow => 'Allow';
+
+  @override
+  String get locationPermissionNotNow => 'Not Now';
+
+  @override
   String get navDeliveries => 'Deliveries';
 
   @override

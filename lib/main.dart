@@ -9,6 +9,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/config/app_flavor.dart';
+import 'core/firebase/fcm_push_setup.dart';
 import 'core/firebase/fcm_token.dart';
 import 'core/firebase/firebase_options.dart';
 
@@ -25,8 +26,15 @@ Future<void> bootstrap(AppFlavor flavor) async {
     appleProvider:
         flavor.isDev ? AppleProvider.debug : AppleProvider.appAttest,
   );
-  // App open: fetch + persist the FCM token without blocking startup.
-  unawaited(refreshAndStoreFcmToken());
+  await configureFirebaseCloudMessaging();
+  // App open: show the native "Allow Notifications" prompt (once — the OS
+  // remembers the user's answer on later launches) for every user, logged
+  // in or not, then fetch + persist the token. Fire-and-forget so a slow or
+  // undecided permission dialog never blocks startup.
+  unawaited(() async {
+    await requestFcmNotificationPermission();
+    await refreshAndStoreFcmToken();
+  }());
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

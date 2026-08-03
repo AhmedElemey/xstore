@@ -12,6 +12,7 @@ import '../../../../core/mock/mock_config.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
@@ -62,6 +63,8 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
     final loginState = ref.read(loginNotifierProvider);
     final authState = ref.read(authProvider);
     if (loginState.error == null && authState.valueOrNull != null) {
+      await maybeShowLocationPermissionPrompt(context, ref);
+      if (!mounted) return;
       // Role-aware redirect routes couriers to /deliveries from here.
       context.go(AppRoutes.home);
     }

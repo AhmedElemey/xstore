@@ -14,6 +14,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
@@ -41,11 +42,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authed = ref.read(authProvider).valueOrNull;
-      if (authed != null && mounted) {
-        context.go(AppRoutes.home);
-      }
+      if (authed == null || !mounted) return;
+      await maybeShowLocationPermissionPrompt(context, ref);
+      if (!mounted) return;
+      context.go(AppRoutes.home);
     });
   }
 
@@ -156,6 +158,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                           ref.read(phoneAuthProvider.notifier).updateOtp(code);
                           final ok = await ref.read(phoneAuthProvider.notifier).verifyOtp();
                           if (!context.mounted || !ok) return;
+                          await maybeShowLocationPermissionPrompt(context, ref);
+                          if (!context.mounted) return;
                           context.go(AppRoutes.home);
                         },
                       ),
@@ -170,6 +174,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                                   .read(phoneAuthProvider.notifier)
                                   .verifyOtp();
                               if (!context.mounted || !ok) return;
+                              await maybeShowLocationPermissionPrompt(
+                                context,
+                                ref,
+                              );
+                              if (!context.mounted) return;
                               context.go(AppRoutes.home);
                             }
                           : null,

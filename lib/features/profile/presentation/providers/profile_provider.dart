@@ -344,6 +344,50 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
   }
 
+  /// Applies a device-detected location without the loading/error flags
+  /// [detectCurrentLocation] sets — those drive Edit Profile's UI and would
+  /// leak into unrelated screens if set from a background bootstrap. Used
+  /// only by [autoDetectAndFillLocationIfMissing].
+  void applyDetectedLocationSilently(LocationResult result) {
+    final googleAddress = result.detailAddress ?? '';
+    final next = state.copyWith(
+      editLatitude: LocationService.formatCoordinate(result.latitude),
+      editLongitude: LocationService.formatCoordinate(result.longitude),
+      editGovernorate: result.governorate ?? '',
+      editTown: result.town ?? '',
+      editLocation: googleAddress,
+      editDetailAddress: googleAddress,
+    );
+    final u = next.user;
+    state = next.copyWith(hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true);
+  }
+
+  /// Best-effort, silent location auto-fill for app-entry bootstrap (splash).
+  /// Unlike [detectCurrentLocation] (user-initiated from Edit Profile,
+  /// surfaces loading/error UI), this never prompts or shows errors — it
+  /// only fills in a profile that has no location set yet, so it never
+  /// overwrites a location the user already set deliberately. Runs on this
+  /// notifier's own keepAlive `ref`, not the caller's — safe to
+  /// fire-and-forget from a widget (splash) that navigates away, and
+  /// disposes, before this completes.
+  Future<void> autoDetectAndFillLocationIfMissing() async {
+    final user = ref.read(authProvider).valueOrNull;
+    if (user == null || user.id.isEmpty) return;
+
+    await refreshProfileData(user: user);
+
+    final current = state.user ?? user;
+    if (current.latitude != null && current.longitude != null) return;
+
+    try {
+      final result = await LocationService().getCurrentLocation();
+      applyDetectedLocationSilently(result);
+      await saveProfile();
+    } catch (_) {
+      // Silent — passive background detection must never surface errors.
+    }
+  }
+
   /// Sets the governorate (`cityId`) + city (`governmentId`) pair from the
   /// location cascade; both are assigned explicitly so a governorate change can
   /// clear the dependent city (null).

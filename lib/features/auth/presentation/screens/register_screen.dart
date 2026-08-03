@@ -13,6 +13,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
 import '../../../store_categories/domain/entities/store_category_entity.dart';
@@ -911,8 +912,10 @@ class _VendorSuccessOverlay extends ConsumerWidget {
               const Gap(AppSpacing.x2l),
               XstoreButton(
                 label: context.l10n.goToMyStore,
-                onPressed: () {
+                onPressed: () async {
                   ref.read(registerNotifierProvider.notifier).dismissVendorSuccessOverlay();
+                  await maybeShowLocationPermissionPrompt(context, ref);
+                  if (!context.mounted) return;
                   context.go(AppRoutes.home);
                 },
               ),

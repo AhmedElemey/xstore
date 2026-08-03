@@ -10,6 +10,7 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/domain/repositories/auth_repository.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/notifications/presentation/providers/fcm_device_token_sync_provider.dart';
+import 'package:xstore/features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 import 'package:xstore/features/profile/domain/entities/update_profile_request.dart';
 import 'package:xstore/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_dependencies.dart';
@@ -105,6 +106,7 @@ void main() {
             (ref) => _EmptySessionAuthRepo(),
           ),
           fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
+          fcmPushHandlingProvider.overrideWith((ref) {}),
         ],
       );
       addTearDown(container.dispose);

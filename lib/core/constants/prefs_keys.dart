@@ -11,4 +11,6 @@ abstract final class PrefsKeys {
   static const profileAppLanguage = 'profile_app_language';
   static const fcmToken = 'xstore_fcm_token';
   static const socialAuthCredentials = 'xstore_social_auth_credentials';
+  static const locationPermissionRationaleShown =
+      'location_permission_rationale_shown';
 }

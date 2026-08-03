@@ -1269,6 +1269,10 @@
   "egypt": "مصر",
   "locationServicesOff": "خدمة الموقع متوقفة",
   "enableLocationServices": "تفعيلها من الإعدادات؟",
+  "locationPermissionRationaleTitle": "استخدام موقعك؟",
+  "locationPermissionRationaleBody": "يستخدم xStore موقعك لملء عنوانك تلقائيًا. يمكنك تغيير ذلك في أي وقت من ملفك الشخصي.",
+  "locationPermissionAllow": "سماح",
+  "locationPermissionNotNow": "ليس الآن",
   "@opensAt": {
     "placeholders": {
       "time": {

@@ -6,6 +6,7 @@ import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
+import '../network/server_error_provider.dart';
 import 'app_routes.dart';
 
 part 'router_notifier.g.dart';
@@ -106,6 +107,7 @@ final class RouterNotifier extends Listenable {
     });
     _ref.listen(socialAuthProvider.select((s) => s.needsRoleSelection), (_, __) => _notify());
     _ref.listen(guestModeProvider, (_, __) => _notify());
+    _ref.listen(serverErrorProvider, (_, __) => _notify());
     _ref.listen(
       registerNotifierProvider.select((s) => s.showVendorSuccessOverlay),
       (_, __) => _notify(),

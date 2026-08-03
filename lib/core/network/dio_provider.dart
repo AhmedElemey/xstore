@@ -9,6 +9,7 @@ import '../constants/prefs_keys.dart';
 import 'api_auth_headers.dart';
 import 'api_endpoints.dart';
 import 'logging_interceptor.dart';
+import 'server_error_provider.dart';
 import 'token_refresh_interceptor.dart';
 
 part 'dio_provider.g.dart';
@@ -69,6 +70,22 @@ Dio dio(DioRef ref) {
         await secureStorage.delete(key: PrefsKeys.authUser);
         resetProfileData(ref);
         ref.invalidate(authProvider);
+      },
+    ),
+  );
+
+  // Flags any 5xx response so the router can swap the current screen for a
+  // full-page server-error screen instead of the failing screen's own inline
+  // error UI. Errors still propagate to `handler.next` so existing
+  // per-call `mapDioException` handling is unaffected.
+  client.interceptors.add(
+    InterceptorsWrapper(
+      onError: (error, handler) {
+        final code = error.response?.statusCode;
+        if (code != null && code >= 500) {
+          ref.read(serverErrorProvider.notifier).trigger();
+        }
+        handler.next(error);
       },
     ),
   );

@@ -15,6 +15,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/guest_mode_provider.dart';
@@ -91,6 +92,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     if (loginState.error == null && authState.valueOrNull != null) {
       await _persistRememberedPhone(loginState.rememberMe, loginState.phone);
       if (!mounted) return;
+      await maybeShowLocationPermissionPrompt(context, ref);
+      if (!mounted) return;
       context.go(AppRoutes.home);
     }
   }
@@ -164,6 +167,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             final authed =
                                 ref.read(authProvider).valueOrNull != null;
                             if (authed) {
+                              await maybeShowLocationPermissionPrompt(
+                                this.context,
+                                ref,
+                              );
+                              if (!mounted) return;
                               this.context.go(AppRoutes.home);
                             } else {
                               this.context.push(AppRoutes.otp);

@@ -3018,6 +3018,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enableLocationServices => 'تفعيلها من الإعدادات؟';
 
   @override
+  String get locationPermissionRationaleTitle => 'استخدام موقعك؟';
+
+  @override
+  String get locationPermissionRationaleBody =>
+      'يستخدم xStore موقعك لملء عنوانك تلقائيًا. يمكنك تغيير ذلك في أي وقت من ملفك الشخصي.';
+
+  @override
+  String get locationPermissionAllow => 'سماح';
+
+  @override
+  String get locationPermissionNotNow => 'ليس الآن';
+
+  @override
   String get navDeliveries => 'التوصيلات';
 
   @override

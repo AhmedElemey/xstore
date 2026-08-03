@@ -1269,6 +1269,10 @@
   "egypt": "Egypt",
   "locationServicesOff": "Location services are off",
   "enableLocationServices": "Enable them in Settings?",
+  "locationPermissionRationaleTitle": "Use Your Location?",
+  "locationPermissionRationaleBody": "xStore uses your location to help fill in your address automatically. You can change this anytime from your profile.",
+  "locationPermissionAllow": "Allow",
+  "locationPermissionNotNow": "Not Now",
   "@opensAt": {
     "placeholders": {
       "time": {

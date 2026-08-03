@@ -41,10 +41,12 @@ import '../../features/profile/presentation/screens/vendor_store_screen.dart';
 import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/coming_soon_screen.dart';
+import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
 import '../animations/page_transitions.dart';
+import '../network/server_error_provider.dart';
 import 'app_routes.dart';
 import 'router_notifier.dart';
 
@@ -235,14 +237,20 @@ GoRouter goRouter(GoRouterRef ref) {
     errorBuilder: (context, state) => AppErrorScreen(
       onRetry: () => context.go(AppRoutes.home),
     ),
-    redirect: (context, state) => computeXStoreAuthRedirect(
-      auth: ref.read(authProvider),
-      needsRoleSelection: ref.read(socialAuthProvider).needsRoleSelection,
-      matchedLocation: state.matchedLocation,
-      holdRegisterForVendorSuccess:
-          ref.read(registerNotifierProvider).showVendorSuccessOverlay,
-      isGuest: ref.read(guestModeProvider),
-    ),
+    redirect: (context, state) {
+      if (ref.read(serverErrorProvider) &&
+          state.matchedLocation != AppRoutes.serverError) {
+        return AppRoutes.serverError;
+      }
+      return computeXStoreAuthRedirect(
+        auth: ref.read(authProvider),
+        needsRoleSelection: ref.read(socialAuthProvider).needsRoleSelection,
+        matchedLocation: state.matchedLocation,
+        holdRegisterForVendorSuccess:
+            ref.read(registerNotifierProvider).showVendorSuccessOverlay,
+        isGuest: ref.read(guestModeProvider),
+      );
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -250,6 +258,14 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const SplashScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.serverError,
+        pageBuilder: (context, state) => fadeScaleTransition(
+          context,
+          state,
+          const ServerErrorScreen(),
         ),
       ),
       GoRoute(

@@ -10,6 +10,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/utils/location_permission_prompt.dart';
 import '../providers/auth_provider.dart';
 import '../providers/guest_mode_provider.dart';
 
@@ -56,6 +57,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (!mounted) return;
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    // Runs on every cold start regardless of login state — the rationale
+    // popup is "first time the app is ever opened", not "first time
+    // logged in". The persisted flag makes this a no-op after the first
+    // launch; the location auto-fill itself still only applies once a
+    // session exists (see autoDetectAndFillLocationIfMissing).
+    await maybeShowLocationPermissionPrompt(context, ref);
+    if (!mounted) return;
 
     final user = ref.read(authProvider).valueOrNull;
     if (user != null) {

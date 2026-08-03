@@ -5882,6 +5882,30 @@ abstract class AppLocalizations {
   /// **'Enable them in Settings?'**
   String get enableLocationServices;
 
+  /// No description provided for @locationPermissionRationaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Your Location?'**
+  String get locationPermissionRationaleTitle;
+
+  /// No description provided for @locationPermissionRationaleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'xStore uses your location to help fill in your address automatically. You can change this anytime from your profile.'**
+  String get locationPermissionRationaleBody;
+
+  /// No description provided for @locationPermissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get locationPermissionAllow;
+
+  /// No description provided for @locationPermissionNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get locationPermissionNotNow;
+
   /// No description provided for @navDeliveries.
   ///
   /// In en, this message translates to:
