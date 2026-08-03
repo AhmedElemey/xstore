@@ -23,15 +23,15 @@ class StubDeliveryRequestRepository implements DeliveryRequestRepository {
 
   @override
   Future<Either<Failure, List<DeliveryRequestEntity>>> getMyRequests(
-    String consumerId,
+    String requesterId,
   ) async =>
       Right(myRequests);
 
   @override
   Future<Either<Failure, DeliveryRequestEntity>> createRequest({
-    required String consumerId,
-    required String consumerName,
-    required String consumerPhone,
+    required String requesterId,
+    required String requesterName,
+    required String requesterPhone,
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
@@ -39,9 +39,9 @@ class StubDeliveryRequestRepository implements DeliveryRequestRepository {
       Right(
         DeliveryRequestEntity(
           id: 'pkg_test_new',
-          consumerId: consumerId,
-          consumerName: consumerName,
-          consumerPhone: consumerPhone,
+          requesterId: requesterId,
+          requesterName: requesterName,
+          requesterPhone: requesterPhone,
           pickup: pickup,
           dropoff: dropoff,
           packageNote: packageNote,
@@ -130,9 +130,9 @@ DeliveryRequestEntity testPackageRequest({
   );
   return DeliveryRequestEntity(
     id: id,
-    consumerId: 'consumer_001',
-    consumerName: 'Sender Person',
-    consumerPhone: '+201055500002',
+    requesterId: 'consumer_001',
+    requesterName: 'Sender Person',
+    requesterPhone: '+201055500002',
     pickup: pickup,
     dropoff: dropoff,
     packageNote: note,
