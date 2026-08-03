@@ -47,6 +47,7 @@ mixin _$ListingModel {
   double get shippingCost => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   Map<String, String> get attributes => throw _privateConstructorUsedError;
+  String? get rejectionReason => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -87,7 +88,8 @@ abstract class $ListingModelCopyWith<$Res> {
       bool shippingAvailable,
       double shippingCost,
       String location,
-      Map<String, String> attributes});
+      Map<String, String> attributes,
+      String? rejectionReason});
 }
 
 /// @nodoc
@@ -130,6 +132,7 @@ class _$ListingModelCopyWithImpl<$Res, $Val extends ListingModel>
     Object? shippingCost = null,
     Object? location = null,
     Object? attributes = null,
+    Object? rejectionReason = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -240,6 +243,10 @@ class _$ListingModelCopyWithImpl<$Res, $Val extends ListingModel>
           ? _value.attributes
           : attributes // ignore: cast_nullable_to_non_nullable
               as Map<String, String>,
+      rejectionReason: freezed == rejectionReason
+          ? _value.rejectionReason
+          : rejectionReason // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -279,7 +286,8 @@ abstract class _$$ListingModelImplCopyWith<$Res>
       bool shippingAvailable,
       double shippingCost,
       String location,
-      Map<String, String> attributes});
+      Map<String, String> attributes,
+      String? rejectionReason});
 }
 
 /// @nodoc
@@ -320,6 +328,7 @@ class __$$ListingModelImplCopyWithImpl<$Res>
     Object? shippingCost = null,
     Object? location = null,
     Object? attributes = null,
+    Object? rejectionReason = freezed,
   }) {
     return _then(_$ListingModelImpl(
       id: null == id
@@ -430,6 +439,10 @@ class __$$ListingModelImplCopyWithImpl<$Res>
           ? _value._attributes
           : attributes // ignore: cast_nullable_to_non_nullable
               as Map<String, String>,
+      rejectionReason: freezed == rejectionReason
+          ? _value.rejectionReason
+          : rejectionReason // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -464,7 +477,8 @@ class _$ListingModelImpl implements _ListingModel {
       this.shippingAvailable = false,
       this.shippingCost = 0.0,
       this.location = '',
-      final Map<String, String> attributes = const <String, String>{}})
+      final Map<String, String> attributes = const <String, String>{},
+      this.rejectionReason})
       : _imageUrls = imageUrls,
         _attributes = attributes;
 
@@ -556,8 +570,11 @@ class _$ListingModelImpl implements _ListingModel {
   }
 
   @override
+  final String? rejectionReason;
+
+  @override
   String toString() {
-    return 'ListingModel(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount, vendorId: $vendorId, titleEn: $titleEn, titleAr: $titleAr, descriptionEn: $descriptionEn, descriptionAr: $descriptionAr, compareAtPrice: $compareAtPrice, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, stockQuantity: $stockQuantity, shippingAvailable: $shippingAvailable, shippingCost: $shippingCost, location: $location, attributes: $attributes)';
+    return 'ListingModel(id: $id, title: $title, description: $description, price: $price, status: $status, imageUrls: $imageUrls, categoryLabel: $categoryLabel, conditionLabel: $conditionLabel, postedAt: $postedAt, viewCount: $viewCount, saveCount: $saveCount, inquiryCount: $inquiryCount, vendorId: $vendorId, titleEn: $titleEn, titleAr: $titleAr, descriptionEn: $descriptionEn, descriptionAr: $descriptionAr, compareAtPrice: $compareAtPrice, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, stockQuantity: $stockQuantity, shippingAvailable: $shippingAvailable, shippingCost: $shippingCost, location: $location, attributes: $attributes, rejectionReason: $rejectionReason)';
   }
 
   @override
@@ -611,7 +628,9 @@ class _$ListingModelImpl implements _ListingModel {
             (identical(other.location, location) ||
                 other.location == location) &&
             const DeepCollectionEquality()
-                .equals(other._attributes, _attributes));
+                .equals(other._attributes, _attributes) &&
+            (identical(other.rejectionReason, rejectionReason) ||
+                other.rejectionReason == rejectionReason));
   }
 
   @JsonKey(ignore: true)
@@ -644,7 +663,8 @@ class _$ListingModelImpl implements _ListingModel {
         shippingAvailable,
         shippingCost,
         location,
-        const DeepCollectionEquality().hash(_attributes)
+        const DeepCollectionEquality().hash(_attributes),
+        rejectionReason
       ]);
 
   @JsonKey(ignore: true)
@@ -689,7 +709,8 @@ abstract class _ListingModel implements ListingModel {
       final bool shippingAvailable,
       final double shippingCost,
       final String location,
-      final Map<String, String> attributes}) = _$ListingModelImpl;
+      final Map<String, String> attributes,
+      final String? rejectionReason}) = _$ListingModelImpl;
 
   factory _ListingModel.fromJson(Map<String, dynamic> json) =
       _$ListingModelImpl.fromJson;
@@ -748,6 +769,8 @@ abstract class _ListingModel implements ListingModel {
   String get location;
   @override
   Map<String, String> get attributes;
+  @override
+  String? get rejectionReason;
   @override
   @JsonKey(ignore: true)
   _$$ListingModelImplCopyWith<_$ListingModelImpl> get copyWith =>

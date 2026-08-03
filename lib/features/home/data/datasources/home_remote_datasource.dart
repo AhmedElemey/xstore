@@ -32,10 +32,54 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (MockConfig.useMock) {
       return MockConfig.simulate(List<BannerModel>.from(mockBannerModels));
     }
-    // No banners endpoint exists in the backend (xStoreEcommerce API) —
-    // the old GET /home/banners was never real. Serve the static set
-    // locally until a real endpoint is added.
-    return _staticBanners();
+    // CONFIRMED (Postman collection): GET /api/banners is a real endpoint
+    // — supersedes the earlier "no banners endpoint exists" assumption
+    // that served static placeholder tiles unconditionally. The read
+    // response has no example in the collection (only the multipart
+    // create body — nameEn/nameAr/image — is documented), so this is
+    // parsed tolerantly; fall back to the static set on any error or an
+    // empty/malformed response so the home screen never shows nothing.
+    try {
+      final response = await _dio.get<dynamic>(
+        ApiEndpoints.banners,
+        options: ApiAuthHeaders.public(),
+      );
+      final banners =
+          _unwrapObjectList(response.data).map(_bannerFromApi).whereType<BannerModel>().toList();
+      return banners.isNotEmpty ? banners : _staticBanners();
+    } on DioException catch (e) {
+      if (_isOffline(e)) return _staticBanners();
+      throw mapDioException(e);
+    }
+  }
+
+  /// Maps a banner API object to [BannerModel]; null when it carries no
+  /// usable id/image. Field names are tolerant guesses (see fetchBanners)
+  /// mirrored from the confirmed create-banner write shape
+  /// (`nameEn`/`nameAr`/`image`).
+  BannerModel? _bannerFromApi(Map<String, dynamic> json) {
+    final id = (json['id'] ?? '').toString();
+    final title = (json['nameEn'] ??
+            json['titleEn'] ??
+            json['name'] ??
+            json['title'] ??
+            '')
+        .toString();
+    final imageUrl = (json['imageUrl'] ??
+            json['image'] ??
+            json['bannerImageUrl'] ??
+            '')
+        .toString();
+    if (id.isEmpty || imageUrl.isEmpty) return null;
+    final actionUrl = json['actionUrl'] ?? json['link'] ?? json['targetUrl'];
+    return BannerModel(
+      id: id,
+      title: title,
+      imageUrl: imageUrl,
+      actionUrl: actionUrl is String && actionUrl.isNotEmpty
+          ? actionUrl
+          : null,
+    );
   }
 
   @override

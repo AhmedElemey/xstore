@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 
@@ -26,7 +26,7 @@ abstract interface class ListingRemoteDataSource {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    List<String> imageUrls = const [],
+    List<String> imagePaths = const [],
   });
 
   Future<List<ListingModel>> fetchMyListings();
@@ -48,11 +48,25 @@ abstract interface class ListingRemoteDataSource {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    required List<String> imageUrls,
+    required List<String> imagePaths,
     required ListingStatus status,
   });
 
   Future<void> deleteListing(String id);
+
+  /// Sends a rejected listing back for review with a corrected price.
+  /// CONFIRMED (Postman collection): unlike create/update, this is a plain
+  /// JSON PUT — `{"newPrice": <double>}` — not multipart.
+  Future<ListingModel> resubmitListing({
+    required String id,
+    required double newPrice,
+  });
+
+  /// Pauses a listing via the dedicated status-only endpoint. CONFIRMED
+  /// (Postman collection) to exist as a plain PUT with no body — used
+  /// instead of the generic multipart update so pausing never sends an
+  /// empty `imageFiles` set (see `_listingFormData`'s image-wipe risk).
+  Future<ListingModel> deactivateListing(String id);
 }
 
 class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
@@ -64,12 +78,24 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   /// the network (see [_isOffline]) — a resilience fallback, not mock data.
   final List<ListingModel> _localMine = [];
 
-  String _attributesToWire(Map<String, String> attributes) {
-    if (attributes.isEmpty) return '';
-    return jsonEncode(attributes);
-  }
+  /// Hard ceiling enforced at the network boundary regardless of what the
+  /// form/draft-restore layers already did — no listing this datasource
+  /// writes can ever carry more than this many photos.
+  static const int _maxImagesPerListing = 5;
 
-  Map<String, dynamic> _listingWriteBody({
+  // CONFIRMED against the xStoreEcommerce Postman collection (POST/PUT
+  // Create/Update Listing): both write endpoints are multipart/form-data,
+  // NOT flat JSON — the earlier "flat JSON, int condition" contract was
+  // superseded. Attributes bind as an indexed list (`Attributes[i].Key` /
+  // `Attributes[i].Value`, matching ASP.NET's default List<T> form
+  // binder), and images attach inline as repeated `imageFiles` parts —
+  // there is no separate pre-upload-then-URL step for listings.
+  // `condition`/`status`/`subcategoryId` aren't shown in the collection's
+  // example bodies but are kept here: extra unbound form keys are ignored
+  // by ASP.NET model binding (confirmed pattern elsewhere in this repo),
+  // and dropping them would silently break condition filtering / the
+  // pause-resume status mutation if the backend DOES bind them.
+  Future<FormData> _listingFormData({
     required String titleEn,
     required String titleAr,
     required String descriptionEn,
@@ -85,30 +111,50 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    required List<String> imageUrls,
+    required List<String> imagePaths,
     String? id,
     ListingStatus? status,
-  }) {
-    return {
+  }) async {
+    final fields = <String, dynamic>{
       if (id != null) 'id': id,
       'titleEn': titleEn,
       'titleAr': titleAr,
       'descriptionEn': descriptionEn,
       'descriptionAr': descriptionAr,
-      'price': price,
-      if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
-      'categoryId': categoryId,
-      if (subcategoryId != null) 'subcategoryId': subcategoryId,
-      'condition': listingConditionToWire(condition),
+      'price': price.toString(),
+      if (compareAtPrice != null) 'compareAtPrice': compareAtPrice.toString(),
+      'categoryId': categoryId.toString(),
+      if (subcategoryId != null) 'subcategoryId': subcategoryId.toString(),
+      'condition': listingConditionToWire(condition).toString(),
       if (brand.isNotEmpty) 'brand': brand,
-      'stockQuantity': stockQuantity,
-      'shippingAvailable': shippingAvailable,
-      'shippingCost': shippingCost,
+      'stockQuantity': stockQuantity.toString(),
+      'shippingAvailable': shippingAvailable.toString(),
+      'shippingCost': shippingCost.toString(),
       'location': location,
-      'attributes': _attributesToWire(attributes),
-      'imageUrls': imageUrls,
-      if (status != null) 'status': listingStatusToWire(status),
+      if (status != null) 'status': listingStatusToWire(status).toString(),
     };
+    var i = 0;
+    for (final entry in attributes.entries) {
+      fields['Attributes[$i].Key'] = entry.key;
+      fields['Attributes[$i].Value'] = entry.value;
+      i++;
+    }
+
+    final formData = FormData.fromMap(fields);
+    for (final path in imagePaths.take(_maxImagesPerListing)) {
+      // photoPaths can be restored from a saved draft across app
+      // sessions; the OS may evict image_picker's cache in the meantime.
+      // Skip a stale path rather than let MultipartFile.fromFile throw
+      // and hard-fail the whole submit over one missing photo.
+      if (!File(path).existsSync()) continue;
+      formData.files.add(
+        MapEntry(
+          'imageFiles',
+          await MultipartFile.fromFile(path, filename: path.split('/').last),
+        ),
+      );
+    }
+    return formData;
   }
 
   @override
@@ -128,14 +174,12 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    List<String> imageUrls = const [],
+    List<String> imagePaths = const [],
   }) async {
     try {
-      // CONFIRMED 2026-07-11: flat JSON body (Postman-style, no `command`
-      // wrapper). Send `condition` as int (0=New), not the string "New".
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
-        data: _listingWriteBody(
+        data: await _listingFormData(
           titleEn: titleEn,
           titleAr: titleAr,
           descriptionEn: descriptionEn,
@@ -151,7 +195,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           shippingCost: shippingCost,
           location: location,
           attributes: attributes,
-          imageUrls: imageUrls,
+          imagePaths: imagePaths,
         ),
         options: ApiAuthHeaders.authenticated(),
       );
@@ -170,7 +214,10 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           description: descriptionEn,
           price: price,
           status: 'pending',
-          imageUrls: imageUrls,
+          // Offline scaffold only — imagePaths are local filesystem paths,
+          // not hosted URLs, and imageUrls here feeds network-image
+          // widgets, so it must stay empty until a real upload succeeds.
+          imageUrls: const [],
           titleEn: titleEn,
           titleAr: titleAr,
           descriptionEn: descriptionEn,
@@ -236,7 +283,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    required List<String> imageUrls,
+    required List<String> imagePaths,
     required ListingStatus status,
   }) async {
     try {
@@ -244,7 +291,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       // /api/listings/{id}. Confirmed from the Postman collection.
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
-        data: _listingWriteBody(
+        data: await _listingFormData(
           id: id,
           titleEn: titleEn,
           titleAr: titleAr,
@@ -261,7 +308,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           shippingCost: shippingCost,
           location: location,
           attributes: attributes,
-          imageUrls: imageUrls,
+          imagePaths: imagePaths,
           status: status,
         ),
         options: ApiAuthHeaders.authenticated(),
@@ -296,7 +343,9 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           shippingCost: shippingCost,
           location: location,
           attributes: attributes,
-          imageUrls: imageUrls,
+          // imagePaths are local file paths (usually empty here — this
+          // fallback only fires for status mutations); keep the cached
+          // model's existing hosted imageUrls untouched via copyWith.
         );
         _localMine[idx] = updated;
         return updated;
@@ -318,6 +367,54 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
         _localMine.removeWhere((e) => e.id == id);
         return;
       }
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<ListingModel> resubmitListing({
+    required String id,
+    required double newPrice,
+  }) async {
+    try {
+      final response = await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.apiListingResubmit(id),
+        data: {'newPrice': newPrice},
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException('Empty response');
+      }
+      final model = ListingModel.fromJson(data);
+      final idx = _localMine.indexWhere((e) => e.id == id);
+      if (idx != -1) {
+        _localMine[idx] = model;
+      }
+      return model;
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<ListingModel> deactivateListing(String id) async {
+    try {
+      final response = await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.apiListingDeactivate(id),
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException('Empty response');
+      }
+      final model = ListingModel.fromJson(data);
+      final idx = _localMine.indexWhere((e) => e.id == id);
+      if (idx != -1) {
+        _localMine[idx] = model;
+      }
+      return model;
+    } on DioException catch (e) {
       throw mapDioException(e);
     }
   }

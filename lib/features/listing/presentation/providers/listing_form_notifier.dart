@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -70,8 +71,12 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         )
         .toList();
     return ListingFormState(
+      // A draft saved by an older build (or a tampered blob) could carry
+      // more than the cap — clamp on restore so the 5-photo limit holds
+      // for every listing, not just ones built via addPhotoPath.
       photoPaths: (m['photoPaths'] as List<dynamic>?)
               ?.map((e) => e as String)
+              .take(_maxPhotos)
               .toList() ??
           [],
       name: m['name'] as String? ?? '',
@@ -145,16 +150,40 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     state = state.copyWith(photoPaths: list);
   }
 
+  /// Compresses a picked photo before it enters form state. Falls back to
+  /// the original path on any compression failure (unsupported format,
+  /// codec issue on a specific device) — a listing photo should never be
+  /// blocked by compression, only shrunk when possible.
+  Future<String> _compressPhoto(String sourcePath) async {
+    try {
+      final targetPath = '$sourcePath-compressed.jpg';
+      final compressed = await FlutterImageCompress.compressAndGetFile(
+        sourcePath,
+        targetPath,
+        quality: 80,
+        minWidth: 1600,
+        minHeight: 1600,
+      );
+      return compressed?.path ?? sourcePath;
+    } catch (_) {
+      return sourcePath;
+    }
+  }
+
   Future<void> pickFromCamera() async {
     final file = await _picker.pickImage(source: ImageSource.camera);
     if (_disposed || file == null) return;
-    addPhoto(File(file.path));
+    final path = await _compressPhoto(file.path);
+    if (_disposed) return;
+    addPhotoPath(path);
   }
 
   Future<void> pickFromGallery() async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
     if (_disposed || file == null) return;
-    addPhoto(File(file.path));
+    final path = await _compressPhoto(file.path);
+    if (_disposed) return;
+    addPhotoPath(path);
   }
 
   void updateField(String field, Object? value) {
@@ -380,10 +409,9 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         shippingCost: shippingCost,
         location: state.location.trim(),
         attributes: attributesMap,
-        // NOTE (known gap): no image-upload endpoint exists in the backend
-        // yet. photoPaths remain local-only for in-form preview; imageUrls
-        // is sent empty until an upload endpoint is confirmed and wired.
-        imageUrls: const [],
+        // CONFIRMED (Postman collection): images attach inline as
+        // multipart `imageFiles` parts on the create request itself.
+        imagePaths: state.photoPaths,
       );
 
       if (_disposed) return false;

@@ -69,10 +69,10 @@ final getCityByIdUseCaseProvider =
 );
 
 typedef GetCityByIdUseCaseRef = AutoDisposeProviderRef<GetCityByIdUseCase>;
-String _$allCitiesHash() => r'4d0a35f24492de9063ed541ca3335f0a14000cda';
+String _$allCitiesHash() => r'0d2d0f87abff04afa59d5f14be0f8d3ec213d839';
 
 /// Full city list for dropdowns. Small reference table — a single
-/// page-size-200 fetch avoids re-implementing pagination in every screen.
+/// page-size-100 fetch (API max) avoids re-implementing pagination in every screen.
 ///
 /// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
 /// the values are cached for the app session (re-entering the register/store

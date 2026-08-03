@@ -75,7 +75,7 @@ final getGovernmentByIdUseCaseProvider =
 
 typedef GetGovernmentByIdUseCaseRef
     = AutoDisposeProviderRef<GetGovernmentByIdUseCase>;
-String _$allGovernmentsHash() => r'aed4902042ddb27da925c8595236281f3532a3a9';
+String _$allGovernmentsHash() => r'44b57b4bda1d8c96d659f375412160bb627b672f';
 
 /// Full government (governorate) list for dropdowns.
 ///

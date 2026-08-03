@@ -20,7 +20,7 @@ abstract interface class ListingRepository {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    List<String> imageUrls = const [],
+    List<String> imagePaths = const [],
   });
 
   Future<Either<Failure, List<ListingEntity>>> getMyListings();
@@ -42,9 +42,16 @@ abstract interface class ListingRepository {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    required List<String> imageUrls,
+    required List<String> imagePaths,
     required ListingStatus status,
   });
 
   Future<Either<Failure, Unit>> deleteListing(String id);
+
+  Future<Either<Failure, ListingEntity>> resubmitListing({
+    required String id,
+    required double newPrice,
+  });
+
+  Future<Either<Failure, ListingEntity>> deactivateListing(String id);
 }

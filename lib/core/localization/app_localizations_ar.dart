@@ -1909,6 +1909,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rejected => 'مرفوض';
 
   @override
+  String get resubmitListing => 'إعادة الإرسال';
+
+  @override
+  String get resubmitListingTitle => 'إعادة إرسال الإعلان';
+
+  @override
+  String get rejectionReasonLabel => 'سبب الرفض';
+
+  @override
+  String get rejectionReasonUnavailable => 'لم يتم تقديم سبب.';
+
+  @override
+  String get resubmitPriceLabel => 'السعر الجديد';
+
+  @override
+  String get resubmitInvalidPrice => 'أدخل سعرًا صحيحًا';
+
+  @override
+  String get resubmitSubmit => 'إعادة الإرسال للمراجعة';
+
+  @override
+  String get resubmitSuccess => 'تمت إعادة إرسال الإعلان للمراجعة';
+
+  @override
   String get retry => '[AR] Retry';
 
   @override

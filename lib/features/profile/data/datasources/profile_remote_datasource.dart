@@ -518,22 +518,24 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return MockConfig.simulate(MockImages.avatar(99));
     }
     try {
-      // Multipart upload of the picked image. Field name `profileImage`
-      // mirrors the only CONFIRMED image field in this backend (vendor
-      // register — see auth_remote_datasource). The route is token-scoped
-      // (the X-Auth-Token interceptor identifies the user), so `userId` is
-      // not sent — it stays on the signature in case the route ever becomes
-      // user-scoped. Returns the stored avatar URL, which the caller then
-      // persists via update-profile's `avatarUrl`.
+      // Multipart upload via the generic uploads endpoint. CONFIRMED
+      // (Postman collection): POST /api/uploads/{entityType}, file field
+      // key `file` — supersedes the old /api/auth/avatar + `profileImage`
+      // guess, which was never confirmed against the backend. The route
+      // is token-scoped (the X-Auth-Token interceptor identifies the
+      // user), so `userId` is not sent — it stays on the signature in
+      // case the route ever becomes user-scoped. Returns the stored
+      // avatar URL, which the caller then persists via update-profile's
+      // `avatarUrl`.
       final formData = FormData.fromMap({
-        'profileImage': await MultipartFile.fromFile(
+        'file': await MultipartFile.fromFile(
           filePath,
           // image_picker returns POSIX-style paths on iOS/Android.
           filename: filePath.split('/').last,
         ),
       });
       final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.uploadAvatar,
+        ApiEndpoints.apiUpload('avatar'),
         data: formData,
         options: ApiAuthHeaders.authenticated(),
       );

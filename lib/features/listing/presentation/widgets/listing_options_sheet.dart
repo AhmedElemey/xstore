@@ -17,6 +17,7 @@ class ListingOptionsSheet extends StatelessWidget {
     required this.onResume,
     required this.onViewStats,
     required this.onDelete,
+    required this.onResubmit,
   });
 
   final ListingEntity listing;
@@ -25,11 +26,13 @@ class ListingOptionsSheet extends StatelessWidget {
   final VoidCallback onResume;
   final VoidCallback onViewStats;
   final VoidCallback onDelete;
+  final VoidCallback onResubmit;
 
   @override
   Widget build(BuildContext context) {
     final showPause = listing.status == ListingStatus.active;
     final showResume = listing.status == ListingStatus.paused;
+    final showResubmit = listing.status == ListingStatus.rejected;
 
     return SafeArea(
       child: Padding(
@@ -49,6 +52,21 @@ class ListingOptionsSheet extends StatelessWidget {
               ),
             ),
             const Gap(AppSpacing.lg),
+            if (showResubmit)
+              ListTile(
+                leading: Icon(LucideIcons.refreshCw, color: AppColors.primary),
+                title: Text(
+                  context.l10n.resubmitListing,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  onResubmit();
+                },
+              ),
             ListTile(
               leading: const Icon(LucideIcons.pencil),
               title: Text(context.l10n.editListingMenu),

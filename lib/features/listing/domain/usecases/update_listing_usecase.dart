@@ -26,7 +26,7 @@ class UpdateListingUseCase {
     required double shippingCost,
     required String location,
     required Map<String, String> attributes,
-    required List<String> imageUrls,
+    required List<String> imagePaths,
     required ListingStatus status,
   }) {
     return _repository.updateListing(
@@ -46,7 +46,7 @@ class UpdateListingUseCase {
       shippingCost: shippingCost,
       location: location,
       attributes: attributes,
-      imageUrls: imageUrls,
+      imagePaths: imagePaths,
       status: status,
     );
   }

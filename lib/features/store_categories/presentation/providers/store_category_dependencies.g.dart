@@ -78,7 +78,7 @@ final getStoreCategoryByIdUseCaseProvider =
 typedef GetStoreCategoryByIdUseCaseRef
     = AutoDisposeProviderRef<GetStoreCategoryByIdUseCase>;
 String _$allStoreCategoriesHash() =>
-    r'12d1c60b5fe7626925f0766b816d68010792ad10';
+    r'1ddf9512568c2d3f12e23be901fddfcfa87f276b';
 
 /// Full store-category list for the registration store-setup dropdown.
 ///

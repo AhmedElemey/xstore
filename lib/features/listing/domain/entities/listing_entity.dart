@@ -52,5 +52,10 @@ class ListingEntity with _$ListingEntity {
     @Default(0.0) double shippingCost,
     @Default('') String location,
     @Default(<String, String>{}) Map<String, String> attributes,
+    // Only meaningful when status == rejected; admin's stated reason from
+    // Admin Listings > Reject Listing. Field name on the GET/my-listings
+    // wire response is unconfirmed (no example response in the Postman
+    // collection) — parsed tolerantly, see listing_model.dart.
+    String? rejectionReason,
   }) = _ListingEntity;
 }
