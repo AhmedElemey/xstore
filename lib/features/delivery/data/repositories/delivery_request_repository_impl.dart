@@ -25,24 +25,24 @@ class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
 
   @override
   Future<Either<Failure, List<DeliveryRequestEntity>>> getMyRequests(
-    String consumerId,
+    String requesterId,
   ) =>
-      _guard(() => _dataSource.getMyRequests(consumerId));
+      _guard(() => _dataSource.getMyRequests(requesterId));
 
   @override
   Future<Either<Failure, DeliveryRequestEntity>> createRequest({
-    required String consumerId,
-    required String consumerName,
-    required String consumerPhone,
+    required String requesterId,
+    required String requesterName,
+    required String requesterPhone,
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
   }) =>
       _guard(
         () => _dataSource.createRequest(
-          consumerId: consumerId,
-          consumerName: consumerName,
-          consumerPhone: consumerPhone,
+          requesterId: requesterId,
+          requesterName: requesterName,
+          requesterPhone: requesterPhone,
           pickup: pickup,
           dropoff: dropoff,
           packageNote: packageNote,

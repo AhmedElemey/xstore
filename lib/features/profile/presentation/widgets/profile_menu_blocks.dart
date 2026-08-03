@@ -115,6 +115,12 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     label: context.l10n.menuEarnings,
                     onTap: () => context.push(AppRoutes.earnings),
                   ),
+                  ProfileMenuTile(
+                    icon: LucideIcons.package,
+                    iconBackground: AppColors.warning,
+                    label: context.l10n.menuMyPackages,
+                    onTap: () => context.push(AppRoutes.myPackages),
+                  ),
                 ]
               : isCourier
                   ? [

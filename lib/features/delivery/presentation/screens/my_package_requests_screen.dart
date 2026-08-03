@@ -13,7 +13,8 @@ import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../domain/entities/delivery_request.dart';
 import '../providers/delivery_requests_provider.dart';
 
-/// Consumer list of package delivery requests, newest first.
+/// Requester's (consumer or vendor) list of package delivery requests,
+/// newest first.
 ///
 /// The COD-at-pickup flow surfaces here: a `submitted` request waits for the
 /// admin's price, a `priced` one shows the fee with a "pay in cash at

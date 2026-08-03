@@ -36,9 +36,9 @@ DeliveryRequestEntity _request({
   final now = DateTime(2026, 7, 19);
   return DeliveryRequestEntity(
     id: 'pkg_test',
-    consumerId: 'consumer_001',
-    consumerName: 'Sara Khelifi',
-    consumerPhone: '+201255500002',
+    requesterId: 'consumer_001',
+    requesterName: 'Sara Khelifi',
+    requesterPhone: '+201255500002',
     pickup: _pickup,
     dropoff: _dropoffSameCity,
     packageNote: 'test package',
@@ -216,9 +216,9 @@ void main() {
       );
 
       final created = await repo.createRequest(
-        consumerId: 'consumer_test',
-        consumerName: 'Test Consumer',
-        consumerPhone: '+201000000000',
+        requesterId: 'consumer_test',
+        requesterName: 'Test Consumer',
+        requesterPhone: '+201000000000',
         pickup: _pickup,
         dropoff: _dropoffCrossCity,
         packageNote: 'lifecycle test parcel',
@@ -285,9 +285,9 @@ void main() {
       final repo =
           DeliveryRequestRepositoryImpl(DeliveryRequestMockDataSource());
       final created = await repo.createRequest(
-        consumerId: 'consumer_test',
-        consumerName: 'Test Consumer',
-        consumerPhone: '+201000000000',
+        requesterId: 'consumer_test',
+        requesterName: 'Test Consumer',
+        requesterPhone: '+201000000000',
         pickup: _pickup,
         dropoff: _dropoffSameCity,
         packageNote: 'unpriced parcel',
@@ -345,6 +345,16 @@ void main() {
       for (final p in packages) {
         expect(p.price, isNotNull);
       }
+    });
+
+    test('seed data includes a vendor-submitted request', () async {
+      final repo =
+          DeliveryRequestRepositoryImpl(DeliveryRequestMockDataSource());
+
+      final mine = (await repo.getMyRequests('vendor_001'))
+          .getOrElse((f) => fail('getMyRequests failed: $f'));
+      expect(mine, isNotEmpty);
+      expect(mine.every((r) => r.requesterId == 'vendor_001'), isTrue);
     });
   });
 }

@@ -24,9 +24,10 @@ RouterNotifier routerNotifier(RouterNotifierRef ref) {
 /// role guards all ways — consumers blocked from vendor areas (listings,
 /// vendor orders, store tooling), vendors and couriers blocked from the
 /// buying flow (cart, checkout, wishlist, consumer orders), non-couriers
-/// blocked from the delivery run. Couriers home to [AppRoutes.deliveries].
-/// Guests ([isGuest]) may browse [isGuestAccessibleRoute] areas; anything
-/// else routes to login.
+/// blocked from the delivery run, couriers blocked from the package-request
+/// routes (consumers and vendors may both send packages). Couriers home to
+/// [AppRoutes.deliveries]. Guests ([isGuest]) may browse
+/// [isGuestAccessibleRoute] areas; anything else routes to login.
 String? computeXStoreAuthRedirect({
   required AsyncValue<UserEntity?> auth,
   required bool needsRoleSelection,
@@ -84,6 +85,9 @@ String? computeXStoreAuthRedirect({
       }
       if (isConsumerRestrictedRoute(loc) &&
           user.role != UserRole.consumer) {
+        return roleHome;
+      }
+      if (isPackageRequestRoute(loc) && user.isCourier) {
         return roleHome;
       }
       return null;
