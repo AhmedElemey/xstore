@@ -11,10 +11,12 @@ class ErrorStateWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onRetry,
+    this.retryLabel = AppStrings.retry,
   });
 
   final String message;
   final VoidCallback? onRetry;
+  final String retryLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class ErrorStateWidget extends StatelessWidget {
             if (onRetry != null) ...[
               const Gap(AppSpacing.lg),
               XstoreButton(
-                label: AppStrings.retry,
+                label: retryLabel,
                 onPressed: onRetry,
               ),
             ],

@@ -25,6 +25,21 @@ const ini=s=>s.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const avatar=(s,r=9)=>`<span class="ua" style="background:${col(s)};border-radius:${r=='50'?'50%':r+'px'}">${ini(s)}</span>`;
 const EGP=n=>'EGP '+n.toLocaleString('en-US');
 
+/* ---------- backend wiring (Listings & Users — see BACKEND_HANDOFF.md) ---------- */
+/* Real fetch() against the documented /admin endpoints. No backend exists yet, so a
+   failed/unreachable call is caught and treated as a no-op — callers fall back to the
+   same local demo behavior (state mutated in-memory, toast shown). */
+async function apiCall(method,path,body){
+ try{
+  const res=await fetch(path,{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,credentials:'include'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return await res.json().catch(()=>null);
+ }catch(err){
+  console.warn('[admin] '+method+' '+path+' failed — demo fallback',err);
+  return null;
+ }
+}
+
 /* ---------- data (grounded in xStore) ---------- */
 const CATS=[['Electronics','📱',4,842,true],['Fashion','👕',4,1290,true],['Home & Garden','🛋️',4,610,true],['Beauty','✨',3,455,true],['Sports','🏋️',3,288,true],['Toys','🧸',3,176,true],['Automotive','🚗',3,203,true],['Food & Drinks','🥤',3,134,false],['Books','📚',3,97,true],['Other','📦',1,58,true]];
 const COUPONS=[['WELCOME50','50% off first order','Platform',312,true],['FREESHIP','Free delivery','Platform',890,true],['EID2026','EGP 100 off > EGP 1000','Seasonal',145,false]];
@@ -113,12 +128,12 @@ const DISPUTES=[
  {id:'XS-2026-4322',buyer:'Rana Fathy',vendor:'Zamalek Boutique',reason:'Refund not received',val:1250,status:'review',note:'Return accepted 9 days ago, refund still pending from the vendor.',sug:'Refund buyer'},
  {id:'XS-2026-4290',buyer:'Sameh Adel',vendor:'Maadi Toy Box',reason:'Late delivery',val:320,status:'open',note:'Delivered 6 days late; buyer requests partial compensation.',sug:'Partial refund'}];
 const CUSTOMERS=[
- {n:'Ahmed Hassan',city:'Cairo',orders:23,spend:142300,joined:'Nov 2025',phone:'+20 100 111 2233'},
- {n:'Sara Mostafa',city:'Giza',orders:18,spend:64200,joined:'Dec 2025',phone:'+20 101 222 3344'},
- {n:'Karim Fouad',city:'Cairo',orders:11,spend:38900,joined:'Jan 2026',phone:'+20 102 333 4455'},
- {n:'Mona Adel',city:'Alexandria',orders:31,spend:98750,joined:'Oct 2025',phone:'+20 103 444 5566'},
- {n:'Youssef Ali',city:'Cairo',orders:7,spend:51600,joined:'Mar 2026',phone:'+20 104 555 6677'},
- {n:'Nour Ibrahim',city:'Giza',orders:14,spend:42100,joined:'Feb 2026',phone:'+20 105 666 7788'}];
+ {n:'Ahmed Hassan',city:'Cairo',orders:23,spend:142300,joined:'Nov 2025',phone:'+20 100 111 2233',status:'active'},
+ {n:'Sara Mostafa',city:'Giza',orders:18,spend:64200,joined:'Dec 2025',phone:'+20 101 222 3344',status:'active'},
+ {n:'Karim Fouad',city:'Cairo',orders:11,spend:38900,joined:'Jan 2026',phone:'+20 102 333 4455',status:'active'},
+ {n:'Mona Adel',city:'Alexandria',orders:31,spend:98750,joined:'Oct 2025',phone:'+20 103 444 5566',status:'active'},
+ {n:'Youssef Ali',city:'Cairo',orders:7,spend:51600,joined:'Mar 2026',phone:'+20 104 555 6677',status:'active'},
+ {n:'Nour Ibrahim',city:'Giza',orders:14,spend:42100,joined:'Feb 2026',phone:'+20 105 666 7788',status:'active'}];
 
 /* ---------- view builders ---------- */
 const kpi=(ico,val,label,trend,dir,c)=>`<div class="card kpi"><div class="k-top"><div class="k-ico" style="background:${c}22;color:${c}">${ic(ico)}</div><span class="trend ${dir}">${trend}</span></div><div class="k-val">${val}</div><div class="k-label">${label}</div></div>`;
@@ -238,10 +253,11 @@ function disputes(){
 }
 
 function customers(){
- const rows=CUSTOMERS.map((c,i)=>`<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>role: consumer</small></div></div></td><td class="muted">${c.city}</td>
+ const rows=CUSTOMERS.map((c,i)=>{const susp=c.status==='suspended';
+  return `<tr data-status="${c.status}"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>role: consumer</small></div></div></td><td class="muted">${c.city}</td>
    <td><span class="badge-s b-blue">👤 Customer</span></td>
-   <td>${c.orders}</td><td class="money">${EGP(c.spend)}</td><td><span class="badge-s b-green">Active</span></td>
-   <td class="r"><button class="btn btn-g btn-sm" onclick="userDrawer(${i})">Profile</button></td></tr>`).join('');
+   <td>${c.orders}</td><td class="money">${EGP(c.spend)}</td><td><span class="badge-s ${susp?'b-red':'b-green'}">${susp?'Suspended':'Active'}</span></td>
+   <td class="r"><button class="btn btn-g btn-sm" onclick="userDrawer(${i})">Profile</button></td></tr>`}).join('');
  return `<div class="page-head"><div><h2>Users</h2><p>Individual <b>customer</b> accounts — normal buyers (role: consumer). <b>Business</b> accounts are managed under <a data-jump="vendors" style="color:var(--primary);cursor:pointer">Vendors</a>.</p></div>
    <button class="btn btn-g">Export CSV</button></div>
    <div class="tabs" style="margin-bottom:18px"><span class="chip active">👤 Customers</span><span class="chip" data-jump="vendors">🏢 Business (vendors)</span></div>
@@ -268,9 +284,9 @@ function content(){
  return `<div class="page-head"><div><h2>Content &amp; Banners</h2><p>Merchandise the app home feed and send push broadcasts</p></div><button class="btn btn-p" onclick="openBannerForm()">+ New banner</button></div>
    <div class="split"><div class="card"><div class="c-head"><h3>Home banners</h3></div><div class="c-body" style="display:flex;flex-direction:column;gap:12px">${rows}</div></div>
    <div class="card"><div class="c-head"><h3>Push broadcast</h3></div><div class="c-body">
-     <div class="form-row"><label>Title</label><input placeholder="Flash sale ends tonight!"></div>
-     <div class="form-row"><label>Audience</label><select><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
-     <div class="form-row"><label>Message</label><input placeholder="Up to 40% off electronics…"></div>
+     <div class="form-row"><label>Title</label><input id="pbTitle" placeholder="Flash sale ends tonight!"></div>
+     <div class="form-row"><label>Audience</label><select id="pbAud"><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
+     <div class="form-row"><label>Message</label><input id="pbMsg" placeholder="Up to 40% off electronics…"></div>
      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="sendBroadcast()">Send push</button></div></div></div>`;
 }
 
@@ -308,7 +324,14 @@ function closeSidebar(){document.querySelector('.sidebar').classList.remove('ope
 
 /* ---------- router ---------- */
 function go(v){
- document.getElementById('content').innerHTML=VIEWS[v]();
+ try{
+  document.getElementById('content').innerHTML=VIEWS[v]();
+ }catch(err){
+  console.error('[admin] view "'+v+'" failed to render',err);
+  document.getElementById('content').innerHTML=errorCard('This page hit an error',
+   'Something went wrong while loading this view.'+(err&&err.message?' ('+err.message+')':''),
+   "go('"+v+"')");
+ }
  document.getElementById('topTitle').textContent=TITLES[v];
  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
  const s=document.getElementById('searchInput'); if(s) s.value='';
@@ -350,12 +373,27 @@ function orderDrawer(i){
 }
 function userDrawer(i){
  const c=CUSTOMERS[i];
+ const susp=c.status==='suspended';
  openDrawer(c.n,
    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
-   +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> <span class="badge-s b-green">Active</span></div>'
+   +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> <span class="badge-s '+(susp?'b-red':'b-green')+'">'+(susp?'Suspended':'Active')+'</span></div>'
    +secH('Account')
    +kv('City',c.city)+kv('Phone',c.phone)+kv('Joined',c.joined)+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
-   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to customer\');closeDrawer()">Message</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Customer suspended\');closeDrawer()">Suspend</button>');
+   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="udecide('+i+',\'message\')">Message</button>'
+   +(susp?'':'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="udecide('+i+',\'suspend\')">Suspend</button>'));
+}
+function udecide(i,action){
+ const c=CUSTOMERS[i]; if(!c)return;
+ if(action==='message'){
+  const msg=prompt('Message to '+c.n+':'); if(!msg)return;
+  apiCall('POST','/admin/users/'+i+'/message',{message:msg}).then(()=>{toast('Message sent to '+c.n);closeDrawer();});
+  return;
+ }
+ apiCall('POST','/admin/users/'+i+'/suspend').then(()=>{
+  c.status='suspended';
+  toast(c.n+' suspended');
+  closeDrawer(); go('customers');
+ });
 }
 function disputeDrawer(i){
  const d=DISPUTES[i];
@@ -393,10 +431,15 @@ function vdecide(i,action){
 }
 
 /* ---------- vendor page (listings + orders) ---------- */
-const LSTAT={live:['b-green','Live'],pending:['b-amber','Pending'],out:['b-red','Out of stock']};
+const LSTAT={live:['b-green','Live'],pending:['b-amber','Pending'],out:['b-red','Out of stock'],unpublished:['b-grey','Unpublished']};
 const emptyCard=(ico,title,sub)=>`<div class="card"><div class="c-body" style="text-align:center;padding:48px 24px">
    <div style="font-size:40px;margin-bottom:10px">${ico}</div><b style="font-size:15px">${title}</b>
    <p class="muted" style="font-size:13px;margin-top:4px">${sub}</p></div></div>`;
+/* full-view error state — same shape as emptyCard, used by the error boundary below */
+const errorCard=(title,sub,retryCall)=>`<div class="card"><div class="c-body" style="text-align:center;padding:48px 24px">
+   <div style="font-size:40px;margin-bottom:10px">⚠️</div><b style="font-size:15px;color:var(--error)">${title}</b>
+   <p class="muted" style="font-size:13px;margin-top:4px">${sub}</p>
+   ${retryCall?'<button class="btn btn-p" style="margin-top:16px" onclick="'+retryCall+'">Try again</button>':''}</div></div>`;
 function vendorProducts(i,tab){
  tab=tab||'listings';
  const v=VENDORS[i];
@@ -537,10 +580,12 @@ function listingDrawer(vi,pi){
  const st=LSTAT[p.status];
  const cmp=p.cmp?' <span style="text-decoration:line-through;color:var(--text-3);font-size:15px;font-weight:500">'+EGP(p.cmp)+'</span> <span class="badge-s b-red">-'+Math.round((1-p.price/p.cmp)*100)+'%</span>':'';
  const act=p.status==='pending'
-   ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="toast(\'Listing approved — now live ✓\');closeDrawer()">Approve</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing rejected — vendor notified\');closeDrawer()">Reject</button>'
+   ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="ldecide('+vi+','+pi+',\'approve\')">Approve</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="ldecide('+vi+','+pi+',\'reject\')">Reject</button>'
    :p.status==='live'
-   ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Opening listing editor…\');closeDrawer()">Edit</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing hidden from store\');closeDrawer()">Unpublish</button>'
-   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Restock reminder sent to vendor\');closeDrawer()">Nudge vendor</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
+   ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Opening listing editor…\');closeDrawer()">Edit</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="ldecide('+vi+','+pi+',\'unpublish\')">Unpublish</button>'
+   :p.status==='out'
+   ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="ldecide('+vi+','+pi+',\'nudge-restock\')">Nudge vendor</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
+   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
  openDrawer('Listing — '+p.t,
    '<div style="width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px">'+p.emoji+'</div>'
    +'<h3 style="font-size:17px;margin-bottom:6px">'+p.t+'</h3>'
@@ -549,6 +594,17 @@ function listingDrawer(vi,pi){
    +secH('Listing details')
    +kv('Vendor (business)',v.n)+kv('Category',v.cat+' › '+p.sub)+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
    act);
+}
+function ldecide(vi,pi,action){
+ const list=VLISTINGS[vi]; const p=list&&list[pi]; if(!p)return;
+ const id=vi+'_'+pi;
+ apiCall('POST','/admin/products/'+id+'/'+action).then(()=>{
+  if(action==='reject') list.splice(pi,1);
+  else if(action==='approve') p.status='live';
+  else if(action==='unpublish') p.status='unpublished';
+  const msg={approve:'Listing approved — now live ✓',reject:'Listing rejected — vendor notified',unpublish:'Listing hidden from store','nudge-restock':'Restock reminder sent to vendor'}[action];
+  toast(msg); closeDrawer(); openVendorProducts(vi,'listings');
+ });
 }
 
 /* ---------- reusable add-form (opens in the drawer, actually adds) ---------- */
@@ -602,7 +658,7 @@ function deleteCoupon(i){const c=COUPONS[i][0];COUPONS.splice(i,1);toast('Coupon
 function deleteBanner(i){BANNERS.splice(i,1);toast('Banner deleted');go('content');}
 
 /* ---------- filter chips ---------- */
-const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out'];
+const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out','unpublished'];
 function onChip(chip){
  const g=chip.closest('.tabs'); if(g) g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c===chip));
  const label=chip.innerText.replace(/\s*\(\d+\)/,'').trim();
@@ -646,5 +702,22 @@ document.getElementById('searchInput').addEventListener('input',e=>searchRows(e.
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeSidebar();}});
 
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
+
+/* ---------- global error boundary ---------- */
+/* Safety net for bugs outside a view render (e.g. a button handler throwing) —
+   go() already handles errors while rendering a view; this catches everything else. */
+function showErrorScreen(detail){
+ try{
+  const content=document.getElementById('content');
+  if(!content||content.querySelector('.js-error-screen')) return;
+  closeDrawer(); closeSidebar();
+  content.innerHTML='<div class="js-error-screen"><div class="page-head"><div><h2>Something went wrong</h2><p>The dashboard hit an unexpected error.</p></div></div>'
+   +errorCard('Unexpected error','This page ran into a problem it couldn\'t recover from — reloading usually fixes it.'+(detail?' ('+detail+')':''),'location.reload()')
+   +'</div>';
+ }catch(e){/* error boundary itself must never throw */}
+}
+window.addEventListener('error',e=>showErrorScreen(e.message));
+window.addEventListener('unhandledrejection',e=>showErrorScreen((e.reason&&e.reason.message)||String(e.reason)));
+
 /* boot */
 go('overview');
