@@ -99,12 +99,18 @@ class MyListingsNotifier extends _$MyListingsNotifier {
   }
 
   /// Resumes via the generic multipart update — no dedicated "activate"
-  /// endpoint is confirmed in the backend contract. This still sends
-  /// `imagePaths: const []`, which is an UNCONFIRMED risk: if the backend
-  /// treats an omitted `imageFiles` part as "clear images" rather than
-  /// "leave unchanged", resuming a listing could drop its photos. Needs a
-  /// live-backend probe before this can be fully trusted; flagged in
-  /// flutter-review SKILL.md.
+  /// endpoint is confirmed in the backend contract, unlike pause's
+  /// `/deactivate`. Passing `imagePaths: const []` is already the
+  /// strongest available mitigation: `_listingFormData` only attaches an
+  /// `imageFiles` part per path actually in the list, so an empty list
+  /// means the field is fully ABSENT from the multipart body, not present
+  /// with an empty value — there is no stronger "don't touch images"
+  /// signal this client can send in a multipart PUT. The remaining risk
+  /// is purely how the backend interprets an absent `imageFiles` part on
+  /// this shared write endpoint, which cannot be resolved without a live
+  /// probe or backend confirmation (the hosted backend was down all
+  /// session). Flagged in flutter-review SKILL.md — do not "fix" this by
+  /// guessing an unconfirmed `/activate` endpoint.
   Future<void> resumeListing(String id) async {
     final listing = _listingById(id);
     if (listing == null || listing.status != ListingStatus.paused) {
@@ -237,9 +243,14 @@ class MyListingsNotifier extends _$MyListingsNotifier {
       },
       (_) {},
     );
-    if (result.isRight()) {
-      await fetchListings();
-    }
+    // Deliberately no fetchListings() refresh here: the backend has no
+    // hard-delete for listings (see ApiEndpoints.apiListingCancel), so a
+    // "deleted" listing is really just cancelled server-side. A refetch
+    // could pull it straight back into view — and since the cancelled
+    // status code isn't confirmed, it would parse to an unmapped/wrong
+    // status (defaults to draft) rather than something recognizable.
+    // Trusting the optimistic local removal keeps the "removed" UX
+    // correct until the next natural refresh (pull-to-refresh).
   }
 }
 

@@ -357,8 +357,13 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   @override
   Future<void> deleteListing(String id) async {
     try {
-      await _dio.delete<void>(
-        ApiEndpoints.apiListingDetail(id),
+      // CONFIRMED (Postman collection): there is no DELETE endpoint for
+      // listings — only /cancel and /deactivate exist. "Delete listing"
+      // in the UI maps to /cancel (see ApiEndpoints.apiListingCancel for
+      // why not /deactivate). This is a soft, terminal status change on
+      // the backend, not a hard row delete.
+      await _dio.put<void>(
+        ApiEndpoints.apiListingCancel(id),
         options: ApiAuthHeaders.authenticated(),
       );
       _localMine.removeWhere((e) => e.id == id);
@@ -393,6 +398,23 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       }
       return model;
     } on DioException catch (e) {
+      if (_isOffline(e)) {
+        // Only meaningful when the listing is already cached locally
+        // (created/updated earlier while offline) — resubmit only
+        // receives `id` + `newPrice`, not enough to fabricate a full
+        // listing from scratch the way createListing's offline scaffold
+        // can. If it's not cached, there's nothing safe to return.
+        final idx = _localMine.indexWhere((e) => e.id == id);
+        if (idx != -1) {
+          final updated = _localMine[idx].copyWith(
+            price: newPrice,
+            status: listingStatusToWire(ListingStatus.pending).toString(),
+            rejectionReason: null,
+          );
+          _localMine[idx] = updated;
+          return updated;
+        }
+      }
       throw mapDioException(e);
     }
   }
@@ -415,6 +437,18 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       }
       return model;
     } on DioException catch (e) {
+      if (_isOffline(e)) {
+        // Same caveat as resubmitListing above: only meaningful if the
+        // listing is already in the local cache.
+        final idx = _localMine.indexWhere((e) => e.id == id);
+        if (idx != -1) {
+          final updated = _localMine[idx].copyWith(
+            status: listingStatusToWire(ListingStatus.paused).toString(),
+          );
+          _localMine[idx] = updated;
+          return updated;
+        }
+      }
       throw mapDioException(e);
     }
   }

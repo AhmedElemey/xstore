@@ -73,6 +73,31 @@ void main() {
     });
   });
 
+  group('ListingRemoteDataSource deleteListing', () {
+    late Dio dio;
+    late _CapturingInterceptor interceptor;
+    late ListingRemoteDataSourceImpl datasource;
+
+    setUp(() {
+      dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
+      interceptor = _CapturingInterceptor();
+      dio.interceptors.add(interceptor);
+      datasource = ListingRemoteDataSourceImpl(dio);
+    });
+
+    test(
+      'PUTs to /listings/{id}/cancel with no body (no DELETE endpoint exists)',
+      () async {
+        await datasource.deleteListing('7');
+
+        final options = interceptor.captured!;
+        expect(options.method, 'PUT');
+        expect(options.path, '/api/listings/7/cancel');
+        expect(options.data, isNull);
+      },
+    );
+  });
+
   group('ListingModel rejectionReason tolerant parsing', () {
     test('reads the confirmed admin write key', () {
       final model = ListingModel.fromJson({
