@@ -23,8 +23,8 @@ import zlib
 from dataclasses import dataclass, field
 from typing import Any
 
-BASE = "https://xstoreegy-001-site1.jtempurl.com"
-AUTH = "Basic MTEzMTk3Njg6NjAtZGF5ZnJlZXRyaWFs"
+BASE = "https://xstoreegy002-001-site1.etempurl.com"
+AUTH = "Basic MTEzMjQ4ODM6NjAtZGF5ZnJlZXRyaWFs"
 GOOGLE_CLIENT_ID = (
     "304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com"
 )

@@ -16,7 +16,7 @@ import 'package:dio/dio.dart';
 /// user), even though nothing here enforces that anymore.
 abstract final class ApiAuthHeaders {
   static const String basicLicenseKey =
-      'Basic MTEzMTk3Njg6NjAtZGF5ZnJlZXRyaWFs';
+      'Basic MTEzMjQ4ODM6NjAtZGF5ZnJlZXRyaWFs';
 
   /// Endpoints that don't require a signed-in user (register / login /
   /// forgot-password / reference-data GET). No-op — see class doc.

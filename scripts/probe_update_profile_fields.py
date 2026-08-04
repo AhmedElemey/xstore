@@ -17,8 +17,8 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
-BASE = "https://xstoreegy-001-site1.jtempurl.com"
-AUTH = "Basic MTEzMTk3Njg6NjAtZGF5ZnJlZXRyaWFs"
+BASE = "https://xstoreegy002-001-site1.etempurl.com"
+AUTH = "Basic MTEzMjQ4ODM6NjAtZGF5ZnJlZXRyaWFs"
 CTX = ssl.create_default_context()
 DELAY_S = 8.0  # avoid 429
 MAX_429_RETRIES = 2

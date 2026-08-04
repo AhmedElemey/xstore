@@ -24,7 +24,7 @@
 # releases and upload assets.
 #
 # API base URLs are workflow env defaults pointing at the live hosted backend
-# (xstoreegy-001-site1.jtempurl.com). Override below if the host changes.
+# (xstoreegy002-001-site1.etempurl.com). Override below if the host changes.
 #
 # MOCK=false: release APKs run against the live backend. Flip back to
 # MOCK=true here (and in Taskfile.yml) only for mock-data demo builds.
@@ -81,8 +81,8 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.35.6"
-  API_BASE_URL_DEV: "https://xstoreegy-001-site1.jtempurl.com"
-  API_BASE_URL_PROD: "https://xstoreegy-001-site1.jtempurl.com"
+  API_BASE_URL_DEV: "https://xstoreegy002-001-site1.etempurl.com"
+  API_BASE_URL_PROD: "https://xstoreegy002-001-site1.etempurl.com"
 
 jobs:
   build-and-release:
