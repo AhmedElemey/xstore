@@ -11,8 +11,6 @@ abstract interface class GovernmentRemoteDataSource {
     required int page,
     required int pageSize,
   });
-
-  Future<GovernmentModel> getGovernmentById(int id);
 }
 
 class GovernmentRemoteDataSourceImpl implements GovernmentRemoteDataSource {
@@ -44,21 +42,6 @@ class GovernmentRemoteDataSourceImpl implements GovernmentRemoteDataSource {
         items: items,
         totalCount: data['totalCount'] as int? ?? items.length,
       );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
-  Future<GovernmentModel> getGovernmentById(int id) async {
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.governments}/$id',
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return GovernmentModel.fromJson(data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

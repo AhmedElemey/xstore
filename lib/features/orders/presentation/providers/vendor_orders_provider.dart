@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../data/datasources/orders_remote_datasource.dart';
 import '../../domain/entities/order_entity.dart';
 import 'orders_dependencies.dart';
 
@@ -88,7 +89,20 @@ class VendorOrdersState {
 const _sentinel = Object();
 
 class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
-  VendorOrdersNotifier(this.ref) : super(const VendorOrdersState());
+  VendorOrdersNotifier(this.ref) : super(const VendorOrdersState()) {
+    // keepAlive state must not outlive the session that fetched it: drop the
+    // previous vendor's orders/revenue whenever the signed-in user changes or
+    // signs out (mirrors OrdersNotifier.build() in orders_provider.dart).
+    ref.listen<AsyncValue<UserEntity?>>(authProvider, (prev, next) {
+      if (next.isLoading) return;
+      if (prev?.valueOrNull?.id == next.valueOrNull?.id) return;
+      Future.microtask(() {
+        if (!mounted) return;
+        OrdersRemoteDataSourceImpl.clearSessionCache();
+        state = const VendorOrdersState();
+      });
+    });
+  }
 
   final Ref ref;
 

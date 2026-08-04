@@ -53,6 +53,7 @@ class ProductGridCard extends StatelessWidget {
                               child: AppCachedNetworkImage(
                                 imageUrl: item.imageUrl!,
                                 fit: BoxFit.cover,
+                                memCacheWidth: 600,
                                 placeholder: (_, __) => ColoredBox(
                                   color: context.textDisabled,
                                 ),

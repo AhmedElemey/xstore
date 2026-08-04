@@ -36,18 +36,4 @@ class CityRepositoryImpl implements CityRepository {
       return Left(Failure.server(e.toString()));
     }
   }
-
-  @override
-  Future<Either<Failure, CityEntity>> getCityById(int id) async {
-    try {
-      final model = await _remote.getCityById(id);
-      return Right(model.toEntity());
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
 }

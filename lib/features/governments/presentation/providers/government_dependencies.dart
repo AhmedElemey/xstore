@@ -5,7 +5,6 @@ import '../../data/datasources/government_remote_datasource.dart';
 import '../../data/repositories/government_repository_impl.dart';
 import '../../domain/entities/government_entity.dart';
 import '../../domain/repositories/government_repository.dart';
-import '../../domain/usecases/get_government_by_id_usecase.dart';
 import '../../domain/usecases/get_governments_usecase.dart';
 
 part 'government_dependencies.g.dart';
@@ -25,13 +24,6 @@ GovernmentRepository governmentRepository(GovernmentRepositoryRef ref) {
 @riverpod
 GetGovernmentsUseCase getGovernmentsUseCase(GetGovernmentsUseCaseRef ref) {
   return GetGovernmentsUseCase(ref.watch(governmentRepositoryProvider));
-}
-
-@riverpod
-GetGovernmentByIdUseCase getGovernmentByIdUseCase(
-  GetGovernmentByIdUseCaseRef ref,
-) {
-  return GetGovernmentByIdUseCase(ref.watch(governmentRepositoryProvider));
 }
 
 /// Full government (governorate) list for dropdowns.

@@ -9,6 +9,4 @@ abstract interface class GovernmentRepository {
     required int page,
     required int pageSize,
   });
-
-  Future<Either<Failure, GovernmentEntity>> getGovernmentById(int id);
 }

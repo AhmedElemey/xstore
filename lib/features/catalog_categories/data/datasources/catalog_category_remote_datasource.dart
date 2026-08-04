@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
@@ -8,8 +7,6 @@ import '../models/catalog_category_model.dart';
 
 abstract interface class CatalogCategoryRemoteDataSource {
   Future<List<CatalogCategoryModel>> getCategories();
-
-  Future<CatalogCategoryModel> getCategoryById(int id);
 }
 
 class CatalogCategoryRemoteDataSourceImpl
@@ -55,23 +52,5 @@ class CatalogCategoryRemoteDataSourceImpl
         (c) => _flatten(Map<String, dynamic>.from(c as Map)),
       ),
     ];
-  }
-
-  @override
-  Future<CatalogCategoryModel> getCategoryById(int id) async {
-    // NOTE: unlike getCategories(), this single-item GET was not directly
-    // verified against the live backend — only structurally consistent
-    // with the confirmed /api/listings/{id}-style pattern used elsewhere.
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.catalogCategories}/$id',
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return CatalogCategoryModel.fromJson(data);
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
   }
 }

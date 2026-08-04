@@ -55,6 +55,8 @@ class ProductListCard extends StatelessWidget {
                             child: AppCachedNetworkImage(
                               imageUrl: item.imageUrl!,
                               fit: BoxFit.cover,
+                              memCacheWidth: 336,
+                              memCacheHeight: 336,
                               placeholder: (_, __) =>
                                   ColoredBox(color: context.textDisabled),
                               errorWidget: (_, __, ___) =>

@@ -55,6 +55,8 @@ class ListingThumbnail extends StatelessWidget {
       return AppCachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
+        memCacheWidth: ((width ?? size) * 3).round(),
+        memCacheHeight: ((height ?? size) * 3).round(),
         placeholder: (_, __) => ColoredBox(color: placeholderBg),
         errorWidget: (_, __, ___) => ColoredBox(
           color: placeholderBg,

@@ -12,8 +12,6 @@ abstract interface class StoreCategoryRemoteDataSource {
     required int page,
     required int pageSize,
   });
-
-  Future<StoreCategoryModel> getStoreCategoryById(int id);
 }
 
 class StoreCategoryRemoteDataSourceImpl
@@ -47,21 +45,6 @@ class StoreCategoryRemoteDataSourceImpl
         items: items,
         totalCount: data['totalCount'] as int? ?? items.length,
       );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
-  Future<StoreCategoryModel> getStoreCategoryById(int id) async {
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.storeCategories}/$id',
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return StoreCategoryModel.fromJson(data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

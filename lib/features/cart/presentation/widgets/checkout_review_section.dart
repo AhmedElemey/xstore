@@ -67,6 +67,8 @@ class CheckoutReviewSection extends ConsumerWidget {
                     child: AppCachedNetworkImage(
                       imageUrl: it.listingImage,
                       fit: BoxFit.cover,
+                      memCacheWidth: 120,
+                      memCacheHeight: 120,
                     ),
                   ),
                 ),

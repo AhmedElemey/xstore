@@ -85,6 +85,7 @@ class WishlistGridCard extends ConsumerWidget {
                     AppCachedNetworkImage(
                       imageUrl: img,
                       fit: BoxFit.cover,
+                      memCacheHeight: 480,
                       placeholder: (_, __) =>
                           ColoredBox(color: context.textDisabled),
                       errorWidget: (_, __, ___) =>

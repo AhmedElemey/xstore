@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/dio_provider.dart';
@@ -16,6 +17,13 @@ part 'listing_dependencies.g.dart';
 @Riverpod(keepAlive: true)
 ListingRemoteDataSource listingRemoteDataSource(ListingRemoteDataSourceRef ref) {
   return ListingRemoteDataSourceImpl(ref.watch(dioProvider));
+}
+
+/// Clears the listing datasource's offline-scaffold cache on logout, so a
+/// new session on the same device never sees the prior vendor's drafts.
+/// Call alongside `resetProfileData(ref)` on every forced session clear.
+void resetListingLocalCache(Ref ref) {
+  ref.read(listingRemoteDataSourceProvider).clearLocalCache();
 }
 
 @Riverpod(keepAlive: true)

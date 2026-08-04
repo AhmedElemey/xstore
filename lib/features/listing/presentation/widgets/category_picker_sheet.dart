@@ -48,7 +48,7 @@ Future<void> showListingCategoryPicker({
               ),
               const Divider(height: 1),
               SizedBox(
-                height: MediaQuery.of(ctx).size.height * 0.45,
+                height: MediaQuery.sizeOf(ctx).height * 0.45,
                 child: ListView.builder(
                   itemCount: categories.length,
                   itemBuilder: (context, i) {
@@ -118,20 +118,25 @@ Future<void> showListingSubcategoryPicker({
               ),
             ),
             const Divider(height: 1),
-            ...subcategories.map(
-              (s) {
-                final sel = s.id == selectedId;
-                return ListTile(
-                  title: Text(labelOf(s)),
-                  trailing: sel
-                      ? const Icon(LucideIcons.check, color: AppColors.primary)
-                      : null,
-                  onTap: () {
-                    onSelected(s.id);
-                    Navigator.pop(ctx);
-                  },
-                );
-              },
+            SizedBox(
+              height: MediaQuery.sizeOf(ctx).height * 0.45,
+              child: ListView.builder(
+                itemCount: subcategories.length,
+                itemBuilder: (context, i) {
+                  final s = subcategories[i];
+                  final sel = s.id == selectedId;
+                  return ListTile(
+                    title: Text(labelOf(s)),
+                    trailing: sel
+                        ? const Icon(LucideIcons.check, color: AppColors.primary)
+                        : null,
+                    onTap: () {
+                      onSelected(s.id);
+                      Navigator.pop(ctx);
+                    },
+                  );
+                },
+              ),
             ),
             const Gap(AppSpacing.lg),
           ],

@@ -8,32 +8,13 @@ import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/pulsing_animation_builder.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 
-class NotificationEmptyState extends ConsumerStatefulWidget {
+class NotificationEmptyState extends ConsumerWidget {
   const NotificationEmptyState({super.key, required this.isAllFilter});
 
   final bool isAllFilter;
-
-  @override
-  ConsumerState<NotificationEmptyState> createState() => _NotificationEmptyStateState();
-}
-
-class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _bell;
-
-  @override
-  void initState() {
-    super.initState();
-    _bell = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _bell.dispose();
-    super.dispose();
-  }
 
   String _filterName(BuildContext context, NotificationFilter f) {
     switch (f) {
@@ -70,10 +51,10 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(notificationsProvider.select((s) => s.selectedFilter));
     final n = ref.read(notificationsProvider.notifier);
-    final all = widget.isAllFilter;
+    final all = isAllFilter;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.x3l),
@@ -81,9 +62,13 @@ class _NotificationEmptyStateState extends ConsumerState<NotificationEmptyState>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (all)
-              RotationTransition(
-                turns: Tween<double>(begin: -0.04, end: 0.04).animate(
-                  CurvedAnimation(parent: _bell, curve: Curves.easeInOut),
+              PulsingAnimationBuilder(
+                duration: const Duration(seconds: 2),
+                builder: (context, animation, child) => RotationTransition(
+                  turns: Tween<double>(begin: -0.04, end: 0.04).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                  ),
+                  child: child,
                 ),
                 child: Icon(LucideIcons.bell, size: AppSpacing.x3l * 2, color: AppColors.primary.withValues(alpha: 0.35)),
               )

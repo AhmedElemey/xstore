@@ -57,24 +57,6 @@ final getGovernmentsUseCaseProvider =
 
 typedef GetGovernmentsUseCaseRef
     = AutoDisposeProviderRef<GetGovernmentsUseCase>;
-String _$getGovernmentByIdUseCaseHash() =>
-    r'afec8f661616db329a9278a8c828eb468282b6b7';
-
-/// See also [getGovernmentByIdUseCase].
-@ProviderFor(getGovernmentByIdUseCase)
-final getGovernmentByIdUseCaseProvider =
-    AutoDisposeProvider<GetGovernmentByIdUseCase>.internal(
-  getGovernmentByIdUseCase,
-  name: r'getGovernmentByIdUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$getGovernmentByIdUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef GetGovernmentByIdUseCaseRef
-    = AutoDisposeProviderRef<GetGovernmentByIdUseCase>;
 String _$allGovernmentsHash() => r'44b57b4bda1d8c96d659f375412160bb627b672f';
 
 /// Full government (governorate) list for dropdowns.

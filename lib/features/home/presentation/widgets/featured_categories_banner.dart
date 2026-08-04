@@ -89,6 +89,7 @@ class _CategoryCard extends StatelessWidget {
               AppCachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
+                memCacheHeight: (height * 3).round(),
                 placeholder: (_, __) => ColoredBox(color: context.textDisabled),
                 errorWidget: (_, __, ___) => ColoredBox(
                   color: context.textDisabled,

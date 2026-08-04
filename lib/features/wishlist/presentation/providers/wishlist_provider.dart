@@ -22,6 +22,13 @@ extension WishlistStateX on WishlistState {
 
 @Riverpod(keepAlive: true)
 class Wishlist extends _$Wishlist {
+  // Bumped on logout/user-switch and on dispose (which also fires on
+  // invalidate), so an in-flight request from a previous session never
+  // writes into the next one. Mirrors ProfileNotifier._sessionEpoch — a
+  // plain _disposed flag is not enough here: keepAlive invalidate reuses
+  // this instance and build() would reset the flag, reopening the gate.
+  var _sessionEpoch = 0;
+
   WishlistRepository get _repo => ref.read(wishlistRepositoryProvider);
 
   String? get _consumerId {
@@ -32,6 +39,7 @@ class Wishlist extends _$Wishlist {
 
   @override
   WishlistState build() {
+    ref.onDispose(() => _sessionEpoch++);
     // Cart sync: ref.listen(cartProvider) lives on [WishlistScreen] per app spec.
     ref.listen(authProvider, (prev, next) {
       if (next.isLoading) return;
@@ -39,6 +47,7 @@ class Wishlist extends _$Wishlist {
       if (u != null && !u.isVendor) {
         Future.microtask(fetchWishlist);
       } else {
+        _sessionEpoch++;
         Future.microtask(
           () => state = const WishlistState(),
         );
@@ -107,8 +116,10 @@ class Wishlist extends _$Wishlist {
   Future<void> fetchWishlist() async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     final r = await ref.read(getWishlistUseCaseProvider).call(id);
+    if (epoch != _sessionEpoch) return;
     r.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
       (list) {
@@ -150,6 +161,7 @@ class Wishlist extends _$Wishlist {
       await removeFromWishlistByListingId(listingId, showUndo: true);
       return;
     }
+    final epoch = _sessionEpoch;
     final snapshot = state.items;
     final snapIds = Set<String>.from(state.wishlistedListingIds);
     WishlistItemEntity stub;
@@ -158,6 +170,7 @@ class Wishlist extends _$Wishlist {
     } catch (_) {
       return;
     }
+    if (epoch != _sessionEpoch) return;
     state = state.copyWith(
       items: [...state.items, stub],
       wishlistedListingIds: {...state.wishlistedListingIds, listingId},
@@ -167,6 +180,7 @@ class Wishlist extends _$Wishlist {
           consumerId: id,
           listingId: listingId,
         );
+    if (epoch != _sessionEpoch) return;
     r.fold(
       (f) {
         state = state.copyWith(
@@ -193,6 +207,7 @@ class Wishlist extends _$Wishlist {
   }) async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _sessionEpoch;
     final snapshot = List<WishlistItemEntity>.from(state.items);
     final snapIds = Set<String>.from(state.wishlistedListingIds);
     final idx = snapshot.indexWhere((e) => e.listingId == listingId);
@@ -208,6 +223,7 @@ class Wishlist extends _$Wishlist {
           consumerId: id,
           listingId: listingId,
         );
+    if (epoch != _sessionEpoch) return;
     r.fold(
       (f) {
         state = state.copyWith(
@@ -226,11 +242,13 @@ class Wishlist extends _$Wishlist {
     final last = state.lastRemoved;
     final id = _consumerId;
     if (last == null || id == null) return;
+    final epoch = _sessionEpoch;
     state = state.copyWith(lastRemoved: null);
     final r = await ref.read(addToWishlistUseCaseProvider).call(
           consumerId: id,
           listingId: last.listingId,
         );
+    if (epoch != _sessionEpoch) return;
     r.fold(
       (f) => state = state.copyWith(error: f.toString()),
       (e) {
@@ -261,11 +279,13 @@ class Wishlist extends _$Wishlist {
       state = state.copyWith(error: kOfflineErrorCode);
       return;
     }
+    final epoch = _sessionEpoch;
     state = state.copyWith(isUpdating: true, error: null);
     final r = await ref.read(moveToCartUseCaseProvider).call(
           consumerId: id,
           listingId: listingId,
         );
+    if (epoch != _sessionEpoch) return;
     state = state.copyWith(isUpdating: false);
     var ok = false;
     r.fold(
@@ -274,6 +294,7 @@ class Wishlist extends _$Wishlist {
     );
     if (ok) {
       await ref.read(cartProvider.notifier).fetchCart();
+      if (epoch != _sessionEpoch) return;
       await fetchWishlist();
     }
   }
@@ -285,6 +306,7 @@ class Wishlist extends _$Wishlist {
       state = state.copyWith(error: kOfflineErrorCode);
       return;
     }
+    final epoch = _sessionEpoch;
     // Every in-stock listing: cart add is idempotent; already-in-cart still OK.
     final targets = state.items.where((e) => e.isAvailable).toList();
     state = state.copyWith(isUpdating: true, error: null);
@@ -293,9 +315,11 @@ class Wishlist extends _$Wishlist {
             consumerId: id,
             listingId: e.listingId,
           );
+      if (epoch != _sessionEpoch) return;
     }
     state = state.copyWith(isUpdating: false);
     await ref.read(cartProvider.notifier).fetchCart();
+    if (epoch != _sessionEpoch) return;
     await fetchWishlist();
   }
 
@@ -383,6 +407,7 @@ class Wishlist extends _$Wishlist {
   Future<void> addSelectedToCart() async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _sessionEpoch;
     final selected = state.filteredItems
         .where((e) => state.selectedItemIds.contains(e.id))
         .where((e) => e.isAvailable)
@@ -393,6 +418,7 @@ class Wishlist extends _$Wishlist {
             consumerId: id,
             listingId: e.listingId,
           );
+      if (epoch != _sessionEpoch) return;
     }
     state = state.copyWith(
       isUpdating: false,
@@ -400,6 +426,7 @@ class Wishlist extends _$Wishlist {
       selectedItemIds: {},
     );
     await ref.read(cartProvider.notifier).fetchCart();
+    if (epoch != _sessionEpoch) return;
     await fetchWishlist();
   }
 

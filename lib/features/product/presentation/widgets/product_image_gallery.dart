@@ -105,6 +105,10 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
+                  // Zoomable up to 4x (InteractiveViewer maxScale) — cache
+                  // above plain screen resolution so zoomed-in detail stays
+                  // sharp instead of upscaling a screen-sized decode.
+                  memCacheWidth: 1600,
                   placeholder: (_, __) => const Center(
                     child: CircularProgressIndicator.adaptive(),
                   ),
@@ -191,6 +195,8 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                             child: AppCachedNetworkImage(
                               imageUrl: urls[i],
                               fit: BoxFit.cover,
+                              memCacheWidth: 192,
+                              memCacheHeight: 192,
                               errorWidget: (_, __, ___) =>
                                   const Icon(LucideIcons.imageOff),
                             ),

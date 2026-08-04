@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -74,6 +75,26 @@ UpdateStoreHoursUseCase updateStoreHoursUseCase(UpdateStoreHoursUseCaseRef ref) 
 @riverpod
 ToggleStoreStatusUseCase toggleStoreStatusUseCase(ToggleStoreStatusUseCaseRef ref) {
   return ToggleStoreStatusUseCase(ref.watch(storeHoursRepositoryProvider));
+}
+
+/// Read-only store hours lookup for an arbitrary vendor (e.g. rendering another
+/// seller's open/closed badge). Screen-scoped per vendor id — unlike
+/// [storeHoursNotifierProvider], which only ever holds the signed-in user's own
+/// store and must not be reused to render a different vendor's status.
+final sellerStoreHoursProvider =
+    FutureProvider.autoDispose.family<StoreHoursEntity, String>((ref, vendorId) async {
+  final result = await ref.watch(getStoreHoursUseCaseProvider).call(vendorId);
+  return result.fold((f) => throw f, (hours) => hours);
+});
+
+/// Clears the signed-in vendor's cached store hours on logout. This notifier
+/// is deliberately `keepAlive` (store hours are read from many screens across
+/// the vendor session), so without this a second vendor account on the same
+/// device could briefly see the prior vendor's hours until they explicitly
+/// re-fetch. Call alongside `resetProfileData(ref)` on every forced session
+/// clear.
+void resetStoreHoursData(Ref ref) {
+  ref.invalidate(storeHoursNotifierProvider);
 }
 
 @Riverpod(keepAlive: true)

@@ -11,8 +11,6 @@ abstract interface class CityRemoteDataSource {
     required int page,
     required int pageSize,
   });
-
-  Future<CityModel> getCityById(int id);
 }
 
 class CityRemoteDataSourceImpl implements CityRemoteDataSource {
@@ -43,21 +41,6 @@ class CityRemoteDataSourceImpl implements CityRemoteDataSource {
         items: items,
         totalCount: data['totalCount'] as int? ?? items.length,
       );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
-  Future<CityModel> getCityById(int id) async {
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.cities}/$id',
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return CityModel.fromJson(data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }

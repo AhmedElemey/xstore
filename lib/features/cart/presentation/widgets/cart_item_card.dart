@@ -67,6 +67,8 @@ class CartItemCard extends StatelessWidget {
                           child: AppCachedNetworkImage(
                             imageUrl: item.listingImage,
                             fit: BoxFit.cover,
+                            memCacheWidth: 216,
+                            memCacheHeight: 216,
                             placeholder: (_, __) => ColoredBox(
                               color: context.backgroundColor,
                               child: Icon(

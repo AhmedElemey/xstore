@@ -134,6 +134,7 @@ class _ProfileSliverAppBarState extends State<ProfileSliverAppBar> {
         child: AppCachedNetworkImage(
           imageUrl: widget.avatarUrl!,
           fit: BoxFit.cover,
+          memCacheHeight: (widget.expandedHeight * 3).round(),
           placeholder: (_, __) => _buildFallback(),
           errorWidget: (_, __, ___) => _buildFallback(),
         ),

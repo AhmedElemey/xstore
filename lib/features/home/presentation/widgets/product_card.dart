@@ -103,6 +103,9 @@ class _ProductImage extends StatelessWidget {
         fit: BoxFit.cover,
         alignment: Alignment.center,
         width: double.infinity,
+        // Square (aspectRatio: 1) grid tile — cap decode size generously
+        // above typical 2-column tile width instead of full network res.
+        memCacheWidth: 600,
         placeholder: (_, __) => ColoredBox(
           color: theme.colorScheme.surfaceContainerHighest,
           child: const Center(child: CircularProgressIndicator.adaptive()),

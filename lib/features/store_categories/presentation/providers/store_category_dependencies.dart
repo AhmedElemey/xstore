@@ -6,7 +6,6 @@ import '../../data/repositories/store_category_repository_impl.dart';
 import '../../domain/entities/store_category_entity.dart';
 import '../../domain/repositories/store_category_repository.dart';
 import '../../domain/usecases/get_store_categories_usecase.dart';
-import '../../domain/usecases/get_store_category_by_id_usecase.dart';
 
 part 'store_category_dependencies.g.dart';
 
@@ -31,15 +30,6 @@ GetStoreCategoriesUseCase getStoreCategoriesUseCase(
   GetStoreCategoriesUseCaseRef ref,
 ) {
   return GetStoreCategoriesUseCase(ref.watch(storeCategoryRepositoryProvider));
-}
-
-@riverpod
-GetStoreCategoryByIdUseCase getStoreCategoryByIdUseCase(
-  GetStoreCategoryByIdUseCaseRef ref,
-) {
-  return GetStoreCategoryByIdUseCase(
-    ref.watch(storeCategoryRepositoryProvider),
-  );
 }
 
 /// Full store-category list for the registration store-setup dropdown.

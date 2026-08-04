@@ -110,6 +110,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                         AppCachedNetworkImage(
                           imageUrl: b.imageUrl,
                           fit: BoxFit.cover,
+                          memCacheHeight: (bannerHeight * 3).round(),
                           placeholder: (_, __) =>
                               ColoredBox(color: context.textDisabled),
                           errorWidget: (_, __, ___) => ColoredBox(

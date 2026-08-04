@@ -117,7 +117,7 @@ class HomeScreen extends ConsumerWidget {
                     data: (data) => HeroBannerCarousel(banners: data).scaleIn(
                       delay: const Duration(milliseconds: 100),
                     ),
-                    loading: () => _BannerShimmer(),
+                    loading: () => const _BannerShimmer(),
                     errorBuilder: (e) => ErrorStateWidget(
                       message: e.toString(),
                       onRetry: () => ref.invalidate(bannersProvider),
@@ -145,7 +145,7 @@ class HomeScreen extends ConsumerWidget {
                   const Gap(AppSpacing.md),
                   categories.toWidget(
                     data: (data) => CategoryChipRow(categories: data),
-                    loading: () => SizedBox(
+                    loading: () => const SizedBox(
                       height: AppSpacing.x3l + AppSpacing.sm,
                       child: _BannerShimmer(),
                     ),
@@ -203,6 +203,8 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _BannerShimmer extends StatelessWidget {
+  const _BannerShimmer();
+
   @override
   Widget build(BuildContext context) => const ProductSkeletonCard();
 }

@@ -52,23 +52,6 @@ final getCitiesUseCaseProvider = AutoDisposeProvider<GetCitiesUseCase>.internal(
 );
 
 typedef GetCitiesUseCaseRef = AutoDisposeProviderRef<GetCitiesUseCase>;
-String _$getCityByIdUseCaseHash() =>
-    r'ac6fbcbd2516aaf78af33626bec8dff71fc24d22';
-
-/// See also [getCityByIdUseCase].
-@ProviderFor(getCityByIdUseCase)
-final getCityByIdUseCaseProvider =
-    AutoDisposeProvider<GetCityByIdUseCase>.internal(
-  getCityByIdUseCase,
-  name: r'getCityByIdUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$getCityByIdUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef GetCityByIdUseCaseRef = AutoDisposeProviderRef<GetCityByIdUseCase>;
 String _$allCitiesHash() => r'0d2d0f87abff04afa59d5f14be0f8d3ec213d839';
 
 /// Full city list for dropdowns. Small reference table — a single

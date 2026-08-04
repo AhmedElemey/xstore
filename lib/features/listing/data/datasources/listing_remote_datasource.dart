@@ -67,6 +67,12 @@ abstract interface class ListingRemoteDataSource {
   /// instead of the generic multipart update so pausing never sends an
   /// empty `imageFiles` set (see `_listingFormData`'s image-wipe risk).
   Future<ListingModel> deactivateListing(String id);
+
+  /// Drops the offline-scaffold cache. Must be called on logout — the
+  /// datasource is a keepAlive singleton, so without this a second account
+  /// signing in on the same device could see the prior vendor's cached
+  /// drafts via [fetchMyListings]'s offline/empty fallback.
+  void clearLocalCache();
 }
 
 class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
@@ -456,5 +462,10 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   bool _isOffline(DioException e) {
     return e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout;
+  }
+
+  @override
+  void clearLocalCache() {
+    _localMine.clear();
   }
 }
