@@ -22,7 +22,7 @@ abstract final class ApiEndpoints {
       !kReleaseMode,
       'API_BASE_URL resolved empty in release; use --dart-define=API_BASE_URL=...',
     );
-    return 'https://xstoreegy002-001-site1.etempurl.com';
+    return 'https://xstoreegy-001-site1.jtempurl.com';
   }
 
   // ---------------------------------------------------------------------
