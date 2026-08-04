@@ -12,6 +12,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
+import '../../../wishlist/presentation/providers/wishlist_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu_blocks.dart';
 import '../widgets/profile_sheets.dart';
@@ -162,33 +163,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.xs,
-                    AppSpacing.lg,
-                    AppSpacing.md,
-                  ),
-                  child: ProfileStatsRow(
-                    role: isVendor ? UserRole.vendor : user.role,
-                    sales: profile?.user.totalSales,
-                    rating: profile?.user.rating,
-                    responsePercent: profile?.responseRatePercent,
-                    orders: profile?.ordersCount,
-                    wishlistCount: profile?.wishlistCount,
-                    savedDzd: profile?.savedAmountDzd,
-                    onSalesTap: () => context.push(AppRoutes.listingMy),
-                    onRatingTap: () => context.push(AppRoutes.analytics),
-                    onResponseTap: () => context.push(AppRoutes.earnings),
-                    onOrdersTap: () => context.push(
-                      isVendor ? AppRoutes.vendorOrders : AppRoutes.orders,
+              // Couriers have no orders/wishlist/saved-amount or vendor
+              // sales stats — ProfileStatsRow only branches vendor vs.
+              // everything-else, so without this gate a courier would see
+              // consumer stats (always 0) whose taps push routes blocked by
+              // the courier route guard. Delivery-specific stats (deliveries
+              // count, cash wallet balance) belong in the delivery module,
+              // out of scope here — omit the row entirely for now.
+              if (!user.isCourier)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.xs,
+                      AppSpacing.lg,
+                      AppSpacing.md,
                     ),
-                    onWishlistTap: () => context.push(AppRoutes.wishlist),
-                    onSavedTap: () => context.push(AppRoutes.earnings),
+                    child: ProfileStatsRow(
+                      role: isVendor ? UserRole.vendor : user.role,
+                      sales: profile?.user.totalSales,
+                      rating: profile?.user.rating,
+                      responsePercent: profile?.responseRatePercent,
+                      orders: profile?.ordersCount,
+                      // getProfile has no confirmed backend source for this
+                      // yet (defaults to 0), but the wishlist endpoint is
+                      // live and wishlistProvider already keeps itself in
+                      // sync via its own authProvider listener — read the
+                      // real count from there instead of the profile stub.
+                      wishlistCount:
+                          ref.watch(wishlistProvider.select((s) => s.itemCount)),
+                      savedDzd: profile?.savedAmountDzd,
+                      onSalesTap: () => context.push(AppRoutes.listingMy),
+                      onRatingTap: () => context.push(AppRoutes.analytics),
+                      onResponseTap: () => context.push(AppRoutes.earnings),
+                      onOrdersTap: () => context.push(
+                        isVendor ? AppRoutes.vendorOrders : AppRoutes.orders,
+                      ),
+                      onWishlistTap: () => context.push(AppRoutes.wishlist),
+                      onSavedTap: () => context.push(AppRoutes.earnings),
+                    ),
                   ),
                 ),
-              ),
               if (isVendor && profile != null)
                 SliverToBoxAdapter(
                   child: Padding(
