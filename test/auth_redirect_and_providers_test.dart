@@ -320,6 +320,7 @@ void main() {
         phoneNumber: '01012345678',
         location: 'Cairo',
       );
+      rn.updateStoreLocation(storeCityId: 1, storeGovernmentId: 1);
       expect(rn.nextStep(l10n), true);
 
       rn.updatePasswordFields('Password1!');
