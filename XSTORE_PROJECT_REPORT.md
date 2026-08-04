@@ -316,9 +316,17 @@ From a **product and business risk** perspective, the app is **not launch-ready*
 | Login required to browse | Lower acquisition vs competitors with guest browse |
 | **Checkout is broken against the live backend** | `cart_remote_datasource.dart` posts order placement to a hardcoded `/orders` route (not the confirmed `/api` contract) with no 404 fallback; since `MOCK` now defaults to `false`, placing an order fails by default until the backend ships a real order-placement route |
 | **Vendor order actions (confirm/reject/ship/deliver/cancel) fail against the live backend** | Same legacy `/orders/*` module; unlike the order-list reads, these write calls have no 404 fallback, so they throw a server error instead of degrading gracefully |
-| **Phone-OTP login has no fallback for the missing backend route** | `loginWithPhoneToken` lacks the 404-to-local-session fallback that `loginWithSocialToken` has, so phone sign-in errors out against the live backend |
 | Minimal automated testing (35 files as of this audit) | Regression risk as API integration proceeds |
 | No backend in repo | Separate API project must exist, stay in sync with `lib/docs/` |
+
+### Recently Fixed (2026-08-04 audit)
+
+| Fix | Detail |
+|-----|--------|
+| ✅ Consumer profile showed 0 wishlist items regardless of actual contents | `getProfile` had no confirmed backend source for wishlist count and defaulted to 0; now reads the real, live count from the wishlist provider instead |
+| ✅ Courier profile showed consumer stats (orders/wishlist/saved amount, all zero, tapping into routes the courier route guard blocks) | Stats row is now gated out entirely for the courier role |
+
+One item from the prior audit pass was corrected rather than fixed: **phone-OTP login does not actually have a live-backend bug.** The suspected missing-fallback path (`loginWithPhoneToken`) turned out to be unreachable dead code — the real phone sign-in screen uses a different, already-confirmed-live backend route. No fix was needed; the dead code itself is still an open cleanup item, not a risk.
 
 ### Prioritized Recommendations
 
