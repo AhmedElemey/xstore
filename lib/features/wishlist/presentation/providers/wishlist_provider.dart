@@ -394,9 +394,11 @@ class Wishlist extends _$Wishlist {
   }
 
   Future<void> removeSelected() async {
+    final epoch = _sessionEpoch;
     final ids = List<String>.from(state.selectedItemIds);
     for (final id in ids) {
       await removeByItemId(id);
+      if (epoch != _sessionEpoch) return;
     }
     state = state.copyWith(
       isSelectionMode: false,
