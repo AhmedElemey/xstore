@@ -56,7 +56,7 @@ The app is branded as **“Egypt’s modern marketplace”** in onboarding copy 
 **Current app state: Advanced MVP / pre-launch development**
 
 - The **UI and user flows are largely built** across 11 feature modules.
-- **Default build runs on mock (fake) data**, not a live backend — `MOCK` defaults to `true` at compile time.
+- **Default build now talks to the live backend**, not mock (fake) data — `MOCK` defaults to `false` at compile time as of the current codebase (`lib/core/mock/mock_config.dart`); pass `--dart-define=MOCK=true` to exercise the mock data paths instead. Several legacy routes (see "Backend Dependency" and "Known Issues" below) 404 against the hosted backend, so running live-by-default currently breaks checkout and some order/phone-login actions.
 - A real HTTP API is expected at `API_BASE_URL` (e.g. `https://api.example.com`), with ~50 REST endpoints documented in `lib/docs/`.
 - **Not live in app stores** based on repository state: legal pages are explicitly “not published yet,” several features show “coming soon,” and payment processing is UI-only.
 - Code quality gate passes: `flutter analyze` reports no issues; 9 automated test files cover validators, cart math, auth redirects, and store hours — not full end-to-end flows.
@@ -80,7 +80,7 @@ The app is branded as **“Egypt’s modern marketplace”** in onboarding copy 
 | **Listings (vendor)** | `lib/features/listing/` | Create listing form (images, category, price, shipping), my listings grid/list | **Partial** — Form validation solid; image upload to real API not fully implemented |
 | **Profile** | `lib/features/profile/` | View/edit profile, avatar, vendor store page, stats, menu links | **Partial** — Avatar upload returns placeholder URL on real API path |
 | **Store hours** | `lib/features/store/` | Weekly schedule editor, open/closed banner, copy-hours templates | **Partial** — Validation tested; mock + API |
-| **Notifications (inbox)** | `lib/features/notifications/` | Activity feed, filters, swipe mark-read/delete, grouped by date | **Stubbed** — **Mock data only**; no REST endpoints (0 in API docs) |
+| **Notifications (inbox)** | `lib/features/notifications/` | Activity feed, filters, swipe mark-read/delete, grouped by date | **Partial** — wired to real `/api/notifications` endpoints (list, unread count, mark read/unread, read-all, delete, device-token) since 2026-07-23; no mock branch at all — always hits the live API |
 | **Notification settings** | `lib/features/notifications/presentation/screens/notification_settings_screen.dart` | Push/email/SMS toggles per event type | **Partial** — Toggles saved locally on device only; **no push SDK** (no Firebase Cloud Messaging) |
 | **Reviews** | Product detail + `product_reviews_screen.dart` | Summary on product page; full list screen | **Partial / stub** — Summary from API/mock; dedicated reviews screen is placeholder text |
 | **Chat / messaging** | Route `/chat/:threadId` | Buyer–seller messaging | **Stubbed** — “Chat with seller — coming soon” |
@@ -156,7 +156,7 @@ Checkout offers four methods (`PaymentMethod` enum in `order_entity.dart`):
 | Limitation | Detail |
 |------------|--------|
 | **Single market** | Egypt phone validation, Egyptian governorates, EGP pricing — not multi-country |
-| **Mock-first development** | `MOCK=true` by default — release builds need explicit `API_BASE_URL` and `MOCK=false` |
+| **Live-first by default** | `MOCK=false` by default — a plain `flutter run` now hits the real API (`API_BASE_URL` falls back to the hosted integration backend in debug/profile); pass `--dart-define=MOCK=true` to run against mock data instead |
 | **No real payments** | Cannot collect money in production without new integration |
 | **Notifications are local mock** | No server-push order updates; inbox is fake data |
 | **No messaging** | Buyers cannot contact sellers in-app |
@@ -254,7 +254,7 @@ The app is a **client to a REST API** configured at build time:
 --dart-define=MOCK=false
 ```
 
-Documented endpoints span auth, home, listings, cart (9), orders (11), profile (6), wishlist (6), store hours (3), explore (2). **Notifications have zero REST endpoints** in the docs.
+Documented endpoints span auth, home, listings, cart (9), orders (11), profile (6), wishlist (6), store hours (3), explore (2), and **notifications (8)** — the notifications module was connected to real endpoints on 2026-07-23 and is no longer mock-only (see "Known Issues" below for the endpoints still unconfirmed against the live backend).
 
 There is **no backend code in this repository** — only the mobile app and API documentation JSON files (recently added under `lib/docs/`, staged but not yet committed).
 
@@ -314,8 +314,10 @@ From a **product and business risk** perspective, the app is **not launch-ready*
 | No push notifications | Poor order update experience; higher support load |
 | No buyer–seller messaging | Disputes handled outside app; trust issues |
 | Login required to browse | Lower acquisition vs competitors with guest browse |
-| Notifications module mock-only | Activity feed misleading in demo vs production |
-| Minimal automated testing (9 files) | Regression risk as API integration proceeds |
+| **Checkout is broken against the live backend** | `cart_remote_datasource.dart` posts order placement to a hardcoded `/orders` route (not the confirmed `/api` contract) with no 404 fallback; since `MOCK` now defaults to `false`, placing an order fails by default until the backend ships a real order-placement route |
+| **Vendor order actions (confirm/reject/ship/deliver/cancel) fail against the live backend** | Same legacy `/orders/*` module; unlike the order-list reads, these write calls have no 404 fallback, so they throw a server error instead of degrading gracefully |
+| **Phone-OTP login has no fallback for the missing backend route** | `loginWithPhoneToken` lacks the 404-to-local-session fallback that `loginWithSocialToken` has, so phone sign-in errors out against the live backend |
+| Minimal automated testing (35 files as of this audit) | Regression risk as API integration proceeds |
 | No backend in repo | Separate API project must exist, stay in sync with `lib/docs/` |
 
 ### Prioritized Recommendations
