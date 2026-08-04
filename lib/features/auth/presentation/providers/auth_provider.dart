@@ -38,6 +38,8 @@ import '../../domain/usecases/send_login_otp_usecase.dart';
 import '../../domain/usecases/login_with_otp_usecase.dart';
 import '../../domain/usecases/google_login_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
+import '../../../listing/presentation/providers/listing_dependencies.dart';
+import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'auth_states.dart';
 import 'guest_mode_provider.dart';
@@ -217,6 +219,8 @@ class Auth extends _$Auth {
     unregisterFcmDeviceTokenOnLogout(ref);
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
+    resetListingLocalCache(ref);
+    resetStoreHoursData(ref);
     ref.invalidateSelf();
   }
 

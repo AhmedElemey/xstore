@@ -10,6 +10,7 @@ import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class SellerCard extends ConsumerWidget {
   const SellerCard({
@@ -26,8 +27,13 @@ class SellerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isOpen = ref.watch(storeHoursNotifierProvider.select((s) => s.isStoreOpen));
-    final message = ref.watch(storeHoursNotifierProvider.select((s) => s.current?.temporaryMessage));
+    final authUser = ref.watch(authProvider).valueOrNull;
+    final isOwnStore = authUser != null && authUser.id.isNotEmpty && authUser.id == seller.id;
+    final ownHours = isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
+    final otherHours =
+        isOwnStore ? null : ref.watch(sellerStoreHoursProvider(seller.id)).valueOrNull;
+    final isOpen = ownHours?.isStoreOpen ?? otherHours?.isStoreOpen ?? false;
+    final message = ownHours?.current?.temporaryMessage ?? otherHours?.temporaryMessage;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Material(

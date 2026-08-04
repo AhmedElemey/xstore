@@ -8,8 +8,9 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/pulsing_animation_builder.dart';
 
-class OrderTimeline extends StatefulWidget {
+class OrderTimeline extends StatelessWidget {
   const OrderTimeline({
     super.key,
     required this.order,
@@ -20,31 +21,8 @@ class OrderTimeline extends StatefulWidget {
   final bool showTitle;
 
   @override
-  State<OrderTimeline> createState() => _OrderTimelineState();
-}
-
-class _OrderTimelineState extends State<OrderTimeline>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulse = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final o = widget.order;
+    final o = order;
     final steps = _Step.values;
     final cancelled = o.status == OrderStatus.cancelled;
     final timeFmt = DateFormat('MMM d, yyyy · HH:mm');
@@ -53,7 +31,7 @@ class _OrderTimelineState extends State<OrderTimeline>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.showTitle) ...[
+        if (showTitle) ...[
           Text(
             context.l10n.ordersTimelineHeading,
             style: AppTypography.titleMedium,
@@ -70,7 +48,6 @@ class _OrderTimelineState extends State<OrderTimeline>
           final date = _dateForStep(o, s);
 
           return _TimelineRow(
-            pulse: _pulse,
             nodeFilled: isCancelNode ? true : filled,
             isCurrent: isCurrent,
             dashedBelow:
@@ -141,7 +118,6 @@ enum _Step {
 
 class _TimelineRow extends StatelessWidget {
   const _TimelineRow({
-    required this.pulse,
     required this.nodeFilled,
     required this.isCurrent,
     required this.dashedBelow,
@@ -152,7 +128,6 @@ class _TimelineRow extends StatelessWidget {
     this.cancelReason,
   });
 
-  final AnimationController pulse;
   final bool nodeFilled;
   final bool isCurrent;
   final bool dashedBelow;
@@ -176,10 +151,10 @@ class _TimelineRow extends StatelessWidget {
             child: Column(
               children: [
                 if (isCurrent && !isCancelNode)
-                  AnimatedBuilder(
-                    animation: pulse,
-                    builder: (context, child) {
-                      final scale = 1 + 0.22 * math.sin(pulse.value * math.pi);
+                  PulsingAnimationBuilder(
+                    duration: const Duration(milliseconds: 1100),
+                    builder: (context, animation, child) {
+                      final scale = 1 + 0.22 * math.sin(animation.value * math.pi);
                       return Transform.scale(
                         scale: scale,
                         child: child,

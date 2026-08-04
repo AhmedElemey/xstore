@@ -35,6 +35,8 @@ class OrderItemTile extends StatelessWidget {
                   ? AppCachedNetworkImage(
                       imageUrl: item.listingImage,
                       fit: BoxFit.cover,
+                      memCacheWidth: 180,
+                      memCacheHeight: 180,
                       placeholder: (_, __) => Container(
                         color: context.textDisabled.withValues(alpha: 0.25),
                       ),

@@ -58,24 +58,6 @@ final getCategoriesUseCaseProvider =
 );
 
 typedef GetCategoriesUseCaseRef = AutoDisposeProviderRef<GetCategoriesUseCase>;
-String _$getCategoryByIdUseCaseHash() =>
-    r'4d77e50916de9fd83677e50cbdbd6ae85a6c1d73';
-
-/// See also [getCategoryByIdUseCase].
-@ProviderFor(getCategoryByIdUseCase)
-final getCategoryByIdUseCaseProvider =
-    AutoDisposeProvider<GetCategoryByIdUseCase>.internal(
-  getCategoryByIdUseCase,
-  name: r'getCategoryByIdUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$getCategoryByIdUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef GetCategoryByIdUseCaseRef
-    = AutoDisposeProviderRef<GetCategoryByIdUseCase>;
 String _$allCatalogCategoriesHash() =>
     r'c5558cd3e92174394c8b0495e2ac06d0fa1b3b60';
 

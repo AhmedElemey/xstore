@@ -10,6 +10,4 @@ abstract interface class StoreCategoryRepository {
     required int page,
     required int pageSize,
   });
-
-  Future<Either<Failure, StoreCategoryEntity>> getStoreCategoryById(int id);
 }

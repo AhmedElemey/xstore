@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/pulsing_animation_builder.dart';
 import '../../domain/entities/order_entity.dart';
 
-class VendorOrderFilterTabs extends StatefulWidget {
+class VendorOrderFilterTabs extends StatelessWidget {
   const VendorOrderFilterTabs({
     super.key,
     required this.selected,
@@ -32,68 +33,42 @@ class VendorOrderFilterTabs extends StatefulWidget {
   final ValueChanged<OrderStatus?> onTap;
 
   @override
-  State<VendorOrderFilterTabs> createState() => _VendorOrderFilterTabsState();
-}
-
-class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse;
-
-  @override
-  void initState() {
-    super.initState();
-    // Eager init: lazy `late final` + initializer would run on first read only.
-    // If `dispose` runs before any `shouldPulse` tab built, lazy init ran while
-    // unmounted → TickerMode lookup crashed.
-    _pulse = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final items = <({OrderStatus? status, String label, int count})>[
       (
         status: null,
         label: context.l10n.ordersFilterAll,
-        count: widget.totalCount,
+        count: totalCount,
       ),
       (
         status: OrderStatus.pending,
         label: context.l10n.ordersFilterPending,
-        count: widget.pendingCount,
+        count: pendingCount,
       ),
       (
         status: OrderStatus.confirmed,
         label: context.l10n.ordersFilterConfirmed,
-        count: widget.confirmedCount,
+        count: confirmedCount,
       ),
       (
         status: OrderStatus.processing,
         label: context.l10n.ordersFilterProcessing,
-        count: widget.processingCount,
+        count: processingCount,
       ),
       (
         status: OrderStatus.shipped,
         label: context.l10n.ordersFilterShipped,
-        count: widget.shippedCount,
+        count: shippedCount,
       ),
       (
         status: OrderStatus.delivered,
         label: context.l10n.ordersFilterDelivered,
-        count: widget.deliveredCount,
+        count: deliveredCount,
       ),
       (
         status: OrderStatus.cancelled,
         label: context.l10n.ordersFilterCancelled,
-        count: widget.cancelledCount,
+        count: cancelledCount,
       ),
     ];
 
@@ -106,11 +81,11 @@ class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
         separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, i) {
           final item = items[i];
-          final selected = widget.selected == item.status;
+          final isSelected = selected == item.status;
           final isPending = item.status == OrderStatus.pending;
-          final shouldPulse = isPending && item.count > 0 && !selected;
+          final shouldPulse = isPending && item.count > 0 && !isSelected;
           return GestureDetector(
-            onTap: () => widget.onTap(item.status),
+            onTap: () => onTap(item.status),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(
@@ -118,10 +93,10 @@ class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: selected ? AppColors.primary : context.surfaceColor,
+                color: isSelected ? AppColors.primary : context.surfaceColor,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: isPending && !selected
+                  color: isPending && !isSelected
                       ? AppColors.warning
                       : context.borderColor.withValues(alpha: 0.7),
                 ),
@@ -130,10 +105,10 @@ class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (shouldPulse)
-                    AnimatedBuilder(
-                      animation: _pulse,
-                      builder: (context, child) => Transform.scale(
-                        scale: 1 + 0.18 * math.sin(_pulse.value * math.pi),
+                    PulsingAnimationBuilder(
+                      duration: const Duration(milliseconds: 1100),
+                      builder: (context, animation, child) => Transform.scale(
+                        scale: 1 + 0.18 * math.sin(animation.value * math.pi),
                         child: child,
                       ),
                       child: const Icon(
@@ -146,7 +121,7 @@ class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
                   Text(
                     item.label,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: selected
+                      color: isSelected
                           ? Theme.of(context).colorScheme.onPrimary
                           : (isPending
                                 ? AppColors.warning
@@ -159,7 +134,7 @@ class _VendorOrderFilterTabsState extends State<VendorOrderFilterTabs>
                     Text(
                       '(${item.count})',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: selected
+                        color: isSelected
                             ? Theme.of(context).colorScheme.onPrimary
                             : context.textSecondary,
                       ),

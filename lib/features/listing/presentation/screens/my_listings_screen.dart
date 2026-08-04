@@ -60,11 +60,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     super.dispose();
   }
 
-  void _openSearch() {
+  Future<void> _openSearch() async {
     final controller = TextEditingController(
       text: ref.read(myListingsNotifierProvider).searchQuery,
     );
-    showAnimatedDialog<void>(
+    await showAnimatedDialog<void>(
       context: context,
       child: AlertDialog(
         title: Text('Search listings'),
@@ -97,6 +97,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         ],
       ),
     );
+    controller.dispose();
   }
 
   Future<void> _confirmDelete(ListingEntity listing) async {
@@ -383,7 +384,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.55,
+              height: MediaQuery.sizeOf(context).height * 0.55,
               child: ListingEmptyState(
                 selectedFilter: selectedFilter,
                 onAddListing: () => context.go(AppRoutes.listingAdd),

@@ -236,7 +236,9 @@ class CourierDeliveriesNotifier extends StateNotifier<CourierDeliveriesState> {
   }
 }
 
-final courierDeliveriesProvider =
-    StateNotifierProvider<CourierDeliveriesNotifier, CourierDeliveriesState>(
+/// Screen-scoped (autoDispose): the demo data itself lives in the
+/// keepAlive datasource, so nothing is lost when the screen closes.
+final courierDeliveriesProvider = StateNotifierProvider.autoDispose<
+    CourierDeliveriesNotifier, CourierDeliveriesState>(
   (ref) => CourierDeliveriesNotifier(ref),
 );

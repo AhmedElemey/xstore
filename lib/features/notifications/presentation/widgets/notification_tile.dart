@@ -228,6 +228,8 @@ class NotificationTile extends StatelessWidget {
                           width: AppSpacing.x4l,
                           height: AppSpacing.x4l,
                           fit: BoxFit.cover,
+                          memCacheWidth: 192,
+                          memCacheHeight: 192,
                           placeholder: (_, __) =>
                               ColoredBox(color: context.textDisabled),
                           errorWidget: (_, __, ___) =>

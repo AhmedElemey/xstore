@@ -211,6 +211,8 @@ class _StoreLogo extends StatelessWidget {
           width: 50,
           height: 50,
           fit: BoxFit.cover,
+          memCacheWidth: 150,
+          memCacheHeight: 150,
           errorWidget: (_, __, ___) => _gradientBox(initials),
         ),
       );

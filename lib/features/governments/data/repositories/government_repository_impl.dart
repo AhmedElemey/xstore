@@ -37,18 +37,4 @@ class GovernmentRepositoryImpl implements GovernmentRepository {
       return Left(Failure.server(e.toString()));
     }
   }
-
-  @override
-  Future<Either<Failure, GovernmentEntity>> getGovernmentById(int id) async {
-    try {
-      final model = await _remote.getGovernmentById(id);
-      return Right(model.toEntity());
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
 }

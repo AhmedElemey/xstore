@@ -6,7 +6,6 @@ import '../../data/repositories/city_repository_impl.dart';
 import '../../domain/entities/city_entity.dart';
 import '../../domain/repositories/city_repository.dart';
 import '../../domain/usecases/get_cities_usecase.dart';
-import '../../domain/usecases/get_city_by_id_usecase.dart';
 
 part 'city_dependencies.g.dart';
 
@@ -23,11 +22,6 @@ CityRepository cityRepository(CityRepositoryRef ref) {
 @riverpod
 GetCitiesUseCase getCitiesUseCase(GetCitiesUseCaseRef ref) {
   return GetCitiesUseCase(ref.watch(cityRepositoryProvider));
-}
-
-@riverpod
-GetCityByIdUseCase getCityByIdUseCase(GetCityByIdUseCaseRef ref) {
-  return GetCityByIdUseCase(ref.watch(cityRepositoryProvider));
 }
 
 /// Full city list for dropdowns. Small reference table — a single

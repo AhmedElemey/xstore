@@ -102,6 +102,8 @@ class _AvatarBody extends StatelessWidget {
           width: diameter,
           height: diameter,
           fit: BoxFit.cover,
+          memCacheWidth: (diameter * 3).round(),
+          memCacheHeight: (diameter * 3).round(),
           placeholder: (_, __) => _InitialsAvatar(name: name, diameter: diameter),
           errorWidget: (_, __, ___) =>
               _InitialsAvatar(name: name, diameter: diameter),

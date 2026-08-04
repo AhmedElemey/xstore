@@ -9,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/pulsing_animation_builder.dart';
 
 class OrderFilterTabs extends ConsumerWidget {
   const OrderFilterTabs({super.key, required this.isVendor});
@@ -138,76 +139,35 @@ class RowTight extends StatelessWidget {
   }
 }
 
-class _Pulse extends StatefulWidget {
+class _Pulse extends StatelessWidget {
   const _Pulse({required this.child});
 
   final Widget child;
 
   @override
-  State<_Pulse> createState() => _PulseState();
-}
-
-class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _c,
-      builder: (context, child) => Transform.scale(
-        scale: 1 + 0.02 * math.sin(_c.value * math.pi),
+    return PulsingAnimationBuilder(
+      duration: const Duration(milliseconds: 1200),
+      builder: (context, animation, child) => Transform.scale(
+        scale: 1 + 0.02 * math.sin(animation.value * math.pi),
         child: child,
       ),
-      child: widget.child,
+      child: child,
     );
   }
 }
 
-class _PulsingDot extends StatefulWidget {
+class _PulsingDot extends StatelessWidget {
   const _PulsingDot();
 
   @override
-  State<_PulsingDot> createState() => _PulsingDotState();
-}
-
-class _PulsingDotState extends State<_PulsingDot>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: Tween(begin: 0.45, end: 1.0).animate(_c),
+    return PulsingAnimationBuilder(
+      duration: const Duration(milliseconds: 900),
+      builder: (context, animation, child) => FadeTransition(
+        opacity: Tween(begin: 0.45, end: 1.0).animate(animation),
+        child: child,
+      ),
       child: Container(
         width: AppSpacing.sm,
         height: AppSpacing.sm,

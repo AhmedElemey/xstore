@@ -58,6 +58,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       clearError: true,
     );
     final result = await ref.read(googleSignInUseCaseProvider).call();
+    if (!mounted) return;
     await result.fold(_handleFailure, _handleGoogleSuccess);
   }
 
@@ -84,6 +85,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       clearError: true,
     );
     final result = await ref.read(appleSignInUseCaseProvider).call();
+    if (!mounted) return;
     await result.fold(_handleFailure, _handleSuccess);
   }
 
@@ -96,6 +98,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       clearError: true,
     );
     final result = await ref.read(facebookSignInUseCaseProvider).call();
+    if (!mounted) return;
     await result.fold(_handleFailure, _handleSuccess);
   }
 

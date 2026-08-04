@@ -122,6 +122,8 @@ class OrderCard extends ConsumerWidget {
                             ? AppCachedNetworkImage(
                                 imageUrl: first.listingImage,
                                 fit: BoxFit.cover,
+                                memCacheWidth: 180,
+                                memCacheHeight: 180,
                               )
                             : Container(
                                 color: context.textDisabled

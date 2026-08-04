@@ -300,9 +300,11 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   Future<void> detectCurrentLocation() async {
+    final epoch = _sessionEpoch;
     state = state.copyWith(isDetectingLocation: true, locationError: null, locationAction: null);
     try {
       final result = await LocationService().getCurrentLocation();
+      if (epoch != _sessionEpoch) return;
       final googleAddress = result.detailAddress ?? '';
       final next = state.copyWith(
         editLatitude: LocationService.formatCoordinate(result.latitude),
@@ -318,24 +320,28 @@ class ProfileNotifier extends _$ProfileNotifier {
       final u = next.user;
       state = next.copyWith(hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true);
     } on XStoreLocationServiceDisabledException {
+      if (epoch != _sessionEpoch) return;
       state = state.copyWith(
         isDetectingLocation: false,
         locationError: 'locationServiceDisabled',
         locationAction: 'open_location_settings',
       );
     } on XStoreLocationPermissionDeniedException {
+      if (epoch != _sessionEpoch) return;
       state = state.copyWith(
         isDetectingLocation: false,
         locationError: 'locationPermissionDenied',
         locationAction: null,
       );
     } on XStoreLocationPermissionPermanentlyDeniedException {
+      if (epoch != _sessionEpoch) return;
       state = state.copyWith(
         isDetectingLocation: false,
         locationError: 'locationPermissionPermanent',
         locationAction: 'open_app_settings',
       );
     } catch (_) {
+      if (epoch != _sessionEpoch) return;
       state = state.copyWith(
         isDetectingLocation: false,
         locationError: 'locationPermissionDenied',
@@ -417,6 +423,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   Future<void> openAppSettings() => Geolocator.openAppSettings();
 
   Future<bool> pickAvatar(ImageSource source) async {
+    final epoch = _sessionEpoch;
     final picker = ImagePicker();
     final x = await picker.pickImage(
       source: source,
@@ -424,6 +431,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       maxHeight: 1024,
       imageQuality: 85,
     );
+    if (epoch != _sessionEpoch) return false;
     if (x == null) return false;
     state = state.copyWith(
       editAvatarFile: File(x.path),
@@ -453,6 +461,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   Future<bool> pickStoreLogo(ImageSource source) async {
+    final epoch = _sessionEpoch;
     final picker = ImagePicker();
     final x = await picker.pickImage(
       source: source,
@@ -460,6 +469,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       maxHeight: 1024,
       imageQuality: 85,
     );
+    if (epoch != _sessionEpoch) return false;
     if (x == null) return false;
     state = state.copyWith(
       editStoreLogoFile: File(x.path),
@@ -574,21 +584,27 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   Future<void> toggleDarkMode(bool enabled) async {
+    final epoch = _sessionEpoch;
     await ref.read(appThemeModeProvider.notifier).setTheme(
           enabled ? ThemeMode.dark : ThemeMode.light,
         );
+    if (epoch != _sessionEpoch) return;
     state = state.copyWith(isDarkMode: enabled);
   }
 
   Future<void> togglePushNotifications(bool enabled) async {
+    final epoch = _sessionEpoch;
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.setBool(PrefsKeys.profilePushNotifications, enabled);
+    if (epoch != _sessionEpoch) return;
     state = state.copyWith(pushNotificationsEnabled: enabled);
   }
 
   Future<void> toggleEmailUpdates(bool enabled) async {
+    final epoch = _sessionEpoch;
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.setBool(PrefsKeys.profileEmailUpdates, enabled);
+    if (epoch != _sessionEpoch) return;
     state = state.copyWith(emailUpdatesEnabled: enabled);
   }
 

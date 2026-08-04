@@ -252,6 +252,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                       AppCachedNetworkImage(
                         imageUrl: banner,
                         fit: BoxFit.cover,
+                        memCacheHeight: 600,
                         errorWidget: (_, __, ___) =>
                             _storeBannerFallback(context),
                       ),

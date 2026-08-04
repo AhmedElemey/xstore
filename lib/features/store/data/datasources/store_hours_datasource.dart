@@ -19,7 +19,12 @@ class StoreHoursDataSourceImpl implements StoreHoursDataSource {
   StoreHoursDataSourceImpl([Dio? dio]) : _dio = dio;
 
   final Dio? _dio;
-  static StoreHoursModel _cache = StoreHoursModel.fromEntity(mockStoreHours);
+  // Instance-scoped (not static): this is only a 404-fallback resilience
+  // cache, not a deliberate cross-session cache — the authoritative store
+  // hours for the signed-in vendor live in the keepAlive StoreHoursNotifier.
+  // A static field here would leak one vendor's fallback data into another
+  // account's requests on the same device.
+  StoreHoursModel _cache = StoreHoursModel.fromEntity(mockStoreHours);
 
   static bool _isStoreHoursRouteMissing(DioException e) =>
       e.response?.statusCode == 404;

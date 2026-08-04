@@ -80,12 +80,13 @@ class CartVendorGroupBlock extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: group.items.length,
-          itemBuilder: (context, index) {
-            final item = group.items[index];
+        // Plain Column, not a nested shrinkWrap ListView: this feature's
+        // parent scrollable already handles the whole cart's scrolling via
+        // slivers, and a vendor's item count is small/bounded (never an
+        // independently long list), so a second Scrollable here would be
+        // pure overhead for no scroll behavior anyone needs.
+        Column(
+          children: group.items.map((item) {
             final selected = selectedIds.contains(item.id);
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -157,7 +158,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
                 ),
               ),
             );
-          },
+          }).toList(),
         ),
       ],
     );

@@ -109,6 +109,8 @@ class WishlistItemCard extends ConsumerWidget {
                               ? AppCachedNetworkImage(
                                   imageUrl: img,
                                   fit: BoxFit.cover,
+                                  memCacheWidth: 270,
+                                  memCacheHeight: 270,
                                   placeholder: (_, __) => ColoredBox(
                                     color: context.textDisabled,
                                   ),

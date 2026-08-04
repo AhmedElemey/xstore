@@ -9,6 +9,4 @@ abstract interface class CityRepository {
     required int page,
     required int pageSize,
   });
-
-  Future<Either<Failure, CityEntity>> getCityById(int id);
 }

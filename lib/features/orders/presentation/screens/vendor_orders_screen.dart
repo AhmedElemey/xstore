@@ -237,7 +237,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                       cacheExtent: 300,
                       children: [
                         SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.6,
+                          height: MediaQuery.sizeOf(context).height * 0.6,
                           child: selectedFilter == null
                               ? Center(
                                   child: Column(
