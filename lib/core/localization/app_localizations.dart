@@ -1676,6 +1676,24 @@ abstract class AppLocalizations {
   /// **'Log out of xStore?'**
   String get logoutConfirmTitle;
 
+  /// No description provided for @accountAlreadyExistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account already exists'**
+  String get accountAlreadyExistsTitle;
+
+  /// No description provided for @accountAlreadyExistsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There's already an account registered with this phone number. Log in instead?'**
+  String get accountAlreadyExistsMessage;
+
+  /// No description provided for @accountAlreadyExistsGoToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Login'**
+  String get accountAlreadyExistsGoToLogin;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:

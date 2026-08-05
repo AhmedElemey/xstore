@@ -805,6 +805,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutConfirmTitle => 'Log out of xStore?';
 
   @override
+  String get accountAlreadyExistsTitle => 'Account already exists';
+
+  @override
+  String get accountAlreadyExistsMessage => 'There\'s already an account registered with this phone number. Log in instead?';
+
+  @override
+  String get accountAlreadyExistsGoToLogin => 'Go to Login';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

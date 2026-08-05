@@ -11,6 +11,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
@@ -136,7 +137,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen(registerNotifierProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error && mounted) {
-        AppSnackbar.error(context, next.error!);
+        if (isDuplicateAccountError(next.error)) {
+          _showAccountAlreadyExistsSheet(context);
+        } else {
+          AppSnackbar.error(context, next.error!);
+        }
       }
     });
 
@@ -288,6 +293,54 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
+}
+
+Future<void> _showAccountAlreadyExistsSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.x2l),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.l10n.accountAlreadyExistsTitle,
+              style: AppTypography.titleMedium,
+            ),
+            const Gap(AppSpacing.sm),
+            Text(
+              context.l10n.accountAlreadyExistsMessage,
+              style: AppTypography.bodyMedium,
+            ),
+            const Gap(AppSpacing.x2l),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(context.l10n.cancel),
+                  ),
+                ),
+                const Gap(AppSpacing.md),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      context.go(AppRoutes.login);
+                    },
+                    child: Text(context.l10n.accountAlreadyExistsGoToLogin),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _StepRole extends StatelessWidget {

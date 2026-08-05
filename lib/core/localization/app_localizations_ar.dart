@@ -806,6 +806,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logoutConfirmTitle => 'تسجيل الخروج من xStore؟';
 
   @override
+  String get accountAlreadyExistsTitle => 'الحساب موجود بالفعل';
+
+  @override
+  String get accountAlreadyExistsMessage => 'يوجد حساب مسجل بالفعل بهذا الرقم. هل تريد تسجيل الدخول بدلاً من ذلك؟';
+
+  @override
+  String get accountAlreadyExistsGoToLogin => 'الذهاب لتسجيل الدخول';
+
+  @override
   String get cancel => 'إلغاء';
 
   @override

@@ -14,3 +14,17 @@ String resolveAppError(BuildContext context, String? error) {
   }
   return error ?? context.l10n.errorGeneric;
 }
+
+/// Heuristic match on a registration failure caused by a phone/email that's
+/// already registered. The backend's exact wording for this case isn't
+/// documented in the API contract, so this matches on common phrasing
+/// rather than a stable error code — broaden the list if a live 400 comes
+/// back with different wording.
+bool isDuplicateAccountError(String? error) {
+  if (error == null) return false;
+  final lower = error.toLowerCase();
+  return lower.contains('already exist') ||
+      lower.contains('already registered') ||
+      lower.contains('already has an account') ||
+      lower.contains('already in use');
+}
