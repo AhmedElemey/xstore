@@ -129,14 +129,21 @@ class _RecordingRemote implements AuthRemoteDataSource {
   Future<String?> sendEmailOtp(String email) => throw UnimplementedError();
 
   @override
-  Future<void> verifyEmailOtp(String otpToken) => throw UnimplementedError();
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String otpToken,
+  }) =>
+      throw UnimplementedError();
 
   @override
   Future<String?> sendPhoneOtpBackend(String phoneNumber) =>
       throw UnimplementedError();
 
   @override
-  Future<void> verifyPhoneOtpBackend(String otpToken) =>
+  Future<void> verifyPhoneOtpBackend({
+    required String phoneNumber,
+    required String otpToken,
+  }) =>
       throw UnimplementedError();
 
   @override

@@ -320,9 +320,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> verifyEmailOtp(String otpToken) async {
+  Future<Either<Failure, Unit>> verifyEmailOtp({
+    required String email,
+    required String otpToken,
+  }) async {
     try {
-      await _remote.verifyEmailOtp(otpToken);
+      await _remote.verifyEmailOtp(email: email, otpToken: otpToken);
       return const Right(unit);
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
@@ -350,11 +353,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> verifyPhoneOtpBackend(
-    String otpToken,
-  ) async {
+  Future<Either<Failure, Unit>> verifyPhoneOtpBackend({
+    required String phoneNumber,
+    required String otpToken,
+  }) async {
     try {
-      await _remote.verifyPhoneOtpBackend(otpToken);
+      await _remote.verifyPhoneOtpBackend(
+        phoneNumber: phoneNumber,
+        otpToken: otpToken,
+      );
       return const Right(unit);
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));

@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/prefs_keys.dart';
 import '../../../shared/providers/shared_providers.dart';
+import '../../home/presentation/providers/categories_provider.dart';
 import '../../listing/data/models/listing_model.dart'
     show listingConditionFromToken, listingConditionToWire;
 import '../data/datasources/explore_remote_datasource.dart';
@@ -77,9 +78,30 @@ class Explore extends _$Explore {
     return parsed == null ? null : listingConditionToWire(parsed).toString();
   }
 
+  /// Server-side `categoryId` only supports a single value; resolve it from
+  /// the real category catalog when exactly one category is selected,
+  /// otherwise leave it unsent and let [_clientFilter] narrow the multi-select
+  /// case. Best-effort: an unavailable catalog just means no server-side
+  /// narrowing this call, not a failed search.
+  Future<int?> _serverCategoryId() async {
+    final selected = state.filters.categories;
+    if (selected.length != 1) return null;
+    try {
+      final categories = await ref.read(categoriesProvider.future);
+      for (final c in categories) {
+        if (c.name == selected.first) return int.tryParse(c.id);
+      }
+    } catch (_) {
+      // Catalog unavailable — fall through to client-side filtering only.
+    }
+    return null;
+  }
+
   Future<void> search(String q) async {
     state = state.copyWith(isSearching: true, page: 1);
     await _persistRecent(q);
+    if (_disposed) return;
+    final categoryId = await _serverCategoryId();
     if (_disposed) return;
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: q,
@@ -87,6 +109,7 @@ class Explore extends _$Explore {
           minPrice: state.filters.minPrice,
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
+          categoryId: categoryId,
         );
     if (_disposed) return;
     result.fold(
@@ -110,12 +133,15 @@ class Explore extends _$Explore {
     if (state.isLoadingMore || !state.hasMore) return;
     state = state.copyWith(isLoadingMore: true);
     final next = state.page + 1;
+    final categoryId = await _serverCategoryId();
+    if (_disposed) return;
     final result = await ref.read(searchListingsUseCaseProvider).call(
           query: state.query,
           page: next,
           minPrice: state.filters.minPrice,
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
+          categoryId: categoryId,
         );
     if (_disposed) return;
     result.fold(

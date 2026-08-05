@@ -443,7 +443,7 @@ def check_vendor_register(state: ProbeState) -> None:
             "storeDescriptionAr": "تجريبي",
             "storeCategoryId": "1",
             "storeCityId": "1",
-            "storeGovernmentId": "1",
+            "storeGovernorateId": "1",
             "whatsappNumber": phone,
         },
         file_field=("profileImage", png, "probe.png", "image/png"),

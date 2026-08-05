@@ -47,9 +47,12 @@ abstract interface class AuthRemoteDataSource {
 
   /// See [forgotPassword] doc — same debug-OTP-echo behavior.
   Future<String?> sendEmailOtp(String email);
-  Future<void> verifyEmailOtp(String otpToken);
+  Future<void> verifyEmailOtp({required String email, required String otpToken});
   Future<String?> sendPhoneOtpBackend(String phoneNumber);
-  Future<void> verifyPhoneOtpBackend(String otpToken);
+  Future<void> verifyPhoneOtpBackend({
+    required String phoneNumber,
+    required String otpToken,
+  });
 
   Future<void> logout();
 
@@ -233,7 +236,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'storeDescriptionAr': params.storeDescriptionAr,
         'storeCategoryId': params.storeCategoryId,
         'storeCityId': params.storeCityId,
-        'storeGovernmentId': params.storeGovernmentId,
+        // Wire key CONFIRMED (Postman collection): the vendor-register
+        // formdata field is `storeGovernorateId`, not `storeGovernmentId` —
+        // keep the Dart param name (matches the rest of this repo's
+        // city/government reference-data naming) but send the backend's
+        // actual key on the wire.
+        'storeGovernorateId': params.storeGovernmentId,
         'whatsappNumber': params.whatsappNumber,
         'profileImage': await MultipartFile.fromFile(
           params.profileImagePath,
@@ -386,11 +394,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> verifyEmailOtp(String otpToken) async {
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String otpToken,
+  }) async {
     try {
       await _dio.post<void>(
         ApiEndpoints.verifyEmail,
-        data: {'otpToken': otpToken},
+        // CONFIRMED (Postman collection): body is {email, otpToken} — email
+        // is required alongside the OTP, not just the token.
+        data: {'email': email, 'otpToken': otpToken},
         options: ApiAuthHeaders.authenticated(),
       );
     } on DioException catch (e) {
@@ -413,11 +426,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> verifyPhoneOtpBackend(String otpToken) async {
+  Future<void> verifyPhoneOtpBackend({
+    required String phoneNumber,
+    required String otpToken,
+  }) async {
     try {
       await _dio.post<void>(
         ApiEndpoints.verifyPhone,
-        data: {'otpToken': otpToken},
+        // CONFIRMED (Postman collection): body is {phoneNumber, otpToken} —
+        // phoneNumber is required alongside the OTP, not just the token.
+        data: {'phoneNumber': phoneNumber, 'otpToken': otpToken},
         options: ApiAuthHeaders.authenticated(),
       );
     } on DioException catch (e) {

@@ -8,7 +8,10 @@ class VerifyEmailOtpUseCase {
 
   final AuthRepository _repository;
 
-  Future<Either<Failure, Unit>> call(String otpToken) {
-    return _repository.verifyEmailOtp(otpToken);
+  Future<Either<Failure, Unit>> call({
+    required String email,
+    required String otpToken,
+  }) {
+    return _repository.verifyEmailOtp(email: email, otpToken: otpToken);
   }
 }

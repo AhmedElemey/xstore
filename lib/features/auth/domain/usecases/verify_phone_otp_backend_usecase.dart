@@ -11,7 +11,13 @@ class VerifyPhoneOtpBackendUseCase {
 
   final AuthRepository _repository;
 
-  Future<Either<Failure, Unit>> call(String otpToken) {
-    return _repository.verifyPhoneOtpBackend(otpToken);
+  Future<Either<Failure, Unit>> call({
+    required String phoneNumber,
+    required String otpToken,
+  }) {
+    return _repository.verifyPhoneOtpBackend(
+      phoneNumber: phoneNumber,
+      otpToken: otpToken,
+    );
   }
 }
