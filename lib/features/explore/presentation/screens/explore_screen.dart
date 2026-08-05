@@ -13,6 +13,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/widgets/skeletons/explore_skeleton.dart';
+import '../../../home/presentation/providers/categories_provider.dart';
 import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
@@ -87,6 +88,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       authProvider.select((a) => a.valueOrNull?.isVendor == true),
     );
     final recentAsync = ref.watch(sharedPreferencesProvider);
+    final categoryOptions = ref
+            .watch(categoriesProvider)
+            .valueOrNull
+            ?.map((c) => c.name)
+            .where((n) => n.isNotEmpty)
+            .toList() ??
+        const <String>[];
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -187,6 +195,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         onOpenFilters: () => showExploreFilterBottomSheet(
                           context: context,
                           initial: state.filters,
+                          categoryOptions: categoryOptions,
                           onApply: notifier.applyFilters,
                           onReset: notifier.resetFilters,
                         ),

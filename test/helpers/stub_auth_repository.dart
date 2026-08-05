@@ -103,7 +103,10 @@ class StubAuthRepository implements AuthRepository {
       Left(Failure.server('stub'));
 
   @override
-  Future<Either<Failure, Unit>> verifyEmailOtp(String otpToken) async =>
+  Future<Either<Failure, Unit>> verifyEmailOtp({
+    required String email,
+    required String otpToken,
+  }) async =>
       Left(Failure.server('stub'));
 
   @override
@@ -113,9 +116,10 @@ class StubAuthRepository implements AuthRepository {
       Left(Failure.server('stub'));
 
   @override
-  Future<Either<Failure, Unit>> verifyPhoneOtpBackend(
-    String otpToken,
-  ) async =>
+  Future<Either<Failure, Unit>> verifyPhoneOtpBackend({
+    required String phoneNumber,
+    required String otpToken,
+  }) async =>
       Left(Failure.server('stub'));
 
   @override

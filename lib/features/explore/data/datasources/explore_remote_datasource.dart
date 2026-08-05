@@ -13,6 +13,7 @@ abstract interface class ExploreRemoteDataSource {
     double? minPrice,
     double? maxPrice,
     String? condition,
+    int? categoryId,
   });
 
   Future<List<String>> getSuggestions(String query);
@@ -33,14 +34,17 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
     double? minPrice,
     double? maxPrice,
     String? condition,
+    int? categoryId,
   }) async {
     try {
       // GET /api/listings supports keyword/categoryId/minPrice/maxPrice/
-      // condition/sortBy/page/pageSize. minPrice/maxPrice/condition are
-      // sent server-side; category (label-based multi-select), rating,
-      // location and shipping filters stay client-side in
-      // explore_provider.dart, and sortBy stays client-side because its
-      // accepted tokens are unconfirmed.
+      // condition/sortBy/page/pageSize. minPrice/maxPrice/condition/
+      // categoryId are sent server-side (categoryId only when exactly one
+      // category is selected — the endpoint takes a single id, not a list;
+      // explore_provider.dart resolves the id and keeps a client-side
+      // narrowing pass for the multi-select case). Rating, location and
+      // shipping filters stay client-side, and sortBy stays client-side
+      // because its accepted tokens are unconfirmed.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListings,
         queryParameters: {
@@ -49,6 +53,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
           if (maxPrice != null) 'maxPrice': maxPrice,
           if (condition != null && condition.isNotEmpty)
             'condition': condition,
+          if (categoryId != null) 'categoryId': categoryId,
           'page': page,
           'pageSize': pageSize,
         },

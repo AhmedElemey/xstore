@@ -10,6 +10,7 @@ abstract interface class ExploreRepository {
     double? minPrice,
     double? maxPrice,
     String? condition,
+    int? categoryId,
   });
 
   Future<Either<Failure, List<String>>> getSuggestions(String query);

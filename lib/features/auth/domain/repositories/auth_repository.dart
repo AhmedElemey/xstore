@@ -46,14 +46,20 @@ abstract interface class AuthRepository {
   /// `verify-email`) — not wired into any screen yet. Right payload is the
   /// debug OTP echoed by the backend, if present.
   Future<Either<Failure, String?>> sendEmailOtp(String email);
-  Future<Either<Failure, Unit>> verifyEmailOtp(String otpToken);
+  Future<Either<Failure, Unit>> verifyEmailOtp({
+    required String email,
+    required String otpToken,
+  });
 
   /// Backend-driven phone OTP (`/api/auth/send-phone-otp` / `verify-phone`)
   /// — distinct from [sendOtp]/[verifyOtp] below (Firebase-based). Not
   /// wired into any screen yet; see PhoneAuthDatasource for the active flow.
   /// Right payload is the debug OTP echoed by the backend, if present.
   Future<Either<Failure, String?>> sendPhoneOtpBackend(String phoneNumber);
-  Future<Either<Failure, Unit>> verifyPhoneOtpBackend(String otpToken);
+  Future<Either<Failure, Unit>> verifyPhoneOtpBackend({
+    required String phoneNumber,
+    required String otpToken,
+  });
 
   /// Passwordless login for an existing account. [sendLoginOtp] Right payload
   /// is the debug OTP echoed by the backend, if present (null once a real SMS

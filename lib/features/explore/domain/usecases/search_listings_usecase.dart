@@ -15,6 +15,7 @@ class SearchListingsUseCase {
     double? minPrice,
     double? maxPrice,
     String? condition,
+    int? categoryId,
   }) =>
       _repository.searchListings(
         query: query,
@@ -22,5 +23,6 @@ class SearchListingsUseCase {
         minPrice: minPrice,
         maxPrice: maxPrice,
         condition: condition,
+        categoryId: categoryId,
       );
 }

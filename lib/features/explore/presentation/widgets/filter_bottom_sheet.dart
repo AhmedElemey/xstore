@@ -13,6 +13,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 Future<void> showExploreFilterBottomSheet({
   required BuildContext context,
   required FilterState initial,
+  required List<String> categoryOptions,
   required void Function(FilterState applied) onApply,
   required VoidCallback onReset,
 }) {
@@ -26,6 +27,7 @@ Future<void> showExploreFilterBottomSheet({
     builder: (ctx) {
       return _FilterSheetBody(
         initial: initial,
+        categoryOptions: categoryOptions,
         onApply: onApply,
         onReset: onReset,
       );
@@ -36,11 +38,13 @@ Future<void> showExploreFilterBottomSheet({
 class _FilterSheetBody extends StatefulWidget {
   const _FilterSheetBody({
     required this.initial,
+    required this.categoryOptions,
     required this.onApply,
     required this.onReset,
   });
 
   final FilterState initial;
+  final List<String> categoryOptions;
   final void Function(FilterState applied) onApply;
   final VoidCallback onReset;
 
@@ -57,8 +61,6 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
   late bool _ship;
   late TextEditingController _minPrice;
   late TextEditingController _maxPrice;
-
-  static const _categoryOptions = ['Electronics', 'Fashion', 'Home', 'Sports'];
 
   @override
   void initState() {
@@ -137,7 +139,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
-                children: _categoryOptions.map((c) {
+                children: widget.categoryOptions.map((c) {
                   final sel = _cats.contains(c);
                   return FilterChip(
                     label: Text(c),
