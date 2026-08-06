@@ -24,15 +24,41 @@ double mockPackagePrice(OrderAddress pickup, OrderAddress dropoff) {
       (sameCity ? 0 : kMockPackageCrossCitySurchargeEgp);
 }
 
-/// In-memory store for package delivery requests (no backend exists — this
-/// is the pilot's demo data path, always active regardless of
-/// `MockConfig.useMock`).
+/// Implemented by [DeliveryRequestMockDataSource] (mock mode) and
+/// `DeliveryRequestRemoteDataSource` (real delivery-backend calls) — see
+/// `delivery_request_dependencies.dart` for the `MockConfig.useMock` switch.
+abstract interface class DeliveryRequestDataSource {
+  Future<List<DeliveryRequestEntity>> getMyRequests(String requesterId);
+
+  Future<DeliveryRequestEntity> createRequest({
+    required String requesterId,
+    required String requesterName,
+    required String requesterPhone,
+    required OrderAddress pickup,
+    required OrderAddress dropoff,
+    required String packageNote,
+    String? orderId,
+  });
+
+  Future<DeliveryRequestEntity> confirmRequest(String id);
+
+  Future<DeliveryRequestEntity> cancelRequest(String id, String reason);
+
+  Future<List<DeliveryRequestEntity>> getCourierPackages(String courierId);
+
+  Future<DeliveryRequestEntity> markPickedUp(String id);
+
+  Future<DeliveryRequestEntity> markDelivered(String id);
+}
+
+/// In-memory store for package delivery requests — the mock-mode path (see
+/// [DeliveryRequestDataSource]).
 ///
 /// All state is INSTANCE fields: the store lives exactly as long as the
 /// provider that owns it (see `deliveryRequestDataSourceProvider`), so a
 /// logout that rebuilds the provider drops the previous user's data — never
 /// use static fields for user-scoped caches.
-class DeliveryRequestMockDataSource {
+class DeliveryRequestMockDataSource implements DeliveryRequestDataSource {
   DeliveryRequestMockDataSource({
     this.adminPricingDelay = kMockAdminPricingDelay,
   }) {
@@ -211,6 +237,7 @@ class DeliveryRequestMockDataSource {
     }
   }
 
+  @override
   Future<List<DeliveryRequestEntity>> getMyRequests(String requesterId) {
     _autoPriceStaleSubmitted();
     final mine = _requests.where((r) => r.requesterId == requesterId).toList()
@@ -218,6 +245,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(mine);
   }
 
+  @override
   Future<DeliveryRequestEntity> createRequest({
     required String requesterId,
     required String requesterName,
@@ -225,6 +253,7 @@ class DeliveryRequestMockDataSource {
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
+    String? orderId,
   }) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -236,6 +265,7 @@ class DeliveryRequestMockDataSource {
       pickup: pickup,
       dropoff: dropoff,
       packageNote: packageNote,
+      orderId: orderId,
       status: DeliveryRequestStatus.submitted,
       createdAt: now,
       updatedAt: now,
@@ -244,6 +274,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(request);
   }
 
+  @override
   Future<DeliveryRequestEntity> confirmRequest(String id) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -261,6 +292,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(next);
   }
 
+  @override
   Future<DeliveryRequestEntity> cancelRequest(String id, String reason) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -279,6 +311,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(next);
   }
 
+  @override
   Future<List<DeliveryRequestEntity>> getCourierPackages(String courierId) {
     _autoPriceStaleSubmitted();
     const courierVisible = {
@@ -294,6 +327,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(assigned);
   }
 
+  @override
   Future<DeliveryRequestEntity> markPickedUp(String id) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();
@@ -309,6 +343,7 @@ class DeliveryRequestMockDataSource {
     return MockConfig.simulate(next);
   }
 
+  @override
   Future<DeliveryRequestEntity> markDelivered(String id) {
     _autoPriceStaleSubmitted();
     final now = DateTime.now();

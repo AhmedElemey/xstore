@@ -17,12 +17,34 @@ import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/delivery_requests_provider.dart';
 
+/// Optional prefill passed via `go_router`'s `extra` when this screen is
+/// opened from a specific context: a vendor requesting custom delivery for
+/// an order ([orderId] + [initialDropoff] from the order's buyer address),
+/// or "Request again" on a cancelled request ([initialPickup]/
+/// [initialDropoff]/[initialNote] copied from it, plus its [orderId] if it
+/// was order-linked).
+class SendPackageArgs {
+  const SendPackageArgs({
+    this.orderId,
+    this.initialPickup,
+    this.initialDropoff,
+    this.initialNote,
+  });
+
+  final String? orderId;
+  final OrderAddress? initialPickup;
+  final OrderAddress? initialDropoff;
+  final String? initialNote;
+}
+
 /// Request form (consumer or vendor): request a courier to move a package
 /// from a pickup address to a drop-off address. COD-at-pickup — the admin
 /// prices the request and the sender pays the courier in cash when the
 /// package is collected; the app never holds money.
 class SendPackageScreen extends ConsumerStatefulWidget {
-  const SendPackageScreen({super.key});
+  const SendPackageScreen({super.key, this.args});
+
+  final SendPackageArgs? args;
 
   @override
   ConsumerState<SendPackageScreen> createState() => _SendPackageScreenState();
@@ -54,12 +76,30 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     super.initState();
     // Sender defaults to the signed-in requester, consumer or vendor (route
     // is login-gated, but valueOrNull keeps this null-safe if auth is
-    // mid-refresh).
+    // mid-refresh). A prefilled pickup (from "Request again") overrides it.
     final user = ref.read(authProvider).valueOrNull;
     if (user != null) {
       _senderNameCtrl.text = user.name;
       _senderPhoneCtrl.text = AppValidators.toLocalEgypt(user.phoneNumber);
     }
+    final pickup = widget.args?.initialPickup;
+    if (pickup != null) {
+      _senderNameCtrl.text = pickup.fullName;
+      _senderPhoneCtrl.text = AppValidators.toLocalEgypt(pickup.phone);
+      _pickupStreetCtrl.text = pickup.street;
+      _pickupCityCtrl.text = pickup.city;
+      if (EgyptWilayas.names.contains(pickup.wilaya)) _pickupWilaya = pickup.wilaya;
+    }
+    final dropoff = widget.args?.initialDropoff;
+    if (dropoff != null) {
+      _recipientNameCtrl.text = dropoff.fullName;
+      _recipientPhoneCtrl.text = AppValidators.toLocalEgypt(dropoff.phone);
+      _dropoffStreetCtrl.text = dropoff.street;
+      _dropoffCityCtrl.text = dropoff.city;
+      if (EgyptWilayas.names.contains(dropoff.wilaya)) _dropoffWilaya = dropoff.wilaya;
+    }
+    final note = widget.args?.initialNote;
+    if (note != null) _noteCtrl.text = note;
   }
 
   @override
@@ -109,6 +149,7 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
           pickup: pickup,
           dropoff: dropoff,
           packageNote: _noteCtrl.text.trim(),
+          orderId: widget.args?.orderId,
         );
     if (!mounted) return;
     if (ok) {

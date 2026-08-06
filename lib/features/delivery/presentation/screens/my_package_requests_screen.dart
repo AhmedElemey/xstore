@@ -12,6 +12,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../domain/entities/delivery_request.dart';
 import '../providers/delivery_requests_provider.dart';
+import 'send_package_screen.dart';
 
 /// Requester's (consumer or vendor) list of package delivery requests,
 /// newest first.
@@ -75,11 +76,27 @@ class _MyPackageRequestsScreenState
   }
 
   Future<void> _cancelRequest(DeliveryRequestEntity request) async {
+    final reasonCtrl = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(dialogContext.l10n.packageCancelDialogTitle),
-        content: Text(dialogContext.l10n.packageCancelDialogBody),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(dialogContext.l10n.packageCancelDialogBody),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: reasonCtrl,
+              decoration: InputDecoration(
+                hintText: dialogContext.l10n.packageRejectReasonHint,
+                border: const OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -93,15 +110,30 @@ class _MyPackageRequestsScreenState
         ],
       ),
     );
+    final reason = reasonCtrl.text.trim();
+    reasonCtrl.dispose();
     if (confirmed != true || !mounted) return;
-    final ok = await ref
-        .read(deliveryRequestsProvider.notifier)
-        .cancelRequest(request.id, context.l10n.packageCancelledBySender);
+    final ok = await ref.read(deliveryRequestsProvider.notifier).cancelRequest(
+          request.id,
+          reason.isNotEmpty ? reason : context.l10n.packageCancelledBySender,
+        );
     if (!mounted) return;
     if (!ok) {
       final error = ref.read(deliveryRequestsProvider).error;
       AppSnackbar.error(context, error ?? context.l10n.errorGeneric);
     }
+  }
+
+  void _requestAgain(DeliveryRequestEntity request) {
+    context.push(
+      AppRoutes.sendPackage,
+      extra: SendPackageArgs(
+        orderId: request.orderId,
+        initialPickup: request.pickup,
+        initialDropoff: request.dropoff,
+        initialNote: request.packageNote,
+      ),
+    );
   }
 
   @override
@@ -161,6 +193,7 @@ class _MyPackageRequestsScreenState
                           request: request,
                           onConfirm: () => _confirmPriced(request),
                           onCancel: () => _cancelRequest(request),
+                          onRequestAgain: () => _requestAgain(request),
                         );
                       },
                     ),
@@ -177,11 +210,13 @@ class _PackageRequestCard extends StatelessWidget {
     required this.request,
     required this.onConfirm,
     required this.onCancel,
+    required this.onRequestAgain,
   });
 
   final DeliveryRequestEntity request;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
+  final VoidCallback onRequestAgain;
 
   @override
   Widget build(BuildContext context) {
@@ -232,6 +267,21 @@ class _PackageRequestCard extends StatelessWidget {
               style: AppTypography.bodySmall.copyWith(
                 color: context.textSecondary,
               ),
+            ),
+          ],
+          if (request.orderId != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                Icon(LucideIcons.link2, size: 12, color: context.textSecondary),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  context.l10n.packageOrderLinkedLabel,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: context.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
@@ -322,6 +372,14 @@ class _PackageRequestCard extends StatelessWidget {
                 color: context.textSecondary,
               ),
             ),
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: OutlinedButton(
+              onPressed: onRequestAgain,
+              child: Text(context.l10n.packageRequestAgainAction),
+            ),
+          ),
         ];
     }
   }

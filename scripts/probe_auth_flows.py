@@ -389,7 +389,7 @@ def check_unknown_phone_otp(state: ProbeState) -> None:
 
 
 def check_consumer_register(state: ProbeState) -> None:
-    suffix = str(int(time.time()))[-7:]
+    suffix = str(int(time.time()))[-8:]
     phone = f"010{suffix}"
     email = f"probe-consumer-{suffix}@xstore.test"
     sleep()
@@ -421,7 +421,7 @@ def check_consumer_register(state: ProbeState) -> None:
 
 
 def check_vendor_register(state: ProbeState) -> None:
-    suffix = str(int(time.time()))[-7:]
+    suffix = str(int(time.time()))[-8:]
     phone = f"011{suffix}"
     email = f"probe-vendor-{suffix}@xstore.test"
     png = tiny_png()

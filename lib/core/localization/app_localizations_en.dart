@@ -3355,4 +3355,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuMyPackages => 'My packages';
+
+  @override
+  String get deliveryMethodSheetTitle => 'How will this order be delivered?';
+
+  @override
+  String get deliveryMethodSelfTitle => 'Deliver it myself';
+
+  @override
+  String get deliveryMethodSelfSubtitle =>
+      'You handle delivery and collect the full payment yourself.';
+
+  @override
+  String get deliveryMethodPlatformTitle => 'Use xStore delivery';
+
+  @override
+  String get deliveryMethodPlatformSubtitle =>
+      'A courier picks up and delivers — the shipping fee is collected on your behalf.';
+
+  @override
+  String get requestCustomDeliveryTitle => 'Request custom delivery';
+
+  @override
+  String get requestCustomDeliverySubtitle =>
+      'Need a different pickup or drop-off point for this order? Request it and we\'ll price it for you.';
+
+  @override
+  String get requestCustomDeliveryAction => 'Request custom delivery';
+
+  @override
+  String get packageRejectReasonHint => 'Reason (optional)';
+
+  @override
+  String get packageRequestAgainAction => 'Request again';
+
+  @override
+  String get packageOrderLinkedLabel => 'Linked to an order';
 }

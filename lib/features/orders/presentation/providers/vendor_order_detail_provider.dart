@@ -68,8 +68,10 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
     );
   }
 
-  Future<bool> confirmOrder() async {
-    final ok = await ref.read(vendorOrdersProvider.notifier).confirmOrder(orderId);
+  Future<bool> confirmOrder(DeliveryMethod method) async {
+    final ok = await ref
+        .read(vendorOrdersProvider.notifier)
+        .confirmOrder(orderId, method);
     if (!mounted) return ok;
     if (ok) {
       ref.invalidate(vendorOrdersProvider);

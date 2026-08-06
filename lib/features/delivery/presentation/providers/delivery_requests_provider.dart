@@ -78,6 +78,7 @@ class DeliveryRequestsNotifier extends StateNotifier<DeliveryRequestsState> {
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
+    String? orderId,
   }) async {
     final requester = _requester;
     if (requester == null) return false;
@@ -90,6 +91,7 @@ class DeliveryRequestsNotifier extends StateNotifier<DeliveryRequestsState> {
               pickup: pickup,
               dropoff: dropoff,
               packageNote: packageNote,
+              orderId: orderId,
             );
     if (!mounted) return false;
     return result.fold((failure) {

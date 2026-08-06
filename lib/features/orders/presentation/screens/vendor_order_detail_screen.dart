@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../delivery/presentation/screens/send_package_screen.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_order_detail_provider.dart';
+import '../widgets/delivery_method_sheet.dart';
 import '../widgets/order_item_tile.dart';
 import '../widgets/order_price_breakdown.dart';
 import '../widgets/order_timeline.dart';
@@ -26,6 +30,16 @@ class VendorOrderDetailScreen extends ConsumerStatefulWidget {
 class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScreen> {
   @override
   void initState() { super.initState(); WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(vendorOrderDetailProvider(widget.orderId).notifier).fetchOrder()); }
+
+  Future<void> _confirmWithMethodPicker(VendorOrderDetailNotifier notifier) async {
+    final method = await showModalBottomSheet<DeliveryMethod>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const DeliveryMethodSheet(),
+    );
+    if (method == null || !mounted) return;
+    await notifier.confirmOrder(method);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +72,7 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 _StatusHeader(order: o),
                 const SizedBox(height: AppSpacing.lg),
-                if (o.status == OrderStatus.pending || o.status == OrderStatus.confirmed || o.status == OrderStatus.processing) _Urgent(order: o, onConfirm: notifier.confirmOrder, onReject: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => RejectOrderSheet(onConfirm: notifier.rejectOrder)), onProcessing: notifier.markProcessing, onShipped: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => ShippingInfoSheet(onConfirm: notifier.markShipped))),
+                if (o.status == OrderStatus.pending || o.status == OrderStatus.confirmed || o.status == OrderStatus.processing) _Urgent(order: o, onConfirm: () => _confirmWithMethodPicker(notifier), onReject: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => RejectOrderSheet(onConfirm: notifier.rejectOrder)), onProcessing: notifier.markProcessing, onShipped: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => ShippingInfoSheet(onConfirm: notifier.markShipped))),
                 const SizedBox(height: AppSpacing.lg),
                 _Card(child: OrderTimeline(order: o)),
                 const SizedBox(height: AppSpacing.lg),
@@ -66,6 +80,33 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 const SizedBox(height: AppSpacing.lg),
                 _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersDeliveryAddressTitle, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), Text(o.deliveryAddress.fullName), Text(o.deliveryAddress.street), Text('${o.deliveryAddress.city}, ${o.deliveryAddress.wilaya}'), TextButton(onPressed: () {}, child: Text(context.l10n.vendorViewOnMap))])),
                 const SizedBox(height: AppSpacing.lg),
+                if (o.deliveryMethod == DeliveryMethod.platform &&
+                    o.status != OrderStatus.cancelled &&
+                    o.status != OrderStatus.delivered &&
+                    o.status != OrderStatus.refunded) ...[
+                  _Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(context.l10n.requestCustomDeliveryTitle, style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(context.l10n.requestCustomDeliverySubtitle, style: Theme.of(context).textTheme.bodySmall),
+                        const SizedBox(height: AppSpacing.md),
+                        OutlinedButton(
+                          onPressed: () => context.push(
+                            AppRoutes.sendPackage,
+                            extra: SendPackageArgs(
+                              orderId: o.id,
+                              initialDropoff: o.deliveryAddress,
+                            ),
+                          ),
+                          child: Text(context.l10n.requestCustomDeliveryAction),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
                 _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersItemsSectionCount(o.items.length), style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), ...o.items.map((e) => OrderItemTile(item: e, showStockHint: true))])),
                 const SizedBox(height: AppSpacing.lg),
                 _Card(child: OrderPriceBreakdown(order: o, vendorMode: true)),
@@ -115,7 +156,7 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
         color: context.surfaceColor,
         child: VendorOrderActionSheet(
           order: o,
-          onConfirm: notifier.confirmOrder,
+          onConfirm: () => _confirmWithMethodPicker(notifier),
           onReject: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => RejectOrderSheet(onConfirm: notifier.rejectOrder)),
           onProcessing: notifier.markProcessing,
           onShipped: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => ShippingInfoSheet(onConfirm: notifier.markShipped)),

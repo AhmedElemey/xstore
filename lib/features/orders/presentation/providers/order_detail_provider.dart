@@ -80,18 +80,20 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     _finalizeMutation(result, prev);
   }
 
-  Future<void> confirmOrderVendor() async {
+  Future<void> confirmOrderVendor(DeliveryMethod method) async {
     final prev = state.order;
     if (prev == null) return;
     final now = DateTime.now();
     final optimistic = prev.copyWith(
       status: OrderStatus.confirmed,
+      deliveryMethod: method,
       confirmedAt: now,
       updatedAt: now,
     );
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
-    final result =
-        await ref.read(confirmOrderUseCaseProvider).call(state.orderId);
+    final result = await ref
+        .read(confirmOrderUseCaseProvider)
+        .call(orderId: state.orderId, method: method);
     _finalizeMutation(result, prev);
   }
 

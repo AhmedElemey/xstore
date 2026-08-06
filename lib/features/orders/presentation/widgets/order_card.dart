@@ -9,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
+import 'delivery_method_sheet.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
@@ -215,7 +216,15 @@ class OrderCard extends ConsumerWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => notifier.confirmOrderVendor(order.id),
+                  onPressed: () async {
+                    final method = await showModalBottomSheet<DeliveryMethod>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => const DeliveryMethodSheet(),
+                    );
+                    if (method == null) return;
+                    await notifier.confirmOrderVendor(order.id, method);
+                  },
                   child: Text(context.l10n.ordersConfirmOrderCta),
                 ),
               ),

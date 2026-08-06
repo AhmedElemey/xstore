@@ -9,7 +9,7 @@ import '../datasources/delivery_request_datasource.dart';
 class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
   DeliveryRequestRepositoryImpl(this._dataSource);
 
-  final DeliveryRequestMockDataSource _dataSource;
+  final DeliveryRequestDataSource _dataSource;
 
   /// Maps datasource throws to typed failures: [StateError] carries the
   /// not-found / invalid-transition messages, anything else is unexpected.
@@ -37,6 +37,7 @@ class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
+    String? orderId,
   }) =>
       _guard(
         () => _dataSource.createRequest(
@@ -46,6 +47,7 @@ class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
           pickup: pickup,
           dropoff: dropoff,
           packageNote: packageNote,
+          orderId: orderId,
         ),
       );
 

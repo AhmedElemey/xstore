@@ -117,9 +117,12 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<Either<Failure, OrderEntity>> confirmOrder(String orderId) async {
+  Future<Either<Failure, OrderEntity>> confirmOrder({
+    required String orderId,
+    required DeliveryMethod method,
+  }) async {
     try {
-      final row = await _remote.confirmOrder(orderId);
+      final row = await _remote.confirmOrder(orderId: orderId, method: method);
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));

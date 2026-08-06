@@ -1459,5 +1459,16 @@
   "packageStatusPickedUp": "تم الاستلام",
   "packageStatusDelivered": "تم التسليم",
   "packageStatusCancelled": "ملغي",
-  "menuMyPackages": "طرودي"
+  "menuMyPackages": "طرودي",
+  "deliveryMethodSheetTitle": "كيف سيتم توصيل هذا الطلب؟",
+  "deliveryMethodSelfTitle": "التوصيل بنفسي",
+  "deliveryMethodSelfSubtitle": "تتولى التوصيل بنفسك وتحصّل المبلغ كاملاً.",
+  "deliveryMethodPlatformTitle": "استخدام توصيل xStore",
+  "deliveryMethodPlatformSubtitle": "سيقوم مندوب بالاستلام والتوصيل — يتم تحصيل رسوم الشحن نيابة عنك.",
+  "requestCustomDeliveryTitle": "طلب توصيل مخصص",
+  "requestCustomDeliverySubtitle": "تحتاج نقطة استلام أو تسليم مختلفة لهذا الطلب؟ اطلبها وسنقوم بتسعيرها لك.",
+  "requestCustomDeliveryAction": "طلب توصيل مخصص",
+  "packageRejectReasonHint": "السبب (اختياري)",
+  "packageRequestAgainAction": "إعادة الطلب",
+  "packageOrderLinkedLabel": "مرتبط بطلب"
 }

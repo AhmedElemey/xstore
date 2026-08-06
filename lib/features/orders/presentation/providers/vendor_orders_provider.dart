@@ -190,10 +190,12 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     _recompute();
   }
 
-  Future<bool> confirmOrder(String orderId) async {
+  Future<bool> confirmOrder(String orderId, DeliveryMethod method) async {
     final snapshot = state.orders;
-    _optimisticStatus(orderId, OrderStatus.confirmed);
-    final result = await ref.read(confirmOrderUseCaseProvider).call(orderId);
+    _optimisticStatus(orderId, OrderStatus.confirmed, deliveryMethod: method);
+    final result = await ref
+        .read(confirmOrderUseCaseProvider)
+        .call(orderId: orderId, method: method);
     if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -205,14 +207,14 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     });
   }
 
-  Future<int> confirmAllPending() async {
+  Future<int> confirmAllPending(DeliveryMethod method) async {
     var ok = 0;
     final pending = state.orders
         .where((o) => o.status == OrderStatus.pending)
         .map((o) => o.id)
         .toList();
     for (final id in pending) {
-      if (await confirmOrder(id)) ok++;
+      if (await confirmOrder(id, method)) ok++;
       if (!mounted) break;
     }
     return ok;
@@ -306,6 +308,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     OrderStatus status, {
     String? cancelReason,
     DateTime? cancelledAt,
+    DeliveryMethod? deliveryMethod,
   }) {
     final now = DateTime.now();
     state = state.copyWith(
@@ -316,6 +319,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
                     status: status,
                     cancelReason: cancelReason ?? o.cancelReason,
                     cancelledAt: cancelledAt ?? o.cancelledAt,
+                    deliveryMethod: deliveryMethod ?? o.deliveryMethod,
                     confirmedAt: status == OrderStatus.confirmed ? now : o.confirmedAt,
                     updatedAt: now,
                   )

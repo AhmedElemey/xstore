@@ -369,7 +369,7 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideUpTransition(
           context,
           state,
-          const SendPackageScreen(),
+          SendPackageScreen(args: state.extra as SendPackageArgs?),
         ),
       ),
       GoRoute(

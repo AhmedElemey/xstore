@@ -40,7 +40,10 @@ abstract interface class OrdersRepository {
     required bool isVendorSession,
   });
 
-  Future<Either<Failure, OrderEntity>> confirmOrder(String orderId);
+  Future<Either<Failure, OrderEntity>> confirmOrder({
+    required String orderId,
+    required DeliveryMethod method,
+  });
 
   Future<Either<Failure, OrderEntity>> rejectOrder({
     required String orderId,

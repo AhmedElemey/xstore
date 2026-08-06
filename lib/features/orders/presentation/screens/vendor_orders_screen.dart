@@ -10,6 +10,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_orders_provider.dart';
+import '../widgets/delivery_method_sheet.dart';
 import '../widgets/order_empty_state.dart';
 import '../widgets/reject_order_sheet.dart';
 import '../widgets/shipping_info_sheet.dart';
@@ -27,6 +28,12 @@ class VendorOrdersScreen extends ConsumerStatefulWidget {
 
 class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
     with SingleTickerProviderStateMixin {
+  Future<DeliveryMethod?> _pickDeliveryMethod() => showModalBottomSheet<DeliveryMethod>(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) => const DeliveryMethodSheet(),
+      );
+
   final _scroll = ScrollController();
   final _search = TextEditingController();
   late final AnimationController _pulse = AnimationController(
@@ -201,13 +208,14 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                   ],
                 ),
               );
-              if (ok == true) {
-                final count = await ref
-                    .read(vendorOrdersProvider.notifier)
-                    .confirmAllPending();
-                if (!context.mounted) return;
-                context.showSnack(context.l10n.vendorOrdersConfirmed(count));
-              }
+              if (ok != true) return;
+              final method = await _pickDeliveryMethod();
+              if (method == null || !context.mounted) return;
+              final count = await ref
+                  .read(vendorOrdersProvider.notifier)
+                  .confirmAllPending(method);
+              if (!context.mounted) return;
+              context.showSnack(context.l10n.vendorOrdersConfirmed(count));
             },
             onViewAnalytics: () => context.push(AppRoutes.analytics),
           ),
@@ -290,9 +298,11 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                             key: ValueKey(order.id),
                             order: order,
                             onConfirm: () async {
+                              final method = await _pickDeliveryMethod();
+                              if (method == null || !context.mounted) return;
                               final ok = await ref
                                   .read(vendorOrdersProvider.notifier)
-                                  .confirmOrder(order.id);
+                                  .confirmOrder(order.id, method);
                               if (!context.mounted) return;
                               if (ok) {
                                 context.showSnack(

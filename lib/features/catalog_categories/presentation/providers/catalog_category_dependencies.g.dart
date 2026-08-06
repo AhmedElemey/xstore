@@ -59,9 +59,15 @@ final getCategoriesUseCaseProvider =
 
 typedef GetCategoriesUseCaseRef = AutoDisposeProviderRef<GetCategoriesUseCase>;
 String _$allCatalogCategoriesHash() =>
-    r'c5558cd3e92174394c8b0495e2ac06d0fa1b3b60';
+    r'160da5182bb2d2e1809c80a8094811fdc0e52d27';
 
-/// See also [allCatalogCategories].
+/// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
+/// the values are cached for the app session (re-entering add-listing reads
+/// the cache instead of re-fetching). A failed fetch is left unpinned, so
+/// leaving and returning retries the request rather than serving a cached
+/// error — mirrors allCities/allGovernments/allStoreCategories.
+///
+/// Copied from [allCatalogCategories].
 @ProviderFor(allCatalogCategories)
 final allCatalogCategoriesProvider =
     AutoDisposeFutureProvider<List<CatalogCategoryEntity>>.internal(

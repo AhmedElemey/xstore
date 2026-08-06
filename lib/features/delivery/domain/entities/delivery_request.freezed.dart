@@ -24,6 +24,11 @@ mixin _$DeliveryRequestEntity {
   OrderAddress get dropoff => throw _privateConstructorUsedError;
   String get packageNote => throw _privateConstructorUsedError;
 
+  /// Set when a vendor raises this for an order whose pickup/dropoff
+  /// doesn't fit the order's standard store-to-buyer route. Null for a
+  /// standalone consumer package.
+  String? get orderId => throw _privateConstructorUsedError;
+
   /// Null until the admin prices the request.
   double? get price => throw _privateConstructorUsedError;
   DeliveryRequestStatus get status => throw _privateConstructorUsedError;
@@ -57,6 +62,7 @@ abstract class $DeliveryRequestEntityCopyWith<$Res> {
       OrderAddress pickup,
       OrderAddress dropoff,
       String packageNote,
+      String? orderId,
       double? price,
       DeliveryRequestStatus status,
       String? courierId,
@@ -93,6 +99,7 @@ class _$DeliveryRequestEntityCopyWithImpl<$Res,
     Object? pickup = null,
     Object? dropoff = null,
     Object? packageNote = null,
+    Object? orderId = freezed,
     Object? price = freezed,
     Object? status = null,
     Object? courierId = freezed,
@@ -133,6 +140,10 @@ class _$DeliveryRequestEntityCopyWithImpl<$Res,
           ? _value.packageNote
           : packageNote // ignore: cast_nullable_to_non_nullable
               as String,
+      orderId: freezed == orderId
+          ? _value.orderId
+          : orderId // ignore: cast_nullable_to_non_nullable
+              as String?,
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
@@ -210,6 +221,7 @@ abstract class _$$DeliveryRequestEntityImplCopyWith<$Res>
       OrderAddress pickup,
       OrderAddress dropoff,
       String packageNote,
+      String? orderId,
       double? price,
       DeliveryRequestStatus status,
       String? courierId,
@@ -246,6 +258,7 @@ class __$$DeliveryRequestEntityImplCopyWithImpl<$Res>
     Object? pickup = null,
     Object? dropoff = null,
     Object? packageNote = null,
+    Object? orderId = freezed,
     Object? price = freezed,
     Object? status = null,
     Object? courierId = freezed,
@@ -286,6 +299,10 @@ class __$$DeliveryRequestEntityImplCopyWithImpl<$Res>
           ? _value.packageNote
           : packageNote // ignore: cast_nullable_to_non_nullable
               as String,
+      orderId: freezed == orderId
+          ? _value.orderId
+          : orderId // ignore: cast_nullable_to_non_nullable
+              as String?,
       price: freezed == price
           ? _value.price
           : price // ignore: cast_nullable_to_non_nullable
@@ -341,6 +358,7 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
       required this.pickup,
       required this.dropoff,
       required this.packageNote,
+      this.orderId,
       this.price,
       required this.status,
       this.courierId,
@@ -366,6 +384,12 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
   final OrderAddress dropoff;
   @override
   final String packageNote;
+
+  /// Set when a vendor raises this for an order whose pickup/dropoff
+  /// doesn't fit the order's standard store-to-buyer route. Null for a
+  /// standalone consumer package.
+  @override
+  final String? orderId;
 
   /// Null until the admin prices the request.
   @override
@@ -393,7 +417,7 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
 
   @override
   String toString() {
-    return 'DeliveryRequestEntity(id: $id, requesterId: $requesterId, requesterName: $requesterName, requesterPhone: $requesterPhone, pickup: $pickup, dropoff: $dropoff, packageNote: $packageNote, price: $price, status: $status, courierId: $courierId, cancelReason: $cancelReason, createdAt: $createdAt, updatedAt: $updatedAt, pricedAt: $pricedAt, confirmedAt: $confirmedAt, pickedUpAt: $pickedUpAt, deliveredAt: $deliveredAt)';
+    return 'DeliveryRequestEntity(id: $id, requesterId: $requesterId, requesterName: $requesterName, requesterPhone: $requesterPhone, pickup: $pickup, dropoff: $dropoff, packageNote: $packageNote, orderId: $orderId, price: $price, status: $status, courierId: $courierId, cancelReason: $cancelReason, createdAt: $createdAt, updatedAt: $updatedAt, pricedAt: $pricedAt, confirmedAt: $confirmedAt, pickedUpAt: $pickedUpAt, deliveredAt: $deliveredAt)';
   }
 
   @override
@@ -412,6 +436,7 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
             (identical(other.dropoff, dropoff) || other.dropoff == dropoff) &&
             (identical(other.packageNote, packageNote) ||
                 other.packageNote == packageNote) &&
+            (identical(other.orderId, orderId) || other.orderId == orderId) &&
             (identical(other.price, price) || other.price == price) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.courierId, courierId) ||
@@ -442,6 +467,7 @@ class _$DeliveryRequestEntityImpl implements _DeliveryRequestEntity {
       pickup,
       dropoff,
       packageNote,
+      orderId,
       price,
       status,
       courierId,
@@ -470,6 +496,7 @@ abstract class _DeliveryRequestEntity implements DeliveryRequestEntity {
       required final OrderAddress pickup,
       required final OrderAddress dropoff,
       required final String packageNote,
+      final String? orderId,
       final double? price,
       required final DeliveryRequestStatus status,
       final String? courierId,
@@ -495,6 +522,12 @@ abstract class _DeliveryRequestEntity implements DeliveryRequestEntity {
   OrderAddress get dropoff;
   @override
   String get packageNote;
+  @override
+
+  /// Set when a vendor raises this for an order whose pickup/dropoff
+  /// doesn't fit the order's standard store-to-buyer route. Null for a
+  /// standalone consumer package.
+  String? get orderId;
   @override
 
   /// Null until the admin prices the request.

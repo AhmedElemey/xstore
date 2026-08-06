@@ -427,7 +427,7 @@ void main() {
           authProvider.overrideWith(() => FakeAuth(_vendor())),
           ordersRepositoryProvider.overrideWith((ref) {
             return StubOrdersRepository(
-              confirmOrderResult: (_) =>
+              confirmOrderResult: (_, __) =>
                   Left(Failure.server('confirm failed')),
             );
           }),
@@ -439,7 +439,7 @@ void main() {
 
       await container
           .read(ordersNotifierProvider.notifier)
-          .confirmOrderVendor('order_x');
+          .confirmOrderVendor('order_x', DeliveryMethod.platform);
 
       expect(
         container.read(ordersNotifierProvider).error,

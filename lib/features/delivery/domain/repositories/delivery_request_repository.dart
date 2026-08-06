@@ -19,6 +19,10 @@ abstract interface class DeliveryRequestRepository {
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
+    /// Set when a vendor raises this for an order whose pickup/dropoff
+    /// doesn't fit the order's standard route. Null for a standalone
+    /// consumer package.
+    String? orderId,
   });
 
   /// Requester accepts the admin's price (`priced` → `confirmed`); the pilot

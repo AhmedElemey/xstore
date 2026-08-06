@@ -40,6 +40,7 @@ import '../../domain/usecases/google_login_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../listing/presentation/providers/listing_dependencies.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
+import '../../../delivery/data/delivery_backend_session.dart';
 import '../../../notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'auth_states.dart';
 import 'guest_mode_provider.dart';
@@ -210,6 +211,7 @@ class Auth extends _$Auth {
       if (firstRestore && user != null) {
         prefetchProfileData(ref, user: user);
         syncFcmDeviceTokenWithBackend(ref, user: user);
+        syncDeliveryBackendSession(ref, user: user);
       }
       return user;
     });
@@ -221,6 +223,7 @@ class Auth extends _$Auth {
     resetProfileData(ref);
     resetListingLocalCache(ref);
     resetStoreHoursData(ref);
+    await clearDeliveryBackendSession();
     ref.invalidateSelf();
   }
 
@@ -234,6 +237,7 @@ class Auth extends _$Auth {
     );
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
+    syncDeliveryBackendSession(ref);
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
@@ -243,6 +247,7 @@ class Auth extends _$Auth {
     state = AsyncData(user);
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
+    syncDeliveryBackendSession(ref);
   }
 }
 

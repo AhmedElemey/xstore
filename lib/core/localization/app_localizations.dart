@@ -6445,6 +6445,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My packages'**
   String get menuMyPackages;
+
+  /// No description provided for @deliveryMethodSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How will this order be delivered?'**
+  String get deliveryMethodSheetTitle;
+
+  /// No description provided for @deliveryMethodSelfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver it myself'**
+  String get deliveryMethodSelfTitle;
+
+  /// No description provided for @deliveryMethodSelfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You handle delivery and collect the full payment yourself.'**
+  String get deliveryMethodSelfSubtitle;
+
+  /// No description provided for @deliveryMethodPlatformTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use xStore delivery'**
+  String get deliveryMethodPlatformTitle;
+
+  /// No description provided for @deliveryMethodPlatformSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A courier picks up and delivers — the shipping fee is collected on your behalf.'**
+  String get deliveryMethodPlatformSubtitle;
+
+  /// No description provided for @requestCustomDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request custom delivery'**
+  String get requestCustomDeliveryTitle;
+
+  /// No description provided for @requestCustomDeliverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Need a different pickup or drop-off point for this order? Request it and we\'ll price it for you.'**
+  String get requestCustomDeliverySubtitle;
+
+  /// No description provided for @requestCustomDeliveryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Request custom delivery'**
+  String get requestCustomDeliveryAction;
+
+  /// No description provided for @packageRejectReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get packageRejectReasonHint;
+
+  /// No description provided for @packageRequestAgainAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Request again'**
+  String get packageRequestAgainAction;
+
+  /// No description provided for @packageOrderLinkedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to an order'**
+  String get packageOrderLinkedLabel;
 }
 
 class _AppLocalizationsDelegate

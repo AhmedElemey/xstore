@@ -39,6 +39,10 @@ class DeliveryRequestEntity with _$DeliveryRequestEntity {
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
+    /// Set when a vendor raises this for an order whose pickup/dropoff
+    /// doesn't fit the order's standard store-to-buyer route. Null for a
+    /// standalone consumer package.
+    String? orderId,
     /// Null until the admin prices the request.
     double? price,
     required DeliveryRequestStatus status,

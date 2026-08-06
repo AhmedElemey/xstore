@@ -1459,5 +1459,16 @@
   "packageStatusPickedUp": "Picked up",
   "packageStatusDelivered": "Delivered",
   "packageStatusCancelled": "Cancelled",
-  "menuMyPackages": "My packages"
+  "menuMyPackages": "My packages",
+  "deliveryMethodSheetTitle": "How will this order be delivered?",
+  "deliveryMethodSelfTitle": "Deliver it myself",
+  "deliveryMethodSelfSubtitle": "You handle delivery and collect the full payment yourself.",
+  "deliveryMethodPlatformTitle": "Use xStore delivery",
+  "deliveryMethodPlatformSubtitle": "A courier picks up and delivers — the shipping fee is collected on your behalf.",
+  "requestCustomDeliveryTitle": "Request custom delivery",
+  "requestCustomDeliverySubtitle": "Need a different pickup or drop-off point for this order? Request it and we'll price it for you.",
+  "requestCustomDeliveryAction": "Request custom delivery",
+  "packageRejectReasonHint": "Reason (optional)",
+  "packageRequestAgainAction": "Request again",
+  "packageOrderLinkedLabel": "Linked to an order"
 }

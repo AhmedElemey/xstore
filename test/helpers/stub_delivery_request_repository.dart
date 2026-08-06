@@ -35,6 +35,7 @@ class StubDeliveryRequestRepository implements DeliveryRequestRepository {
     required OrderAddress pickup,
     required OrderAddress dropoff,
     required String packageNote,
+    String? orderId,
   }) async =>
       Right(
         DeliveryRequestEntity(
@@ -45,6 +46,7 @@ class StubDeliveryRequestRepository implements DeliveryRequestRepository {
           pickup: pickup,
           dropoff: dropoff,
           packageNote: packageNote,
+          orderId: orderId,
           status: DeliveryRequestStatus.submitted,
           createdAt: DateTime(2026, 7, 19),
           updatedAt: DateTime(2026, 7, 19),

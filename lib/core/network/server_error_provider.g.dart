@@ -8,10 +8,8 @@ part of 'server_error_provider.dart';
 
 String _$serverErrorHash() => r'5c0433954458d5a47ab1167d06bc462e1663d68d';
 
-/// Set when any API response comes back with an HTTP 5xx status, or when
-/// several 404s land in a short burst (see the error interceptor in
-/// `dio_provider.dart` — a lone 404 is normal app behavior, e.g. OTP for an
-/// unregistered phone, and must not trigger this). While true, the router
+/// Set when any API response comes back with an HTTP 5xx status (see the
+/// error interceptor in `dio_provider.dart`). While true, the router
 /// redirects every route to [AppRoutes.serverError] instead of letting the
 /// failing screen render its own inline error, and clears when the user
 /// retries from that screen.

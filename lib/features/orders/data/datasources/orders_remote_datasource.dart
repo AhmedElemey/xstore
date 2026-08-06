@@ -42,7 +42,10 @@ abstract interface class OrdersRemoteDataSource {
     required bool isVendorSession,
   });
 
-  Future<OrderModel> confirmOrder(String orderId);
+  Future<OrderModel> confirmOrder({
+    required String orderId,
+    required DeliveryMethod method,
+  });
 
   Future<OrderModel> rejectOrder({
     required String orderId,
@@ -647,13 +650,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   @override
-  Future<OrderModel> confirmOrder(String orderId) async {
+  Future<OrderModel> confirmOrder({
+    required String orderId,
+    required DeliveryMethod method,
+  }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
       if (row == null) throw StateError('order');
       final now = DateTime.now();
       final next = row.copyWith(
         status: OrderStatus.confirmed,
+        deliveryMethod: method,
         confirmedAt: now,
         updatedAt: now,
       );
@@ -663,6 +670,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.orderConfirm(orderId),
+        data: {'deliveryMethod': method.name},
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty order response');
@@ -877,6 +885,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       discount: (data['discount'] as num?)?.toDouble() ?? 0,
       total: (data['total'] as num?)?.toDouble() ?? 0,
       trackingNumber: data['trackingNumber'] as String?,
+      deliveryMethod: switch ((data['deliveryMethod'] ?? '').toString().toLowerCase()) {
+        'self' => DeliveryMethod.self,
+        'platform' => DeliveryMethod.platform,
+        _ => null,
+      },
       courierId: data['courierId']?.toString(),
       courierName: data['courierName'] as String?,
       trackingLocation: data['trackingLocation'] as String?,
@@ -940,6 +953,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         'discount': order.discount,
         'total': order.total,
         'trackingNumber': order.trackingNumber,
+        'deliveryMethod': order.deliveryMethod?.name,
         'courierId': order.courierId,
         'courierName': order.courierName,
         'trackingLocation': order.trackingLocation,

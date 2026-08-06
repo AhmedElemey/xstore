@@ -289,12 +289,13 @@ class OrdersNotifier extends _$OrdersNotifier {
     await ref.read(cartProvider.notifier).reorderFromOrderItems(order.items);
   }
 
-  Future<void> confirmOrderVendor(String orderId) async {
+  Future<void> confirmOrderVendor(String orderId, DeliveryMethod method) async {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.confirmed,
-        confirmedAt: DateTime.now(),);
-    final result =
-        await ref.read(confirmOrderUseCaseProvider).call(orderId);
+        confirmedAt: DateTime.now(), deliveryMethod: method,);
+    final result = await ref
+        .read(confirmOrderUseCaseProvider)
+        .call(orderId: orderId, method: method);
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -406,6 +407,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     DateTime? confirmedAt,
     DateTime? cancelledAt,
     String? cancelReason,
+    DeliveryMethod? deliveryMethod,
   }) {
     final now = DateTime.now();
     state = state.copyWith(
@@ -418,6 +420,7 @@ class OrdersNotifier extends _$OrdersNotifier {
                     confirmedAt: confirmedAt ?? o.confirmedAt,
                     cancelledAt: cancelledAt ?? o.cancelledAt,
                     cancelReason: cancelReason ?? o.cancelReason,
+                    deliveryMethod: deliveryMethod ?? o.deliveryMethod,
                   )
                 : o,
           )

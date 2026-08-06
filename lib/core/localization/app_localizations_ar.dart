@@ -3341,4 +3341,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get menuMyPackages => 'طرودي';
+
+  @override
+  String get deliveryMethodSheetTitle => 'كيف سيتم توصيل هذا الطلب؟';
+
+  @override
+  String get deliveryMethodSelfTitle => 'التوصيل بنفسي';
+
+  @override
+  String get deliveryMethodSelfSubtitle =>
+      'تتولى التوصيل بنفسك وتحصّل المبلغ كاملاً.';
+
+  @override
+  String get deliveryMethodPlatformTitle => 'استخدام توصيل xStore';
+
+  @override
+  String get deliveryMethodPlatformSubtitle =>
+      'سيقوم مندوب بالاستلام والتوصيل — يتم تحصيل رسوم الشحن نيابة عنك.';
+
+  @override
+  String get requestCustomDeliveryTitle => 'طلب توصيل مخصص';
+
+  @override
+  String get requestCustomDeliverySubtitle =>
+      'تحتاج نقطة استلام أو تسليم مختلفة لهذا الطلب؟ اطلبها وسنقوم بتسعيرها لك.';
+
+  @override
+  String get requestCustomDeliveryAction => 'طلب توصيل مخصص';
+
+  @override
+  String get packageRejectReasonHint => 'السبب (اختياري)';
+
+  @override
+  String get packageRequestAgainAction => 'إعادة الطلب';
+
+  @override
+  String get packageOrderLinkedLabel => 'مرتبط بطلب';
 }

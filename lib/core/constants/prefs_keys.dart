@@ -10,6 +10,7 @@ abstract final class PrefsKeys {
   static const profileEmailUpdates = 'profile_email_updates';
   static const profileAppLanguage = 'profile_app_language';
   static const fcmToken = 'xstore_fcm_token';
+  static const deliveryAuthToken = 'xstore_delivery_auth_token';
   static const socialAuthCredentials = 'xstore_social_auth_credentials';
   static const locationPermissionRationaleShown =
       'location_permission_rationale_shown';

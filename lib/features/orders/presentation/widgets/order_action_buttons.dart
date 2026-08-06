@@ -10,8 +10,9 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/order_entity.dart'
-    show OrderEntity, OrderStatus, ShippingInfo;
+    show DeliveryMethod, OrderEntity, OrderStatus, ShippingInfo;
 import '../providers/order_detail_provider.dart';
+import 'delivery_method_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 
@@ -70,7 +71,20 @@ class OrderActionButtons extends ConsumerWidget {
               child: FilledButton(
                 onPressed: busy
                     ? null
-                    : () => _run(context, ref, orderId, notifier.confirmOrderVendor),
+                    : () async {
+                        final method = await showModalBottomSheet<DeliveryMethod>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => const DeliveryMethodSheet(),
+                        );
+                        if (method == null || !context.mounted) return;
+                        await _run(
+                          context,
+                          ref,
+                          orderId,
+                          () => notifier.confirmOrderVendor(method),
+                        );
+                      },
                 child: Text(context.l10n.ordersConfirmOrderCta),
               ),
             ),

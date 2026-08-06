@@ -9,7 +9,8 @@ class StubOrdersRepository implements OrdersRepository {
     FutureOrEitherVendorOrders? getVendorOrdersResult,
     FutureOrEitherCourierOrders? getCourierOrdersResult,
     FutureOrEitherOrderStats? getVendorStatsResult,
-    Either<Failure, OrderEntity> Function(String orderId)? confirmOrderResult,
+    Either<Failure, OrderEntity> Function(String orderId, DeliveryMethod method)?
+        confirmOrderResult,
   })  : _getConsumer =
             getConsumerOrdersResult ??
                 (({required consumerId, required page, required pageSize}) =>
@@ -27,13 +28,14 @@ class StubOrdersRepository implements OrdersRepository {
                 (({required vendorId}) => Left(Failure.network('stub stats'))),
         _confirm =
             confirmOrderResult ??
-                ((_) => Left(Failure.server('stub confirm')));
+                ((_, __) => Left(Failure.server('stub confirm')));
 
   final FutureOrEitherConsumerOrders _getConsumer;
   final FutureOrEitherVendorOrders _getVendor;
   final FutureOrEitherCourierOrders _getCourier;
   final FutureOrEitherOrderStats _getStats;
-  final Either<Failure, OrderEntity> Function(String orderId) _confirm;
+  final Either<Failure, OrderEntity> Function(String orderId, DeliveryMethod method)
+      _confirm;
 
   @override
   Future<Either<Failure, List<OrderEntity>>> getConsumerOrders({
@@ -95,8 +97,11 @@ class StubOrdersRepository implements OrdersRepository {
       Left(Failure.server('stub'));
 
   @override
-  Future<Either<Failure, OrderEntity>> confirmOrder(String orderId) async =>
-      Future.value(_confirm(orderId));
+  Future<Either<Failure, OrderEntity>> confirmOrder({
+    required String orderId,
+    required DeliveryMethod method,
+  }) async =>
+      Future.value(_confirm(orderId, method));
 
   @override
   Future<Either<Failure, OrderEntity>> rejectOrder({

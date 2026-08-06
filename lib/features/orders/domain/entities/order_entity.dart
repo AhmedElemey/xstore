@@ -21,6 +21,17 @@ enum PaymentMethod {
   baridimob,
 }
 
+/// How the vendor chose to fulfil an accepted order. Null while `pending`.
+/// Self = vendor delivers and keeps the shipping fee as their own
+/// compensation; platform = queued for admin to assign a courier, who
+/// collects the fee as part of the COD total on the platform's behalf. The
+/// fee itself is fixed at checkout ([OrderEntity.shippingCost]) — this only
+/// decides who ends up collecting it.
+enum DeliveryMethod {
+  self,
+  platform,
+}
+
 @freezed
 class OrderAddress with _$OrderAddress {
   const factory OrderAddress({
@@ -84,6 +95,8 @@ class OrderEntity with _$OrderEntity {
     required double discount,
     required double total,
     String? trackingNumber,
+    /// Set when the vendor accepts (pending → confirmed). See [DeliveryMethod].
+    DeliveryMethod? deliveryMethod,
     /// Platform courier assigned to deliver this order ("Delivered by
     /// xStore"). Null = vendor self-delivery (default flow).
     String? courierId,
