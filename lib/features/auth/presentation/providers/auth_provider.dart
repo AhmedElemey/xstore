@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
@@ -218,6 +220,7 @@ class Auth extends _$Auth {
   }
 
   Future<void> logout() async {
+    final user = state.valueOrNull;
     unregisterFcmDeviceTokenOnLogout(ref);
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
@@ -225,9 +228,13 @@ class Auth extends _$Auth {
     resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
     ref.invalidateSelf();
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.logout,
+      properties: {if (user != null) AnalyticsProps.role: user.role.name},
+    );
   }
 
-  Future<void> setUser(UserEntity user) async {
+  Future<void> setUser(UserEntity user, {String method = 'google'}) async {
     state = const AsyncLoading();
     final result = await ref.read(authRepositoryProvider).persistSessionUser(user);
     ref.read(guestModeProvider.notifier).disable();
@@ -238,16 +245,28 @@ class Auth extends _$Auth {
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
     syncDeliveryBackendSession(ref);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.loginSuccess,
+      properties: {AnalyticsProps.method: method, AnalyticsProps.role: user.role.name},
+    );
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
   /// reloading from storage, which would recreate [GoRouter] mid-navigation.
-  void adoptSession(UserEntity user) {
+  void adoptSession(
+    UserEntity user, {
+    String method = 'password',
+    String event = AnalyticsEvents.loginSuccess,
+  }) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
     syncDeliveryBackendSession(ref);
+    ref.read(analyticsServiceProvider).track(
+      event,
+      properties: {AnalyticsProps.method: method, AnalyticsProps.role: user.role.name},
+    );
   }
 }
 
@@ -690,7 +709,10 @@ class RegisterNotifier extends _$RegisterNotifier {
           error: null,
           showVendorSuccessOverlay: role == UserRole.vendor,
         );
-        ref.read(authProvider.notifier).adoptSession(user);
+        ref.read(authProvider.notifier).adoptSession(
+              user,
+              event: AnalyticsEvents.registerSuccess,
+            );
       },
     );
   }

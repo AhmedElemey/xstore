@@ -41,26 +41,6 @@ abstract final class ApiEndpoints {
   static const String socialLogin = '$_api/auth/social';
   static const String phoneLogin = '/auth/phone';
 
-  /// Legacy orders module — not on the confirmed `/api` contract; the hosted
-  /// integration backend does not expose these routes yet (404). Call sites
-  /// in `orders_remote_datasource.dart` treat 404 as an empty list until the
-  /// backend ships.
-  static const String orders = '/orders';
-  static String ordersConsumer(String consumerId) =>
-      '$orders/consumer/$consumerId';
-  static String ordersVendor(String vendorId) => '$orders/vendor/$vendorId';
-  static String ordersCourier(String courierId) =>
-      '$orders/courier/$courierId';
-  static String ordersVendorStats(String vendorId) =>
-      '$orders/vendor/$vendorId/stats';
-  static String orderById(String orderId) => '$orders/$orderId';
-  static String orderCancel(String orderId) => '$orders/$orderId/cancel';
-  static String orderConfirm(String orderId) => '$orders/$orderId/confirm';
-  static String orderReject(String orderId) => '$orders/$orderId/reject';
-  static String orderProcessing(String orderId) => '$orders/$orderId/processing';
-  static String orderShipped(String orderId) => '$orders/$orderId/shipped';
-  static String orderDelivered(String orderId) => '$orders/$orderId/delivered';
-
   /// Legacy store-hours module — not on the confirmed `/api` contract; hosted
   /// backend returns 404 until deployed. See `store_hours_datasource.dart`.
   static String vendorStoreHours(String vendorId) =>
@@ -169,4 +149,32 @@ abstract final class ApiEndpoints {
   // listing reappear as merely paused-and-resumable), so /cancel is the
   // closer semantic match for a listing the vendor wants gone for good.
   static String apiListingCancel(String id) => '$apiListings/$id/cancel';
+
+  // Orders (CONFIRMED — xStoreEcommerce PR "Add Orders backend": create,
+  // confirm/reject/cancel, ship/deliver, plus admin courier assignment).
+  static const String orders = '$_api/orders';
+  static String ordersConsumer(String consumerId) =>
+      '$orders/consumer/$consumerId';
+  static String ordersVendor(String vendorId) => '$orders/vendor/$vendorId';
+  static String ordersCourier(String courierId) =>
+      '$orders/courier/$courierId';
+  static String ordersVendorStats(String vendorId) =>
+      '$orders/vendor/$vendorId/stats';
+  static String orderById(String orderId) => '$orders/$orderId';
+  static String orderCancel(String orderId) => '$orders/$orderId/cancel';
+  static String orderConfirm(String orderId) => '$orders/$orderId/confirm';
+  static String orderReject(String orderId) => '$orders/$orderId/reject';
+  static String orderProcessing(String orderId) => '$orders/$orderId/processing';
+  static String orderShipped(String orderId) => '$orders/$orderId/shipped';
+  static String orderDelivered(String orderId) => '$orders/$orderId/delivered';
+
+  // ---------------------------------------------------------------------
+  // Analytics — PROPOSED, not yet built on the backend. Contract spec for
+  // the backend team: docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md.
+  // The client batches events locally and POSTs here; until the backend
+  // ships the route it 404s and events stay queued (see
+  // AnalyticsService._flush, which backs off on repeated 404s instead of
+  // hammering a route that doesn't exist yet).
+  // ---------------------------------------------------------------------
+  static const String analyticsEvents = '$_api/analytics/events';
 }

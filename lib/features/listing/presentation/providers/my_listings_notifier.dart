@@ -1,6 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'listing_dependencies.dart';
@@ -182,6 +184,13 @@ class MyListingsNotifier extends _$MyListingsNotifier {
             .map((e) => e.id == entity.id ? entity : e)
             .toList();
         state = _withComputed(state.copyWith(listings: list, error: null));
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.listingResubmitted,
+          properties: {
+            AnalyticsProps.itemId: entity.id,
+            AnalyticsProps.priceEgp: newPrice,
+          },
+        );
       },
     );
     return success;
@@ -226,6 +235,13 @@ class MyListingsNotifier extends _$MyListingsNotifier {
             .map((e) => e.id == entity.id ? entity : e)
             .toList();
         state = _withComputed(state.copyWith(listings: list, error: null));
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.listingStatusChanged,
+          properties: {
+            AnalyticsProps.itemId: entity.id,
+            AnalyticsProps.status: nextStatus.name,
+          },
+        );
       },
     );
   }
@@ -241,7 +257,12 @@ class MyListingsNotifier extends _$MyListingsNotifier {
       (failure) {
         state = _withComputed(snapshot.copyWith(error: failure.toString()));
       },
-      (_) {},
+      (_) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.listingDeleted,
+          properties: {AnalyticsProps.itemId: id},
+        );
+      },
     );
     // Deliberately no fetchListings() refresh here: the backend has no
     // hard-delete for listings (see ApiEndpoints.apiListingCancel), so a

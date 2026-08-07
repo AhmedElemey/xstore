@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/analytics/event_names.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/prefs_keys.dart';
 import '../../../shared/providers/shared_providers.dart';
@@ -125,6 +127,16 @@ class Explore extends _$Explore {
           hasMore: list.length >= ExploreRemoteDataSourceImpl.pageSize,
           page: 1,
         );
+        final trimmed = q.trim();
+        if (trimmed.isNotEmpty) {
+          ref.read(analyticsServiceProvider).track(
+            AnalyticsEvents.searchPerformed,
+            properties: {
+              AnalyticsProps.query: trimmed,
+              AnalyticsProps.resultCount: sorted.length,
+            },
+          );
+        }
       },
     );
   }

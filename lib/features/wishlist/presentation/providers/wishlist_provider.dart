@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/domain/entities/cart_item_entity.dart';
@@ -197,6 +199,10 @@ class Wishlist extends _$Wishlist {
           wishlistedListingIds: {...state.wishlistedListingIds, listingId},
         );
         _applyFilterSort();
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.wishlistAdd,
+          properties: {AnalyticsProps.itemId: listingId},
+        );
       },
     );
   }
@@ -234,7 +240,12 @@ class Wishlist extends _$Wishlist {
         );
         _applyFilterSort();
       },
-      (_) {},
+      (_) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.wishlistRemove,
+          properties: {AnalyticsProps.itemId: listingId},
+        );
+      },
     );
   }
 

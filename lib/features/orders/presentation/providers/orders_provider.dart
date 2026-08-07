@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -239,6 +241,25 @@ class OrdersNotifier extends _$OrdersNotifier {
   List<OrderStatus> filtersForRole(bool vendor) =>
       vendor ? _vendorFilters : _consumerFilters;
 
+  void _trackOrderStatus(
+    String orderId,
+    OrderStatus status, {
+    required String role,
+    DeliveryMethod? deliveryMethod,
+    String? reason,
+  }) {
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.orderStatusChanged,
+      properties: {
+        AnalyticsProps.orderId: orderId,
+        AnalyticsProps.status: status.name,
+        AnalyticsProps.role: role,
+        if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
+        if (reason != null) AnalyticsProps.reason: reason,
+      },
+    );
+  }
+
   Future<void> cancelOrder(String orderId, String reason) async {
     final snapshot = state.orders;
     final updated = snapshot
@@ -266,7 +287,15 @@ class OrdersNotifier extends _$OrdersNotifier {
         _recomputeDerived();
         state = state.copyWith(error: failure.toString());
       },
-      (o) => _mergeOrder(o),
+      (o) {
+        _mergeOrder(o);
+        _trackOrderStatus(
+          orderId,
+          OrderStatus.cancelled,
+          role: _isVendor ? 'vendor' : 'consumer',
+          reason: reason,
+        );
+      },
     );
   }
 
@@ -301,7 +330,15 @@ class OrdersNotifier extends _$OrdersNotifier {
         state = state.copyWith(orders: snapshot, error: failure.toString());
         _recomputeDerived();
       },
-      _mergeOrder,
+      (o) {
+        _mergeOrder(o);
+        _trackOrderStatus(
+          orderId,
+          OrderStatus.confirmed,
+          role: 'vendor',
+          deliveryMethod: method,
+        );
+      },
     );
   }
 
@@ -319,7 +356,10 @@ class OrdersNotifier extends _$OrdersNotifier {
         state = state.copyWith(orders: snapshot, error: failure.toString());
         _recomputeDerived();
       },
-      _mergeOrder,
+      (o) {
+        _mergeOrder(o);
+        _trackOrderStatus(orderId, OrderStatus.cancelled, role: 'vendor', reason: reason);
+      },
     );
   }
 
@@ -333,7 +373,10 @@ class OrdersNotifier extends _$OrdersNotifier {
         state = state.copyWith(orders: snapshot, error: failure.toString());
         _recomputeDerived();
       },
-      _mergeOrder,
+      (o) {
+        _mergeOrder(o);
+        _trackOrderStatus(orderId, OrderStatus.processing, role: 'vendor');
+      },
     );
   }
 
@@ -369,7 +412,10 @@ class OrdersNotifier extends _$OrdersNotifier {
         state = state.copyWith(orders: snapshot, error: failure.toString());
         _recomputeDerived();
       },
-      _mergeOrder,
+      (o) {
+        _mergeOrder(o);
+        _trackOrderStatus(orderId, OrderStatus.shipped, role: 'vendor');
+      },
     );
   }
 
@@ -397,7 +443,10 @@ class OrdersNotifier extends _$OrdersNotifier {
         state = state.copyWith(orders: snapshot, error: failure.toString());
         _recomputeDerived();
       },
-      _mergeOrder,
+      (o) {
+        _mergeOrder(o);
+        _trackOrderStatus(orderId, OrderStatus.delivered, role: 'consumer');
+      },
     );
   }
 

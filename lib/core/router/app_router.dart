@@ -45,6 +45,7 @@ import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
+import '../analytics/analytics_service.dart';
 import '../animations/page_transitions.dart';
 import '../network/server_error_provider.dart';
 import 'app_routes.dart';
@@ -231,7 +232,7 @@ GoRouter goRouter(GoRouterRef ref) {
     UserRole.consumer => _consumerShellBranches(),
   };
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: refresh,
     errorBuilder: (context, state) => AppErrorScreen(
@@ -588,4 +589,7 @@ GoRouter goRouter(GoRouterRef ref) {
       ),
     ],
   );
+
+  ref.read(analyticsServiceProvider).attachRouter(router);
+  return router;
 }

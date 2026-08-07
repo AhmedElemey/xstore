@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
@@ -20,6 +22,15 @@ class Checkout extends _$Checkout {
   CheckoutState build() {
     _disposed = false;
     ref.onDispose(() => _disposed = true);
+    final cart = ref.read(cartProvider);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.beginCheckout,
+      properties: {
+        AnalyticsProps.cartValueEgp: cart.total,
+        AnalyticsProps.itemCount: cart.selectedAvailableItems.length,
+        AnalyticsProps.vendorCount: cart.vendorGroups.length,
+      },
+    );
     return CheckoutState(
       savedAddresses: [
         const OrderAddress(
@@ -52,6 +63,10 @@ class Checkout extends _$Checkout {
 
   void selectPayment(PaymentMethod m) {
     state = state.copyWith(selectedPayment: m);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.checkoutPaymentMethodSelected,
+      properties: {AnalyticsProps.method: m.name},
+    );
   }
 
   void updateDeliveryNote(String v) {

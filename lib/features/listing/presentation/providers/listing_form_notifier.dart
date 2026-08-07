@@ -6,6 +6,8 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/error/failures.dart';
@@ -426,8 +428,16 @@ class ListingFormNotifier extends _$ListingFormNotifier {
             },
           );
         },
-        (_) {
+        (listing) {
           success = true;
+          ref.read(analyticsServiceProvider).track(
+            AnalyticsEvents.listingPublished,
+            properties: {
+              AnalyticsProps.itemId: listing.id,
+              AnalyticsProps.category: listing.categoryLabel,
+              AnalyticsProps.priceEgp: listing.price,
+            },
+          );
           unawaited(_completePublishSuccess());
         },
       );

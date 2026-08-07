@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -174,6 +176,14 @@ class Cart extends _$Cart {
           selectedItemIds: {...state.selectedItemIds, ...newOnes},
         );
         _recomputeTotals();
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.addToCart,
+          properties: {
+            AnalyticsProps.itemId: listingId,
+            AnalyticsProps.quantity: quantity,
+            AnalyticsProps.cartValueEgp: state.total,
+          },
+        );
       },
     );
   }
@@ -427,6 +437,16 @@ class Cart extends _$Cart {
           lastRemovedIndex: null,
         );
         Future.microtask(fetchCart);
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.purchase,
+          properties: {
+            AnalyticsProps.orderId: order.id,
+            AnalyticsProps.valueEgp: params.total,
+            AnalyticsProps.currency: 'EGP',
+            AnalyticsProps.paymentType: params.paymentMethod.name,
+            AnalyticsProps.itemCount: params.items.length,
+          },
+        );
         return order;
       },
     );

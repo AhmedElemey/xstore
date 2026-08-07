@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/orders_remote_datasource.dart';
@@ -110,6 +112,24 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
   String? get _vendorId =>
       _user?.role == UserRole.vendor ? _user?.id : null;
 
+  void _trackOrderStatus(
+    String orderId,
+    OrderStatus status, {
+    DeliveryMethod? deliveryMethod,
+    String? reason,
+  }) {
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.orderStatusChanged,
+      properties: {
+        AnalyticsProps.orderId: orderId,
+        AnalyticsProps.status: status.name,
+        AnalyticsProps.role: 'vendor',
+        if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
+        if (reason != null) AnalyticsProps.reason: reason,
+      },
+    );
+  }
+
   Future<void> fetchOrders() async {
     final vendorId = _vendorId;
     if (vendorId == null) return;
@@ -203,6 +223,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       return false;
     }, (order) {
       _mergeOrder(order);
+      _trackOrderStatus(orderId, OrderStatus.confirmed, deliveryMethod: method);
       return true;
     });
   }
@@ -239,6 +260,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       return false;
     }, (order) {
       _mergeOrder(order);
+      _trackOrderStatus(orderId, OrderStatus.cancelled, reason: reason);
       return true;
     });
   }
@@ -254,6 +276,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       return false;
     }, (order) {
       _mergeOrder(order);
+      _trackOrderStatus(orderId, OrderStatus.processing);
       return true;
     });
   }
@@ -292,6 +315,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       return false;
     }, (order) {
       _mergeOrder(order);
+      _trackOrderStatus(orderId, OrderStatus.shipped);
       return true;
     });
   }

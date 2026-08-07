@@ -1,5 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../domain/entities/product_detail_entity.dart';
@@ -107,6 +110,16 @@ class ProductDetail extends _$ProductDetail {
     ref.onDispose(() => _disposed = true);
     final entity = await _fetchEntity(listingId);
     final merged = await _enriched(listingId, entity);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.viewItem,
+      properties: {
+        AnalyticsProps.itemId: merged.listing.id,
+        AnalyticsProps.category: merged.listing.categoryLabel,
+        AnalyticsProps.sellerId: merged.listing.vendorId,
+        AnalyticsProps.priceEgp: merged.listing.price,
+        AnalyticsProps.guest: ref.read(authProvider).valueOrNull == null,
+      },
+    );
     return _fromEntity(merged);
   }
 

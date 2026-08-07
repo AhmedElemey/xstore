@@ -4,6 +4,14 @@
 **Priority:** P0 — measurement  
 **Audience:** Product owner, mobile, backend, marketing
 
+> **2026-08-06 update:** Phase A shipped as a **custom event pipeline** (mobile client built and
+> instrumented), not Firebase-only as originally scoped below — the admin dashboard needs these
+> events directly, and Firebase's console isn't wired into `XStoreAdminDashboard`. Event names in
+> §4 below are unchanged (the client uses the same schema). Wire contract + backend to-do:
+> [`../backend/03_ANALYTICS_EVENTS_HANDOFF.md`](../backend/03_ANALYTICS_EVENTS_HANDOFF.md).
+> Firebase Analytics remains an option to enable in parallel later; it's just not the primary
+> pipeline anymore.
+
 ---
 
 ## 1. Executive summary
@@ -92,7 +100,13 @@ Use consistent names in **Firebase Analytics** (client) and optionally mirror on
 
 **Phase C (post-launch):**
 
-- Vendor-side funnel: listing live → first order
+- ~~Vendor-side funnel: listing live → first order~~ — shipped client-side 2026-08-06 alongside
+  Phase A (`listing_published`/`listing_status_changed`/`listing_resubmitted`/`listing_deleted`,
+  `order_status_changed` for every vendor+consumer order transition — see
+  [`../backend/03_ANALYTICS_EVENTS_HANDOFF.md`](../backend/03_ANALYTICS_EVENTS_HANDOFF.md)).
+  Pulled forward because it's the other half of the marketplace loop and the instrumentation
+  cost was marginal once the event pipeline existed. Dashboard visualization of it is still a
+  Phase C dashboard-side task.
 - Cohort by governorate / category
 
 ---

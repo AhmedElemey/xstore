@@ -439,7 +439,7 @@ final googleLoginUseCaseProvider =
 );
 
 typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
-String _$authHash() => r'249014da56d0e7115fcf3d70547ca22da67f2f2a';
+String _$authHash() => r'eefd6f95bbe8c1093c4ca89eeb7756d1f2ef44b4';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -469,7 +469,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'615bffbccdd82cace00bc98b4ffce4cd1be2d363';
+String _$registerNotifierHash() => r'2023417a6f1a101e8c664fa47284c633c3be32ec';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

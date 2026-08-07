@@ -14,4 +14,6 @@ abstract final class PrefsKeys {
   static const socialAuthCredentials = 'xstore_social_auth_credentials';
   static const locationPermissionRationaleShown =
       'location_permission_rationale_shown';
+  static const analyticsDeviceId = 'xstore_analytics_device_id';
+  static const analyticsQueue = 'xstore_analytics_queue';
 }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../core/analytics/analytics_service.dart';
+import '../../core/analytics/event_names.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
@@ -23,6 +25,11 @@ import '../widgets/xstore_button.dart';
 bool requireLogin(BuildContext context, WidgetRef ref, {String? message}) {
   final signedIn = ref.read(authProvider).valueOrNull != null;
   if (signedIn) return true;
+
+  // No extra properties needed: every event already carries `screenName`
+  // from router-driven screen tracking, which answers "where" — `message`
+  // here is localized UI copy, not a stable analytics dimension.
+  ref.read(analyticsServiceProvider).track(AnalyticsEvents.loginPromptShown);
 
   // Not awaited on purpose: the caller's action is aborted either way; the
   // sheet outcome only decides whether we navigate to login.

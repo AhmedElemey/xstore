@@ -110,7 +110,10 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     // social backend route ships. Google uses the Google OAuth idToken (not a
     // Firebase ID token) against the role-specific backend login endpoints.
     if (pending.provider != SocialProvider.google) {
-      await ref.read(authProvider.notifier).setUser(pending.toUserEntity(role));
+      await ref.read(authProvider.notifier).setUser(
+            pending.toUserEntity(role),
+            method: pending.provider.name,
+          );
       state = state.copyWith(
         isGoogleLoading: false,
         isAppleLoading: false,
@@ -149,7 +152,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         );
         // Session already persisted by the repository; adopt it synchronously
         // so the router moves off the role screen to home.
-        ref.read(authProvider.notifier).adoptSession(user);
+        ref.read(authProvider.notifier).adoptSession(user, method: 'google');
       },
     );
   }
@@ -196,6 +199,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     }
     await ref.read(authProvider.notifier).setUser(
           result.toUserEntity(UserRole.consumer),
+          method: result.provider.name,
         );
     state = state.copyWith(
       isGoogleLoading: false,

@@ -2,6 +2,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/error/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -77,7 +79,12 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
           reason: reason,
           isVendorSession: _isVendor,
         );
-    _finalizeMutation(result, prev);
+    _finalizeMutation(
+      result,
+      prev,
+      role: _isVendor ? 'vendor' : 'consumer',
+      reason: reason,
+    );
   }
 
   Future<void> confirmOrderVendor(DeliveryMethod method) async {
@@ -94,7 +101,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     final result = await ref
         .read(confirmOrderUseCaseProvider)
         .call(orderId: state.orderId, method: method);
-    _finalizeMutation(result, prev);
+    _finalizeMutation(result, prev, deliveryMethod: method);
   }
 
   Future<void> rejectOrder(String reason) async {
@@ -111,7 +118,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
           orderId: state.orderId,
           reason: reason,
         );
-    _finalizeMutation(result, prev);
+    _finalizeMutation(result, prev, reason: reason);
   }
 
   Future<void> markProcessing() async {
@@ -162,10 +169,16 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
     final result =
         await ref.read(markDeliveredUseCaseProvider).call(state.orderId);
-    _finalizeMutation(result, prev);
+    _finalizeMutation(result, prev, role: 'consumer');
   }
 
-  void _finalizeMutation(Either<Failure, OrderEntity> result, OrderEntity prev) {
+  void _finalizeMutation(
+    Either<Failure, OrderEntity> result,
+    OrderEntity prev, {
+    String role = 'vendor',
+    DeliveryMethod? deliveryMethod,
+    String? reason,
+  }) {
     // Every mutation awaits its use case before calling this; if the screen
     // was popped mid-request the notifier is disposed — skip the state write
     // (the orders list refetches on mount, so the missed invalidate is fine).
@@ -179,6 +192,16 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       (o) {
         state = state.copyWith(isActioning: false, order: o);
         ref.invalidate(ordersNotifierProvider);
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.orderStatusChanged,
+          properties: {
+            AnalyticsProps.orderId: state.orderId,
+            AnalyticsProps.status: o.status.name,
+            AnalyticsProps.role: role,
+            if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
+            if (reason != null) AnalyticsProps.reason: reason,
+          },
+        );
       },
     );
   }

@@ -154,7 +154,7 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
       // Session already persisted by the repository; adoptSession updates auth
       // synchronously so the router redirects to home without a storage reload.
       state = state.copyWith(isVerifyingOtp: false, isNewUser: user.isNewUser);
-      ref.read(authProvider.notifier).adoptSession(user);
+      ref.read(authProvider.notifier).adoptSession(user, method: 'otp');
       return true;
     });
   }
