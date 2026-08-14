@@ -203,10 +203,14 @@ class Checkout extends _$Checkout {
     // The order is placed either way; only skip the state write if the
     // checkout screen (and this notifier) is already gone.
     if (_disposed) return order;
+    // Cart's own notifier captures the specific failure (e.g. offline,
+    // or a stable code like phoneNotVerifiedErrorCode) in its own state —
+    // read it through rather than collapsing every failure to 'failed'.
+    final cartError = ref.read(cartProvider).error;
     state = state.copyWith(
       isPlacingOrder: false,
       placedOrderId: order?.id,
-      error: order == null ? (state.error ?? 'failed') : null,
+      error: order == null ? (cartError ?? 'failed') : null,
     );
     return order;
   }

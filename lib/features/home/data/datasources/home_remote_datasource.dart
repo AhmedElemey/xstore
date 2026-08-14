@@ -11,12 +11,28 @@ import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/deal_model.dart';
 
+/// GET /api/home aggregate — CONFIRMED route + top-level keys via live
+/// probe (2026-08-14): `{banners, newArrivals, recommendedForYou,
+/// hotDeals}`. Null fields mean the aggregate call failed or returned
+/// nothing usable; callers fall back to the existing derived approach.
+typedef HomeAggregate = ({
+  List<BannerModel> banners,
+  List<DealModel> hotDeals,
+  List<DealModel> newArrivals,
+  List<DealModel> recommendedForYou,
+});
+
 abstract interface class HomeRemoteDataSource {
   Future<List<BannerModel>> fetchBanners();
 
   Future<List<DealModel>> fetchHotDeals();
 
   Future<List<CategoryModel>> fetchCategories();
+
+  /// Fetches all four home sections in one call. Returns null on error or
+  /// when every section comes back empty, so callers can fall back to the
+  /// per-section derivation that already exists.
+  Future<HomeAggregate?> fetchHomeAggregate();
 }
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -87,9 +103,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (MockConfig.useMock) {
       return MockConfig.simulate(List<DealModel>.from(mockHotDealModels));
     }
-    // No dedicated hot-deals endpoint exists — derive deals from
-    // GET /api/listings: any listing with compareAtPrice > price is
-    // discounted; biggest discounts first.
+    final aggregate = await fetchHomeAggregate();
+    if (aggregate != null && aggregate.hotDeals.isNotEmpty) {
+      return aggregate.hotDeals.take(_hotDealsCount).toList();
+    }
+    // Fallback: no dedicated hot-deals data from /api/home — derive from
+    // GET /api/listings instead (any listing with compareAtPrice > price
+    // is discounted; biggest discounts first).
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListings,
@@ -105,6 +125,50 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     } on DioException catch (e) {
       if (_isOffline(e)) return _fallbackDeals();
       throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<HomeAggregate?> fetchHomeAggregate() async {
+    if (MockConfig.useMock) return null;
+    try {
+      final response = await _dio.get<dynamic>(
+        ApiEndpoints.home,
+        options: ApiAuthHeaders.public(),
+      );
+      final data = response.data;
+      if (data is! Map) return null;
+      final map = Map<String, dynamic>.from(data);
+      final banners = _unwrapObjectList(map['banners'])
+          .map(_bannerFromApi)
+          .whereType<BannerModel>()
+          .toList();
+      final hotDeals = _unwrapObjectList(map['hotDeals'])
+          .map(_dealFromListing)
+          .whereType<DealModel>()
+          .toList();
+      final newArrivals = _unwrapObjectList(map['newArrivals'])
+          .map(_dealFromListing)
+          .whereType<DealModel>()
+          .toList();
+      final recommended = _unwrapObjectList(map['recommendedForYou'])
+          .map(_dealFromListing)
+          .whereType<DealModel>()
+          .toList();
+      if (banners.isEmpty &&
+          hotDeals.isEmpty &&
+          newArrivals.isEmpty &&
+          recommended.isEmpty) {
+        return null;
+      }
+      return (
+        banners: banners,
+        hotDeals: hotDeals,
+        newArrivals: newArrivals,
+        recommendedForYou: recommended,
+      );
+    } on DioException {
+      return null;
     }
   }
 

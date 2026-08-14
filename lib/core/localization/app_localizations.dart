@@ -2348,6 +2348,18 @@ abstract class AppLocalizations {
   /// **'Cancel Order'**
   String get ordersCancelOrder;
 
+  /// No description provided for @ordersUpdateDeliveryLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Update delivery location'**
+  String get ordersUpdateDeliveryLocation;
+
+  /// No description provided for @ordersDeliveryLocationUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery location updated'**
+  String get ordersDeliveryLocationUpdated;
+
   /// No description provided for @ordersConfirmReceipt.
   ///
   /// In en, this message translates to:
@@ -3499,6 +3511,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not place order'**
   String get checkoutErrorGeneric;
+
+  /// No description provided for @checkoutErrorPhoneNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your phone number to place an order'**
+  String get checkoutErrorPhoneNotVerified;
 
   /// No description provided for @orderPlacedTitle.
   ///
@@ -5720,6 +5738,12 @@ abstract class AppLocalizations {
   /// **'Password must be at least 8 characters'**
   String get validationPasswordMinEight;
 
+  /// No description provided for @validationPasswordComplexity.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must include an uppercase letter, a lowercase letter, a number, and a special character'**
+  String get validationPasswordComplexity;
+
   /// No description provided for @validationPasswordsMismatch.
   ///
   /// In en, this message translates to:
@@ -5863,6 +5887,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn\'t publish your listing — the server failed to save it. Your form looks valid; this is a known issue on the live backend. Please try again later.'**
   String get listingPublishServerError;
+
+  /// No description provided for @listingErrorStoreLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your store\'s location before publishing a listing'**
+  String get listingErrorStoreLocationRequired;
+
+  /// No description provided for @setStoreLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Set location'**
+  String get setStoreLocation;
 
   /// No description provided for @egypt.
   ///

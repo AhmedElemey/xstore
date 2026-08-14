@@ -9,6 +9,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
@@ -485,6 +486,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
 
   String _listingSubmitErrorMessage(Failure failure, AppLocalizations l10n) {
     final raw = failure.toString();
+    // Passed through as the stable code, not translated here — the screen
+    // detects it to show an actionable "Set location" CTA instead of a
+    // plain Retry snackbar.
+    if (raw == storeLocationRequiredErrorCode) return raw;
     if (raw.contains('could not save your changes') ||
         raw.contains('saving the entity changes')) {
       return l10n.listingPublishServerError;

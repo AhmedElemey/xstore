@@ -8,6 +8,7 @@ import '../../features/listing/presentation/providers/listing_dependencies.dart'
 import '../../features/profile/presentation/providers/profile_provider.dart';
 import '../../features/store/presentation/providers/store_hours_provider.dart';
 import '../constants/prefs_keys.dart';
+import '../utils/app_location_cache.dart';
 import 'api_auth_headers.dart';
 import 'api_endpoints.dart';
 import 'logging_interceptor.dart';
@@ -54,6 +55,11 @@ Dio dio(DioRef ref) {
             debugPrint('X-Auth-Token: ${options.headers['X-Auth-Token']}');
           }
         }
+        // CONFIRMED (live probe, 2026-08-14): listing reads 400 without
+        // these. Best-known device fix, falling back to Cairo — see
+        // AppLocationCache.
+        options.headers['X-Latitude'] = AppLocationCache.latitude.toString();
+        options.headers['X-Longitude'] = AppLocationCache.longitude.toString();
         handler.next(options);
       },
     ),

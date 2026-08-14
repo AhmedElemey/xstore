@@ -1146,6 +1146,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersCancelOrder => 'Cancel Order';
 
   @override
+  String get ordersUpdateDeliveryLocation => 'Update delivery location';
+
+  @override
+  String get ordersDeliveryLocationUpdated => 'Delivery location updated';
+
+  @override
   String get ordersConfirmReceipt => '✓ Confirm Receipt';
 
   @override
@@ -1720,6 +1726,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkoutErrorGeneric => 'Could not place order';
+
+  @override
+  String get checkoutErrorPhoneNotVerified =>
+      'Please verify your phone number to place an order';
 
   @override
   String get orderPlacedTitle => 'Order Placed! 🎉';
@@ -2944,6 +2954,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Password must be at least 8 characters';
 
   @override
+  String get validationPasswordComplexity =>
+      'Password must include an uppercase letter, a lowercase letter, a number, and a special character';
+
+  @override
   String get validationPasswordsMismatch => 'Passwords do not match';
 
   @override
@@ -3017,6 +3031,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listingPublishServerError =>
       'We couldn\'t publish your listing — the server failed to save it. Your form looks valid; this is a known issue on the live backend. Please try again later.';
+
+  @override
+  String get listingErrorStoreLocationRequired =>
+      'Set your store\'s location before publishing a listing';
+
+  @override
+  String get setStoreLocation => 'Set location';
 
   @override
   String get egypt => 'Egypt';

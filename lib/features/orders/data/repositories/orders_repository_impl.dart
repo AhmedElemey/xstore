@@ -73,14 +73,24 @@ class OrdersRepositoryImpl implements OrdersRepository {
     required bool isVendorSession,
   }) async {
     try {
+      if (isVendorSession) {
+        // No confirmed vendor-scoped by-id route exists (only
+        // GET /orders/me/{id}, which is consumer-scoped) — find it in the
+        // vendor's own order list instead.
+        if (vendorId == null) return Left(Failure.unauthorized());
+        final rows = await _remote.getVendorOrders(
+          vendorId: vendorId,
+          page: 1,
+          pageSize: 100,
+        );
+        final row = rows.where((e) => e.id == orderId).firstOrNull;
+        if (row == null) return Left(Failure.notFound('Order'));
+        return Right(row.toEntity());
+      }
       final row = await _remote.getOrderById(orderId);
       if (row == null) return Left(Failure.notFound('Order'));
       final e = row.toEntity();
-      if (isVendorSession) {
-        if (e.vendorId != vendorId) return Left(Failure.unauthorized());
-      } else {
-        if (e.consumerId != consumerId) return Left(Failure.unauthorized());
-      }
+      if (e.consumerId != consumerId) return Left(Failure.unauthorized());
       return Right(e);
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -173,6 +183,24 @@ class OrdersRepositoryImpl implements OrdersRepository {
     try {
       final row = await _remote.markDelivered(orderId);
       return Right(row.toEntity());
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateDeliveryLocation({
+    required String orderId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      await _remote.updateDeliveryCoordinates(
+        orderId: orderId,
+        latitude: latitude,
+        longitude: longitude,
+      );
+      return const Right(unit);
     } catch (e) {
       return Left(Failure.server(e.toString()));
     }

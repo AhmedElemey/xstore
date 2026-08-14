@@ -6,6 +6,10 @@ import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/utils/app_location_cache.dart';
+import '../../../orders/data/datasources/orders_remote_datasource.dart';
+import '../../../orders/data/models/order_item_model.dart';
+import '../../../orders/data/models/order_model.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/domain/entities/order_item_entity.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -46,9 +50,10 @@ abstract interface class CartRemoteDataSource {
 }
 
 class CartRemoteDataSourceImpl implements CartRemoteDataSource {
-  CartRemoteDataSourceImpl(this._dio);
+  CartRemoteDataSourceImpl(this._dio, this._orders);
 
   final Dio _dio;
+  final OrdersRemoteDataSource _orders;
   static const _cartPath = '/cart';
 
   static final List<CartItemEntity> _items = [];
@@ -566,17 +571,56 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       _couponCodeInput = null;
       return order;
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        '/orders',
-        data: _placeOrderPayload(params),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromMap(data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to place order');
+    // CONFIRMED (Postman + live probe, 2026-08-14): the backend has no
+    // multi-item/cart checkout endpoint — POST /api/orders takes exactly
+    // one {listingId, quantity, latitude, longitude}. There is no batch
+    // variant, so checkout places one real order per distinct cart line
+    // and the confirmation screen shows a combined view built from the
+    // already-known cart context (address/payment/totals) plus whatever
+    // id/status each created order echoes back. This is a stopgap, not a
+    // true atomic multi-item order — see the production-readiness audit
+    // for why a real backend cart is the correct long-term fix.
+    if (params.items.isEmpty) {
+      throw const ServerException('Cart is empty');
     }
+    final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
+    final createdOrders = <OrderModel>[];
+    for (final item in params.items) {
+      final created = await _orders.createOrder(
+        listingId: item.listingId,
+        quantity: item.quantity,
+        latitude: AppLocationCache.latitude,
+        longitude: AppLocationCache.longitude,
+        fallbackItem: OrderItemModel(
+          id: 'oi_${item.listingId}',
+          listingId: item.listingId,
+          listingName: item.listingName,
+          listingImage: item.listingImage,
+          category: item.category,
+          condition: item.condition,
+          price: item.price,
+          quantity: item.quantity,
+          total: item.price * item.quantity,
+        ),
+        fallbackAddress: fallbackAddress,
+        fallbackPayment: params.paymentMethod,
+        notes: params.deliveryNote,
+      );
+      createdOrders.add(created);
+    }
+    // Combine the per-listing orders into one view for the confirmation
+    // screen: real id/status/createdAt from the first created order, full
+    // item list from all of them, totals from the already-known cart
+    // context (more reliable than summing unconfirmed per-order totals).
+    final first = createdOrders.first.toEntity();
+    return first.copyWith(
+      items: createdOrders.expand((o) => o.items).map((m) => m.toEntity()).toList(),
+      subtotal: params.subtotal,
+      shippingCost: params.shippingTotal,
+      discount: params.discount,
+      total: params.total,
+      notes: params.deliveryNote,
+    );
   }
 
   /// Used when adding from product — builds line from catalog.
@@ -688,123 +732,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         'shippingCost': item.shippingCost,
         'isAvailable': item.isAvailable,
       };
-
-  Map<String, dynamic> _placeOrderPayload(PlaceOrderParams params) => {
-        'consumerId': params.consumerId,
-        'deliveryAddress': {
-          'fullName': params.deliveryAddress.fullName,
-          'phone': params.deliveryAddress.phone,
-          'street': params.deliveryAddress.street,
-          'city': params.deliveryAddress.city,
-          'wilaya': params.deliveryAddress.wilaya,
-          'postalCode': params.deliveryAddress.postalCode,
-        },
-        'paymentMethod': params.paymentMethod.name,
-        'items': params.items
-            .map(
-              (e) => {
-                'listingId': e.listingId,
-                'listingName': e.listingName,
-                'listingImage': e.listingImage,
-                'category': e.category,
-                'condition': e.condition,
-                'price': e.price,
-                'quantity': e.quantity,
-                'total': e.price * e.quantity,
-              },
-            )
-            .toList(),
-        'subtotal': params.subtotal,
-        'shippingTotal': params.shippingTotal,
-        'discount': params.discount,
-        'total': params.total,
-        'deliveryNote': params.deliveryNote,
-      };
-
-  OrderEntity _orderFromMap(Map<String, dynamic> json) {
-    final address = Map<String, dynamic>.from(
-      (json['deliveryAddress'] as Map?)?.cast<String, dynamic>() ??
-          const <String, dynamic>{},
-    );
-    final items = (json['items'] as List<dynamic>? ?? const [])
-        .whereType<Map>()
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
-    final status = (json['status'] ?? '').toString().toLowerCase();
-    final payment = (json['paymentMethod'] ?? '').toString().toLowerCase();
-    return OrderEntity(
-      id: (json['id'] ?? '').toString(),
-      consumerId: (json['consumerId'] ?? '').toString(),
-      consumerName: (json['consumerName'] ?? '').toString(),
-      consumerPhone: (json['consumerPhone'] ?? '').toString(),
-      consumerAvatar: (json['consumerAvatar'] ?? '').toString(),
-      vendorId: (json['vendorId'] ?? '').toString(),
-      vendorName: (json['vendorName'] ?? '').toString(),
-      vendorStoreName: (json['vendorStoreName'] ?? '').toString(),
-      vendorAvatar: (json['vendorAvatar'] ?? '').toString(),
-      vendorRating: _num(json['vendorRating']),
-      items: items
-          .map(
-            (e) => OrderItemEntity(
-              id: (e['id'] ?? '').toString(),
-              listingId: (e['listingId'] ?? '').toString(),
-              listingName: (e['listingName'] ?? '').toString(),
-              listingImage: (e['listingImage'] ?? '').toString(),
-              category: (e['category'] ?? '').toString(),
-              condition: (e['condition'] ?? '').toString(),
-              price: _num(e['price']),
-              quantity: (e['quantity'] as num?)?.toInt() ?? 1,
-              total: _num(e['total']),
-            ),
-          )
-          .toList(),
-      status: switch (status) {
-        'confirmed' => OrderStatus.confirmed,
-        'processing' => OrderStatus.processing,
-        'shipped' => OrderStatus.shipped,
-        'delivered' => OrderStatus.delivered,
-        'cancelled' => OrderStatus.cancelled,
-        'refunded' => OrderStatus.refunded,
-        _ => OrderStatus.pending,
-      },
-      paymentMethod: switch (payment) {
-        'cibcard' => PaymentMethod.cibCard,
-        'dahabicard' => PaymentMethod.dahabiCard,
-        'baridimob' => PaymentMethod.baridimob,
-        _ => PaymentMethod.cashOnDelivery,
-      },
-      isPaid: json['isPaid'] == true,
-      deliveryAddress: OrderAddress(
-        fullName: (address['fullName'] ?? '').toString(),
-        phone: (address['phone'] ?? '').toString(),
-        street: (address['street'] ?? '').toString(),
-        city: (address['city'] ?? '').toString(),
-        wilaya: (address['wilaya'] ?? '').toString(),
-        postalCode: address['postalCode'] as String?,
-      ),
-      subtotal: _num(json['subtotal']),
-      shippingCost: _num(json['shippingCost']),
-      discount: _num(json['discount']),
-      total: _num(json['total']),
-      trackingNumber: json['trackingNumber'] as String?,
-      courierName: json['courierName'] as String?,
-      trackingLocation: json['trackingLocation'] as String?,
-      estimatedDelivery: DateTime.tryParse(
-        (json['estimatedDelivery'] ?? '').toString(),
-      ),
-      cancelReason: json['cancelReason'] as String?,
-      notes: json['notes'] as String?,
-      createdAt:
-          DateTime.tryParse((json['createdAt'] ?? '').toString()) ?? DateTime.now(),
-      updatedAt:
-          DateTime.tryParse((json['updatedAt'] ?? '').toString()) ?? DateTime.now(),
-      confirmedAt:
-          DateTime.tryParse((json['confirmedAt'] ?? '').toString()),
-      shippedAt: DateTime.tryParse((json['shippedAt'] ?? '').toString()),
-      deliveredAt: DateTime.tryParse((json['deliveredAt'] ?? '').toString()),
-      cancelledAt: DateTime.tryParse((json['cancelledAt'] ?? '').toString()),
-    );
-  }
 
   double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
 }

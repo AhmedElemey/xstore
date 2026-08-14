@@ -7,7 +7,7 @@ part of 'cart_dependencies.dart';
 // **************************************************************************
 
 String _$cartRemoteDataSourceHash() =>
-    r'1135175e7e7c71f95547e5723d5d9714d2081cc1';
+    r'fd6775b5c334df67abd2f24460acd6b75ce4b78f';
 
 /// See also [cartRemoteDataSource].
 @ProviderFor(cartRemoteDataSource)

@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/utils/location_service.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
@@ -210,6 +211,46 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     final order = state.order;
     if (order == null) return;
     await ref.read(cartProvider.notifier).reorderFromOrderItems(order.items);
+  }
+
+  /// Detects the device's current GPS location and updates it as this
+  /// order's delivery coordinates. Doesn't change any visible order field
+  /// ([OrderEntity] has nowhere to display raw lat/lng) — the caller shows
+  /// its own success/error feedback based on whether [state.error] is set.
+  Future<void> updateDeliveryLocation() async {
+    state = state.copyWith(isActioning: true, error: null);
+    try {
+      final loc = await LocationService().getCurrentLocation();
+      if (_disposed) return;
+      final result = await ref.read(updateDeliveryLocationUseCaseProvider).call(
+            orderId: state.orderId,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          );
+      if (_disposed) return;
+      result.fold(
+        (f) => state = state.copyWith(isActioning: false, error: f.toString()),
+        (_) => state = state.copyWith(isActioning: false, error: null),
+      );
+    } on XStoreLocationServiceDisabledException {
+      if (_disposed) return;
+      state = state.copyWith(
+        isActioning: false,
+        error: 'locationServiceDisabled',
+      );
+    } on XStoreLocationPermissionDeniedException {
+      if (_disposed) return;
+      state = state.copyWith(
+        isActioning: false,
+        error: 'locationPermissionDenied',
+      );
+    } on XStoreLocationPermissionPermanentlyDeniedException {
+      if (_disposed) return;
+      state = state.copyWith(
+        isActioning: false,
+        error: 'locationPermissionDenied',
+      );
+    }
   }
 
   void clearError() {

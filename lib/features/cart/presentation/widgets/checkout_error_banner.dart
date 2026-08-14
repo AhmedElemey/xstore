@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 String checkoutErrorMessage(BuildContext context, String? k) => switch (k) {
@@ -14,6 +15,7 @@ String checkoutErrorMessage(BuildContext context, String? k) => switch (k) {
       'failed' => context.l10n.checkoutErrorGeneric,
       'offline' => context.l10n.noInternet,
       'noConsumer' => context.l10n.signInPrompt,
+      phoneNotVerifiedErrorCode => context.l10n.checkoutErrorPhoneNotVerified,
       _ => context.l10n.checkoutErrorGeneric,
     };
 

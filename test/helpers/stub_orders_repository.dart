@@ -126,6 +126,14 @@ class StubOrdersRepository implements OrdersRepository {
       Left(Failure.server('stub'));
 
   @override
+  Future<Either<Failure, Unit>> updateDeliveryLocation({
+    required String orderId,
+    required double latitude,
+    required double longitude,
+  }) async =>
+      const Right(unit);
+
+  @override
   Future<Either<Failure, Unit>> registerCheckoutOrder(OrderEntity order) async =>
       const Right(unit);
 }

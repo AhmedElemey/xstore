@@ -5,6 +5,10 @@ abstract final class Validators {
   static final RegExp _emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
   static final RegExp _fullNameLetters = RegExp(r'^[a-zA-Z\s]+$');
   static final RegExp _egyptMobileLocal = RegExp(r'^01[0125]\d{8}$');
+  static final RegExp _hasUppercase = RegExp(r'[A-Z]');
+  static final RegExp _hasLowercase = RegExp(r'[a-z]');
+  static final RegExp _hasDigit = RegExp(r'[0-9]');
+  static final RegExp _hasSpecialChar = RegExp(r'[^A-Za-z0-9]');
 
   static String? loginPassword(AppLocalizations l10n, String value) {
     if (value.isEmpty) return l10n.validationLoginPasswordRequired;
@@ -49,8 +53,19 @@ abstract final class Validators {
   }
 
   /// Password rules for registration (min 8 characters).
+  /// CONFIRMED (live probe, 2026-08-14): the backend rejects passwords
+  /// without at least one uppercase, lowercase, digit, and special
+  /// character — stricter than the length-only rule this used to enforce,
+  /// which let a password through client-side that the server would then
+  /// bounce with a confusing 400 at submit time.
   static String? registerPassword(AppLocalizations l10n, String password) {
     if (password.length < 8) return l10n.validationPasswordMinEight;
+    if (!_hasUppercase.hasMatch(password) ||
+        !_hasLowercase.hasMatch(password) ||
+        !_hasDigit.hasMatch(password) ||
+        !_hasSpecialChar.hasMatch(password)) {
+      return l10n.validationPasswordComplexity;
+    }
     return null;
   }
 

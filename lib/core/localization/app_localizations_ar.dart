@@ -1147,6 +1147,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersCancelOrder => 'إلغاء الطلب';
 
   @override
+  String get ordersUpdateDeliveryLocation => 'تحديث موقع التوصيل';
+
+  @override
+  String get ordersDeliveryLocationUpdated => 'تم تحديث موقع التوصيل';
+
+  @override
   String get ordersConfirmReceipt => '✓ تأكيد الاستلام';
 
   @override
@@ -1721,6 +1727,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get checkoutErrorGeneric => 'مقدرناش نكمل الطلب';
+
+  @override
+  String get checkoutErrorPhoneNotVerified =>
+      'من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب';
 
   @override
   String get orderPlacedTitle => 'تم الطلب! 🎉';
@@ -2936,6 +2946,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'كلمة السر لازم تكون 8 أحرف على الأقل';
 
   @override
+  String get validationPasswordComplexity =>
+      'كلمة السر لازم تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص';
+
+  @override
   String get validationPasswordsMismatch => 'كلمتا السر مش متطابقتين';
 
   @override
@@ -3007,6 +3021,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get listingPublishServerError =>
       'ما قدرناش ننشر الإعلان — السيرفر فشل في الحفظ. البيانات اللي دخلتها سليمة؛ المشكلة من السيرفر حالياً. جرّب تاني بعدين.';
+
+  @override
+  String get listingErrorStoreLocationRequired =>
+      'حدد موقع متجرك الأول عشان تقدر تنشر إعلان';
+
+  @override
+  String get setStoreLocation => 'تحديد الموقع';
 
   @override
   String get egypt => 'مصر';

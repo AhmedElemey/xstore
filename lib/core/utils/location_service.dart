@@ -1,6 +1,8 @@
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
+import 'app_location_cache.dart';
+
 class LocationResult {
   const LocationResult({
     required this.latitude,
@@ -41,6 +43,8 @@ class LocationService {
         timeLimit: Duration(seconds: 15),
       ),
     );
+
+    AppLocationCache.set(position.latitude, position.longitude);
 
     try {
       final placemarks = await placemarkFromCoordinates(

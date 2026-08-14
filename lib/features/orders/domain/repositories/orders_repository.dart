@@ -59,6 +59,14 @@ abstract interface class OrdersRepository {
 
   Future<Either<Failure, OrderEntity>> markDelivered(String orderId);
 
+  /// Updates the delivery pin on an already-placed order (e.g. the consumer
+  /// re-detects their GPS location before the order ships).
+  Future<Either<Failure, Unit>> updateDeliveryLocation({
+    required String orderId,
+    required double latitude,
+    required double longitude,
+  });
+
   /// Persists a newly placed consumer order (mock checkout).
   Future<Either<Failure, Unit>> registerCheckoutOrder(OrderEntity order);
 }

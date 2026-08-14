@@ -79,6 +79,27 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   Future<Either<Failure, List<ListingEntity>>> getNewArrivals() async {
+    try {
+      final aggregate = await _remote.fetchHomeAggregate();
+      if (aggregate != null && aggregate.newArrivals.isNotEmpty) {
+        final now = DateTime.now();
+        final list = aggregate.newArrivals
+            .asMap()
+            .entries
+            .map(
+              (e) => _listingFromDeal(
+                e.value.toEntity(),
+                now.subtract(Duration(hours: e.key)),
+              ),
+            )
+            .toList();
+        return Right(list);
+      }
+    } catch (_) {
+      // Falls through to the hot-deals-derived approach below.
+    }
+    // Fallback (no dedicated data from /api/home): reuse hot deals, same
+    // as before the aggregate endpoint existed.
     final dealsResult = await getHotDeals();
     return dealsResult.fold(Left.new, (deals) {
       final now = DateTime.now();
@@ -102,6 +123,18 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   Future<Either<Failure, List<ListingEntity>>> getRecommended() async {
+    try {
+      final aggregate = await _remote.fetchHomeAggregate();
+      if (aggregate != null && aggregate.recommendedForYou.isNotEmpty) {
+        final now = DateTime.now();
+        final list = aggregate.recommendedForYou
+            .map((d) => _listingFromDeal(d.toEntity(), now))
+            .toList();
+        return Right(list);
+      }
+    } catch (_) {
+      // Falls through to the hot-deals-derived approach below.
+    }
     final dealsResult = await getHotDeals();
     return dealsResult.fold(Left.new, (deals) {
       final list =

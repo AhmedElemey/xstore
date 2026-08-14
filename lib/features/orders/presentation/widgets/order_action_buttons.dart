@@ -121,21 +121,60 @@ class OrderActionButtons extends ConsumerWidget {
     switch (order.status) {
       case OrderStatus.pending:
       case OrderStatus.confirmed:
-        return SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: busy
-                ? null
-                : () async {
-                    final r = await _cancelReason(context);
-                    if (r != null && context.mounted) {
-                      await notifier.cancelOrder(r);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton.icon(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      await notifier.updateDeliveryLocation();
                       if (!context.mounted) return;
-                      _err(context, ref, orderId);
-                    }
-                  },
-            child: Text(context.l10n.ordersCancelOrder),
-          ),
+                      final e =
+                          ref.read(orderDetailNotifierProvider(orderId)).error;
+                      if (e == 'locationServiceDisabled') {
+                        AppSnackbar.error(
+                          context,
+                          context.l10n.locationServiceDisabled,
+                        );
+                        ref
+                            .read(orderDetailNotifierProvider(orderId).notifier)
+                            .clearError();
+                      } else if (e == 'locationPermissionDenied') {
+                        AppSnackbar.error(
+                          context,
+                          context.l10n.locationPermissionDenied,
+                        );
+                        ref
+                            .read(orderDetailNotifierProvider(orderId).notifier)
+                            .clearError();
+                      } else if (e != null) {
+                        _err(context, ref, orderId);
+                      } else {
+                        AppSnackbar.success(
+                          context,
+                          context.l10n.ordersDeliveryLocationUpdated,
+                        );
+                      }
+                    },
+              icon: const Icon(Icons.my_location, size: 18),
+              label: Text(context.l10n.ordersUpdateDeliveryLocation),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            OutlinedButton(
+              onPressed: busy
+                  ? null
+                  : () async {
+                      final r = await _cancelReason(context);
+                      if (r != null && context.mounted) {
+                        await notifier.cancelOrder(r);
+                        if (!context.mounted) return;
+                        _err(context, ref, orderId);
+                      }
+                    },
+              child: Text(context.l10n.ordersCancelOrder),
+            ),
+          ],
         );
       case OrderStatus.shipped:
         return Row(

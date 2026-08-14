@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/legacy_route_options.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
@@ -25,7 +26,9 @@ abstract interface class OrdersRemoteDataSource {
     required int pageSize,
   });
 
-  /// Orders assigned to a platform courier ("Delivered by xStore").
+  /// Orders assigned to a platform courier ("Delivered by xStore"). No
+  /// confirmed route exists for this on the xStoreEcommerce backend — see
+  /// [ApiEndpoints.ordersCourier].
   Future<List<OrderModel>> getCourierOrders({
     required String courierId,
     required int page,
@@ -61,20 +64,43 @@ abstract interface class OrdersRemoteDataSource {
 
   Future<OrderModel> markDelivered(String orderId);
 
-  /// Inserts a consumer order after checkout (mock persistence).
+  /// Updates the delivery coordinates on an already-placed order. CONFIRMED
+  /// (Postman collection) route + request body — response shape was never
+  /// live-probed (no order survived long enough to reach this call), so
+  /// treated as a bodyless-success signal rather than parsed.
+  Future<void> updateDeliveryCoordinates({
+    required String orderId,
+    required double latitude,
+    required double longitude,
+  });
+
+  /// Mock-mode-only: inserts a consumer order after checkout. Live mode has
+  /// no equivalent call — [createOrder] already persists the order
+  /// server-side, so this is a no-op there (see doc on the impl).
   Future<void> registerPlacedConsumerOrder(OrderModel order);
+
+  /// Places a real single-listing order. CONFIRMED (Postman + live probe,
+  /// 2026-08-14): `POST /api/orders` takes exactly `{listingId, quantity,
+  /// latitude, longitude}` — there is no multi-item/cart endpoint. The
+  /// fallback* fields are NOT sent on the wire; they're used to build a
+  /// complete [OrderModel] for the UI from whatever the (unconfirmed-shape)
+  /// response does or doesn't echo back.
+  Future<OrderModel> createOrder({
+    required String listingId,
+    required int quantity,
+    required double latitude,
+    required double longitude,
+    required OrderItemModel fallbackItem,
+    required OrderAddressModel fallbackAddress,
+    required PaymentMethod fallbackPayment,
+    String? notes,
+  });
 }
 
 class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   OrdersRemoteDataSourceImpl(this._dio);
 
   final Dio _dio;
-
-  /// Hosted backend returns 404 for the whole legacy `/orders/*` module until
-  /// it is deployed — treat as "no data" so vendor/consumer screens show the
-  /// empty state instead of error spam.
-  static bool _isOrdersRouteMissing(DioException e) =>
-      e.response?.statusCode == 404;
 
   Options get _legacyOptions => LegacyRouteOptions.allowNotFound();
 
@@ -449,21 +475,44 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
     try {
+      // CONFIRMED (live probe): bare array, 200 (empty on a fresh account).
+      // page/pageSize aren't in the collection's example — sent
+      // defensively, with a client-side slice as a safety net either way.
       final response = await _dio.get<List<dynamic>>(
-        ApiEndpoints.ordersConsumer(consumerId),
+        ApiEndpoints.ordersMe,
         queryParameters: {'page': page, 'pageSize': pageSize},
-        options: _legacyOptions,
       );
-      if (LegacyRouteOptions.isNotFound(response)) return const [];
       final list = response.data ?? const [];
-      return list
+      final all = list
           .whereType<Map>()
           .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
           .toList();
+      return _page(all, page, pageSize);
     } on DioException catch (e) {
-      if (_isOrdersRouteMissing(e)) return const [];
-      throw ServerException(e.message ?? 'Failed to fetch consumer orders');
+      throw mapDioException(e);
     }
+  }
+
+  /// GET /vendor/orders envelope: `{orders, totalCount, pendingCount,
+  /// confirmedCount, totalRevenue, warnThresholdEgp, pauseThresholdEgp,
+  /// exceedsWarnThreshold, exceedsPauseThreshold, commissionValueOnOrder}`
+  /// — CONFIRMED via live probe (2026-08-14). Shared by [getVendorOrders]
+  /// and [getVendorOrderStats] so the stats-carrying fields aren't fetched
+  /// twice.
+  Future<Map<String, dynamic>> _fetchVendorOrdersEnvelope({
+    String? status,
+    int page = 1,
+    int pageSize = 100,
+  }) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      ApiEndpoints.vendorOrders,
+      queryParameters: {
+        if (status != null) 'status': status,
+        'page': page,
+        'pageSize': pageSize,
+      },
+    );
+    return response.data ?? const {};
   }
 
   @override
@@ -477,20 +526,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
     try {
-      final response = await _dio.get<List<dynamic>>(
-        ApiEndpoints.ordersVendor(vendorId),
-        queryParameters: {'page': page, 'pageSize': pageSize},
-        options: _legacyOptions,
+      final envelope = await _fetchVendorOrdersEnvelope(
+        page: page,
+        pageSize: pageSize,
       );
-      if (LegacyRouteOptions.isNotFound(response)) return const [];
-      final list = response.data ?? const [];
+      final list = envelope['orders'] as List<dynamic>? ?? const [];
       return list
           .whereType<Map>()
           .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
           .toList();
     } on DioException catch (e) {
-      if (_isOrdersRouteMissing(e)) return const [];
-      throw ServerException(e.message ?? 'Failed to fetch vendor orders');
+      throw mapDioException(e);
     }
   }
 
@@ -506,6 +552,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           .toList();
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
+    // No confirmed backend route — see ApiEndpoints.ordersCourier doc.
+    // Treated as "no data" (404-tolerant) rather than a hard error so the
+    // courier tab shows an empty state instead of error spam.
     try {
       final response = await _dio.get<List<dynamic>>(
         ApiEndpoints.ordersCourier(courierId),
@@ -519,8 +568,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           .map((e) => _orderFromApiMap(Map<String, dynamic>.from(e)))
           .toList();
     } on DioException catch (e) {
-      if (_isOrdersRouteMissing(e)) return const [];
-      throw ServerException(e.message ?? 'Failed to fetch courier orders');
+      if (e.response?.statusCode == 404) return const [];
+      throw mapDioException(e);
     }
   }
 
@@ -536,19 +585,20 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return MockConfig.simulate(null);
     }
     try {
+      // CONFIRMED route: GET /orders/me/{id} (consumer-scoped). Vendor
+      // order detail has no dedicated by-id route in the collection — it
+      // reads from the list fetched via getVendorOrders instead (see
+      // OrdersRepositoryImpl.getOrderDetail, which falls back to that path
+      // for vendor sessions rather than calling this method).
       final response = await _dio.get<Map<String, dynamic>>(
-        ApiEndpoints.orderById(orderId),
-        options: _legacyOptions,
+        ApiEndpoints.orderMeById(orderId),
       );
-      if (LegacyRouteOptions.isNotFound(response)) return null;
       final data = response.data;
       if (data == null) return null;
       return _orderFromApiMap(data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        return null;
-      }
-      throw ServerException(e.message ?? 'Failed to fetch order');
+      if (e.response?.statusCode == 404) return null;
+      throw mapDioException(e);
     }
   }
 
@@ -583,25 +633,25 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       );
     }
     try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        ApiEndpoints.ordersVendorStats(vendorId),
-        options: _legacyOptions,
-      );
-      if (LegacyRouteOptions.isNotFound(response)) return _emptyVendorStats;
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty vendor order stats');
-      }
+      // Small pageSize: the stats fields are present regardless of how
+      // many order rows come back, so there's no need to fetch the full
+      // list just to read them.
+      final envelope = await _fetchVendorOrdersEnvelope(pageSize: 1);
       return OrderStatsEntity(
-        pendingCount: (data['pendingCount'] as num?)?.toInt() ?? 0,
-        activeCount: (data['activeCount'] as num?)?.toInt() ?? 0,
-        monthCount: (data['monthCount'] as num?)?.toInt() ?? 0,
-        totalCount: (data['totalCount'] as num?)?.toInt() ?? 0,
-        totalRevenue: (data['totalRevenue'] as num?)?.toDouble() ?? 0,
+        pendingCount: (envelope['pendingCount'] as num?)?.toInt() ?? 0,
+        // UNCONFIRMED: no separate "processing"/"shipped" counts in the
+        // probed response — confirmedCount is the closest available proxy
+        // for "active". Revisit once the backend confirms a fuller
+        // breakdown.
+        activeCount: (envelope['confirmedCount'] as num?)?.toInt() ?? 0,
+        // UNCONFIRMED: no month-scoped count in the probed response.
+        monthCount: 0,
+        totalCount: (envelope['totalCount'] as num?)?.toInt() ?? 0,
+        totalRevenue: (envelope['totalRevenue'] as num?)?.toDouble() ?? 0,
       );
     } on DioException catch (e) {
-      if (_isOrdersRouteMissing(e)) return _emptyVendorStats;
-      throw ServerException(e.message ?? 'Failed to fetch vendor order stats');
+      if (e.response?.statusCode == 404) return _emptyVendorStats;
+      throw mapDioException(e);
     }
   }
 
@@ -636,16 +686,95 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
+    if (isVendorSession) {
+      // Vendor-side cancel goes through the same bulk status endpoint as
+      // confirm/reject — there's no vendor-specific cancel route.
+      return _setVendorOrderStatus(
+        orderId: orderId,
+        status: 'cancelled',
+        localReason: reason,
+      );
+    }
     try {
+      // CONFIRMED route: POST /orders/{id}/cancel. No documented request
+      // body — the reason is applied locally for display only.
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.orderCancel(orderId),
-        data: {'reason': reason, 'isVendorSession': isVendorSession},
       );
       final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromApiMap(data);
+      final parsed = data != null
+          ? _orderFromApiMap(data)
+          : (await getOrderById(orderId));
+      if (parsed == null) throw const ServerException('Empty order response');
+      return parsed.copyWith(
+        status: OrderStatus.cancelled,
+        cancelReason: parsed.cancelReason ?? reason,
+      );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to cancel order');
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<void> updateDeliveryCoordinates({
+    required String orderId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    if (MockConfig.useMock) {
+      await MockConfig.simulate<void>(null);
+      return;
+    }
+    try {
+      await _dio.put<void>(
+        ApiEndpoints.orderCoordinates(orderId),
+        data: {'latitude': latitude, 'longitude': longitude},
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  /// Every vendor status transition (confirm/reject/processing/shipped/
+  /// delivered/cancel) goes through this one bulk endpoint. UNCONFIRMED
+  /// beyond `"confirmed"` (the only value shown in the collection's
+  /// example body) — the other values below are the app's existing enum
+  /// names lowercased, matching that one confirmed convention. Verify
+  /// the full enum with the backend before this ships to production.
+  Future<OrderModel> _setVendorOrderStatus({
+    required String orderId,
+    required String status,
+    String? localReason,
+    DeliveryMethod? localDeliveryMethod,
+    ShippingInfo? localShippingInfo,
+  }) async {
+    try {
+      final response = await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.vendorOrdersStatus,
+        data: {
+          'orderIds': [int.tryParse(orderId) ?? orderId],
+          'status': status,
+        },
+      );
+      final data = response.data;
+      final parsedFromResponse =
+          (data != null && data['orders'] == null && data['id'] != null)
+              ? _orderFromApiMap(data)
+              : null;
+      final base = parsedFromResponse ?? await getOrderById(orderId);
+      if (base == null) throw const ServerException('Empty order response');
+      return base.copyWith(
+        status: _statusFromWire(status) ?? base.status,
+        cancelReason: localReason ?? base.cancelReason,
+        deliveryMethod: localDeliveryMethod ?? base.deliveryMethod,
+        trackingNumber:
+            localShippingInfo?.trackingNumber ?? base.trackingNumber,
+        courierName: localShippingInfo?.courierName ?? base.courierName,
+        estimatedDelivery:
+            localShippingInfo?.estimatedDelivery ?? base.estimatedDelivery,
+      );
+    } on DioException catch (e) {
+      throw mapDioException(e);
     }
   }
 
@@ -667,17 +796,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.orderConfirm(orderId),
-        data: {'deliveryMethod': method.name},
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromApiMap(data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to confirm order');
-    }
+    // UNCONFIRMED: no wire field carries self-vs-platform delivery choice
+    // on this endpoint — applied locally for display only. See the
+    // "required for production" audit: this needs a backend field.
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: 'confirmed',
+      localDeliveryMethod: method,
+    );
   }
 
   @override
@@ -698,17 +824,16 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.orderReject(orderId),
-        data: {'reason': reason},
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromApiMap(data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to reject order');
-    }
+    // UNCONFIRMED: no status value for "rejected" is documented — the
+    // collection only shows "confirmed". Using "cancelled" (a value we
+    // know the app itself sends) until the backend confirms a dedicated
+    // rejected status; the reason is applied locally regardless, since no
+    // rejection-reason field is documented on this endpoint either.
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: 'cancelled',
+      localReason: reason,
+    );
   }
 
   @override
@@ -724,16 +849,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.orderProcessing(orderId),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromApiMap(data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to mark order processing');
-    }
+    return _setVendorOrderStatus(orderId: orderId, status: 'processing');
   }
 
   @override
@@ -760,21 +876,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.orderShipped(orderId),
-        data: {
-          'trackingNumber': shippingInfo.trackingNumber,
-          'courierName': shippingInfo.courierName,
-          'estimatedDelivery': shippingInfo.estimatedDelivery?.toIso8601String(),
-        },
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromApiMap(data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to mark order shipped');
-    }
+    // UNCONFIRMED: no wire fields for tracking number/courier/ETA on this
+    // endpoint — applied locally for display only, same caveat as
+    // confirmOrder's delivery method.
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: 'shipped',
+      localShippingInfo: shippingInfo,
+    );
   }
 
   @override
@@ -791,16 +900,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.orderDelivered(orderId),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty order response');
-      return _orderFromApiMap(data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to mark order delivered');
-    }
+    return _setVendorOrderStatus(orderId: orderId, status: 'delivered');
   }
 
   @override
@@ -810,80 +910,122 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _consumerCache = [order, ..._consumerOrders];
       return;
     }
+    // No-op in live mode: CartRemoteDataSourceImpl.placeOrder already
+    // persists the order via createOrder (POST /api/orders) — calling this
+    // too would create a duplicate order. Kept only so the shared
+    // CartRepositoryImpl.placeOrder call site doesn't need a mock/live
+    // branch of its own.
+  }
+
+  @override
+  Future<OrderModel> createOrder({
+    required String listingId,
+    required int quantity,
+    required double latitude,
+    required double longitude,
+    required OrderItemModel fallbackItem,
+    required OrderAddressModel fallbackAddress,
+    required PaymentMethod fallbackPayment,
+    String? notes,
+  }) async {
     try {
-      await _dio.post<void>(
-        ApiEndpoints.ordersConsumer(order.consumerId),
-        data: _orderToApiMap(order),
+      // CONFIRMED (Postman): flat body, listingId as the backend's numeric
+      // id. Response shape is UNCONFIRMED (no example in the collection,
+      // and the probe couldn't reach a real order — the test vendor
+      // account needed admin approval before it could list a product) —
+      // parsed tolerantly with the fallback* args covering anything the
+      // response doesn't echo back.
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.orders,
+        data: {
+          'listingId': int.tryParse(listingId) ?? listingId,
+          'quantity': quantity,
+          'latitude': latitude,
+          'longitude': longitude,
+        },
+      );
+      final data = response.data;
+      if (data == null) throw const ServerException('Empty order response');
+      return _orderFromApiMap(
+        data,
+        fallbackItems: [fallbackItem],
+        fallbackAddress: fallbackAddress,
+        fallbackPayment: fallbackPayment,
+        fallbackNotes: notes,
       );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to register placed order');
+      throw mapDioException(e);
     }
   }
 
-  OrderModel _orderFromApiMap(Map<String, dynamic> data) {
-    final items = (data['items'] as List<dynamic>? ?? const [])
-        .whereType<Map>()
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
-    final address =
-        Map<String, dynamic>.from((data['deliveryAddress'] as Map?) ?? const {});
-    final statusRaw = (data['status'] ?? '').toString().toLowerCase();
-    final paymentRaw = (data['paymentMethod'] ?? '').toString().toLowerCase();
+  static const _statusWireValues = {
+    'pending': OrderStatus.pending,
+    'confirmed': OrderStatus.confirmed,
+    'processing': OrderStatus.processing,
+    'shipped': OrderStatus.shipped,
+    'delivered': OrderStatus.delivered,
+    'cancelled': OrderStatus.cancelled,
+    'rejected': OrderStatus.cancelled,
+    'refunded': OrderStatus.refunded,
+  };
+
+  OrderStatus? _statusFromWire(String raw) =>
+      _statusWireValues[raw.toLowerCase()];
+
+  /// Parses a single order object from the API. UNCONFIRMED field shape
+  /// (see the doc on [ApiEndpoints.orders]) — tolerant of both a
+  /// multi-item `items` array (in case a future contract adds one) and the
+  /// CONFIRMED single-listing create shape (`listingId`/`quantity` at the
+  /// top level), and falls back to locally-known context (the item/address/
+  /// payment method the caller already has) for anything the response
+  /// doesn't carry, rather than guessing wrong.
+  OrderModel _orderFromApiMap(
+    Map<String, dynamic> data, {
+    List<OrderItemModel>? fallbackItems,
+    OrderAddressModel? fallbackAddress,
+    PaymentMethod? fallbackPayment,
+    String? fallbackNotes,
+  }) {
+    final rawItems = data['items'] as List<dynamic>?;
+    final items = rawItems != null
+        ? rawItems
+            .whereType<Map>()
+            .map((e) => _itemFromApiMap(Map<String, dynamic>.from(e)))
+            .toList()
+        : _itemFromFlatOrder(data, fallbackItems);
+
+    final statusRaw = (data['status'] ?? '').toString();
+    final status = _statusFromWire(statusRaw) ?? OrderStatus.pending;
+
+    final computedTotal = items.fold<double>(0, (a, b) => a + b.total);
+
     return OrderModel(
-      id: (data['id'] ?? '').toString(),
-      consumerId: (data['consumerId'] ?? '').toString(),
+      id: (data['id'] ?? data['orderId'] ?? '').toString(),
+      consumerId: (data['consumerId'] ?? data['userId'] ?? '').toString(),
       consumerName: (data['consumerName'] ?? '').toString(),
       consumerPhone: (data['consumerPhone'] ?? '').toString(),
       consumerAvatar: (data['consumerAvatar'] ?? '').toString(),
-      vendorId: (data['vendorId'] ?? '').toString(),
+      vendorId: (data['vendorId'] ?? data['storeId'] ?? '').toString(),
       vendorName: (data['vendorName'] ?? '').toString(),
-      vendorStoreName: (data['vendorStoreName'] ?? '').toString(),
+      vendorStoreName: (data['vendorStoreName'] ?? data['storeName'] ?? '').toString(),
       vendorAvatar: (data['vendorAvatar'] ?? '').toString(),
       vendorRating: (data['vendorRating'] as num?)?.toDouble() ?? 4.8,
-      items: items
-          .map(
-            (e) => OrderItemModel(
-              id: (e['id'] ?? '').toString(),
-              listingId: (e['listingId'] ?? '').toString(),
-              listingName: (e['listingName'] ?? '').toString(),
-              listingImage: (e['listingImage'] ?? '').toString(),
-              category: (e['category'] ?? '').toString(),
-              condition: (e['condition'] ?? '').toString(),
-              price: (e['price'] as num?)?.toDouble() ?? 0,
-              quantity: (e['quantity'] as num?)?.toInt() ?? 1,
-              total: (e['total'] as num?)?.toDouble() ?? 0,
-            ),
-          )
-          .toList(),
-      status: switch (statusRaw) {
-        'confirmed' => OrderStatus.confirmed,
-        'processing' => OrderStatus.processing,
-        'shipped' => OrderStatus.shipped,
-        'delivered' => OrderStatus.delivered,
-        'cancelled' => OrderStatus.cancelled,
-        'refunded' => OrderStatus.refunded,
-        _ => OrderStatus.pending,
-      },
-      paymentMethod: switch (paymentRaw) {
-        'cibcard' => PaymentMethod.cibCard,
-        'dahabicard' => PaymentMethod.dahabiCard,
-        'baridimob' => PaymentMethod.baridimob,
-        _ => PaymentMethod.cashOnDelivery,
-      },
+      items: items,
+      status: status,
+      paymentMethod: fallbackPayment ?? PaymentMethod.cashOnDelivery,
       isPaid: data['isPaid'] == true,
-      deliveryAddress: OrderAddressModel(
-        fullName: (address['fullName'] ?? '').toString(),
-        phone: (address['phone'] ?? '').toString(),
-        street: (address['street'] ?? '').toString(),
-        city: (address['city'] ?? '').toString(),
-        wilaya: (address['wilaya'] ?? '').toString(),
-        postalCode: address['postalCode'] as String?,
-        isDefault: address['isDefault'] == true,
-      ),
-      subtotal: (data['subtotal'] as num?)?.toDouble() ?? 0,
+      deliveryAddress: fallbackAddress ??
+          OrderAddressModel(
+            fullName: (data['consumerName'] ?? '').toString(),
+            phone: (data['consumerPhone'] ?? '').toString(),
+            street: '',
+            city: '',
+            wilaya: '',
+          ),
+      subtotal: (data['subtotal'] as num?)?.toDouble() ?? computedTotal,
       shippingCost: (data['shippingCost'] as num?)?.toDouble() ?? 0,
       discount: (data['discount'] as num?)?.toDouble() ?? 0,
-      total: (data['total'] as num?)?.toDouble() ?? 0,
+      total: (data['total'] as num?)?.toDouble() ?? computedTotal,
       trackingNumber: data['trackingNumber'] as String?,
       deliveryMethod: switch ((data['deliveryMethod'] ?? '').toString().toLowerCase()) {
         'self' => DeliveryMethod.self,
@@ -897,7 +1039,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         (data['estimatedDelivery'] ?? '').toString(),
       ),
       cancelReason: data['cancelReason'] as String?,
-      notes: data['notes'] as String?,
+      notes: (data['notes'] as String?) ?? fallbackNotes,
       createdAt:
           DateTime.tryParse((data['createdAt'] ?? '').toString()) ?? DateTime.now(),
       updatedAt:
@@ -910,61 +1052,46 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     );
   }
 
-  Map<String, dynamic> _orderToApiMap(OrderModel order) => {
-        'id': order.id,
-        'consumerId': order.consumerId,
-        'consumerName': order.consumerName,
-        'consumerPhone': order.consumerPhone,
-        'consumerAvatar': order.consumerAvatar,
-        'vendorId': order.vendorId,
-        'vendorName': order.vendorName,
-        'vendorStoreName': order.vendorStoreName,
-        'vendorAvatar': order.vendorAvatar,
-        'vendorRating': order.vendorRating,
-        'items': order.items
-            .map(
-              (e) => {
-                'id': e.id,
-                'listingId': e.listingId,
-                'listingName': e.listingName,
-                'listingImage': e.listingImage,
-                'category': e.category,
-                'condition': e.condition,
-                'price': e.price,
-                'quantity': e.quantity,
-                'total': e.total,
-              },
-            )
-            .toList(),
-        'status': order.status.name,
-        'paymentMethod': order.paymentMethod.name,
-        'isPaid': order.isPaid,
-        'deliveryAddress': {
-          'fullName': order.deliveryAddress.fullName,
-          'phone': order.deliveryAddress.phone,
-          'street': order.deliveryAddress.street,
-          'city': order.deliveryAddress.city,
-          'wilaya': order.deliveryAddress.wilaya,
-          'postalCode': order.deliveryAddress.postalCode,
-          'isDefault': order.deliveryAddress.isDefault,
-        },
-        'subtotal': order.subtotal,
-        'shippingCost': order.shippingCost,
-        'discount': order.discount,
-        'total': order.total,
-        'trackingNumber': order.trackingNumber,
-        'deliveryMethod': order.deliveryMethod?.name,
-        'courierId': order.courierId,
-        'courierName': order.courierName,
-        'trackingLocation': order.trackingLocation,
-        'estimatedDelivery': order.estimatedDelivery?.toIso8601String(),
-        'cancelReason': order.cancelReason,
-        'notes': order.notes,
-        'createdAt': order.createdAt.toIso8601String(),
-        'updatedAt': order.updatedAt.toIso8601String(),
-        'confirmedAt': order.confirmedAt?.toIso8601String(),
-        'shippedAt': order.shippedAt?.toIso8601String(),
-        'deliveredAt': order.deliveredAt?.toIso8601String(),
-        'cancelledAt': order.cancelledAt?.toIso8601String(),
-      };
+  OrderItemModel _itemFromApiMap(Map<String, dynamic> e) => OrderItemModel(
+        id: (e['id'] ?? '').toString(),
+        listingId: (e['listingId'] ?? '').toString(),
+        listingName: (e['listingName'] ?? e['title'] ?? '').toString(),
+        listingImage: (e['listingImage'] ?? e['imageUrl'] ?? '').toString(),
+        category: (e['category'] ?? '').toString(),
+        condition: (e['condition'] ?? '').toString(),
+        price: (e['price'] as num?)?.toDouble() ?? 0,
+        quantity: (e['quantity'] as num?)?.toInt() ?? 1,
+        total: (e['total'] as num?)?.toDouble() ??
+            (((e['price'] as num?)?.toDouble() ?? 0) *
+                ((e['quantity'] as num?)?.toInt() ?? 1)),
+      );
+
+  /// Builds a single synthetic line item from a flat (non-`items`) order
+  /// object — the CONFIRMED single-listing create shape only has
+  /// `listingId`/`quantity` at the top level, not a nested list.
+  List<OrderItemModel> _itemFromFlatOrder(
+    Map<String, dynamic> data,
+    List<OrderItemModel>? fallbackItems,
+  ) {
+    final listingId = data['listingId'];
+    if (listingId == null) {
+      return fallbackItems ?? const [];
+    }
+    final fallback = fallbackItems?.isNotEmpty == true ? fallbackItems!.first : null;
+    final quantity = (data['quantity'] as num?)?.toInt() ?? fallback?.quantity ?? 1;
+    final price = (data['price'] as num?)?.toDouble() ?? fallback?.price ?? 0;
+    return [
+      OrderItemModel(
+        id: fallback?.id ?? 'line_${data['id'] ?? listingId}',
+        listingId: listingId.toString(),
+        listingName: (data['listingName'] ?? fallback?.listingName ?? '').toString(),
+        listingImage: (data['listingImage'] ?? fallback?.listingImage ?? '').toString(),
+        category: fallback?.category ?? '',
+        condition: fallback?.condition ?? '',
+        price: price,
+        quantity: quantity,
+        total: (data['total'] as num?)?.toDouble() ?? price * quantity,
+      ),
+    ];
+  }
 }

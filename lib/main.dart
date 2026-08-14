@@ -12,6 +12,7 @@ import 'core/config/app_flavor.dart';
 import 'core/firebase/fcm_push_setup.dart';
 import 'core/firebase/fcm_token.dart';
 import 'core/firebase/firebase_options.dart';
+import 'core/utils/app_location_cache.dart';
 
 /// Shared startup used by all flavor entry points.
 Future<void> bootstrap(AppFlavor flavor) async {
@@ -35,6 +36,10 @@ Future<void> bootstrap(AppFlavor flavor) async {
     await requestFcmNotificationPermission();
     await refreshAndStoreFcmToken();
   }());
+  // Every API request needs X-Latitude/X-Longitude (see AppLocationCache) —
+  // prime from the OS's last-known fix so the very first request already
+  // has a real location instead of the Cairo fallback, when available.
+  unawaited(AppLocationCache.primeFromLastKnown());
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

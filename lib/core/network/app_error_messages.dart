@@ -6,6 +6,16 @@ import 'connectivity_provider.dart';
 /// Stable error key stored in provider state; map to l10n in [resolveAppError].
 const rateLimitErrorCode = 'rateLimitExceeded';
 
+/// CONFIRMED (live probe, 2026-08-14): `POST /api/orders` 400s with this
+/// case for a consumer who hasn't verified their phone number yet.
+const phoneNotVerifiedErrorCode = 'phoneNotVerified';
+
+/// CONFIRMED (live probe, 2026-08-14): `POST /api/listings` 403s with this
+/// case when the vendor's store has no saved lat/lng — register only
+/// collects city/governorate dropdowns, so every vendor hits this on their
+/// first listing until they complete a location step.
+const storeLocationRequiredErrorCode = 'storeLocationRequired';
+
 /// Maps internal error codes (e.g. offline) to user-facing l10n strings.
 String resolveAppError(BuildContext context, String? error) {
   if (isOfflineError(error)) return context.l10n.noInternet;

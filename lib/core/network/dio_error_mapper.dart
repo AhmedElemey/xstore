@@ -21,12 +21,28 @@ AppException mapDioException(DioException e) {
       final code = e.response?.statusCode;
       final serverMessage = _serverErrorMessage(e.response?.data);
       if (code == 401 || code == 403) {
+        // CONFIRMED (live probe, 2026-08-14): POST /api/listings 403s with
+        // this exact text when the vendor's store has no saved lat/lng —
+        // a distinct, actionable case (route to the location step) rather
+        // than a generic "unauthorized".
+        if (serverMessage != null &&
+            serverMessage.toLowerCase().contains('store location')) {
+          return const ServerException(storeLocationRequiredErrorCode);
+        }
         return UnauthorizedException(serverMessage ?? e.message);
       }
       if (code == 429) {
         return const ServerException(rateLimitErrorCode);
       }
       if (code == 400 || code == 422) {
+        // CONFIRMED (live probe, 2026-08-14): POST /api/orders 400s with
+        // this exact text for a consumer who hasn't verified their phone —
+        // a distinct, actionable case the app should route to phone
+        // verification rather than show as a generic failure.
+        if (serverMessage != null &&
+            serverMessage.toLowerCase().contains('verify your phone')) {
+          return const ServerException(phoneNotVerifiedErrorCode);
+        }
         final message =
             _validationMessage(e.response?.data) ?? serverMessage;
         if (message != null) return ServerException(message);
@@ -38,10 +54,14 @@ AppException mapDioException(DioException e) {
 }
 
 /// Reads a human-readable message from common xStore API error bodies:
-/// `{"error": "..."}`, `{"message": "..."}`, or
-/// `{"error": {"message": "..."}}`.
+/// `{"error": "..."}`, `{"message": "..."}`, `{"error": {"message": "..."}}`,
+/// or the CONFIRMED (live probe, 2026-08-14) envelope
+/// `{"isSuccess": false, "data": null, "errorEn": "...", "errorAr": "..."}`.
+/// `errorEn` is checked first since the mapper has no locale context here.
 String? _serverErrorMessage(Object? data) {
   if (data is! Map) return null;
+  final errorEn = data['errorEn'];
+  if (errorEn is String && errorEn.isNotEmpty) return errorEn;
   final error = data['error'];
   if (error is String && error.isNotEmpty) return error;
   if (error is Map) {
@@ -50,6 +70,8 @@ String? _serverErrorMessage(Object? data) {
   }
   final message = data['message'];
   if (message is String && message.isNotEmpty) return message;
+  final errorAr = data['errorAr'];
+  if (errorAr is String && errorAr.isNotEmpty) return errorAr;
   return null;
 }
 

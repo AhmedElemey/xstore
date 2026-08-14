@@ -34,8 +34,16 @@ void main() {
       expect(Validators.registerPassword(l10n, '1234567'), isNotNull);
     });
 
-    test('ok at 8', () {
-      expect(Validators.registerPassword(l10n, '12345678'), isNull);
+    test('missing complexity (digits only) is rejected', () {
+      expect(Validators.registerPassword(l10n, '12345678'), isNotNull);
+    });
+
+    test('missing special character is rejected', () {
+      expect(Validators.registerPassword(l10n, 'Passw0rd'), isNotNull);
+    });
+
+    test('meets length + uppercase + lowercase + digit + special char', () {
+      expect(Validators.registerPassword(l10n, 'Passw0rd!'), isNull);
     });
   });
 

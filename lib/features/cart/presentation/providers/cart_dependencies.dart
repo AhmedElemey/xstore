@@ -19,7 +19,10 @@ part 'cart_dependencies.g.dart';
 
 @Riverpod(keepAlive: true)
 CartRemoteDataSource cartRemoteDataSource(CartRemoteDataSourceRef ref) {
-  return CartRemoteDataSourceImpl(ref.watch(dioProvider));
+  return CartRemoteDataSourceImpl(
+    ref.watch(dioProvider),
+    ref.watch(ordersRemoteDataSourceProvider),
+  );
 }
 
 @Riverpod(keepAlive: true)

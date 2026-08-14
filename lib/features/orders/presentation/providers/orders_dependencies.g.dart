@@ -231,5 +231,23 @@ final markDeliveredUseCaseProvider =
 );
 
 typedef MarkDeliveredUseCaseRef = AutoDisposeProviderRef<MarkDeliveredUseCase>;
+String _$updateDeliveryLocationUseCaseHash() =>
+    r'e88f003bc7fa9b810a05a270ac616a2405bdf54e';
+
+/// See also [updateDeliveryLocationUseCase].
+@ProviderFor(updateDeliveryLocationUseCase)
+final updateDeliveryLocationUseCaseProvider =
+    AutoDisposeProvider<UpdateDeliveryLocationUseCase>.internal(
+  updateDeliveryLocationUseCase,
+  name: r'updateDeliveryLocationUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$updateDeliveryLocationUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef UpdateDeliveryLocationUseCaseRef
+    = AutoDisposeProviderRef<UpdateDeliveryLocationUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

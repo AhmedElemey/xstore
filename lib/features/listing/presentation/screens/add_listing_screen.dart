@@ -9,6 +9,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
@@ -170,6 +171,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       return;
     }
     final err = ref.read(listingFormNotifierProvider).errors['submit'];
+    if (err == storeLocationRequiredErrorCode) {
+      AppSnackbar.show(
+        context,
+        message: context.l10n.listingErrorStoreLocationRequired,
+        backgroundColor: AppColors.error,
+        action: SnackBarAction(
+          label: context.l10n.setStoreLocation,
+          textColor: AppColors.white,
+          onPressed: () => context.push(AppRoutes.profileEdit),
+        ),
+      );
+      return;
+    }
     if (err != null) {
       AppSnackbar.show(
         context,

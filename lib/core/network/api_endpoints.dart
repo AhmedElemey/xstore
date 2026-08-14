@@ -150,23 +150,45 @@ abstract final class ApiEndpoints {
   // closer semantic match for a listing the vendor wants gone for good.
   static String apiListingCancel(String id) => '$apiListings/$id/cancel';
 
-  // Orders (CONFIRMED — xStoreEcommerce PR "Add Orders backend": create,
-  // confirm/reject/cancel, ship/deliver, plus admin courier assignment).
+  // Orders. CONFIRMED (Postman collection + live probe, 2026-08-14): the
+  // backend model is ONE listing per order (POST body is
+  // {listingId, quantity, latitude, longitude}) — there is no multi-item
+  // cart/checkout endpoint anywhere on this backend. Vendor status changes
+  // are a single bulk endpoint ({orderIds:[...], status: "..."}), not the
+  // separate confirm/reject/processing/shipped/delivered routes the app
+  // used to assume — none of those exist. Live-probed response shapes:
+  // GET /orders/me -> bare array (confirmed empty-array response).
+  // GET /vendor/orders -> {orders:[...], totalCount, pendingCount,
+  // confirmedCount, totalRevenue, warnThresholdEgp, pauseThresholdEgp,
+  // exceedsWarnThreshold, exceedsPauseThreshold, commissionValueOnOrder} —
+  // vendor stats are embedded here, no separate stats endpoint exists.
+  // UNCONFIRMED: the field shape of a single order object (no example
+  // response in the collection, and the probe couldn't reach real order
+  // data — the test vendor account needed admin approval to list a
+  // product). Parsed tolerantly in OrdersRemoteDataSource; verify against
+  // a real order payload before shipping this to production.
   static const String orders = '$_api/orders';
-  static String ordersConsumer(String consumerId) =>
-      '$orders/consumer/$consumerId';
-  static String ordersVendor(String vendorId) => '$orders/vendor/$vendorId';
+  static const String ordersMe = '$orders/me';
+  static String orderMeById(String orderId) => '$ordersMe/$orderId';
+  static String orderCoordinates(String orderId) => '$orders/$orderId';
+  static String orderCancel(String orderId) => '$orders/$orderId/cancel';
+  static const String vendorOrders = '$_api/vendor/orders';
+  static const String vendorOrdersStatus = '$vendorOrders/status';
+
+  // No confirmed route exists for "orders assigned to a platform courier"
+  // on this backend — courier fulfillment lives entirely on the separate
+  // delivery-backend microservice (see DeliveryRequestRemoteDataSource).
+  // Kept 404-tolerant until/unless the business confirms this belongs here.
   static String ordersCourier(String courierId) =>
       '$orders/courier/$courierId';
-  static String ordersVendorStats(String vendorId) =>
-      '$orders/vendor/$vendorId/stats';
-  static String orderById(String orderId) => '$orders/$orderId';
-  static String orderCancel(String orderId) => '$orders/$orderId/cancel';
-  static String orderConfirm(String orderId) => '$orders/$orderId/confirm';
-  static String orderReject(String orderId) => '$orders/$orderId/reject';
-  static String orderProcessing(String orderId) => '$orders/$orderId/processing';
-  static String orderShipped(String orderId) => '$orders/$orderId/shipped';
-  static String orderDelivered(String orderId) => '$orders/$orderId/delivered';
+
+  // Home aggregate. CONFIRMED route + top-level keys via live probe
+  // (2026-08-14): {"banners": [], "newArrivals": [], "recommendedForYou":
+  // [], "hotDeals": []} — returned genuinely empty on the probed instance
+  // (unseeded catalog), so per-item field shape is unconfirmed; assumed to
+  // match GET /api/listings / /api/banners item shapes, which the app
+  // already parses tolerantly.
+  static const String home = '$_api/home';
 
   // ---------------------------------------------------------------------
   // Analytics — PROPOSED, not yet built on the backend. Contract spec for

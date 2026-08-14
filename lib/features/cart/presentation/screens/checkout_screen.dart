@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/widgets/phone_verification_sheet.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
@@ -36,6 +38,16 @@ class CheckoutScreen extends ConsumerWidget {
       if (order == null) {
         final ck = ref.read(checkoutProvider);
         final c = ref.read(cartProvider);
+        final errorCode = ck.error ?? c.error;
+        if (errorCode == phoneNotVerifiedErrorCode) {
+          final phone = ref.read(authProvider).valueOrNull?.phoneNumber ?? '';
+          final verified = await verifyPhoneNow(context, ref, phone);
+          if (!context.mounted) return;
+          if (verified) {
+            await onPrimary();
+          }
+          return;
+        }
         final msg = ck.error != null
             ? checkoutErrorMessage(context, ck.error)
             : resolveAppError(context, c.error);

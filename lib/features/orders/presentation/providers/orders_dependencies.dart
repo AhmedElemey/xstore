@@ -15,6 +15,7 @@ import '../../domain/usecases/mark_delivered_usecase.dart';
 import '../../domain/usecases/mark_processing_usecase.dart';
 import '../../domain/usecases/mark_shipped_usecase.dart';
 import '../../domain/usecases/reject_order_usecase.dart';
+import '../../domain/usecases/update_delivery_location_usecase.dart';
 
 part 'orders_dependencies.g.dart';
 
@@ -87,4 +88,11 @@ MarkShippedUseCase markShippedUseCase(MarkShippedUseCaseRef ref) {
 @riverpod
 MarkDeliveredUseCase markDeliveredUseCase(MarkDeliveredUseCaseRef ref) {
   return MarkDeliveredUseCase(ref.watch(ordersRepositoryProvider));
+}
+
+@riverpod
+UpdateDeliveryLocationUseCase updateDeliveryLocationUseCase(
+  UpdateDeliveryLocationUseCaseRef ref,
+) {
+  return UpdateDeliveryLocationUseCase(ref.watch(ordersRepositoryProvider));
 }

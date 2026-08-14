@@ -59,7 +59,7 @@ typedef GetGovernmentsUseCaseRef
     = AutoDisposeProviderRef<GetGovernmentsUseCase>;
 String _$allGovernmentsHash() => r'44b57b4bda1d8c96d659f375412160bb627b672f';
 
-/// Full government (governorate) list for dropdowns.
+/// Full governorate list for dropdowns.
 ///
 /// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
 /// the values are cached for the app session (re-entering the register/store
