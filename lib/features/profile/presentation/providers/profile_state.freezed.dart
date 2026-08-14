@@ -36,9 +36,8 @@ mixin _$ProfileState {
   String get editStoreDescriptionAr => throw _privateConstructorUsedError;
   String get editStoreCity => throw _privateConstructorUsedError;
   String get editStoreWilaya =>
-      throw _privateConstructorUsedError; // Governorate (backend cityId) + city/district (backend governmentId) pair,
-// captured via the location cascade. See LocationCascadeField for the
-// inverted-naming note.
+      throw _privateConstructorUsedError; // City (`cityId`) + governorate (`governmentId`) pair from the location
+// cascade. See LocationCascadeField.
   int? get editStoreCityId => throw _privateConstructorUsedError;
   int? get editStoreGovernmentId => throw _privateConstructorUsedError;
   String get editWhatsapp => throw _privateConstructorUsedError;
@@ -707,9 +706,8 @@ class _$ProfileStateImpl implements _ProfileState {
   @override
   @JsonKey()
   final String editStoreWilaya;
-// Governorate (backend cityId) + city/district (backend governmentId) pair,
-// captured via the location cascade. See LocationCascadeField for the
-// inverted-naming note.
+// City (`cityId`) + governorate (`governmentId`) pair from the location
+// cascade. See LocationCascadeField.
   @override
   final int? editStoreCityId;
   @override
@@ -991,9 +989,8 @@ abstract class _ProfileState implements ProfileState {
   String get editStoreCity;
   @override
   String get editStoreWilaya;
-  @override // Governorate (backend cityId) + city/district (backend governmentId) pair,
-// captured via the location cascade. See LocationCascadeField for the
-// inverted-naming note.
+  @override // City (`cityId`) + governorate (`governmentId`) pair from the location
+// cascade. See LocationCascadeField.
   int? get editStoreCityId;
   @override
   int? get editStoreGovernmentId;

@@ -470,7 +470,7 @@ class RegisterNotifier extends _$RegisterNotifier {
     state = next.copyWith(stepErrors: {}, error: null);
   }
 
-  /// Sets the governorate (`storeCityId`) + city (`storeGovernmentId`) pair from
+  /// Sets the city (`storeCityId`) + governorate (`storeGovernmentId`) pair from
   /// the location cascade. Unlike [updateField], this assigns both explicitly so
   /// changing the governorate can clear the dependent city (passing null).
   void updateStoreLocation({int? storeCityId, int? storeGovernmentId}) {

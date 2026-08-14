@@ -394,7 +394,7 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
   }
 
-  /// Sets the governorate (`cityId`) + city (`governmentId`) pair from the
+  /// Sets the city (`cityId`) + governorate (`governmentId`) pair from the
   /// location cascade; both are assigned explicitly so a governorate change can
   /// clear the dependent city (null).
   void updateStoreLocation(int? cityId, int? governmentId) {

@@ -18,6 +18,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8790", "--directory", "docs_business/admin-dashboard/src"],
       "port": 8790
+    },
+    {
+      "name": "xstore-marketing-site",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/ahmedtaha/xstore-website-standalone && npm run dev -- --port 3100"],
+      "port": 3100
     }
   ]
 }

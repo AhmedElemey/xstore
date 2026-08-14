@@ -4,9 +4,12 @@ import '../../../../core/localization/localized_text.dart';
 
 part 'government_entity.freezed.dart';
 
-/// NOTE: per the API spec, POST/PUT bodies are `{nameEn, nameAr, cityId}` —
-/// a government belongs to a city. This inverts Egypt's usual real-world
-/// hierarchy (Government -> City) — worth confirming with the backend dev.
+/// Top-level Egyptian governorate from `/api/governorates`.
+///
+/// Live GET payloads are `{id, nameEn, nameAr}` only. Older docs linked a
+/// government *down* to a city via `cityId`; that link is gone — cities now
+/// point *up* via `CityEntity.governorateId`. [cityId] is kept for tolerant
+/// parsing of any leftover payloads.
 @freezed
 class GovernmentEntity with _$GovernmentEntity {
   const factory GovernmentEntity({

@@ -15,12 +15,10 @@ import '../../features/governments/presentation/providers/government_dependencie
 /// Single form field that captures a governorate + city pair through a
 /// two-step popup cascade, used in both register and edit-profile.
 ///
-/// Backend naming is inverted vs. Egypt's real-world hierarchy: the `cities`
-/// endpoint holds the top-level governorates (Cairo, Alexandria) and the
-/// `governments` endpoint holds the districts within a city (Nasr City, Maadi)
-/// via `Government.cityId`. So [cityId] is the governorate (popup 1) and
-/// [governmentId] is the city/district (popup 2), filtered by the chosen
-/// governorate. See the note on [GovernmentEntity].
+/// Live hierarchy (confirmed 2026-08-11): `/api/governorates` holds the
+/// top-level governorates; `/api/cities` holds cities linked upward via
+/// `governorateId`. So [governmentId] is the governorate (popup 1) and
+/// [cityId] is the city (popup 2), filtered by the chosen governorate.
 class LocationCascadeField extends ConsumerWidget {
   const LocationCascadeField({
     super.key,
@@ -30,10 +28,10 @@ class LocationCascadeField extends ConsumerWidget {
     this.errorText,
   });
 
-  /// Selected governorate id (backend `cities`).
+  /// Selected city id (backend `cities`).
   final int? cityId;
 
-  /// Selected city/district id (backend `governments`).
+  /// Selected governorate id (backend `governorates`).
   final int? governmentId;
 
   /// Fires with the full pair whenever the selection changes. The city is
@@ -60,10 +58,11 @@ class LocationCascadeField extends ConsumerWidget {
     final governments = ref.watch(allGovernmentsProvider).valueOrNull;
 
     final governorate =
+        _byId<GovernmentEntity>(governments, governmentId, (e) => e.id)
+            ?.name
+            .resolve(isArabic);
+    final city =
         _byId<CityEntity>(cities, cityId, (e) => e.id)?.name.resolve(isArabic);
-    final city = _byId<GovernmentEntity>(governments, governmentId, (e) => e.id)
-        ?.name
-        .resolve(isArabic);
 
     final display = switch ((governorate, city)) {
       (final g?, final c?) => '$g — $c',
@@ -100,28 +99,28 @@ class LocationCascadeField extends ConsumerWidget {
   }
 
   Future<void> _openCascade(BuildContext context, bool isArabic) async {
-    // Step 1 — governorate (backend city).
-    final pickedGovernorate = await _showLookupSheet<CityEntity>(
+    // Step 1 — governorate (backend `/api/governorates`).
+    final pickedGovernorate = await _showLookupSheet<GovernmentEntity>(
       context: context,
       title: context.l10n.selectGovernorate,
-      provider: allCitiesProvider,
+      provider: allGovernmentsProvider,
       filter: (all) => all,
       idOf: (e) => e.id,
       labelOf: (e) => e.name.resolve(isArabic),
-      selectedId: cityId,
+      selectedId: governmentId,
     );
     if (pickedGovernorate == null || !context.mounted) return;
 
     // Keep the current city only when the governorate is unchanged.
-    final priorCity = pickedGovernorate == cityId ? governmentId : null;
+    final priorCity = pickedGovernorate == governmentId ? cityId : null;
 
-    // Step 2 — city/district (backend government) within that governorate.
-    final pickedCity = await _showLookupSheet<GovernmentEntity>(
+    // Step 2 — city within that governorate (backend `/api/cities`).
+    final pickedCity = await _showLookupSheet<CityEntity>(
       context: context,
       title: context.l10n.selectCityLabel,
-      provider: allGovernmentsProvider,
+      provider: allCitiesProvider,
       filter: (all) =>
-          all.where((g) => g.cityId == pickedGovernorate).toList(),
+          all.where((c) => c.governorateId == pickedGovernorate).toList(),
       idOf: (e) => e.id,
       labelOf: (e) => e.name.resolve(isArabic),
       selectedId: priorCity,
@@ -130,7 +129,7 @@ class LocationCascadeField extends ConsumerWidget {
 
     // Governorate is committed regardless; city may be null if step 2 was
     // dismissed (form validation flags the incomplete pair).
-    onChanged(pickedGovernorate, pickedCity);
+    onChanged(pickedCity, pickedGovernorate);
   }
 
   /// Bottom-sheet single-select over a cached reference list. Returns the

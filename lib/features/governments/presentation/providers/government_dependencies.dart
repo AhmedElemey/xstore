@@ -26,7 +26,7 @@ GetGovernmentsUseCase getGovernmentsUseCase(GetGovernmentsUseCaseRef ref) {
   return GetGovernmentsUseCase(ref.watch(governmentRepositoryProvider));
 }
 
-/// Full government (governorate) list for dropdowns.
+/// Full governorate list for dropdowns.
 ///
 /// Stays autoDispose but pins the *successful* result via [Ref.keepAlive] so
 /// the values are cached for the app session (re-entering the register/store

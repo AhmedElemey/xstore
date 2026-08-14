@@ -185,10 +185,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'phoneNumber': params.phoneNumber,
           'password': params.password,
           'confirmPassword': params.confirmPassword,
-          // Single user location (governorate=cityId, city=governmentId). NOTE:
-          // key names unconfirmed against the live consumer-register model —
-          // unbound extra fields are ignored by the backend, so this is safe;
-          // verify they persist once the contract is confirmed.
+          // Single user location (cityId = city, governmentId = governorate).
+          // NOTE: key names unconfirmed against the live consumer-register
+          // model — unbound extra fields are ignored by the backend, so this
+          // is safe; verify they persist once the contract is confirmed.
           'cityId': params.cityId,
           'governmentId': params.governmentId,
           // A birth DATE — send `YYYY-MM-DD` (every backend example uses that),

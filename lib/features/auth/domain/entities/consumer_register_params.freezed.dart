@@ -22,8 +22,8 @@ mixin _$ConsumerRegisterParams {
   String get phoneNumber => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
   String get confirmPassword =>
-      throw _privateConstructorUsedError; // Single user location captured by the register step-2 cascade. See
-// LocationCascadeField for the inverted city/government naming.
+      throw _privateConstructorUsedError; // Single user location from the register step-2 cascade
+// (cityId = city, governmentId = governorate).
   int get cityId => throw _privateConstructorUsedError;
   int get governmentId => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
@@ -227,8 +227,8 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
   final String password;
   @override
   final String confirmPassword;
-// Single user location captured by the register step-2 cascade. See
-// LocationCascadeField for the inverted city/government naming.
+// Single user location from the register step-2 cascade
+// (cityId = city, governmentId = governorate).
   @override
   final int cityId;
   @override
@@ -309,8 +309,8 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
   String get password;
   @override
   String get confirmPassword;
-  @override // Single user location captured by the register step-2 cascade. See
-// LocationCascadeField for the inverted city/government naming.
+  @override // Single user location from the register step-2 cascade
+// (cityId = city, governmentId = governorate).
   int get cityId;
   @override
   int get governmentId;

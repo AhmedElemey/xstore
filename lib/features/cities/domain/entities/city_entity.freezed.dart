@@ -19,6 +19,9 @@ mixin _$CityEntity {
   int get id => throw _privateConstructorUsedError;
   LocalizedText get name => throw _privateConstructorUsedError;
 
+  /// Parent governorate id from `/api/cities` (`governorateId` on the wire).
+  int? get governorateId => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $CityEntityCopyWith<CityEntity> get copyWith =>
       throw _privateConstructorUsedError;
@@ -30,7 +33,7 @@ abstract class $CityEntityCopyWith<$Res> {
           CityEntity value, $Res Function(CityEntity) then) =
       _$CityEntityCopyWithImpl<$Res, CityEntity>;
   @useResult
-  $Res call({int id, LocalizedText name});
+  $Res call({int id, LocalizedText name, int? governorateId});
 
   $LocalizedTextCopyWith<$Res> get name;
 }
@@ -50,6 +53,7 @@ class _$CityEntityCopyWithImpl<$Res, $Val extends CityEntity>
   $Res call({
     Object? id = null,
     Object? name = null,
+    Object? governorateId = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -60,6 +64,10 @@ class _$CityEntityCopyWithImpl<$Res, $Val extends CityEntity>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as LocalizedText,
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 
@@ -80,7 +88,7 @@ abstract class _$$CityEntityImplCopyWith<$Res>
       __$$CityEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, LocalizedText name});
+  $Res call({int id, LocalizedText name, int? governorateId});
 
   @override
   $LocalizedTextCopyWith<$Res> get name;
@@ -99,6 +107,7 @@ class __$$CityEntityImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? name = null,
+    Object? governorateId = freezed,
   }) {
     return _then(_$CityEntityImpl(
       id: null == id
@@ -109,6 +118,10 @@ class __$$CityEntityImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as LocalizedText,
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -116,16 +129,21 @@ class __$$CityEntityImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$CityEntityImpl implements _CityEntity {
-  const _$CityEntityImpl({required this.id, required this.name});
+  const _$CityEntityImpl(
+      {required this.id, required this.name, this.governorateId});
 
   @override
   final int id;
   @override
   final LocalizedText name;
 
+  /// Parent governorate id from `/api/cities` (`governorateId` on the wire).
+  @override
+  final int? governorateId;
+
   @override
   String toString() {
-    return 'CityEntity(id: $id, name: $name)';
+    return 'CityEntity(id: $id, name: $name, governorateId: $governorateId)';
   }
 
   @override
@@ -134,11 +152,13 @@ class _$CityEntityImpl implements _CityEntity {
         (other.runtimeType == runtimeType &&
             other is _$CityEntityImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name));
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.governorateId, governorateId) ||
+                other.governorateId == governorateId));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, name);
+  int get hashCode => Object.hash(runtimeType, id, name, governorateId);
 
   @JsonKey(ignore: true)
   @override
@@ -150,12 +170,17 @@ class _$CityEntityImpl implements _CityEntity {
 abstract class _CityEntity implements CityEntity {
   const factory _CityEntity(
       {required final int id,
-      required final LocalizedText name}) = _$CityEntityImpl;
+      required final LocalizedText name,
+      final int? governorateId}) = _$CityEntityImpl;
 
   @override
   int get id;
   @override
   LocalizedText get name;
+  @override
+
+  /// Parent governorate id from `/api/cities` (`governorateId` on the wire).
+  int? get governorateId;
   @override
   @JsonKey(ignore: true)
   _$$CityEntityImplCopyWith<_$CityEntityImpl> get copyWith =>

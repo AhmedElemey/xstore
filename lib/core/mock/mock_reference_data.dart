@@ -4,32 +4,37 @@ import '../../features/governments/data/models/government_model.dart';
 import '../../features/store_categories/data/models/store_category_model.dart';
 
 /// Fixtures keeping the app fully functional under `MockConfig.useMock`
-/// (the default) with no backend running.
+/// with no backend running.
+///
+/// Hierarchy matches live API: governorates are parents; cities link upward
+/// via [CityModel.governorateId].
 abstract final class MockReferenceData {
-  static const cities = <CityModel>[
-    CityModel(id: 1, nameEn: 'Cairo', nameAr: 'القاهرة'),
-    CityModel(id: 2, nameEn: 'Alexandria', nameAr: 'الإسكندرية'),
-    CityModel(id: 3, nameEn: 'Giza', nameAr: 'الجيزة'),
-    CityModel(id: 4, nameEn: 'Port Said', nameAr: 'بورسعيد'),
-    CityModel(id: 5, nameEn: 'Suez', nameAr: 'السويس'),
-    CityModel(id: 6, nameEn: 'Luxor', nameAr: 'الأقصر'),
-    CityModel(id: 7, nameEn: 'Aswan', nameAr: 'أسوان'),
-    CityModel(id: 8, nameEn: 'Mansoura', nameAr: 'المنصورة'),
-    CityModel(id: 9, nameEn: 'Tanta', nameAr: 'طنطا'),
-    CityModel(id: 10, nameEn: 'Ismailia', nameAr: 'الإسماعيلية'),
+  static const governments = <GovernmentModel>[
+    GovernmentModel(id: 1, nameEn: 'Cairo', nameAr: 'القاهرة'),
+    GovernmentModel(id: 2, nameEn: 'Alexandria', nameAr: 'الإسكندرية'),
+    GovernmentModel(id: 3, nameEn: 'Giza', nameAr: 'الجيزة'),
+    GovernmentModel(id: 4, nameEn: 'Qalyubia', nameAr: 'القليوبية'),
+    GovernmentModel(id: 5, nameEn: 'Port Said', nameAr: 'بورسعيد'),
+    GovernmentModel(id: 6, nameEn: 'Suez', nameAr: 'السويس'),
+    GovernmentModel(id: 7, nameEn: 'Luxor', nameAr: 'الأقصر'),
+    GovernmentModel(id: 8, nameEn: 'Aswan', nameAr: 'أسوان'),
+    GovernmentModel(id: 9, nameEn: 'Dakahlia', nameAr: 'الدقهلية'),
+    GovernmentModel(id: 10, nameEn: 'Gharbia', nameAr: 'الغربية'),
   ];
 
-  static const governments = <GovernmentModel>[
-    GovernmentModel(id: 1, nameEn: 'Cairo', nameAr: 'القاهرة', cityId: 1),
-    GovernmentModel(id: 2, nameEn: 'Alexandria', nameAr: 'الإسكندرية', cityId: 2),
-    GovernmentModel(id: 3, nameEn: 'Giza', nameAr: 'الجيزة', cityId: 3),
-    GovernmentModel(id: 4, nameEn: 'Qalyubia', nameAr: 'القليوبية', cityId: 1),
-    GovernmentModel(id: 5, nameEn: 'Port Said', nameAr: 'بورسعيد', cityId: 4),
-    GovernmentModel(id: 6, nameEn: 'Suez', nameAr: 'السويس', cityId: 5),
-    GovernmentModel(id: 7, nameEn: 'Luxor', nameAr: 'الأقصر', cityId: 6),
-    GovernmentModel(id: 8, nameEn: 'Aswan', nameAr: 'أسوان', cityId: 7),
-    GovernmentModel(id: 9, nameEn: 'Dakahlia', nameAr: 'الدقهلية', cityId: 8),
-    GovernmentModel(id: 10, nameEn: 'Gharbia', nameAr: 'الغربية', cityId: 9),
+  static const cities = <CityModel>[
+    CityModel(id: 1, nameEn: 'Cairo', nameAr: 'القاهرة', governorateId: 1),
+    CityModel(
+        id: 2, nameEn: 'Alexandria', nameAr: 'الإسكندرية', governorateId: 2),
+    CityModel(id: 3, nameEn: 'Giza', nameAr: 'الجيزة', governorateId: 3),
+    CityModel(id: 4, nameEn: 'Port Said', nameAr: 'بورسعيد', governorateId: 5),
+    CityModel(id: 5, nameEn: 'Suez', nameAr: 'السويس', governorateId: 6),
+    CityModel(id: 6, nameEn: 'Luxor', nameAr: 'الأقصر', governorateId: 7),
+    CityModel(id: 7, nameEn: 'Aswan', nameAr: 'أسوان', governorateId: 8),
+    CityModel(id: 8, nameEn: 'Mansoura', nameAr: 'المنصورة', governorateId: 9),
+    CityModel(id: 9, nameEn: 'Tanta', nameAr: 'طنطا', governorateId: 10),
+    CityModel(
+        id: 10, nameEn: 'Ismailia', nameAr: 'الإسماعيلية', governorateId: 5),
   ];
 
   static const storeCategories = <StoreCategoryModel>[

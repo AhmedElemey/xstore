@@ -32,9 +32,8 @@ class ProfileState with _$ProfileState {
     @Default('') String editStoreDescriptionAr,
     @Default('') String editStoreCity,
     @Default('') String editStoreWilaya,
-    // Governorate (backend cityId) + city/district (backend governmentId) pair,
-    // captured via the location cascade. See LocationCascadeField for the
-    // inverted-naming note.
+    // City (`cityId`) + governorate (`governmentId`) pair from the location
+    // cascade. See LocationCascadeField.
     int? editStoreCityId,
     int? editStoreGovernmentId,
     @Default('') String editWhatsapp,

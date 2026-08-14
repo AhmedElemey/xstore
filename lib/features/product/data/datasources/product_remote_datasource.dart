@@ -1,6 +1,11 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/mock/mock_config.dart';
+import '../../../../core/mock/mock_images.dart';
+import '../../../../core/mock/mock_listings.dart';
+import '../../../../core/mock/mock_reviews.dart';
+import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
@@ -49,8 +54,19 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
   final Dio _dio;
 
+  static final Map<String, List<ReviewEntity>> _mockReviewsByListingId = {};
+
+  /// Drops mock reviews added/edited during this session so they don't
+  /// survive into the next account on the same device (mock mode only).
+  static void clearSessionCache() {
+    _mockReviewsByListingId.clear();
+  }
+
   @override
   Future<ProductDetailEntity> fetchProductDetail(String listingId) async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(_mockProductDetail(listingId));
+    }
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.apiListingDetail(listingId),
@@ -71,6 +87,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     required String productId,
     required String category,
   }) async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(_mockSimilarProducts(productId, category));
+    }
     try {
       // Spec's similar-listings endpoint is id-based (not category-based)
       // — `category` is kept in the signature for source compatibility but
@@ -95,6 +114,11 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     required int page,
     required int pageSize,
   }) async {
+    if (MockConfig.useMock) {
+      return MockConfig.simulate(
+        _mockReviewsPage(listingId, page: page, pageSize: pageSize),
+      );
+    }
     try {
       // ASSUMPTION: envelope is {"items": [...], "totalCount": N} matching
       // cities/governments precedent. Falls back to a bare list with
@@ -136,6 +160,19 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     required String listingId,
     required ReviewWriteParams params,
   }) async {
+    if (MockConfig.useMock) {
+      final review = ReviewEntity(
+        id: 'review_${DateTime.now().microsecondsSinceEpoch}',
+        userId: mockConsumerUser.id,
+        userName: mockConsumerUser.name,
+        userAvatar: MockImages.avatar(2),
+        rating: params.rating,
+        comment: params.comment,
+        createdAt: DateTime.now(),
+      );
+      _mockReviewsForListing(listingId).insert(0, review);
+      return MockConfig.simulate(review);
+    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiListingReviews(listingId),
@@ -156,6 +193,28 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     required String reviewId,
     required ReviewWriteParams params,
   }) async {
+    if (MockConfig.useMock) {
+      final list = _mockReviewsForListing(listingId);
+      final idx = list.indexWhere((e) => e.id == reviewId);
+      final base = idx >= 0
+          ? list[idx]
+          : ReviewEntity(
+              id: reviewId,
+              userId: mockConsumerUser.id,
+              userName: mockConsumerUser.name,
+              userAvatar: MockImages.avatar(2),
+              rating: params.rating,
+              comment: params.comment,
+              createdAt: DateTime.now(),
+            );
+      final updated = base.copyWith(rating: params.rating, comment: params.comment);
+      if (idx >= 0) {
+        list[idx] = updated;
+      } else {
+        list.insert(0, updated);
+      }
+      return MockConfig.simulate(updated);
+    }
     try {
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.apiListingReview(listingId, reviewId),
@@ -175,6 +234,11 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     required String listingId,
     required String reviewId,
   }) async {
+    if (MockConfig.useMock) {
+      _mockReviewsForListing(listingId).removeWhere((e) => e.id == reviewId);
+      await MockConfig.simulate<void>(null);
+      return;
+    }
     try {
       await _dio.delete<void>(
         ApiEndpoints.apiListingReview(listingId, reviewId),
@@ -183,6 +247,139 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     } on DioException catch (e) {
       throw mapDioException(e);
     }
+  }
+
+  // CONFIRMED against the mock cart seed: listing_002/003/016 belong to
+  // vendor_002 (Karim Merabet / Oran Fashion Hub), everything else to
+  // vendor_001 (mockVendorUser) — matches cart_remote_datasource.dart.
+  String _mockVendorIdForListing(String listingId) {
+    const v2 = {'listing_003', 'listing_016', 'listing_002'};
+    return v2.contains(listingId) ? 'vendor_002' : 'vendor_001';
+  }
+
+  (String name, String store, String avatar, double rating, bool verified)
+      _mockVendorDisplay(String vendorId) {
+    if (vendorId == 'vendor_002') {
+      return (
+        'Karim Merabet',
+        'Oran Fashion Hub',
+        MockImages.avatar(4),
+        4.7,
+        true,
+      );
+    }
+    return (
+      mockVendorUser.name,
+      mockVendorUser.storeName ?? mockVendorUser.name,
+      MockImages.avatar(1),
+      mockVendorUser.rating ?? 4.8,
+      true,
+    );
+  }
+
+  List<ReviewEntity> _mockReviewsForListing(String listingId) {
+    return _mockReviewsByListingId.putIfAbsent(listingId, () {
+      final bundle = mockReviewsForListing(listingId);
+      if (bundle == null) return <ReviewEntity>[];
+      return bundle.reviews
+          .map(
+            (r) => ReviewEntity(
+              id: r.id,
+              userId: r.id,
+              userName: r.userName,
+              userAvatar: r.userAvatarUrl,
+              rating: r.stars,
+              comment: r.text,
+              helpfulCount: r.helpfulCount,
+              createdAt: r.date,
+            ),
+          )
+          .toList();
+    });
+  }
+
+  PaginatedResult<ReviewEntity> _mockReviewsPage(
+    String listingId, {
+    required int page,
+    required int pageSize,
+  }) {
+    final all = _mockReviewsForListing(listingId);
+    final start = page * pageSize;
+    final end = (start + pageSize).clamp(0, all.length);
+    final items = start >= all.length ? <ReviewEntity>[] : all.sublist(start, end);
+    return PaginatedResult(
+      items: items,
+      page: page,
+      pageSize: pageSize,
+      totalCount: all.length,
+    );
+  }
+
+  ProductDetailEntity _mockProductDetail(String listingId) {
+    final m = mockListingModels.firstWhere((e) => e.id == listingId);
+    final vid = _mockVendorIdForListing(listingId);
+    final vd = _mockVendorDisplay(vid);
+    final bundle = mockReviewsForListing(listingId);
+    final similar = mockListingModels
+        .where((e) => e.id != listingId && e.categoryLabel == m.categoryLabel)
+        .take(6)
+        .map(_mockDealFromListing)
+        .toList();
+    return ProductDetailEntity(
+      listing: m.toEntity(),
+      compareAtPrice: mockCompareAtByListingId[listingId],
+      stockQuantity: 99,
+      locationLine: vid == 'vendor_002' ? '📍 Oran, Egypt' : '📍 ${mockVendorUser.storeCity ?? 'Cairo'}, Egypt',
+      seller: ProductSellerEntity(
+        id: vid,
+        name: vd.$1,
+        avatarUrl: vd.$3,
+        rating: vd.$4,
+        salesCount: vid == 'vendor_002' ? 340 : (mockVendorUser.totalSales ?? 230),
+        verified: vd.$5,
+      ),
+      specifications: const {},
+      reviewSummary: bundle?.summary,
+      reviews: bundle?.reviews ?? const [],
+      similarProducts: similar,
+    );
+  }
+
+  List<ProductDetailEntity> _mockSimilarProducts(String productId, String category) {
+    final matches = mockListingModels
+        .where((e) => e.id != productId && e.categoryLabel == category)
+        .toList();
+    final pool = matches.isNotEmpty
+        ? matches
+        : mockListingModels.where((e) => e.id != productId).toList();
+    return pool.take(6).map(_mockSimilarProductDetail).toList();
+  }
+
+  ProductDetailEntity _mockSimilarProductDetail(ListingModel m) {
+    return ProductDetailEntity(
+      listing: m.toEntity(),
+      compareAtPrice: mockCompareAtByListingId[m.id],
+      stockQuantity: 99,
+      locationLine: '',
+      specifications: const {},
+      similarProducts: const [],
+      reviews: const [],
+      reviewSummary: null,
+      seller: null,
+    );
+  }
+
+  DealEntity _mockDealFromListing(ListingModel m) {
+    final compare = mockCompareAtByListingId[m.id];
+    final discount =
+        compare != null && compare > m.price ? ((compare - m.price) / compare) * 100 : 0.0;
+    return DealEntity(
+      id: m.id,
+      title: m.title,
+      price: m.price,
+      imageUrl: m.imageUrls.isNotEmpty ? m.imageUrls.first : null,
+      discountPercent: discount,
+    );
   }
 
   ProductDetailEntity _parseProductDetail(
