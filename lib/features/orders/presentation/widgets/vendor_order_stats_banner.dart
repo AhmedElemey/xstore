@@ -13,7 +13,6 @@ class VendorOrderStatsBanner extends StatelessWidget {
     required this.totalCount,
     required this.totalRevenue,
     required this.onConfirmAllPending,
-    required this.onViewAnalytics,
   });
 
   final int pendingCount;
@@ -21,7 +20,6 @@ class VendorOrderStatsBanner extends StatelessWidget {
   final int totalCount;
   final double totalRevenue;
   final VoidCallback onConfirmAllPending;
-  final VoidCallback onViewAnalytics;
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +64,6 @@ class VendorOrderStatsBanner extends StatelessWidget {
                 context,
                 label: context.l10n.vendorConfirmAllPending,
                 onTap: onConfirmAllPending,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _chip(
-                context,
-                label: context.l10n.vendorViewAnalytics,
-                onTap: onViewAnalytics,
               ),
             ],
           ),

@@ -22,7 +22,6 @@ class VendorCommissionAlertBanner extends StatelessWidget {
 
     final isPaused = level == VendorCommissionAlertLevel.paused;
     final color = isPaused ? AppColors.error : AppColors.warning;
-    final amount = context.formatCurrency(wallet.outstandingEgp);
     final limit = context.formatCurrency(
       isPaused ? wallet.pauseThresholdEgp : wallet.warnThresholdEgp,
     );
@@ -60,10 +59,8 @@ class VendorCommissionAlertBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   isPaused
-                      ? context.l10n
-                          .commissionWalletPausedBody(amount, limit)
-                      : context.l10n
-                          .commissionWalletWarnBody(amount, limit),
+                      ? context.l10n.commissionWalletPausedBody(limit)
+                      : context.l10n.commissionWalletWarnBody(limit),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: context.textSecondary,
                         height: 1.35,

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Route fragments for the standalone delivery-backend service (a separate
 /// .NET API from the main marketplace backend — see [ApiEndpoints]). Powers
 /// the consumer/vendor package-delivery requests (Flow B); marketplace
@@ -7,13 +9,18 @@ abstract final class DeliveryApiEndpoints {
   static const String _fromDefine =
       String.fromEnvironment('DELIVERY_API_BASE_URL');
 
-  /// Non-empty API origin (no trailing slash). This service isn't deployed
-  /// anywhere yet (see delivery-backend's own README), so — unlike
-  /// [ApiEndpoints.baseUrl] — there is no release assertion here; it just
-  /// falls back to local dev (`dotnet run` default port).
+  /// Non-empty API origin (no trailing slash). Debug/profile may fall back
+  /// to local `dotnet run` (`localhost:5080`). Release must pass
+  /// `--dart-define=DELIVERY_API_BASE_URL=https://…` — never localhost.
   static String get baseUrl {
     final v = _fromDefine.trim();
     if (v.isNotEmpty) return v;
+    if (kReleaseMode) {
+      throw StateError(
+        'Release builds require --dart-define=DELIVERY_API_BASE_URL='
+        '<https://your-delivery-api-host> (non-empty). See README.md.',
+      );
+    }
     return 'http://localhost:5080';
   }
 

@@ -9,10 +9,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../domain/entities/order_entity.dart';
 import 'order_item_tile.dart';
 import 'order_price_breakdown.dart';
@@ -31,9 +31,6 @@ class OrderDetailScrollContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isVendor = ref.watch(
       authProvider.select((a) => a.valueOrNull?.role == UserRole.vendor),
-    );
-    final vendorWhatsApp = ref.watch(
-      profileNotifierProvider.select((s) => s.profile?.user.whatsappNumber),
     );
 
     return SliverList(
@@ -76,7 +73,7 @@ class OrderDetailScrollContent extends ConsumerWidget {
         if (!isVendor)
           _SellerSection(order: order)
         else
-          _BuyerSection(order: order, whatsapp: vendorWhatsApp),
+          _BuyerSection(order: order),
         if (order.status == OrderStatus.shipped &&
             (order.trackingNumber != null || order.courierName != null)) ...[
           const SizedBox(height: AppSpacing.lg),
@@ -322,14 +319,6 @@ class _SellerSection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () => AppSnackbar.info(
-                context,
-                context.l10n.ordersMessageSellerSoon,
-              ),
-              child: Text(context.l10n.ordersMessageSeller),
-            ),
-            const SizedBox(height: AppSpacing.sm),
             XstoreButton(
               label: context.l10n.visitStore,
               onPressed: () =>
@@ -343,10 +332,9 @@ class _SellerSection extends StatelessWidget {
 }
 
 class _BuyerSection extends StatelessWidget {
-  const _BuyerSection({required this.order, required this.whatsapp});
+  const _BuyerSection({required this.order});
 
   final OrderEntity order;
-  final String? whatsapp;
 
   @override
   Widget build(BuildContext context) {
@@ -410,14 +398,17 @@ class _BuyerSection extends StatelessWidget {
                 ),
               ],
             ),
-            if (whatsapp != null && whatsapp!.trim().isNotEmpty) ...[
+            if (order.consumerPhone.trim().isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(
                 onPressed: () async {
-                  final digits = whatsapp!.replaceAll(RegExp(r'\D'), '');
-                  final uri = Uri.parse('https://wa.me/$digits');
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  final opened =
+                      await launchWhatsApp(phone: order.consumerPhone);
+                  if (!opened && context.mounted) {
+                    AppSnackbar.info(
+                      context,
+                      context.l10n.whatsappSellerUnavailable,
+                    );
                   }
                 },
                 child: Text(context.l10n.ordersWhatsapp),

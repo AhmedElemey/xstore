@@ -194,13 +194,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ref.watch(wishlistProvider.select((s) => s.itemCount)),
                       savedDzd: profile?.savedAmountDzd,
                       onSalesTap: () => context.push(AppRoutes.listingMy),
-                      onRatingTap: () => context.push(AppRoutes.analytics),
-                      onResponseTap: () => context.push(AppRoutes.earnings),
                       onOrdersTap: () => context.push(
                         isVendor ? AppRoutes.vendorOrders : AppRoutes.orders,
                       ),
                       onWishlistTap: () => context.push(AppRoutes.wishlist),
-                      onSavedTap: () => context.push(AppRoutes.earnings),
                     ),
                   ),
                 ),

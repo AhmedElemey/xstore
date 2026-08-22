@@ -244,7 +244,7 @@ class _$ProductDetailEntityImpl implements _ProductDetailEntity {
   const _$ProductDetailEntityImpl(
       {required this.listing,
       this.compareAtPrice,
-      this.stockQuantity = 99,
+      this.stockQuantity = 0,
       this.locationLine = '',
       this.seller,
       final Map<String, String> specifications = const {},

@@ -755,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @listingAddPhotoTile.
   ///
   /// In en, this message translates to:
-  /// **'Add Photo'**
+  /// **'Add photos'**
   String get listingAddPhotoTile;
 
   /// No description provided for @listingPhotoCoverBadge.
@@ -851,8 +851,8 @@ abstract class AppLocalizations {
   /// No description provided for @commissionWalletWarnBody.
   ///
   /// In en, this message translates to:
-  /// **'You owe {amount} in platform fees. Pay it off before it reaches {limit} or new listings will be paused.'**
-  String commissionWalletWarnBody(String amount, String limit);
+  /// **'You have unpaid platform fees. Pay them off before you reach the {limit} limit or new listings will be paused.'**
+  String commissionWalletWarnBody(String limit);
 
   /// No description provided for @commissionWalletPausedTitle.
   ///
@@ -863,8 +863,8 @@ abstract class AppLocalizations {
   /// No description provided for @commissionWalletPausedBody.
   ///
   /// In en, this message translates to:
-  /// **'You owe {amount} in platform fees, over the {limit} limit. Pay it off to publish new listings again.'**
-  String commissionWalletPausedBody(String amount, String limit);
+  /// **'Your platform fees are over the {limit} limit. Pay them off to publish new listings again.'**
+  String commissionWalletPausedBody(String limit);
 
   /// No description provided for @commissionWalletBlockedSubmit.
   ///
@@ -1039,252 +1039,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Good'**
   String get listingCondGood;
-
-  /// No description provided for @listingCatElectronics.
-  ///
-  /// In en, this message translates to:
-  /// **'Electronics'**
-  String get listingCatElectronics;
-
-  /// No description provided for @listingCatFashion.
-  ///
-  /// In en, this message translates to:
-  /// **'Fashion'**
-  String get listingCatFashion;
-
-  /// No description provided for @listingCatHomeGarden.
-  ///
-  /// In en, this message translates to:
-  /// **'Home & Garden'**
-  String get listingCatHomeGarden;
-
-  /// No description provided for @listingCatBeauty.
-  ///
-  /// In en, this message translates to:
-  /// **'Beauty'**
-  String get listingCatBeauty;
-
-  /// No description provided for @listingCatSports.
-  ///
-  /// In en, this message translates to:
-  /// **'Sports'**
-  String get listingCatSports;
-
-  /// No description provided for @listingCatToys.
-  ///
-  /// In en, this message translates to:
-  /// **'Toys'**
-  String get listingCatToys;
-
-  /// No description provided for @listingCatAutomotive.
-  ///
-  /// In en, this message translates to:
-  /// **'Automotive'**
-  String get listingCatAutomotive;
-
-  /// No description provided for @listingCatFoodDrinks.
-  ///
-  /// In en, this message translates to:
-  /// **'Food & Drinks'**
-  String get listingCatFoodDrinks;
-
-  /// No description provided for @listingCatBooks.
-  ///
-  /// In en, this message translates to:
-  /// **'Books'**
-  String get listingCatBooks;
-
-  /// No description provided for @listingCatOther.
-  ///
-  /// In en, this message translates to:
-  /// **'Other'**
-  String get listingCatOther;
-
-  /// No description provided for @listingSubElectronicsPhones.
-  ///
-  /// In en, this message translates to:
-  /// **'Phones & tablets'**
-  String get listingSubElectronicsPhones;
-
-  /// No description provided for @listingSubElectronicsLaptops.
-  ///
-  /// In en, this message translates to:
-  /// **'Laptops & PCs'**
-  String get listingSubElectronicsLaptops;
-
-  /// No description provided for @listingSubElectronicsAudio.
-  ///
-  /// In en, this message translates to:
-  /// **'Audio'**
-  String get listingSubElectronicsAudio;
-
-  /// No description provided for @listingSubElectronicsAccessories.
-  ///
-  /// In en, this message translates to:
-  /// **'Accessories'**
-  String get listingSubElectronicsAccessories;
-
-  /// No description provided for @listingSubFashionMens.
-  ///
-  /// In en, this message translates to:
-  /// **'Men\'s'**
-  String get listingSubFashionMens;
-
-  /// No description provided for @listingSubFashionWomens.
-  ///
-  /// In en, this message translates to:
-  /// **'Women\'s'**
-  String get listingSubFashionWomens;
-
-  /// No description provided for @listingSubFashionKids.
-  ///
-  /// In en, this message translates to:
-  /// **'Kids'**
-  String get listingSubFashionKids;
-
-  /// No description provided for @listingSubFashionShoes.
-  ///
-  /// In en, this message translates to:
-  /// **'Shoes'**
-  String get listingSubFashionShoes;
-
-  /// No description provided for @listingSubHomeFurniture.
-  ///
-  /// In en, this message translates to:
-  /// **'Furniture'**
-  String get listingSubHomeFurniture;
-
-  /// No description provided for @listingSubHomeDecor.
-  ///
-  /// In en, this message translates to:
-  /// **'Decor'**
-  String get listingSubHomeDecor;
-
-  /// No description provided for @listingSubHomeKitchen.
-  ///
-  /// In en, this message translates to:
-  /// **'Kitchen'**
-  String get listingSubHomeKitchen;
-
-  /// No description provided for @listingSubHomeGarden.
-  ///
-  /// In en, this message translates to:
-  /// **'Garden'**
-  String get listingSubHomeGarden;
-
-  /// No description provided for @listingSubBeautySkincare.
-  ///
-  /// In en, this message translates to:
-  /// **'Skincare'**
-  String get listingSubBeautySkincare;
-
-  /// No description provided for @listingSubBeautyMakeup.
-  ///
-  /// In en, this message translates to:
-  /// **'Makeup'**
-  String get listingSubBeautyMakeup;
-
-  /// No description provided for @listingSubBeautyHair.
-  ///
-  /// In en, this message translates to:
-  /// **'Hair care'**
-  String get listingSubBeautyHair;
-
-  /// No description provided for @listingSubSportsFitness.
-  ///
-  /// In en, this message translates to:
-  /// **'Fitness'**
-  String get listingSubSportsFitness;
-
-  /// No description provided for @listingSubSportsOutdoor.
-  ///
-  /// In en, this message translates to:
-  /// **'Outdoor'**
-  String get listingSubSportsOutdoor;
-
-  /// No description provided for @listingSubSportsTeam.
-  ///
-  /// In en, this message translates to:
-  /// **'Team sports'**
-  String get listingSubSportsTeam;
-
-  /// No description provided for @listingSubToysGames.
-  ///
-  /// In en, this message translates to:
-  /// **'Games'**
-  String get listingSubToysGames;
-
-  /// No description provided for @listingSubToysDolls.
-  ///
-  /// In en, this message translates to:
-  /// **'Dolls & figures'**
-  String get listingSubToysDolls;
-
-  /// No description provided for @listingSubToysEducational.
-  ///
-  /// In en, this message translates to:
-  /// **'Educational'**
-  String get listingSubToysEducational;
-
-  /// No description provided for @listingSubAutoParts.
-  ///
-  /// In en, this message translates to:
-  /// **'Parts'**
-  String get listingSubAutoParts;
-
-  /// No description provided for @listingSubAutoAccessories.
-  ///
-  /// In en, this message translates to:
-  /// **'Accessories'**
-  String get listingSubAutoAccessories;
-
-  /// No description provided for @listingSubAutoCare.
-  ///
-  /// In en, this message translates to:
-  /// **'Care products'**
-  String get listingSubAutoCare;
-
-  /// No description provided for @listingSubFoodBeverages.
-  ///
-  /// In en, this message translates to:
-  /// **'Beverages'**
-  String get listingSubFoodBeverages;
-
-  /// No description provided for @listingSubFoodSnacks.
-  ///
-  /// In en, this message translates to:
-  /// **'Snacks'**
-  String get listingSubFoodSnacks;
-
-  /// No description provided for @listingSubFoodGrocery.
-  ///
-  /// In en, this message translates to:
-  /// **'Grocery'**
-  String get listingSubFoodGrocery;
-
-  /// No description provided for @listingSubBooksFiction.
-  ///
-  /// In en, this message translates to:
-  /// **'Fiction'**
-  String get listingSubBooksFiction;
-
-  /// No description provided for @listingSubBooksNonfiction.
-  ///
-  /// In en, this message translates to:
-  /// **'Non-fiction'**
-  String get listingSubBooksNonfiction;
-
-  /// No description provided for @listingSubBooksTextbooks.
-  ///
-  /// In en, this message translates to:
-  /// **'Textbooks'**
-  String get listingSubBooksTextbooks;
-
-  /// No description provided for @listingSubOtherMisc.
-  ///
-  /// In en, this message translates to:
-  /// **'Miscellaneous'**
-  String get listingSubOtherMisc;
 
   /// No description provided for @vendorAccount.
   ///
@@ -1649,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @storeWilayaLabel.
   ///
   /// In en, this message translates to:
-  /// **'Store Wilaya'**
+  /// **'Store Governorate'**
   String get storeWilayaLabel;
 
   /// No description provided for @whatsappLabel.
@@ -1657,6 +1411,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WhatsApp Number'**
   String get whatsappLabel;
+
+  /// No description provided for @whatsappProductPrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I\'m interested in {title}'**
+  String whatsappProductPrefill(String title);
+
+  /// No description provided for @whatsappStorePrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I saw your store {name} on xStore'**
+  String whatsappStorePrefill(String name);
+
+  /// No description provided for @whatsappSellerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open WhatsApp.'**
+  String get whatsappSellerUnavailable;
 
   /// No description provided for @instagramLabel.
   ///
@@ -1865,7 +1637,7 @@ abstract class AppLocalizations {
   /// No description provided for @trustInfoPaymentMethodsBody.
   ///
   /// In en, this message translates to:
-  /// **'Saved payment methods aren\'t available yet. When you check out, you can pay securely with cash on delivery or enter card details for that order only — card details are used during checkout and are not saved here.'**
+  /// **'Saved payment methods aren\'t available yet. Checkout is cash on delivery only — pay when your order arrives.'**
   String get trustInfoPaymentMethodsBody;
 
   /// No description provided for @trustInfoAddressesBody.
@@ -1885,6 +1657,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Our Privacy Policy is not published in the app yet. We don\'t show placeholder legal text here. How we collect and use your data will be documented here before launch.'**
   String get trustInfoPrivacyBody;
+
+  /// No description provided for @legalDraftNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Operational draft for how xStore works today. Company registration, return window, and a counsel-finalized Arabic legal text will replace this before store release. This is not a substitute for legal advice.'**
+  String get legalDraftNotice;
+
+  /// No description provided for @newSeller.
+  ///
+  /// In en, this message translates to:
+  /// **'New seller'**
+  String get newSeller;
+
+  /// No description provided for @newSellerEmDash.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get newSellerEmDash;
+
+  /// No description provided for @notificationSettingsDeviceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'These apply on this device only until preferences sync to your account.'**
+  String get notificationSettingsDeviceOnly;
 
   /// No description provided for @trustInfoHelpBody.
   ///
@@ -2567,7 +2363,7 @@ abstract class AppLocalizations {
   /// No description provided for @ordersCurrentLocationMock.
   ///
   /// In en, this message translates to:
-  /// **'In transit — Algiers hub'**
+  /// **'In transit — Cairo hub'**
   String get ordersCurrentLocationMock;
 
   /// No description provided for @ordersExpectedPrefix.
@@ -3209,7 +3005,7 @@ abstract class AppLocalizations {
   /// No description provided for @cartCouponMinOrder.
   ///
   /// In en, this message translates to:
-  /// **'Minimum order 5,000 DZD required'**
+  /// **'Minimum order 5,000 EGP required'**
   String get cartCouponMinOrder;
 
   /// No description provided for @cartOrderSummary.
@@ -3329,7 +3125,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutWilaya.
   ///
   /// In en, this message translates to:
-  /// **'Wilaya'**
+  /// **'Governorate'**
   String get checkoutWilaya;
 
   /// No description provided for @checkoutPostalCode.
@@ -3545,7 +3341,7 @@ abstract class AppLocalizations {
   /// No description provided for @couponDetailFree500.
   ///
   /// In en, this message translates to:
-  /// **'500 DZD discount applied!'**
+  /// **'500 EGP discount applied!'**
   String get couponDetailFree500;
 
   /// No description provided for @couponDetailWelcome.
@@ -4451,7 +4247,7 @@ abstract class AppLocalizations {
   /// No description provided for @cartShippingPaid.
   ///
   /// In en, this message translates to:
-  /// **'🚚 +{amount} DZD shipping'**
+  /// **'🚚 +{amount} EGP shipping'**
   String cartShippingPaid(int amount);
 
   /// No description provided for @cartCouponApplied.
@@ -4877,7 +4673,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationHintAlgiers.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Algiers'**
+  /// **'e.g. Cairo'**
   String get locationHintAlgiers;
 
   /// No description provided for @secureYourAccount.
@@ -4898,11 +4694,23 @@ abstract class AppLocalizations {
   /// **'Password *'**
   String get passwordRequired;
 
+  /// No description provided for @currentPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password *'**
+  String get currentPasswordRequired;
+
   /// No description provided for @newPasswordRequired.
   ///
   /// In en, this message translates to:
   /// **'New Password *'**
   String get newPasswordRequired;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password was changed.'**
+  String get changePasswordSuccess;
 
   /// No description provided for @confirmPasswordRequired.
   ///
@@ -5027,7 +4835,7 @@ abstract class AppLocalizations {
   /// No description provided for @wilayaRequired.
   ///
   /// In en, this message translates to:
-  /// **'Wilaya *'**
+  /// **'Governorate *'**
   String get wilayaRequired;
 
   /// No description provided for @sellerFallbackName.
@@ -5783,7 +5591,7 @@ abstract class AppLocalizations {
   /// No description provided for @validationStoreCityWilayaRequired.
   ///
   /// In en, this message translates to:
-  /// **'City and wilaya are required'**
+  /// **'City and governorate are required'**
   String get validationStoreCityWilayaRequired;
 
   /// No description provided for @validationFullNameArRequired.

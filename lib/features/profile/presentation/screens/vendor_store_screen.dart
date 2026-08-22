@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -22,7 +24,10 @@ import '../../domain/repositories/profile_repository.dart';
 import '../providers/profile_dependencies.dart';
 import '../providers/profile_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/public_seller_stats.dart';
+import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../store/presentation/widgets/store_hours_summary_card.dart';
 
@@ -185,6 +190,23 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return false;
   }
 
+  Future<void> _openStoreWhatsApp(String? phone, String storeName) async {
+    final text = context.l10n.whatsappStorePrefill(storeName);
+    final opened = await launchWhatsApp(phone: phone ?? '', prefilledText: text);
+    if (!mounted) return;
+    if (!opened) {
+      AppSnackbar.info(context, context.l10n.whatsappSellerUnavailable);
+      return;
+    }
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.whatsappSellerTap,
+      properties: {
+        AnalyticsProps.source: 'store',
+        AnalyticsProps.sellerId: widget.sellerId,
+      },
+    );
+  }
+
   Set<String> get _categories {
     final set = <String>{};
     for (final e in _listings) {
@@ -323,7 +345,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                       ),
                                     ),
                                   Text(
-                                    '⭐ ${(u.rating ?? 0).toStringAsFixed(1)} · ${u.totalSales ?? 0} ${context.l10n.statSalesShort}'
+                                    '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
                                     '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
                                     style: AppTypography.bodySmall.copyWith(
                                       color: AppColors.white.withValues(alpha: 0.9),
@@ -332,15 +354,27 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                   const Gap(AppSpacing.sm),
                                   Row(
                                     children: [
-                                      FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.white,
-                                          foregroundColor: AppColors.primary,
+                                      if (!isOwnStore &&
+                                          (u.whatsappNumber ?? '')
+                                              .trim()
+                                              .isNotEmpty) ...[
+                                        IconButton.filled(
+                                          style: IconButton.styleFrom(
+                                            backgroundColor: AppColors.white
+                                                .withValues(alpha: 0.2),
+                                            foregroundColor: AppColors.white,
+                                          ),
+                                          onPressed: () => _openStoreWhatsApp(
+                                            u.whatsappNumber,
+                                            name,
+                                          ),
+                                          tooltip: context.l10n.ordersWhatsapp,
+                                          icon: const Icon(
+                                            LucideIcons.messageCircle,
+                                          ),
                                         ),
-                                        onPressed: () {},
-                                        child: Text(context.l10n.followStore),
-                                      ),
-                                      const Gap(AppSpacing.sm),
+                                        const Gap(AppSpacing.sm),
+                                      ],
                                       IconButton.filled(
                                         style: IconButton.styleFrom(
                                           backgroundColor: AppColors.white.withValues(alpha: 0.2),
@@ -496,7 +530,9 @@ class _VendorStoreStatsCard extends StatelessWidget {
         context.l10n.vendorStoreStatListings,
       ),
       (
-        '${u.totalSales ?? 0}',
+        u.totalSales != null && u.totalSales! > 0
+            ? '${u.totalSales}'
+            : context.l10n.newSellerEmDash,
         context.l10n.vendorStoreStatSales,
       ),
       (
@@ -504,7 +540,9 @@ class _VendorStoreStatsCard extends StatelessWidget {
         context.l10n.vendorStoreStatResponse,
       ),
       (
-        (u.rating ?? 0).toStringAsFixed(1),
+        u.rating != null && u.rating! > 0
+            ? u.rating!.toStringAsFixed(1)
+            : context.l10n.newSellerEmDash,
         context.l10n.statRating,
       ),
     ];

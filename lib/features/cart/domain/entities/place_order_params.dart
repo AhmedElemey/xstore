@@ -17,8 +17,5 @@ class PlaceOrderParams with _$PlaceOrderParams {
     required double shippingTotal,
     required double discount,
     required double total,
-    String? cardNumber,
-    String? cardExpiry,
-    String? cardCvv,
   }) = _PlaceOrderParams;
 }

@@ -10,17 +10,14 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import 'cart_summary_card.dart';
+import 'checkout_payment_section.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutReviewSection extends ConsumerWidget {
   const CheckoutReviewSection({super.key});
 
-  static String _payLabel(BuildContext context, PaymentMethod m) => switch (m) {
-        PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
-        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
-        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
-      };
+  static String _payLabel(BuildContext context, PaymentMethod m) =>
+      checkoutPaymentLabel(context, m);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

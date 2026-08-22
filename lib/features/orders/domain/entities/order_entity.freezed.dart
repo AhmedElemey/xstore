@@ -429,7 +429,18 @@ mixin _$OrderStatsEntity {
   int get activeCount => throw _privateConstructorUsedError;
   int get monthCount => throw _privateConstructorUsedError;
   int get totalCount => throw _privateConstructorUsedError;
-  double get totalRevenue => throw _privateConstructorUsedError;
+  double get totalRevenue =>
+      throw _privateConstructorUsedError; // Platform commission config + wallet-alert flags, echoed on the
+// GET /vendor/orders envelope (CONFIRMED against backend source
+// 2026-08-15 — the admin-only /api/admin/system-settings endpoint that
+// owns these values has no vendor-accessible equivalent). Null in mock
+// mode / on fetch failure — callers fall back to the starter constants
+// in commission_config_provider.dart.
+  double? get commissionValueOnOrder => throw _privateConstructorUsedError;
+  double? get warnThresholdEgp => throw _privateConstructorUsedError;
+  double? get pauseThresholdEgp => throw _privateConstructorUsedError;
+  bool get exceedsWarnThreshold => throw _privateConstructorUsedError;
+  bool get exceedsPauseThreshold => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $OrderStatsEntityCopyWith<OrderStatsEntity> get copyWith =>
@@ -447,7 +458,12 @@ abstract class $OrderStatsEntityCopyWith<$Res> {
       int activeCount,
       int monthCount,
       int totalCount,
-      double totalRevenue});
+      double totalRevenue,
+      double? commissionValueOnOrder,
+      double? warnThresholdEgp,
+      double? pauseThresholdEgp,
+      bool exceedsWarnThreshold,
+      bool exceedsPauseThreshold});
 }
 
 /// @nodoc
@@ -468,6 +484,11 @@ class _$OrderStatsEntityCopyWithImpl<$Res, $Val extends OrderStatsEntity>
     Object? monthCount = null,
     Object? totalCount = null,
     Object? totalRevenue = null,
+    Object? commissionValueOnOrder = freezed,
+    Object? warnThresholdEgp = freezed,
+    Object? pauseThresholdEgp = freezed,
+    Object? exceedsWarnThreshold = null,
+    Object? exceedsPauseThreshold = null,
   }) {
     return _then(_value.copyWith(
       pendingCount: null == pendingCount
@@ -490,6 +511,26 @@ class _$OrderStatsEntityCopyWithImpl<$Res, $Val extends OrderStatsEntity>
           ? _value.totalRevenue
           : totalRevenue // ignore: cast_nullable_to_non_nullable
               as double,
+      commissionValueOnOrder: freezed == commissionValueOnOrder
+          ? _value.commissionValueOnOrder
+          : commissionValueOnOrder // ignore: cast_nullable_to_non_nullable
+              as double?,
+      warnThresholdEgp: freezed == warnThresholdEgp
+          ? _value.warnThresholdEgp
+          : warnThresholdEgp // ignore: cast_nullable_to_non_nullable
+              as double?,
+      pauseThresholdEgp: freezed == pauseThresholdEgp
+          ? _value.pauseThresholdEgp
+          : pauseThresholdEgp // ignore: cast_nullable_to_non_nullable
+              as double?,
+      exceedsWarnThreshold: null == exceedsWarnThreshold
+          ? _value.exceedsWarnThreshold
+          : exceedsWarnThreshold // ignore: cast_nullable_to_non_nullable
+              as bool,
+      exceedsPauseThreshold: null == exceedsPauseThreshold
+          ? _value.exceedsPauseThreshold
+          : exceedsPauseThreshold // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -507,7 +548,12 @@ abstract class _$$OrderStatsEntityImplCopyWith<$Res>
       int activeCount,
       int monthCount,
       int totalCount,
-      double totalRevenue});
+      double totalRevenue,
+      double? commissionValueOnOrder,
+      double? warnThresholdEgp,
+      double? pauseThresholdEgp,
+      bool exceedsWarnThreshold,
+      bool exceedsPauseThreshold});
 }
 
 /// @nodoc
@@ -526,6 +572,11 @@ class __$$OrderStatsEntityImplCopyWithImpl<$Res>
     Object? monthCount = null,
     Object? totalCount = null,
     Object? totalRevenue = null,
+    Object? commissionValueOnOrder = freezed,
+    Object? warnThresholdEgp = freezed,
+    Object? pauseThresholdEgp = freezed,
+    Object? exceedsWarnThreshold = null,
+    Object? exceedsPauseThreshold = null,
   }) {
     return _then(_$OrderStatsEntityImpl(
       pendingCount: null == pendingCount
@@ -548,6 +599,26 @@ class __$$OrderStatsEntityImplCopyWithImpl<$Res>
           ? _value.totalRevenue
           : totalRevenue // ignore: cast_nullable_to_non_nullable
               as double,
+      commissionValueOnOrder: freezed == commissionValueOnOrder
+          ? _value.commissionValueOnOrder
+          : commissionValueOnOrder // ignore: cast_nullable_to_non_nullable
+              as double?,
+      warnThresholdEgp: freezed == warnThresholdEgp
+          ? _value.warnThresholdEgp
+          : warnThresholdEgp // ignore: cast_nullable_to_non_nullable
+              as double?,
+      pauseThresholdEgp: freezed == pauseThresholdEgp
+          ? _value.pauseThresholdEgp
+          : pauseThresholdEgp // ignore: cast_nullable_to_non_nullable
+              as double?,
+      exceedsWarnThreshold: null == exceedsWarnThreshold
+          ? _value.exceedsWarnThreshold
+          : exceedsWarnThreshold // ignore: cast_nullable_to_non_nullable
+              as bool,
+      exceedsPauseThreshold: null == exceedsPauseThreshold
+          ? _value.exceedsPauseThreshold
+          : exceedsPauseThreshold // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -560,7 +631,12 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
       this.activeCount = 0,
       this.monthCount = 0,
       this.totalCount = 0,
-      this.totalRevenue = 0.0});
+      this.totalRevenue = 0.0,
+      this.commissionValueOnOrder,
+      this.warnThresholdEgp,
+      this.pauseThresholdEgp,
+      this.exceedsWarnThreshold = false,
+      this.exceedsPauseThreshold = false});
 
   @override
   @JsonKey()
@@ -577,10 +653,28 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
   @override
   @JsonKey()
   final double totalRevenue;
+// Platform commission config + wallet-alert flags, echoed on the
+// GET /vendor/orders envelope (CONFIRMED against backend source
+// 2026-08-15 — the admin-only /api/admin/system-settings endpoint that
+// owns these values has no vendor-accessible equivalent). Null in mock
+// mode / on fetch failure — callers fall back to the starter constants
+// in commission_config_provider.dart.
+  @override
+  final double? commissionValueOnOrder;
+  @override
+  final double? warnThresholdEgp;
+  @override
+  final double? pauseThresholdEgp;
+  @override
+  @JsonKey()
+  final bool exceedsWarnThreshold;
+  @override
+  @JsonKey()
+  final bool exceedsPauseThreshold;
 
   @override
   String toString() {
-    return 'OrderStatsEntity(pendingCount: $pendingCount, activeCount: $activeCount, monthCount: $monthCount, totalCount: $totalCount, totalRevenue: $totalRevenue)';
+    return 'OrderStatsEntity(pendingCount: $pendingCount, activeCount: $activeCount, monthCount: $monthCount, totalCount: $totalCount, totalRevenue: $totalRevenue, commissionValueOnOrder: $commissionValueOnOrder, warnThresholdEgp: $warnThresholdEgp, pauseThresholdEgp: $pauseThresholdEgp, exceedsWarnThreshold: $exceedsWarnThreshold, exceedsPauseThreshold: $exceedsPauseThreshold)';
   }
 
   @override
@@ -597,12 +691,32 @@ class _$OrderStatsEntityImpl implements _OrderStatsEntity {
             (identical(other.totalCount, totalCount) ||
                 other.totalCount == totalCount) &&
             (identical(other.totalRevenue, totalRevenue) ||
-                other.totalRevenue == totalRevenue));
+                other.totalRevenue == totalRevenue) &&
+            (identical(other.commissionValueOnOrder, commissionValueOnOrder) ||
+                other.commissionValueOnOrder == commissionValueOnOrder) &&
+            (identical(other.warnThresholdEgp, warnThresholdEgp) ||
+                other.warnThresholdEgp == warnThresholdEgp) &&
+            (identical(other.pauseThresholdEgp, pauseThresholdEgp) ||
+                other.pauseThresholdEgp == pauseThresholdEgp) &&
+            (identical(other.exceedsWarnThreshold, exceedsWarnThreshold) ||
+                other.exceedsWarnThreshold == exceedsWarnThreshold) &&
+            (identical(other.exceedsPauseThreshold, exceedsPauseThreshold) ||
+                other.exceedsPauseThreshold == exceedsPauseThreshold));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, pendingCount, activeCount,
-      monthCount, totalCount, totalRevenue);
+  int get hashCode => Object.hash(
+      runtimeType,
+      pendingCount,
+      activeCount,
+      monthCount,
+      totalCount,
+      totalRevenue,
+      commissionValueOnOrder,
+      warnThresholdEgp,
+      pauseThresholdEgp,
+      exceedsWarnThreshold,
+      exceedsPauseThreshold);
 
   @JsonKey(ignore: true)
   @override
@@ -618,7 +732,12 @@ abstract class _OrderStatsEntity implements OrderStatsEntity {
       final int activeCount,
       final int monthCount,
       final int totalCount,
-      final double totalRevenue}) = _$OrderStatsEntityImpl;
+      final double totalRevenue,
+      final double? commissionValueOnOrder,
+      final double? warnThresholdEgp,
+      final double? pauseThresholdEgp,
+      final bool exceedsWarnThreshold,
+      final bool exceedsPauseThreshold}) = _$OrderStatsEntityImpl;
 
   @override
   int get pendingCount;
@@ -630,6 +749,21 @@ abstract class _OrderStatsEntity implements OrderStatsEntity {
   int get totalCount;
   @override
   double get totalRevenue;
+  @override // Platform commission config + wallet-alert flags, echoed on the
+// GET /vendor/orders envelope (CONFIRMED against backend source
+// 2026-08-15 — the admin-only /api/admin/system-settings endpoint that
+// owns these values has no vendor-accessible equivalent). Null in mock
+// mode / on fetch failure — callers fall back to the starter constants
+// in commission_config_provider.dart.
+  double? get commissionValueOnOrder;
+  @override
+  double? get warnThresholdEgp;
+  @override
+  double? get pauseThresholdEgp;
+  @override
+  bool get exceedsWarnThreshold;
+  @override
+  bool get exceedsPauseThreshold;
   @override
   @JsonKey(ignore: true)
   _$$OrderStatsEntityImplCopyWith<_$OrderStatsEntityImpl> get copyWith =>

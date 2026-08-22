@@ -102,25 +102,13 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     trailingBadgeCount: pendingVendorOrders,
                     onTap: () => context.push(AppRoutes.vendorOrders),
                   ),
-                  ProfileMenuTile(
-                    
-                    icon: LucideIcons.barChart2,
-                    iconBackground: AppColors.primary,
-                    label: context.l10n.menuAnalytics,
-                    onTap: () => context.push(AppRoutes.analytics),
-                  ),
-                  ProfileMenuTile(
-                    icon: LucideIcons.wallet,
-                    iconBackground: AppColors.success,
-                    label: context.l10n.menuEarnings,
-                    onTap: () => context.push(AppRoutes.earnings),
-                  ),
-                  ProfileMenuTile(
-                    icon: LucideIcons.package,
-                    iconBackground: AppColors.warning,
-                    label: context.l10n.menuMyPackages,
-                    onTap: () => context.push(AppRoutes.myPackages),
-                  ),
+                  // Package delivery deferred to phase 2.
+                  // ProfileMenuTile(
+                  //   icon: LucideIcons.package,
+                  //   iconBackground: AppColors.warning,
+                  //   label: context.l10n.menuMyPackages,
+                  //   onTap: () => context.push(AppRoutes.myPackages),
+                  // ),
                 ]
               : isCourier
                   ? [
@@ -146,29 +134,18 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     label: context.l10n.menuMyOrders,
                     onTap: () => context.push(AppRoutes.orders),
                   ),
-                  ProfileMenuTile(
-                    icon: LucideIcons.package,
-                    iconBackground: AppColors.warning,
-                    label: context.l10n.menuMyPackages,
-                    onTap: () => context.push(AppRoutes.myPackages),
-                  ),
+                  // Package delivery deferred to phase 2.
+                  // ProfileMenuTile(
+                  //   icon: LucideIcons.package,
+                  //   iconBackground: AppColors.warning,
+                  //   label: context.l10n.menuMyPackages,
+                  //   onTap: () => context.push(AppRoutes.myPackages),
+                  // ),
                   ProfileMenuTile(
                     icon: LucideIcons.heart,
                     iconBackground: AppColors.accent,
                     label: context.l10n.menuWishlist,
                     onTap: () => context.push(AppRoutes.wishlist),
-                  ),
-                  ProfileMenuTile(
-                    icon: LucideIcons.clock,
-                    iconBackground: AppColors.primary,
-                    label: context.l10n.menuRecentlyViewed,
-                    onTap: () => context.push(AppRoutes.recentlyViewed),
-                  ),
-                  ProfileMenuTile(
-                    icon: LucideIcons.star,
-                    iconBackground: AppColors.success,
-                    label: context.l10n.menuMyReviews,
-                    onTap: () => context.push(AppRoutes.myReviews),
                   ),
                 ],
         ),

@@ -38,11 +38,11 @@ class OrderPriceBreakdown extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Buyer never sees the platform fee — computed only in vendor mode.
-    final rate = vendorMode
-        ? ref.watch(commissionRateForCategoryProvider(null))
+    final feeEgp = vendorMode
+        ? ref.watch(commissionFeeEgpForCategoryProvider(null))
         : 0.0;
     final commission = vendorMode
-        ? CommissionBreakdown.forPrice(order.total, ratePercent: rate)
+        ? CommissionBreakdown.forPrice(order.total, feeEgp: feeEgp)
         : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -155,7 +155,7 @@ class OrderPriceBreakdown extends ConsumerWidget {
           ),
           _row(
             context,
-            '${context.l10n.commissionPlatformFee} (${commission.ratePercent.toStringAsFixed(0)}%)',
+            context.l10n.commissionPlatformFee,
             commission.feeAmount,
           ),
         ],

@@ -217,7 +217,6 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
               if (!context.mounted) return;
               context.showSnack(context.l10n.vendorOrdersConfirmed(count));
             },
-            onViewAnalytics: () => context.push(AppRoutes.analytics),
           ),
           const SizedBox(height: AppSpacing.md),
           VendorOrderFilterTabs(

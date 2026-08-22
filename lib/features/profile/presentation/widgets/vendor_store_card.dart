@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/profile_entity.dart';
+import '../../../../shared/utils/public_seller_stats.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -28,8 +29,6 @@ class VendorStoreCard extends ConsumerWidget {
     final u = profile.user;
     final storeName = u.storeName ?? u.name;
     final category = u.storeCategory ?? '';
-    final rating = u.rating ?? 0;
-    final sales = u.totalSales ?? 0;
     final joined = u.joinedAt;
 
     final joinedLine =
@@ -74,7 +73,7 @@ class VendorStoreCard extends ConsumerWidget {
                       ),
                     const Gap(AppSpacing.xs),
                     Text(
-                      '⭐ ${rating.toStringAsFixed(1)} · $sales ${context.l10n.statSalesShort}'
+                      '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
                       '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeMetaLinePrefix}$joinedLine' : ''}',
                       style: AppTypography.labelSmall,
                     ),

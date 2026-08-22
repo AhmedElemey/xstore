@@ -11,9 +11,12 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/utils/require_login.dart';
+import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/router/app_routes.dart';
@@ -72,6 +75,43 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Future<void> _shareListing(String title, String id) async {
     await Share.share('$title — ${context.l10n.appName} · ${AppRoutes.product}/$id');
+  }
+
+  Future<void> _messageSeller({
+    required String listingId,
+    required String listingTitle,
+    String? sellerId,
+    String? whatsapp,
+  }) async {
+    final text = context.l10n.whatsappProductPrefill(listingTitle);
+    final opened = await launchWhatsApp(phone: whatsapp ?? '', prefilledText: text);
+    if (!mounted) return;
+    if (!opened) {
+      AppSnackbar.info(context, context.l10n.whatsappSellerUnavailable);
+      return;
+    }
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.whatsappSellerTap,
+      properties: {
+        AnalyticsProps.source: 'product',
+        AnalyticsProps.itemId: listingId,
+        if (sellerId != null) AnalyticsProps.sellerId: sellerId,
+      },
+    );
+  }
+
+  Future<void> _buyNow(String productId) async {
+    if (!requireLogin(context, ref)) return;
+    final notifier = ref.read(productDetailProvider(productId).notifier);
+    await notifier.addToCart();
+    if (!mounted) return;
+    final cartError = ref.read(cartProvider).error;
+    if (cartError != null) {
+      AppSnackbar.error(context, resolveAppError(context, cartError));
+      ref.read(cartProvider.notifier).clearError();
+      return;
+    }
+    context.push(AppRoutes.checkout);
   }
 
   void _scrollToReviews() {
@@ -306,9 +346,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             child: ProductStickyBar(
               showAddToCart: !isVendor,
               isAddingToCart: data.isAddingToCart,
-              onChat: () {
-                AppSnackbar.info(context, context.l10n.chatSellerSoon);
-              },
+              onChat: () => _messageSeller(
+                listingId: listing.id,
+                listingTitle: listing.title,
+                sellerId: data.seller?.id,
+                whatsapp: data.seller?.whatsappNumber,
+              ),
               onAddToCart: () async {
                 if (!requireLogin(context, ref)) return;
                 await notifier.addToCart();
@@ -327,9 +370,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   context.l10n.addedToCart,
                 );
               },
-              onBuyNow: () {
-                AppSnackbar.info(context, context.l10n.expressCheckoutSoon);
-              },
+              onBuyNow: () => _buyNow(widget.productId),
             )
                 .animate()
                 .slideY(

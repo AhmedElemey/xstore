@@ -109,7 +109,7 @@ class _ProfileSliverAppBarState extends State<ProfileSliverAppBar> {
       actions: [
         IconButton(
           icon:  Icon(LucideIcons.settings,color: AppColors.white,),
-          onPressed: () => context.push(AppRoutes.settings),
+          onPressed: () => context.push(AppRoutes.notificationSettings),
           tooltip: context.l10n.settings,
         ),
         NotificationBellButton(

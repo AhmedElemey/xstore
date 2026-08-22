@@ -34,12 +34,12 @@ class Checkout extends _$Checkout {
     return CheckoutState(
       savedAddresses: [
         const OrderAddress(
-          fullName: 'Sara Khelifi',
+          fullName: 'Ahmed Hassan',
           phone: '01012345678',
-          street: '12 Rue Didouche Mourad',
-          city: 'Oran',
-          wilaya: 'Oran',
-          postalCode: '31000',
+          street: '12 Tahrir Street',
+          city: 'Cairo',
+          wilaya: 'Cairo',
+          postalCode: '11511',
           isDefault: true,
         ),
       ],
@@ -61,24 +61,8 @@ class Checkout extends _$Checkout {
     );
   }
 
-  void selectPayment(PaymentMethod m) {
-    state = state.copyWith(selectedPayment: m);
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.checkoutPaymentMethodSelected,
-      properties: {AnalyticsProps.method: m.name},
-    );
-  }
-
   void updateDeliveryNote(String v) {
     state = state.copyWith(deliveryNote: v);
-  }
-
-  void updateCard(String number, String expiry, String cvv) {
-    state = state.copyWith(
-      cardNumber: number,
-      cardExpiry: expiry,
-      cardCvv: cvv,
-    );
   }
 
   String? _validateStep1() {
@@ -88,38 +72,7 @@ class Checkout extends _$Checkout {
   }
 
   String? _validateStep2() {
-    final p = state.selectedPayment;
-    if (p == null) return 'noPayment';
-    if (p == PaymentMethod.cibCard) {
-      final n = state.cardNumber.replaceAll(RegExp(r'\s'), '');
-      if (n.length < 12 || n.length > 19 || !RegExp(r'^\d+$').hasMatch(n)) {
-        return 'invalidCard';
-      }
-      if (_cardExpiryError(state.cardExpiry) != null) return 'invalidExpiry';
-      if (_cardCvvError(state.cardCvv) != null) return 'invalidCvv';
-    }
-    return null;
-  }
-
-  String? _cardExpiryError(String raw) {
-    final t = raw.trim();
-    if (t.isEmpty) return 'empty';
-    final m = RegExp(r'^(\d{2})/(\d{2})$').firstMatch(t);
-    if (m == null) return 'invalid';
-    final month = int.tryParse(m.group(1)!);
-    final yy = int.tryParse(m.group(2)!);
-    if (month == null || yy == null || month < 1 || month > 12) return 'invalid';
-    final year = 2000 + yy;
-    final now = DateTime.now();
-    final lastDay = DateTime(year, month + 1, 0);
-    if (lastDay.isBefore(DateTime(now.year, now.month))) return 'invalid';
-    return null;
-  }
-
-  String? _cardCvvError(String raw) {
-    final d = raw.replaceAll(RegExp(r'\D'), '');
-    if (d.isEmpty) return 'empty';
-    if (d.length < 3 || d.length > 4) return 'invalid';
+    // COD is the only launch method; no card capture.
     return null;
   }
 
@@ -169,11 +122,6 @@ class Checkout extends _$Checkout {
       state = state.copyWith(error: 'noAddress');
       return null;
     }
-    final pay = state.selectedPayment;
-    if (pay == null) {
-      state = state.copyWith(error: 'noPayment');
-      return null;
-    }
     state = state.copyWith(isPlacingOrder: true, error: null);
     final addr = state.savedAddresses[idx];
     final consumerId = cart.consumerId.isNotEmpty
@@ -187,7 +135,7 @@ class Checkout extends _$Checkout {
       consumerId: consumerId,
       items: selected,
       deliveryAddress: addr,
-      paymentMethod: pay,
+      paymentMethod: PaymentMethod.cashOnDelivery,
       deliveryNote: state.deliveryNote.trim().isEmpty
           ? null
           : state.deliveryNote.trim(),
@@ -195,9 +143,6 @@ class Checkout extends _$Checkout {
       shippingTotal: cart.shippingTotal,
       discount: cart.discount,
       total: cart.total,
-      cardNumber: pay == PaymentMethod.cibCard ? state.cardNumber : null,
-      cardExpiry: pay == PaymentMethod.cibCard ? state.cardExpiry : null,
-      cardCvv: pay == PaymentMethod.cibCard ? state.cardCvv : null,
     );
     final order = await cartNotifier.placeOrder(params);
     // The order is placed either way; only skip the state write if the

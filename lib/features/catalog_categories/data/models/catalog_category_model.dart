@@ -7,20 +7,48 @@ class CatalogCategoryModel {
     required this.nameEn,
     required this.nameAr,
     this.parentId,
+    this.children = const [],
   });
 
-  factory CatalogCategoryModel.fromJson(Map<String, dynamic> json) =>
-      CatalogCategoryModel(
-        id: json['id'] as int,
-        nameEn: json['nameEn'] as String? ?? '',
-        nameAr: json['nameAr'] as String? ?? '',
-        parentId: json['parentId'] as int?,
-      );
+  factory CatalogCategoryModel.fromJson(Map<String, dynamic> json) {
+    final rawChildren = json['children'];
+    final children = rawChildren is List
+        ? rawChildren
+            .whereType<Map>()
+            .map(
+              (e) => CatalogCategoryModel.fromJson(
+                Map<String, dynamic>.from(e),
+              ),
+            )
+            .toList()
+        : const <CatalogCategoryModel>[];
+    final parentId = _asInt(json['parentId']);
+    return CatalogCategoryModel(
+      id: _asInt(json['id']) ?? 0,
+      nameEn: _asString(json['nameEn']) ?? _asString(json['name']) ?? '',
+      nameAr: _asString(json['nameAr']) ?? '',
+      parentId: parentId == null || parentId == 0 ? null : parentId,
+      children: children,
+    );
+  }
+
+  static String? _asString(Object? value) {
+    if (value is String) {
+      return value;
+    }
+    return null;
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
+  }
 
   final int id;
   final String nameEn;
   final String nameAr;
   final int? parentId;
+  final List<CatalogCategoryModel> children;
 }
 
 extension CatalogCategoryModelX on CatalogCategoryModel {
@@ -28,5 +56,6 @@ extension CatalogCategoryModelX on CatalogCategoryModel {
         id: id,
         name: LocalizedText(en: nameEn, ar: nameAr),
         parentId: parentId,
+        children: children.map((c) => c.toEntity()).toList(),
       );
 }

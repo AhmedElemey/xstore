@@ -90,8 +90,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('You earn'), findsOneWidget);
-      expect(find.textContaining('980'), findsOneWidget);
-      expect(find.textContaining('20'), findsWidgets);
+      // Flat platform fee (not a % of price) — no vendor session is mocked
+      // here, so this exercises the kStarterCommissionFeeEgp fallback (2
+      // EGP): vendor earns 1000 - 2 = 998.
+      expect(find.textContaining('998'), findsOneWidget);
+      expect(find.textContaining('EGP 2'), findsWidgets);
       expect(find.textContaining('Due on delivery'), findsOneWidget);
     });
 

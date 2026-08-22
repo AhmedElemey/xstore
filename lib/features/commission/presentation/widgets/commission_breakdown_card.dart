@@ -40,8 +40,7 @@ class CommissionBreakdownCard extends StatelessWidget {
           const SizedBox(height: 6),
           _row(
             context,
-            label:
-                '${context.l10n.commissionPlatformFee} (${breakdown.ratePercent.toStringAsFixed(0)}%)',
+            label: context.l10n.commissionPlatformFee,
             value: '$currencyCode ${breakdown.feeAmount.toStringAsFixed(2)}',
             valueColor: context.textSecondary,
           ),

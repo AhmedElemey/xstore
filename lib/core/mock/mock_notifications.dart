@@ -34,7 +34,7 @@ List<NotificationEntity> _consumerNotifications(DateTime n) {
       type: NotificationType.priceDrop,
       title: 'Price Drop Alert! 💰',
       body:
-          'iPhone 15 Pro dropped by 7% (200,000 → 185,000 DZD). Grab it before it\'s gone!',
+          'iPhone 15 Pro dropped by 7% (200,000 → 185,000 EGP). Grab it before it\'s gone!',
       imageUrl: MockImages.product(10),
       actionRoute: product('listing_001'),
       discountPercent: 7,
@@ -167,7 +167,7 @@ List<NotificationEntity> _consumerNotifications(DateTime n) {
       id: 'notif_015',
       type: NotificationType.securityAlert,
       title: 'New sign-in',
-      body: 'We noticed a login from a new device in Algiers.',
+      body: 'We noticed a login from a new device in Cairo.',
       isRead: true,
       createdAt: n.subtract(const Duration(days: 28)),
     ),
@@ -184,7 +184,7 @@ List<NotificationEntity> _vendorNotifications(DateTime n) {
       type: NotificationType.newOrder,
       title: 'New Order Received! 🛍️',
       body:
-          'Sara Khelifi ordered iPhone 15 Pro x1 for 185,000 DZD. Confirm now!',
+          'Sara Khelifi ordered iPhone 15 Pro x1 for 185,000 EGP. Confirm now!',
       imageUrl: MockImages.avatar(2),
       actionRoute: order('XS-2024-001'),
       isRead: false,
@@ -195,7 +195,7 @@ List<NotificationEntity> _vendorNotifications(DateTime n) {
       type: NotificationType.newOrder,
       title: 'New Order Received! 🛍️',
       body:
-          'Karim Boudiaf ordered AirPods Pro x1 for 32,000 DZD. Confirm now!',
+          'Karim Boudiaf ordered AirPods Pro x1 for 32,000 EGP. Confirm now!',
       imageUrl: MockImages.avatar(3),
       actionRoute: order('XS-2024-002'),
       isRead: false,
@@ -206,7 +206,7 @@ List<NotificationEntity> _vendorNotifications(DateTime n) {
       type: NotificationType.newMessage,
       title: 'New message from Sara Khelifi',
       body:
-          'Sara: Hi! Is the iPhone still available? Can you ship to Oran?',
+          'Sara: Hi! Is the iPhone still available? Can you ship to Cairo?',
       imageUrl: MockImages.avatar(2),
       actionRoute: AppRoutes.chatThread('consumer_001'),
       isRead: false,
@@ -239,7 +239,7 @@ List<NotificationEntity> _vendorNotifications(DateTime n) {
       type: NotificationType.paymentReceived,
       title: 'Payment Received 💰',
       body:
-          'You received 185,000 DZD for order #XS-2024-001. Check your earnings.',
+          'You received 185,000 EGP for order #XS-2024-001. Check your earnings.',
       actionRoute: AppRoutes.earnings,
       isRead: true,
       createdAt: n.subtract(const Duration(hours: 22)),
@@ -289,7 +289,7 @@ List<NotificationEntity> _vendorNotifications(DateTime n) {
       id: 'notif_v011',
       type: NotificationType.paymentReceived,
       title: 'Payout processed',
-      body: '32,000 DZD for order #XS-2024-088 is on the way.',
+      body: '32,000 EGP for order #XS-2024-088 is on the way.',
       actionRoute: AppRoutes.earnings,
       isRead: true,
       createdAt: n.subtract(const Duration(days: 7)),

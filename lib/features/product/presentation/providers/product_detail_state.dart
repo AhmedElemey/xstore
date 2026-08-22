@@ -16,7 +16,7 @@ class ProductDetailState with _$ProductDetailState {
     @Default(false) bool isDescriptionExpanded,
     @Default(false) bool isAddingToCart,
     double? compareAtPrice,
-    @Default(99) int stockQuantity,
+    @Default(0) int stockQuantity,
     @Default('') String locationLine,
     ProductSellerEntity? seller,
     @Default({}) Map<String, String> specifications,

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../delivery/presentation/screens/send_package_screen.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_order_detail_provider.dart';
 import '../widgets/delivery_method_sheet.dart';
@@ -80,33 +77,35 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 const SizedBox(height: AppSpacing.lg),
                 _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersDeliveryAddressTitle, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), Text(o.deliveryAddress.fullName), Text(o.deliveryAddress.street), Text('${o.deliveryAddress.city}, ${o.deliveryAddress.wilaya}'), TextButton(onPressed: () {}, child: Text(context.l10n.vendorViewOnMap))])),
                 const SizedBox(height: AppSpacing.lg),
-                if (o.deliveryMethod == DeliveryMethod.platform &&
-                    o.status != OrderStatus.cancelled &&
-                    o.status != OrderStatus.delivered &&
-                    o.status != OrderStatus.refunded) ...[
-                  _Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(context.l10n.requestCustomDeliveryTitle, style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(context.l10n.requestCustomDeliverySubtitle, style: Theme.of(context).textTheme.bodySmall),
-                        const SizedBox(height: AppSpacing.md),
-                        OutlinedButton(
-                          onPressed: () => context.push(
-                            AppRoutes.sendPackage,
-                            extra: SendPackageArgs(
-                              orderId: o.id,
-                              initialDropoff: o.deliveryAddress,
-                            ),
-                          ),
-                          child: Text(context.l10n.requestCustomDeliveryAction),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
+                // Package delivery ("request custom delivery") deferred to
+                // phase 2 — out of scope for phase 1 launch.
+                // if (o.deliveryMethod == DeliveryMethod.platform &&
+                //     o.status != OrderStatus.cancelled &&
+                //     o.status != OrderStatus.delivered &&
+                //     o.status != OrderStatus.refunded) ...[
+                //   _Card(
+                //     child: Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         Text(context.l10n.requestCustomDeliveryTitle, style: Theme.of(context).textTheme.titleMedium),
+                //         const SizedBox(height: AppSpacing.sm),
+                //         Text(context.l10n.requestCustomDeliverySubtitle, style: Theme.of(context).textTheme.bodySmall),
+                //         const SizedBox(height: AppSpacing.md),
+                //         OutlinedButton(
+                //           onPressed: () => context.push(
+                //             AppRoutes.sendPackage,
+                //             extra: SendPackageArgs(
+                //               orderId: o.id,
+                //               initialDropoff: o.deliveryAddress,
+                //             ),
+                //           ),
+                //           child: Text(context.l10n.requestCustomDeliveryAction),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                //   const SizedBox(height: AppSpacing.lg),
+                // ],
                 _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersItemsSectionCount(o.items.length), style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), ...o.items.map((e) => OrderItemTile(item: e, showStockHint: true))])),
                 const SizedBox(height: AppSpacing.lg),
                 _Card(child: OrderPriceBreakdown(order: o, vendorMode: true)),

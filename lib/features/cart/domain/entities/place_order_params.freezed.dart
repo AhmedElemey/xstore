@@ -25,9 +25,6 @@ mixin _$PlaceOrderParams {
   double get shippingTotal => throw _privateConstructorUsedError;
   double get discount => throw _privateConstructorUsedError;
   double get total => throw _privateConstructorUsedError;
-  String? get cardNumber => throw _privateConstructorUsedError;
-  String? get cardExpiry => throw _privateConstructorUsedError;
-  String? get cardCvv => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $PlaceOrderParamsCopyWith<PlaceOrderParams> get copyWith =>
@@ -49,10 +46,7 @@ abstract class $PlaceOrderParamsCopyWith<$Res> {
       double subtotal,
       double shippingTotal,
       double discount,
-      double total,
-      String? cardNumber,
-      String? cardExpiry,
-      String? cardCvv});
+      double total});
 
   $OrderAddressCopyWith<$Res> get deliveryAddress;
 }
@@ -79,9 +73,6 @@ class _$PlaceOrderParamsCopyWithImpl<$Res, $Val extends PlaceOrderParams>
     Object? shippingTotal = null,
     Object? discount = null,
     Object? total = null,
-    Object? cardNumber = freezed,
-    Object? cardExpiry = freezed,
-    Object? cardCvv = freezed,
   }) {
     return _then(_value.copyWith(
       consumerId: null == consumerId
@@ -120,18 +111,6 @@ class _$PlaceOrderParamsCopyWithImpl<$Res, $Val extends PlaceOrderParams>
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as double,
-      cardNumber: freezed == cardNumber
-          ? _value.cardNumber
-          : cardNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      cardExpiry: freezed == cardExpiry
-          ? _value.cardExpiry
-          : cardExpiry // ignore: cast_nullable_to_non_nullable
-              as String?,
-      cardCvv: freezed == cardCvv
-          ? _value.cardCvv
-          : cardCvv // ignore: cast_nullable_to_non_nullable
-              as String?,
     ) as $Val);
   }
 
@@ -161,10 +140,7 @@ abstract class _$$PlaceOrderParamsImplCopyWith<$Res>
       double subtotal,
       double shippingTotal,
       double discount,
-      double total,
-      String? cardNumber,
-      String? cardExpiry,
-      String? cardCvv});
+      double total});
 
   @override
   $OrderAddressCopyWith<$Res> get deliveryAddress;
@@ -190,9 +166,6 @@ class __$$PlaceOrderParamsImplCopyWithImpl<$Res>
     Object? shippingTotal = null,
     Object? discount = null,
     Object? total = null,
-    Object? cardNumber = freezed,
-    Object? cardExpiry = freezed,
-    Object? cardCvv = freezed,
   }) {
     return _then(_$PlaceOrderParamsImpl(
       consumerId: null == consumerId
@@ -231,18 +204,6 @@ class __$$PlaceOrderParamsImplCopyWithImpl<$Res>
           ? _value.total
           : total // ignore: cast_nullable_to_non_nullable
               as double,
-      cardNumber: freezed == cardNumber
-          ? _value.cardNumber
-          : cardNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      cardExpiry: freezed == cardExpiry
-          ? _value.cardExpiry
-          : cardExpiry // ignore: cast_nullable_to_non_nullable
-              as String?,
-      cardCvv: freezed == cardCvv
-          ? _value.cardCvv
-          : cardCvv // ignore: cast_nullable_to_non_nullable
-              as String?,
     ));
   }
 }
@@ -259,10 +220,7 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
       required this.subtotal,
       required this.shippingTotal,
       required this.discount,
-      required this.total,
-      this.cardNumber,
-      this.cardExpiry,
-      this.cardCvv})
+      required this.total})
       : _items = items;
 
   @override
@@ -289,16 +247,10 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
   final double discount;
   @override
   final double total;
-  @override
-  final String? cardNumber;
-  @override
-  final String? cardExpiry;
-  @override
-  final String? cardCvv;
 
   @override
   String toString() {
-    return 'PlaceOrderParams(consumerId: $consumerId, items: $items, deliveryAddress: $deliveryAddress, paymentMethod: $paymentMethod, deliveryNote: $deliveryNote, subtotal: $subtotal, shippingTotal: $shippingTotal, discount: $discount, total: $total, cardNumber: $cardNumber, cardExpiry: $cardExpiry, cardCvv: $cardCvv)';
+    return 'PlaceOrderParams(consumerId: $consumerId, items: $items, deliveryAddress: $deliveryAddress, paymentMethod: $paymentMethod, deliveryNote: $deliveryNote, subtotal: $subtotal, shippingTotal: $shippingTotal, discount: $discount, total: $total)';
   }
 
   @override
@@ -321,12 +273,7 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
                 other.shippingTotal == shippingTotal) &&
             (identical(other.discount, discount) ||
                 other.discount == discount) &&
-            (identical(other.total, total) || other.total == total) &&
-            (identical(other.cardNumber, cardNumber) ||
-                other.cardNumber == cardNumber) &&
-            (identical(other.cardExpiry, cardExpiry) ||
-                other.cardExpiry == cardExpiry) &&
-            (identical(other.cardCvv, cardCvv) || other.cardCvv == cardCvv));
+            (identical(other.total, total) || other.total == total));
   }
 
   @override
@@ -340,10 +287,7 @@ class _$PlaceOrderParamsImpl implements _PlaceOrderParams {
       subtotal,
       shippingTotal,
       discount,
-      total,
-      cardNumber,
-      cardExpiry,
-      cardCvv);
+      total);
 
   @JsonKey(ignore: true)
   @override
@@ -363,10 +307,7 @@ abstract class _PlaceOrderParams implements PlaceOrderParams {
       required final double subtotal,
       required final double shippingTotal,
       required final double discount,
-      required final double total,
-      final String? cardNumber,
-      final String? cardExpiry,
-      final String? cardCvv}) = _$PlaceOrderParamsImpl;
+      required final double total}) = _$PlaceOrderParamsImpl;
 
   @override
   String get consumerId;
@@ -386,12 +327,6 @@ abstract class _PlaceOrderParams implements PlaceOrderParams {
   double get discount;
   @override
   double get total;
-  @override
-  String? get cardNumber;
-  @override
-  String? get cardExpiry;
-  @override
-  String? get cardCvv;
   @override
   @JsonKey(ignore: true)
   _$$PlaceOrderParamsImplCopyWith<_$PlaceOrderParamsImpl> get copyWith =>

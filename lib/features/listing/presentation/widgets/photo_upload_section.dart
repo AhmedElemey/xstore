@@ -10,6 +10,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Horizontal photo strip: add tile, previews, reorder via long-press drag.
+/// Gallery selection fills remaining slots (max 5) in one shot.
 class PhotoUploadSection extends StatelessWidget {
   const PhotoUploadSection({
     super.key,

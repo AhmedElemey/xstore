@@ -8,8 +8,10 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/utils/extensions/context_extensions.dart';
-import '../../shared/utils/require_login.dart';
-import '../../shared/widgets/xstore_button.dart';
+import '../legal/xstore_legal_documents.dart';
+import '../utils/require_login.dart';
+import '../widgets/xstore_button.dart';
+import 'legal_document_screen.dart';
 
 /// Honest placeholder for features not yet built — clearer than generic
 /// “Coming Soon” without inventing backend or legal content.
@@ -119,10 +121,10 @@ class TermsInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TrustInfoScreen(
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    return LegalDocumentScreen(
       title: context.l10n.menuTerms,
-      message: context.l10n.trustInfoTermsBody,
-      icon: LucideIcons.fileText,
+      sections: isAr ? xstoreTermsAr : xstoreTermsEn,
     );
   }
 }
@@ -132,10 +134,10 @@ class PrivacyInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TrustInfoScreen(
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    return LegalDocumentScreen(
       title: context.l10n.menuPrivacy,
-      message: context.l10n.trustInfoPrivacyBody,
-      icon: LucideIcons.shield,
+      sections: isAr ? xstorePrivacyAr : xstorePrivacyEn,
     );
   }
 }

@@ -12,7 +12,7 @@ class ProductDetailEntity with _$ProductDetailEntity {
   const factory ProductDetailEntity({
     required ListingEntity listing,
     double? compareAtPrice,
-    @Default(99) int stockQuantity,
+    @Default(0) int stockQuantity,
     @Default('') String locationLine,
     ProductSellerEntity? seller,
     @Default({}) Map<String, String> specifications,

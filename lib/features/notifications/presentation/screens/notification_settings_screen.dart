@@ -106,6 +106,16 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Text(
+              context.l10n.notificationSettingsDeviceOnly,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ),
           if (!isVendor) ...[
             _Section(title: context.l10n.notificationSettingsSectionOrders, children: [
               _Row(icon: LucideIcons.checkCircle2, label: context.l10n.notificationSettingsOrderConfirmed, value: _vals[_kOrderConfirmed]!, onChanged: (v) => _set(_kOrderConfirmed, v)),

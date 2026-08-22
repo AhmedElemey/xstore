@@ -304,7 +304,7 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
       this.isDescriptionExpanded = false,
       this.isAddingToCart = false,
       this.compareAtPrice,
-      this.stockQuantity = 99,
+      this.stockQuantity = 0,
       this.locationLine = '',
       this.seller,
       final Map<String, String> specifications = const {},

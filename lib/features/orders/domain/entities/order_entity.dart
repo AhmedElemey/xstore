@@ -69,6 +69,17 @@ class OrderStatsEntity with _$OrderStatsEntity {
     @Default(0) int monthCount,
     @Default(0) int totalCount,
     @Default(0.0) double totalRevenue,
+    // Platform commission config + wallet-alert flags, echoed on the
+    // GET /vendor/orders envelope (CONFIRMED against backend source
+    // 2026-08-15 — the admin-only /api/admin/system-settings endpoint that
+    // owns these values has no vendor-accessible equivalent). Null in mock
+    // mode / on fetch failure — callers fall back to the starter constants
+    // in commission_config_provider.dart.
+    double? commissionValueOnOrder,
+    double? warnThresholdEgp,
+    double? pauseThresholdEgp,
+    @Default(false) bool exceedsWarnThreshold,
+    @Default(false) bool exceedsPauseThreshold,
   }) = _OrderStatsEntity;
 }
 

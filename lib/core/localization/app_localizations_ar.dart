@@ -337,7 +337,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'أضف من 1 لـ 5 صور (الأولى = الغلاف)';
 
   @override
-  String get listingAddPhotoTile => 'إضافة صورة';
+  String get listingAddPhotoTile => 'إضافة صور';
 
   @override
   String get listingPhotoCoverBadge => 'غلاف';
@@ -385,16 +385,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commissionWalletWarnTitle => 'ادفع رسوم المنصة قريبًا';
 
   @override
-  String commissionWalletWarnBody(String amount, String limit) {
-    return 'عليك $amount كرسوم منصة. ادفعها قبل أن تصل إلى $limit وإلا سيتم إيقاف الإعلانات الجديدة.';
+  String commissionWalletWarnBody(String limit) {
+    return 'لديك رسوم منصة غير مدفوعة. ادفعها قبل أن تصل إلى حد $limit وإلا سيتم إيقاف الإعلانات الجديدة.';
   }
 
   @override
   String get commissionWalletPausedTitle => 'تم إيقاف الإعلانات الجديدة';
 
   @override
-  String commissionWalletPausedBody(String amount, String limit) {
-    return 'عليك $amount كرسوم منصة، تجاوزت حد $limit. ادفعها لتتمكن من نشر إعلانات جديدة.';
+  String commissionWalletPausedBody(String limit) {
+    return 'تجاوزت رسوم المنصة حد $limit. ادفعها لتتمكن من نشر إعلانات جديدة.';
   }
 
   @override
@@ -486,129 +486,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listingCondGood => 'جيد';
-
-  @override
-  String get listingCatElectronics => 'إلكترونيات';
-
-  @override
-  String get listingCatFashion => 'أزياء';
-
-  @override
-  String get listingCatHomeGarden => 'المنزل والحديقة';
-
-  @override
-  String get listingCatBeauty => 'تجميل';
-
-  @override
-  String get listingCatSports => 'رياضة';
-
-  @override
-  String get listingCatToys => 'ألعاب';
-
-  @override
-  String get listingCatAutomotive => 'سيارات';
-
-  @override
-  String get listingCatFoodDrinks => 'أطعمة ومشروبات';
-
-  @override
-  String get listingCatBooks => 'كتب';
-
-  @override
-  String get listingCatOther => 'أخرى';
-
-  @override
-  String get listingSubElectronicsPhones => 'موبايلات وأجهزة لوحية';
-
-  @override
-  String get listingSubElectronicsLaptops => 'لابتوب وأجهزة كمبيوتر';
-
-  @override
-  String get listingSubElectronicsAudio => 'صوتيات';
-
-  @override
-  String get listingSubElectronicsAccessories => 'إكسسوارات';
-
-  @override
-  String get listingSubFashionMens => 'رجالي';
-
-  @override
-  String get listingSubFashionWomens => 'حريمي';
-
-  @override
-  String get listingSubFashionKids => 'أطفال';
-
-  @override
-  String get listingSubFashionShoes => 'أحذية';
-
-  @override
-  String get listingSubHomeFurniture => 'أثاث';
-
-  @override
-  String get listingSubHomeDecor => 'ديكور';
-
-  @override
-  String get listingSubHomeKitchen => 'مطبخ';
-
-  @override
-  String get listingSubHomeGarden => 'حديقة';
-
-  @override
-  String get listingSubBeautySkincare => 'عناية بالبشرة';
-
-  @override
-  String get listingSubBeautyMakeup => 'مكياج';
-
-  @override
-  String get listingSubBeautyHair => 'عناية بالشعر';
-
-  @override
-  String get listingSubSportsFitness => 'لياقة';
-
-  @override
-  String get listingSubSportsOutdoor => 'أنشطة خارجية';
-
-  @override
-  String get listingSubSportsTeam => 'رياضات جماعية';
-
-  @override
-  String get listingSubToysGames => 'ألعاب';
-
-  @override
-  String get listingSubToysDolls => 'دمى ومجسمات';
-
-  @override
-  String get listingSubToysEducational => 'تعليمية';
-
-  @override
-  String get listingSubAutoParts => 'قطع غيار';
-
-  @override
-  String get listingSubAutoAccessories => 'إكسسوارات';
-
-  @override
-  String get listingSubAutoCare => 'منتجات العناية';
-
-  @override
-  String get listingSubFoodBeverages => 'مشروبات';
-
-  @override
-  String get listingSubFoodSnacks => 'سناكس';
-
-  @override
-  String get listingSubFoodGrocery => 'بقالة';
-
-  @override
-  String get listingSubBooksFiction => 'روايات';
-
-  @override
-  String get listingSubBooksNonfiction => 'غير خيال';
-
-  @override
-  String get listingSubBooksTextbooks => 'كتب دراسية';
-
-  @override
-  String get listingSubOtherMisc => 'متنوع';
 
   @override
   String get vendorAccount => 'حساب البائع';
@@ -797,6 +674,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get whatsappLabel => 'رقم واتساب';
 
   @override
+  String whatsappProductPrefill(String title) {
+    return 'مرحباً، مهتم بالإعلان $title';
+  }
+
+  @override
+  String whatsappStorePrefill(String name) {
+    return 'مرحباً، شفت متجر $name على xStore';
+  }
+
+  @override
+  String get whatsappSellerUnavailable => 'مش قادرين نفتح واتساب.';
+
+  @override
   String get instagramLabel => 'حساب إنستجرام';
 
   @override
@@ -900,7 +790,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get trustInfoPaymentMethodsBody =>
-      'حفظ طرق الدفع مش متاح دلوقتي. وقت الدفع تقدر تدفع كاش عند الاستلام أو تدخل بيانات البطاقة للطلب ده بس — مش بنحفظ البطاقة هنا.';
+      'حفظ طرق الدفع مش متاح دلوقتي. الدفع كاش عند الاستلام بس — تدفع لما الأوردر يوصّل.';
 
   @override
   String get trustInfoAddressesBody =>
@@ -913,6 +803,20 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get trustInfoPrivacyBody =>
       'سياسة الخصوصية لسه مش منشورة في التطبيق. مش بنعرض نص قانوني مؤقت هنا. هنوضّح إزاي بنتعامل مع بياناتك هنا قبل الإطلاق.';
+
+  @override
+  String get legalDraftNotice =>
+      'مسودة تشغيلية لطريقة شغل xStore دلوقتي. بيانات الشركة ومدة الإرجاع والنص القانوني العربي المعتمد هتتضاف قبل النشر على المتاجر. ده مش بديل لاستشارة قانونية.';
+
+  @override
+  String get newSeller => 'بائع جديد';
+
+  @override
+  String get newSellerEmDash => '—';
+
+  @override
+  String get notificationSettingsDeviceOnly =>
+      'الإعدادات دي على الجهاز ده بس لحد ما تتتزامن مع حسابك.';
 
   @override
   String get trustInfoHelpBody =>
@@ -2499,7 +2403,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordRequired => 'كلمة المرور *';
 
   @override
+  String get currentPasswordRequired => 'كلمة المرور الحالية *';
+
+  @override
   String get newPasswordRequired => 'كلمة المرور الجديدة *';
+
+  @override
+  String get changePasswordSuccess => 'تم تغيير كلمة المرور.';
 
   @override
   String get confirmPasswordRequired => 'تأكيد كلمة المرور *';
@@ -2968,7 +2878,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationStoreDescriptionMax => 'أقصى 300 حرف';
 
   @override
-  String get validationStoreCityWilayaRequired => 'المدينة والولاية مطلوبين';
+  String get validationStoreCityWilayaRequired => 'المدينة والمحافظة مطلوبين';
 
   @override
   String get validationFullNameArRequired => 'الاسم الكامل بالعربية مطلوب';

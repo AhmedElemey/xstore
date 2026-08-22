@@ -241,16 +241,6 @@ abstract final class AppStrings {
   static const verified = 'Verified';
   static const requiredField = 'Required';
 
-  /// Vendor store category picker (edit profile).
-  static List<String> get storeCategoryPickerOptions => const [
-        'Electronics',
-        'Fashion',
-        'Home',
-        'Sports',
-        'Beauty',
-        'Other',
-      ];
-
   // Nav
   static const navHome = 'Home';
   static const navExplore = 'Explore';
@@ -508,7 +498,7 @@ abstract final class AppStrings {
   static const cartUndo = 'Undo';
   static const cartShippingFree = '🚚 Free Shipping';
   static String cartShippingPaid(double amount) =>
-      '🚚 +${amount.round()} DZD shipping';
+      '🚚 +${amount.round()} EGP shipping';
   static const cartPickupOnly = '🚫 Pickup Only';
   static const cartPromoHeading = '🏷️ Have a promo code?';
   static const cartCouponHint = 'Enter coupon code…';
@@ -517,7 +507,7 @@ abstract final class AppStrings {
   static String cartCouponApplied(String code, String detail) =>
       '✅ "$code" — $detail';
   static const cartCouponInvalid = 'Invalid coupon code';
-  static const cartCouponMinOrder = 'Minimum order 5,000 DZD required';
+  static const cartCouponMinOrder = 'Minimum order 5,000 EGP required';
   static const cartOrderSummary = 'Order Summary';
   static String cartSubtotalLine(int n) => 'Subtotal ($n items)';
   static const cartShippingLine = 'Shipping';
@@ -586,7 +576,7 @@ abstract final class AppStrings {
   static const orderTrackCta = 'Track My Order';
   static const orderContinueShopping = 'Continue Shopping';
   static const couponDetailSave10 = '10% discount applied!';
-  static const couponDetailFree500 = '500 DZD discount applied!';
+  static const couponDetailFree500 = '500 EGP discount applied!';
   static const couponDetailWelcome = '15% discount applied!';
 
   // Product

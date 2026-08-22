@@ -250,7 +250,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   }
 
   // CONFIRMED against the mock cart seed: listing_002/003/016 belong to
-  // vendor_002 (Karim Merabet / Oran Fashion Hub), everything else to
+  // vendor_002 (Karim Hassan / Cairo Fashion Hub), everything else to
   // vendor_001 (mockVendorUser) — matches cart_remote_datasource.dart.
   String _mockVendorIdForListing(String listingId) {
     const v2 = {'listing_003', 'listing_016', 'listing_002'};
@@ -261,8 +261,8 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       _mockVendorDisplay(String vendorId) {
     if (vendorId == 'vendor_002') {
       return (
-        'Karim Merabet',
-        'Oran Fashion Hub',
+        'Karim Hassan',
+        'Cairo Fashion Hub',
         MockImages.avatar(4),
         4.7,
         true,
@@ -328,14 +328,14 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ProductDetailEntity(
       listing: m.toEntity(),
       compareAtPrice: mockCompareAtByListingId[listingId],
-      stockQuantity: 99,
-      locationLine: vid == 'vendor_002' ? '📍 Oran, Egypt' : '📍 ${mockVendorUser.storeCity ?? 'Cairo'}, Egypt',
+      stockQuantity: m.stockQuantity,
+      locationLine: vid == 'vendor_002' ? '📍 Giza, Egypt' : '📍 ${mockVendorUser.storeCity ?? 'Cairo'}, Egypt',
       seller: ProductSellerEntity(
         id: vid,
         name: vd.$1,
         avatarUrl: vd.$3,
         rating: vd.$4,
-        salesCount: vid == 'vendor_002' ? 340 : (mockVendorUser.totalSales ?? 230),
+        salesCount: vid == 'vendor_002' ? 340 : mockVendorUser.totalSales,
         verified: vd.$5,
       ),
       specifications: const {},
@@ -359,7 +359,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ProductDetailEntity(
       listing: m.toEntity(),
       compareAtPrice: mockCompareAtByListingId[m.id],
-      stockQuantity: 99,
+      stockQuantity: m.stockQuantity,
       locationLine: '',
       specifications: const {},
       similarProducts: const [],
@@ -428,7 +428,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ProductDetailEntity(
       listing: listing,
       compareAtPrice: compare,
-      stockQuantity: stock?.toInt() ?? 99,
+      stockQuantity: stock?.toInt() ?? 0,
       locationLine: loc,
       seller: seller,
       specifications: specs,
@@ -461,9 +461,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       id: userId.toString(),
       name: (json['userName'] ?? '').toString(),
       avatarUrl: (json['userAvatar'] ?? '').toString(),
-      rating: _num(json['rating']),
-      salesCount: 0,
+      rating: _numOrNull(json['rating']),
+      salesCount: _intOrNull(json['salesCount'] ?? json['totalSales'] ?? json['sales']),
       verified: false,
+      whatsappNumber: _optWhatsapp(json),
     );
   }
 
@@ -474,10 +475,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       id: (m['id'] ?? m['vendorId'] ?? '').toString(),
       name: (m['name'] ?? m['displayName'] ?? '').toString(),
       avatarUrl: (m['avatarUrl'] ?? m['avatar'] ?? '').toString(),
-      rating: _num(m['rating'] ?? m['averageRating']),
-      salesCount:
-          _int(m['salesCount'] ?? m['totalSales'] ?? m['sales'], fallback: 230),
+      rating: _numOrNull(m['rating'] ?? m['averageRating']),
+      salesCount: _intOrNull(m['salesCount'] ?? m['totalSales'] ?? m['sales']),
       verified: m['verified'] == true || m['isVerified'] == true,
+      whatsappNumber: _optWhatsapp(m),
     );
   }
 
@@ -541,7 +542,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ProductDetailEntity(
       listing: listing,
       compareAtPrice: compare == 0 ? null : compare,
-      stockQuantity: _int(m['stockQuantity'] ?? m['stock'], fallback: 99),
+      stockQuantity: _int(m['stockQuantity'] ?? m['stock'], fallback: 0),
       locationLine: '',
       specifications: const {},
       similarProducts: const [],
@@ -593,6 +594,26 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       }
     }
     return const [];
+  }
+
+  String? _optWhatsapp(Map<String, dynamic> m) {
+    for (final key in ['whatsappNumber', 'whatsAppNumber', 'whatsapp']) {
+      final v = m[key]?.toString().trim();
+      if (v != null && v.isNotEmpty) return v;
+    }
+    return null;
+  }
+
+  double? _numOrNull(Object? v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
+  }
+
+  int? _intOrNull(Object? v) {
+    if (v == null) return null;
+    if (v is num) return v.toInt();
+    return int.tryParse(v.toString());
   }
 
   double _num(Object? v) =>

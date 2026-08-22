@@ -17,7 +17,7 @@ final mockBannerModels = [
   ),
   BannerModel(
     id: 'banner_003',
-    title: 'Free Shipping — On all orders above 2000 DZD',
+    title: 'Free Shipping — On all orders above 2000 EGP',
     imageUrl: MockImages.banner(30),
     actionUrl: '/explore?sort=deals',
   ),

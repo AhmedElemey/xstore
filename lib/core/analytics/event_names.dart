@@ -24,6 +24,7 @@ abstract final class AnalyticsEvents {
   static const String wishlistRemove = 'wishlist_remove';
   static const String checkoutPaymentMethodSelected =
       'checkout_payment_method_selected';
+  static const String whatsappSellerTap = 'whatsapp_seller_tap';
 
   // Vendor funnel (listing live -> order fulfilled) — the other half of
   // the marketplace loop, see docs_business/launch_todos/03_funnel_metrics.md
@@ -50,6 +51,7 @@ abstract final class AnalyticsProps {
   static const String currency = 'currency';
   static const String paymentType = 'payment_type';
   static const String method = 'method';
+  static const String source = 'source';
   static const String role = 'role';
   static const String query = 'query';
   static const String resultCount = 'result_count';

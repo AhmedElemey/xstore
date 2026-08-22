@@ -108,7 +108,7 @@ const List<_CatalogRow> _catalog = [
     description:
         'Immersive 65-inch Samsung QLED with vivid 4K HDR and smart TV apps built in. '
         'Ideal for movies and sports with deep contrast and smooth motion. '
-        'Large carton — local pickup recommended; seller can meet in Algiers.',
+        'Large carton — local pickup recommended; seller can meet in Cairo.',
     price: 145000,
     compareAt: null,
     categoryLabel: 'Electronics / Televisions',
@@ -147,7 +147,7 @@ const List<_CatalogRow> _catalog = [
     description:
         'Warm brown genuine leather three-seater with classic lines and deep seats. '
         'Shows gentle patina consistent with age — no tears or structural issues. '
-        'Delivery can be arranged locally only in Oran and surrounding areas.',
+        'Delivery can be arranged locally only in Cairo and surrounding areas.',
     price: 65000,
     compareAt: null,
     categoryLabel: 'Home / Furniture',

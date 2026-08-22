@@ -371,20 +371,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           bgColor: AppColors.transparent,
                           textColor: context.textPrimary,
                         ),
-                        const Gap(AppSpacing.md),
-                        SocialButton(
-                          onTap: () => context.push(AppRoutes.courierLogin),
-                          isLoading: false,
-                          icon: Icon(
-                            LucideIcons.truck,
-                            size: 22,
-                            color: context.primaryColor,
-                          ),
-                          label: context.l10n.loginAsCourier,
-                          borderColor: context.borderColor,
-                          bgColor: AppColors.transparent,
-                          textColor: context.textPrimary,
-                        ),
+                        // Courier login deferred to phase 2 — delivery
+                        // feature is out of scope for phase 1 launch.
+                        // const Gap(AppSpacing.md),
+                        // SocialButton(
+                        //   onTap: () => context.push(AppRoutes.courierLogin),
+                        //   isLoading: false,
+                        //   icon: Icon(
+                        //     LucideIcons.truck,
+                        //     size: 22,
+                        //     color: context.primaryColor,
+                        //   ),
+                        //   label: context.l10n.loginAsCourier,
+                        //   borderColor: context.borderColor,
+                        //   bgColor: AppColors.transparent,
+                        //   textColor: context.textPrimary,
+                        // ),
                         const Gap(AppSpacing.md),
                         const SocialLoginRow(),
                         const Gap(AppSpacing.md),

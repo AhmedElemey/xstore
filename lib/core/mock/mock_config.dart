@@ -1,14 +1,20 @@
+import 'package:flutter/foundation.dart';
+
 class MockConfig {
   /// Toggle to switch between mock and real network data.
   ///
   /// Defaults to FALSE: every run and build talks to the live backend
   /// (see `ApiEndpoints.baseUrl`). Pass `--dart-define=MOCK=true` only to
   /// exercise the mock data paths (e.g. the mock-mode test suite in CI).
+  ///
+  /// Release builds ignore `MOCK=true` so a store APK can never ship on
+  /// fixtures or a local delivery API.
   static const bool _mockFromDefine = bool.fromEnvironment(
     'MOCK',
     defaultValue: false,
   );
-  static const bool useMock = _mockFromDefine;
+
+  static bool get useMock => !kReleaseMode && _mockFromDefine;
 
   /// Simulated latency for loading states (refresh, submits, etc.).
   static const Duration mockDelay = Duration(milliseconds: 800);

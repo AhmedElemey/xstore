@@ -19,6 +19,8 @@ mixin _$CatalogCategoryEntity {
   int get id => throw _privateConstructorUsedError;
   LocalizedText get name => throw _privateConstructorUsedError;
   int? get parentId => throw _privateConstructorUsedError;
+  List<CatalogCategoryEntity> get children =>
+      throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $CatalogCategoryEntityCopyWith<CatalogCategoryEntity> get copyWith =>
@@ -31,7 +33,11 @@ abstract class $CatalogCategoryEntityCopyWith<$Res> {
           $Res Function(CatalogCategoryEntity) then) =
       _$CatalogCategoryEntityCopyWithImpl<$Res, CatalogCategoryEntity>;
   @useResult
-  $Res call({int id, LocalizedText name, int? parentId});
+  $Res call(
+      {int id,
+      LocalizedText name,
+      int? parentId,
+      List<CatalogCategoryEntity> children});
 
   $LocalizedTextCopyWith<$Res> get name;
 }
@@ -53,6 +59,7 @@ class _$CatalogCategoryEntityCopyWithImpl<$Res,
     Object? id = null,
     Object? name = null,
     Object? parentId = freezed,
+    Object? children = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -67,6 +74,10 @@ class _$CatalogCategoryEntityCopyWithImpl<$Res,
           ? _value.parentId
           : parentId // ignore: cast_nullable_to_non_nullable
               as int?,
+      children: null == children
+          ? _value.children
+          : children // ignore: cast_nullable_to_non_nullable
+              as List<CatalogCategoryEntity>,
     ) as $Val);
   }
 
@@ -88,7 +99,11 @@ abstract class _$$CatalogCategoryEntityImplCopyWith<$Res>
       __$$CatalogCategoryEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, LocalizedText name, int? parentId});
+  $Res call(
+      {int id,
+      LocalizedText name,
+      int? parentId,
+      List<CatalogCategoryEntity> children});
 
   @override
   $LocalizedTextCopyWith<$Res> get name;
@@ -109,6 +124,7 @@ class __$$CatalogCategoryEntityImplCopyWithImpl<$Res>
     Object? id = null,
     Object? name = null,
     Object? parentId = freezed,
+    Object? children = null,
   }) {
     return _then(_$CatalogCategoryEntityImpl(
       id: null == id
@@ -123,6 +139,10 @@ class __$$CatalogCategoryEntityImplCopyWithImpl<$Res>
           ? _value.parentId
           : parentId // ignore: cast_nullable_to_non_nullable
               as int?,
+      children: null == children
+          ? _value._children
+          : children // ignore: cast_nullable_to_non_nullable
+              as List<CatalogCategoryEntity>,
     ));
   }
 }
@@ -131,7 +151,12 @@ class __$$CatalogCategoryEntityImplCopyWithImpl<$Res>
 
 class _$CatalogCategoryEntityImpl implements _CatalogCategoryEntity {
   const _$CatalogCategoryEntityImpl(
-      {required this.id, required this.name, this.parentId});
+      {required this.id,
+      required this.name,
+      this.parentId,
+      final List<CatalogCategoryEntity> children =
+          const <CatalogCategoryEntity>[]})
+      : _children = children;
 
   @override
   final int id;
@@ -139,10 +164,18 @@ class _$CatalogCategoryEntityImpl implements _CatalogCategoryEntity {
   final LocalizedText name;
   @override
   final int? parentId;
+  final List<CatalogCategoryEntity> _children;
+  @override
+  @JsonKey()
+  List<CatalogCategoryEntity> get children {
+    if (_children is EqualUnmodifiableListView) return _children;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_children);
+  }
 
   @override
   String toString() {
-    return 'CatalogCategoryEntity(id: $id, name: $name, parentId: $parentId)';
+    return 'CatalogCategoryEntity(id: $id, name: $name, parentId: $parentId, children: $children)';
   }
 
   @override
@@ -153,11 +186,13 @@ class _$CatalogCategoryEntityImpl implements _CatalogCategoryEntity {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.parentId, parentId) ||
-                other.parentId == parentId));
+                other.parentId == parentId) &&
+            const DeepCollectionEquality().equals(other._children, _children));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, parentId);
+  int get hashCode => Object.hash(runtimeType, id, name, parentId,
+      const DeepCollectionEquality().hash(_children));
 
   @JsonKey(ignore: true)
   @override
@@ -169,9 +204,11 @@ class _$CatalogCategoryEntityImpl implements _CatalogCategoryEntity {
 
 abstract class _CatalogCategoryEntity implements CatalogCategoryEntity {
   const factory _CatalogCategoryEntity(
-      {required final int id,
-      required final LocalizedText name,
-      final int? parentId}) = _$CatalogCategoryEntityImpl;
+          {required final int id,
+          required final LocalizedText name,
+          final int? parentId,
+          final List<CatalogCategoryEntity> children}) =
+      _$CatalogCategoryEntityImpl;
 
   @override
   int get id;
@@ -179,6 +216,8 @@ abstract class _CatalogCategoryEntity implements CatalogCategoryEntity {
   LocalizedText get name;
   @override
   int? get parentId;
+  @override
+  List<CatalogCategoryEntity> get children;
   @override
   @JsonKey(ignore: true)
   _$$CatalogCategoryEntityImplCopyWith<_$CatalogCategoryEntityImpl>

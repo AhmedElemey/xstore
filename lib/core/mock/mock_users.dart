@@ -9,7 +9,7 @@ import 'mock_images.dart';
 /// Domain session user (reference display).
 const mockVendorUser = UserEntity(
   id: 'vendor_001',
-  name: 'Ahmed Bensalem',
+  name: 'Ahmed Hassan',
   email: 'ahmed@xstore.com',
   phoneNumber: '+201055500001',
   role: UserRole.vendor,
@@ -17,14 +17,14 @@ const mockVendorUser = UserEntity(
   rating: 4.8,
   totalSales: 142,
   joinedAt: null,
-  location: 'Algiers, Egypt',
+  location: 'Cairo, Egypt',
   storeName: "Ahmed's Electronics",
   storeSlug: 'ahmeds-electronics',
   storeCategory: 'Electronics',
   storeDescription:
       'Premium electronics at the best prices in Egypt. All products are genuine and come with full warranty.',
-  storeCity: 'Algiers',
-  storeWilaya: 'Alger',
+  storeCity: 'Cairo',
+  storeWilaya: 'Cairo',
   storeId: 1,
   whatsappNumber: '+20 105 551 2345',
   latitude: 30.044400,
@@ -54,7 +54,7 @@ const mockConsumerUser = UserEntity(
   role: UserRole.consumer,
   isVerified: false,
   joinedAt: null,
-  location: 'Oran, Egypt',
+  location: 'Giza, Egypt',
 );
 
 UserModel mockVendorUserModel({

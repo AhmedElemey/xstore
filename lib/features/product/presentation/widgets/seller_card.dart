@@ -9,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/public_seller_stats.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
@@ -104,7 +105,11 @@ class SellerCard extends ConsumerWidget {
                             ),
                           const Gap(AppSpacing.xs),
                           Text(
-                            '⭐ ${seller.rating.toStringAsFixed(1)}${context.l10n.sellerRatingMid}${seller.salesCount}${context.l10n.sellerSalesSuffix}',
+                            publicSellerStatsLabel(
+                              context.l10n,
+                              rating: seller.rating,
+                              sales: seller.salesCount,
+                            ),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),

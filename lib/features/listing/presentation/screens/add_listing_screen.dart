@@ -291,8 +291,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     errors: err,
                     brandController: _brand,
                     brandFocusNode: _brandFocus,
-                    catalogCategories: catalogCategories,
-                    isArabic: isArabic,
                     categoryDisplay:
                         _categoryLabel(catalogCategories, isArabic, form.categoryId),
                     subcategoryDisplay: _subcategoryLabel(
@@ -346,10 +344,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       return context.l10n.listingSelectCategory;
     }
     final intId = int.tryParse(id);
-    for (final c in categories) {
-      if (c.id == intId) return c.name.resolve(isArabic);
+    if (intId == null) {
+      return context.l10n.listingSelectCategory;
     }
-    return context.l10n.listingSelectCategory;
+    return catalogCategoryById(categories, intId)?.name.resolve(isArabic) ??
+        context.l10n.listingSelectCategory;
   }
 
   String _subcategoryLabel(
@@ -361,10 +360,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       return context.l10n.listingSelectSubcategory;
     }
     final intId = int.tryParse(subId);
-    for (final c in categories) {
-      if (c.id == intId) return c.name.resolve(isArabic);
+    if (intId == null) {
+      return context.l10n.listingSelectSubcategory;
     }
-    return context.l10n.listingSelectSubcategory;
+    return catalogCategoryById(categories, intId)?.name.resolve(isArabic) ??
+        context.l10n.listingSelectSubcategory;
   }
 }
 
@@ -395,7 +395,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final price = Validators.parseMoneyInput(form.priceInput);
     final categoryId = int.tryParse(form.categoryId);
-    final rate = ref.watch(commissionRateForCategoryProvider(categoryId));
+    final feeEgp = ref.watch(commissionFeeEgpForCategoryProvider(categoryId));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -430,7 +430,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
         if (price != null && price > 0) ...[
           const Gap(AppSpacing.sm),
           CommissionBreakdownCard(
-            breakdown: CommissionBreakdown.forPrice(price, ratePercent: rate),
+            breakdown: CommissionBreakdown.forPrice(price, feeEgp: feeEgp),
             currencyCode: notifier.currencyCode,
           ),
         ],
@@ -494,8 +494,6 @@ class _ListingCategoryBrandSection extends StatelessWidget {
     required this.errors,
     required this.brandController,
     required this.brandFocusNode,
-    required this.catalogCategories,
-    required this.isArabic,
     required this.categoryDisplay,
     required this.subcategoryDisplay,
   });
@@ -505,18 +503,12 @@ class _ListingCategoryBrandSection extends StatelessWidget {
   final Map<String, String?> errors;
   final TextEditingController brandController;
   final FocusNode brandFocusNode;
-  final List<CatalogCategoryEntity> catalogCategories;
-  final bool isArabic;
   final String categoryDisplay;
   final String subcategoryDisplay;
 
   @override
   Widget build(BuildContext context) {
-    final topLevel = topLevelCategories(catalogCategories);
     final selectedCategoryId = int.tryParse(form.categoryId);
-    final subs = selectedCategoryId == null
-        ? const <CatalogCategoryEntity>[]
-        : subcategoriesOf(catalogCategories, selectedCategoryId);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -531,10 +523,9 @@ class _ListingCategoryBrandSection extends StatelessWidget {
           onTap: () => showListingCategoryPicker(
             context: context,
             title: context.l10n.listingFormCategoryPickerTitle,
-            categories: topLevel,
             selectedId: selectedCategoryId,
-            labelOf: (c) => c.name.resolve(isArabic),
-            onSelected: (id) => notifier.updateField('categoryId', id.toString()),
+            onSelected: (id) =>
+                notifier.updateField('categoryId', id.toString()),
           ),
         ),
         const Gap(AppSpacing.lg),
@@ -544,15 +535,19 @@ class _ListingCategoryBrandSection extends StatelessWidget {
             value: subcategoryDisplay,
             valueIsPlaceholder: form.subcategoryId.isEmpty,
             errorText: errors['subcategory'],
-            onTap: () => showListingSubcategoryPicker(
-              context: context,
-              title: '${context.l10n.subcategoryPickerPrefix}$categoryDisplay',
-              subcategories: subs,
-              selectedId: int.tryParse(form.subcategoryId),
-              labelOf: (c) => c.name.resolve(isArabic),
-              onSelected: (id) =>
-                  notifier.updateField('subcategoryId', id.toString()),
-            ),
+            onTap: () {
+              final parentId = selectedCategoryId;
+              if (parentId == null) return;
+              showListingSubcategoryPicker(
+                context: context,
+                title:
+                    '${context.l10n.subcategoryPickerPrefix}$categoryDisplay',
+                parentId: parentId,
+                selectedId: int.tryParse(form.subcategoryId),
+                onSelected: (id) =>
+                    notifier.updateField('subcategoryId', id.toString()),
+              );
+            },
           ),
           const Gap(AppSpacing.lg),
         ],

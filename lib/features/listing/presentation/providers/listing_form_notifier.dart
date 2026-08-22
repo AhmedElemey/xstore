@@ -127,12 +127,17 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     await prefs.setString(_draftKey, jsonEncode(snapshot));
   }
 
-  void addPhotoPath(String path) {
-    if (state.photoPaths.length >= _maxPhotos) {
-      return;
-    }
-    final next = [...state.photoPaths, path];
-    state = state.copyWith(photoPaths: next, errors: _clearKey(state.errors, 'photos'));
+  void addPhotoPath(String path) => addPhotoPaths([path]);
+
+  void addPhotoPaths(Iterable<String> paths) {
+    final remaining = _maxPhotos - state.photoPaths.length;
+    if (remaining <= 0) return;
+    final extra = paths.take(remaining).toList();
+    if (extra.isEmpty) return;
+    state = state.copyWith(
+      photoPaths: [...state.photoPaths, ...extra],
+      errors: _clearKey(state.errors, 'photos'),
+    );
   }
 
   /// Spec: `addPhoto(File)` — stored as a path in state.
@@ -182,11 +187,27 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   }
 
   Future<void> pickFromGallery() async {
-    final file = await _picker.pickImage(source: ImageSource.gallery);
-    if (_disposed || file == null) return;
-    final path = await _compressPhoto(file.path);
-    if (_disposed) return;
-    addPhotoPath(path);
+    final remaining = _maxPhotos - state.photoPaths.length;
+    if (remaining <= 0) return;
+
+    // pickMultiImage(limit:) throws ArgumentError when limit < 2, so a
+    // single remaining slot has to use the one-image gallery picker.
+    final List<XFile> files;
+    if (remaining == 1) {
+      final file = await _picker.pickImage(source: ImageSource.gallery);
+      files = file == null ? const [] : [file];
+    } else {
+      files = await _picker.pickMultiImage(limit: remaining);
+    }
+    if (_disposed || files.isEmpty) return;
+
+    final compressed = <String>[];
+    for (final file in files.take(remaining)) {
+      final path = await _compressPhoto(file.path);
+      if (_disposed) return;
+      compressed.add(path);
+    }
+    addPhotoPaths(compressed);
   }
 
   void updateField(String field, Object? value) {
@@ -209,16 +230,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         );
       case 'category':
       case 'categoryId':
-        final id = value as String;
-        final cat = ListingCategoriesData.categoryById(id);
-        final hints = cat?.attributeHints ?? [];
-        final newAttrs = hints
-            .map((h) => AttributeEntry(key: h, value: ''))
-            .toList();
         state = state.copyWith(
-          categoryId: id,
+          categoryId: value as String,
           subcategoryId: '',
-          attributes: newAttrs,
+          attributes: const [],
           errors: e,
         );
       case 'subcategory':

@@ -43,7 +43,9 @@ class ProductDetail extends _$ProductDetail {
     final len = base.listing?.imageUrls.length ?? 0;
     final maxIdx = len > 0 ? len - 1 : 0;
     return base.copyWith(
-      quantity: previous.quantity.clamp(1, base.stockQuantity),
+      quantity: base.stockQuantity < 1
+          ? 1
+          : previous.quantity.clamp(1, base.stockQuantity),
       selectedImageIndex: previous.selectedImageIndex.clamp(0, maxIdx),
       isDescriptionExpanded: previous.isDescriptionExpanded,
       isAddingToCart: false,

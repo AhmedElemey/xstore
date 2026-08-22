@@ -7,13 +7,13 @@ abstract final class Formatters {
     return '$symbol${amount.toStringAsFixed(2)}';
   }
 
-  /// Whole DZD with grouping, e.g. `185,500 DZD`.
+  /// Whole EGP with grouping, e.g. `185,500 EGP`.
   static String dzdWhole(double amount) {
     final f = NumberFormat('#,##0', 'fr_FR');
     return '${f.format(amount.round())} ${AppStrings.currencyDzd}';
   }
 
-  /// Egyptn DZD saved for profile stats; [minorUnits] e.g. 23000 → 230 DZD shown.
+  /// Saved amount for profile stats; [minorUnits] e.g. 23000 → 230 shown.
   static String dzdSavedDisplay(int minorUnits) {
     if (minorUnits <= 0) return '0';
     final whole = minorUnits ~/ 100;

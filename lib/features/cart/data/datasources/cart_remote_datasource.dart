@@ -78,8 +78,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       _vendorDisplay(String vendorId) {
     if (vendorId == 'vendor_002') {
       return (
-        'Karim Merabet',
-        'Oran Fashion Hub',
+        'Karim Hassan',
+        'Cairo Fashion Hub',
         MockImages.avatar(4),
         4.7,
         true,
@@ -129,8 +129,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         listingImage: MockImages.product(30),
         listingSlug: 'listing_003',
         vendorId: 'vendor_002',
-        vendorName: 'Karim Merabet',
-        vendorStoreName: 'Oran Fashion Hub',
+        vendorName: 'Karim Hassan',
+        vendorStoreName: 'Cairo Fashion Hub',
         vendorAvatar: MockImages.avatar(4),
         vendorRating: 4.7,
         vendorVerified: true,
@@ -152,8 +152,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         listingImage: MockImages.product(60),
         listingSlug: 'listing_016',
         vendorId: 'vendor_002',
-        vendorName: 'Karim Merabet',
-        vendorStoreName: 'Oran Fashion Hub',
+        vendorName: 'Karim Hassan',
+        vendorStoreName: 'Cairo Fashion Hub',
         vendorAvatar: MockImages.avatar(4),
         vendorRating: 4.7,
         vendorVerified: true,

@@ -1,28 +1,57 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../orders/domain/entities/order_entity.dart';
+import '../../../orders/presentation/providers/orders_dependencies.dart';
+
 part 'commission_config_provider.g.dart';
 
-/// Starter flat commission rate (%), applied to every category at launch.
-///
-/// No backend commission-config endpoint exists yet (see design memory:
-/// rates must eventually be server-side, per-category). Until that endpoint
-/// is confirmed, this is the single place the rate is defined — swap the
-/// body of [commissionRateForCategory] for a real network call once the
-/// endpoint exists; call sites already pass `categoryId` for that.
-const double kStarterCommissionRatePercent = 2.0;
+/// Fallback flat commission fee (EGP per order), used while
+/// [vendorCommissionSnapshot] is loading, failed, or the session has no
+/// vendor identity (mock mode included — mock has no real backend truth).
+/// The real value is admin-configured; see [vendorCommissionSnapshot] for
+/// where it's actually sourced.
+const double kStarterCommissionFeeEgp = 2.0;
 
-/// Weekly vendor owed-balance thresholds (EGP), both owner-configurable.
-/// Warn: notify the vendor to pay before being blocked. Pause: block new
-/// listing publishes until the balance is paid down. See design memory
-/// for the full mechanism — no backend config endpoint exists yet, so
-/// these are the single source of truth until one does.
+/// Fallback weekly vendor owed-balance thresholds (EGP) — see
+/// [kStarterCommissionFeeEgp] for when these apply instead of the real,
+/// admin-configured values.
 const double kCommissionWarnThresholdEgp = 100.0;
 const double kCommissionPauseThresholdEgp = 200.0;
 
+/// The vendor's commission fee + wallet-alert flags.
+///
+/// The admin-configured source of truth is `SystemSetting`
+/// (`commissionValueOnOrder`/`warnThresholdEgp`/`pauseThresholdEgp`) and
+/// the vendor's own `VendorCommissionWallet` row — but both are only
+/// exposed through `PUT/GET /api/admin/system-settings` and
+/// `PUT /api/users/{id}/commission/settle`, which are
+/// `[Authorize(Roles = "ADMINISTRATOR, SUPERADMIN")]` (confirmed against
+/// backend source 2026-08-15) — a vendor session cannot call either. The
+/// only vendor-accessible echo of these values is the
+/// `GET /api/vendor/orders` envelope (`OrderStatsEntity`), so this reuses
+/// the existing vendor-order-stats fetch rather than adding a dead-on-arrival
+/// call to the admin routes. Plain autoDispose (not cached) — the
+/// exceeds-threshold flags can change mid-session (e.g. a new delivered
+/// order pushes the vendor over the pause limit) and gate listing
+/// publishing, so staleness here is a correctness risk, not just a UX one.
 @riverpod
-double commissionRateForCategory(
-  CommissionRateForCategoryRef ref,
+Future<OrderStatsEntity?> vendorCommissionSnapshot(
+  VendorCommissionSnapshotRef ref,
+) async {
+  final user = ref.watch(authProvider).valueOrNull;
+  if (user == null || user.role != UserRole.vendor) return null;
+
+  final result = await ref.watch(getVendorOrderStatsUseCaseProvider)(user.id);
+  return result.fold((_) => null, (stats) => stats);
+}
+
+@riverpod
+double commissionFeeEgpForCategory(
+  CommissionFeeEgpForCategoryRef ref,
   int? categoryId,
 ) {
-  return kStarterCommissionRatePercent;
+  final snapshot = ref.watch(vendorCommissionSnapshotProvider).valueOrNull;
+  return snapshot?.commissionValueOnOrder ?? kStarterCommissionFeeEgp;
 }

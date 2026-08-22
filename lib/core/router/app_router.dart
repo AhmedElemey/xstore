@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/constants/app_strings.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/courier_login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/social_role_screen.dart';
@@ -40,7 +40,6 @@ import '../../features/notifications/presentation/screens/notifications_screen.d
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
 import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/app_error_screen.dart';
-import '../../shared/screens/coming_soon_screen.dart';
 import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
 import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
@@ -450,58 +449,34 @@ GoRouter goRouter(GoRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.settings,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.settings),
-        ),
+        redirect: (_, __) => AppRoutes.notificationSettings,
       ),
       GoRoute(
         path: AppRoutes.analytics,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.menuAnalytics),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.myOrdersPlaceholder,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.menuMyOrders),
-        ),
+        redirect: (_, __) => AppRoutes.orders,
       ),
       GoRoute(
         path: AppRoutes.earnings,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.menuEarnings),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.recentlyViewed,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.menuRecentlyViewed),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.myReviews,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.menuMyReviews),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.changePassword,
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const ComingSoonScreen(title: AppStrings.menuChangePassword),
+          const ChangePasswordScreen(),
         ),
       ),
       GoRoute(
@@ -522,11 +497,7 @@ GoRouter goRouter(GoRouterRef ref) {
       ),
       GoRoute(
         path: '/chat/:threadId',
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const ComingSoonScreen(title: AppStrings.chatSeller),
-        ),
+        redirect: (_, __) => AppRoutes.notifications,
       ),
       GoRoute(
         path: AppRoutes.paymentMethods,

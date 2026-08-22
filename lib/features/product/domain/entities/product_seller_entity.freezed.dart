@@ -19,9 +19,10 @@ mixin _$ProductSellerEntity {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get avatarUrl => throw _privateConstructorUsedError;
-  double get rating => throw _privateConstructorUsedError;
-  int get salesCount => throw _privateConstructorUsedError;
+  double? get rating => throw _privateConstructorUsedError;
+  int? get salesCount => throw _privateConstructorUsedError;
   bool get verified => throw _privateConstructorUsedError;
+  String? get whatsappNumber => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProductSellerEntityCopyWith<ProductSellerEntity> get copyWith =>
@@ -38,9 +39,10 @@ abstract class $ProductSellerEntityCopyWith<$Res> {
       {String id,
       String name,
       String avatarUrl,
-      double rating,
-      int salesCount,
-      bool verified});
+      double? rating,
+      int? salesCount,
+      bool verified,
+      String? whatsappNumber});
 }
 
 /// @nodoc
@@ -59,9 +61,10 @@ class _$ProductSellerEntityCopyWithImpl<$Res, $Val extends ProductSellerEntity>
     Object? id = null,
     Object? name = null,
     Object? avatarUrl = null,
-    Object? rating = null,
-    Object? salesCount = null,
+    Object? rating = freezed,
+    Object? salesCount = freezed,
     Object? verified = null,
+    Object? whatsappNumber = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -76,18 +79,22 @@ class _$ProductSellerEntityCopyWithImpl<$Res, $Val extends ProductSellerEntity>
           ? _value.avatarUrl
           : avatarUrl // ignore: cast_nullable_to_non_nullable
               as String,
-      rating: null == rating
+      rating: freezed == rating
           ? _value.rating
           : rating // ignore: cast_nullable_to_non_nullable
-              as double,
-      salesCount: null == salesCount
+              as double?,
+      salesCount: freezed == salesCount
           ? _value.salesCount
           : salesCount // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       verified: null == verified
           ? _value.verified
           : verified // ignore: cast_nullable_to_non_nullable
               as bool,
+      whatsappNumber: freezed == whatsappNumber
+          ? _value.whatsappNumber
+          : whatsappNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -104,9 +111,10 @@ abstract class _$$ProductSellerEntityImplCopyWith<$Res>
       {String id,
       String name,
       String avatarUrl,
-      double rating,
-      int salesCount,
-      bool verified});
+      double? rating,
+      int? salesCount,
+      bool verified,
+      String? whatsappNumber});
 }
 
 /// @nodoc
@@ -123,9 +131,10 @@ class __$$ProductSellerEntityImplCopyWithImpl<$Res>
     Object? id = null,
     Object? name = null,
     Object? avatarUrl = null,
-    Object? rating = null,
-    Object? salesCount = null,
+    Object? rating = freezed,
+    Object? salesCount = freezed,
     Object? verified = null,
+    Object? whatsappNumber = freezed,
   }) {
     return _then(_$ProductSellerEntityImpl(
       id: null == id
@@ -140,32 +149,38 @@ class __$$ProductSellerEntityImplCopyWithImpl<$Res>
           ? _value.avatarUrl
           : avatarUrl // ignore: cast_nullable_to_non_nullable
               as String,
-      rating: null == rating
+      rating: freezed == rating
           ? _value.rating
           : rating // ignore: cast_nullable_to_non_nullable
-              as double,
-      salesCount: null == salesCount
+              as double?,
+      salesCount: freezed == salesCount
           ? _value.salesCount
           : salesCount // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       verified: null == verified
           ? _value.verified
           : verified // ignore: cast_nullable_to_non_nullable
               as bool,
+      whatsappNumber: freezed == whatsappNumber
+          ? _value.whatsappNumber
+          : whatsappNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
 
 /// @nodoc
 
-class _$ProductSellerEntityImpl implements _ProductSellerEntity {
+class _$ProductSellerEntityImpl extends _ProductSellerEntity {
   const _$ProductSellerEntityImpl(
       {required this.id,
       required this.name,
       required this.avatarUrl,
-      this.rating = 4.9,
-      this.salesCount = 230,
-      this.verified = false});
+      this.rating,
+      this.salesCount,
+      this.verified = false,
+      this.whatsappNumber})
+      : super._();
 
   @override
   final String id;
@@ -174,18 +189,18 @@ class _$ProductSellerEntityImpl implements _ProductSellerEntity {
   @override
   final String avatarUrl;
   @override
-  @JsonKey()
-  final double rating;
+  final double? rating;
   @override
-  @JsonKey()
-  final int salesCount;
+  final int? salesCount;
   @override
   @JsonKey()
   final bool verified;
+  @override
+  final String? whatsappNumber;
 
   @override
   String toString() {
-    return 'ProductSellerEntity(id: $id, name: $name, avatarUrl: $avatarUrl, rating: $rating, salesCount: $salesCount, verified: $verified)';
+    return 'ProductSellerEntity(id: $id, name: $name, avatarUrl: $avatarUrl, rating: $rating, salesCount: $salesCount, verified: $verified, whatsappNumber: $whatsappNumber)';
   }
 
   @override
@@ -201,12 +216,14 @@ class _$ProductSellerEntityImpl implements _ProductSellerEntity {
             (identical(other.salesCount, salesCount) ||
                 other.salesCount == salesCount) &&
             (identical(other.verified, verified) ||
-                other.verified == verified));
+                other.verified == verified) &&
+            (identical(other.whatsappNumber, whatsappNumber) ||
+                other.whatsappNumber == whatsappNumber));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, name, avatarUrl, rating, salesCount, verified);
+  int get hashCode => Object.hash(runtimeType, id, name, avatarUrl, rating,
+      salesCount, verified, whatsappNumber);
 
   @JsonKey(ignore: true)
   @override
@@ -216,14 +233,16 @@ class _$ProductSellerEntityImpl implements _ProductSellerEntity {
           this, _$identity);
 }
 
-abstract class _ProductSellerEntity implements ProductSellerEntity {
+abstract class _ProductSellerEntity extends ProductSellerEntity {
   const factory _ProductSellerEntity(
       {required final String id,
       required final String name,
       required final String avatarUrl,
-      final double rating,
-      final int salesCount,
-      final bool verified}) = _$ProductSellerEntityImpl;
+      final double? rating,
+      final int? salesCount,
+      final bool verified,
+      final String? whatsappNumber}) = _$ProductSellerEntityImpl;
+  const _ProductSellerEntity._() : super._();
 
   @override
   String get id;
@@ -232,11 +251,13 @@ abstract class _ProductSellerEntity implements ProductSellerEntity {
   @override
   String get avatarUrl;
   @override
-  double get rating;
+  double? get rating;
   @override
-  int get salesCount;
+  int? get salesCount;
   @override
   bool get verified;
+  @override
+  String? get whatsappNumber;
   @override
   @JsonKey(ignore: true)
   _$$ProductSellerEntityImplCopyWith<_$ProductSellerEntityImpl> get copyWith =>

@@ -204,8 +204,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         fullName: mockConsumerUser.name,
         phone: mockConsumerUser.phoneNumber,
         street: street,
-        city: rest.isNotEmpty ? rest : mockConsumerUser.location ?? 'Oran',
-        wilaya: rest.isNotEmpty ? rest : 'Oran',
+        city: rest.isNotEmpty ? rest : mockConsumerUser.location ?? 'Cairo',
+        wilaya: rest.isNotEmpty ? rest : 'Cairo',
       ),
       subtotal: sub,
       shippingCost: ship,
@@ -214,7 +214,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       trackingNumber: m.trackingNumber,
       courierName: m.trackingNumber != null ? 'xStore Logistics' : null,
       trackingLocation: m.status == MockOrderStatus.shipped
-          ? 'In transit — Algiers hub'
+          ? 'In transit — Cairo hub'
           : null,
       estimatedDelivery: m.estimatedDelivery,
       cancelReason: m.cancelReason,
@@ -286,8 +286,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         fullName: consumerName,
         phone: consumerPhone,
         street: street ?? '12 Rue Didouche Mourad',
-        city: city ?? 'Oran',
-        wilaya: wilaya ?? city ?? 'Oran',
+        city: city ?? 'Cairo',
+        wilaya: wilaya ?? city ?? 'Cairo',
       ),
       subtotal: subtotal,
       shippingCost: shipping,
@@ -298,7 +298,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       courierName: courierName ??
           (trackingNumber != null ? 'xStore Logistics' : null),
       trackingLocation: status == OrderStatus.shipped
-          ? 'In transit — Algiers hub'
+          ? 'In transit — Cairo hub'
           : null,
       estimatedDelivery: estimatedDelivery,
       cancelReason: cancelReason,
@@ -334,8 +334,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         total: 185500,
         createdAt: now.subtract(const Duration(minutes: 30)),
         payment: PaymentMethod.cashOnDelivery,
-        city: 'Oran',
-        wilaya: 'Oran',
+        city: 'Cairo',
+        wilaya: 'Cairo',
         notes: 'Please wrap it carefully',
       ),
       _vendorOrderTemplate(
@@ -349,8 +349,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         total: 32500,
         createdAt: now.subtract(const Duration(hours: 2)),
         payment: PaymentMethod.cibCard,
-        city: 'Algiers',
-        wilaya: 'Algiers',
+        city: 'Cairo',
+        wilaya: 'Cairo',
       ),
       _vendorOrderTemplate(
         id: 'XS-2024-V003',
@@ -364,8 +364,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         createdAt: now.subtract(const Duration(days: 1)),
         confirmedAt: now.subtract(const Duration(hours: 20)),
         payment: PaymentMethod.cibCard,
-        city: 'Constantine',
-        wilaya: 'Constantine',
+        city: 'Alexandria',
+        wilaya: 'Alexandria',
         courierId: mockCourierUser.id,
         courierName: mockCourierUser.name,
       ),
@@ -382,14 +382,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         createdAt: now.subtract(const Duration(days: 2)),
         confirmedAt: now.subtract(const Duration(days: 1, hours: 20)),
         payment: PaymentMethod.cashOnDelivery,
-        city: 'Annaba',
-        wilaya: 'Annaba',
+        city: 'Mansoura',
+        wilaya: 'Mansoura',
         courierId: mockCourierUser.id,
         courierName: mockCourierUser.name,
       ),
       _vendorOrderTemplate(
         id: 'XS-2024-V005',
-        consumerName: 'Amira Setifienne',
+        consumerName: 'Amira Hassan',
         consumerPhone: '+20 101 333 9994',
         status: OrderStatus.shipped,
         items: [
@@ -400,8 +400,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         trackingNumber: 'YAL-2024-8842',
         courierName: 'Yalidine Express',
         estimatedDelivery: now.add(const Duration(days: 1)),
-        city: 'Setif',
-        wilaya: 'Setif',
+        city: 'Tanta',
+        wilaya: 'Tanta',
         shippedAt: now.subtract(const Duration(days: 4)),
         createdAt: now.subtract(const Duration(days: 5)),
       ),
@@ -415,8 +415,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ],
         total: 145500,
         payment: PaymentMethod.cashOnDelivery,
-        city: 'Oran',
-        wilaya: 'Oran',
+        city: 'Cairo',
+        wilaya: 'Cairo',
         deliveredAt: now.subtract(const Duration(days: 2)),
         createdAt: now.subtract(const Duration(days: 10)),
         courierId: mockCourierUser.id,
@@ -432,8 +432,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ],
         total: 55500,
         payment: PaymentMethod.cashOnDelivery,
-        city: 'Algiers',
-        wilaya: 'Algiers',
+        city: 'Cairo',
+        wilaya: 'Cairo',
         cancelReason: 'Buyer changed their mind',
         cancelledAt: now.subtract(const Duration(days: 3)),
         createdAt: now.subtract(const Duration(days: 5)),
@@ -449,8 +449,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ],
         total: 35700,
         payment: PaymentMethod.baridimob,
-        city: 'Bejaia',
-        wilaya: 'Bejaia',
+        city: 'Aswan',
+        wilaya: 'Aswan',
         createdAt: now.subtract(const Duration(days: 3)),
       ),
     ];
@@ -648,6 +648,22 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         monthCount: 0,
         totalCount: (envelope['totalCount'] as num?)?.toInt() ?? 0,
         totalRevenue: (envelope['totalRevenue'] as num?)?.toDouble() ?? 0,
+        // CONFIRMED against backend source (GetVendorOrdersQueryHandler,
+        // 2026-08-15): commissionValueOnOrder/warnThresholdEgp/
+        // pauseThresholdEgp come from the admin-configured SystemSetting
+        // row; exceedsWarnThreshold/exceedsPauseThreshold come from the
+        // vendor's own VendorCommissionWallet row (its raw OutstandingEgp
+        // is admin-only, never sent to the vendor app — these booleans are
+        // the only wallet signal a vendor session can read).
+        commissionValueOnOrder:
+            (envelope['commissionValueOnOrder'] as num?)?.toDouble(),
+        warnThresholdEgp: (envelope['warnThresholdEgp'] as num?)?.toDouble(),
+        pauseThresholdEgp:
+            (envelope['pauseThresholdEgp'] as num?)?.toDouble(),
+        exceedsWarnThreshold:
+            envelope['exceedsWarnThreshold'] as bool? ?? false,
+        exceedsPauseThreshold:
+            envelope['exceedsPauseThreshold'] as bool? ?? false,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return _emptyVendorStats;
@@ -869,7 +885,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         trackingNumber: tn,
         courierName: shippingInfo.courierName ?? row.courierName,
         estimatedDelivery: shippingInfo.estimatedDelivery ?? row.estimatedDelivery,
-        trackingLocation: 'In transit — Algiers hub',
+        trackingLocation: 'In transit — Cairo hub',
         shippedAt: now,
         updatedAt: now,
       );

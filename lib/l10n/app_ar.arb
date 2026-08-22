@@ -109,7 +109,7 @@
   "newListing": "إعلان جديد",
   "listingPhotoSectionTitle": "صور المنتج",
   "listingPhotoSectionSubtitle": "أضف من 1 لـ 5 صور (الأولى = الغلاف)",
-  "listingAddPhotoTile": "إضافة صورة",
+  "listingAddPhotoTile": "إضافة صور",
   "listingPhotoCoverBadge": "غلاف",
   "listingTakePhoto": "📷 التقاط صورة",
   "listingChooseFromGallery": "🖼️ اختيار من المعرض",
@@ -125,24 +125,18 @@
   "commissionStatusSettled": "تمت التسوية",
   "commissionStatusVoided": "ملغاة",
   "commissionWalletWarnTitle": "ادفع رسوم المنصة قريبًا",
-  "commissionWalletWarnBody": "عليك {amount} كرسوم منصة. ادفعها قبل أن تصل إلى {limit} وإلا سيتم إيقاف الإعلانات الجديدة.",
+  "commissionWalletWarnBody": "لديك رسوم منصة غير مدفوعة. ادفعها قبل أن تصل إلى حد {limit} وإلا سيتم إيقاف الإعلانات الجديدة.",
   "@commissionWalletWarnBody": {
     "placeholders": {
-      "amount": {
-        "type": "String"
-      },
       "limit": {
         "type": "String"
       }
     }
   },
   "commissionWalletPausedTitle": "تم إيقاف الإعلانات الجديدة",
-  "commissionWalletPausedBody": "عليك {amount} كرسوم منصة، تجاوزت حد {limit}. ادفعها لتتمكن من نشر إعلانات جديدة.",
+  "commissionWalletPausedBody": "تجاوزت رسوم المنصة حد {limit}. ادفعها لتتمكن من نشر إعلانات جديدة.",
   "@commissionWalletPausedBody": {
     "placeholders": {
-      "amount": {
-        "type": "String"
-      },
       "limit": {
         "type": "String"
       }
@@ -177,47 +171,6 @@
   "listingCondNew": "جديد",
   "listingCondLikeNew": "شبه جديد",
   "listingCondGood": "جيد",
-  "listingCatElectronics": "إلكترونيات",
-  "listingCatFashion": "أزياء",
-  "listingCatHomeGarden": "المنزل والحديقة",
-  "listingCatBeauty": "تجميل",
-  "listingCatSports": "رياضة",
-  "listingCatToys": "ألعاب",
-  "listingCatAutomotive": "سيارات",
-  "listingCatFoodDrinks": "أطعمة ومشروبات",
-  "listingCatBooks": "كتب",
-  "listingCatOther": "أخرى",
-  "listingSubElectronicsPhones": "موبايلات وأجهزة لوحية",
-  "listingSubElectronicsLaptops": "لابتوب وأجهزة كمبيوتر",
-  "listingSubElectronicsAudio": "صوتيات",
-  "listingSubElectronicsAccessories": "إكسسوارات",
-  "listingSubFashionMens": "رجالي",
-  "listingSubFashionWomens": "حريمي",
-  "listingSubFashionKids": "أطفال",
-  "listingSubFashionShoes": "أحذية",
-  "listingSubHomeFurniture": "أثاث",
-  "listingSubHomeDecor": "ديكور",
-  "listingSubHomeKitchen": "مطبخ",
-  "listingSubHomeGarden": "حديقة",
-  "listingSubBeautySkincare": "عناية بالبشرة",
-  "listingSubBeautyMakeup": "مكياج",
-  "listingSubBeautyHair": "عناية بالشعر",
-  "listingSubSportsFitness": "لياقة",
-  "listingSubSportsOutdoor": "أنشطة خارجية",
-  "listingSubSportsTeam": "رياضات جماعية",
-  "listingSubToysGames": "ألعاب",
-  "listingSubToysDolls": "دمى ومجسمات",
-  "listingSubToysEducational": "تعليمية",
-  "listingSubAutoParts": "قطع غيار",
-  "listingSubAutoAccessories": "إكسسوارات",
-  "listingSubAutoCare": "منتجات العناية",
-  "listingSubFoodBeverages": "مشروبات",
-  "listingSubFoodSnacks": "سناكس",
-  "listingSubFoodGrocery": "بقالة",
-  "listingSubBooksFiction": "روايات",
-  "listingSubBooksNonfiction": "غير خيال",
-  "listingSubBooksTextbooks": "كتب دراسية",
-  "listingSubOtherMisc": "متنوع",
   "vendorAccount": "حساب البائع",
   "customerAccount": "حساب المشتري",
   "theme": "المظهر",
@@ -280,6 +233,23 @@
   "storeCityLabel": "مدينة المتجر",
   "storeWilayaLabel": "محافظة المتجر",
   "whatsappLabel": "رقم واتساب",
+  "whatsappProductPrefill": "مرحباً، مهتم بالإعلان {title}",
+  "@whatsappProductPrefill": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappStorePrefill": "مرحباً، شفت متجر {name} على xStore",
+  "@whatsappStorePrefill": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappSellerUnavailable": "مش قادرين نفتح واتساب.",
   "instagramLabel": "حساب إنستجرام",
   "facebookLabel": "صفحة فيسبوك",
   "logoutConfirmTitle": "تسجيل الخروج من xStore؟",
@@ -314,10 +284,14 @@
   "vendorStoreStatSales": "إجمالي المبيعات",
   "vendorStoreStatResponse": "نسبة الرد",
   "placeholderScreenSubtitle": "الشاشة دي جاية قريباً.",
-  "trustInfoPaymentMethodsBody": "حفظ طرق الدفع مش متاح دلوقتي. وقت الدفع تقدر تدفع كاش عند الاستلام أو تدخل بيانات البطاقة للطلب ده بس — مش بنحفظ البطاقة هنا.",
+  "trustInfoPaymentMethodsBody": "حفظ طرق الدفع مش متاح دلوقتي. الدفع كاش عند الاستلام بس — تدفع لما الأوردر يوصّل.",
   "trustInfoAddressesBody": "دفتر العناوين المحفوظة جاي قريباً. دلوقتي اختار أو أضف عنوان التوصيل أثناء الدفع قبل تأكيد الطلب.",
   "trustInfoTermsBody": "شروط الخدمة لسه مش منشورة في التطبيق. مش بنعرض نص قانوني مؤقت هنا. الشروط الكاملة هتظهر على الشاشة دي قبل الإطلاق.",
   "trustInfoPrivacyBody": "سياسة الخصوصية لسه مش منشورة في التطبيق. مش بنعرض نص قانوني مؤقت هنا. هنوضّح إزاي بنتعامل مع بياناتك هنا قبل الإطلاق.",
+  "legalDraftNotice": "مسودة تشغيلية لطريقة شغل xStore دلوقتي. بيانات الشركة ومدة الإرجاع والنص القانوني العربي المعتمد هتتضاف قبل النشر على المتاجر. ده مش بديل لاستشارة قانونية.",
+  "newSeller": "بائع جديد",
+  "newSellerEmDash": "—",
+  "notificationSettingsDeviceOnly": "الإعدادات دي على الجهاز ده بس لحد ما تتتزامن مع حسابك.",
   "trustInfoHelpBody": "مقالات المساعدة والدعم المباشر لسه مش متاحين. لأسئلة الطلبات، افتح طلباتي. تقدر تتحكم في التنبيهات من إعدادات الإشعارات.",
   "trustInfoActionCheckout": "روح للدفع",
   "trustInfoHelpViewOrders": "روح لطلباتي",
@@ -1082,7 +1056,9 @@
   "secureYourAccount": "أمّن حسابك",
   "strongPasswordHint": "اختار كلمة مرور قوية لحماية حسابك",
   "passwordRequired": "كلمة المرور *",
+  "currentPasswordRequired": "كلمة المرور الحالية *",
   "newPasswordRequired": "كلمة المرور الجديدة *",
+  "changePasswordSuccess": "تم تغيير كلمة المرور.",
   "confirmPasswordRequired": "تأكيد كلمة المرور *",
   "resetPasswordTitle": "إعادة تعيين كلمة المرور",
   "resetPasswordOtpSentTo": "أدخل الكود المرسل إلى {email} واختر كلمة مرور جديدة",
@@ -1252,7 +1228,7 @@
   "validationStoreCategoryRequired": "اختار تصنيف",
   "validationStoreDescriptionShort": "صف متجرك",
   "validationStoreDescriptionMax": "أقصى 300 حرف",
-  "validationStoreCityWilayaRequired": "المدينة والولاية مطلوبين",
+  "validationStoreCityWilayaRequired": "المدينة والمحافظة مطلوبين",
   "validationFullNameArRequired": "الاسم الكامل بالعربية مطلوب",
   "validationStoreNameArRequired": "اسم المتجر بالعربية مطلوب",
   "validationStoreDescriptionArShort": "صف متجرك بالعربية",

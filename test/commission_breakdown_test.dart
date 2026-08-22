@@ -8,17 +8,16 @@ import 'package:xstore/features/commission/presentation/widgets/commission_break
 
 void main() {
   group('CommissionBreakdown.forPrice', () {
-    test('splits price into vendor earnings and platform fee', () {
-      final b = CommissionBreakdown.forPrice(1000, ratePercent: 2.0);
+    test('subtracts flat fee from price for vendor earnings', () {
+      final b = CommissionBreakdown.forPrice(1000, feeEgp: 2.0);
 
-      expect(b.feeAmount, 20.0);
-      expect(b.vendorEarns, 980.0);
+      expect(b.feeAmount, 2.0);
+      expect(b.vendorEarns, 998.0);
       expect(b.price, 1000.0);
-      expect(b.ratePercent, 2.0);
     });
 
-    test('zero rate means vendor keeps the full price', () {
-      final b = CommissionBreakdown.forPrice(500, ratePercent: 0);
+    test('zero fee means vendor keeps the full price', () {
+      final b = CommissionBreakdown.forPrice(500, feeEgp: 0);
 
       expect(b.feeAmount, 0.0);
       expect(b.vendorEarns, 500.0);
@@ -28,7 +27,7 @@ void main() {
   group('CommissionBreakdownCard', () {
     testWidgets('renders vendor earnings and platform fee with currency',
         (tester) async {
-      final breakdown = CommissionBreakdown.forPrice(1000, ratePercent: 2.0);
+      final breakdown = CommissionBreakdown.forPrice(1000, feeEgp: 2.0);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -49,9 +48,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('980.00'), findsOneWidget);
-      expect(find.textContaining('20.00'), findsOneWidget);
-      expect(find.textContaining('2%'), findsOneWidget);
+      expect(find.textContaining('998.00'), findsOneWidget);
+      expect(find.textContaining('2.00'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing);
     });
   });
 }

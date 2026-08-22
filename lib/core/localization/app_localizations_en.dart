@@ -336,7 +336,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingPhotoSectionSubtitle => 'Add 1–5 photos (first = cover)';
 
   @override
-  String get listingAddPhotoTile => 'Add Photo';
+  String get listingAddPhotoTile => 'Add photos';
 
   @override
   String get listingPhotoCoverBadge => 'Cover';
@@ -384,16 +384,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commissionWalletWarnTitle => 'Pay your platform fees soon';
 
   @override
-  String commissionWalletWarnBody(String amount, String limit) {
-    return 'You owe $amount in platform fees. Pay it off before it reaches $limit or new listings will be paused.';
+  String commissionWalletWarnBody(String limit) {
+    return 'You have unpaid platform fees. Pay them off before you reach the $limit limit or new listings will be paused.';
   }
 
   @override
   String get commissionWalletPausedTitle => 'New listings are paused';
 
   @override
-  String commissionWalletPausedBody(String amount, String limit) {
-    return 'You owe $amount in platform fees, over the $limit limit. Pay it off to publish new listings again.';
+  String commissionWalletPausedBody(String limit) {
+    return 'Your platform fees are over the $limit limit. Pay them off to publish new listings again.';
   }
 
   @override
@@ -485,129 +485,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listingCondGood => 'Good';
-
-  @override
-  String get listingCatElectronics => 'Electronics';
-
-  @override
-  String get listingCatFashion => 'Fashion';
-
-  @override
-  String get listingCatHomeGarden => 'Home & Garden';
-
-  @override
-  String get listingCatBeauty => 'Beauty';
-
-  @override
-  String get listingCatSports => 'Sports';
-
-  @override
-  String get listingCatToys => 'Toys';
-
-  @override
-  String get listingCatAutomotive => 'Automotive';
-
-  @override
-  String get listingCatFoodDrinks => 'Food & Drinks';
-
-  @override
-  String get listingCatBooks => 'Books';
-
-  @override
-  String get listingCatOther => 'Other';
-
-  @override
-  String get listingSubElectronicsPhones => 'Phones & tablets';
-
-  @override
-  String get listingSubElectronicsLaptops => 'Laptops & PCs';
-
-  @override
-  String get listingSubElectronicsAudio => 'Audio';
-
-  @override
-  String get listingSubElectronicsAccessories => 'Accessories';
-
-  @override
-  String get listingSubFashionMens => 'Men\'s';
-
-  @override
-  String get listingSubFashionWomens => 'Women\'s';
-
-  @override
-  String get listingSubFashionKids => 'Kids';
-
-  @override
-  String get listingSubFashionShoes => 'Shoes';
-
-  @override
-  String get listingSubHomeFurniture => 'Furniture';
-
-  @override
-  String get listingSubHomeDecor => 'Decor';
-
-  @override
-  String get listingSubHomeKitchen => 'Kitchen';
-
-  @override
-  String get listingSubHomeGarden => 'Garden';
-
-  @override
-  String get listingSubBeautySkincare => 'Skincare';
-
-  @override
-  String get listingSubBeautyMakeup => 'Makeup';
-
-  @override
-  String get listingSubBeautyHair => 'Hair care';
-
-  @override
-  String get listingSubSportsFitness => 'Fitness';
-
-  @override
-  String get listingSubSportsOutdoor => 'Outdoor';
-
-  @override
-  String get listingSubSportsTeam => 'Team sports';
-
-  @override
-  String get listingSubToysGames => 'Games';
-
-  @override
-  String get listingSubToysDolls => 'Dolls & figures';
-
-  @override
-  String get listingSubToysEducational => 'Educational';
-
-  @override
-  String get listingSubAutoParts => 'Parts';
-
-  @override
-  String get listingSubAutoAccessories => 'Accessories';
-
-  @override
-  String get listingSubAutoCare => 'Care products';
-
-  @override
-  String get listingSubFoodBeverages => 'Beverages';
-
-  @override
-  String get listingSubFoodSnacks => 'Snacks';
-
-  @override
-  String get listingSubFoodGrocery => 'Grocery';
-
-  @override
-  String get listingSubBooksFiction => 'Fiction';
-
-  @override
-  String get listingSubBooksNonfiction => 'Non-fiction';
-
-  @override
-  String get listingSubBooksTextbooks => 'Textbooks';
-
-  @override
-  String get listingSubOtherMisc => 'Miscellaneous';
 
   @override
   String get vendorAccount => 'Vendor Account';
@@ -790,10 +667,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeCityLabel => 'Store City';
 
   @override
-  String get storeWilayaLabel => 'Store Wilaya';
+  String get storeWilayaLabel => 'Store Governorate';
 
   @override
   String get whatsappLabel => 'WhatsApp Number';
+
+  @override
+  String whatsappProductPrefill(String title) {
+    return 'Hi, I\'m interested in $title';
+  }
+
+  @override
+  String whatsappStorePrefill(String name) {
+    return 'Hi, I saw your store $name on xStore';
+  }
+
+  @override
+  String get whatsappSellerUnavailable => 'Couldn\'t open WhatsApp.';
 
   @override
   String get instagramLabel => 'Instagram handle';
@@ -899,7 +789,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trustInfoPaymentMethodsBody =>
-      'Saved payment methods aren\'t available yet. When you check out, you can pay securely with cash on delivery or enter card details for that order only — card details are used during checkout and are not saved here.';
+      'Saved payment methods aren\'t available yet. Checkout is cash on delivery only — pay when your order arrives.';
 
   @override
   String get trustInfoAddressesBody =>
@@ -912,6 +802,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get trustInfoPrivacyBody =>
       'Our Privacy Policy is not published in the app yet. We don\'t show placeholder legal text here. How we collect and use your data will be documented here before launch.';
+
+  @override
+  String get legalDraftNotice =>
+      'Operational draft for how xStore works today. Company registration, return window, and a counsel-finalized Arabic legal text will replace this before store release. This is not a substitute for legal advice.';
+
+  @override
+  String get newSeller => 'New seller';
+
+  @override
+  String get newSellerEmDash => '—';
+
+  @override
+  String get notificationSettingsDeviceOnly =>
+      'These apply on this device only until preferences sync to your account.';
 
   @override
   String get trustInfoHelpBody =>
@@ -1254,7 +1158,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersCourierWebsiteSoon => 'Courier tracking — coming soon';
 
   @override
-  String get ordersCurrentLocationMock => 'In transit — Algiers hub';
+  String get ordersCurrentLocationMock => 'In transit — Cairo hub';
 
   @override
   String get ordersExpectedPrefix => '📅 Expected by';
@@ -1575,7 +1479,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartCouponInvalid => 'Invalid coupon code';
 
   @override
-  String get cartCouponMinOrder => 'Minimum order 5,000 DZD required';
+  String get cartCouponMinOrder => 'Minimum order 5,000 EGP required';
 
   @override
   String get cartOrderSummary => 'Order Summary';
@@ -1635,7 +1539,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutCity => 'City';
 
   @override
-  String get checkoutWilaya => 'Wilaya';
+  String get checkoutWilaya => 'Governorate';
 
   @override
   String get checkoutPostalCode => 'Postal Code';
@@ -1744,7 +1648,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couponDetailSave10 => '10% discount applied!';
 
   @override
-  String get couponDetailFree500 => '500 DZD discount applied!';
+  String get couponDetailFree500 => '500 EGP discount applied!';
 
   @override
   String get couponDetailWelcome => '15% discount applied!';
@@ -2250,7 +2154,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cartShippingPaid(int amount) {
-    return '🚚 +$amount DZD shipping';
+    return '🚚 +$amount EGP shipping';
   }
 
   @override
@@ -2490,7 +2394,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationCityRequired => 'Location / City *';
 
   @override
-  String get locationHintAlgiers => 'e.g. Algiers';
+  String get locationHintAlgiers => 'e.g. Cairo';
 
   @override
   String get secureYourAccount => 'Secure your account';
@@ -2503,7 +2407,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordRequired => 'Password *';
 
   @override
+  String get currentPasswordRequired => 'Current Password *';
+
+  @override
   String get newPasswordRequired => 'New Password *';
+
+  @override
+  String get changePasswordSuccess => 'Your password was changed.';
 
   @override
   String get confirmPasswordRequired => 'Confirm Password *';
@@ -2570,7 +2480,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityRequired => 'City *';
 
   @override
-  String get wilayaRequired => 'Wilaya *';
+  String get wilayaRequired => 'Governorate *';
 
   @override
   String get sellerFallbackName => 'Seller';
@@ -2977,7 +2887,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validationStoreCityWilayaRequired =>
-      'City and wilaya are required';
+      'City and governorate are required';
 
   @override
   String get validationFullNameArRequired => 'Arabic full name is required';

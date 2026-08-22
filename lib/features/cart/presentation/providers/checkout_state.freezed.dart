@@ -21,9 +21,6 @@ mixin _$CheckoutState {
   int? get selectedAddressIndex => throw _privateConstructorUsedError;
   PaymentMethod? get selectedPayment => throw _privateConstructorUsedError;
   String get deliveryNote => throw _privateConstructorUsedError;
-  String get cardNumber => throw _privateConstructorUsedError;
-  String get cardExpiry => throw _privateConstructorUsedError;
-  String get cardCvv => throw _privateConstructorUsedError;
   bool get isPlacingOrder => throw _privateConstructorUsedError;
   String? get placedOrderId => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
@@ -45,9 +42,6 @@ abstract class $CheckoutStateCopyWith<$Res> {
       int? selectedAddressIndex,
       PaymentMethod? selectedPayment,
       String deliveryNote,
-      String cardNumber,
-      String cardExpiry,
-      String cardCvv,
       bool isPlacingOrder,
       String? placedOrderId,
       String? error});
@@ -71,9 +65,6 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
     Object? selectedAddressIndex = freezed,
     Object? selectedPayment = freezed,
     Object? deliveryNote = null,
-    Object? cardNumber = null,
-    Object? cardExpiry = null,
-    Object? cardCvv = null,
     Object? isPlacingOrder = null,
     Object? placedOrderId = freezed,
     Object? error = freezed,
@@ -98,18 +89,6 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
       deliveryNote: null == deliveryNote
           ? _value.deliveryNote
           : deliveryNote // ignore: cast_nullable_to_non_nullable
-              as String,
-      cardNumber: null == cardNumber
-          ? _value.cardNumber
-          : cardNumber // ignore: cast_nullable_to_non_nullable
-              as String,
-      cardExpiry: null == cardExpiry
-          ? _value.cardExpiry
-          : cardExpiry // ignore: cast_nullable_to_non_nullable
-              as String,
-      cardCvv: null == cardCvv
-          ? _value.cardCvv
-          : cardCvv // ignore: cast_nullable_to_non_nullable
               as String,
       isPlacingOrder: null == isPlacingOrder
           ? _value.isPlacingOrder
@@ -141,9 +120,6 @@ abstract class _$$CheckoutStateImplCopyWith<$Res>
       int? selectedAddressIndex,
       PaymentMethod? selectedPayment,
       String deliveryNote,
-      String cardNumber,
-      String cardExpiry,
-      String cardCvv,
       bool isPlacingOrder,
       String? placedOrderId,
       String? error});
@@ -165,9 +141,6 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
     Object? selectedAddressIndex = freezed,
     Object? selectedPayment = freezed,
     Object? deliveryNote = null,
-    Object? cardNumber = null,
-    Object? cardExpiry = null,
-    Object? cardCvv = null,
     Object? isPlacingOrder = null,
     Object? placedOrderId = freezed,
     Object? error = freezed,
@@ -192,18 +165,6 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
       deliveryNote: null == deliveryNote
           ? _value.deliveryNote
           : deliveryNote // ignore: cast_nullable_to_non_nullable
-              as String,
-      cardNumber: null == cardNumber
-          ? _value.cardNumber
-          : cardNumber // ignore: cast_nullable_to_non_nullable
-              as String,
-      cardExpiry: null == cardExpiry
-          ? _value.cardExpiry
-          : cardExpiry // ignore: cast_nullable_to_non_nullable
-              as String,
-      cardCvv: null == cardCvv
-          ? _value.cardCvv
-          : cardCvv // ignore: cast_nullable_to_non_nullable
               as String,
       isPlacingOrder: null == isPlacingOrder
           ? _value.isPlacingOrder
@@ -230,9 +191,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
       this.selectedAddressIndex,
       this.selectedPayment,
       this.deliveryNote = '',
-      this.cardNumber = '',
-      this.cardExpiry = '',
-      this.cardCvv = '',
       this.isPlacingOrder = false,
       this.placedOrderId,
       this.error})
@@ -259,15 +217,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
   final String deliveryNote;
   @override
   @JsonKey()
-  final String cardNumber;
-  @override
-  @JsonKey()
-  final String cardExpiry;
-  @override
-  @JsonKey()
-  final String cardCvv;
-  @override
-  @JsonKey()
   final bool isPlacingOrder;
   @override
   final String? placedOrderId;
@@ -276,7 +225,7 @@ class _$CheckoutStateImpl implements _CheckoutState {
 
   @override
   String toString() {
-    return 'CheckoutState(currentStep: $currentStep, savedAddresses: $savedAddresses, selectedAddressIndex: $selectedAddressIndex, selectedPayment: $selectedPayment, deliveryNote: $deliveryNote, cardNumber: $cardNumber, cardExpiry: $cardExpiry, cardCvv: $cardCvv, isPlacingOrder: $isPlacingOrder, placedOrderId: $placedOrderId, error: $error)';
+    return 'CheckoutState(currentStep: $currentStep, savedAddresses: $savedAddresses, selectedAddressIndex: $selectedAddressIndex, selectedPayment: $selectedPayment, deliveryNote: $deliveryNote, isPlacingOrder: $isPlacingOrder, placedOrderId: $placedOrderId, error: $error)';
   }
 
   @override
@@ -294,11 +243,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
                 other.selectedPayment == selectedPayment) &&
             (identical(other.deliveryNote, deliveryNote) ||
                 other.deliveryNote == deliveryNote) &&
-            (identical(other.cardNumber, cardNumber) ||
-                other.cardNumber == cardNumber) &&
-            (identical(other.cardExpiry, cardExpiry) ||
-                other.cardExpiry == cardExpiry) &&
-            (identical(other.cardCvv, cardCvv) || other.cardCvv == cardCvv) &&
             (identical(other.isPlacingOrder, isPlacingOrder) ||
                 other.isPlacingOrder == isPlacingOrder) &&
             (identical(other.placedOrderId, placedOrderId) ||
@@ -314,9 +258,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
       selectedAddressIndex,
       selectedPayment,
       deliveryNote,
-      cardNumber,
-      cardExpiry,
-      cardCvv,
       isPlacingOrder,
       placedOrderId,
       error);
@@ -335,9 +276,6 @@ abstract class _CheckoutState implements CheckoutState {
       final int? selectedAddressIndex,
       final PaymentMethod? selectedPayment,
       final String deliveryNote,
-      final String cardNumber,
-      final String cardExpiry,
-      final String cardCvv,
       final bool isPlacingOrder,
       final String? placedOrderId,
       final String? error}) = _$CheckoutStateImpl;
@@ -352,12 +290,6 @@ abstract class _CheckoutState implements CheckoutState {
   PaymentMethod? get selectedPayment;
   @override
   String get deliveryNote;
-  @override
-  String get cardNumber;
-  @override
-  String get cardExpiry;
-  @override
-  String get cardCvv;
   @override
   bool get isPlacingOrder;
   @override
