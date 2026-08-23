@@ -24,34 +24,44 @@ import 'event_names.dart';
 
 part 'analytics_service.g.dart';
 
-/// Batches user-journey events locally and POSTs them to the (proposed)
-/// backend collector — see `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`.
+/// Batches user-journey events locally and POSTs them to
+/// `POST /api/analytics/events` — see
+/// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`.
 ///
 /// Deliberately uses its own [Dio] client rather than the shared `dio`
 /// provider: the shared client's error interceptor flips the whole app to
 /// the full-screen server-error state on any 5xx, which is correct for
 /// user-facing API calls but wrong for a background telemetry POST — a
-/// flaky analytics endpoint must never take over the UI.
+/// flaky analytics endpoint must never take over the UI. Same reason this
+/// client must not share [TokenRefreshInterceptor]: a 401 from telemetry
+/// must back off, not log the user out.
 ///
-/// Until the backend ships the collector route, POSTs 404 (tolerated via
-/// [LegacyRouteOptions.allowNotFound]) and the queue keeps growing/retrying
-/// with backoff instead of erroring — same "legacy 404" pattern used
-/// elsewhere in this app for undeployed routes.
+/// The collector is session-gated: [_flush] POSTs only while a signed-in
+/// user (non-empty id + `X-Auth-Token`) is present. Guest events stay in
+/// the local queue until login. This dedicated Dio does not inherit
+/// `dio_provider`'s token interceptor, so the token is attached per POST.
 class AnalyticsService {
-  AnalyticsService(this._ref) {
-    _client = Dio(
-      BaseOptions(
-        baseUrl: ApiEndpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': ApiAuthHeaders.basicLicenseKey,
-        },
-      ),
-    );
-    if (kDebugMode) _client.interceptors.add(LoggingInterceptor());
-    unawaited(_init());
+  AnalyticsService(
+    this._ref, {
+    Dio? client,
+    Future<String?> Function()? readAuthToken,
+  }) : _readAuthToken = readAuthToken {
+    _client = client ??
+        Dio(
+          BaseOptions(
+            baseUrl: ApiEndpoints.baseUrl,
+            connectTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 10),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': ApiAuthHeaders.basicLicenseKey,
+            },
+          ),
+        );
+    if (kDebugMode && client == null) {
+      _client.interceptors.add(LoggingInterceptor());
+    }
+    _initFuture = _init();
   }
 
   static const int _maxQueueSize = 500;
@@ -59,7 +69,9 @@ class AnalyticsService {
   static const Duration _flushInterval = Duration(seconds: 20);
 
   final Ref _ref;
+  final Future<String?> Function()? _readAuthToken;
   late final Dio _client;
+  late final Future<void> _initFuture;
   late final String _sessionId;
   String _deviceId = '';
   String? _userId;
@@ -69,12 +81,26 @@ class AnalyticsService {
   final List<AnalyticsEvent> _queue = [];
   final List<(String, Map<String, Object?>)> _pending = [];
   bool _ready = false;
-  bool _flushing = false;
+  Future<void>? _inFlightFlush;
   int _consecutiveFailures = 0;
   DateTime? _backoffUntil;
 
   Timer? _flushTimer;
   VoidCallback? _detachRouterListener;
+
+  /// Completes when the persisted queue has loaded and listeners are bound.
+  @visibleForTesting
+  Future<void> get ready => _initFuture;
+
+  @visibleForTesting
+  Future<void> flushNow() => _flush();
+
+  bool get _isSignedIn => _userId != null && _userId!.isNotEmpty;
+
+  void _bindUser(UserEntity? user) {
+    _userId = user?.id;
+    _userRole = user?.role.name;
+  }
 
   Future<void> _init() async {
     _sessionId = generateEventId();
@@ -85,10 +111,19 @@ class AnalyticsService {
 
     _ref.listen<AsyncValue<UserEntity?>>(authProvider, (prev, next) {
       if (next.isLoading) return;
-      final user = next.valueOrNull;
-      _userId = user?.id;
-      _userRole = user?.role.name;
+      final wasSignedIn = _isSignedIn;
+      _bindUser(next.valueOrNull);
+      if (_ready && !wasSignedIn && _isSignedIn) unawaited(_flush());
     });
+
+    // listen() only fires on future changes, and auth may still be restoring
+    // when this service is first built. Await the current session so the
+    // initial flush (below) sees a real logged-in/guest answer.
+    try {
+      _bindUser(await _ref.read(authProvider.future));
+    } catch (_) {
+      _bindUser(null);
+    }
 
     _ref.listen<bool>(isOnlineProvider, (prev, next) {
       if (next && prev == false) unawaited(_flush());
@@ -189,19 +224,42 @@ class AnalyticsService {
     _backoffUntil = DateTime.now().add(Duration(seconds: _backoffSeconds()));
   }
 
+  Future<String?> _sessionToken() async {
+    final readToken = _readAuthToken;
+    if (readToken != null) return readToken();
+    return _ref.read(secureStorageProvider).read(key: PrefsKeys.authToken);
+  }
+
   Future<void> _flush() async {
-    if (_flushing || _queue.isEmpty || !_ready) return;
+    final inFlight = _inFlightFlush;
+    if (inFlight != null) return inFlight;
+    final done = _runFlush();
+    _inFlightFlush = done;
+    try {
+      await done;
+    } finally {
+      if (identical(_inFlightFlush, done)) _inFlightFlush = null;
+    }
+  }
+
+  Future<void> _runFlush() async {
+    if (_queue.isEmpty || !_ready) return;
+    if (!_isSignedIn) return;
     final until = _backoffUntil;
     if (until != null && DateTime.now().isBefore(until)) return;
     if (!_ref.read(isOnlineProvider)) return;
 
-    _flushing = true;
     try {
+      final token = await _sessionToken();
+      if (!_isSignedIn || token == null || token.isEmpty) return;
+
       final batch = _queue.take(_batchSize).toList();
       final response = await _client.post<dynamic>(
         ApiEndpoints.analyticsEvents,
         data: {'events': batch.map((e) => e.toJson()).toList()},
-        options: LegacyRouteOptions.allowNotFound(),
+        options: LegacyRouteOptions.allowNotFound().copyWith(
+          headers: {'X-Auth-Token': token},
+        ),
       );
       if (LegacyRouteOptions.isNotFound(response)) {
         _registerFailure();
@@ -213,8 +271,6 @@ class AnalyticsService {
       await _withPrefs(_persistQueue);
     } catch (_) {
       _registerFailure();
-    } finally {
-      _flushing = false;
     }
   }
 

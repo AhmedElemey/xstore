@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -66,24 +67,29 @@ class AuthTextField extends StatelessWidget {
           maxLines: maxLines,
           inputFormatters: inputFormatters,
           textInputAction: textInputAction,
-          style: TextStyle(
-            fontSize: AppTypography.rem(1),
-            color: context.textPrimary,
-          ),
+          style: AppTypography.bodyLarge.copyWith(color: context.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: AppTypography.bodyLarge.copyWith(
+              color: context.textSecondary,
+            ),
             filled: true,
             fillColor: context.surfaceColor,
-            prefixIcon: prefixIcon == null
-                ? null
-                : IconTheme(
-                    data: IconThemeData(color: context.iconSecondary),
-                    child: prefixIcon!,
-                  ),
+            isDense: true,
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            prefixIcon: prefixIcon,
+            prefixIconColor: context.iconSecondary,
+            // Default 48×48 min with no max lets prefix/suffix eat the input
+            // slot; PhoneInputField uses tight constraints so the hint can paint.
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 40,
+              minHeight: 40,
+            ),
             suffixIcon: suffixIcon,
+            suffixIconColor: context.iconSecondary,
             contentPadding: EdgeInsets.symmetric(
               horizontal: context.scaledPx(16),
-              vertical: context.scaledPx(16),
+              vertical: context.scaledPx(AppSpacing.inputContentPaddingV),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

@@ -683,3 +683,38 @@ Rules for the log:
 - **What happened:** Added a back button to the city sheet so users can reopen the governorate sheet without losing progress. `showModalBottomSheet<int>` only had two outcomes (`int` picked, `null` dismissed) — a back tap needs to be distinguishable from both, or it either closes the whole flow (mistaken for "dismissed") or gets misread as picking id `null`.
 - **Rule:** When a chained bottom sheet needs a "go back" affordance, widen the sheet's pop type (`showModalBottomSheet<Object>`) and pop a private `static const Object _goBack = Object()` sentinel from the back button; drive the chain with a `while (true)` loop that `continue`s on the sentinel and `return`s on `null`/success. Never overload the same nullable type to mean both "dismissed" and "go back."
 - **Where it applies:** `location_cascade_field.dart`; any future multi-step `showModalBottomSheet` flow needing in-flow back navigation.
+
+### 2026-08-23 — Analytics collector POSTs only while signed in; dedicated Dio must attach X-Auth-Token itself
+- **What happened:** `POST /api/analytics/events` was firing for guests. The dedicated telemetry Dio (kept separate so 5xx cannot trip the full-screen server-error interceptor) also never inherited `dio_provider`'s `X-Auth-Token` interceptor, so even a logged-in flush would have gone out without a session. `ref.listen(authProvider)` alone missed the already-resolved session at startup. An overlapping `_flush()` (init's unawaited flush vs `flushNow()`) returned immediately while the first POST was still in flight, so tests saw zero requests.
+- **Rule:** Gate telemetry POSTs on a signed-in user (non-empty id) *and* a session token; skip the network for guests and queue locally until login. On a dedicated Dio, attach `X-Auth-Token` per request — do not share `TokenRefreshInterceptor` (a telemetry 401 must back off, not log the user out). Await `authProvider.future` after `listen` so the first flush sees the restored session, not just later changes. Coalesce in-flight flushes (`return` the same Future) so callers that `await flush` actually wait for the POST.
+- **Where it applies:** `analytics_service.dart` `_flush` / `_runFlush` / `_sessionToken`; any future background collector that uses its own Dio.
+
+### 2026-08-23 — iOS FCM getToken requires an APNS token first
+- **What happened:** Cold-start `refreshAndStoreFcmToken()` called `FirebaseMessaging.getToken()` immediately after `requestPermission()`. On Apple platforms the plugin throws `firebase_messaging/apns-token-not-set` until APNS has delivered a device token (always on Simulator; briefly on a real device).
+- **Rule:** On iOS/macOS, poll `getAPNSToken()` until it is non-empty before calling `getToken()`. If APNS never arrives, skip `getToken()` (do not catch-and-log the exception as the happy path). `onTokenRefresh` still persists/registers the token if it shows up later.
+- **Where it applies:** `fcm_token.dart` `refreshAndStoreFcmToken` / `waitForApnsToken`; any future Apple-only FCM token fetch.
+
+### 2026-08-23 — prefixIcon + 16px vertical padding clips InputDecoration.hintText
+- **What happened:** AuthTextField set `hintText` but the placeholder looked missing. `prefixIcon` keeps the field at 48px tall; `contentPadding` vertical 16+16 left ~16px for text, while themed `bodyMedium` hint uses `height: 1.4` (~20px), so the glyphs were clipped.
+- **Rule:** Filled outlined fields with a prefix/suffix icon must not use 16px vertical content padding — use the theme token (`AppSpacing.inputContentPaddingV` = 12). Set an explicit `hintStyle` with `height: 1` and `color: context.textHint` (same pattern as ListingFormField). Widget-test that the hint rect overlaps the field and its `AnimatedOpacity` is 1.
+- **Where it applies:** `auth_text_field.dart` and any custom `InputDecoration` that sets both `prefixIcon`/`suffixIcon` and `contentPadding`.
+
+### 2026-08-23 — find.text is not proof a TextField hint is visible
+- **What happened:** Email and password placeholders still looked missing after padding/hintStyle tweaks. `find.text` and `AnimatedOpacity(1)` passed while the input slot was squeezed; PhoneInputField hints showed because of `isDense` + tight `prefixIconConstraints`.
+- **Rule:** Copy a working sibling field's layout (`isDense: true`, `prefixIconConstraints` min ~40, no unconstrained `IconTheme` wrap). Assert hint **width** on a phone-sized surface with prefix+suffix. Use `textSecondary` for hint color — `textHint` on white is ~2.5:1. Hot reload often will not rebuild an existing `InputDecoration`; confirm with a full restart.
+- **Where it applies:** `auth_text_field.dart`, `phone_input_field.dart`, any filled outlined field with `prefixIcon`.
+
+### 2026-08-23 — AuthTextField placeholder is per call site, not the widget
+- **What happened:** Email hint worked after `enterEmailHint` was passed; full name still looked empty because that `AuthTextField` never got a `hint`.
+- **Rule:** `AuthTextField` does not invent a placeholder from `label`. When adding in-box copy, grep every `AuthTextField(` on the screen and pass `hint` on each empty one in the same change — do not wait for another field-by-field ping.
+- **Where it applies:** Every `AuthTextField(` in `lib/features/auth/presentation/screens/`.
+
+### 2026-08-23 — Don't put a real person's name in placeholder copy
+- **What happened:** Full-name hint used "Ahmed Taha" (the developer's name); the user asked to change it to "Ahmed Mohamed".
+- **Rule:** Placeholder examples are generic sample data, not the current user's or developer's real name. Prefer a conventional dummy like "Ahmed Mohamed".
+- **Where it applies:** `fullNameHint` and any `e.g.` / `مثال:` hint strings in `lib/l10n/`.
+
+### 2026-08-23 — Don't validate a field you hid
+- **What happened:** Register Continue on step 2 did nothing: `validateStep` still required `fullNameAr` after the Arabic name field was commented out, so `nextStep` failed with an error that had no widget to show it.
+- **Rule:** When a form field is removed or commented out, delete its `validateStep` entry in the same change. A `stepErrors` key with no matching `errorText:` looks like a dead Continue button. If the backend still wants the value, copy a visible field onto the wire (here: `fullName` → `fullNameAr`) instead of blocking the UI.
+- **Where it applies:** `auth_provider.dart` `validateStep` / `_performRegister`; any wizard whose UI fields and validator keys must stay 1:1.

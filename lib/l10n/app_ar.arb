@@ -1046,6 +1046,7 @@
   "tellUsAboutYou": "احكيلنا عنك",
   "infoOnProfile": "المعلومات دي هتظهر في ملفك الشخصي",
   "fullNameRequired": "الاسم الكامل *",
+  "fullNameHint": "مثال: أحمد محمد",
   "fullNameArRequired": "الاسم الكامل (بالعربية) *",
   "storeNameArRequired": "اسم المتجر (بالعربية) *",
   "storeDescriptionArRequired": "وصف المتجر (بالعربية) *",

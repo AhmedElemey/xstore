@@ -407,6 +407,7 @@ class _StepPersonal extends StatelessWidget {
         const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.fullNameRequired,
+          hint: context.l10n.fullNameHint,
           controller: fullName,
           prefixIcon: const Icon(LucideIcons.user),
           errorText: s.stepErrors['fullName'],
@@ -427,6 +428,7 @@ class _StepPersonal extends StatelessWidget {
             final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val.text.trim());
             return AuthTextField(
               label: context.l10n.emailAddressRequired,
+              hint: context.l10n.enterEmailHint,
               controller: email,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),

@@ -4634,6 +4634,12 @@ abstract class AppLocalizations {
   /// **'Full Name *'**
   String get fullNameRequired;
 
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Ahmed Mohamed'**
+  String get fullNameHint;
+
   /// No description provided for @fullNameArRequired.
   ///
   /// In en, this message translates to:
