@@ -20,44 +20,44 @@ import 'helpers/stub_cart_repository.dart';
 import 'helpers/stub_orders_repository.dart';
 
 UserEntity _consumer() => UserEntity(
-      id: 'c1',
-      name: 'Buyer',
-      email: 'buyer@test.com',
-      phoneNumber: '01011111111',
-    );
+  id: 'c1',
+  name: 'Buyer',
+  email: 'buyer@test.com',
+  phoneNumber: '01011111111',
+);
 
 UserEntity _vendor() => UserEntity(
-      id: 'v99',
-      name: 'Ven',
-      email: 'v@test.com',
-      phoneNumber: '01099999999',
-      role: UserRole.vendor,
-    );
+  id: 'v99',
+  name: 'Ven',
+  email: 'v@test.com',
+  phoneNumber: '01099999999',
+  role: UserRole.vendor,
+);
 
 UserEntity _courier() => UserEntity(
-      id: 'cr1',
-      name: 'Cour',
-      email: 'cr@test.com',
-      phoneNumber: '01088888888',
-      role: UserRole.courier,
-    );
+  id: 'cr1',
+  name: 'Cour',
+  email: 'cr@test.com',
+  phoneNumber: '01088888888',
+  role: UserRole.courier,
+);
 
 PlaceOrderParams _dummyCheckout(String consumerId) => PlaceOrderParams(
-      consumerId: consumerId,
-      items: const [],
-      deliveryAddress: const OrderAddress(
-        fullName: 'x',
-        phone: '010',
-        street: '-',
-        city: 'city',
-        wilaya: 'w',
-      ),
-      paymentMethod: PaymentMethod.cashOnDelivery,
-      subtotal: 0,
-      shippingTotal: 0,
-      discount: 0,
-      total: 0,
-    );
+  consumerId: consumerId,
+  items: const [],
+  deliveryAddress: const OrderAddress(
+    fullName: 'x',
+    phone: '010',
+    street: '-',
+    city: 'city',
+    wilaya: 'w',
+  ),
+  paymentMethod: PaymentMethod.cashOnDelivery,
+  subtotal: 0,
+  shippingTotal: 0,
+  discount: 0,
+  total: 0,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -237,8 +237,7 @@ void main() {
       }
     });
 
-    test(
-        'package delivery requests are open to consumers and vendors, '
+    test('package delivery requests are open to consumers and vendors, '
         'blocked for couriers', () {
       for (final loc in [AppRoutes.sendPackage, AppRoutes.myPackages]) {
         for (final user in [_consumer(), _vendor()]) {
@@ -293,48 +292,75 @@ void main() {
       );
     });
 
-    test('register failure after valid wizard leaves error populated', () async {
-      final l10n = AppLocalizationsEn();
-      final container = ProviderContainer(
-        overrides: [
-          authRepositoryProvider.overrideWith((ref) {
-            return StubAuthRepository(
-              restoreUser: null,
-              registerConsumerResult: Left(Failure.server('signup failed')),
-            );
-          }),
-          authProvider.overrideWith(() => FakeAuth(null)),
-        ],
-      );
-      addTearDown(container.dispose);
+    test(
+      'register step 2 continues without Arabic name when location ids are set',
+      () {
+        final l10n = AppLocalizationsEn();
+        final container = ProviderContainer(
+          overrides: [authProvider.overrideWith(() => FakeAuth(null))],
+        );
+        addTearDown(container.dispose);
 
-      await container.read(authProvider.future);
+        final rn = container.read(registerNotifierProvider.notifier)..reset();
+        rn.updateRole(UserRole.consumer);
+        expect(rn.nextStep(l10n), true);
+        rn.updateField(
+          fullName: 'Ahmed Mohamed',
+          email: 'ahmed@test.com',
+          phoneNumber: '01012345678',
+        );
+        rn.updateStoreLocation(storeCityId: 1, storeGovernmentId: 16);
+        expect(rn.nextStep(l10n), isTrue);
+        expect(rn.state.currentStep, 3);
+        expect(rn.state.stepErrors, isEmpty);
+      },
+    );
 
-      final rn = container.read(registerNotifierProvider.notifier)..reset();
-      rn.updateRole(UserRole.consumer);
-      expect(rn.nextStep(l10n), true);
-      rn.updateField(
-        fullName: 'Jane Doe',
-        fullNameAr: 'جين دو',
-        email: 'jane@test.com',
-        phoneNumber: '01012345678',
-        location: 'Cairo',
-      );
-      expect(rn.nextStep(l10n), true);
+    test(
+      'register failure after valid wizard leaves error populated',
+      () async {
+        final l10n = AppLocalizationsEn();
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWith((ref) {
+              return StubAuthRepository(
+                restoreUser: null,
+                registerConsumerResult: Left(Failure.server('signup failed')),
+              );
+            }),
+            authProvider.overrideWith(() => FakeAuth(null)),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      rn.updatePasswordFields('Password1!');
-      rn.updateConfirmPassword('Password1!');
-      if (!rn.state.agreedToTerms) {
-        rn.toggleAgreedToTerms();
-      }
+        await container.read(authProvider.future);
 
-      await rn.submitFromCurrentStep(l10n);
+        final rn = container.read(registerNotifierProvider.notifier)..reset();
+        rn.updateRole(UserRole.consumer);
+        expect(rn.nextStep(l10n), true);
+        rn.updateField(
+          fullName: 'Jane Doe',
+          email: 'jane@test.com',
+          phoneNumber: '01012345678',
+          location: 'Cairo',
+        );
+        rn.updateStoreLocation(storeCityId: 1, storeGovernmentId: 16);
+        expect(rn.nextStep(l10n), true);
 
-      expect(
-        container.read(registerNotifierProvider).error,
-        Failure.server('signup failed').toString(),
-      );
-    });
+        rn.updatePasswordFields('Password1!');
+        rn.updateConfirmPassword('Password1!');
+        if (!rn.state.agreedToTerms) {
+          rn.toggleAgreedToTerms();
+        }
+
+        await rn.submitFromCurrentStep(l10n);
+
+        expect(
+          container.read(registerNotifierProvider).error,
+          Failure.server('signup failed').toString(),
+        );
+      },
+    );
 
     test('cart addFromListing surfaces repository failure', () async {
       final container = ProviderContainer(
@@ -342,12 +368,12 @@ void main() {
           authProvider.overrideWith(() => FakeAuth(_consumer())),
           cartRepositoryProvider.overrideWith((ref) {
             return StubCartRepository(
-              addFromListingResult: ({
-                required String consumerId,
-                required String listingId,
-                required int quantity,
-              }) =>
-                  Left(Failure.network('cart add failed')),
+              addFromListingResult:
+                  ({
+                    required String consumerId,
+                    required String listingId,
+                    required int quantity,
+                  }) => Left(Failure.network('cart add failed')),
             );
           }),
         ],
@@ -356,10 +382,9 @@ void main() {
 
       await container.read(authProvider.future);
 
-      await container.read(cartProvider.notifier).addFromListing(
-            listingId: 'lst1',
-            quantity: 1,
-          );
+      await container
+          .read(cartProvider.notifier)
+          .addFromListing(listingId: 'lst1', quantity: 1);
 
       expect(
         container.read(cartProvider).error,
@@ -373,8 +398,7 @@ void main() {
           authProvider.overrideWith(() => FakeAuth(_consumer())),
           cartRepositoryProvider.overrideWith((ref) {
             return StubCartRepository(
-              placeOrderResult: (_) =>
-                  Left(Failure.server('cannot place')),
+              placeOrderResult: (_) => Left(Failure.server('cannot place')),
             );
           }),
         ],
@@ -383,9 +407,9 @@ void main() {
 
       await container.read(authProvider.future);
 
-      await container.read(cartProvider.notifier).placeOrder(
-            _dummyCheckout('c1'),
-          );
+      await container
+          .read(cartProvider.notifier)
+          .placeOrder(_dummyCheckout('c1'));
 
       expect(
         container.read(cartProvider).error,
@@ -399,12 +423,12 @@ void main() {
           authProvider.overrideWith(() => FakeAuth(_consumer())),
           ordersRepositoryProvider.overrideWith((ref) {
             return StubOrdersRepository(
-              getConsumerOrdersResult: ({
-                required String consumerId,
-                required int page,
-                required int pageSize,
-              }) =>
-                  Left(Failure.network('orders down')),
+              getConsumerOrdersResult:
+                  ({
+                    required String consumerId,
+                    required int page,
+                    required int pageSize,
+                  }) => Left(Failure.network('orders down')),
             );
           }),
         ],

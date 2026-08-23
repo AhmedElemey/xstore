@@ -90,7 +90,9 @@ RegisterUseCase registerUseCase(RegisterUseCaseRef ref) {
 }
 
 @riverpod
-RegisterConsumerUseCase registerConsumerUseCase(RegisterConsumerUseCaseRef ref) {
+RegisterConsumerUseCase registerConsumerUseCase(
+  RegisterConsumerUseCaseRef ref,
+) {
   return RegisterConsumerUseCase(ref.watch(authRepositoryProvider));
 }
 
@@ -228,27 +230,33 @@ class Auth extends _$Auth {
     resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
     ref.invalidateSelf();
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.logout,
-      properties: {if (user != null) AnalyticsProps.role: user.role.name},
-    );
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          AnalyticsEvents.logout,
+          properties: {if (user != null) AnalyticsProps.role: user.role.name},
+        );
   }
 
   Future<void> setUser(UserEntity user, {String method = 'google'}) async {
     state = const AsyncLoading();
-    final result = await ref.read(authRepositoryProvider).persistSessionUser(user);
+    final result = await ref
+        .read(authRepositoryProvider)
+        .persistSessionUser(user);
     ref.read(guestModeProvider.notifier).disable();
-    state = result.fold(
-      (_) => AsyncData(user),
-      (_) => AsyncData(user),
-    );
+    state = result.fold((_) => AsyncData(user), (_) => AsyncData(user));
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
     syncDeliveryBackendSession(ref);
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.loginSuccess,
-      properties: {AnalyticsProps.method: method, AnalyticsProps.role: user.role.name},
-    );
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          AnalyticsEvents.loginSuccess,
+          properties: {
+            AnalyticsProps.method: method,
+            AnalyticsProps.role: user.role.name,
+          },
+        );
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
@@ -263,10 +271,15 @@ class Auth extends _$Auth {
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
     syncDeliveryBackendSession(ref);
-    ref.read(analyticsServiceProvider).track(
-      event,
-      properties: {AnalyticsProps.method: method, AnalyticsProps.role: user.role.name},
-    );
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          event,
+          properties: {
+            AnalyticsProps.method: method,
+            AnalyticsProps.role: user.role.name,
+          },
+        );
   }
 }
 
@@ -286,12 +299,14 @@ class LoginNotifier extends _$LoginNotifier {
 
   void updatePhone(String v) => state = state.copyWith(phone: v, error: null);
 
-  void updatePassword(String v) => state = state.copyWith(password: v, error: null);
+  void updatePassword(String v) =>
+      state = state.copyWith(password: v, error: null);
 
   void togglePasswordVisibility() =>
       state = state.copyWith(isPasswordVisible: !state.isPasswordVisible);
 
-  void toggleRememberMe() => state = state.copyWith(rememberMe: !state.rememberMe);
+  void toggleRememberMe() =>
+      state = state.copyWith(rememberMe: !state.rememberMe);
 
   void setRememberMe(bool value) => state = state.copyWith(rememberMe: value);
 
@@ -314,7 +329,9 @@ class LoginNotifier extends _$LoginNotifier {
   Future<void> login(AppLocalizations l10n) async {
     if (!validate(l10n)) return;
     state = state.copyWith(isLoading: true, error: null);
-    final result = await ref.read(loginUseCaseProvider).call(
+    final result = await ref
+        .read(loginUseCaseProvider)
+        .call(
           LoginParams(
             // Backend `emailOrPhone` field; the app authenticates by phone.
             emailOrPhone: AppValidators.normalizeEgyptLocal(state.phone),
@@ -348,7 +365,9 @@ PasswordStrength computePasswordStrengthFor(String p) {
   if (p.isEmpty) return PasswordStrength.none;
   final hasUpper = RegExp(r'[A-Z]').hasMatch(p);
   final hasNum = RegExp(r'[0-9]').hasMatch(p);
-  final hasSym = RegExp(r'''[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;`~']''').hasMatch(p);
+  final hasSym = RegExp(
+    r'''[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;`~']''',
+  ).hasMatch(p);
   if (p.length >= 8 && hasUpper && hasNum && hasSym) {
     return PasswordStrength.strong;
   }
@@ -399,11 +418,14 @@ class RegisterNotifier extends _$RegisterNotifier {
   void togglePasswordVisibility() =>
       state = state.copyWith(isPasswordVisible: !state.isPasswordVisible);
 
-  void toggleConfirmPasswordVisibility() => state =
-      state.copyWith(isConfirmPasswordVisible: !state.isConfirmPasswordVisible);
+  void toggleConfirmPasswordVisibility() => state = state.copyWith(
+    isConfirmPasswordVisible: !state.isConfirmPasswordVisible,
+  );
 
-  void toggleAgreedToTerms() =>
-      state = state.copyWith(agreedToTerms: !state.agreedToTerms, stepErrors: {});
+  void toggleAgreedToTerms() => state = state.copyWith(
+    agreedToTerms: !state.agreedToTerms,
+    stepErrors: {},
+  );
 
   void updateField({
     String? fullName,
@@ -444,7 +466,8 @@ class RegisterNotifier extends _$RegisterNotifier {
       );
     }
     if (storeNameAr != null) next = next.copyWith(storeNameAr: storeNameAr);
-    if (storeCategory != null) next = next.copyWith(storeCategory: storeCategory);
+    if (storeCategory != null)
+      next = next.copyWith(storeCategory: storeCategory);
     if (storeDescription != null) {
       final t = storeDescription.length > 300
           ? storeDescription.substring(0, 300)
@@ -466,7 +489,8 @@ class RegisterNotifier extends _$RegisterNotifier {
     if (storeGovernmentId != null) {
       next = next.copyWith(storeGovernmentId: storeGovernmentId);
     }
-    if (whatsappNumber != null) next = next.copyWith(whatsappNumber: whatsappNumber);
+    if (whatsappNumber != null)
+      next = next.copyWith(whatsappNumber: whatsappNumber);
     state = next.copyWith(stepErrors: {}, error: null);
   }
 
@@ -485,11 +509,7 @@ class RegisterNotifier extends _$RegisterNotifier {
   /// Validates and stores a picked birth date; keeps existing step errors when invalid.
   void applyDateOfBirth(DateTime date, AppLocalizations l10n) {
     final dateOnly = Validators.calendarDate(date);
-    final err = Validators.dateOfBirth(
-      l10n,
-      dateOnly,
-      enforceMinimumAge: true,
-    );
+    final err = Validators.dateOfBirth(l10n, dateOnly, enforceMinimumAge: true);
     if (err != null) {
       state = state.copyWith(stepErrors: {...state.stepErrors, 'dob': err});
       return;
@@ -525,12 +545,8 @@ class RegisterNotifier extends _$RegisterNotifier {
         final fn = Validators.personFullName(l10n, state.fullName);
         if (fn != null) errors['fullName'] = fn;
 
-        final fnAr = Validators.nonEmptyLine(
-          l10n,
-          state.fullNameAr,
-          (l) => l.validationFullNameArRequired,
-        );
-        if (fnAr != null) errors['fullNameAr'] = fnAr;
+        // Arabic full name is not collected on this step (the field is
+        // hidden). Submit copies [fullName] onto the wire when Ar is empty.
 
         // Email is now REQUIRED by the backend for both consumer and vendor
         // register (an empty/missing email 400s server-side).
@@ -612,7 +628,8 @@ class RegisterNotifier extends _$RegisterNotifier {
           errors['storeDescriptionAr'] = l10n.validationStoreDescriptionMax;
         }
         // The vendor-register endpoint requires a store image (multipart).
-        if (state.storeLogoPath == null || state.storeLogoPath!.trim().isEmpty) {
+        if (state.storeLogoPath == null ||
+            state.storeLogoPath!.trim().isEmpty) {
           errors['storeLogo'] = l10n.validationStoreLogoRequired;
         }
         return errors;
@@ -665,40 +682,48 @@ class RegisterNotifier extends _$RegisterNotifier {
 
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
     final role = state.selectedRole ?? UserRole.consumer;
+    final fullNameEn = state.fullName.trim();
+    final fullNameAr = state.fullNameAr.trim().isNotEmpty
+        ? state.fullNameAr.trim()
+        : fullNameEn;
     final result = role == UserRole.vendor
-        ? await ref.read(registerVendorUseCaseProvider).call(
-              VendorRegisterParams(
-                fullNameEn: state.fullName.trim(),
-                fullNameAr: state.fullNameAr.trim(),
-                email: state.email.trim(),
-                phoneNumber: state.phoneNumber,
-                password: state.password,
-                confirmPassword: state.confirmPassword,
-                dateOfBirth: state.dateOfBirth,
-                storeNameEn: state.storeName,
-                storeNameAr: state.storeNameAr,
-                storeDescriptionEn: state.storeDescription,
-                storeDescriptionAr: state.storeDescriptionAr,
-                storeCategoryId: state.storeCategoryId!,
-                storeCityId: state.storeCityId!,
-                storeGovernmentId: state.storeGovernmentId!,
-                whatsappNumber: state.whatsappNumber,
-                profileImagePath: state.storeLogoPath ?? '',
-              ),
-            )
-        : await ref.read(registerConsumerUseCaseProvider).call(
-              ConsumerRegisterParams(
-                fullNameEn: state.fullName.trim(),
-                fullNameAr: state.fullNameAr.trim(),
-                email: state.email.trim(),
-                phoneNumber: state.phoneNumber,
-                password: state.password,
-                confirmPassword: state.confirmPassword,
-                cityId: state.storeCityId!,
-                governmentId: state.storeGovernmentId!,
-                dateOfBirth: state.dateOfBirth,
-              ),
-            );
+        ? await ref
+              .read(registerVendorUseCaseProvider)
+              .call(
+                VendorRegisterParams(
+                  fullNameEn: fullNameEn,
+                  fullNameAr: fullNameAr,
+                  email: state.email.trim(),
+                  phoneNumber: state.phoneNumber,
+                  password: state.password,
+                  confirmPassword: state.confirmPassword,
+                  dateOfBirth: state.dateOfBirth,
+                  storeNameEn: state.storeName,
+                  storeNameAr: state.storeNameAr,
+                  storeDescriptionEn: state.storeDescription,
+                  storeDescriptionAr: state.storeDescriptionAr,
+                  storeCategoryId: state.storeCategoryId!,
+                  storeCityId: state.storeCityId!,
+                  storeGovernmentId: state.storeGovernmentId!,
+                  whatsappNumber: state.whatsappNumber,
+                  profileImagePath: state.storeLogoPath ?? '',
+                ),
+              )
+        : await ref
+              .read(registerConsumerUseCaseProvider)
+              .call(
+                ConsumerRegisterParams(
+                  fullNameEn: fullNameEn,
+                  fullNameAr: fullNameAr,
+                  email: state.email.trim(),
+                  phoneNumber: state.phoneNumber,
+                  password: state.password,
+                  confirmPassword: state.confirmPassword,
+                  cityId: state.storeCityId!,
+                  governmentId: state.storeGovernmentId!,
+                  dateOfBirth: state.dateOfBirth,
+                ),
+              );
     if (_disposed) return;
     result.fold(
       (failure) =>
@@ -709,10 +734,9 @@ class RegisterNotifier extends _$RegisterNotifier {
           error: null,
           showVendorSuccessOverlay: role == UserRole.vendor,
         );
-        ref.read(authProvider.notifier).adoptSession(
-              user,
-              event: AnalyticsEvents.registerSuccess,
-            );
+        ref
+            .read(authProvider.notifier)
+            .adoptSession(user, event: AnalyticsEvents.registerSuccess);
       },
     );
   }

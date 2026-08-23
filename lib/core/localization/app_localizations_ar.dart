@@ -2372,6 +2372,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullNameRequired => 'الاسم الكامل *';
 
   @override
+  String get fullNameHint => 'مثال: أحمد محمد';
+
+  @override
   String get fullNameArRequired => 'الاسم الكامل (بالعربية) *';
 
   @override

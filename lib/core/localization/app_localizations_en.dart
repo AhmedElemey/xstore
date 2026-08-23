@@ -2375,6 +2375,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullNameRequired => 'Full Name *';
 
   @override
+  String get fullNameHint => 'e.g. Ahmed Mohamed';
+
+  @override
   String get fullNameArRequired => 'Full Name (Arabic) *';
 
   @override

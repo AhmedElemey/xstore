@@ -1045,6 +1045,7 @@
   "tellUsAboutYou": "Tell us about you",
   "infoOnProfile": "This information will be on your profile",
   "fullNameRequired": "Full Name *",
+  "fullNameHint": "e.g. Ahmed Mohamed",
   "fullNameArRequired": "Full Name (Arabic) *",
   "storeNameArRequired": "Store Name (Arabic) *",
   "storeDescriptionArRequired": "Store Description (Arabic) *",
