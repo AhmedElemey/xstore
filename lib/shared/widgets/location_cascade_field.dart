@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -12,13 +13,14 @@ import '../../features/cities/presentation/providers/city_dependencies.dart';
 import '../../features/governments/domain/entities/government_entity.dart';
 import '../../features/governments/presentation/providers/government_dependencies.dart';
 
-/// Single form field that captures a governorate + city pair through a
-/// two-step popup cascade, used in both register and edit-profile.
+/// Two API-backed pickers for a governorate + city pair (register + edit
+/// profile).
 ///
-/// Live hierarchy (confirmed 2026-08-11): `/api/governorates` holds the
-/// top-level governorates; `/api/cities` holds cities linked upward via
-/// `governorateId`. So [governmentId] is the governorate (popup 1) and
-/// [cityId] is the city (popup 2), filtered by the chosen governorate.
+/// Live hierarchy (confirmed 2026-08-11 / 2026-08-22): `/api/governorates`
+/// holds the top-level governorates; `/api/cities` holds cities linked upward
+/// via `governorateId`. Opening government loads [allGovernmentsProvider];
+/// opening city loads [allCitiesProvider] filtered by the chosen
+/// governorate. [governmentId] / [cityId] are the ids sent on register.
 class LocationCascadeField extends ConsumerWidget {
   const LocationCascadeField({
     super.key,
@@ -34,9 +36,9 @@ class LocationCascadeField extends ConsumerWidget {
   /// Selected governorate id (backend `governorates`).
   final int? governmentId;
 
-  /// Fires with the full pair whenever the selection changes. The city is
+  /// Fires with the full pair whenever either picker changes. The city is
   /// reset to `null` when the governorate changes, or when the user dismisses
-  /// the city popup after picking a governorate.
+  /// the city sheet after picking a governorate.
   final void Function(int? cityId, int? governmentId) onChanged;
 
   final String? errorText;
@@ -52,92 +54,106 @@ class LocationCascadeField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isArabic = ref.watch(appIsArabicProvider);
-    // Watched so the field rebuilds once the (cached) lists resolve and can
+    // Watched so the fields rebuild once the (cached) lists resolve and can
     // render the selected names.
     final cities = ref.watch(allCitiesProvider).valueOrNull;
     final governments = ref.watch(allGovernmentsProvider).valueOrNull;
 
-    final governorate =
+    final governorateName =
         _byId<GovernmentEntity>(governments, governmentId, (e) => e.id)
             ?.name
             .resolve(isArabic);
-    final city =
+    final cityName =
         _byId<CityEntity>(cities, cityId, (e) => e.id)?.name.resolve(isArabic);
 
-    final display = switch ((governorate, city)) {
-      (final g?, final c?) => '$g — $c',
-      (final g?, _) => g,
-      _ => null,
-    };
-    final hasError = errorText != null;
+    final missingGovernment = governmentId == null;
+    final missingCity = cityId == null;
 
-    return InkWell(
-      onTap: () => _openCascade(context, isArabic),
-      borderRadius: BorderRadius.circular(14),
-      child: InputDecorator(
-        isEmpty: display == null,
-        decoration: InputDecoration(
-          labelText: context.l10n.governorateAndCityLabel,
-          hintText: context.l10n.locationCascadeHint,
-          prefixIcon: const Icon(LucideIcons.mapPin),
-          suffixIcon: const Icon(LucideIcons.chevronDown),
-          filled: true,
-          fillColor: context.surfaceColor,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-          errorText: errorText,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _LocationPickerTile(
+          key: const ValueKey('locationGovernmentPicker'),
+          label: context.l10n.selectGovernorate,
+          hint: context.l10n.selectGovernorate,
+          display: governorateName,
+          icon: LucideIcons.mapPin,
+          errorText: errorText != null && missingGovernment ? errorText : null,
+          onTap: () => _pickGovernment(context, isArabic),
         ),
-        child: display == null
-            ? null
-            : Text(
-                display,
-                style: AppTypography.body15.copyWith(
-                  color: hasError ? AppColors.error : context.textPrimary,
-                ),
-              ),
-      ),
+        const Gap(AppSpacing.inputContentPaddingH),
+        _LocationPickerTile(
+          key: const ValueKey('locationCityPicker'),
+          label: context.l10n.selectCityLabel,
+          hint: context.l10n.selectCityLabel,
+          display: cityName,
+          icon: LucideIcons.mapPin,
+          errorText:
+              errorText != null && !missingGovernment && missingCity
+                  ? errorText
+                  : null,
+          onTap: () => _pickCity(context, isArabic),
+        ),
+      ],
     );
   }
 
-  Future<void> _openCascade(BuildContext context, bool isArabic) async {
-    // Step 1 — governorate (backend `/api/governorates`).
+  Future<void> _pickGovernment(BuildContext context, bool isArabic) async {
     final pickedGovernorate = await _showLookupSheet<GovernmentEntity>(
       context: context,
       title: context.l10n.selectGovernorate,
       provider: allGovernmentsProvider,
+      invalidate: (ref) => ref.invalidate(allGovernmentsProvider),
       filter: (all) => all,
       idOf: (e) => e.id,
       labelOf: (e) => e.name.resolve(isArabic),
       selectedId: governmentId,
     );
     if (pickedGovernorate == null || !context.mounted) return;
+    if (pickedGovernorate == governmentId) return;
+    onChanged(null, pickedGovernorate);
+  }
 
-    // Keep the current city only when the governorate is unchanged.
-    final priorCity = pickedGovernorate == governmentId ? cityId : null;
+  Future<void> _pickCity(BuildContext context, bool isArabic) async {
+    var govId = governmentId;
+    if (govId == null) {
+      govId = await _showLookupSheet<GovernmentEntity>(
+        context: context,
+        title: context.l10n.selectGovernorate,
+        provider: allGovernmentsProvider,
+        invalidate: (ref) => ref.invalidate(allGovernmentsProvider),
+        filter: (all) => all,
+        idOf: (e) => e.id,
+        labelOf: (e) => e.name.resolve(isArabic),
+        selectedId: null,
+      );
+      if (govId == null || !context.mounted) return;
+    }
 
-    // Step 2 — city within that governorate (backend `/api/cities`).
     final pickedCity = await _showLookupSheet<CityEntity>(
       context: context,
       title: context.l10n.selectCityLabel,
       provider: allCitiesProvider,
+      invalidate: (ref) => ref.invalidate(allCitiesProvider),
       filter: (all) =>
-          all.where((c) => c.governorateId == pickedGovernorate).toList(),
+          all.where((c) => c.governorateId == govId).toList(),
       idOf: (e) => e.id,
       labelOf: (e) => e.name.resolve(isArabic),
-      selectedId: priorCity,
+      selectedId: govId == governmentId ? cityId : null,
       emptyText: context.l10n.noCitiesForGovernorate,
     );
-
-    // Governorate is committed regardless; city may be null if step 2 was
-    // dismissed (form validation flags the incomplete pair).
-    onChanged(pickedCity, pickedGovernorate);
+    if (!context.mounted) return;
+    onChanged(pickedCity, govId);
   }
 
   /// Bottom-sheet single-select over a cached reference list. Returns the
-  /// chosen id, or `null` when dismissed.
+  /// chosen id, or `null` when dismissed. Opens immediately; the sheet
+  /// itself watches the provider (spinner / error+retry / data).
   Future<int?> _showLookupSheet<T>({
     required BuildContext context,
     required String title,
     required ProviderListenable<AsyncValue<List<T>>> provider,
+    required void Function(WidgetRef ref) invalidate,
     required List<T> Function(List<T>) filter,
     required int Function(T) idOf,
     required String Function(T) labelOf,
@@ -152,36 +168,42 @@ class LocationCascadeField extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (sheetContext) {
-        final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.7;
+        final sheetHeight = MediaQuery.sizeOf(sheetContext).height * 0.55;
         return SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxHeight),
+          child: SizedBox(
+            height: sheetHeight,
             child: Consumer(
               builder: (context, ref, _) {
                 final async = ref.watch(provider);
                 return Column(
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Text(title, style: AppTypography.titleMedium),
                     ),
-                    Flexible(
+                    Expanded(
                       child: async.when(
-                        loading: () => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Center(
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
-                          ),
+                        loading: () => const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                         error: (_, __) => Padding(
                           padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: Text(
-                            context.l10n.genericError,
-                            style: AppTypography.bodyMedium
-                                .copyWith(color: AppColors.error),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                context.l10n.genericError,
+                                textAlign: TextAlign.center,
+                                style: AppTypography.bodyMedium
+                                    .copyWith(color: AppColors.error),
+                              ),
+                              const Gap(AppSpacing.sm),
+                              TextButton(
+                                onPressed: () => invalidate(ref),
+                                child: Text(context.l10n.retry),
+                              ),
+                            ],
                           ),
                         ),
                         data: (all) {
@@ -191,8 +213,9 @@ class LocationCascadeField extends ConsumerWidget {
                               padding: const EdgeInsets.all(AppSpacing.lg),
                               child: Text(
                                 emptyText ?? context.l10n.genericError,
-                                style: AppTypography.bodyMedium
-                                    .copyWith(color: context.textSecondary),
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: context.textSecondary,
+                                ),
                               ),
                             );
                           }
@@ -204,11 +227,12 @@ class LocationCascadeField extends ConsumerWidget {
                               return ListTile(
                                 title: Text(labelOf(item)),
                                 trailing: id == selectedId
-                                    ? const Icon(Icons.check,
-                                        color: AppColors.primary)
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: AppColors.primary,
+                                      )
                                     : null,
-                                onTap: () =>
-                                    Navigator.pop(sheetContext, id),
+                                onTap: () => Navigator.pop(sheetContext, id),
                               );
                             },
                           );
@@ -222,6 +246,55 @@ class LocationCascadeField extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _LocationPickerTile extends StatelessWidget {
+  const _LocationPickerTile({
+    super.key,
+    required this.label,
+    required this.hint,
+    required this.display,
+    required this.icon,
+    required this.onTap,
+    this.errorText,
+  });
+
+  final String label;
+  final String hint;
+  final String? display;
+  final IconData icon;
+  final VoidCallback onTap;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError = errorText != null;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: InputDecorator(
+        isEmpty: display == null,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Icon(icon),
+          suffixIcon: const Icon(LucideIcons.chevronDown),
+          filled: true,
+          fillColor: context.surfaceColor,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+          errorText: errorText,
+        ),
+        child: display == null
+            ? null
+            : Text(
+                display!,
+                style: AppTypography.body15.copyWith(
+                  color: hasError ? AppColors.error : context.textPrimary,
+                ),
+              ),
+      ),
     );
   }
 }

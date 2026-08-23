@@ -185,12 +185,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'phoneNumber': params.phoneNumber,
           'password': params.password,
           'confirmPassword': params.confirmPassword,
-          // Single user location (cityId = city, governmentId = governorate).
-          // NOTE: key names unconfirmed against the live consumer-register
-          // model — unbound extra fields are ignored by the backend, so this
-          // is safe; verify they persist once the contract is confirmed.
+          // User location from the register government/city pickers.
+          // `governmentId` matches update-profile; `governorateId` is the
+          // same value under the cities/vendor wire name. Extra unbound
+          // keys are ignored by ASP.NET.
           'cityId': params.cityId,
           'governmentId': params.governmentId,
+          'governorateId': params.governmentId,
           // A birth DATE — send `YYYY-MM-DD` (every backend example uses that),
           // not a full ISO timestamp. Omit the key entirely when not provided.
           if (params.dateOfBirth != null)
@@ -242,6 +243,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // city/government reference-data naming) but send the backend's
         // actual key on the wire.
         'storeGovernorateId': params.storeGovernmentId,
+        // Same pair under the user-level keys used by consumer register /
+        // update-profile, so both store and user location bind.
+        'cityId': params.storeCityId,
+        'governmentId': params.storeGovernmentId,
         'whatsappNumber': params.whatsappNumber,
         'profileImage': await MultipartFile.fromFile(
           params.profileImagePath,

@@ -412,14 +412,14 @@ class _StepPersonal extends StatelessWidget {
           errorText: s.stepErrors['fullName'],
           onChanged: (v) => n.updateField(fullName: v),
         ),
-        const Gap(AppSpacing.inputContentPaddingH),
-        AuthTextField(
-          label: context.l10n.fullNameArRequired,
-          controller: fullNameAr,
-          prefixIcon: const Icon(LucideIcons.user),
-          errorText: s.stepErrors['fullNameAr'],
-          onChanged: (v) => n.updateField(fullNameAr: v),
-        ),
+        // const Gap(AppSpacing.inputContentPaddingH),
+        // AuthTextField(
+        //   label: context.l10n.fullNameArRequired,
+        //   controller: fullNameAr,
+        //   prefixIcon: const Icon(LucideIcons.user),
+        //   errorText: s.stepErrors['fullNameAr'],
+        //   onChanged: (v) => n.updateField(fullNameAr: v),
+        // ),
         const Gap(AppSpacing.inputContentPaddingH),
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: email,

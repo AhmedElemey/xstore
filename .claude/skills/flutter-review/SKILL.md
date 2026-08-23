@@ -669,3 +669,8 @@ Rules for the log:
 - **Rule:** Call `pickMultiImage(limit: remaining)` only when remaining ≥ 2; fall back to `pickImage` for a single slot. After the picker returns, always `take(remaining)` and clamp again in `addPhotoPaths` — never treat the OS `limit` as the business cap.
 - **Where it applies:** `listing_form_notifier.dart` `pickFromGallery` / `addPhotoPaths`; any future multi-image pick with a numeric cap.
 
+### 2026-08-22 — Register government/city are two API pickers; both IDs go on the wire
+- **What happened:** Register needed government and city to load from the live lists on open, and to persist both ids on signup. A single cascade field hid the city picker, and vendor register only sent `storeCityId`/`storeGovernorateId`.
+- **Rule:** Location pickers are two independent fields: government opens `allGovernmentsProvider` (`GET /api/governorates`), city opens `allCitiesProvider` (`GET /api/cities`) filtered client-side by `governorateId` (the cities endpoint ignores filter query params). Save `storeCityId`/`storeGovernmentId` in register state. Consumer POST sends `cityId` + `governmentId` (plus `governorateId` alias). Vendor multipart sends those two *in addition to* `storeCityId`/`storeGovernorateId`. Live seed currently has cities only for Cairo/Alexandria/Giza.
+- **Where it applies:** `location_cascade_field.dart`, `register_screen.dart` step 2, `auth_remote_datasource.dart` `registerConsumer`/`registerVendor`.
+
