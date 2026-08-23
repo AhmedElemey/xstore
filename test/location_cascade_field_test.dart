@@ -89,7 +89,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const ValueKey('locationGovernmentPicker')));
+    await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsWidgets);
     expect(find.text('Cairo'), findsNothing);
@@ -99,9 +99,42 @@ void main() {
     expect(find.text('Alexandria'), findsOneWidget);
   });
 
-  testWidgets('selecting a government saves governmentId and clears city',
+  testWidgets(
+      'picking a government cascades straight into the city sheet, filtered to it',
       (tester) async {
     int? city;
+    int? government;
+    await tester.pumpWidget(
+      _app(
+        cityId: null,
+        governmentId: null,
+        onChanged: (c, g) {
+          city = c;
+          government = g;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cairo'));
+    await tester.pumpAndSettle();
+
+    // The city sheet opened automatically, filtered to the picked government.
+    expect(find.text('Cairo City'), findsOneWidget);
+    expect(find.text('Alexandria City'), findsNothing);
+
+    await tester.tap(find.text('Cairo City'));
+    await tester.pumpAndSettle();
+
+    expect(government, 16);
+    expect(city, 1);
+  });
+
+  testWidgets('dismissing the city sheet after a government change clears the city',
+      (tester) async {
+    int? city = -1;
     int? government;
     await tester.pumpWidget(
       _app(
@@ -115,40 +148,26 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('locationGovernmentPicker')));
+    await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Alexandria'));
+    await tester.pumpAndSettle();
+
+    // Dismiss the auto-opened city sheet without picking a city.
+    await tester.tapAt(const Offset(20, 20));
     await tester.pumpAndSettle();
 
     expect(government, 15);
     expect(city, isNull);
   });
 
-  testWidgets('city sheet only lists cities for the selected government',
+  testWidgets('selected government + city render as "Government - City"',
       (tester) async {
-    int? city;
-    int? government;
     await tester.pumpWidget(
-      _app(
-        cityId: null,
-        governmentId: 16,
-        onChanged: (c, g) {
-          city = c;
-          government = g;
-        },
-      ),
+      _app(cityId: 1, governmentId: 16, onChanged: (_, __) {}),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('locationCityPicker')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Cairo City'), findsOneWidget);
-    expect(find.text('Alexandria City'), findsNothing);
-
-    await tester.tap(find.text('Cairo City'));
-    await tester.pumpAndSettle();
-    expect(city, 1);
-    expect(government, 16);
+    expect(find.text('Cairo - Cairo City'), findsOneWidget);
   });
 }

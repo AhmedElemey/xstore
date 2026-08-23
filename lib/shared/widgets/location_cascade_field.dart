@@ -13,8 +13,12 @@ import '../../features/cities/presentation/providers/city_dependencies.dart';
 import '../../features/governments/domain/entities/government_entity.dart';
 import '../../features/governments/presentation/providers/government_dependencies.dart';
 
-/// Two API-backed pickers for a governorate + city pair (register + edit
-/// profile).
+/// A single API-backed cascading picker for a governorate + city pair
+/// (register + edit profile).
+///
+/// Tapping the field opens the governorate bottom sheet; picking a
+/// governorate immediately opens the city bottom sheet filtered to it. Once
+/// both are picked, the field displays "Governorate - City".
 ///
 /// Live hierarchy (confirmed 2026-08-11 / 2026-08-22): `/api/governorates`
 /// holds the top-level governorates; `/api/cities` holds cities linked upward
@@ -66,39 +70,28 @@ class LocationCascadeField extends ConsumerWidget {
     final cityName =
         _byId<CityEntity>(cities, cityId, (e) => e.id)?.name.resolve(isArabic);
 
-    final missingGovernment = governmentId == null;
-    final missingCity = cityId == null;
+    final combinedDisplay = governorateName == null
+        ? null
+        : cityName == null
+            ? governorateName
+            : '$governorateName - $cityName';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _LocationPickerTile(
-          key: const ValueKey('locationGovernmentPicker'),
-          label: context.l10n.selectGovernorate,
-          hint: context.l10n.selectGovernorate,
-          display: governorateName,
-          icon: LucideIcons.mapPin,
-          errorText: errorText != null && missingGovernment ? errorText : null,
-          onTap: () => _pickGovernment(context, isArabic),
-        ),
-        const Gap(AppSpacing.inputContentPaddingH),
-        _LocationPickerTile(
-          key: const ValueKey('locationCityPicker'),
-          label: context.l10n.selectCityLabel,
-          hint: context.l10n.selectCityLabel,
-          display: cityName,
-          icon: LucideIcons.mapPin,
-          errorText:
-              errorText != null && !missingGovernment && missingCity
-                  ? errorText
-                  : null,
-          onTap: () => _pickCity(context, isArabic),
-        ),
-      ],
+    return _LocationPickerTile(
+      key: const ValueKey('locationCascadeField'),
+      label: context.l10n.governorateAndCityLabel,
+      hint: context.l10n.locationCascadeHint,
+      display: combinedDisplay,
+      icon: LucideIcons.mapPin,
+      errorText: errorText,
+      onTap: () => _pickLocation(context, isArabic),
     );
   }
 
-  Future<void> _pickGovernment(BuildContext context, bool isArabic) async {
+  /// Opens the governorate sheet, then immediately cascades into the city
+  /// sheet (filtered to the picked governorate). Dismissing the city sheet
+  /// keeps the previous city when the governorate didn't change, and clears
+  /// it otherwise.
+  Future<void> _pickLocation(BuildContext context, bool isArabic) async {
     final pickedGovernorate = await _showLookupSheet<GovernmentEntity>(
       context: context,
       title: context.l10n.selectGovernorate,
@@ -110,25 +103,8 @@ class LocationCascadeField extends ConsumerWidget {
       selectedId: governmentId,
     );
     if (pickedGovernorate == null || !context.mounted) return;
-    if (pickedGovernorate == governmentId) return;
-    onChanged(null, pickedGovernorate);
-  }
 
-  Future<void> _pickCity(BuildContext context, bool isArabic) async {
-    var govId = governmentId;
-    if (govId == null) {
-      govId = await _showLookupSheet<GovernmentEntity>(
-        context: context,
-        title: context.l10n.selectGovernorate,
-        provider: allGovernmentsProvider,
-        invalidate: (ref) => ref.invalidate(allGovernmentsProvider),
-        filter: (all) => all,
-        idOf: (e) => e.id,
-        labelOf: (e) => e.name.resolve(isArabic),
-        selectedId: null,
-      );
-      if (govId == null || !context.mounted) return;
-    }
+    final keptCityId = pickedGovernorate == governmentId ? cityId : null;
 
     final pickedCity = await _showLookupSheet<CityEntity>(
       context: context,
@@ -136,14 +112,15 @@ class LocationCascadeField extends ConsumerWidget {
       provider: allCitiesProvider,
       invalidate: (ref) => ref.invalidate(allCitiesProvider),
       filter: (all) =>
-          all.where((c) => c.governorateId == govId).toList(),
+          all.where((c) => c.governorateId == pickedGovernorate).toList(),
       idOf: (e) => e.id,
       labelOf: (e) => e.name.resolve(isArabic),
-      selectedId: govId == governmentId ? cityId : null,
+      selectedId: keptCityId,
       emptyText: context.l10n.noCitiesForGovernorate,
     );
     if (!context.mounted) return;
-    onChanged(pickedCity, govId);
+
+    onChanged(pickedCity ?? keptCityId, pickedGovernorate);
   }
 
   /// Bottom-sheet single-select over a cached reference list. Returns the
