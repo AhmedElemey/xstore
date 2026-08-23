@@ -683,16 +683,13 @@ class RegisterNotifier extends _$RegisterNotifier {
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
     final role = state.selectedRole ?? UserRole.consumer;
     final fullNameEn = state.fullName.trim();
-    final fullNameAr = state.fullNameAr.trim().isNotEmpty
-        ? state.fullNameAr.trim()
-        : fullNameEn;
     final result = role == UserRole.vendor
         ? await ref
               .read(registerVendorUseCaseProvider)
               .call(
                 VendorRegisterParams(
                   fullNameEn: fullNameEn,
-                  fullNameAr: fullNameAr,
+                  fullNameAr: '',
                   email: state.email.trim(),
                   phoneNumber: state.phoneNumber,
                   password: state.password,
@@ -714,7 +711,7 @@ class RegisterNotifier extends _$RegisterNotifier {
               .call(
                 ConsumerRegisterParams(
                   fullNameEn: fullNameEn,
-                  fullNameAr: fullNameAr,
+                  fullNameAr: '',
                   email: state.email.trim(),
                   phoneNumber: state.phoneNumber,
                   password: state.password,

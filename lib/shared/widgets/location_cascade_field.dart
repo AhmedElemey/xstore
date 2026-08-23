@@ -110,6 +110,7 @@ class LocationCascadeField extends ConsumerWidget {
         filter: (all) => all,
         idOf: (e) => e.id,
         labelOf: (e) => e.name.resolve(isArabic),
+        searchTextOf: (e) => '${e.name.en} ${e.name.ar}',
         selectedId: selectedGovernorate,
       );
       if (govResult == null || !context.mounted) return;
@@ -127,6 +128,7 @@ class LocationCascadeField extends ConsumerWidget {
             .toList(),
         idOf: (e) => e.id,
         labelOf: (e) => e.name.resolve(isArabic),
+        searchTextOf: (e) => '${e.name.en} ${e.name.ar}',
         selectedId: keptCityId,
         emptyText: context.l10n.noCitiesForGovernorate,
         showBackButton: true,
@@ -152,6 +154,7 @@ class LocationCascadeField extends ConsumerWidget {
     required List<T> Function(List<T>) filter,
     required int Function(T) idOf,
     required String Function(T) labelOf,
+    required String Function(T) searchTextOf,
     required int? selectedId,
     String? emptyText,
     bool showBackButton = false,
@@ -164,108 +167,261 @@ class LocationCascadeField extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (sheetContext) {
-        final sheetHeight = MediaQuery.sizeOf(sheetContext).height * 0.55;
-        return SafeArea(
-          child: SizedBox(
-            height: sheetHeight,
-            child: Consumer(
-              builder: (context, ref, _) {
-                final async = ref.watch(provider);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: showBackButton
-                          ? const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            )
-                          : const EdgeInsets.all(AppSpacing.lg),
-                      child: showBackButton
-                          ? Row(
-                              children: [
-                                IconButton(
-                                  key: const ValueKey(
-                                    'locationCascadeBackButton',
-                                  ),
-                                  icon: Icon(context.arrowBackIcon),
-                                  onPressed: () =>
-                                      Navigator.pop(sheetContext, _goBack),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    title,
-                                    style: AppTypography.titleMedium,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Text(title, style: AppTypography.titleMedium),
-                    ),
-                    Expanded(
-                      child: async.when(
-                        loading: () => const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        error: (_, __) => Padding(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                context.l10n.genericError,
-                                textAlign: TextAlign.center,
-                                style: AppTypography.bodyMedium
-                                    .copyWith(color: AppColors.error),
-                              ),
-                              const Gap(AppSpacing.sm),
-                              TextButton(
-                                onPressed: () => invalidate(ref),
-                                child: Text(context.l10n.retry),
-                              ),
-                            ],
-                          ),
-                        ),
-                        data: (all) {
-                          final items = filter(all);
-                          if (items.isEmpty) {
-                            return Padding(
-                              padding: const EdgeInsets.all(AppSpacing.lg),
-                              child: Text(
-                                emptyText ?? context.l10n.genericError,
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: context.textSecondary,
-                                ),
-                              ),
-                            );
-                          }
-                          return ListView.builder(
-                            itemCount: items.length,
-                            itemBuilder: (context, i) {
-                              final item = items[i];
-                              final id = idOf(item);
-                              return ListTile(
-                                title: Text(labelOf(item)),
-                                trailing: id == selectedId
-                                    ? const Icon(
-                                        Icons.check,
-                                        color: AppColors.primary,
-                                      )
-                                    : null,
-                                onTap: () => Navigator.pop(sheetContext, id),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+        return _LookupSheetBody<T>(
+          title: title,
+          provider: provider,
+          invalidate: invalidate,
+          filter: filter,
+          idOf: idOf,
+          labelOf: labelOf,
+          searchTextOf: searchTextOf,
+          selectedId: selectedId,
+          emptyText: emptyText,
+          showBackButton: showBackButton,
         );
       },
+    );
+  }
+}
+
+class _LookupSheetBody<T> extends ConsumerStatefulWidget {
+  const _LookupSheetBody({
+    required this.title,
+    required this.provider,
+    required this.invalidate,
+    required this.filter,
+    required this.idOf,
+    required this.labelOf,
+    required this.searchTextOf,
+    required this.selectedId,
+    this.emptyText,
+    this.showBackButton = false,
+  });
+
+  final String title;
+  final ProviderListenable<AsyncValue<List<T>>> provider;
+  final void Function(WidgetRef ref) invalidate;
+  final List<T> Function(List<T>) filter;
+  final int Function(T) idOf;
+  final String Function(T) labelOf;
+  final String Function(T) searchTextOf;
+  final int? selectedId;
+  final String? emptyText;
+  final bool showBackButton;
+
+  @override
+  ConsumerState<_LookupSheetBody<T>> createState() =>
+      _LookupSheetBodyState<T>();
+}
+
+class _LookupSheetBodyState<T> extends ConsumerState<_LookupSheetBody<T>> {
+  late final TextEditingController _search;
+
+  @override
+  void initState() {
+    super.initState();
+    _search = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  List<T> _matching(List<T> items) {
+    final query = _search.text.trim().toLowerCase();
+    if (query.isEmpty) return items;
+    return items
+        .where(
+          (item) => widget.searchTextOf(item).toLowerCase().contains(query),
+        )
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(widget.provider);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final sheetHeight =
+        (screenHeight * 0.55).clamp(0.0, screenHeight - keyboard);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboard),
+      child: SafeArea(
+        child: SizedBox(
+          height: sheetHeight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: widget.showBackButton
+                    ? const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      )
+                    : const EdgeInsets.all(AppSpacing.lg),
+                child: widget.showBackButton
+                    ? Row(
+                        children: [
+                          IconButton(
+                            key: const ValueKey(
+                              'locationCascadeBackButton',
+                            ),
+                            icon: Icon(context.arrowBackIcon),
+                            onPressed: () => Navigator.pop(
+                              context,
+                              LocationCascadeField._goBack,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              widget.title,
+                              style: AppTypography.titleMedium,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(widget.title, style: AppTypography.titleMedium),
+              ),
+              Expanded(
+                child: async.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (_, __) => Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          context.l10n.genericError,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodyMedium
+                              .copyWith(color: AppColors.error),
+                        ),
+                        const Gap(AppSpacing.sm),
+                        TextButton(
+                          onPressed: () => widget.invalidate(ref),
+                          child: Text(context.l10n.retry),
+                        ),
+                      ],
+                    ),
+                  ),
+                  data: (all) {
+                    final items = widget.filter(all);
+                    if (items.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Text(
+                          widget.emptyText ?? context.l10n.genericError,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: context.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+                    final visible = _matching(items);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            0,
+                            AppSpacing.lg,
+                            AppSpacing.sm,
+                          ),
+                          child: TextField(
+                            key: const ValueKey(
+                              'locationCascadeSearchField',
+                            ),
+                            controller: _search,
+                            textInputAction: TextInputAction.search,
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            onChanged: (_) => setState(() {}),
+                            style: AppTypography.bodyLarge.copyWith(
+                              color: context.textPrimary,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: context.l10n.locationSheetSearchHint,
+                              hintStyle: AppTypography.bodyLarge.copyWith(
+                                color: context.textSecondary,
+                                height: 1,
+                              ),
+                              filled: true,
+                              fillColor: context.surfaceColor,
+                              isDense: true,
+                              prefixIcon: const Icon(LucideIcons.search),
+                              prefixIconConstraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
+                              suffixIcon: _search.text.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      icon: const Icon(LucideIcons.x),
+                                      onPressed: () {
+                                        _search.clear();
+                                        setState(() {});
+                                      },
+                                    ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.lg,
+                                vertical: AppSpacing.inputContentPaddingV,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: visible.isEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.all(
+                                    AppSpacing.lg,
+                                  ),
+                                  child: Text(
+                                    context.l10n.locationSheetNoMatches,
+                                    style: AppTypography.bodyMedium.copyWith(
+                                      color: context.textSecondary,
+                                    ),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior
+                                          .onDrag,
+                                  itemCount: visible.length,
+                                  itemBuilder: (context, i) {
+                                    final item = visible[i];
+                                    final id = widget.idOf(item);
+                                    return ListTile(
+                                      title: Text(widget.labelOf(item)),
+                                      trailing: id == widget.selectedId
+                                          ? const Icon(
+                                              Icons.check,
+                                              color: AppColors.primary,
+                                            )
+                                          : null,
+                                      onTap: () =>
+                                          Navigator.pop(context, id),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

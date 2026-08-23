@@ -177,8 +177,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.consumerRegister,
         data: {
-          'fullNameEn': params.fullNameEn,
-          'fullNameAr': params.fullNameAr,
+          // Live contract (2026-08-24): display name is `fullName` only.
+          // `fullNameEn` / `fullNameAr` are no longer accepted.
+          'fullName': params.fullNameEn,
           // CONFIRMED live: email is now REQUIRED and must be a valid address
           // (an empty/missing key 400s). Callers validate it before this call.
           'email': params.email.trim(),
@@ -222,8 +223,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // CONFIRMED live: vendor register is multipart/form-data and REQUIRES a
       // `profileImage` file (JSON 400s: "The ProfileImage field is required.").
       final formData = FormData.fromMap({
-        'fullNameEn': params.fullNameEn,
-        'fullNameAr': params.fullNameAr,
+        'fullName': params.fullNameEn,
         // Email is required here too (same contract as consumer register).
         'email': params.email.trim(),
         'phoneNumber': params.phoneNumber,

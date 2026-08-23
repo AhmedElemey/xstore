@@ -39,7 +39,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _fullName = TextEditingController();
-  final _fullNameAr = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _password = TextEditingController();
@@ -61,7 +60,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _fullName.dispose();
-    _fullNameAr.dispose();
     _email.dispose();
     _phone.dispose();
     _password.dispose();
@@ -261,7 +259,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           s: s,
           n: n,
           fullName: _fullName,
-          fullNameAr: _fullNameAr,
           email: _email,
           phone: _phone,
           onPickDob: () => _pickDob(n, s),
@@ -369,7 +366,6 @@ class _StepPersonal extends StatelessWidget {
     required this.s,
     required this.n,
     required this.fullName,
-    required this.fullNameAr,
     required this.email,
     required this.phone,
     required this.onPickDob,
@@ -378,7 +374,6 @@ class _StepPersonal extends StatelessWidget {
   final RegisterState s;
   final RegisterNotifier n;
   final TextEditingController fullName;
-  final TextEditingController fullNameAr;
   final TextEditingController email;
   final TextEditingController phone;
   final VoidCallback onPickDob;
@@ -413,14 +408,6 @@ class _StepPersonal extends StatelessWidget {
           errorText: s.stepErrors['fullName'],
           onChanged: (v) => n.updateField(fullName: v),
         ),
-        // const Gap(AppSpacing.inputContentPaddingH),
-        // AuthTextField(
-        //   label: context.l10n.fullNameArRequired,
-        //   controller: fullNameAr,
-        //   prefixIcon: const Icon(LucideIcons.user),
-        //   errorText: s.stepErrors['fullNameAr'],
-        //   onChanged: (v) => n.updateField(fullNameAr: v),
-        // ),
         const Gap(AppSpacing.inputContentPaddingH),
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: email,

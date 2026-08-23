@@ -12,7 +12,7 @@ class GovernmentModel {
   factory GovernmentModel.fromJson(Map<String, dynamic> json) =>
       GovernmentModel(
         id: json['id'] as int,
-        nameEn: json['nameEn'] as String? ?? '',
+        nameEn: json['nameEn'] as String? ?? json['name'] as String? ?? '',
         nameAr: json['nameAr'] as String? ?? '',
         cityId: json['cityId'] as int?,
       );

@@ -385,11 +385,12 @@ Rules for the log:
 - **Rule:** For static reference-data list providers, keep them `@riverpod` (autoDispose) and call `ref.keepAlive()` inside the SUCCESS branch of the fold — caches values for the app session while leaving failures unpinned so re-entry retries. Prefer this over `@Riverpod(keepAlive: true)`, which would also cache an AsyncError permanently (dropdowns break with no retry).
 - **Where it applies:** `city_dependencies.dart`, `government_dependencies.dart`, `store_category_dependencies.dart`, any future lookup/reference list provider.
 
-### 2026-07-26 — cities/governments hierarchy (updated 2026-08-11)
+### 2026-07-26 — cities/governments hierarchy (updated 2026-08-23)
 - **What happened (2026-07-26):** An earlier live probe showed an inverted hierarchy (cities as parents, governments as districts via `Government.cityId`), and the cascade was built around that.
 - **What happened (2026-08-11):** Buyer register's government popup showed no usable cascade — live `/api/governorates` now returns real governorates (`{id,nameEn,nameAr}` only) and `/api/cities` returns cities with `governorateId` pointing up. Filtering governments by `cityId` always yielded an empty city sheet.
-- **Rule:** Location cascade matches Egypt's real hierarchy and the current live API: popup 1 = `allGovernments` → writes `governmentId`/`storeGovernmentId` (labeled Governorate); popup 2 = `allCities` filtered by `governorateId == chosen` → writes `cityId`/`storeCityId` (labeled City). Parse cities with `governorateId` (fallback `governmentId`). Do not trust old inverted-hierarchy comments — re-probe both list endpoints when location pickers break. Shared picker: `location_cascade_field.dart`. Changing a governorate resets the dependent city via `updateStoreLocation`.
-- **Where it applies:** `location_cascade_field.dart`, `city_model.dart`/`city_entity.dart`, register + edit profile location fields.
+- **What happened (2026-08-23):** Government sheet showed the generic error. Live `/api/governorates` and `/api/cities` now return a **bare JSON array** (27 governorates, 240 cities; `pageSize` ignored). Datasources still did `get<Map<String, dynamic>>` expecting `{items,totalCount}`, so Dio threw a type error and the sheet rendered `genericError`.
+- **Rule:** Location cascade matches Egypt's real hierarchy and the current live API: popup 1 = `allGovernments` → writes `governmentId`/`storeGovernmentId` (labeled Governorate); popup 2 = `allCities` filtered by `governorateId == chosen` → writes `cityId`/`storeCityId` (labeled City). Parse cities with `governorateId` (fallback `governmentId`). GET reference lists as `dynamic` and unwrap a bare array **or** `{items|data|results}` — never assume the pagination envelope. Do not trust old inverted-hierarchy comments or an old envelope lesson — re-probe both list endpoints when location pickers break or error. Shared picker: `location_cascade_field.dart`. Changing a governorate resets the dependent city via `updateStoreLocation`.
+- **Where it applies:** `location_cascade_field.dart`, `government_remote_datasource.dart`, `city_remote_datasource.dart`, `json_list_unwrap.dart`, register + edit profile location fields.
 
 ### 2026-07-26 — One shared user location; consumer register omits location by default
 - **What happened:** The government→city cascade was first added only to the vendor store step + profile store section, but the personal "Location / City" field (register step 2, all roles) was free-text and — critically — NOT sent on the wire at all (consumer register only posts name/email/phone/password/DOB; the personal `location` string only fed the dead legacy `register` path). Backend has ONE structured `cityId`/`governmentId` pair, so two cascades would conflict.
@@ -718,3 +719,13 @@ Rules for the log:
 - **What happened:** Register Continue on step 2 did nothing: `validateStep` still required `fullNameAr` after the Arabic name field was commented out, so `nextStep` failed with an error that had no widget to show it.
 - **Rule:** When a form field is removed or commented out, delete its `validateStep` entry in the same change. A `stepErrors` key with no matching `errorText:` looks like a dead Continue button. If the backend still wants the value, copy a visible field onto the wire (here: `fullName` → `fullNameAr`) instead of blocking the UI.
 - **Where it applies:** `auth_provider.dart` `validateStep` / `_performRegister`; any wizard whose UI fields and validator keys must stay 1:1.
+
+### 2026-08-23 — Location picker sheets search both nameEn and nameAr
+- **What happened:** Government and city bottom sheets needed in-sheet search. Filtering only the displayed locale would miss mixed-language typing, which is common in Egypt.
+- **Rule:** Client-side filter on bilingual reference lists matches against both `name.en` and `name.ar`. Own the search `TextEditingController` on a StatefulWidget inside the sheet and dispose it. Pad with `viewInsetsOf` so the keyboard does not cover the field. Do not autofocus the search field — a focused TextField's cursor blink hangs `pumpAndSettle`.
+- **Where it applies:** `location_cascade_field.dart` lookup sheets; any future searchable reference-data bottom sheet.
+
+### 2026-08-24 — Register/update-profile display name wire key is `fullName`
+- **What happened:** The app still posted `fullNameEn` on consumer/vendor register and update-profile after the backend renamed that field to `fullName`.
+- **Rule:** The live display-name key is `fullName` only — do not send `fullNameEn` or `fullNameAr` on register or update-profile. When reading profiles, accept `fullName`, then `fullNameEn`, then `name`.
+- **Where it applies:** `auth_remote_datasource.dart` register bodies, `profile_remote_datasource.dart` `updateProfileWireFields`, `user_model.dart` `fromJson`.

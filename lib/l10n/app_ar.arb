@@ -1198,6 +1198,8 @@
   "selectGovernorate": "اختر المحافظة",
   "selectCityLabel": "اختر المدينة",
   "noCitiesForGovernorate": "لا توجد مدن متاحة لهذه المحافظة",
+  "locationSheetSearchHint": "ابحث",
+  "locationSheetNoMatches": "لا توجد نتائج",
   "townCity": "المدينة / الحي",
   "townCityHint": "مثلاً مدينة نصر، الدقي، سيدي جابر",
   "detailAddress": "العنوان التفصيلي",

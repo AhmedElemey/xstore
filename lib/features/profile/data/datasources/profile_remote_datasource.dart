@@ -64,9 +64,7 @@ String? _birthDateWire(DateTime? date) {
 Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
   return {
     if (_optTrimmed(request.fullNameEn) != null)
-      'fullNameEn': _optTrimmed(request.fullNameEn),
-    if (_optTrimmed(request.fullNameAr) != null)
-      'fullNameAr': _optTrimmed(request.fullNameAr),
+      'fullName': _optTrimmed(request.fullNameEn),
     'userImageUrl': request.userImageUrl,
     'storeImageUrl': request.storeImageUrl,
     if (_optTrimmed(request.storeNameEn) != null)
@@ -137,8 +135,7 @@ void _debugLogProfileFields({
 
   /// PUT wire key → get-profile response path (user.* or store.*).
   const fieldMap = <String, String>{
-    'fullNameEn': 'user.fullNameEn',
-    'fullNameAr': 'user.fullNameAr',
+    'fullName': 'user.fullName',
     'birthDate': 'user.birthDate',
     'userImageUrl': 'user.avatarUrl',
     'storeNameEn': 'store.nameEn',

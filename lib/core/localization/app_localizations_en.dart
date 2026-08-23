@@ -2788,6 +2788,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'No cities available for this government';
 
   @override
+  String get locationSheetSearchHint => 'Search';
+
+  @override
+  String get locationSheetNoMatches => 'No matches';
+
+  @override
   String get townCity => 'Town / City';
 
   @override

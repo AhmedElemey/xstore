@@ -220,4 +220,58 @@ void main() {
     expect(government, 15);
     expect(city, 2);
   });
+
+  testWidgets('government sheet search filters by English and Arabic names',
+      (tester) async {
+    await tester.pumpWidget(
+      _app(cityId: null, governmentId: null, onChanged: (_, __) {}),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+    await tester.pumpAndSettle();
+
+    final search = find.byKey(const ValueKey('locationCascadeSearchField'));
+    expect(search, findsOneWidget);
+
+    await tester.enterText(search, 'cai');
+    await tester.pump();
+    expect(find.text('Cairo'), findsOneWidget);
+    expect(find.text('Alexandria'), findsNothing);
+
+    await tester.enterText(search, 'الإسكند');
+    await tester.pump();
+    expect(find.text('Alexandria'), findsOneWidget);
+    expect(find.text('Cairo'), findsNothing);
+
+    await tester.enterText(search, 'zzzz');
+    await tester.pump();
+    expect(find.text('No matches'), findsOneWidget);
+    expect(find.text('Cairo'), findsNothing);
+    expect(find.text('Alexandria'), findsNothing);
+  });
+
+  testWidgets('city sheet search filters the cities of the picked government',
+      (tester) async {
+    await tester.pumpWidget(
+      _app(cityId: null, governmentId: null, onChanged: (_, __) {}),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cairo'));
+    await tester.pumpAndSettle();
+
+    final search = find.byKey(const ValueKey('locationCascadeSearchField'));
+    await tester.enterText(search, 'cairo city');
+    await tester.pump();
+    expect(find.text('Cairo City'), findsOneWidget);
+
+    await tester.enterText(search, 'alex');
+    await tester.pump();
+    expect(find.text('No matches'), findsOneWidget);
+    expect(find.text('Cairo City'), findsNothing);
+    expect(find.text('Alexandria City'), findsNothing);
+  });
 }

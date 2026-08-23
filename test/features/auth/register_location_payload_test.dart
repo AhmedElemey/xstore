@@ -54,6 +54,9 @@ void main() {
 
     final body = interceptor.captured!.data as Map<String, dynamic>;
     expect(interceptor.captured!.path, '/api/auth/consumer/register');
+    expect(body['fullName'], 'Jane Doe');
+    expect(body.containsKey('fullNameEn'), isFalse);
+    expect(body.containsKey('fullNameAr'), isFalse);
     expect(body['cityId'], 1);
     expect(body['governmentId'], 16);
     expect(body['governorateId'], 16);
@@ -90,6 +93,11 @@ void main() {
         formData.fields.firstWhere((e) => e.key == key).value;
 
     expect(interceptor.captured!.path, '/api/auth/vendor/register');
+    expect(field('fullName'), 'Ahmed Ali');
+    expect(
+      formData.fields.any((e) => e.key == 'fullNameEn' || e.key == 'fullNameAr'),
+      isFalse,
+    );
     expect(field('storeCityId'), '1');
     expect(field('storeGovernorateId'), '16');
     expect(field('cityId'), '1');

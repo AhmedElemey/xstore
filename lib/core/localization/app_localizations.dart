@@ -5408,6 +5408,18 @@ abstract class AppLocalizations {
   /// **'No cities available for this government'**
   String get noCitiesForGovernorate;
 
+  /// No description provided for @locationSheetSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get locationSheetSearchHint;
+
+  /// No description provided for @locationSheetNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get locationSheetNoMatches;
+
   /// No description provided for @townCity.
   ///
   /// In en, this message translates to:

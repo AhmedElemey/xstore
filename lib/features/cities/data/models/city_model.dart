@@ -11,7 +11,7 @@ class CityModel {
 
   factory CityModel.fromJson(Map<String, dynamic> json) => CityModel(
         id: json['id'] as int,
-        nameEn: json['nameEn'] as String? ?? '',
+        nameEn: json['nameEn'] as String? ?? json['name'] as String? ?? '',
         nameAr: json['nameAr'] as String? ?? '',
         // Live wire key is `governorateId` (city → parent governorate).
         // Older seeds/docs used `governmentId`; accept both.

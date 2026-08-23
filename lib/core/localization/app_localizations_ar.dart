@@ -2780,6 +2780,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noCitiesForGovernorate => 'لا توجد مدن متاحة لهذه المحافظة';
 
   @override
+  String get locationSheetSearchHint => 'ابحث';
+
+  @override
+  String get locationSheetNoMatches => 'لا توجد نتائج';
+
+  @override
   String get townCity => 'المدينة / الحي';
 
   @override

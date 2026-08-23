@@ -167,8 +167,8 @@ void main() {
 
       final body = updateProfileWireFields(state.toUpdateProfileRequest());
 
-      expect(body['fullNameEn'], 'Ahmed');
-      expect(body['fullNameAr'], 'أحمد');
+      expect(body['fullName'], 'Ahmed');
+      expect(body.containsKey('fullNameAr'), isFalse);
       expect(body['storeNameEn'], 'Tech Hub');
       expect(body['detailedAddressByGoogleMaps'], '12 Abbas El Akkad, Nasr City');
       expect(body['detailedAddressByUser'], 'Building 5, floor 2');

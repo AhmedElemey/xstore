@@ -41,7 +41,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   ];
 
   final _name = TextEditingController();
-  final _fullNameAr = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _location = TextEditingController();
@@ -76,7 +75,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   void dispose() {
     _name.dispose();
-    _fullNameAr.dispose();
     _email.dispose();
     _phone.dispose();
     _location.dispose();
@@ -101,7 +99,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   void _syncFromState(ProfileState s) {
     _name.text = s.editName;
-    _fullNameAr.text = s.editFullNameAr;
     _email.text = s.editEmail;
     _phone.text = s.editPhone;
     _location.text = s.editLocation;
@@ -131,7 +128,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void _pushFieldsToNotifier() {
     final n = ref.read(profileNotifierProvider.notifier);
     n.updateField('name', _name.text);
-    n.updateField('fullNameAr', _fullNameAr.text);
     n.updateField('email', _email.text);
     n.updateField('phone', _phone.text);
     n.updateField('location', _location.text);
@@ -449,17 +445,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('name', v),
-          ),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _fullNameAr,
-            decoration: InputDecoration(
-              labelText: context.l10n.fullNameArRequired,
-              prefixIcon: const Icon(LucideIcons.user),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) =>
-                ref.read(profileNotifierProvider.notifier).updateField('fullNameAr', v),
           ),
           const Gap(AppSpacing.md),
           TextField(

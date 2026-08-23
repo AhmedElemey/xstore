@@ -217,8 +217,11 @@ class UserModel with _$UserModel {
     return UserModel(
       // CONFIRMED: `id` is a JSON number on the real backend, not a string.
       id: json['id']?.toString() ?? '',
-      // Backward compat: new backend sends fullNameEn/fullNameAr, not name.
-      name: optString('name') ?? optString('fullNameEn') ?? '',
+      // Live name key is `fullName`; older payloads used `fullNameEn` or `name`.
+      name: optString('name') ??
+          optString('fullName') ??
+          optString('fullNameEn') ??
+          '',
       email: json['email'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
@@ -264,7 +267,7 @@ class UserModel with _$UserModel {
       token: json['token'] as String?,
       refreshToken: json['refreshToken'] as String?,
       isNewUser: json['isNewUser'] as bool? ?? false,
-      fullNameEn: optString('fullNameEn'),
+      fullNameEn: optString('fullNameEn') ?? optString('fullName'),
       fullNameAr: optString('fullNameAr'),
       storeNameEn: optString('storeNameEn'),
       storeNameAr: optString('storeNameAr'),

@@ -1198,6 +1198,8 @@
   "selectGovernorate": "Select government",
   "selectCityLabel": "Select city",
   "noCitiesForGovernorate": "No cities available for this government",
+  "locationSheetSearchHint": "Search",
+  "locationSheetNoMatches": "No matches",
   "townCity": "Town / City",
   "townCityHint": "e.g. Nasr City, Dokki, Sidi Gaber",
   "detailAddress": "Detailed Address",

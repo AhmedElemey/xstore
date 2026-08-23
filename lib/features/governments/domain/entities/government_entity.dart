@@ -6,7 +6,8 @@ part 'government_entity.freezed.dart';
 
 /// Top-level Egyptian governorate from `/api/governorates`.
 ///
-/// Live GET payloads are `{id, nameEn, nameAr}` only. Older docs linked a
+/// Live GET (2026-08-23) is a bare list of `{id, nameEn, nameAr}`. Older
+/// hosts wrapped the same rows in `{items, totalCount}`. Older docs linked a
 /// government *down* to a city via `cityId`; that link is gone — cities now
 /// point *up* via `CityEntity.governorateId`. [cityId] is kept for tolerant
 /// parsing of any leftover payloads.
