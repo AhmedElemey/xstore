@@ -170,4 +170,54 @@ void main() {
 
     expect(find.text('Cairo - Cairo City'), findsOneWidget);
   });
+
+  testWidgets(
+      'city sheet back button reopens the government sheet, keeping progress',
+      (tester) async {
+    int? city;
+    int? government;
+    await tester.pumpWidget(
+      _app(
+        cityId: null,
+        governmentId: null,
+        onChanged: (c, g) {
+          city = c;
+          government = g;
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cairo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cairo City'), findsOneWidget);
+
+    // Change my mind — go back to the governorate sheet.
+    await tester.tap(find.byKey(const ValueKey('locationCascadeBackButton')));
+    await tester.pumpAndSettle();
+
+    // Back on the governorate sheet, Cairo shows as the current selection,
+    // and nothing has been committed to the caller yet.
+    expect(find.text('Alexandria'), findsOneWidget);
+    final cairoTile = tester.widget<ListTile>(
+      find.ancestor(of: find.text('Cairo'), matching: find.byType(ListTile)),
+    );
+    expect(cairoTile.trailing, isNotNull);
+    expect(government, isNull);
+    expect(city, isNull);
+
+    // Pick a different governorate; cascades into ITS city sheet.
+    await tester.tap(find.text('Alexandria'));
+    await tester.pumpAndSettle();
+    expect(find.text('Alexandria City'), findsOneWidget);
+    expect(find.text('Cairo City'), findsNothing);
+
+    await tester.tap(find.text('Alexandria City'));
+    await tester.pumpAndSettle();
+
+    expect(government, 15);
+    expect(city, 2);
+  });
 }

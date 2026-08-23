@@ -87,46 +87,64 @@ class LocationCascadeField extends ConsumerWidget {
     );
   }
 
-  /// Opens the governorate sheet, then immediately cascades into the city
-  /// sheet (filtered to the picked governorate). Dismissing the city sheet
-  /// keeps the previous city when the governorate didn't change, and clears
-  /// it otherwise.
+  /// Sentinel returned by the city sheet's back button, distinct from `null`
+  /// (dismissed with no pick) and any `int` (a picked id) — signals
+  /// "reopen the governorate sheet" instead of closing the whole flow.
+  static const Object _goBack = Object();
+
+  /// Opens the governorate sheet, then cascades into the city sheet (filtered
+  /// to the picked governorate). The city sheet's back button reopens the
+  /// governorate sheet, keeping the governorate just picked selected, so the
+  /// user can change it without losing the flow. Dismissing the city sheet
+  /// (tap-outside/swipe, not back) keeps the previous city when the
+  /// governorate didn't change, and clears it otherwise.
   Future<void> _pickLocation(BuildContext context, bool isArabic) async {
-    final pickedGovernorate = await _showLookupSheet<GovernmentEntity>(
-      context: context,
-      title: context.l10n.selectGovernorate,
-      provider: allGovernmentsProvider,
-      invalidate: (ref) => ref.invalidate(allGovernmentsProvider),
-      filter: (all) => all,
-      idOf: (e) => e.id,
-      labelOf: (e) => e.name.resolve(isArabic),
-      selectedId: governmentId,
-    );
-    if (pickedGovernorate == null || !context.mounted) return;
+    var selectedGovernorate = governmentId;
 
-    final keptCityId = pickedGovernorate == governmentId ? cityId : null;
+    while (true) {
+      final govResult = await _showLookupSheet<GovernmentEntity>(
+        context: context,
+        title: context.l10n.selectGovernorate,
+        provider: allGovernmentsProvider,
+        invalidate: (ref) => ref.invalidate(allGovernmentsProvider),
+        filter: (all) => all,
+        idOf: (e) => e.id,
+        labelOf: (e) => e.name.resolve(isArabic),
+        selectedId: selectedGovernorate,
+      );
+      if (govResult == null || !context.mounted) return;
+      selectedGovernorate = govResult as int;
 
-    final pickedCity = await _showLookupSheet<CityEntity>(
-      context: context,
-      title: context.l10n.selectCityLabel,
-      provider: allCitiesProvider,
-      invalidate: (ref) => ref.invalidate(allCitiesProvider),
-      filter: (all) =>
-          all.where((c) => c.governorateId == pickedGovernorate).toList(),
-      idOf: (e) => e.id,
-      labelOf: (e) => e.name.resolve(isArabic),
-      selectedId: keptCityId,
-      emptyText: context.l10n.noCitiesForGovernorate,
-    );
-    if (!context.mounted) return;
+      final keptCityId = selectedGovernorate == governmentId ? cityId : null;
 
-    onChanged(pickedCity ?? keptCityId, pickedGovernorate);
+      final cityResult = await _showLookupSheet<CityEntity>(
+        context: context,
+        title: context.l10n.selectCityLabel,
+        provider: allCitiesProvider,
+        invalidate: (ref) => ref.invalidate(allCitiesProvider),
+        filter: (all) => all
+            .where((c) => c.governorateId == selectedGovernorate)
+            .toList(),
+        idOf: (e) => e.id,
+        labelOf: (e) => e.name.resolve(isArabic),
+        selectedId: keptCityId,
+        emptyText: context.l10n.noCitiesForGovernorate,
+        showBackButton: true,
+      );
+      if (!context.mounted) return;
+
+      if (cityResult == _goBack) continue;
+
+      onChanged(cityResult as int? ?? keptCityId, selectedGovernorate);
+      return;
+    }
   }
 
   /// Bottom-sheet single-select over a cached reference list. Returns the
-  /// chosen id, or `null` when dismissed. Opens immediately; the sheet
-  /// itself watches the provider (spinner / error+retry / data).
-  Future<int?> _showLookupSheet<T>({
+  /// chosen id, `null` when dismissed, or [_goBack] when [showBackButton] is
+  /// set and the user tapped it. Opens immediately; the sheet itself watches
+  /// the provider (spinner / error+retry / data).
+  Future<Object?> _showLookupSheet<T>({
     required BuildContext context,
     required String title,
     required ProviderListenable<AsyncValue<List<T>>> provider,
@@ -136,8 +154,9 @@ class LocationCascadeField extends ConsumerWidget {
     required String Function(T) labelOf,
     required int? selectedId,
     String? emptyText,
+    bool showBackButton = false,
   }) {
-    return showModalBottomSheet<int>(
+    return showModalBottomSheet<Object>(
       context: context,
       isScrollControlled: true,
       backgroundColor: context.surfaceColor,
@@ -156,8 +175,32 @@ class LocationCascadeField extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Text(title, style: AppTypography.titleMedium),
+                      padding: showBackButton
+                          ? const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            )
+                          : const EdgeInsets.all(AppSpacing.lg),
+                      child: showBackButton
+                          ? Row(
+                              children: [
+                                IconButton(
+                                  key: const ValueKey(
+                                    'locationCascadeBackButton',
+                                  ),
+                                  icon: Icon(context.arrowBackIcon),
+                                  onPressed: () =>
+                                      Navigator.pop(sheetContext, _goBack),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    style: AppTypography.titleMedium,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(title, style: AppTypography.titleMedium),
                     ),
                     Expanded(
                       child: async.when(
