@@ -37,7 +37,7 @@ void main() {
     datasource = AuthRemoteDataSourceImpl(dio);
   });
 
-  test('consumer register sends cityId and governmentId from the pickers',
+  test('consumer register sends cityId and governorateId from the pickers',
       () async {
     await datasource.registerConsumer(
       const ConsumerRegisterParams(
@@ -48,7 +48,7 @@ void main() {
         password: 'Password1!',
         confirmPassword: 'Password1!',
         cityId: 1,
-        governmentId: 16,
+        governorateId: 16,
       ),
     );
 
@@ -58,11 +58,11 @@ void main() {
     expect(body.containsKey('fullNameEn'), isFalse);
     expect(body.containsKey('fullNameAr'), isFalse);
     expect(body['cityId'], 1);
-    expect(body['governmentId'], 16);
     expect(body['governorateId'], 16);
+    expect(body.containsKey('governmentId'), isFalse);
   });
 
-  test('vendor register sends cityId and governmentId too', () async {
+  test('vendor register sends cityId and governorateId too', () async {
     final tmp = await Directory.systemTemp.createTemp('vendor_reg_test');
     addTearDown(() => tmp.delete(recursive: true));
     final photo = File('${tmp.path}/store.jpg')
@@ -101,6 +101,10 @@ void main() {
     expect(field('storeCityId'), '1');
     expect(field('storeGovernorateId'), '16');
     expect(field('cityId'), '1');
-    expect(field('governmentId'), '16');
+    expect(field('governorateId'), '16');
+    expect(
+      formData.fields.any((e) => e.key == 'governmentId'),
+      isFalse,
+    );
   });
 }

@@ -12,9 +12,9 @@ class ConsumerRegisterParams with _$ConsumerRegisterParams {
     required String password,
     required String confirmPassword,
     // Single user location from the register step-2 cascade
-    // (cityId = city, governmentId = governorate).
+    // (cityId = city, governorateId = governorate).
     required int cityId,
-    required int governmentId,
+    required int governorateId,
     DateTime? dateOfBirth,
   }) = _ConsumerRegisterParams;
 }

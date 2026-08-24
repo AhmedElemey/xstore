@@ -23,9 +23,9 @@ mixin _$ConsumerRegisterParams {
   String get password => throw _privateConstructorUsedError;
   String get confirmPassword =>
       throw _privateConstructorUsedError; // Single user location from the register step-2 cascade
-// (cityId = city, governmentId = governorate).
+// (cityId = city, governorateId = governorate).
   int get cityId => throw _privateConstructorUsedError;
-  int get governmentId => throw _privateConstructorUsedError;
+  int get governorateId => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -47,7 +47,7 @@ abstract class $ConsumerRegisterParamsCopyWith<$Res> {
       String password,
       String confirmPassword,
       int cityId,
-      int governmentId,
+      int governorateId,
       DateTime? dateOfBirth});
 }
 
@@ -72,7 +72,7 @@ class _$ConsumerRegisterParamsCopyWithImpl<$Res,
     Object? password = null,
     Object? confirmPassword = null,
     Object? cityId = null,
-    Object? governmentId = null,
+    Object? governorateId = null,
     Object? dateOfBirth = freezed,
   }) {
     return _then(_value.copyWith(
@@ -104,9 +104,9 @@ class _$ConsumerRegisterParamsCopyWithImpl<$Res,
           ? _value.cityId
           : cityId // ignore: cast_nullable_to_non_nullable
               as int,
-      governmentId: null == governmentId
-          ? _value.governmentId
-          : governmentId // ignore: cast_nullable_to_non_nullable
+      governorateId: null == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
               as int,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
@@ -133,7 +133,7 @@ abstract class _$$ConsumerRegisterParamsImplCopyWith<$Res>
       String password,
       String confirmPassword,
       int cityId,
-      int governmentId,
+      int governorateId,
       DateTime? dateOfBirth});
 }
 
@@ -157,7 +157,7 @@ class __$$ConsumerRegisterParamsImplCopyWithImpl<$Res>
     Object? password = null,
     Object? confirmPassword = null,
     Object? cityId = null,
-    Object? governmentId = null,
+    Object? governorateId = null,
     Object? dateOfBirth = freezed,
   }) {
     return _then(_$ConsumerRegisterParamsImpl(
@@ -189,9 +189,9 @@ class __$$ConsumerRegisterParamsImplCopyWithImpl<$Res>
           ? _value.cityId
           : cityId // ignore: cast_nullable_to_non_nullable
               as int,
-      governmentId: null == governmentId
-          ? _value.governmentId
-          : governmentId // ignore: cast_nullable_to_non_nullable
+      governorateId: null == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
               as int,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
@@ -212,7 +212,7 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
       required this.password,
       required this.confirmPassword,
       required this.cityId,
-      required this.governmentId,
+      required this.governorateId,
       this.dateOfBirth});
 
   @override
@@ -228,17 +228,17 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
   @override
   final String confirmPassword;
 // Single user location from the register step-2 cascade
-// (cityId = city, governmentId = governorate).
+// (cityId = city, governorateId = governorate).
   @override
   final int cityId;
   @override
-  final int governmentId;
+  final int governorateId;
   @override
   final DateTime? dateOfBirth;
 
   @override
   String toString() {
-    return 'ConsumerRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, cityId: $cityId, governmentId: $governmentId, dateOfBirth: $dateOfBirth)';
+    return 'ConsumerRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, cityId: $cityId, governorateId: $governorateId, dateOfBirth: $dateOfBirth)';
   }
 
   @override
@@ -258,8 +258,8 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
             (identical(other.confirmPassword, confirmPassword) ||
                 other.confirmPassword == confirmPassword) &&
             (identical(other.cityId, cityId) || other.cityId == cityId) &&
-            (identical(other.governmentId, governmentId) ||
-                other.governmentId == governmentId) &&
+            (identical(other.governorateId, governorateId) ||
+                other.governorateId == governorateId) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth));
   }
@@ -274,7 +274,7 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
       password,
       confirmPassword,
       cityId,
-      governmentId,
+      governorateId,
       dateOfBirth);
 
   @JsonKey(ignore: true)
@@ -294,7 +294,7 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
       required final String password,
       required final String confirmPassword,
       required final int cityId,
-      required final int governmentId,
+      required final int governorateId,
       final DateTime? dateOfBirth}) = _$ConsumerRegisterParamsImpl;
 
   @override
@@ -310,10 +310,10 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
   @override
   String get confirmPassword;
   @override // Single user location from the register step-2 cascade
-// (cityId = city, governmentId = governorate).
+// (cityId = city, governorateId = governorate).
   int get cityId;
   @override
-  int get governmentId;
+  int get governorateId;
   @override
   DateTime? get dateOfBirth;
   @override

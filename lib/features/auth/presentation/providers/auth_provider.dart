@@ -717,7 +717,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                   password: state.password,
                   confirmPassword: state.confirmPassword,
                   cityId: state.storeCityId!,
-                  governmentId: state.storeGovernmentId!,
+                  governorateId: state.storeGovernmentId!,
                   dateOfBirth: state.dateOfBirth,
                 ),
               );

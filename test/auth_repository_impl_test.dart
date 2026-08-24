@@ -380,7 +380,7 @@ void main() {
           password: 'Password1!',
           confirmPassword: 'Password1!',
           cityId: 1,
-          governmentId: 2,
+          governorateId: 2,
         ),
       );
 

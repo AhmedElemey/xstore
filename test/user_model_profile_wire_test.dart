@@ -173,7 +173,7 @@ void main() {
           'descriptionAr': 'وصف المتجر المعدل',
           'whatsAppNumber': '01012345677',
           'cityId': 2,
-          'governmentId': 2,
+          'governorateId': 2,
           'storeCategoryId': 2,
           'storeLogoUrl':
               'http://example.com/uploads/avatars/65db2fb1-66ae-412b-8892-9d5f6e0a8e6f.jpg',
@@ -216,6 +216,72 @@ void main() {
       expect(model.governorate, 'Cairo Governorate');
       expect(model.role, UserRole.vendor);
       expect(model.storeId, isNotNull);
+    });
+
+    test('still reads legacy governmentId when governorateId is absent', () {
+      final model = UserModel.fromJson({
+        'id': 22,
+        'email': 'buyer@test.com',
+        'cityId': 1,
+        'governmentId': 16,
+      });
+      expect(model.storeCityId, 1);
+      expect(model.storeGovernmentId, 16);
+    });
+
+    test('reads nested city/government on the user (consumer register)', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'id': 22,
+          'email': 'buyer@test.com',
+          'fullName': 'Buyer',
+          'cityId': 1,
+          'governorateId': 16,
+          'city': {
+            'id': 1,
+            'nameEn': 'Nasr City',
+            'nameAr': 'مدينة نصر',
+          },
+          'government': {
+            'id': 16,
+            'nameEn': 'Cairo',
+            'nameAr': 'القاهرة',
+          },
+        },
+        'store': null,
+      });
+
+      expect(model.storeCityId, 1);
+      expect(model.storeGovernmentId, 16);
+      expect(model.storeCity, 'Nasr City');
+      expect(model.storeWilaya, 'Cairo');
+    });
+
+    test('reads nested city/government on the store when ids are omitted', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'email': 'vendor@test.com',
+          'fullName': 'Vendor',
+        },
+        'store': {
+          'id': 1,
+          'city': {
+            'id': 2,
+            'nameEn': 'Alexandria City',
+            'nameAr': 'مدينة الإسكندرية',
+          },
+          'government': {
+            'id': 15,
+            'nameEn': 'Alexandria',
+            'nameAr': 'الإسكندرية',
+          },
+        },
+      });
+
+      expect(model.storeCityId, 2);
+      expect(model.storeGovernmentId, 15);
+      expect(model.storeCity, 'Alexandria City');
+      expect(model.storeWilaya, 'Alexandria');
     });
 
     test('falls back to raw user object when wrapper is absent', () {

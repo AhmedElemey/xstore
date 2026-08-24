@@ -447,11 +447,11 @@ class _StepPersonal extends StatelessWidget {
         const Gap(AppSpacing.inputContentPaddingH),
         LocationCascadeField(
           cityId: s.storeCityId,
-          governmentId: s.storeGovernmentId,
+          governorateId: s.storeGovernmentId,
           errorText: s.stepErrors['storeLocation'],
-          onChanged: (cityId, governmentId) => n.updateStoreLocation(
+          onChanged: (cityId, governorateId) => n.updateStoreLocation(
             storeCityId: cityId,
-            storeGovernmentId: governmentId,
+            storeGovernmentId: governorateId,
           ),
         ),
       ],

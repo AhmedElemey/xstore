@@ -20,6 +20,53 @@ class ProfileResponseWire {
   final bool hasStore;
 }
 
+int? _optInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim());
+  return null;
+}
+
+int? _nestedId(dynamic node) => node is Map ? _optInt(node['id']) : null;
+
+String? _nestedPlaceName(dynamic node) {
+  if (node is! Map) return null;
+  String? pick(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    return text.isEmpty ? null : text;
+  }
+
+  return pick(node['nameEn']) ?? pick(node['nameAr']) ?? pick(node['name']);
+}
+
+/// Copies city/government ids and names from [src] (user or store) onto the
+/// flat user keys [UserModel.fromJson] reads.
+void _flattenLocationIntoUser(
+  Map<String, dynamic> user,
+  Map<String, dynamic> src,
+) {
+  void put(String key, dynamic value) {
+    if (value == null) return;
+    user[key] = value;
+  }
+
+  final city = src['city'];
+  final government = src['government'] ?? src['governorate'];
+  put(
+    'storeCityId',
+    _optInt(src['cityId']) ?? _nestedId(city),
+  );
+  put(
+    'storeGovernmentId',
+    _optInt(src['governorateId']) ??
+        _optInt(src['governmentId']) ??
+        _nestedId(government),
+  );
+  put('storeCity', _nestedPlaceName(city));
+  put('storeWilaya', _nestedPlaceName(government));
+}
+
 /// Maps the nested `store` object onto flat user keys [UserModel.fromJson] expects.
 void mergeStoreJsonIntoUser(
   Map<String, dynamic> user,
@@ -36,8 +83,7 @@ void mergeStoreJsonIntoUser(
   put('storeDescriptionEn', store['descriptionEn']);
   put('storeDescriptionAr', store['descriptionAr']);
   put('whatsAppNumber', store['whatsAppNumber']);
-  put('storeCityId', store['cityId']);
-  put('storeGovernmentId', store['governmentId']);
+  _flattenLocationIntoUser(user, store);
   put('storeCategoryId', store['storeCategoryId']);
   put('storeLogoUrl', store['storeLogoUrl']);
   put('storeCategory', store['storeCategoryNameEn']);
@@ -69,6 +115,8 @@ ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
     throw const FormatException('Missing user in profile response');
   }
 
+  // Consumers store city/government on `user`; vendors nest them on `store`.
+  _flattenLocationIntoUser(userJson, userJson);
   final storeRaw = data['store'];
   final hasStore = storeRaw is Map;
   if (hasStore) {
@@ -247,16 +295,21 @@ class UserModel with _$UserModel {
           optString('storeDescriptionAr') ??
           optString('storeDescription'),
       storeLogoUrl: json['storeLogoUrl'] as String?,
-      storeCity: json['storeCity'] as String?,
-      storeWilaya: json['storeWilaya'] as String?,
+      storeCity: optString('storeCity') ?? _nestedPlaceName(json['city']),
+      storeWilaya: optString('storeWilaya') ??
+          _nestedPlaceName(json['government']) ??
+          _nestedPlaceName(json['governorate']),
       // update-profile writes whatsAppNumber; get-profile may return either key.
       whatsappNumber: optString('whatsappNumber', altKey: 'whatsAppNumber'),
       latitude: (json['latitude'] as num?)?.toDouble() ??
           (json['lat'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble() ??
           (json['lng'] as num?)?.toDouble(),
-      governorate: json['governorate'] as String?,
-      town: json['town'] as String?,
+      // GPS strings only — nested `governorate`/`city` objects are the
+      // cascade parent and are read into storeWilaya/storeCity above.
+      governorate:
+          json['governorate'] is String ? optString('governorate') : null,
+      town: json['town'] is String ? optString('town') : null,
       detailAddress: json['detailAddress'] as String?,
       bio: json['bio'] as String?,
       // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`.
@@ -273,10 +326,15 @@ class UserModel with _$UserModel {
       storeNameAr: optString('storeNameAr'),
       storeDescriptionEn: optString('storeDescriptionEn'),
       storeDescriptionAr: optString('storeDescriptionAr'),
-      storeCategoryId: json['storeCategoryId'] as int?,
-      storeCityId: json['storeCityId'] as int? ?? json['cityId'] as int?,
-      storeGovernmentId:
-          json['storeGovernmentId'] as int? ?? json['governmentId'] as int?,
+      storeCategoryId: _optInt(json['storeCategoryId']),
+      storeCityId: _optInt(json['storeCityId']) ??
+          _optInt(json['cityId']) ??
+          _nestedId(json['city']),
+      storeGovernmentId: _optInt(json['storeGovernmentId']) ??
+          _optInt(json['governorateId']) ??
+          _optInt(json['governmentId']) ??
+          _nestedId(json['government']) ??
+          _nestedId(json['governorate']),
       storeId: (json['storeId'] as num?)?.toInt(),
     );
   }

@@ -32,7 +32,7 @@ class ProfileState with _$ProfileState {
     @Default('') String editStoreDescriptionAr,
     @Default('') String editStoreCity,
     @Default('') String editStoreWilaya,
-    // City (`cityId`) + governorate (`governmentId`) pair from the location
+    // City (`cityId`) + governorate (`governorateId`) pair from the location
     // cascade. See LocationCascadeField.
     int? editStoreCityId,
     int? editStoreGovernmentId,
@@ -148,7 +148,7 @@ extension ProfileStateX on ProfileState {
       lng: parseCoord(editLongitude),
       storeCategoryId: u.storeCategoryId,
       cityId: editStoreCityId,
-      governmentId: editStoreGovernmentId,
+      governorateId: editStoreGovernmentId,
       birthDate: editDateOfBirth,
     );
   }

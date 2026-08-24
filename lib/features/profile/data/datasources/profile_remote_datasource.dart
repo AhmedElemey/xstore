@@ -95,7 +95,8 @@ Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
     if (request.storeCategoryId != null)
       'storeCategoryId': request.storeCategoryId,
     if (request.cityId != null) 'cityId': request.cityId,
-    if (request.governmentId != null) 'governmentId': request.governmentId,
+    if (request.governorateId != null)
+      'governorateId': request.governorateId,
     if (request.birthDate != null)
       'birthDate': _birthDateWire(request.birthDate),
   };
@@ -154,7 +155,7 @@ void _debugLogProfileFields({
     'lng': 'store.lng',
     'storeCategoryId': 'store.storeCategoryId',
     'cityId': 'store.cityId',
-    'governmentId': 'store.governmentId',
+    'governorateId': 'store.governorateId',
   };
 
   debugPrint('── profile $tag ──');
@@ -241,7 +242,7 @@ UserEntity _entityFromUpdateRequest(
     longitude: request.lng ?? session.longitude,
     storeCategoryId: request.storeCategoryId ?? session.storeCategoryId,
     storeCityId: request.cityId ?? session.storeCityId,
-    storeGovernmentId: request.governmentId ?? session.storeGovernmentId,
+    storeGovernmentId: request.governorateId ?? session.storeGovernmentId,
     dateOfBirth: request.birthDate ?? session.dateOfBirth,
   );
 }

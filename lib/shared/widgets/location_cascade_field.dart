@@ -24,13 +24,14 @@ import '../../features/governments/presentation/providers/government_dependencie
 /// holds the top-level governorates; `/api/cities` holds cities linked upward
 /// via `governorateId`. Opening government loads [allGovernmentsProvider];
 /// opening city loads [allCitiesProvider] filtered by the chosen
-/// governorate. [governmentId] / [cityId] are the ids sent on register.
+/// governorate. [governorateId] / [cityId] are the ids sent on register.
 class LocationCascadeField extends ConsumerWidget {
   const LocationCascadeField({
     super.key,
     required this.cityId,
-    required this.governmentId,
+    required this.governorateId,
     required this.onChanged,
+    this.hint,
     this.errorText,
   });
 
@@ -38,12 +39,16 @@ class LocationCascadeField extends ConsumerWidget {
   final int? cityId;
 
   /// Selected governorate id (backend `governorates`).
-  final int? governmentId;
+  final int? governorateId;
 
   /// Fires with the full pair whenever either picker changes. The city is
   /// reset to `null` when the governorate changes, or when the user dismisses
   /// the city sheet after picking a governorate.
-  final void Function(int? cityId, int? governmentId) onChanged;
+  final void Function(int? cityId, int? governorateId) onChanged;
+
+  /// Placeholder / fallback label when the selected ids have not resolved to
+  /// names yet (edit profile shows the location saved at register).
+  final String? hint;
 
   final String? errorText;
 
@@ -64,7 +69,7 @@ class LocationCascadeField extends ConsumerWidget {
     final governments = ref.watch(allGovernmentsProvider).valueOrNull;
 
     final governorateName =
-        _byId<GovernmentEntity>(governments, governmentId, (e) => e.id)
+        _byId<GovernmentEntity>(governments, governorateId, (e) => e.id)
             ?.name
             .resolve(isArabic);
     final cityName =
@@ -75,12 +80,15 @@ class LocationCascadeField extends ConsumerWidget {
         : cityName == null
             ? governorateName
             : '$governorateName - $cityName';
+    final fallback = hint?.trim();
+    final display = combinedDisplay ??
+        (fallback != null && fallback.isNotEmpty ? fallback : null);
 
     return _LocationPickerTile(
       key: const ValueKey('locationCascadeField'),
       label: context.l10n.governorateAndCityLabel,
       hint: context.l10n.locationCascadeHint,
-      display: combinedDisplay,
+      display: display,
       icon: LucideIcons.mapPin,
       errorText: errorText,
       onTap: () => _pickLocation(context, isArabic),
@@ -99,7 +107,7 @@ class LocationCascadeField extends ConsumerWidget {
   /// (tap-outside/swipe, not back) keeps the previous city when the
   /// governorate didn't change, and clears it otherwise.
   Future<void> _pickLocation(BuildContext context, bool isArabic) async {
-    var selectedGovernorate = governmentId;
+    var selectedGovernorate = governorateId;
 
     while (true) {
       final govResult = await _showLookupSheet<GovernmentEntity>(
@@ -116,7 +124,7 @@ class LocationCascadeField extends ConsumerWidget {
       if (govResult == null || !context.mounted) return;
       selectedGovernorate = govResult as int;
 
-      final keptCityId = selectedGovernorate == governmentId ? cityId : null;
+      final keptCityId = selectedGovernorate == governorateId ? cityId : null;
 
       final cityResult = await _showLookupSheet<CityEntity>(
         context: context,

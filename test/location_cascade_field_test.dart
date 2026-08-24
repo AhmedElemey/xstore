@@ -32,8 +32,9 @@ const _alexCity = CityEntity(
 
 Widget _app({
   required int? cityId,
-  required int? governmentId,
-  required void Function(int? cityId, int? governmentId) onChanged,
+  required int? governorateId,
+  required void Function(int? cityId, int? governorateId) onChanged,
+  String? hint,
   Duration? delay,
   Object? error,
 }) {
@@ -63,7 +64,8 @@ Widget _app({
           padding: const EdgeInsets.all(16),
           child: LocationCascadeField(
             cityId: cityId,
-            governmentId: governmentId,
+            governorateId: governorateId,
+            hint: hint,
             onChanged: onChanged,
           ),
         ),
@@ -83,7 +85,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         cityId: null,
-        governmentId: null,
+        governorateId: null,
         delay: const Duration(milliseconds: 80),
         onChanged: (_, __) {},
       ),
@@ -107,7 +109,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         cityId: null,
-        governmentId: null,
+        governorateId: null,
         onChanged: (c, g) {
           city = c;
           government = g;
@@ -139,7 +141,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         cityId: 1,
-        governmentId: 16,
+        governorateId: 16,
         onChanged: (c, g) {
           city = c;
           government = g;
@@ -164,11 +166,26 @@ void main() {
   testWidgets('selected government + city render as "Government - City"',
       (tester) async {
     await tester.pumpWidget(
-      _app(cityId: 1, governmentId: 16, onChanged: (_, __) {}),
+      _app(cityId: 1, governorateId: 16, onChanged: (_, __) {}),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Cairo - Cairo City'), findsOneWidget);
+  });
+
+  testWidgets('profile hint shows while selected ids have not resolved',
+      (tester) async {
+    await tester.pumpWidget(
+      _app(
+        cityId: null,
+        governorateId: null,
+        hint: 'Cairo - Nasr City',
+        onChanged: (_, __) {},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cairo - Nasr City'), findsOneWidget);
   });
 
   testWidgets(
@@ -179,7 +196,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         cityId: null,
-        governmentId: null,
+        governorateId: null,
         onChanged: (c, g) {
           city = c;
           government = g;
@@ -224,7 +241,7 @@ void main() {
   testWidgets('government sheet search filters by English and Arabic names',
       (tester) async {
     await tester.pumpWidget(
-      _app(cityId: null, governmentId: null, onChanged: (_, __) {}),
+      _app(cityId: null, governorateId: null, onChanged: (_, __) {}),
     );
     await tester.pumpAndSettle();
 
@@ -254,7 +271,7 @@ void main() {
   testWidgets('city sheet search filters the cities of the picked government',
       (tester) async {
     await tester.pumpWidget(
-      _app(cityId: null, governmentId: null, onChanged: (_, __) {}),
+      _app(cityId: null, governorateId: null, onChanged: (_, __) {}),
     );
     await tester.pumpAndSettle();
 

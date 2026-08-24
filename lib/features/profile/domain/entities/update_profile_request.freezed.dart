@@ -37,7 +37,7 @@ mixin _$UpdateProfileRequest {
   double? get lng => throw _privateConstructorUsedError;
   int? get storeCategoryId => throw _privateConstructorUsedError;
   int? get cityId => throw _privateConstructorUsedError;
-  int? get governmentId => throw _privateConstructorUsedError;
+  int? get governorateId => throw _privateConstructorUsedError;
   DateTime? get birthDate => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -73,7 +73,7 @@ abstract class $UpdateProfileRequestCopyWith<$Res> {
       double? lng,
       int? storeCategoryId,
       int? cityId,
-      int? governmentId,
+      int? governorateId,
       DateTime? birthDate});
 }
 
@@ -112,7 +112,7 @@ class _$UpdateProfileRequestCopyWithImpl<$Res,
     Object? lng = freezed,
     Object? storeCategoryId = freezed,
     Object? cityId = freezed,
-    Object? governmentId = freezed,
+    Object? governorateId = freezed,
     Object? birthDate = freezed,
   }) {
     return _then(_value.copyWith(
@@ -200,9 +200,9 @@ class _$UpdateProfileRequestCopyWithImpl<$Res,
           ? _value.cityId
           : cityId // ignore: cast_nullable_to_non_nullable
               as int?,
-      governmentId: freezed == governmentId
-          ? _value.governmentId
-          : governmentId // ignore: cast_nullable_to_non_nullable
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
               as int?,
       birthDate: freezed == birthDate
           ? _value.birthDate
@@ -242,7 +242,7 @@ abstract class _$$UpdateProfileRequestImplCopyWith<$Res>
       double? lng,
       int? storeCategoryId,
       int? cityId,
-      int? governmentId,
+      int? governorateId,
       DateTime? birthDate});
 }
 
@@ -278,7 +278,7 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
     Object? lng = freezed,
     Object? storeCategoryId = freezed,
     Object? cityId = freezed,
-    Object? governmentId = freezed,
+    Object? governorateId = freezed,
     Object? birthDate = freezed,
   }) {
     return _then(_$UpdateProfileRequestImpl(
@@ -366,9 +366,9 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
           ? _value.cityId
           : cityId // ignore: cast_nullable_to_non_nullable
               as int?,
-      governmentId: freezed == governmentId
-          ? _value.governmentId
-          : governmentId // ignore: cast_nullable_to_non_nullable
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
               as int?,
       birthDate: freezed == birthDate
           ? _value.birthDate
@@ -403,7 +403,7 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
       this.lng,
       this.storeCategoryId,
       this.cityId,
-      this.governmentId,
+      this.governorateId,
       this.birthDate});
 
   @override
@@ -449,13 +449,13 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
   @override
   final int? cityId;
   @override
-  final int? governmentId;
+  final int? governorateId;
   @override
   final DateTime? birthDate;
 
   @override
   String toString() {
-    return 'UpdateProfileRequest(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, userImageUrl: $userImageUrl, storeImageUrl: $storeImageUrl, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, whatsAppNumber: $whatsAppNumber, instagramPage: $instagramPage, facebookPage: $facebookPage, detailedAddressByGoogleMaps: $detailedAddressByGoogleMaps, detailedAddressByUser: $detailedAddressByUser, cityByGoogleMaps: $cityByGoogleMaps, governmentByGoogleMaps: $governmentByGoogleMaps, userImagePath: $userImagePath, storeImagePath: $storeImagePath, lat: $lat, lng: $lng, storeCategoryId: $storeCategoryId, cityId: $cityId, governmentId: $governmentId, birthDate: $birthDate)';
+    return 'UpdateProfileRequest(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, userImageUrl: $userImageUrl, storeImageUrl: $storeImageUrl, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, whatsAppNumber: $whatsAppNumber, instagramPage: $instagramPage, facebookPage: $facebookPage, detailedAddressByGoogleMaps: $detailedAddressByGoogleMaps, detailedAddressByUser: $detailedAddressByUser, cityByGoogleMaps: $cityByGoogleMaps, governmentByGoogleMaps: $governmentByGoogleMaps, userImagePath: $userImagePath, storeImagePath: $storeImagePath, lat: $lat, lng: $lng, storeCategoryId: $storeCategoryId, cityId: $cityId, governorateId: $governorateId, birthDate: $birthDate)';
   }
 
   @override
@@ -504,8 +504,8 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
             (identical(other.storeCategoryId, storeCategoryId) ||
                 other.storeCategoryId == storeCategoryId) &&
             (identical(other.cityId, cityId) || other.cityId == cityId) &&
-            (identical(other.governmentId, governmentId) ||
-                other.governmentId == governmentId) &&
+            (identical(other.governorateId, governorateId) ||
+                other.governorateId == governorateId) &&
             (identical(other.birthDate, birthDate) ||
                 other.birthDate == birthDate));
   }
@@ -534,7 +534,7 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
         lng,
         storeCategoryId,
         cityId,
-        governmentId,
+        governorateId,
         birthDate
       ]);
 
@@ -570,7 +570,7 @@ abstract class _UpdateProfileRequest implements UpdateProfileRequest {
       final double? lng,
       final int? storeCategoryId,
       final int? cityId,
-      final int? governmentId,
+      final int? governorateId,
       final DateTime? birthDate}) = _$UpdateProfileRequestImpl;
 
   @override
@@ -616,7 +616,7 @@ abstract class _UpdateProfileRequest implements UpdateProfileRequest {
   @override
   int? get cityId;
   @override
-  int? get governmentId;
+  int? get governorateId;
   @override
   DateTime? get birthDate;
   @override

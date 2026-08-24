@@ -178,7 +178,8 @@ void main() {
       expect(body['lng'], closeTo(31.2357, 0.0001));
       expect(body['storeCategoryId'], 3);
       expect(body['cityId'], 10);
-      expect(body['governmentId'], 2);
+      expect(body['governorateId'], 2);
+      expect(body.containsKey('governmentId'), isFalse);
       expect(body['birthDate'], '1990-03-20');
       expect(body['whatsAppNumber'], '01012345678');
       expect(body['instagramPage'], 'techhub');

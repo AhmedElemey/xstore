@@ -31,7 +31,7 @@ class UpdateProfileRequest with _$UpdateProfileRequest {
     double? lng,
     int? storeCategoryId,
     int? cityId,
-    int? governmentId,
+    int? governorateId,
     DateTime? birthDate,
   }) = _UpdateProfileRequest;
 }

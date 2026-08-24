@@ -15,6 +15,9 @@ import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'helpers/fake_async_auth_notifier.dart';
 
 class _RecordingAdapter implements HttpClientAdapter {
+  _RecordingAdapter({this.statusCode = 202});
+
+  final int statusCode;
   final posts = <RequestOptions>[];
 
   @override
@@ -26,7 +29,7 @@ class _RecordingAdapter implements HttpClientAdapter {
     posts.add(options);
     return ResponseBody.fromString(
       jsonEncode({'ok': true}),
-      202,
+      statusCode,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
@@ -116,6 +119,27 @@ void main() {
     expect(adapter.posts.single.headers['X-Auth-Token'], 'sess-token');
   });
 
+  test('POST body is {events: <queued event list>}, not a bare array',
+      () async {
+    buildContainer(
+      auth: FakeAuth(_user()),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    service.track('view_item', properties: {'item_id': 'p1'});
+    service.track('add_to_cart', properties: {'item_id': 'p1'});
+    await service.ready;
+    await service.flushNow();
+
+    expect(adapter.posts, hasLength(1));
+    final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
+    expect(body.keys, ['events']);
+    final events = (body['events'] as List).cast<Map>();
+    expect(events, hasLength(2));
+    expect(events.map((e) => e['name']), ['view_item', 'add_to_cart']);
+    expect(events.first['eventId'], isNotEmpty);
+    expect(events.first['properties'], {'item_id': 'p1'});
+  });
+
   test('flushes the queued events once the user logs in', () async {
     final auth = _EmittingAuth(null);
     buildContainer(
@@ -132,5 +156,22 @@ void main() {
 
     expect(adapter.posts, hasLength(1));
     expect(adapter.posts.single.path, ApiEndpoints.analyticsEvents);
+  });
+
+  test('HTTP 200 drops the sent batch so the next flush does not resend it',
+      () async {
+    adapter = _RecordingAdapter(statusCode: 200);
+    dio.httpClientAdapter = adapter;
+    buildContainer(
+      auth: FakeAuth(_user()),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    service.track('view_item');
+    await service.ready;
+    await service.flushNow();
+    expect(adapter.posts, hasLength(1));
+
+    await service.flushNow();
+    expect(adapter.posts, hasLength(1));
   });
 }

@@ -47,7 +47,7 @@ Rules for the log:
 - **Where it applies:** `update_profile_request.dart`, `profile_state.dart`, `profile_provider.dart` `saveProfile`, `profile_remote_datasource.dart`.
 
 - **What happened:** Edit-profile save still sent legacy keys (`avatarUrl`, `latitude`, `email`, `bio`) instead of the confirmed `UpdateProfileRequest` shape (`storeImageUrl`, `lat`/`lng`, `detailedAddressByGoogleMaps`, `cityId`, date-only `birthDate`).
-- **Rule:** Build update-profile bodies from the C# `UpdateProfileRequest` contract — omit commented-out email/phone; map entity location fields to `detailedAddressByGoogleMaps`/`detailedAddressByUser`/`cityByGoogleMaps`/`governmentByGoogleMaps`; wire IDs as `cityId`/`governmentId`; send `storeImageUrl` (always, null to clear); format `birthDate` as `YYYY-MM-DD`. Populate `editLocation` on GPS detect for the Google address field.
+- **Rule:** Build update-profile bodies from the C# `UpdateProfileRequest` contract — omit commented-out email/phone; map entity location fields to `detailedAddressByGoogleMaps`/`detailedAddressByUser`/`cityByGoogleMaps`/`governmentByGoogleMaps`; wire IDs as `cityId`/`governorateId` (C# `GovernorateId`, not `governmentId`); send `storeImageUrl` (always, null to clear); format `birthDate` as `YYYY-MM-DD`. Populate `editLocation` on GPS detect for the Google address field.
 - **Where it applies:** `profile_state.dart` `toUpdateProfileRequest()`, `update_profile_request.dart`, `profile_remote_datasource.dart` `updateProfileWireFields`/`updateProfileFormData`, `profile_provider.dart` `saveProfile`.
 
 - **What happened:** Live `POST /api/auth/google/consumer/login` returned 401 `"Invalid Google identity token."` even though Google sign-in succeeded — `GoogleSignIn()` had no `serverClientId`, so the ID token's audience was the Android/iOS OAuth client, not the Web client the backend verifies.
@@ -729,3 +729,23 @@ Rules for the log:
 - **What happened:** The app still posted `fullNameEn` on consumer/vendor register and update-profile after the backend renamed that field to `fullName`.
 - **Rule:** The live display-name key is `fullName` only — do not send `fullNameEn` or `fullNameAr` on register or update-profile. When reading profiles, accept `fullName`, then `fullNameEn`, then `name`.
 - **Where it applies:** `auth_remote_datasource.dart` register bodies, `profile_remote_datasource.dart` `updateProfileWireFields`, `user_model.dart` `fromJson`.
+
+### 2026-08-24 — Edit-profile location cascade needs register names as fallback
+- **What happened:** Edit profile's location field showed the generic "Select government & city" hint after signup because names only resolved from live city/governorate lists, and get-profile city/government objects were not flattened onto `storeCity`/`storeWilaya`.
+- **Rule:** Parse get-profile city/government from both `user` (consumers) and `store` (vendors), including nested `{id,nameEn,nameAr}` objects, onto `storeCityId`/`storeGovernmentId` and the name strings. On edit profile, pass those registered names as `LocationCascadeField.hint` so the field shows "Governorate - City" until list lookup resolves the ids. Do not mix GPS `town`/`governorate` into that hint — those are a different address pair.
+- **Where it applies:** `user_model.dart` `parseProfileResponse` / `fromJson`, `location_cascade_field.dart`, `edit_profile_screen.dart`.
+
+### 2026-08-24 — Location wire key is `governorateId`, not `governmentId`
+- **What happened:** Register and update-profile posted `governmentId`; the backend field is `GovernorateId`, which serializes as `governorateId`.
+- **Rule:** Write `cityId` + `governorateId` on consumer register, vendor register, and update-profile. Do not send `governmentId`. When reading profiles, accept `governorateId` first and fall back to `governmentId`. Vendor multipart still also sends `storeGovernorateId`.
+- **Where it applies:** `auth_remote_datasource.dart`, `profile_remote_datasource.dart` `updateProfileWireFields`, `update_profile_request.dart`, `consumer_register_params.dart`.
+
+### 2026-08-25 — Analytics ingest body is `{events: [...]}` not a bare array
+- **What happened:** The live collector (`POST /api/analytics/events`, Postman "POST Ingest Events") binds an envelope `{ "events": [ ... ] }`. Sending a raw list or a single event object fails model binding.
+- **Rule:** The analytics POST body is exactly `{ "events": <list of event objects> }` — never a top-level array and never one event as the root. Assert it on the Dio request `data`.
+- **Where it applies:** `analytics_service.dart` `_runFlush`.
+
+### 2026-08-25 — Analytics queue drops only the sent batch on 2xx
+- **What happened:** Confirming buffer-clear behavior: a 200 (or any other 2xx) removes the batch that was POSTed; a 404 (collector not deployed) and thrown non-2xx leave the queue for retry. Unsent events beyond the batch of 20 stay queued.
+- **Rule:** Treat any 2xx from `POST /api/analytics/events` as "this batch delivered — `removeRange` it and persist." Do not drop the rest of the queue. Do not drop on 404.
+- **Where it applies:** `analytics_service.dart` `_runFlush`.

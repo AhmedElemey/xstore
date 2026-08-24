@@ -394,13 +394,13 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
   }
 
-  /// Sets the city (`cityId`) + governorate (`governmentId`) pair from the
+  /// Sets the city (`cityId`) + governorate (`governorateId`) pair from the
   /// location cascade; both are assigned explicitly so a governorate change can
   /// clear the dependent city (null).
-  void updateStoreLocation(int? cityId, int? governmentId) {
+  void updateStoreLocation(int? cityId, int? governorateId) {
     final next = state.copyWith(
       editStoreCityId: cityId,
-      editStoreGovernmentId: governmentId,
+      editStoreGovernmentId: governorateId,
     );
     final u = next.user;
     state = next.copyWith(
@@ -536,7 +536,7 @@ class ProfileNotifier extends _$ProfileNotifier {
         'cityByGoogleMaps=${request.cityByGoogleMaps} '
         'governmentByGoogleMaps=${request.governmentByGoogleMaps} '
         'lat=${request.lat} lng=${request.lng} '
-        'cityId=${request.cityId} governmentId=${request.governmentId} '
+        'cityId=${request.cityId} governorateId=${request.governorateId} '
         'storeCategoryId=${request.storeCategoryId} '
         'userImageUrl=${request.userImageUrl} storeImageUrl=${request.storeImageUrl}',
       );

@@ -474,24 +474,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             onTap: _pickDob,
           ),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _location,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.mapPin),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
-          ),
+          // const Gap(AppSpacing.md),
+          // TextField(
+          //   controller: _location,
+          //   decoration: InputDecoration(
+          //     prefixIcon: const Icon(LucideIcons.mapPin),
+          //     border: const OutlineInputBorder(),
+          //   ),
+          //   onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
+          // ),
           const Gap(AppSpacing.md),
           // Single user location (governorate + city) for all roles; vendors
           // reuse this same pair as the store location.
           LocationCascadeField(
             cityId: s.editStoreCityId,
-            governmentId: s.editStoreGovernmentId,
-            onChanged: (cityId, governmentId) => ref
+            governorateId: s.editStoreGovernmentId,
+            hint: _registeredLocationHint(s),
+            onChanged: (cityId, governorateId) => ref
                 .read(profileNotifierProvider.notifier)
-                .updateStoreLocation(cityId, governmentId),
+                .updateStoreLocation(cityId, governorateId),
           ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
@@ -649,6 +650,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
     );
   }
+}
+
+/// "Governorate - City" from the location saved at register, used as the
+/// cascade hint until the live lists resolve the selected ids.
+String? _registeredLocationHint(ProfileState s) {
+  final government = s.editStoreWilaya.trim();
+  final city = s.editStoreCity.trim();
+  if (government.isEmpty && city.isEmpty) return null;
+  if (government.isEmpty) return city;
+  if (city.isEmpty) return government;
+  return '$government - $city';
 }
 
 String _errorText(BuildContext context, String key) {

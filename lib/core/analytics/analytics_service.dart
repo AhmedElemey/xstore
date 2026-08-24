@@ -254,9 +254,14 @@ class AnalyticsService {
       if (!_isSignedIn || token == null || token.isEmpty) return;
 
       final batch = _queue.take(_batchSize).toList();
+      // Backend ingest DTO is `{ "events": [ ... ] }`, not a bare array
+      // and not a single event object (Postman: POST Ingest Events).
+      final body = <String, dynamic>{
+        'events': [for (final event in batch) event.toJson()],
+      };
       final response = await _client.post<dynamic>(
         ApiEndpoints.analyticsEvents,
-        data: {'events': batch.map((e) => e.toJson()).toList()},
+        data: body,
         options: LegacyRouteOptions.allowNotFound().copyWith(
           headers: {'X-Auth-Token': token},
         ),
@@ -265,6 +270,8 @@ class AnalyticsService {
         _registerFailure();
         return;
       }
+      // 200 / any other 2xx: this batch was accepted — drop it. 404 and
+      // thrown non-2xx leave the queue intact for retry.
       _queue.removeRange(0, batch.length);
       _consecutiveFailures = 0;
       _backoffUntil = null;
