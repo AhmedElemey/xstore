@@ -7,7 +7,21 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="app">
+<!-- LOGIN SCREEN — shown when there's no stored JWT; see api.js (Auth) / app.js (login()) -->
+<div class="login-wrap" id="loginScreen">
+  <form class="login-card" id="loginForm" onsubmit="return handleLoginSubmit(event)">
+    <div class="brand" style="padding:0 0 18px"><div class="logo">x</div><div><b style="color:var(--text)">xStore</b><span style="color:var(--text-3)">Admin Console</span></div></div>
+    <div class="form-row"><label>API base URL</label><input id="liBase" placeholder="http://localhost:5000"></div>
+    <div class="form-row"><label>Phone number</label><input id="liPhone" placeholder="01012345678" required autocomplete="username"></div>
+    <div class="form-row"><label>Password</label><input id="liPass" type="password" placeholder="••••••••" required autocomplete="current-password"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);margin-bottom:14px"><input id="liRemember" type="checkbox" style="width:auto"> Remember me</label>
+    <div id="loginError" class="login-error" style="display:none"></div>
+    <button class="btn btn-p" id="loginSubmitBtn" type="submit" style="width:100%;justify-content:center">Sign in</button>
+    <p class="muted" style="font-size:11.5px;margin-top:14px;text-align:center">ADMINISTRATOR or SUPERADMIN accounts only.</p>
+  </form>
+</div>
+
+<div class="app" id="appShell" style="display:none">
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="brand"><div class="logo">x</div><div><b>xStore</b><span>Admin Console</span></div></div>
@@ -30,7 +44,7 @@
       <div class="nav-group">System</div>
       <a data-view="settings"><i data-ic="cog"></i><span>Settings</span></a>
     </div>
-    <div class="side-foot"><div class="avatar">A</div><div><b style="color:#fff;font-size:13px">Ahmed (Owner)</b><small>Super Admin</small></div></div>
+    <div class="side-foot"><div class="avatar">A</div><div><b style="color:#fff;font-size:13px">Admin</b><small>Signed in</small></div></div>
   </aside>
 
   <!-- MAIN -->
@@ -42,6 +56,7 @@
       <div class="top-actions">
         <div class="icon-btn"><i data-ic="bell"></i><span class="dot"></span></div>
         <div class="icon-btn hide-sm"><i data-ic="help"></i></div>
+        <div class="icon-btn" id="logoutBtn" title="Sign out" onclick="handleLogout()">⏻</div>
         <div class="avatar" style="background:var(--primary)">A</div>
       </div>
     </div>
@@ -52,6 +67,7 @@
 <aside class="drawer" id="drawer"></aside>
 <div class="toast" id="toast"></div>
 
+<script src="api.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
