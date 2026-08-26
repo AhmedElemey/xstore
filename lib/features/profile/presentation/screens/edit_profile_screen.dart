@@ -507,24 +507,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               prefixIcon: const Icon(LucideIcons.mail),
+              suffixIcon: _VerificationStatus(
+                verified: s.profile?.isEmailVerified ?? false,
+                onVerify: _email.text.trim().isEmpty ? null : _verifyEmail,
+              ),
+              suffixIconConstraints:
+                  const BoxConstraints(minWidth: 0, minHeight: 0),
               border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('email', v),
           ),
-          _VerificationStatusRow(
-            verified: s.profile?.isEmailVerified ?? false,
-            onVerify: _email.text.trim().isEmpty ? null : _verifyEmail,
-          ),
           const Gap(AppSpacing.md),
           PhoneInputField(
             controller: _phone,
+            suffix: _VerificationStatus(
+              verified: s.profile?.isPhoneNumberVerified ?? false,
+              onVerify: _phone.text.trim().isEmpty ? null : _verifyPhone,
+            ),
             onChanged: (v) => ref
                 .read(profileNotifierProvider.notifier)
                 .updateField('phone', v.replaceAll(RegExp(r'\D'), '')),
-          ),
-          _VerificationStatusRow(
-            verified: s.profile?.isPhoneNumberVerified ?? false,
-            onVerify: _phone.text.trim().isEmpty ? null : _verifyPhone,
           ),
           const Gap(AppSpacing.md),
           TextField(
@@ -715,9 +717,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 }
 
-/// Verified badge or a "Verify" action shown under the email/phone fields.
-class _VerificationStatusRow extends StatelessWidget {
-  const _VerificationStatusRow({required this.verified, required this.onVerify});
+/// Compact verified badge or "Verify" action for the trailing edge of a field.
+class _VerificationStatus extends StatelessWidget {
+  const _VerificationStatus({required this.verified, required this.onVerify});
 
   final bool verified;
   final VoidCallback? onVerify;
@@ -725,30 +727,33 @@ class _VerificationStatusRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (verified) {
-      return Align(
-        alignment: AlignmentDirectional.centerEnd,
-        child: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xs),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.verified, size: 16, color: AppColors.success),
-              const Gap(AppSpacing.xs),
-              Text(
-                context.l10n.verified,
-                style: AppTypography.labelSmall.copyWith(color: AppColors.success),
-              ),
-            ],
-          ),
+      return Padding(
+        padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.verified, size: 16, color: AppColors.success),
+            const Gap(AppSpacing.xs),
+            Text(
+              context.l10n.verified,
+              style: AppTypography.labelSmall.copyWith(color: AppColors.success),
+            ),
+          ],
         ),
       );
     }
-    return Align(
-      alignment: AlignmentDirectional.centerEnd,
-      child: TextButton(
-        onPressed: onVerify,
-        child: Text(context.l10n.verify),
+    return TextButton(
+      onPressed: onVerify,
+      style: TextButton.styleFrom(
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
       ),
+      child: Text(context.l10n.verify),
     );
   }
 }
