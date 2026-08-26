@@ -17,6 +17,7 @@ import '../widgets/checkout_primary_footer.dart';
 import '../widgets/checkout_progress.dart';
 import '../widgets/checkout_review_section.dart';
 import '../widgets/order_confirmation_sheet.dart';
+import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class CheckoutScreen extends ConsumerWidget {
@@ -33,6 +34,11 @@ class CheckoutScreen extends ConsumerWidget {
         notifier.nextStep();
         return;
       }
+      // Proactive check — the backend rejects this with the same
+      // phoneNotVerifiedErrorCode below, but checking first skips a
+      // guaranteed-failing request and gets the OTP sheet up sooner.
+      if (!await requirePhoneVerified(context, ref)) return;
+      if (!context.mounted) return;
       final order = await notifier.placeOrder();
       if (!context.mounted) return;
       if (order == null) {
