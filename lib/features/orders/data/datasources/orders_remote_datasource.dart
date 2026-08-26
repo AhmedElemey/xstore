@@ -1015,6 +1015,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
 
     final computedTotal = items.fold<double>(0, (a, b) => a + b.total);
 
+    // Missing/zero rating means "no reviews yet" — never fabricate a score.
+    final vendorRatingRaw = (data['vendorRating'] as num?)?.toDouble();
+    final vendorRating =
+        (vendorRatingRaw != null && vendorRatingRaw > 0) ? vendorRatingRaw : null;
+
     return OrderModel(
       id: (data['id'] ?? data['orderId'] ?? '').toString(),
       consumerId: (data['consumerId'] ?? data['userId'] ?? '').toString(),
@@ -1025,7 +1030,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       vendorName: (data['vendorName'] ?? '').toString(),
       vendorStoreName: (data['vendorStoreName'] ?? data['storeName'] ?? '').toString(),
       vendorAvatar: (data['vendorAvatar'] ?? '').toString(),
-      vendorRating: (data['vendorRating'] as num?)?.toDouble() ?? 4.8,
+      vendorRating: vendorRating,
       items: items,
       status: status,
       paymentMethod: fallbackPayment ?? PaymentMethod.cashOnDelivery,

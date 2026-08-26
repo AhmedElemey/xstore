@@ -244,17 +244,25 @@ class WishlistItemCard extends ConsumerWidget {
                         const Gap(AppSpacing.xs),
                         Row(
                           children: [
-                            Icon(
-                              LucideIcons.star,
-                              size: AppSpacing.md,
-                              color: AppColors.warning,
-                            ),
-                            Text(
-                              ' ${item.rating.toStringAsFixed(1)} · ${item.reviewCount} ${context.l10n.wishlistReviewsWord}',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: context.textSecondary,
+                            if (item.rating != null) ...[
+                              Icon(
+                                LucideIcons.star,
+                                size: AppSpacing.md,
+                                color: AppColors.warning,
                               ),
-                            ),
+                              Text(
+                                ' ${item.rating!.toStringAsFixed(1)} · ${item.reviewCount} ${context.l10n.wishlistReviewsWord}',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: context.textSecondary,
+                                ),
+                              ),
+                            ] else
+                              Text(
+                                context.l10n.noReviewsYet,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: context.textSecondary,
+                                ),
+                              ),
                           ],
                         ),
                         const Gap(AppSpacing.xs),

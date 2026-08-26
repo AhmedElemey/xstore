@@ -781,7 +781,7 @@ mixin _$OrderEntity {
   String get vendorName => throw _privateConstructorUsedError;
   String get vendorStoreName => throw _privateConstructorUsedError;
   String get vendorAvatar => throw _privateConstructorUsedError;
-  double get vendorRating => throw _privateConstructorUsedError;
+  double? get vendorRating => throw _privateConstructorUsedError;
   List<OrderItemEntity> get items => throw _privateConstructorUsedError;
   OrderStatus get status => throw _privateConstructorUsedError;
   PaymentMethod get paymentMethod => throw _privateConstructorUsedError;
@@ -832,7 +832,7 @@ abstract class $OrderEntityCopyWith<$Res> {
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       List<OrderItemEntity> items,
       OrderStatus status,
       PaymentMethod paymentMethod,
@@ -882,7 +882,7 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? items = null,
     Object? status = null,
     Object? paymentMethod = null,
@@ -944,10 +944,10 @@ class _$OrderEntityCopyWithImpl<$Res, $Val extends OrderEntity>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       items: null == items
           ? _value.items
           : items // ignore: cast_nullable_to_non_nullable
@@ -1070,7 +1070,7 @@ abstract class _$$OrderEntityImplCopyWith<$Res>
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       List<OrderItemEntity> items,
       OrderStatus status,
       PaymentMethod paymentMethod,
@@ -1119,7 +1119,7 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? items = null,
     Object? status = null,
     Object? paymentMethod = null,
@@ -1181,10 +1181,10 @@ class __$$OrderEntityImplCopyWithImpl<$Res>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       items: null == items
           ? _value._items
           : items // ignore: cast_nullable_to_non_nullable
@@ -1294,7 +1294,7 @@ class _$OrderEntityImpl implements _OrderEntity {
       required this.vendorName,
       required this.vendorStoreName,
       this.vendorAvatar = '',
-      this.vendorRating = 4.8,
+      this.vendorRating,
       required final List<OrderItemEntity> items,
       required this.status,
       required this.paymentMethod,
@@ -1341,8 +1341,7 @@ class _$OrderEntityImpl implements _OrderEntity {
   @JsonKey()
   final String vendorAvatar;
   @override
-  @JsonKey()
-  final double vendorRating;
+  final double? vendorRating;
   final List<OrderItemEntity> _items;
   @override
   List<OrderItemEntity> get items {
@@ -1530,7 +1529,7 @@ abstract class _OrderEntity implements OrderEntity {
       required final String vendorName,
       required final String vendorStoreName,
       final String vendorAvatar,
-      final double vendorRating,
+      final double? vendorRating,
       required final List<OrderItemEntity> items,
       required final OrderStatus status,
       required final PaymentMethod paymentMethod,
@@ -1574,7 +1573,7 @@ abstract class _OrderEntity implements OrderEntity {
   @override
   String get vendorAvatar;
   @override
-  double get vendorRating;
+  double? get vendorRating;
   @override
   List<OrderItemEntity> get items;
   @override

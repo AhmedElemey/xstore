@@ -272,7 +272,7 @@ mixin _$OrderModel {
   String get vendorName => throw _privateConstructorUsedError;
   String get vendorStoreName => throw _privateConstructorUsedError;
   String get vendorAvatar => throw _privateConstructorUsedError;
-  double get vendorRating => throw _privateConstructorUsedError;
+  double? get vendorRating => throw _privateConstructorUsedError;
   List<OrderItemModel> get items => throw _privateConstructorUsedError;
   OrderStatus get status => throw _privateConstructorUsedError;
   PaymentMethod get paymentMethod => throw _privateConstructorUsedError;
@@ -318,7 +318,7 @@ abstract class $OrderModelCopyWith<$Res> {
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       List<OrderItemModel> items,
       OrderStatus status,
       PaymentMethod paymentMethod,
@@ -368,7 +368,7 @@ class _$OrderModelCopyWithImpl<$Res, $Val extends OrderModel>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? items = null,
     Object? status = null,
     Object? paymentMethod = null,
@@ -430,10 +430,10 @@ class _$OrderModelCopyWithImpl<$Res, $Val extends OrderModel>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       items: null == items
           ? _value.items
           : items // ignore: cast_nullable_to_non_nullable
@@ -556,7 +556,7 @@ abstract class _$$OrderModelImplCopyWith<$Res>
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       List<OrderItemModel> items,
       OrderStatus status,
       PaymentMethod paymentMethod,
@@ -605,7 +605,7 @@ class __$$OrderModelImplCopyWithImpl<$Res>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? items = null,
     Object? status = null,
     Object? paymentMethod = null,
@@ -667,10 +667,10 @@ class __$$OrderModelImplCopyWithImpl<$Res>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       items: null == items
           ? _value._items
           : items // ignore: cast_nullable_to_non_nullable
@@ -780,7 +780,7 @@ class _$OrderModelImpl implements _OrderModel {
       required this.vendorName,
       required this.vendorStoreName,
       this.vendorAvatar = '',
-      this.vendorRating = 4.8,
+      this.vendorRating,
       required final List<OrderItemModel> items,
       required this.status,
       required this.paymentMethod,
@@ -827,8 +827,7 @@ class _$OrderModelImpl implements _OrderModel {
   @JsonKey()
   final String vendorAvatar;
   @override
-  @JsonKey()
-  final double vendorRating;
+  final double? vendorRating;
   final List<OrderItemModel> _items;
   @override
   List<OrderItemModel> get items {
@@ -1011,7 +1010,7 @@ abstract class _OrderModel implements OrderModel {
       required final String vendorName,
       required final String vendorStoreName,
       final String vendorAvatar,
-      final double vendorRating,
+      final double? vendorRating,
       required final List<OrderItemModel> items,
       required final OrderStatus status,
       required final PaymentMethod paymentMethod,
@@ -1055,7 +1054,7 @@ abstract class _OrderModel implements OrderModel {
   @override
   String get vendorAvatar;
   @override
-  double get vendorRating;
+  double? get vendorRating;
   @override
   List<OrderItemModel> get items;
   @override

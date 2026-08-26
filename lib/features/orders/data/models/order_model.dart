@@ -30,7 +30,7 @@ class OrderModel with _$OrderModel {
     required String vendorName,
     required String vendorStoreName,
     @Default('') String vendorAvatar,
-    @Default(4.8) double vendorRating,
+    double? vendorRating,
     required List<OrderItemModel> items,
     required OrderStatus status,
     required PaymentMethod paymentMethod,

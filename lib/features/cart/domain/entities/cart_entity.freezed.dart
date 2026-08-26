@@ -268,7 +268,7 @@ mixin _$CartVendorGroup {
   String get vendorName => throw _privateConstructorUsedError;
   String get vendorStoreName => throw _privateConstructorUsedError;
   String get vendorAvatar => throw _privateConstructorUsedError;
-  double get vendorRating => throw _privateConstructorUsedError;
+  double? get vendorRating => throw _privateConstructorUsedError;
   bool get vendorVerified => throw _privateConstructorUsedError;
   List<CartItemEntity> get items => throw _privateConstructorUsedError;
   double get groupSubtotal => throw _privateConstructorUsedError;
@@ -289,7 +289,7 @@ abstract class $CartVendorGroupCopyWith<$Res> {
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       bool vendorVerified,
       List<CartItemEntity> items,
       double groupSubtotal});
@@ -312,7 +312,7 @@ class _$CartVendorGroupCopyWithImpl<$Res, $Val extends CartVendorGroup>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? vendorVerified = null,
     Object? items = null,
     Object? groupSubtotal = null,
@@ -334,10 +334,10 @@ class _$CartVendorGroupCopyWithImpl<$Res, $Val extends CartVendorGroup>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       vendorVerified: null == vendorVerified
           ? _value.vendorVerified
           : vendorVerified // ignore: cast_nullable_to_non_nullable
@@ -367,7 +367,7 @@ abstract class _$$CartVendorGroupImplCopyWith<$Res>
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       bool vendorVerified,
       List<CartItemEntity> items,
       double groupSubtotal});
@@ -388,7 +388,7 @@ class __$$CartVendorGroupImplCopyWithImpl<$Res>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? vendorVerified = null,
     Object? items = null,
     Object? groupSubtotal = null,
@@ -410,10 +410,10 @@ class __$$CartVendorGroupImplCopyWithImpl<$Res>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       vendorVerified: null == vendorVerified
           ? _value.vendorVerified
           : vendorVerified // ignore: cast_nullable_to_non_nullable
@@ -438,7 +438,7 @@ class _$CartVendorGroupImpl implements _CartVendorGroup {
       required this.vendorName,
       required this.vendorStoreName,
       required this.vendorAvatar,
-      this.vendorRating = 4.8,
+      this.vendorRating,
       this.vendorVerified = true,
       required final List<CartItemEntity> items,
       this.groupSubtotal = 0.0})
@@ -453,8 +453,7 @@ class _$CartVendorGroupImpl implements _CartVendorGroup {
   @override
   final String vendorAvatar;
   @override
-  @JsonKey()
-  final double vendorRating;
+  final double? vendorRating;
   @override
   @JsonKey()
   final bool vendorVerified;
@@ -523,7 +522,7 @@ abstract class _CartVendorGroup implements CartVendorGroup {
       required final String vendorName,
       required final String vendorStoreName,
       required final String vendorAvatar,
-      final double vendorRating,
+      final double? vendorRating,
       final bool vendorVerified,
       required final List<CartItemEntity> items,
       final double groupSubtotal}) = _$CartVendorGroupImpl;
@@ -537,7 +536,7 @@ abstract class _CartVendorGroup implements CartVendorGroup {
   @override
   String get vendorAvatar;
   @override
-  double get vendorRating;
+  double? get vendorRating;
   @override
   bool get vendorVerified;
   @override

@@ -168,7 +168,9 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     final condition =
         condRaw is String ? condRaw : condRaw?.toString() ?? '';
 
-    final rating = _num(root['rating'] ?? root['averageRating']);
+    final ratingRaw = root['rating'] ?? root['averageRating'];
+    // Missing/zero rating means "no reviews yet" — never fabricate a score.
+    final rating = ratingRaw == null ? null : _num(ratingRaw);
 
     final reviewCountRaw = root['reviewCount'];
     final reviewsList = root['reviews'];
@@ -204,7 +206,7 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       priceDropPercent: null,
       category: category,
       condition: condition,
-      rating: rating == 0 ? 4.7 : rating,
+      rating: (rating != null && rating > 0) ? rating : null,
       reviewCount: reviewCount,
       stockQuantity: stock,
       isAvailable: root['isAvailable'] != false,
@@ -239,7 +241,9 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
       priceDropPercent: (json['priceDropPercent'] as num?)?.toInt(),
       category: (json['category'] ?? '').toString(),
       condition: (json['condition'] ?? '').toString(),
-      rating: _num(json['rating']),
+      rating: json['rating'] == null || _num(json['rating']) <= 0
+          ? null
+          : _num(json['rating']),
       reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
       stockQuantity: (json['stockQuantity'] as num?)?.toInt() ?? 1,
       isAvailable: json['isAvailable'] != false,

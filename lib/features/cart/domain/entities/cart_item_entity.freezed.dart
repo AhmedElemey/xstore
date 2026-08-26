@@ -25,7 +25,7 @@ mixin _$CartItemEntity {
   String get vendorName => throw _privateConstructorUsedError;
   String get vendorStoreName => throw _privateConstructorUsedError;
   String get vendorAvatar => throw _privateConstructorUsedError;
-  double get vendorRating => throw _privateConstructorUsedError;
+  double? get vendorRating => throw _privateConstructorUsedError;
   bool get vendorVerified => throw _privateConstructorUsedError;
   double get price => throw _privateConstructorUsedError;
   double? get compareAtPrice => throw _privateConstructorUsedError;
@@ -59,7 +59,7 @@ abstract class $CartItemEntityCopyWith<$Res> {
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       bool vendorVerified,
       double price,
       double? compareAtPrice,
@@ -95,7 +95,7 @@ class _$CartItemEntityCopyWithImpl<$Res, $Val extends CartItemEntity>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? vendorVerified = null,
     Object? price = null,
     Object? compareAtPrice = freezed,
@@ -145,10 +145,10 @@ class _$CartItemEntityCopyWithImpl<$Res, $Val extends CartItemEntity>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       vendorVerified: null == vendorVerified
           ? _value.vendorVerified
           : vendorVerified // ignore: cast_nullable_to_non_nullable
@@ -215,7 +215,7 @@ abstract class _$$CartItemEntityImplCopyWith<$Res>
       String vendorName,
       String vendorStoreName,
       String vendorAvatar,
-      double vendorRating,
+      double? vendorRating,
       bool vendorVerified,
       double price,
       double? compareAtPrice,
@@ -249,7 +249,7 @@ class __$$CartItemEntityImplCopyWithImpl<$Res>
     Object? vendorName = null,
     Object? vendorStoreName = null,
     Object? vendorAvatar = null,
-    Object? vendorRating = null,
+    Object? vendorRating = freezed,
     Object? vendorVerified = null,
     Object? price = null,
     Object? compareAtPrice = freezed,
@@ -299,10 +299,10 @@ class __$$CartItemEntityImplCopyWithImpl<$Res>
           ? _value.vendorAvatar
           : vendorAvatar // ignore: cast_nullable_to_non_nullable
               as String,
-      vendorRating: null == vendorRating
+      vendorRating: freezed == vendorRating
           ? _value.vendorRating
           : vendorRating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       vendorVerified: null == vendorVerified
           ? _value.vendorVerified
           : vendorVerified // ignore: cast_nullable_to_non_nullable
@@ -364,7 +364,7 @@ class _$CartItemEntityImpl implements _CartItemEntity {
       required this.vendorName,
       required this.vendorStoreName,
       this.vendorAvatar = '',
-      this.vendorRating = 4.8,
+      this.vendorRating,
       this.vendorVerified = true,
       required this.price,
       this.compareAtPrice,
@@ -398,8 +398,7 @@ class _$CartItemEntityImpl implements _CartItemEntity {
   @JsonKey()
   final String vendorAvatar;
   @override
-  @JsonKey()
-  final double vendorRating;
+  final double? vendorRating;
   @override
   @JsonKey()
   final bool vendorVerified;
@@ -523,7 +522,7 @@ abstract class _CartItemEntity implements CartItemEntity {
       required final String vendorName,
       required final String vendorStoreName,
       final String vendorAvatar,
-      final double vendorRating,
+      final double? vendorRating,
       final bool vendorVerified,
       required final double price,
       final double? compareAtPrice,
@@ -555,7 +554,7 @@ abstract class _CartItemEntity implements CartItemEntity {
   @override
   String get vendorAvatar;
   @override
-  double get vendorRating;
+  double? get vendorRating;
   @override
   bool get vendorVerified;
   @override
