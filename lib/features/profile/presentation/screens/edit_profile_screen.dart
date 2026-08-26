@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -11,11 +12,13 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
+import '../providers/profile_verification_provider.dart';
 import '../widgets/profile_avatar_picker.dart';
 import '../widgets/vendor_location_section.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
@@ -319,6 +322,58 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     Navigator.of(context).pop();
   }
 
+  Future<void> _verifyEmail() async {
+    final email = _email.text.trim();
+    if (email.isEmpty) return;
+    final verified = await context.push<bool>(
+      AppRoutes.profileVerification,
+      extra: ProfileVerificationArgs(
+        target: ProfileVerificationTarget.email,
+        contactValue: email,
+      ),
+    );
+    if (!mounted || verified != true) return;
+    setState(() => _syncFromState(ref.read(profileNotifierProvider)));
+  }
+
+  Future<void> _verifyPhone() async {
+    final isEmailVerified =
+        ref.read(profileNotifierProvider).profile?.isEmailVerified ?? false;
+    if (!isEmailVerified) {
+      final proceed = await showAnimatedDialog<bool>(
+        context: context,
+        child: AlertDialog(
+          title: Text(context.l10n.verifyYourEmail),
+          content: Text(context.l10n.verifyEmailBeforePhone),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(context.l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(context.l10n.verify),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true || !mounted) return;
+      await _verifyEmail();
+      return;
+    }
+    final phone = _phone.text.trim();
+    if (phone.isEmpty) return;
+    final verified = await context.push<bool>(
+      AppRoutes.profileVerification,
+      extra: ProfileVerificationArgs(
+        target: ProfileVerificationTarget.phone,
+        contactValue: phone,
+      ),
+    );
+    if (!mounted || verified != true) return;
+    setState(() => _syncFromState(ref.read(profileNotifierProvider)));
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<ProfileState>(profileNotifierProvider, (prev, next) async {
@@ -456,12 +511,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('email', v),
           ),
+          _VerificationStatusRow(
+            verified: s.profile?.isEmailVerified ?? false,
+            onVerify: _email.text.trim().isEmpty ? null : _verifyEmail,
+          ),
           const Gap(AppSpacing.md),
           PhoneInputField(
             controller: _phone,
             onChanged: (v) => ref
                 .read(profileNotifierProvider.notifier)
                 .updateField('phone', v.replaceAll(RegExp(r'\D'), '')),
+          ),
+          _VerificationStatusRow(
+            verified: s.profile?.isPhoneNumberVerified ?? false,
+            onVerify: _phone.text.trim().isEmpty ? null : _verifyPhone,
           ),
           const Gap(AppSpacing.md),
           TextField(
@@ -647,6 +710,44 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
           const Gap(AppSpacing.x3l),
         ],
+      ),
+    );
+  }
+}
+
+/// Verified badge or a "Verify" action shown under the email/phone fields.
+class _VerificationStatusRow extends StatelessWidget {
+  const _VerificationStatusRow({required this.verified, required this.onVerify});
+
+  final bool verified;
+  final VoidCallback? onVerify;
+
+  @override
+  Widget build(BuildContext context) {
+    if (verified) {
+      return Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xs),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.verified, size: 16, color: AppColors.success),
+              const Gap(AppSpacing.xs),
+              Text(
+                context.l10n.verified,
+                style: AppTypography.labelSmall.copyWith(color: AppColors.success),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return Align(
+      alignment: AlignmentDirectional.centerEnd,
+      child: TextButton(
+        onPressed: onVerify,
+        child: Text(context.l10n.verify),
       ),
     );
   }

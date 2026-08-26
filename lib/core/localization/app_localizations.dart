@@ -242,6 +242,36 @@ abstract class AppLocalizations {
   /// **'Code expired. Request a new one.'**
   String get otpSessionExpired;
 
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @verifyYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyYourEmail;
+
+  /// No description provided for @verifyEmailBeforePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your email before changing or verifying your phone number.'**
+  String get verifyEmailBeforePhone;
+
+  /// No description provided for @emailVerifiedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified'**
+  String get emailVerifiedSuccess;
+
+  /// No description provided for @phoneVerifiedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number verified'**
+  String get phoneVerifiedSuccess;
+
   /// No description provided for @smsRatesNote.
   ///
   /// In en, this message translates to:

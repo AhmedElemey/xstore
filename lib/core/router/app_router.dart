@@ -35,6 +35,8 @@ import '../../features/product/presentation/screens/product_detail_screen.dart';
 import '../../features/product/presentation/screens/product_reviews_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/profile_verification_screen.dart';
+import '../../features/profile/presentation/providers/profile_verification_provider.dart';
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
@@ -445,6 +447,16 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const EditProfileScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.profileVerification,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          ProfileVerificationScreen(
+            args: state.extra as ProfileVerificationArgs,
+          ),
         ),
       ),
       GoRoute(

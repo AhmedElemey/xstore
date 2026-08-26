@@ -14,6 +14,8 @@ class ProfileModel {
     this.responseRatePercent = 0,
     this.isEmailVerificationRequired = false,
     this.isPhoneVerificationRequired = false,
+    this.isEmailVerified = false,
+    this.isPhoneNumberVerified = false,
   });
 
   final UserModel user;
@@ -26,6 +28,8 @@ class ProfileModel {
   final int responseRatePercent;
   final bool isEmailVerificationRequired;
   final bool isPhoneVerificationRequired;
+  final bool isEmailVerified;
+  final bool isPhoneNumberVerified;
 
   ProfileEntity toEntity() => ProfileEntity(
         user: user.toEntity(),
@@ -38,5 +42,7 @@ class ProfileModel {
         responseRatePercent: responseRatePercent,
         isEmailVerificationRequired: isEmailVerificationRequired,
         isPhoneVerificationRequired: isPhoneVerificationRequired,
+        isEmailVerified: isEmailVerified,
+        isPhoneNumberVerified: isPhoneNumberVerified,
       );
 }

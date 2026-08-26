@@ -81,6 +81,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpSessionExpired => 'Code expired. Request a new one.';
 
   @override
+  String get verify => 'Verify';
+
+  @override
+  String get verifyYourEmail => 'Verify your email';
+
+  @override
+  String get verifyEmailBeforePhone =>
+      'Please verify your email before changing or verifying your phone number.';
+
+  @override
+  String get emailVerifiedSuccess => 'Email verified';
+
+  @override
+  String get phoneVerifiedSuccess => 'Phone number verified';
+
+  @override
   String get smsRatesNote => 'Standard SMS rates may apply';
 
   @override

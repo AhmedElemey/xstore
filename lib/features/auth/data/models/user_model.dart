@@ -11,12 +11,16 @@ class ProfileResponseWire {
     required this.userJson,
     this.isEmailVerificationRequired = false,
     this.isPhoneVerificationRequired = false,
+    this.isEmailVerified = false,
+    this.isPhoneNumberVerified = false,
     this.hasStore = false,
   });
 
   final Map<String, dynamic> userJson;
   final bool isEmailVerificationRequired;
   final bool isPhoneVerificationRequired;
+  final bool isEmailVerified;
+  final bool isPhoneNumberVerified;
   final bool hasStore;
 }
 
@@ -131,6 +135,13 @@ ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
         data['isEmailVerificationRequired'] as bool? ?? false,
     isPhoneVerificationRequired:
         data['isPhoneVerificationRequired'] as bool? ?? false,
+    // Sent alongside isVerified on the user object itself (see
+    // UserModel.fromJson) — isPhoneVerified is the older/alternate key some
+    // responses used before isPhoneNumberVerified.
+    isEmailVerified: userJson['isEmailVerified'] as bool? ?? false,
+    isPhoneNumberVerified: userJson['isPhoneNumberVerified'] as bool? ??
+        userJson['isPhoneVerified'] as bool? ??
+        false,
     hasStore: hasStore,
   );
 }

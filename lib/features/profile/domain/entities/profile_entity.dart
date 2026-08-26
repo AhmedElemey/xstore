@@ -17,5 +17,7 @@ class ProfileEntity with _$ProfileEntity {
     @Default(0) int responseRatePercent,
     @Default(false) bool isEmailVerificationRequired,
     @Default(false) bool isPhoneVerificationRequired,
+    @Default(false) bool isEmailVerified,
+    @Default(false) bool isPhoneNumberVerified,
   }) = _ProfileEntity;
 }
