@@ -36,7 +36,14 @@ class _ProfileVerificationScreenState
   void initState() {
     super.initState();
     _otp.addListener(_onOtpChanged);
-    ref.read(profileVerificationProvider(widget.args).notifier).sendCode();
+    // sendCode() writes to provider state synchronously as its first line —
+    // Riverpod forbids modifying a provider during initState/build, so defer
+    // past this widget-building phase (same pattern as the auth prefetch
+    // lesson in flutter-review/SKILL.md).
+    Future(() {
+      if (!mounted) return;
+      ref.read(profileVerificationProvider(widget.args).notifier).sendCode();
+    });
   }
 
   @override
