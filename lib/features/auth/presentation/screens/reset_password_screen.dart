@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -13,8 +14,10 @@ import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
+import '../providers/otp_resend_cooldown.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/otp_input_field.dart';
+import '../widgets/otp_resend_row.dart';
 
 /// Second step of the forgot-password flow: enter the OTP sent to [email]
 /// plus a new password. See [ForgotPasswordScreen] for the first step.
@@ -32,17 +35,61 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _otp = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
+  final _cooldown = OtpResendCooldown();
   bool _isLoading = false;
+  bool _isResending = false;
+  int _resendCooldown = 60;
+  bool _canResend = false;
   String? _otpError;
   String? _passwordError;
   String? _confirmError;
 
   @override
+  void initState() {
+    super.initState();
+    // The OTP was already sent by ForgotPasswordScreen right before this
+    // screen opened — start the same 60s cooldown other OTP screens use.
+    _startResendCooldown();
+  }
+
+  @override
   void dispose() {
+    _cooldown.cancel();
     _otp.dispose();
     _password.dispose();
     _confirm.dispose();
     super.dispose();
+  }
+
+  void _startResendCooldown() {
+    _cooldown.start(
+      (remaining) {
+        if (!mounted) return;
+        setState(() {
+          _resendCooldown = remaining;
+          _canResend = remaining == 0;
+        });
+      },
+      isMounted: () => mounted,
+    );
+  }
+
+  Future<void> _resend() async {
+    if (!_canResend || _isResending) return;
+    setState(() => _isResending = true);
+    final result =
+        await ref.read(forgotPasswordUseCaseProvider).call(widget.email);
+    if (!mounted) return;
+    setState(() => _isResending = false);
+    result.fold(
+      (failure) => AppSnackbar.error(context, context.l10n.errorGeneric),
+      (debugOtp) {
+        _startResendCooldown();
+        if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
+          AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+        }
+      },
+    );
   }
 
   Future<void> _submit() async {
@@ -129,6 +176,15 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   enabled: !_isLoading,
                   errorText: _otpError,
                   onCompleted: (_) => setState(() {}),
+                ),
+              ),
+              const Gap(AppSpacing.md),
+              Center(
+                child: OtpResendRow(
+                  canResend: _canResend,
+                  resendCooldown: _resendCooldown,
+                  isSending: _isResending,
+                  onResend: _resend,
                 ),
               ),
               const Gap(AppSpacing.xl),

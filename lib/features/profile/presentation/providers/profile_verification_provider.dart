@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/providers/otp_resend_cooldown.dart';
 
 /// Which contact field a [ProfileVerificationScreen] is verifying — drives
 /// which backend OTP use-cases get called and which copy is shown.
@@ -90,7 +89,7 @@ class ProfileVerificationNotifier extends StateNotifier<ProfileVerificationState
 
   final Ref ref;
   final ProfileVerificationArgs args;
-  Timer? _timer;
+  final _cooldown = OtpResendCooldown();
 
   Future<void> sendCode() async {
     state = state.copyWith(isSending: true, clearError: true);
@@ -149,24 +148,21 @@ class ProfileVerificationNotifier extends StateNotifier<ProfileVerificationState
   }
 
   void _startResendCooldown() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) {
-        t.cancel();
-        return;
-      }
-      if (state.resendCooldown <= 1) {
-        t.cancel();
-        state = state.copyWith(resendCooldown: 0, canResend: true);
-      } else {
-        state = state.copyWith(resendCooldown: state.resendCooldown - 1);
-      }
-    });
+    _cooldown.start(
+      (remaining) {
+        if (!mounted) return;
+        state = state.copyWith(
+          resendCooldown: remaining,
+          canResend: remaining == 0,
+        );
+      },
+      isMounted: () => mounted,
+    );
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _cooldown.cancel();
     super.dispose();
   }
 }

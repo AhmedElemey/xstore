@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import 'auth_provider.dart';
+import 'otp_resend_cooldown.dart';
 
 class PhoneAuthState {
   const PhoneAuthState({
@@ -78,7 +77,7 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
   PhoneAuthNotifier(this.ref) : super(const PhoneAuthState());
 
   final Ref ref;
-  Timer? _timer;
+  final _cooldown = OtpResendCooldown();
 
   void updatePhone(String value, AppLocalizations l10n) {
     final normalized = AppValidators.normalizeEgyptLocal(value);
@@ -168,29 +167,26 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
   void clearOtpError() => state = state.copyWith(clearOtpError: true);
 
   void reset() {
-    _timer?.cancel();
+    _cooldown.cancel();
     state = const PhoneAuthState();
   }
 
   void _startResendCooldown() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) {
-        t.cancel();
-        return;
-      }
-      if (state.resendCooldown <= 1) {
-        t.cancel();
-        state = state.copyWith(resendCooldown: 0, canResend: true);
-      } else {
-        state = state.copyWith(resendCooldown: state.resendCooldown - 1);
-      }
-    });
+    _cooldown.start(
+      (remaining) {
+        if (!mounted) return;
+        state = state.copyWith(
+          resendCooldown: remaining,
+          canResend: remaining == 0,
+        );
+      },
+      isMounted: () => mounted,
+    );
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _cooldown.cancel();
     super.dispose();
   }
 }

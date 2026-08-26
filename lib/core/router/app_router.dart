@@ -451,6 +451,14 @@ GoRouter goRouter(GoRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.profileVerification,
+        redirect: (context, state) {
+          // No args (cold deep link, route-restoration replay — extra is
+          // never serialized) — bounce back rather than crash on the cast.
+          if (state.extra is! ProfileVerificationArgs) {
+            return AppRoutes.profileEdit;
+          }
+          return null;
+        },
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,

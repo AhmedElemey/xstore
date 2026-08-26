@@ -9,6 +9,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/widgets/otp_input_field.dart';
+import '../../../auth/presentation/widgets/otp_resend_row.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_verification_provider.dart';
 
@@ -136,22 +137,14 @@ class _ProfileVerificationScreenState
               ),
               const Gap(AppSpacing.md),
               Center(
-                child: !state.canResend
-                    ? Text(
-                        '${context.l10n.resendCodeIn} 0:${state.resendCooldown.toString().padLeft(2, '0')}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: context.textSecondary,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      )
-                    : TextButton(
-                        onPressed: state.isSending
-                            ? null
-                            : () => ref
-                                .read(profileVerificationProvider(args).notifier)
-                                .resend(),
-                        child: Text(context.l10n.resendCode),
-                      ),
+                child: OtpResendRow(
+                  canResend: state.canResend,
+                  resendCooldown: state.resendCooldown,
+                  isSending: state.isSending,
+                  onResend: () => ref
+                      .read(profileVerificationProvider(args).notifier)
+                      .resend(),
+                ),
               ),
             ],
           ),
