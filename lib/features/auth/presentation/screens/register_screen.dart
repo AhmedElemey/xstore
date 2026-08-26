@@ -16,8 +16,8 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
-import '../../../store_categories/domain/entities/store_category_entity.dart';
-import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
+import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
+import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
@@ -44,9 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _password = TextEditingController();
   final _confirm = TextEditingController();
   final _storeName = TextEditingController();
-  final _storeNameAr = TextEditingController();
   final _storeDesc = TextEditingController();
-  final _storeDescAr = TextEditingController();
   final _whatsapp = TextEditingController();
 
   @override
@@ -65,9 +63,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _password.dispose();
     _confirm.dispose();
     _storeName.dispose();
-    _storeNameAr.dispose();
     _storeDesc.dispose();
-    _storeDescAr.dispose();
     _whatsapp.dispose();
     super.dispose();
   }
@@ -275,9 +271,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           s: s,
           n: n,
           storeName: _storeName,
-          storeNameAr: _storeNameAr,
           storeDesc: _storeDesc,
-          storeDescAr: _storeDescAr,
           whatsapp: _whatsapp,
         );
       default:
@@ -607,22 +601,18 @@ class _StepStore extends ConsumerWidget {
     required this.s,
     required this.n,
     required this.storeName,
-    required this.storeNameAr,
     required this.storeDesc,
-    required this.storeDescAr,
     required this.whatsapp,
   });
 
   final RegisterState s;
   final RegisterNotifier n;
   final TextEditingController storeName;
-  final TextEditingController storeNameAr;
   final TextEditingController storeDesc;
-  final TextEditingController storeDescAr;
   final TextEditingController whatsapp;
 
-  /// Renders a labeled dropdown for a reference-data lookup (city / government
-  /// / store category), sourced from an [AsyncValue] provider.
+  /// Renders a labeled dropdown for a reference-data lookup (store category
+  /// from `GET /api/categories`), sourced from an [AsyncValue] provider.
   Widget _lookupDropdown<T>({
     required BuildContext context,
     required AsyncValue<List<T>> async,
@@ -632,15 +622,26 @@ class _StepStore extends ConsumerWidget {
     required String hint,
     required ValueChanged<int?> onChanged,
     String? errorText,
+    VoidCallback? onRetry,
   }) {
     return async.when(
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
         child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       ),
-      error: (_, __) => Text(
-        context.l10n.genericError,
-        style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+      error: (_, __) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.genericError,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+          ),
+          if (onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              child: Text(context.l10n.retry),
+            ),
+        ],
       ),
       data: (items) => DropdownButtonFormField<int>(
         // ignore: deprecated_member_use
@@ -704,14 +705,6 @@ class _StepStore extends ConsumerWidget {
           errorText: s.stepErrors['storeName'],
           onChanged: (v) => n.updateField(storeName: v),
         ),
-        const Gap(AppSpacing.inputContentPaddingH),
-        AuthTextField(
-          label: context.l10n.storeNameArRequired,
-          controller: storeNameAr,
-          prefixIcon: const Icon(LucideIcons.store),
-          errorText: s.stepErrors['storeNameAr'],
-          onChanged: (v) => n.updateField(storeNameAr: v),
-        ),
         const Gap(AppSpacing.sm),
         Text(
           'Your store URL: xstore.com/store/${s.storeSlug}',
@@ -729,15 +722,16 @@ class _StepStore extends ConsumerWidget {
           ),
         ),
         const Gap(AppSpacing.sm),
-        _lookupDropdown<StoreCategoryEntity>(
+        _lookupDropdown<CatalogCategoryEntity>(
           context: context,
-          async: ref.watch(allStoreCategoriesProvider),
+          async: ref.watch(allCatalogCategoriesProvider),
           value: s.storeCategoryId,
           idOf: (e) => e.id,
           labelOf: (e) => e.name.resolve(isArabic),
           hint: context.l10n.storeSellHint,
           errorText: s.stepErrors['storeCategory'],
           onChanged: (v) => n.updateField(storeCategoryId: v),
+          onRetry: () => ref.invalidate(allCatalogCategoriesProvider),
         ),
         const Gap(AppSpacing.lg),
         AuthTextField(
@@ -752,23 +746,6 @@ class _StepStore extends ConsumerWidget {
           alignment: Alignment.centerRight,
           child: Text(
             '${s.storeDescription.length}/300',
-            style: AppTypography.body12.copyWith(
-              color: context.textSecondary,
-            ),
-          ),
-        ),
-        const Gap(AppSpacing.lg),
-        AuthTextField(
-          label: context.l10n.storeDescriptionArRequired,
-          controller: storeDescAr,
-          maxLines: 3,
-          errorText: s.stepErrors['storeDescriptionAr'],
-          onChanged: (v) => n.updateField(storeDescriptionAr: v),
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            '${s.storeDescriptionAr.length}/300',
             style: AppTypography.body12.copyWith(
               color: context.textSecondary,
             ),

@@ -718,7 +718,7 @@ Rules for the log:
 ### 2026-08-23 — Don't validate a field you hid
 - **What happened:** Register Continue on step 2 did nothing: `validateStep` still required `fullNameAr` after the Arabic name field was commented out, so `nextStep` failed with an error that had no widget to show it.
 - **Rule:** When a form field is removed or commented out, delete its `validateStep` entry in the same change. A `stepErrors` key with no matching `errorText:` looks like a dead Continue button. If the backend still wants the value, copy a visible field onto the wire (here: `fullName` → `fullNameAr`) instead of blocking the UI.
-- **Where it applies:** `auth_provider.dart` `validateStep` / `_performRegister`; any wizard whose UI fields and validator keys must stay 1:1.
+- **Where it applies:** `auth_provider.dart` `validateStep` / `_executeRegister`; any wizard whose UI fields and validator keys must stay 1:1. Recurred 2026-08-25 for `storeNameAr` and `storeDescriptionAr` — copy the visible field onto the wire instead of requiring a hidden bilingual field.
 
 ### 2026-08-23 — Location picker sheets search both nameEn and nameAr
 - **What happened:** Government and city bottom sheets needed in-sheet search. Filtering only the displayed locale would miss mixed-language typing, which is common in Egypt.
@@ -749,3 +749,8 @@ Rules for the log:
 - **What happened:** Confirming buffer-clear behavior: a 200 (or any other 2xx) removes the batch that was POSTed; a 404 (collector not deployed) and thrown non-2xx leave the queue for retry. Unsent events beyond the batch of 20 stay queued.
 - **Rule:** Treat any 2xx from `POST /api/analytics/events` as "this batch delivered — `removeRange` it and persist." Do not drop the rest of the queue. Do not drop on 404.
 - **Where it applies:** `analytics_service.dart` `_runFlush`.
+
+### 2026-08-25 — Vendor register store category uses GET /api/categories
+- **What happened:** The vendor store-setup dropdown watched `allStoreCategoriesProvider` (`/api/storecategories`) while listings/home already used `allCatalogCategoriesProvider`.
+- **Rule:** Vendor `storeCategoryId` is a catalog category id. Watch `allCatalogCategoriesProvider` (`GET /api/categories`) for that dropdown — do not fetch `/api/storecategories`. Show the top-level list as returned; do not flatten `children` into the register dropdown.
+- **Where it applies:** `register_screen.dart` store-setup dropdown; any future store-category picker.

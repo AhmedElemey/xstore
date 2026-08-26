@@ -605,13 +605,6 @@ class RegisterNotifier extends _$RegisterNotifier {
         );
         if (sn != null) errors['storeName'] = sn;
 
-        final snAr = Validators.nonEmptyLine(
-          l10n,
-          state.storeNameAr,
-          (l) => l.validationStoreNameArRequired,
-        );
-        if (snAr != null) errors['storeNameAr'] = snAr;
-
         if (state.storeCategoryId == null) {
           errors['storeCategory'] = l10n.validationStoreCategoryRequired;
         }
@@ -620,12 +613,6 @@ class RegisterNotifier extends _$RegisterNotifier {
           errors['storeDescription'] = l10n.validationStoreDescriptionShort;
         } else if (desc.length > 300) {
           errors['storeDescription'] = l10n.validationStoreDescriptionMax;
-        }
-        final descAr = state.storeDescriptionAr.trim();
-        if (descAr.length < 3) {
-          errors['storeDescriptionAr'] = l10n.validationStoreDescriptionArShort;
-        } else if (descAr.length > 300) {
-          errors['storeDescriptionAr'] = l10n.validationStoreDescriptionMax;
         }
         // The vendor-register endpoint requires a store image (multipart).
         if (state.storeLogoPath == null ||
@@ -696,9 +683,13 @@ class RegisterNotifier extends _$RegisterNotifier {
                   confirmPassword: state.confirmPassword,
                   dateOfBirth: state.dateOfBirth,
                   storeNameEn: state.storeName,
-                  storeNameAr: state.storeNameAr,
+                  // Arabic store-name field is hidden; copy the visible name
+                  // so the backend's storeNameAr key still binds.
+                  storeNameAr: state.storeName.trim(),
                   storeDescriptionEn: state.storeDescription,
-                  storeDescriptionAr: state.storeDescriptionAr,
+                  // Arabic description field is hidden; copy the visible text
+                  // so the backend's storeDescriptionAr key still binds.
+                  storeDescriptionAr: state.storeDescription.trim(),
                   storeCategoryId: state.storeCategoryId!,
                   storeCityId: state.storeCityId!,
                   storeGovernmentId: state.storeGovernmentId!,
