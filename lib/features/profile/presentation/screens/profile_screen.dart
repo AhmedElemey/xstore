@@ -18,6 +18,7 @@ import '../widgets/profile_menu_blocks.dart';
 import '../widgets/profile_sheets.dart';
 import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
+import '../widgets/profile_verification_banner.dart';
 import '../widgets/vendor_store_card.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
@@ -163,6 +164,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ),
+              if (profile != null &&
+                  (profile.isEmailVerificationRequired ||
+                      profile.isPhoneVerificationRequired))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      0,
+                    ),
+                    child: ProfileVerificationBanner(
+                      email: u.email,
+                      phoneNumber: u.phoneNumber,
+                      showEmailPrompt: profile.isEmailVerificationRequired,
+                      showPhonePrompt: profile.isPhoneVerificationRequired,
+                    ),
+                  ),
+                ),
               // Couriers have no orders/wishlist/saved-amount or vendor
               // sales stats — ProfileStatsRow only branches vendor vs.
               // everything-else, so without this gate a courier would see

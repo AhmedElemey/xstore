@@ -48,9 +48,9 @@ abstract final class ApiEndpoints {
   static String vendorStoreStatus(String vendorId) =>
       '/vendors/$vendorId/store-status';
 
-  /// Used by profile for vendor store head/stats, avatar upload, account
-  /// delete and public store listings — none of which exist in the
-  /// confirmed contract yet.
+  /// Used by profile for vendor store head/stats and public store listings —
+  /// none of which exist in the confirmed contract yet. (Account delete now
+  /// has a confirmed route — see [deleteAccount] below.)
   static const String users = '/users';
 
 
@@ -75,6 +75,11 @@ abstract final class ApiEndpoints {
   static const String sendPhoneOtp = '$_api/auth/send-phone-otp';
   static const String verifyEmail = '$_api/auth/verify-email';
   static const String verifyPhone = '$_api/auth/verify-phone';
+
+  /// CONFIRMED (Postman collection): `DELETE /api/auth/delete-account`, JSON
+  /// body `{"password": "...", "confirmationText": "DELETE"}`. Replaces the
+  /// old `DELETE /users/me` guess, which had no route on this backend.
+  static const String deleteAccount = '$_api/auth/delete-account';
 
   /// Passwordless login: request an SMS OTP for an EXISTING account, then
   /// exchange it for a session. CONFIRMED live: [sendLoginOtp] returns

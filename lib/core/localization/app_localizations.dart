@@ -212,6 +212,30 @@ abstract class AppLocalizations {
   /// **'Code sent to'**
   String get codeSentTo;
 
+  /// No description provided for @verifyYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyYourEmail;
+
+  /// No description provided for @profileEmailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is not verified'**
+  String get profileEmailNotVerified;
+
+  /// No description provided for @profilePhoneNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number is not verified'**
+  String get profilePhoneNotVerified;
+
+  /// No description provided for @verifyNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Now'**
+  String get verifyNow;
+
   /// No description provided for @changeNumber.
   ///
   /// In en, this message translates to:

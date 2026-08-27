@@ -21,7 +21,10 @@ abstract interface class ProfileRepository {
     required String filePath,
   });
 
-  Future<Either<Failure, Unit>> deleteAccount();
+  Future<Either<Failure, Unit>> deleteAccount({
+    required String password,
+    required String confirmationText,
+  });
 
   Future<Either<Failure, List<ListingEntity>>> fetchVendorStoreListings({
     required String sellerId,

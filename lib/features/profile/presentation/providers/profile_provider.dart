@@ -613,8 +613,14 @@ class ProfileNotifier extends _$ProfileNotifier {
   // mid-way), which is what resetProfileData(ref) did from here. Auth's ref
   // invalidates this provider legally, and the router redirect on the auth
   // change handles navigation to login.
-  Future<void> deleteAccount() async {
-    final remote = await ref.read(deleteAccountUseCaseProvider).call();
+  Future<void> deleteAccount({
+    required String password,
+    required String confirmationText,
+  }) async {
+    final remote = await ref.read(deleteAccountUseCaseProvider).call(
+          password: password,
+          confirmationText: confirmationText,
+        );
     await remote.fold(
       (f) async {
         state = state.copyWith(error: f.toString());

@@ -30,7 +30,10 @@ abstract interface class ProfileRemoteDataSource {
 
   Future<String> updateAvatar({required String userId, required String filePath});
 
-  Future<void> deleteAccount();
+  Future<void> deleteAccount({
+    required String password,
+    required String confirmationText,
+  });
 
   Future<List<ListingEntity>> fetchVendorStoreListings({
     required String sellerId,
@@ -562,17 +565,24 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount({
+    required String password,
+    required String confirmationText,
+  }) async {
     if (MockConfig.useMock) {
       await Future<void>.delayed(MockConfig.mockDelay);
       return;
     }
     try {
-      // NOT in the confirmed backend contract — no account-delete route
-      // exists in the xStoreEcommerce API yet.
-      await _dio.delete<void>('${ApiEndpoints.users}/me');
+      // CONFIRMED (Postman collection): DELETE /api/auth/delete-account,
+      // JSON body {password, confirmationText}.
+      await _dio.delete<void>(
+        ApiEndpoints.deleteAccount,
+        data: {'password': password, 'confirmationText': confirmationText},
+        options: ApiAuthHeaders.authenticated(),
+      );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error');
+      throw mapDioException(e);
     }
   }
 
