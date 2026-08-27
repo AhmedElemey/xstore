@@ -19,6 +19,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
 import '../widgets/otp_input_field.dart';
+import '../widgets/otp_resend_row.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
@@ -184,45 +185,25 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                           : null,
                     ),
                     const Gap(AppSpacing.md),
-                    if (!st.canResend)
-                      Text(
-                        '${context.l10n.resendCodeIn} 0:${st.resendCooldown.toString().padLeft(2, '0')}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: context.textSecondary,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      )
-                    else
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            context.l10n.didntReceiveCode,
-                            style: AppTypography.bodySmall.copyWith(color: context.textSecondary),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              await ref
-                                  .read(phoneAuthProvider.notifier)
-                                  .resendOtp(context.l10n);
-                              if (!context.mounted) return;
-                              // Mock mode sends no real SMS — the fixed test
-                              // code is echoed back for local dev/testing.
-                              final debugOtp =
-                                  ref.read(phoneAuthProvider).debugOtp;
-                              if (kDebugMode &&
-                                  debugOtp != null &&
-                                  debugOtp.isNotEmpty) {
-                                AppSnackbar.info(
-                                  context,
-                                  'Debug OTP: $debugOtp',
-                                );
-                              }
-                            },
-                            child: Text(context.l10n.resendCode),
-                          ),
-                        ],
-                      ),
+                    OtpResendRow(
+                      canResend: st.canResend,
+                      resendCooldown: st.resendCooldown,
+                      isSending: st.isSendingOtp,
+                      onResend: () async {
+                        await ref
+                            .read(phoneAuthProvider.notifier)
+                            .resendOtp(context.l10n);
+                        if (!context.mounted) return;
+                        // Mock mode sends no real SMS — the fixed test
+                        // code is echoed back for local dev/testing.
+                        final debugOtp = ref.read(phoneAuthProvider).debugOtp;
+                        if (kDebugMode &&
+                            debugOtp != null &&
+                            debugOtp.isNotEmpty) {
+                          AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+                        }
+                      },
+                    ),
                     const Spacer(),
                     Text(
                       'Having trouble? Contact Support',

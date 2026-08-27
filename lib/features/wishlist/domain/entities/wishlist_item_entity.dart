@@ -21,7 +21,7 @@ class WishlistItemEntity with _$WishlistItemEntity {
     int? priceDropPercent,
     required String category,
     required String condition,
-    @Default(4.7) double rating,
+    double? rating,
     @Default(0) int reviewCount,
     @Default(1) int stockQuantity,
     @Default(true) bool isAvailable,

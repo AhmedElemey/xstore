@@ -29,7 +29,7 @@ class CartVendorGroup with _$CartVendorGroup {
     required String vendorName,
     required String vendorStoreName,
     required String vendorAvatar,
-    @Default(4.8) double vendorRating,
+    double? vendorRating,
     @Default(true) bool vendorVerified,
     required List<CartItemEntity> items,
     @Default(0.0) double groupSubtotal,

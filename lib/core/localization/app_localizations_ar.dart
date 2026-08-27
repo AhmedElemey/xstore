@@ -93,6 +93,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otpSessionExpired => 'انتهت صلاحية الكود. اطلب كود جديد.';
 
   @override
+  String get verify => 'تحقق';
+
+  @override
+  String get verifyEmailBeforePhone =>
+      'يرجى التحقق من بريدك الإلكتروني قبل تغيير رقم هاتفك أو التحقق منه.';
+
+  @override
+  String get emailVerifiedSuccess => 'تم التحقق من البريد الإلكتروني';
+
+  @override
+  String get phoneVerifiedSuccess => 'تم التحقق من رقم الهاتف';
+
+  @override
   String get smsRatesNote => 'قد يتم تطبيق رسوم SMS عادية';
 
   @override

@@ -31,6 +31,7 @@ import '../widgets/quantity_stepper.dart';
 import '../utils/listing_localized_labels.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
@@ -151,6 +152,12 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   }
 
   Future<void> _publish() async {
+    // Proactive check — the backend 403s "Account must be verified to
+    // create listings" for an unverified phone; check first instead of
+    // letting a guaranteed-failing request go out.
+    if (!await requirePhoneVerified(context, ref)) return;
+    if (!mounted) return;
+
     final notifier = ref.read(listingFormNotifierProvider.notifier);
     notifier.updateField('name', _name.text);
     notifier.updateField('priceInput', _price.text);

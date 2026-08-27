@@ -214,15 +214,21 @@ class WishlistGridCard extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
-                      Icon(
-                        LucideIcons.star,
-                        size: AppSpacing.md,
-                        color: AppColors.warning,
-                      ),
-                      Text(
-                        ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
-                        style: AppTypography.bodySmall,
-                      ),
+                      if (item.rating != null) ...[
+                        Icon(
+                          LucideIcons.star,
+                          size: AppSpacing.md,
+                          color: AppColors.warning,
+                        ),
+                        Text(
+                          ' ${item.rating!.toStringAsFixed(1)} (${item.reviewCount})',
+                          style: AppTypography.bodySmall,
+                        ),
+                      ] else
+                        Text(
+                          context.l10n.noReviewsYet,
+                          style: AppTypography.bodySmall,
+                        ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),

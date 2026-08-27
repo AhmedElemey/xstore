@@ -26,6 +26,8 @@ mixin _$ProfileEntity {
   int get responseRatePercent => throw _privateConstructorUsedError;
   bool get isEmailVerificationRequired => throw _privateConstructorUsedError;
   bool get isPhoneVerificationRequired => throw _privateConstructorUsedError;
+  bool get isEmailVerified => throw _privateConstructorUsedError;
+  bool get isPhoneVerified => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProfileEntityCopyWith<ProfileEntity> get copyWith =>
@@ -48,7 +50,9 @@ abstract class $ProfileEntityCopyWith<$Res> {
       int storeActiveListings,
       int responseRatePercent,
       bool isEmailVerificationRequired,
-      bool isPhoneVerificationRequired});
+      bool isPhoneVerificationRequired,
+      bool isEmailVerified,
+      bool isPhoneVerified});
 
   $UserEntityCopyWith<$Res> get user;
 }
@@ -76,6 +80,8 @@ class _$ProfileEntityCopyWithImpl<$Res, $Val extends ProfileEntity>
     Object? responseRatePercent = null,
     Object? isEmailVerificationRequired = null,
     Object? isPhoneVerificationRequired = null,
+    Object? isEmailVerified = null,
+    Object? isPhoneVerified = null,
   }) {
     return _then(_value.copyWith(
       user: null == user
@@ -118,6 +124,14 @@ class _$ProfileEntityCopyWithImpl<$Res, $Val extends ProfileEntity>
           ? _value.isPhoneVerificationRequired
           : isPhoneVerificationRequired // ignore: cast_nullable_to_non_nullable
               as bool,
+      isEmailVerified: null == isEmailVerified
+          ? _value.isEmailVerified
+          : isEmailVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPhoneVerified: null == isPhoneVerified
+          ? _value.isPhoneVerified
+          : isPhoneVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -148,7 +162,9 @@ abstract class _$$ProfileEntityImplCopyWith<$Res>
       int storeActiveListings,
       int responseRatePercent,
       bool isEmailVerificationRequired,
-      bool isPhoneVerificationRequired});
+      bool isPhoneVerificationRequired,
+      bool isEmailVerified,
+      bool isPhoneVerified});
 
   @override
   $UserEntityCopyWith<$Res> get user;
@@ -175,6 +191,8 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
     Object? responseRatePercent = null,
     Object? isEmailVerificationRequired = null,
     Object? isPhoneVerificationRequired = null,
+    Object? isEmailVerified = null,
+    Object? isPhoneVerified = null,
   }) {
     return _then(_$ProfileEntityImpl(
       user: null == user
@@ -217,6 +235,14 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
           ? _value.isPhoneVerificationRequired
           : isPhoneVerificationRequired // ignore: cast_nullable_to_non_nullable
               as bool,
+      isEmailVerified: null == isEmailVerified
+          ? _value.isEmailVerified
+          : isEmailVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPhoneVerified: null == isPhoneVerified
+          ? _value.isPhoneVerified
+          : isPhoneVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -234,7 +260,9 @@ class _$ProfileEntityImpl implements _ProfileEntity {
       this.storeActiveListings = 0,
       this.responseRatePercent = 0,
       this.isEmailVerificationRequired = false,
-      this.isPhoneVerificationRequired = false});
+      this.isPhoneVerificationRequired = false,
+      this.isEmailVerified = false,
+      this.isPhoneVerified = false});
 
   @override
   final UserEntity user;
@@ -265,10 +293,16 @@ class _$ProfileEntityImpl implements _ProfileEntity {
   @override
   @JsonKey()
   final bool isPhoneVerificationRequired;
+  @override
+  @JsonKey()
+  final bool isEmailVerified;
+  @override
+  @JsonKey()
+  final bool isPhoneVerified;
 
   @override
   String toString() {
-    return 'ProfileEntity(user: $user, ordersCount: $ordersCount, wishlistCount: $wishlistCount, savedAmountDzd: $savedAmountDzd, storeViewCount: $storeViewCount, storeSaveCount: $storeSaveCount, storeActiveListings: $storeActiveListings, responseRatePercent: $responseRatePercent, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired)';
+    return 'ProfileEntity(user: $user, ordersCount: $ordersCount, wishlistCount: $wishlistCount, savedAmountDzd: $savedAmountDzd, storeViewCount: $storeViewCount, storeSaveCount: $storeSaveCount, storeActiveListings: $storeActiveListings, responseRatePercent: $responseRatePercent, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired, isEmailVerified: $isEmailVerified, isPhoneVerified: $isPhoneVerified)';
   }
 
   @override
@@ -298,7 +332,11 @@ class _$ProfileEntityImpl implements _ProfileEntity {
             (identical(other.isPhoneVerificationRequired,
                     isPhoneVerificationRequired) ||
                 other.isPhoneVerificationRequired ==
-                    isPhoneVerificationRequired));
+                    isPhoneVerificationRequired) &&
+            (identical(other.isEmailVerified, isEmailVerified) ||
+                other.isEmailVerified == isEmailVerified) &&
+            (identical(other.isPhoneVerified, isPhoneVerified) ||
+                other.isPhoneVerified == isPhoneVerified));
   }
 
   @override
@@ -313,7 +351,9 @@ class _$ProfileEntityImpl implements _ProfileEntity {
       storeActiveListings,
       responseRatePercent,
       isEmailVerificationRequired,
-      isPhoneVerificationRequired);
+      isPhoneVerificationRequired,
+      isEmailVerified,
+      isPhoneVerified);
 
   @JsonKey(ignore: true)
   @override
@@ -333,7 +373,9 @@ abstract class _ProfileEntity implements ProfileEntity {
       final int storeActiveListings,
       final int responseRatePercent,
       final bool isEmailVerificationRequired,
-      final bool isPhoneVerificationRequired}) = _$ProfileEntityImpl;
+      final bool isPhoneVerificationRequired,
+      final bool isEmailVerified,
+      final bool isPhoneVerified}) = _$ProfileEntityImpl;
 
   @override
   UserEntity get user;
@@ -355,6 +397,10 @@ abstract class _ProfileEntity implements ProfileEntity {
   bool get isEmailVerificationRequired;
   @override
   bool get isPhoneVerificationRequired;
+  @override
+  bool get isEmailVerified;
+  @override
+  bool get isPhoneVerified;
   @override
   @JsonKey(ignore: true)
   _$$ProfileEntityImplCopyWith<_$ProfileEntityImpl> get copyWith =>

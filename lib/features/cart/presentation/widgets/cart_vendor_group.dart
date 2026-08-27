@@ -69,7 +69,9 @@ class CartVendorGroupBlock extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    '${context.l10n.starChar} ${group.vendorRating.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}',
+                    group.vendorRating != null
+                        ? '${context.l10n.starChar} ${group.vendorRating!.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}'
+                        : context.l10n.newSeller,
                     style: AppTypography.labelSmall.copyWith(
                       color: context.textSecondary,
                     ),

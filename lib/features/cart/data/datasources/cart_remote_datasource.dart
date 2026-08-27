@@ -253,7 +253,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final storeName =
         (seller['storeName'] ?? seller['businessName'] ?? vendorName).toString();
     final avatar = (seller['avatarUrl'] ?? seller['avatar'] ?? '').toString();
-    final sellerRating = _num(seller['rating'] ?? seller['averageRating']);
+    final sellerRatingRaw = seller['rating'] ?? seller['averageRating'];
+    // Missing/zero rating means "no reviews yet" — never fabricate a score.
+    final sellerRating =
+        sellerRatingRaw == null ? null : _num(sellerRatingRaw);
     final verified = seller['verified'] == true || seller['isVerified'] == true;
 
     final imgs = root['imageUrls'];
@@ -291,7 +294,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       vendorName: vendorName.isEmpty ? '—' : vendorName,
       vendorStoreName: storeName.isEmpty ? vendorName : storeName,
       vendorAvatar: avatar,
-      vendorRating: sellerRating == 0 ? 4.7 : sellerRating,
+      vendorRating: (sellerRating != null && sellerRating > 0) ? sellerRating : null,
       vendorVerified: verified,
       price: price,
       compareAtPrice: compare,
@@ -674,7 +677,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       vendorName: (json['vendorName'] ?? '').toString(),
       vendorStoreName: (json['vendorStoreName'] ?? '').toString(),
       vendorAvatar: (json['vendorAvatar'] ?? '').toString(),
-      vendorRating: _num(json['vendorRating']),
+      vendorRating: json['vendorRating'] == null
+          ? null
+          : _num(json['vendorRating']),
       vendorVerified: json['vendorVerified'] != false,
       price: _num(json['price']),
       compareAtPrice: json['compareAtPrice'] == null

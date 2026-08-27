@@ -14,7 +14,7 @@ class CartItemEntity with _$CartItemEntity {
     required String vendorName,
     required String vendorStoreName,
     @Default('') String vendorAvatar,
-    @Default(4.8) double vendorRating,
+    double? vendorRating,
     @Default(true) bool vendorVerified,
     required double price,
     double? compareAtPrice,

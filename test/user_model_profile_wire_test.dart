@@ -153,6 +153,57 @@ void main() {
       expect(wire.hasStore, isFalse);
     });
 
+    test('reads isEmailVerified/isPhoneVerified as top-level flags, not nested under user', () {
+      // Exact shape of a real GET /api/auth/get-profile response (captured
+      // live 2026-08-27) — isEmailVerified/isPhoneVerified sit alongside
+      // `user`/`store`, not inside `user`.
+      final wire = parseProfileResponse({
+        'user': {
+          'id': 42,
+          'fullName': 'Ahmed taha',
+          'email': 'rehab.mhmd2@gmail.com',
+          'phoneNumber': '01019890452',
+        },
+        'store': null,
+        'isEmailVerified': true,
+        'isPhoneVerified': false,
+      });
+      expect(wire.isEmailVerified, isTrue);
+      expect(wire.isPhoneVerified, isFalse);
+      // Confirms it's NOT read from the user object itself.
+      expect(wire.userJson.containsKey('isEmailVerified'), isFalse);
+    });
+
+    test('falls back to nested user flags when top-level keys are absent', () {
+      final wire = parseProfileResponse({
+        'user': {
+          'id': 9,
+          'email': 'nested@test.local',
+          'isEmailVerified': false,
+          'isPhoneVerified': true,
+        },
+        'store': null,
+      });
+      expect(wire.isEmailVerified, isFalse);
+      expect(wire.isPhoneVerified, isTrue);
+    });
+
+    test('top-level isEmailVerified/isPhoneVerified win over nested user flags', () {
+      final wire = parseProfileResponse({
+        'user': {
+          'id': 9,
+          'email': 'both@test.local',
+          'isEmailVerified': false,
+          'isPhoneVerified': false,
+        },
+        'store': null,
+        'isEmailVerified': true,
+        'isPhoneVerified': true,
+      });
+      expect(wire.isEmailVerified, isTrue);
+      expect(wire.isPhoneVerified, isTrue);
+    });
+
     test('merges nested store object onto user fields', () {
       final model = userModelFromProfileResponse({
         'user': {

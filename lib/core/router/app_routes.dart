@@ -20,6 +20,9 @@ abstract final class AppRoutes {
   static const wishlist = '/wishlist';
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
+  /// Email/phone OTP verification, opened from Edit Profile. Target + value
+  /// are passed via `state.extra` as a `ProfileVerificationArgs`.
+  static const profileVerification = '/profile/verify';
   static const orders = '/orders';
   static const vendorOrders = '/vendor-orders';
   /// Vendor stack route (same [OrdersScreen] as consumer tab).

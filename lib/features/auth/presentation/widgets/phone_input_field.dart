@@ -15,12 +15,17 @@ class PhoneInputField extends StatelessWidget {
     required this.onChanged,
     this.errorText,
     this.enabled = true,
+    this.suffix,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String? errorText;
   final bool enabled;
+
+  /// Trailing widget inside the field (e.g. a Verify action). Replaces the
+  /// clear button so the row stays on one line.
+  final Widget? suffix;
 
   String _normalizeEgyptInput(String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -95,18 +100,22 @@ class PhoneInputField extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 
-                  suffixIcon: controller.text.isNotEmpty
-                      ? IconButton(
-                          onPressed: () {
-                            controller.clear();
-                            onChanged('');
-                          },
-                          icon: Icon(
-                            LucideIcons.x,
-                            size: 18,
-                            color: context.iconSecondary,
-                          ),
-                        )
+                  suffixIcon: suffix ??
+                      (controller.text.isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                controller.clear();
+                                onChanged('');
+                              },
+                              icon: Icon(
+                                LucideIcons.x,
+                                size: 18,
+                                color: context.iconSecondary,
+                              ),
+                            )
+                          : null),
+                  suffixIconConstraints: suffix != null
+                      ? const BoxConstraints(minWidth: 0, minHeight: 0)
                       : null,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,

@@ -32,7 +32,7 @@ mixin _$WishlistItemEntity {
   int? get priceDropPercent => throw _privateConstructorUsedError;
   String get category => throw _privateConstructorUsedError;
   String get condition => throw _privateConstructorUsedError;
-  double get rating => throw _privateConstructorUsedError;
+  double? get rating => throw _privateConstructorUsedError;
   int get reviewCount => throw _privateConstructorUsedError;
   int get stockQuantity => throw _privateConstructorUsedError;
   bool get isAvailable => throw _privateConstructorUsedError;
@@ -70,7 +70,7 @@ abstract class $WishlistItemEntityCopyWith<$Res> {
       int? priceDropPercent,
       String category,
       String condition,
-      double rating,
+      double? rating,
       int reviewCount,
       int stockQuantity,
       bool isAvailable,
@@ -110,7 +110,7 @@ class _$WishlistItemEntityCopyWithImpl<$Res, $Val extends WishlistItemEntity>
     Object? priceDropPercent = freezed,
     Object? category = null,
     Object? condition = null,
-    Object? rating = null,
+    Object? rating = freezed,
     Object? reviewCount = null,
     Object? stockQuantity = null,
     Object? isAvailable = null,
@@ -185,10 +185,10 @@ class _$WishlistItemEntityCopyWithImpl<$Res, $Val extends WishlistItemEntity>
           ? _value.condition
           : condition // ignore: cast_nullable_to_non_nullable
               as String,
-      rating: null == rating
+      rating: freezed == rating
           ? _value.rating
           : rating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       reviewCount: null == reviewCount
           ? _value.reviewCount
           : reviewCount // ignore: cast_nullable_to_non_nullable
@@ -250,7 +250,7 @@ abstract class _$$WishlistItemEntityImplCopyWith<$Res>
       int? priceDropPercent,
       String category,
       String condition,
-      double rating,
+      double? rating,
       int reviewCount,
       int stockQuantity,
       bool isAvailable,
@@ -288,7 +288,7 @@ class __$$WishlistItemEntityImplCopyWithImpl<$Res>
     Object? priceDropPercent = freezed,
     Object? category = null,
     Object? condition = null,
-    Object? rating = null,
+    Object? rating = freezed,
     Object? reviewCount = null,
     Object? stockQuantity = null,
     Object? isAvailable = null,
@@ -363,10 +363,10 @@ class __$$WishlistItemEntityImplCopyWithImpl<$Res>
           ? _value.condition
           : condition // ignore: cast_nullable_to_non_nullable
               as String,
-      rating: null == rating
+      rating: freezed == rating
           ? _value.rating
           : rating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as double?,
       reviewCount: null == reviewCount
           ? _value.reviewCount
           : reviewCount // ignore: cast_nullable_to_non_nullable
@@ -423,7 +423,7 @@ class _$WishlistItemEntityImpl implements _WishlistItemEntity {
       this.priceDropPercent,
       required this.category,
       required this.condition,
-      this.rating = 4.7,
+      this.rating,
       this.reviewCount = 0,
       this.stockQuantity = 1,
       this.isAvailable = true,
@@ -476,8 +476,7 @@ class _$WishlistItemEntityImpl implements _WishlistItemEntity {
   @override
   final String condition;
   @override
-  @JsonKey()
-  final double rating;
+  final double? rating;
   @override
   @JsonKey()
   final int reviewCount;
@@ -615,7 +614,7 @@ abstract class _WishlistItemEntity implements WishlistItemEntity {
       final int? priceDropPercent,
       required final String category,
       required final String condition,
-      final double rating,
+      final double? rating,
       final int reviewCount,
       final int stockQuantity,
       final bool isAvailable,
@@ -658,7 +657,7 @@ abstract class _WishlistItemEntity implements WishlistItemEntity {
   @override
   String get condition;
   @override
-  double get rating;
+  double? get rating;
   @override
   int get reviewCount;
   @override

@@ -11,12 +11,16 @@ class ProfileResponseWire {
     required this.userJson,
     this.isEmailVerificationRequired = false,
     this.isPhoneVerificationRequired = false,
+    this.isEmailVerified = false,
+    this.isPhoneVerified = false,
     this.hasStore = false,
   });
 
   final Map<String, dynamic> userJson;
   final bool isEmailVerificationRequired;
   final bool isPhoneVerificationRequired;
+  final bool isEmailVerified;
+  final bool isPhoneVerified;
   final bool hasStore;
 }
 
@@ -100,7 +104,9 @@ void mergeStoreJsonIntoUser(
 /// Parses GET/PUT `/api/auth/get-profile` and `/api/auth/update-profile` responses.
 ///
 /// CONFIRMED live API: `{ "user": { ... }, "store": { ... } | null,
-/// "isEmailVerificationRequired", "isPhoneVerificationRequired" }`.
+/// "isEmailVerificationRequired", "isPhoneVerificationRequired",
+/// "isEmailVerified", "isPhoneVerified" }` — all four flags are top-level,
+/// not nested inside `user`.
 /// Login/register return `{ "token", "refreshToken" }` only — no user object;
 /// do not use this helper on those responses.
 ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
@@ -131,6 +137,18 @@ ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
         data['isEmailVerificationRequired'] as bool? ?? false,
     isPhoneVerificationRequired:
         data['isPhoneVerificationRequired'] as bool? ?? false,
+    // CONFIRMED (live get-profile): isEmailVerified/isPhoneVerified are
+    // top-level siblings of `user`/`store`. Fall back to the nested user
+    // object and the older isPhoneNumberVerified key if a payload still
+    // sends them there.
+    isEmailVerified: data['isEmailVerified'] as bool? ??
+        userJson['isEmailVerified'] as bool? ??
+        false,
+    isPhoneVerified: data['isPhoneVerified'] as bool? ??
+        data['isPhoneNumberVerified'] as bool? ??
+        userJson['isPhoneVerified'] as bool? ??
+        userJson['isPhoneNumberVerified'] as bool? ??
+        false,
     hasStore: hasStore,
   );
 }
@@ -274,8 +292,9 @@ class UserModel with _$UserModel {
       phoneNumber: json['phoneNumber'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
       role: parseRole(),
-      // CONFIRMED: real response sends isEmailVerified/isPhoneVerified
-      // alongside isVerified — isVerified is still the field to use here.
+      // isVerified lives on the user object. isEmailVerified/isPhoneVerified
+      // are top-level profile-wrapper flags — parsed in parseProfileResponse,
+      // not here.
       isVerified: json['isVerified'] as bool? ?? false,
       rating: (json['rating'] as num?)?.toDouble(),
       totalSales: json['totalSales'] as int?,
