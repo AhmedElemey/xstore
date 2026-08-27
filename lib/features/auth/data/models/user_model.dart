@@ -104,7 +104,9 @@ void mergeStoreJsonIntoUser(
 /// Parses GET/PUT `/api/auth/get-profile` and `/api/auth/update-profile` responses.
 ///
 /// CONFIRMED live API: `{ "user": { ... }, "store": { ... } | null,
-/// "isEmailVerificationRequired", "isPhoneVerificationRequired" }`.
+/// "isEmailVerificationRequired", "isPhoneVerificationRequired",
+/// "isEmailVerified", "isPhoneVerified" }` — all four flags are top-level,
+/// not nested inside `user`.
 /// Login/register return `{ "token", "refreshToken" }` only — no user object;
 /// do not use this helper on those responses.
 ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
@@ -135,12 +137,12 @@ ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
         data['isEmailVerificationRequired'] as bool? ?? false,
     isPhoneVerificationRequired:
         data['isPhoneVerificationRequired'] as bool? ?? false,
-    // Sent alongside isVerified on the user object itself (see
-    // UserModel.fromJson) — isPhoneVerified is the older/alternate key some
-    // responses used before isPhoneNumberVerified.
-    isEmailVerified: userJson['isEmailVerified'] as bool? ?? false,
-    isPhoneNumberVerified: userJson['isPhoneNumberVerified'] as bool? ??
-        userJson['isPhoneVerified'] as bool? ??
+    // CONFIRMED (live get-profile response): isEmailVerified/isPhoneVerified
+    // are top-level siblings of `user`/`store`, same as the
+    // isXVerificationRequired flags above — NOT nested inside `user`.
+    isEmailVerified: data['isEmailVerified'] as bool? ?? false,
+    isPhoneNumberVerified: data['isPhoneNumberVerified'] as bool? ??
+        data['isPhoneVerified'] as bool? ??
         false,
     hasStore: hasStore,
   );
