@@ -2403,12 +2403,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullNameArRequired => 'الاسم الكامل (بالعربية) *';
 
   @override
-  String get storeNameArRequired => 'اسم المتجر (بالعربية) *';
-
-  @override
-  String get storeDescriptionArRequired => 'وصف المتجر (بالعربية) *';
-
-  @override
   String get emailAddressRequired => 'البريد الإلكتروني *';
 
   @override

@@ -62,12 +62,9 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editLocation.trim() == (u.location ?? '').trim() &&
       s.editFullNameAr.trim() == (u.fullNameAr ?? '').trim() &&
       s.editStoreName.trim() == (u.storeName ?? '').trim() &&
-      s.editStoreNameAr.trim() == (u.storeNameAr ?? '').trim() &&
       s.editStoreCategory.trim() == (u.storeCategory ?? '').trim() &&
       s.editStoreDescription.trim() ==
-          (u.storeDescriptionEn ?? u.storeDescription ?? '').trim() &&
-      s.editStoreDescriptionAr.trim() ==
-          (u.storeDescriptionAr ?? '').trim() &&
+          (u.storeDescription ?? '').trim() &&
       s.editStoreCity.trim() == (u.storeCity ?? '').trim() &&
       s.editStoreWilaya.trim() == (u.storeWilaya ?? '').trim() &&
       s.editStoreCityId == u.storeCityId &&
@@ -257,17 +254,11 @@ class ProfileNotifier extends _$ProfileNotifier {
       case 'storeName':
         next = next.copyWith(editStoreName: value as String);
         break;
-      case 'storeNameAr':
-        next = next.copyWith(editStoreNameAr: value as String);
-        break;
       case 'storeCategory':
         next = next.copyWith(editStoreCategory: value as String);
         break;
       case 'storeDescription':
         next = next.copyWith(editStoreDescription: value as String);
-        break;
-      case 'storeDescriptionAr':
-        next = next.copyWith(editStoreDescriptionAr: value as String);
         break;
       case 'storeCity':
         next = next.copyWith(editStoreCity: value as String);
@@ -538,9 +529,8 @@ class ProfileNotifier extends _$ProfileNotifier {
         '[ProfileNotifier] saveProfile — '
         'fullNameEn=${request.fullNameEn} fullNameAr=${request.fullNameAr} '
         'birthDate=${request.birthDate} '
-        'storeNameEn=${request.storeNameEn} storeNameAr=${request.storeNameAr} '
-        'storeDescriptionEn=${request.storeDescriptionEn} '
-        'storeDescriptionAr=${request.storeDescriptionAr} '
+        'storeName=${request.storeName} '
+        'storeDescription=${request.storeDescription} '
         'whatsAppNumber=${request.whatsAppNumber} '
         'instagramPage=${request.instagramPage} facebookPage=${request.facebookPage} '
         'detailedAddressByGoogleMaps=${request.detailedAddressByGoogleMaps} '
@@ -620,26 +610,27 @@ class ProfileNotifier extends _$ProfileNotifier {
     state = state.copyWith(emailUpdatesEnabled: enabled);
   }
 
-  // Session teardown lives in Auth.logout — a notifier must not
-  // ref.invalidate() itself (riverpod's debug assert kills the method
-  // mid-way), which is what resetProfileData(ref) did from here. Auth's ref
-  // invalidates this provider legally, and the router redirect on the auth
-  // change handles navigation to login.
-  Future<void> deleteAccount({
+  // Returns true when the backend deleted the account. Session teardown is
+  // the caller's job — this notifier must not `ref.read(authProvider)`:
+  // that makes Profile depend on Auth, Auth.logout then reads analytics
+  // (or invalidates Profile), and Riverpod circular-asserts in debug.
+  // The dialog's WidgetRef calls Auth.logout(), same as the logout sheet.
+  Future<bool> deleteAccount({
     required String password,
     required String confirmationText,
   }) async {
+    final epoch = _sessionEpoch;
     final remote = await ref.read(deleteAccountUseCaseProvider).call(
           password: password,
           confirmationText: confirmationText,
         );
-    await remote.fold(
-      (f) async {
+    if (epoch != _sessionEpoch) return false;
+    return remote.fold(
+      (f) {
         state = state.copyWith(error: f.toString());
+        return false;
       },
-      (_) async {
-        await ref.read(authProvider.notifier).logout();
-      },
+      (_) => true,
     );
   }
 }

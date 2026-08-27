@@ -1055,8 +1055,6 @@
   "fullNameRequired": "Full Name *",
   "fullNameHint": "e.g. Ahmed Mohamed",
   "fullNameArRequired": "Full Name (Arabic) *",
-  "storeNameArRequired": "Store Name (Arabic) *",
-  "storeDescriptionArRequired": "Store Description (Arabic) *",
   "emailAddressRequired": "Email Address *",
   "emailAddressOptional": "Email Address (optional — for password recovery)",
   "locationCityRequired": "Location / City *",

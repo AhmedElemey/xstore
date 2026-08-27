@@ -20,10 +20,8 @@ mixin _$UpdateProfileRequest {
   String? get fullNameAr => throw _privateConstructorUsedError;
   String? get userImageUrl => throw _privateConstructorUsedError;
   String? get storeImageUrl => throw _privateConstructorUsedError;
-  String? get storeNameEn => throw _privateConstructorUsedError;
-  String? get storeNameAr => throw _privateConstructorUsedError;
-  String? get storeDescriptionEn => throw _privateConstructorUsedError;
-  String? get storeDescriptionAr => throw _privateConstructorUsedError;
+  String? get storeName => throw _privateConstructorUsedError;
+  String? get storeDescription => throw _privateConstructorUsedError;
   String? get whatsAppNumber => throw _privateConstructorUsedError;
   String? get instagramPage => throw _privateConstructorUsedError;
   String? get facebookPage => throw _privateConstructorUsedError;
@@ -56,10 +54,8 @@ abstract class $UpdateProfileRequestCopyWith<$Res> {
       String? fullNameAr,
       String? userImageUrl,
       String? storeImageUrl,
-      String? storeNameEn,
-      String? storeNameAr,
-      String? storeDescriptionEn,
-      String? storeDescriptionAr,
+      String? storeName,
+      String? storeDescription,
       String? whatsAppNumber,
       String? instagramPage,
       String? facebookPage,
@@ -95,10 +91,8 @@ class _$UpdateProfileRequestCopyWithImpl<$Res,
     Object? fullNameAr = freezed,
     Object? userImageUrl = freezed,
     Object? storeImageUrl = freezed,
-    Object? storeNameEn = freezed,
-    Object? storeNameAr = freezed,
-    Object? storeDescriptionEn = freezed,
-    Object? storeDescriptionAr = freezed,
+    Object? storeName = freezed,
+    Object? storeDescription = freezed,
     Object? whatsAppNumber = freezed,
     Object? instagramPage = freezed,
     Object? facebookPage = freezed,
@@ -132,21 +126,13 @@ class _$UpdateProfileRequestCopyWithImpl<$Res,
           ? _value.storeImageUrl
           : storeImageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      storeNameEn: freezed == storeNameEn
-          ? _value.storeNameEn
-          : storeNameEn // ignore: cast_nullable_to_non_nullable
+      storeName: freezed == storeName
+          ? _value.storeName
+          : storeName // ignore: cast_nullable_to_non_nullable
               as String?,
-      storeNameAr: freezed == storeNameAr
-          ? _value.storeNameAr
-          : storeNameAr // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionEn: freezed == storeDescriptionEn
-          ? _value.storeDescriptionEn
-          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionAr: freezed == storeDescriptionAr
-          ? _value.storeDescriptionAr
-          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+      storeDescription: freezed == storeDescription
+          ? _value.storeDescription
+          : storeDescription // ignore: cast_nullable_to_non_nullable
               as String?,
       whatsAppNumber: freezed == whatsAppNumber
           ? _value.whatsAppNumber
@@ -225,10 +211,8 @@ abstract class _$$UpdateProfileRequestImplCopyWith<$Res>
       String? fullNameAr,
       String? userImageUrl,
       String? storeImageUrl,
-      String? storeNameEn,
-      String? storeNameAr,
-      String? storeDescriptionEn,
-      String? storeDescriptionAr,
+      String? storeName,
+      String? storeDescription,
       String? whatsAppNumber,
       String? instagramPage,
       String? facebookPage,
@@ -261,10 +245,8 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
     Object? fullNameAr = freezed,
     Object? userImageUrl = freezed,
     Object? storeImageUrl = freezed,
-    Object? storeNameEn = freezed,
-    Object? storeNameAr = freezed,
-    Object? storeDescriptionEn = freezed,
-    Object? storeDescriptionAr = freezed,
+    Object? storeName = freezed,
+    Object? storeDescription = freezed,
     Object? whatsAppNumber = freezed,
     Object? instagramPage = freezed,
     Object? facebookPage = freezed,
@@ -298,21 +280,13 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
           ? _value.storeImageUrl
           : storeImageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      storeNameEn: freezed == storeNameEn
-          ? _value.storeNameEn
-          : storeNameEn // ignore: cast_nullable_to_non_nullable
+      storeName: freezed == storeName
+          ? _value.storeName
+          : storeName // ignore: cast_nullable_to_non_nullable
               as String?,
-      storeNameAr: freezed == storeNameAr
-          ? _value.storeNameAr
-          : storeNameAr // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionEn: freezed == storeDescriptionEn
-          ? _value.storeDescriptionEn
-          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionAr: freezed == storeDescriptionAr
-          ? _value.storeDescriptionAr
-          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+      storeDescription: freezed == storeDescription
+          ? _value.storeDescription
+          : storeDescription // ignore: cast_nullable_to_non_nullable
               as String?,
       whatsAppNumber: freezed == whatsAppNumber
           ? _value.whatsAppNumber
@@ -386,10 +360,8 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
       this.fullNameAr,
       this.userImageUrl,
       this.storeImageUrl,
-      this.storeNameEn,
-      this.storeNameAr,
-      this.storeDescriptionEn,
-      this.storeDescriptionAr,
+      this.storeName,
+      this.storeDescription,
       this.whatsAppNumber,
       this.instagramPage,
       this.facebookPage,
@@ -415,13 +387,9 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
   @override
   final String? storeImageUrl;
   @override
-  final String? storeNameEn;
+  final String? storeName;
   @override
-  final String? storeNameAr;
-  @override
-  final String? storeDescriptionEn;
-  @override
-  final String? storeDescriptionAr;
+  final String? storeDescription;
   @override
   final String? whatsAppNumber;
   @override
@@ -455,7 +423,7 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
 
   @override
   String toString() {
-    return 'UpdateProfileRequest(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, userImageUrl: $userImageUrl, storeImageUrl: $storeImageUrl, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, whatsAppNumber: $whatsAppNumber, instagramPage: $instagramPage, facebookPage: $facebookPage, detailedAddressByGoogleMaps: $detailedAddressByGoogleMaps, detailedAddressByUser: $detailedAddressByUser, cityByGoogleMaps: $cityByGoogleMaps, governmentByGoogleMaps: $governmentByGoogleMaps, userImagePath: $userImagePath, storeImagePath: $storeImagePath, lat: $lat, lng: $lng, storeCategoryId: $storeCategoryId, cityId: $cityId, governorateId: $governorateId, birthDate: $birthDate)';
+    return 'UpdateProfileRequest(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, userImageUrl: $userImageUrl, storeImageUrl: $storeImageUrl, storeName: $storeName, storeDescription: $storeDescription, whatsAppNumber: $whatsAppNumber, instagramPage: $instagramPage, facebookPage: $facebookPage, detailedAddressByGoogleMaps: $detailedAddressByGoogleMaps, detailedAddressByUser: $detailedAddressByUser, cityByGoogleMaps: $cityByGoogleMaps, governmentByGoogleMaps: $governmentByGoogleMaps, userImagePath: $userImagePath, storeImagePath: $storeImagePath, lat: $lat, lng: $lng, storeCategoryId: $storeCategoryId, cityId: $cityId, governorateId: $governorateId, birthDate: $birthDate)';
   }
 
   @override
@@ -471,14 +439,10 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
                 other.userImageUrl == userImageUrl) &&
             (identical(other.storeImageUrl, storeImageUrl) ||
                 other.storeImageUrl == storeImageUrl) &&
-            (identical(other.storeNameEn, storeNameEn) ||
-                other.storeNameEn == storeNameEn) &&
-            (identical(other.storeNameAr, storeNameAr) ||
-                other.storeNameAr == storeNameAr) &&
-            (identical(other.storeDescriptionEn, storeDescriptionEn) ||
-                other.storeDescriptionEn == storeDescriptionEn) &&
-            (identical(other.storeDescriptionAr, storeDescriptionAr) ||
-                other.storeDescriptionAr == storeDescriptionAr) &&
+            (identical(other.storeName, storeName) ||
+                other.storeName == storeName) &&
+            (identical(other.storeDescription, storeDescription) ||
+                other.storeDescription == storeDescription) &&
             (identical(other.whatsAppNumber, whatsAppNumber) ||
                 other.whatsAppNumber == whatsAppNumber) &&
             (identical(other.instagramPage, instagramPage) ||
@@ -517,10 +481,8 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
         fullNameAr,
         userImageUrl,
         storeImageUrl,
-        storeNameEn,
-        storeNameAr,
-        storeDescriptionEn,
-        storeDescriptionAr,
+        storeName,
+        storeDescription,
         whatsAppNumber,
         instagramPage,
         facebookPage,
@@ -553,10 +515,8 @@ abstract class _UpdateProfileRequest implements UpdateProfileRequest {
       final String? fullNameAr,
       final String? userImageUrl,
       final String? storeImageUrl,
-      final String? storeNameEn,
-      final String? storeNameAr,
-      final String? storeDescriptionEn,
-      final String? storeDescriptionAr,
+      final String? storeName,
+      final String? storeDescription,
       final String? whatsAppNumber,
       final String? instagramPage,
       final String? facebookPage,
@@ -582,13 +542,9 @@ abstract class _UpdateProfileRequest implements UpdateProfileRequest {
   @override
   String? get storeImageUrl;
   @override
-  String? get storeNameEn;
+  String? get storeName;
   @override
-  String? get storeNameAr;
-  @override
-  String? get storeDescriptionEn;
-  @override
-  String? get storeDescriptionAr;
+  String? get storeDescription;
   @override
   String? get whatsAppNumber;
   @override

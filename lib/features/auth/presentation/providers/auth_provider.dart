@@ -209,7 +209,10 @@ class Auth extends _$Auth {
     if (firstRestore) {
       ref.read(fcmDeviceTokenSyncProvider);
     }
-    return result.fold((_) => null, (user) {
+    return result.fold((_) {
+      _bindAnalyticsSession(null);
+      return null;
+    }, (user) {
       // build() hasn't returned yet, so authProvider still reads as Loading —
       // pass the user in; reading auth back here throws (self-dependency).
       if (firstRestore && user != null) {
@@ -217,8 +220,13 @@ class Auth extends _$Auth {
         syncFcmDeviceTokenWithBackend(ref, user: user);
         syncDeliveryBackendSession(ref, user: user);
       }
+      _bindAnalyticsSession(user);
       return user;
     });
+  }
+
+  void _bindAnalyticsSession(UserEntity? user) {
+    ref.read(analyticsServiceProvider).bindSession(user);
   }
 
   Future<void> logout() async {
@@ -229,13 +237,13 @@ class Auth extends _$Auth {
     resetListingLocalCache(ref);
     resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
+    final analytics = ref.read(analyticsServiceProvider);
+    analytics.track(
+      AnalyticsEvents.logout,
+      properties: {if (user != null) AnalyticsProps.role: user.role.name},
+    );
+    analytics.bindSession(null);
     ref.invalidateSelf();
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          AnalyticsEvents.logout,
-          properties: {if (user != null) AnalyticsProps.role: user.role.name},
-        );
   }
 
   Future<void> setUser(UserEntity user, {String method = 'google'}) async {
@@ -248,15 +256,14 @@ class Auth extends _$Auth {
     syncFcmDeviceTokenWithBackend(ref, user: user);
     prefetchProfileData(ref, user: user);
     syncDeliveryBackendSession(ref, user: user);
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          AnalyticsEvents.loginSuccess,
-          properties: {
-            AnalyticsProps.method: method,
-            AnalyticsProps.role: user.role.name,
-          },
-        );
+    _bindAnalyticsSession(user);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.loginSuccess,
+      properties: {
+        AnalyticsProps.method: method,
+        AnalyticsProps.role: user.role.name,
+      },
+    );
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
@@ -271,15 +278,14 @@ class Auth extends _$Auth {
     syncFcmDeviceTokenWithBackend(ref, user: user);
     prefetchProfileData(ref, user: user);
     syncDeliveryBackendSession(ref, user: user);
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          event,
-          properties: {
-            AnalyticsProps.method: method,
-            AnalyticsProps.role: user.role.name,
-          },
-        );
+    _bindAnalyticsSession(user);
+    ref.read(analyticsServiceProvider).track(
+      event,
+      properties: {
+        AnalyticsProps.method: method,
+        AnalyticsProps.role: user.role.name,
+      },
+    );
   }
 }
 
@@ -436,10 +442,8 @@ class RegisterNotifier extends _$RegisterNotifier {
     DateTime? dateOfBirth,
     String? location,
     String? storeName,
-    String? storeNameAr,
     String? storeCategory,
     String? storeDescription,
-    String? storeDescriptionAr,
     String? storeCity,
     String? storeWilaya,
     int? storeCategoryId,
@@ -465,7 +469,6 @@ class RegisterNotifier extends _$RegisterNotifier {
         storeSlug: slugifyStoreName(storeName),
       );
     }
-    if (storeNameAr != null) next = next.copyWith(storeNameAr: storeNameAr);
     if (storeCategory != null)
       next = next.copyWith(storeCategory: storeCategory);
     if (storeDescription != null) {
@@ -473,12 +476,6 @@ class RegisterNotifier extends _$RegisterNotifier {
           ? storeDescription.substring(0, 300)
           : storeDescription;
       next = next.copyWith(storeDescription: t);
-    }
-    if (storeDescriptionAr != null) {
-      final t = storeDescriptionAr.length > 300
-          ? storeDescriptionAr.substring(0, 300)
-          : storeDescriptionAr;
-      next = next.copyWith(storeDescriptionAr: t);
     }
     if (storeCity != null) next = next.copyWith(storeCity: storeCity);
     if (storeWilaya != null) next = next.copyWith(storeWilaya: storeWilaya);
@@ -682,14 +679,8 @@ class RegisterNotifier extends _$RegisterNotifier {
                   password: state.password,
                   confirmPassword: state.confirmPassword,
                   dateOfBirth: state.dateOfBirth,
-                  storeNameEn: state.storeName,
-                  // Arabic store-name field is hidden; copy the visible name
-                  // so the backend's storeNameAr key still binds.
-                  storeNameAr: state.storeName.trim(),
-                  storeDescriptionEn: state.storeDescription,
-                  // Arabic description field is hidden; copy the visible text
-                  // so the backend's storeDescriptionAr key still binds.
-                  storeDescriptionAr: state.storeDescription.trim(),
+                  storeName: state.storeName.trim(),
+                  storeDescription: state.storeDescription.trim(),
                   storeCategoryId: state.storeCategoryId!,
                   storeCityId: state.storeCityId!,
                   storeGovernmentId: state.storeGovernmentId!,

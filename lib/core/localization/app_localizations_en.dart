@@ -2406,12 +2406,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullNameArRequired => 'Full Name (Arabic) *';
 
   @override
-  String get storeNameArRequired => 'Store Name (Arabic) *';
-
-  @override
-  String get storeDescriptionArRequired => 'Store Description (Arabic) *';
-
-  @override
   String get emailAddressRequired => 'Email Address *';
 
   @override

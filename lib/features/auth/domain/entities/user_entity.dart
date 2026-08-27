@@ -51,12 +51,9 @@ class UserEntity with _$UserEntity {
     // Additive: legacy fields above are kept so unrelated screens keep
     // working. [name] is populated from [fullNameEn] on login/register for
     // backward compatibility — see UserModel.fromJson.
+    // Store name/description are single (not bilingual) fields.
     String? fullNameEn,
     String? fullNameAr,
-    String? storeNameEn,
-    String? storeNameAr,
-    String? storeDescriptionEn,
-    String? storeDescriptionAr,
     int? storeCategoryId,
     int? storeCityId,
     int? storeGovernmentId,
@@ -77,16 +74,6 @@ class UserEntity with _$UserEntity {
     return (localized != null && localized.trim().isNotEmpty)
         ? localized.trim()
         : name;
-  }
-
-  /// Same resolution rules as [displayName], for vendor store names.
-  String displayStoreName(bool isArabic) {
-    final localized = isArabic ? storeNameAr : storeNameEn;
-    if (localized != null && localized.trim().isNotEmpty) {
-      return localized.trim();
-    }
-    final legacy = storeName?.trim();
-    return (legacy != null && legacy.isNotEmpty) ? legacy : '';
   }
 }
 

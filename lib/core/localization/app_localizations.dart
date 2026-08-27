@@ -4694,18 +4694,6 @@ abstract class AppLocalizations {
   /// **'Full Name (Arabic) *'**
   String get fullNameArRequired;
 
-  /// No description provided for @storeNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Name (Arabic) *'**
-  String get storeNameArRequired;
-
-  /// No description provided for @storeDescriptionArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Description (Arabic) *'**
-  String get storeDescriptionArRequired;
-
   /// No description provided for @emailAddressRequired.
   ///
   /// In en, this message translates to:

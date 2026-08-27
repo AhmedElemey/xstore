@@ -49,10 +49,6 @@ mixin _$UserModel {
   bool get isNewUser => throw _privateConstructorUsedError;
   String? get fullNameEn => throw _privateConstructorUsedError;
   String? get fullNameAr => throw _privateConstructorUsedError;
-  String? get storeNameEn => throw _privateConstructorUsedError;
-  String? get storeNameAr => throw _privateConstructorUsedError;
-  String? get storeDescriptionEn => throw _privateConstructorUsedError;
-  String? get storeDescriptionAr => throw _privateConstructorUsedError;
   int? get storeCategoryId => throw _privateConstructorUsedError;
   int? get storeCityId => throw _privateConstructorUsedError;
   int? get storeGovernmentId => throw _privateConstructorUsedError;
@@ -102,10 +98,6 @@ abstract class $UserModelCopyWith<$Res> {
       bool isNewUser,
       String? fullNameEn,
       String? fullNameAr,
-      String? storeNameEn,
-      String? storeNameAr,
-      String? storeDescriptionEn,
-      String? storeDescriptionAr,
       int? storeCategoryId,
       int? storeCityId,
       int? storeGovernmentId,
@@ -158,10 +150,6 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? isNewUser = null,
     Object? fullNameEn = freezed,
     Object? fullNameAr = freezed,
-    Object? storeNameEn = freezed,
-    Object? storeNameAr = freezed,
-    Object? storeDescriptionEn = freezed,
-    Object? storeDescriptionAr = freezed,
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
@@ -300,22 +288,6 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.fullNameAr
           : fullNameAr // ignore: cast_nullable_to_non_nullable
               as String?,
-      storeNameEn: freezed == storeNameEn
-          ? _value.storeNameEn
-          : storeNameEn // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeNameAr: freezed == storeNameAr
-          ? _value.storeNameAr
-          : storeNameAr // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionEn: freezed == storeDescriptionEn
-          ? _value.storeDescriptionEn
-          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionAr: freezed == storeDescriptionAr
-          ? _value.storeDescriptionAr
-          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
-              as String?,
       storeCategoryId: freezed == storeCategoryId
           ? _value.storeCategoryId
           : storeCategoryId // ignore: cast_nullable_to_non_nullable
@@ -378,10 +350,6 @@ abstract class _$$UserModelImplCopyWith<$Res>
       bool isNewUser,
       String? fullNameEn,
       String? fullNameAr,
-      String? storeNameEn,
-      String? storeNameAr,
-      String? storeDescriptionEn,
-      String? storeDescriptionAr,
       int? storeCategoryId,
       int? storeCityId,
       int? storeGovernmentId,
@@ -432,10 +400,6 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? isNewUser = null,
     Object? fullNameEn = freezed,
     Object? fullNameAr = freezed,
-    Object? storeNameEn = freezed,
-    Object? storeNameAr = freezed,
-    Object? storeDescriptionEn = freezed,
-    Object? storeDescriptionAr = freezed,
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
@@ -574,22 +538,6 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.fullNameAr
           : fullNameAr // ignore: cast_nullable_to_non_nullable
               as String?,
-      storeNameEn: freezed == storeNameEn
-          ? _value.storeNameEn
-          : storeNameEn // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeNameAr: freezed == storeNameAr
-          ? _value.storeNameAr
-          : storeNameAr // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionEn: freezed == storeDescriptionEn
-          ? _value.storeDescriptionEn
-          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
-              as String?,
-      storeDescriptionAr: freezed == storeDescriptionAr
-          ? _value.storeDescriptionAr
-          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
-              as String?,
       storeCategoryId: freezed == storeCategoryId
           ? _value.storeCategoryId
           : storeCategoryId // ignore: cast_nullable_to_non_nullable
@@ -647,10 +595,6 @@ class _$UserModelImpl implements _UserModel {
       this.isNewUser = false,
       this.fullNameEn,
       this.fullNameAr,
-      this.storeNameEn,
-      this.storeNameAr,
-      this.storeDescriptionEn,
-      this.storeDescriptionAr,
       this.storeCategoryId,
       this.storeCityId,
       this.storeGovernmentId,
@@ -728,14 +672,6 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String? fullNameAr;
   @override
-  final String? storeNameEn;
-  @override
-  final String? storeNameAr;
-  @override
-  final String? storeDescriptionEn;
-  @override
-  final String? storeDescriptionAr;
-  @override
   final int? storeCategoryId;
   @override
   final int? storeCityId;
@@ -746,7 +682,7 @@ class _$UserModelImpl implements _UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, storeId: $storeId)';
+    return 'UserModel(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber, avatarUrl: $avatarUrl, role: $role, isVerified: $isVerified, rating: $rating, totalSales: $totalSales, joinedAt: $joinedAt, location: $location, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoUrl: $storeLogoUrl, storeCity: $storeCity, storeWilaya: $storeWilaya, whatsappNumber: $whatsappNumber, latitude: $latitude, longitude: $longitude, governorate: $governorate, town: $town, detailAddress: $detailAddress, bio: $bio, dateOfBirth: $dateOfBirth, instagramHandle: $instagramHandle, facebookPage: $facebookPage, token: $token, refreshToken: $refreshToken, isNewUser: $isNewUser, fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, storeId: $storeId)';
   }
 
   @override
@@ -812,14 +748,6 @@ class _$UserModelImpl implements _UserModel {
                 other.fullNameEn == fullNameEn) &&
             (identical(other.fullNameAr, fullNameAr) ||
                 other.fullNameAr == fullNameAr) &&
-            (identical(other.storeNameEn, storeNameEn) ||
-                other.storeNameEn == storeNameEn) &&
-            (identical(other.storeNameAr, storeNameAr) ||
-                other.storeNameAr == storeNameAr) &&
-            (identical(other.storeDescriptionEn, storeDescriptionEn) ||
-                other.storeDescriptionEn == storeDescriptionEn) &&
-            (identical(other.storeDescriptionAr, storeDescriptionAr) ||
-                other.storeDescriptionAr == storeDescriptionAr) &&
             (identical(other.storeCategoryId, storeCategoryId) ||
                 other.storeCategoryId == storeCategoryId) &&
             (identical(other.storeCityId, storeCityId) ||
@@ -865,10 +793,6 @@ class _$UserModelImpl implements _UserModel {
         isNewUser,
         fullNameEn,
         fullNameAr,
-        storeNameEn,
-        storeNameAr,
-        storeDescriptionEn,
-        storeDescriptionAr,
         storeCategoryId,
         storeCityId,
         storeGovernmentId,
@@ -917,10 +841,6 @@ abstract class _UserModel implements UserModel {
       final bool isNewUser,
       final String? fullNameEn,
       final String? fullNameAr,
-      final String? storeNameEn,
-      final String? storeNameAr,
-      final String? storeDescriptionEn,
-      final String? storeDescriptionAr,
       final int? storeCategoryId,
       final int? storeCityId,
       final int? storeGovernmentId,
@@ -992,14 +912,6 @@ abstract class _UserModel implements UserModel {
   String? get fullNameEn;
   @override
   String? get fullNameAr;
-  @override
-  String? get storeNameEn;
-  @override
-  String? get storeNameAr;
-  @override
-  String? get storeDescriptionEn;
-  @override
-  String? get storeDescriptionAr;
   @override
   int? get storeCategoryId;
   @override

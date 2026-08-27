@@ -5,12 +5,12 @@ import 'dart:math' show min;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../shared/providers/shared_providers.dart';
 import '../constants/prefs_keys.dart';
 import '../network/api_auth_headers.dart';
@@ -38,7 +38,11 @@ part 'analytics_service.g.dart';
 ///
 /// The collector is session-gated: [_flush] POSTs only while a signed-in
 /// user (non-empty id + `X-Auth-Token`) is present. Guest events stay in
-/// the local queue until login. This dedicated Dio does not inherit
+/// the local queue until login. Session identity is pushed in via
+/// [bindSession] from the auth notifier — this provider must not
+/// `read`/`listen` to `authProvider`, or Auth's own
+/// `ref.read(analyticsServiceProvider)` becomes a Riverpod circular
+/// dependency in debug. This dedicated Dio does not inherit
 /// `dio_provider`'s token interceptor, so the token is attached per POST.
 class AnalyticsService {
   AnalyticsService(
@@ -102,28 +106,21 @@ class AnalyticsService {
     _userRole = user?.role.name;
   }
 
+  /// Pushed from the auth notifier on restore / login / logout. Must not be
+  /// wired via `ref.listen(authProvider)` — that makes this provider depend
+  /// on auth, and Auth reading this provider then circular-asserts in debug.
+  void bindSession(UserEntity? user) {
+    final wasSignedIn = _isSignedIn;
+    _bindUser(user);
+    if (_ready && !wasSignedIn && _isSignedIn) unawaited(_flush());
+  }
+
   Future<void> _init() async {
     _sessionId = generateEventId();
     final prefs = await _ref.read(sharedPreferencesProvider.future);
     _deviceId = prefs.getString(PrefsKeys.analyticsDeviceId) ?? generateEventId();
     await prefs.setString(PrefsKeys.analyticsDeviceId, _deviceId);
     _loadPersistedQueue(prefs);
-
-    _ref.listen<AsyncValue<UserEntity?>>(authProvider, (prev, next) {
-      if (next.isLoading) return;
-      final wasSignedIn = _isSignedIn;
-      _bindUser(next.valueOrNull);
-      if (_ready && !wasSignedIn && _isSignedIn) unawaited(_flush());
-    });
-
-    // listen() only fires on future changes, and auth may still be restoring
-    // when this service is first built. Await the current session so the
-    // initial flush (below) sees a real logged-in/guest answer.
-    try {
-      _bindUser(await _ref.read(authProvider.future));
-    } catch (_) {
-      _bindUser(null);
-    }
 
     _ref.listen<bool>(isOnlineProvider, (prev, next) {
       if (next && prev == false) unawaited(_flush());
@@ -227,7 +224,7 @@ class AnalyticsService {
   Future<String?> _sessionToken() async {
     final readToken = _readAuthToken;
     if (readToken != null) return readToken();
-    return _ref.read(secureStorageProvider).read(key: PrefsKeys.authToken);
+    return const FlutterSecureStorage().read(key: PrefsKeys.authToken);
   }
 
   Future<void> _flush() async {

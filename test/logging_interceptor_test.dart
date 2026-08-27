@@ -75,7 +75,7 @@ void main() {
       method: 'PUT',
       data: FormData.fromMap({
         'birthDate': '1990-03-20',
-        'storeDescriptionEn': 'Test desc',
+        'storeDescription': 'Test desc',
         'userImage': MultipartFile.fromString('x', filename: 'a.jpg'),
       }),
     );
@@ -85,7 +85,7 @@ void main() {
     final output = logs.join('\n');
     expect(output, contains('birthDate'));
     expect(output, contains('1990-03-20'));
-    expect(output, contains('storeDescriptionEn'));
+    expect(output, contains('storeDescription'));
     expect(output, contains('Test desc'));
     expect(output, contains('<file:a.jpg>'));
   });
