@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import 'auth_provider.dart';
@@ -112,8 +114,15 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     if (pending.provider != SocialProvider.google) {
       await ref.read(authProvider.notifier).setUser(
             pending.toUserEntity(role),
-            method: pending.provider.name,
           );
+      if (!mounted) return;
+      ref.read(analyticsServiceProvider).track(
+        AnalyticsEvents.loginSuccess,
+        properties: {
+          AnalyticsProps.method: pending.provider.name,
+          AnalyticsProps.role: role.name,
+        },
+      );
       state = state.copyWith(
         isGoogleLoading: false,
         isAppleLoading: false,
@@ -152,7 +161,14 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         );
         // Session already persisted by the repository; adopt it synchronously
         // so the router moves off the role screen to home.
-        ref.read(authProvider.notifier).adoptSession(user, method: 'google');
+        ref.read(authProvider.notifier).adoptSession(user);
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.loginSuccess,
+          properties: {
+            AnalyticsProps.method: 'google',
+            AnalyticsProps.role: user.role.name,
+          },
+        );
       },
     );
   }
@@ -199,8 +215,15 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     }
     await ref.read(authProvider.notifier).setUser(
           result.toUserEntity(UserRole.consumer),
-          method: result.provider.name,
         );
+    if (!mounted) return;
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.loginSuccess,
+      properties: {
+        AnalyticsProps.method: result.provider.name,
+        AnalyticsProps.role: UserRole.consumer.name,
+      },
+    );
     state = state.copyWith(
       isGoogleLoading: false,
       isAppleLoading: false,

@@ -800,3 +800,8 @@ Rules for the log:
 - **What happened:** Edit Profile Verify/Verified was wired to `ProfileEntity.isPhoneNumberVerified` while the get-profile payload sends `isPhoneVerified`. The parser mapped the live key into the invented name, so a reader (or a later change) looking for `isPhoneVerified` on the profile would miss the phone badge.
 - **Rule:** Keep Dart field names for profile wrapper flags 1:1 with the live JSON keys (`isEmailVerified`, `isPhoneVerified`). Accept an older alternate key only as a parse fallback, never as the domain/UI name.
 - **Where it applies:** `parseProfileResponse`, `ProfileEntity`, `ProfileModel`, Edit Profile verify suffix, `requirePhoneVerified`.
+
+### 2026-08-27 — Auth must not read a provider that listens to authProvider
+- **What happened:** Delete-account's API succeeded, then `Auth.logout` crashed with `CircularDependencyError` at `ref.read(analyticsServiceProvider)`. `AnalyticsService._init` already `ref.listen`s to `authProvider`, so Auth reading that service is a cycle in riverpod 2.6 debug asserts. The same read existed on `setUser`/`adoptSession` (login/register tracking).
+- **Rule:** Never `ref.read`/`watch` a provider from Auth if that provider listens to `authProvider`. Observe signed-in → signed-out from the listener (logout analytics), and fire login/register analytics from the caller notifiers (login, register, social, phone) — not from Auth itself.
+- **Where it applies:** `auth_provider.dart` `Auth.logout`/`setUser`/`adoptSession`, `analytics_service.dart` auth listen, any future post-auth side-effect that also watches/listens to auth.

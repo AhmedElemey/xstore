@@ -95,6 +95,10 @@ class AnalyticsService {
   @visibleForTesting
   Future<void> flushNow() => _flush();
 
+  @visibleForTesting
+  List<String> get queuedEventNames =>
+      [for (final event in _queue) event.name];
+
   bool get _isSignedIn => _userId != null && _userId!.isNotEmpty;
 
   void _bindUser(UserEntity? user) {
@@ -112,6 +116,19 @@ class AnalyticsService {
     _ref.listen<AsyncValue<UserEntity?>>(authProvider, (prev, next) {
       if (next.isLoading) return;
       final wasSignedIn = _isSignedIn;
+      final previousRole = _userRole;
+      final signedOut = next.valueOrNull == null;
+      // Track before unbinding so the event still carries the old role.
+      // Auth itself must not read this provider — we listen to authProvider,
+      // which is a debug-mode CircularDependencyError (see Auth.logout).
+      if (_ready && wasSignedIn && signedOut) {
+        track(
+          AnalyticsEvents.logout,
+          properties: {
+            if (previousRole != null) AnalyticsProps.role: previousRole,
+          },
+        );
+      }
       _bindUser(next.valueOrNull);
       if (_ready && !wasSignedIn && _isSignedIn) unawaited(_flush());
     });

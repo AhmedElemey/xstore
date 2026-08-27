@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xstore/core/analytics/analytics_service.dart';
+import 'package:xstore/core/analytics/event_names.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
@@ -156,6 +157,26 @@ void main() {
 
     expect(adapter.posts, hasLength(1));
     expect(adapter.posts.single.path, ApiEndpoints.analyticsEvents);
+  });
+
+  test('does not queue logout for the initial guest session', () async {
+    buildContainer(auth: FakeAuth(null));
+    await service.ready;
+    expect(service.queuedEventNames, isEmpty);
+  });
+
+  test('queues logout when the session goes from signed-in to signed-out',
+      () async {
+    final auth = _EmittingAuth(_user());
+    buildContainer(
+      auth: auth,
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    await service.ready;
+    expect(service.queuedEventNames, isEmpty);
+
+    auth.emit(null);
+    expect(service.queuedEventNames, [AnalyticsEvents.logout]);
   });
 
   test('HTTP 200 drops the sent batch so the next flush does not resend it',

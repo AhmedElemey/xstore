@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import 'auth_provider.dart';
@@ -153,7 +155,14 @@ class PhoneAuthNotifier extends StateNotifier<PhoneAuthState> {
       // Session already persisted by the repository; adoptSession updates auth
       // synchronously so the router redirects to home without a storage reload.
       state = state.copyWith(isVerifyingOtp: false, isNewUser: user.isNewUser);
-      ref.read(authProvider.notifier).adoptSession(user, method: 'otp');
+      ref.read(authProvider.notifier).adoptSession(user);
+      ref.read(analyticsServiceProvider).track(
+        AnalyticsEvents.loginSuccess,
+        properties: {
+          AnalyticsProps.method: 'otp',
+          AnalyticsProps.role: user.role.name,
+        },
+      );
       return true;
     });
   }

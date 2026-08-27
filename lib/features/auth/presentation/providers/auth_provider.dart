@@ -222,23 +222,19 @@ class Auth extends _$Auth {
   }
 
   Future<void> logout() async {
-    final user = state.valueOrNull;
     unregisterFcmDeviceTokenOnLogout(ref);
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
     resetListingLocalCache(ref);
     resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
+    // Do not ref.read(analyticsServiceProvider) here: that service listens
+    // to authProvider, so the read is a debug-mode CircularDependencyError.
+    // Logout is tracked from AnalyticsService's auth listener.
     ref.invalidateSelf();
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          AnalyticsEvents.logout,
-          properties: {if (user != null) AnalyticsProps.role: user.role.name},
-        );
   }
 
-  Future<void> setUser(UserEntity user, {String method = 'google'}) async {
+  Future<void> setUser(UserEntity user) async {
     state = const AsyncLoading();
     final result = await ref
         .read(authRepositoryProvider)
@@ -248,38 +244,16 @@ class Auth extends _$Auth {
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
     syncDeliveryBackendSession(ref);
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          AnalyticsEvents.loginSuccess,
-          properties: {
-            AnalyticsProps.method: method,
-            AnalyticsProps.role: user.role.name,
-          },
-        );
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
   /// reloading from storage, which would recreate [GoRouter] mid-navigation.
-  void adoptSession(
-    UserEntity user, {
-    String method = 'password',
-    String event = AnalyticsEvents.loginSuccess,
-  }) {
+  void adoptSession(UserEntity user) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
     syncFcmDeviceTokenWithBackend(ref);
     prefetchProfileData(ref);
     syncDeliveryBackendSession(ref);
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          event,
-          properties: {
-            AnalyticsProps.method: method,
-            AnalyticsProps.role: user.role.name,
-          },
-        );
   }
 }
 
@@ -346,6 +320,13 @@ class LoginNotifier extends _$LoginNotifier {
       (user) {
         state = state.copyWith(isLoading: false, error: null);
         ref.read(authProvider.notifier).adoptSession(user);
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.loginSuccess,
+          properties: {
+            AnalyticsProps.method: 'password',
+            AnalyticsProps.role: user.role.name,
+          },
+        );
       },
     );
   }
@@ -722,9 +703,14 @@ class RegisterNotifier extends _$RegisterNotifier {
           error: null,
           showVendorSuccessOverlay: role == UserRole.vendor,
         );
-        ref
-            .read(authProvider.notifier)
-            .adoptSession(user, event: AnalyticsEvents.registerSuccess);
+        ref.read(authProvider.notifier).adoptSession(user);
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.registerSuccess,
+          properties: {
+            AnalyticsProps.method: 'password',
+            AnalyticsProps.role: user.role.name,
+          },
+        );
       },
     );
   }
