@@ -70,14 +70,10 @@ Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
       'fullName': _optTrimmed(request.fullNameEn),
     'userImageUrl': request.userImageUrl,
     'storeImageUrl': request.storeImageUrl,
-    if (_optTrimmed(request.storeNameEn) != null)
-      'storeNameEn': _optTrimmed(request.storeNameEn),
-    if (_optTrimmed(request.storeNameAr) != null)
-      'storeNameAr': _optTrimmed(request.storeNameAr),
-    if (_optTrimmed(request.storeDescriptionEn) != null)
-      'storeDescriptionEn': _optTrimmed(request.storeDescriptionEn),
-    if (_optTrimmed(request.storeDescriptionAr) != null)
-      'storeDescriptionAr': _optTrimmed(request.storeDescriptionAr),
+    if (_optTrimmed(request.storeName) != null)
+      'storeName': _optTrimmed(request.storeName),
+    if (_optTrimmed(request.storeDescription) != null)
+      'storeDescription': _optTrimmed(request.storeDescription),
     if (_optTrimmed(request.whatsAppNumber) != null)
       'whatsAppNumber': _optTrimmed(request.whatsAppNumber),
     if (_optTrimmed(request.instagramPage) != null)
@@ -142,10 +138,8 @@ void _debugLogProfileFields({
     'fullName': 'user.fullName',
     'birthDate': 'user.birthDate',
     'userImageUrl': 'user.avatarUrl',
-    'storeNameEn': 'store.nameEn',
-    'storeNameAr': 'store.nameAr',
-    'storeDescriptionEn': 'store.descriptionEn',
-    'storeDescriptionAr': 'store.descriptionAr',
+    'storeName': 'store.name',
+    'storeDescription': 'store.description',
     'storeImageUrl': 'store.storeLogoUrl',
     'whatsAppNumber': 'store.whatsAppNumber',
     'instagramPage': 'store.instagramPage',
@@ -192,7 +186,7 @@ void _debugLogProfileFields({
   if (parsed != null) {
     debugPrint(
       'parsed model: name=${parsed.name} dateOfBirth=${parsed.dateOfBirth} '
-      'storeDescriptionEn=${parsed.storeDescriptionEn} storeNameEn=${parsed.storeNameEn}',
+      'storeDescription=${parsed.storeDescription} storeName=${parsed.storeName}',
     );
   }
 }
@@ -226,14 +220,8 @@ UserEntity _entityFromUpdateRequest(
     fullNameAr: request.fullNameAr ?? session.fullNameAr,
     avatarUrl: request.userImageUrl,
     storeLogoUrl: request.storeImageUrl,
-    storeNameEn: request.storeNameEn ?? session.storeNameEn,
-    storeNameAr: request.storeNameAr ?? session.storeNameAr,
-    storeName: request.storeNameEn ?? session.storeName,
-    storeDescriptionEn:
-        request.storeDescriptionEn ?? session.storeDescriptionEn,
-    storeDescriptionAr:
-        request.storeDescriptionAr ?? session.storeDescriptionAr,
-    storeDescription: request.storeDescriptionEn ?? session.storeDescription,
+    storeName: request.storeName ?? session.storeName,
+    storeDescription: request.storeDescription ?? session.storeDescription,
     whatsappNumber: request.whatsAppNumber ?? session.whatsappNumber,
     instagramHandle: request.instagramPage ?? session.instagramHandle,
     facebookPage: request.facebookPage ?? session.facebookPage,
@@ -350,10 +338,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       token: token,
       fullNameEn: user.fullNameEn,
       fullNameAr: user.fullNameAr,
-      storeNameEn: user.storeNameEn,
-      storeNameAr: user.storeNameAr,
-      storeDescriptionEn: user.storeDescriptionEn,
-      storeDescriptionAr: user.storeDescriptionAr,
       storeCategoryId: user.storeCategoryId,
       storeCityId: user.storeCityId,
       storeGovernmentId: user.storeGovernmentId,

@@ -32,6 +32,10 @@ void main() {
   group('ProfileRemoteDataSource updateAvatar', () {
     test(
       'POSTs multipart to the generic uploads endpoint with field `file`',
+      skip: MockConfig.useMock
+          ? 'Requires MOCK=false — MOCK=true short-circuits to mock data '
+              'before the request reaches the interceptor'
+          : false,
       () async {
         final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
         final interceptor = _CapturingInterceptor();
@@ -57,38 +61,6 @@ void main() {
         expect(url, '/uploads/avatars/example.jpg');
       },
     );
-  });
-
-  group('UserEntity.displayStoreName', () {
-    const entity = UserEntity(
-      id: '1',
-      name: 'Vendor',
-      email: 'v@test.com',
-      phoneNumber: '010',
-      storeName: 'Legacy',
-      storeNameEn: 'English Shop',
-      storeNameAr: 'متجر',
-    );
-
-    test('returns Arabic when isArabic is true', () {
-      expect(entity.displayStoreName(true), 'متجر');
-    });
-
-    test('returns English when isArabic is false', () {
-      expect(entity.displayStoreName(false), 'English Shop');
-    });
-
-    test('falls back to legacy storeName when locale field is absent', () {
-      const legacyOnly = UserEntity(
-        id: '2',
-        name: 'Vendor',
-        email: 'v2@test.com',
-        phoneNumber: '010',
-        storeName: 'Legacy Only',
-      );
-      expect(legacyOnly.displayStoreName(true), 'Legacy Only');
-      expect(legacyOnly.displayStoreName(false), 'Legacy Only');
-    });
   });
 
   group('updateProfileWireFields', () {
@@ -170,7 +142,9 @@ void main() {
 
       expect(body['fullName'], 'Ahmed');
       expect(body.containsKey('fullNameAr'), isFalse);
-      expect(body['storeNameEn'], 'Tech Hub');
+      expect(body['storeName'], 'Tech Hub');
+      expect(body.containsKey('storeNameEn'), isFalse);
+      expect(body.containsKey('storeNameAr'), isFalse);
       expect(body['detailedAddressByGoogleMaps'], '12 Abbas El Akkad, Nasr City');
       expect(body['detailedAddressByUser'], 'Building 5, floor 2');
       expect(body['cityByGoogleMaps'], 'Nasr City');
@@ -206,9 +180,8 @@ void main() {
         final request = UpdateProfileRequest(
           fullNameEn: 'Ahmed Vendor',
           fullNameAr: 'أحمد',
-          storeNameEn: 'Tech Hub',
-          storeNameAr: 'متجر',
-          storeDescriptionEn: 'Electronics seller',
+          storeName: 'Tech Hub',
+          storeDescription: 'Electronics seller',
           detailedAddressByGoogleMaps: '12 Abbas El Akkad',
           detailedAddressByUser: '12 Abbas El Akkad',
           cityByGoogleMaps: 'Nasr City',
@@ -234,14 +207,14 @@ void main() {
         expect(u.location, '12 Abbas El Akkad');
         expect(u.detailAddress, '12 Abbas El Akkad');
         expect(u.dateOfBirth, DateTime.parse('1990-03-20'));
-        expect(u.storeCity, isNull);
+        // Legacy free-text field, not part of this request — the vendor
+        // mock backfills it from mockVendorUser like storeName/location/etc.
+        expect(u.storeCity, 'Cairo');
         expect(u.town, 'Nasr City');
         expect(u.governorate, 'Cairo');
         expect(u.latitude, 30.0444);
         expect(u.longitude, 31.2357);
-        expect(u.storeNameEn, 'Tech Hub');
-        expect(u.storeNameAr, 'متجر');
-        expect(u.storeDescriptionEn, 'Electronics seller');
+        expect(u.storeName, 'Tech Hub');
         expect(u.storeDescription, 'Electronics seller');
       },
       skip: MockConfig.useMock ? false : 'Requires --dart-define=MOCK=true',

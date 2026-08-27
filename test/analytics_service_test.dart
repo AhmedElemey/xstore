@@ -41,11 +41,13 @@ class _RecordingAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-class _EmittingAuth extends FakeAuth {
-  _EmittingAuth(super.user);
+/// Real [Auth.logout] / [Auth.adoptSession] read analytics through Auth's own
+/// `ref`. If analytics listens to `authProvider`, that read circular-asserts.
+class _AuthThatReadsAnalytics extends FakeAuth {
+  _AuthThatReadsAnalytics(super.user);
 
-  void emit(UserEntity? user) {
-    state = AsyncData(user);
+  void pingAnalytics() {
+    ref.read(analyticsServiceProvider);
   }
 }
 
@@ -72,6 +74,7 @@ void main() {
 
   ProviderContainer buildContainer({
     required Auth auth,
+    UserEntity? sessionUser,
     Map<String, String> secureValues = const {},
   }) {
     FlutterSecureStorage.setMockInitialValues(secureValues);
@@ -92,6 +95,7 @@ void main() {
     addTearDown(container.dispose);
     container.read(analyticsServiceProvider);
     service = created;
+    service.bindSession(sessionUser);
     return container;
   }
 
@@ -109,6 +113,7 @@ void main() {
       () async {
     buildContainer(
       auth: FakeAuth(_user()),
+      sessionUser: _user(),
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     service.track('view_item');
@@ -124,6 +129,7 @@ void main() {
       () async {
     buildContainer(
       auth: FakeAuth(_user()),
+      sessionUser: _user(),
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     service.track('view_item', properties: {'item_id': 'p1'});
@@ -142,9 +148,8 @@ void main() {
   });
 
   test('flushes the queued events once the user logs in', () async {
-    final auth = _EmittingAuth(null);
     buildContainer(
-      auth: auth,
+      auth: FakeAuth(null),
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     service.track('view_item');
@@ -152,7 +157,7 @@ void main() {
     await service.flushNow();
     expect(adapter.posts, isEmpty);
 
-    auth.emit(_user());
+    service.bindSession(_user());
     await service.flushNow();
 
     expect(adapter.posts, hasLength(1));
@@ -185,6 +190,7 @@ void main() {
     dio.httpClientAdapter = adapter;
     buildContainer(
       auth: FakeAuth(_user()),
+      sessionUser: _user(),
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     service.track('view_item');
@@ -195,4 +201,31 @@ void main() {
     await service.flushNow();
     expect(adapter.posts, hasLength(1));
   });
+
+  test('bindSession(null) stops flushing signed-in events', () async {
+    buildContainer(
+      auth: FakeAuth(_user()),
+      sessionUser: _user(),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    await service.ready;
+    service.bindSession(null);
+    service.track('view_item');
+    await service.flushNow();
+    expect(adapter.posts, isEmpty);
+  });
+
+  test(
+    'Auth.ref.read(analyticsServiceProvider) is not a circular dependency',
+    () async {
+      final auth = _AuthThatReadsAnalytics(_user());
+      final container = buildContainer(
+        auth: auth,
+        sessionUser: _user(),
+      );
+      await container.read(authProvider.future);
+      await service.ready;
+      expect(auth.pingAnalytics, returnsNormally);
+    },
+  );
 }

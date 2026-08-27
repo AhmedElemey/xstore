@@ -209,7 +209,10 @@ class Auth extends _$Auth {
     if (firstRestore) {
       ref.read(fcmDeviceTokenSyncProvider);
     }
-    return result.fold((_) => null, (user) {
+    return result.fold((_) {
+      _bindAnalyticsSession(null);
+      return null;
+    }, (user) {
       // build() hasn't returned yet, so authProvider still reads as Loading —
       // pass the user in; reading auth back here throws (self-dependency).
       if (firstRestore && user != null) {
@@ -217,20 +220,29 @@ class Auth extends _$Auth {
         syncFcmDeviceTokenWithBackend(ref, user: user);
         syncDeliveryBackendSession(ref, user: user);
       }
+      _bindAnalyticsSession(user);
       return user;
     });
   }
 
+  void _bindAnalyticsSession(UserEntity? user) {
+    ref.read(analyticsServiceProvider).bindSession(user);
+  }
+
   Future<void> logout() async {
+    final user = state.valueOrNull;
     unregisterFcmDeviceTokenOnLogout(ref);
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
     resetListingLocalCache(ref);
     resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
-    // Do not ref.read(analyticsServiceProvider) here: that service listens
-    // to authProvider, so the read is a debug-mode CircularDependencyError.
-    // Logout is tracked from AnalyticsService's auth listener.
+    final analytics = ref.read(analyticsServiceProvider);
+    analytics.track(
+      AnalyticsEvents.logout,
+      properties: {if (user != null) AnalyticsProps.role: user.role.name},
+    );
+    analytics.bindSession(null);
     ref.invalidateSelf();
   }
 
@@ -241,19 +253,24 @@ class Auth extends _$Auth {
         .persistSessionUser(user);
     ref.read(guestModeProvider.notifier).disable();
     state = result.fold((_) => AsyncData(user), (_) => AsyncData(user));
-    syncFcmDeviceTokenWithBackend(ref);
-    prefetchProfileData(ref);
-    syncDeliveryBackendSession(ref);
+    syncFcmDeviceTokenWithBackend(ref, user: user);
+    prefetchProfileData(ref, user: user);
+    syncDeliveryBackendSession(ref, user: user);
+    _bindAnalyticsSession(user);
   }
 
   /// Session already persisted (e.g. login/register API) — update auth without
   /// reloading from storage, which would recreate [GoRouter] mid-navigation.
+  /// Login/register event tracking (with the caller's actual method — google,
+  /// otp, password, ...) happens at each call site, not here, since this
+  /// method has no way to know which auth flow reached it.
   void adoptSession(UserEntity user) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
-    syncFcmDeviceTokenWithBackend(ref);
-    prefetchProfileData(ref);
-    syncDeliveryBackendSession(ref);
+    syncFcmDeviceTokenWithBackend(ref, user: user);
+    prefetchProfileData(ref, user: user);
+    syncDeliveryBackendSession(ref, user: user);
+    _bindAnalyticsSession(user);
   }
 }
 
@@ -417,10 +434,8 @@ class RegisterNotifier extends _$RegisterNotifier {
     DateTime? dateOfBirth,
     String? location,
     String? storeName,
-    String? storeNameAr,
     String? storeCategory,
     String? storeDescription,
-    String? storeDescriptionAr,
     String? storeCity,
     String? storeWilaya,
     int? storeCategoryId,
@@ -446,7 +461,6 @@ class RegisterNotifier extends _$RegisterNotifier {
         storeSlug: slugifyStoreName(storeName),
       );
     }
-    if (storeNameAr != null) next = next.copyWith(storeNameAr: storeNameAr);
     if (storeCategory != null)
       next = next.copyWith(storeCategory: storeCategory);
     if (storeDescription != null) {
@@ -454,12 +468,6 @@ class RegisterNotifier extends _$RegisterNotifier {
           ? storeDescription.substring(0, 300)
           : storeDescription;
       next = next.copyWith(storeDescription: t);
-    }
-    if (storeDescriptionAr != null) {
-      final t = storeDescriptionAr.length > 300
-          ? storeDescriptionAr.substring(0, 300)
-          : storeDescriptionAr;
-      next = next.copyWith(storeDescriptionAr: t);
     }
     if (storeCity != null) next = next.copyWith(storeCity: storeCity);
     if (storeWilaya != null) next = next.copyWith(storeWilaya: storeWilaya);
@@ -663,14 +671,8 @@ class RegisterNotifier extends _$RegisterNotifier {
                   password: state.password,
                   confirmPassword: state.confirmPassword,
                   dateOfBirth: state.dateOfBirth,
-                  storeNameEn: state.storeName,
-                  // Arabic store-name field is hidden; copy the visible name
-                  // so the backend's storeNameAr key still binds.
-                  storeNameAr: state.storeName.trim(),
-                  storeDescriptionEn: state.storeDescription,
-                  // Arabic description field is hidden; copy the visible text
-                  // so the backend's storeDescriptionAr key still binds.
-                  storeDescriptionAr: state.storeDescription.trim(),
+                  storeName: state.storeName.trim(),
+                  storeDescription: state.storeDescription.trim(),
                   storeCategoryId: state.storeCategoryId!,
                   storeCityId: state.storeCityId!,
                   storeGovernmentId: state.storeGovernmentId!,

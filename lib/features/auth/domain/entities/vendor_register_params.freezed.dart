@@ -23,10 +23,8 @@ mixin _$VendorRegisterParams {
   String get password => throw _privateConstructorUsedError;
   String get confirmPassword => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
-  String get storeNameEn => throw _privateConstructorUsedError;
-  String get storeNameAr => throw _privateConstructorUsedError;
-  String get storeDescriptionEn => throw _privateConstructorUsedError;
-  String get storeDescriptionAr => throw _privateConstructorUsedError;
+  String get storeName => throw _privateConstructorUsedError;
+  String get storeDescription => throw _privateConstructorUsedError;
   int get storeCategoryId => throw _privateConstructorUsedError;
   int get storeCityId => throw _privateConstructorUsedError;
   int get storeGovernmentId => throw _privateConstructorUsedError;
@@ -54,10 +52,8 @@ abstract class $VendorRegisterParamsCopyWith<$Res> {
       String password,
       String confirmPassword,
       DateTime? dateOfBirth,
-      String storeNameEn,
-      String storeNameAr,
-      String storeDescriptionEn,
-      String storeDescriptionAr,
+      String storeName,
+      String storeDescription,
       int storeCategoryId,
       int storeCityId,
       int storeGovernmentId,
@@ -86,10 +82,8 @@ class _$VendorRegisterParamsCopyWithImpl<$Res,
     Object? password = null,
     Object? confirmPassword = null,
     Object? dateOfBirth = freezed,
-    Object? storeNameEn = null,
-    Object? storeNameAr = null,
-    Object? storeDescriptionEn = null,
-    Object? storeDescriptionAr = null,
+    Object? storeName = null,
+    Object? storeDescription = null,
     Object? storeCategoryId = null,
     Object? storeCityId = null,
     Object? storeGovernmentId = null,
@@ -125,21 +119,13 @@ class _$VendorRegisterParamsCopyWithImpl<$Res,
           ? _value.dateOfBirth
           : dateOfBirth // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      storeNameEn: null == storeNameEn
-          ? _value.storeNameEn
-          : storeNameEn // ignore: cast_nullable_to_non_nullable
+      storeName: null == storeName
+          ? _value.storeName
+          : storeName // ignore: cast_nullable_to_non_nullable
               as String,
-      storeNameAr: null == storeNameAr
-          ? _value.storeNameAr
-          : storeNameAr // ignore: cast_nullable_to_non_nullable
-              as String,
-      storeDescriptionEn: null == storeDescriptionEn
-          ? _value.storeDescriptionEn
-          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
-              as String,
-      storeDescriptionAr: null == storeDescriptionAr
-          ? _value.storeDescriptionAr
-          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+      storeDescription: null == storeDescription
+          ? _value.storeDescription
+          : storeDescription // ignore: cast_nullable_to_non_nullable
               as String,
       storeCategoryId: null == storeCategoryId
           ? _value.storeCategoryId
@@ -181,10 +167,8 @@ abstract class _$$VendorRegisterParamsImplCopyWith<$Res>
       String password,
       String confirmPassword,
       DateTime? dateOfBirth,
-      String storeNameEn,
-      String storeNameAr,
-      String storeDescriptionEn,
-      String storeDescriptionAr,
+      String storeName,
+      String storeDescription,
       int storeCategoryId,
       int storeCityId,
       int storeGovernmentId,
@@ -210,10 +194,8 @@ class __$$VendorRegisterParamsImplCopyWithImpl<$Res>
     Object? password = null,
     Object? confirmPassword = null,
     Object? dateOfBirth = freezed,
-    Object? storeNameEn = null,
-    Object? storeNameAr = null,
-    Object? storeDescriptionEn = null,
-    Object? storeDescriptionAr = null,
+    Object? storeName = null,
+    Object? storeDescription = null,
     Object? storeCategoryId = null,
     Object? storeCityId = null,
     Object? storeGovernmentId = null,
@@ -249,21 +231,13 @@ class __$$VendorRegisterParamsImplCopyWithImpl<$Res>
           ? _value.dateOfBirth
           : dateOfBirth // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      storeNameEn: null == storeNameEn
-          ? _value.storeNameEn
-          : storeNameEn // ignore: cast_nullable_to_non_nullable
+      storeName: null == storeName
+          ? _value.storeName
+          : storeName // ignore: cast_nullable_to_non_nullable
               as String,
-      storeNameAr: null == storeNameAr
-          ? _value.storeNameAr
-          : storeNameAr // ignore: cast_nullable_to_non_nullable
-              as String,
-      storeDescriptionEn: null == storeDescriptionEn
-          ? _value.storeDescriptionEn
-          : storeDescriptionEn // ignore: cast_nullable_to_non_nullable
-              as String,
-      storeDescriptionAr: null == storeDescriptionAr
-          ? _value.storeDescriptionAr
-          : storeDescriptionAr // ignore: cast_nullable_to_non_nullable
+      storeDescription: null == storeDescription
+          ? _value.storeDescription
+          : storeDescription // ignore: cast_nullable_to_non_nullable
               as String,
       storeCategoryId: null == storeCategoryId
           ? _value.storeCategoryId
@@ -300,10 +274,8 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
       required this.password,
       required this.confirmPassword,
       this.dateOfBirth,
-      required this.storeNameEn,
-      required this.storeNameAr,
-      required this.storeDescriptionEn,
-      required this.storeDescriptionAr,
+      required this.storeName,
+      required this.storeDescription,
       required this.storeCategoryId,
       required this.storeCityId,
       required this.storeGovernmentId,
@@ -325,13 +297,9 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
   @override
   final DateTime? dateOfBirth;
   @override
-  final String storeNameEn;
+  final String storeName;
   @override
-  final String storeNameAr;
-  @override
-  final String storeDescriptionEn;
-  @override
-  final String storeDescriptionAr;
+  final String storeDescription;
   @override
   final int storeCategoryId;
   @override
@@ -347,7 +315,7 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
 
   @override
   String toString() {
-    return 'VendorRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth, storeNameEn: $storeNameEn, storeNameAr: $storeNameAr, storeDescriptionEn: $storeDescriptionEn, storeDescriptionAr: $storeDescriptionAr, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, profileImagePath: $profileImagePath)';
+    return 'VendorRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth, storeName: $storeName, storeDescription: $storeDescription, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, profileImagePath: $profileImagePath)';
   }
 
   @override
@@ -368,14 +336,10 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
                 other.confirmPassword == confirmPassword) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth) &&
-            (identical(other.storeNameEn, storeNameEn) ||
-                other.storeNameEn == storeNameEn) &&
-            (identical(other.storeNameAr, storeNameAr) ||
-                other.storeNameAr == storeNameAr) &&
-            (identical(other.storeDescriptionEn, storeDescriptionEn) ||
-                other.storeDescriptionEn == storeDescriptionEn) &&
-            (identical(other.storeDescriptionAr, storeDescriptionAr) ||
-                other.storeDescriptionAr == storeDescriptionAr) &&
+            (identical(other.storeName, storeName) ||
+                other.storeName == storeName) &&
+            (identical(other.storeDescription, storeDescription) ||
+                other.storeDescription == storeDescription) &&
             (identical(other.storeCategoryId, storeCategoryId) ||
                 other.storeCategoryId == storeCategoryId) &&
             (identical(other.storeCityId, storeCityId) ||
@@ -398,10 +362,8 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
       password,
       confirmPassword,
       dateOfBirth,
-      storeNameEn,
-      storeNameAr,
-      storeDescriptionEn,
-      storeDescriptionAr,
+      storeName,
+      storeDescription,
       storeCategoryId,
       storeCityId,
       storeGovernmentId,
@@ -426,10 +388,8 @@ abstract class _VendorRegisterParams implements VendorRegisterParams {
       required final String password,
       required final String confirmPassword,
       final DateTime? dateOfBirth,
-      required final String storeNameEn,
-      required final String storeNameAr,
-      required final String storeDescriptionEn,
-      required final String storeDescriptionAr,
+      required final String storeName,
+      required final String storeDescription,
       required final int storeCategoryId,
       required final int storeCityId,
       required final int storeGovernmentId,
@@ -451,13 +411,9 @@ abstract class _VendorRegisterParams implements VendorRegisterParams {
   @override
   DateTime? get dateOfBirth;
   @override
-  String get storeNameEn;
+  String get storeName;
   @override
-  String get storeNameAr;
-  @override
-  String get storeDescriptionEn;
-  @override
-  String get storeDescriptionAr;
+  String get storeDescription;
   @override
   int get storeCategoryId;
   @override

@@ -81,11 +81,34 @@ void mergeStoreJsonIntoUser(
     user[key] = value;
   }
 
+  String? firstNonBlank(List<dynamic> values) {
+    for (final v in values) {
+      if (v == null) continue;
+      final t = v.toString().trim();
+      if (t.isNotEmpty) return t;
+    }
+    return null;
+  }
+
   put('storeId', store['id']);
-  put('storeNameEn', store['nameEn']);
-  put('storeNameAr', store['nameAr']);
-  put('storeDescriptionEn', store['descriptionEn']);
-  put('storeDescriptionAr', store['descriptionAr']);
+  put(
+    'storeName',
+    firstNonBlank([
+      store['name'],
+      store['storeName'],
+      store['nameEn'],
+      store['nameAr'],
+    ]),
+  );
+  put(
+    'storeDescription',
+    firstNonBlank([
+      store['description'],
+      store['storeDescription'],
+      store['descriptionEn'],
+      store['descriptionAr'],
+    ]),
+  );
   put('whatsAppNumber', store['whatsAppNumber']);
   _flattenLocationIntoUser(user, store);
   put('storeCategoryId', store['storeCategoryId']);
@@ -214,10 +237,6 @@ class UserModel with _$UserModel {
     @Default(false) bool isNewUser,
     String? fullNameEn,
     String? fullNameAr,
-    String? storeNameEn,
-    String? storeNameAr,
-    String? storeDescriptionEn,
-    String? storeDescriptionAr,
     int? storeCategoryId,
     int? storeCityId,
     int? storeGovernmentId,
@@ -301,18 +320,14 @@ class UserModel with _$UserModel {
       // CONFIRMED: real response sends `creationDate`, not `joinedAt`.
       joinedAt: parseDate('joinedAt', altKey: 'creationDate'),
       location: optString('location'),
-      // Localized store name keys before legacy storeName; use
-      // UserEntity.displayStoreName(isArabic) at runtime for locale.
-      storeName: optString('storeNameEn') ??
-          optString('storeNameAr') ??
-          optString('storeName'),
+      storeName: optString('storeName') ??
+          optString('storeNameEn') ??
+          optString('storeNameAr'),
       storeSlug: json['storeSlug'] as String?,
       storeCategory: json['storeCategory'] as String?,
-      // Localized keys before legacy storeDescription; profile GET nests
-      // descriptionEn/Ar on store (merged to storeDescriptionEn/Ar).
-      storeDescription: optString('storeDescriptionEn') ??
-          optString('storeDescriptionAr') ??
-          optString('storeDescription'),
+      storeDescription: optString('storeDescription') ??
+          optString('storeDescriptionEn') ??
+          optString('storeDescriptionAr'),
       storeLogoUrl: json['storeLogoUrl'] as String?,
       storeCity: optString('storeCity') ?? _nestedPlaceName(json['city']),
       storeWilaya: optString('storeWilaya') ??
@@ -341,10 +356,6 @@ class UserModel with _$UserModel {
       isNewUser: json['isNewUser'] as bool? ?? false,
       fullNameEn: optString('fullNameEn') ?? optString('fullName'),
       fullNameAr: optString('fullNameAr'),
-      storeNameEn: optString('storeNameEn'),
-      storeNameAr: optString('storeNameAr'),
-      storeDescriptionEn: optString('storeDescriptionEn'),
-      storeDescriptionAr: optString('storeDescriptionAr'),
       storeCategoryId: _optInt(json['storeCategoryId']),
       storeCityId: _optInt(json['storeCityId']) ??
           _optInt(json['cityId']) ??
@@ -392,10 +403,6 @@ extension UserModelX on UserModel {
         isNewUser: isNewUser,
         fullNameEn: fullNameEn,
         fullNameAr: fullNameAr,
-        storeNameEn: storeNameEn,
-        storeNameAr: storeNameAr,
-        storeDescriptionEn: storeDescriptionEn,
-        storeDescriptionAr: storeDescriptionAr,
         storeCategoryId: storeCategoryId,
         storeCityId: storeCityId,
         storeGovernmentId: storeGovernmentId,
@@ -438,12 +445,6 @@ extension UserModelX on UserModel {
         'isNewUser': isNewUser,
         if (fullNameEn != null) 'fullNameEn': fullNameEn,
         if (fullNameAr != null) 'fullNameAr': fullNameAr,
-        if (storeNameEn != null) 'storeNameEn': storeNameEn,
-        if (storeNameAr != null) 'storeNameAr': storeNameAr,
-        if (storeDescriptionEn != null)
-          'storeDescriptionEn': storeDescriptionEn,
-        if (storeDescriptionAr != null)
-          'storeDescriptionAr': storeDescriptionAr,
         if (storeCategoryId != null) 'storeCategoryId': storeCategoryId,
         if (storeCityId != null) 'storeCityId': storeCityId,
         if (storeGovernmentId != null) 'storeGovernmentId': storeGovernmentId,

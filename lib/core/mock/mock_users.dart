@@ -243,7 +243,7 @@ UserModel userModelFromVendorRegisterParams(
   String? id,
 }) {
   final newId = id ?? 'user_${p.email.hashCode.abs()}';
-  final slug = p.storeNameEn
+  final slug = p.storeName
       .toLowerCase()
       .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
       .trim()
@@ -258,16 +258,12 @@ UserModel userModelFromVendorRegisterParams(
     isVerified: false,
     joinedAt: DateTime.now(),
     dateOfBirth: p.dateOfBirth,
-    storeName: p.storeNameEn,
+    storeName: p.storeName,
     storeSlug: safeSlug,
-    storeDescription: p.storeDescriptionEn,
+    storeDescription: p.storeDescription,
     whatsappNumber: p.whatsappNumber,
     fullNameEn: p.fullNameEn,
     fullNameAr: p.fullNameAr,
-    storeNameEn: p.storeNameEn,
-    storeNameAr: p.storeNameAr,
-    storeDescriptionEn: p.storeDescriptionEn,
-    storeDescriptionAr: p.storeDescriptionAr,
     storeCategoryId: p.storeCategoryId,
     storeCityId: p.storeCityId,
     storeGovernmentId: p.storeGovernmentId,

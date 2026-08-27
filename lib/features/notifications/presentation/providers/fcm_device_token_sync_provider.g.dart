@@ -7,9 +7,12 @@ part of 'fcm_device_token_sync_provider.dart';
 // **************************************************************************
 
 String _$fcmDeviceTokenSyncHash() =>
-    r'0a38a51579ae531ece661c5c9990bb3808a4c1a4';
+    r'66389d874c90c63d6c47b62ceb084ae90259a18f';
 
 /// Subscribes to [FirebaseMessaging.onTokenRefresh] for the app lifetime.
+/// Best-effort: devices without Google Play Services (common in the target
+/// market) can throw here — that must never take down auth session restore,
+/// which reads this provider from `Auth.build()`.
 ///
 /// Copied from [fcmDeviceTokenSync].
 @ProviderFor(fcmDeviceTokenSync)

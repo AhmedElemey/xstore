@@ -9,8 +9,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/presentation/providers/vendor_orders_provider.dart';
+import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
@@ -57,11 +58,16 @@ class ProfileMenuBlocks extends ConsumerWidget {
     await showAnimatedDialog<void>(
       context: context,
       child: DeleteAccountDialog(
-        onConfirm: (password, confirmationText) =>
-            ref.read(profileNotifierProvider.notifier).deleteAccount(
-                  password: password,
-                  confirmationText: confirmationText,
-                ),
+        onConfirm: (password, confirmationText) async {
+          final deleted =
+              await ref.read(profileNotifierProvider.notifier).deleteAccount(
+                    password: password,
+                    confirmationText: confirmationText,
+                  );
+          if (deleted) {
+            await ref.read(authProvider.notifier).logout();
+          }
+        },
       ),
     );
   }

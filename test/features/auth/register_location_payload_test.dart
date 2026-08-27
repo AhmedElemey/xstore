@@ -76,10 +76,8 @@ void main() {
         phoneNumber: '01112345678',
         password: 'Password1!',
         confirmPassword: 'Password1!',
-        storeNameEn: 'Tech Store',
-        storeNameAr: 'متجر التقنية',
-        storeDescriptionEn: 'Best electronics',
-        storeDescriptionAr: 'أفضل إلكترونيات',
+        storeName: 'Tech Store',
+        storeDescription: 'Best electronics',
         storeCategoryId: 1,
         storeCityId: 1,
         storeGovernmentId: 16,
@@ -96,6 +94,18 @@ void main() {
     expect(field('fullName'), 'Ahmed Ali');
     expect(
       formData.fields.any((e) => e.key == 'fullNameEn' || e.key == 'fullNameAr'),
+      isFalse,
+    );
+    expect(field('storeName'), 'Tech Store');
+    expect(field('storeDescription'), 'Best electronics');
+    expect(
+      formData.fields.any(
+        (e) =>
+            e.key == 'storeNameEn' ||
+            e.key == 'storeNameAr' ||
+            e.key == 'storeDescriptionEn' ||
+            e.key == 'storeDescriptionAr',
+      ),
       isFalse,
     );
     expect(field('storeCityId'), '1');

@@ -62,18 +62,18 @@ void main() {
       expect(model.dateOfBirth, DateTime(1990, 3, 20));
     });
 
-    test('prefers storeNameEn over legacy storeName when all are set', () {
+    test('prefers storeName over bilingual fallback keys when all are set', () {
       final model = UserModel.fromJson({
         'id': 1,
         'email': 'v@test.com',
-        'storeName': 'Legacy Name',
+        'storeName': 'Canonical Name',
         'storeNameEn': 'English Shop',
         'storeNameAr': 'متجر',
       });
-      expect(model.storeName, 'English Shop');
+      expect(model.storeName, 'Canonical Name');
     });
 
-    test('empty legacy storeName falls through to storeNameEn', () {
+    test('empty storeName falls through to storeNameEn', () {
       final model = UserModel.fromJson({
         'id': 1,
         'email': 'v@test.com',
@@ -83,7 +83,7 @@ void main() {
       expect(model.storeName, 'English Shop');
     });
 
-    test('empty legacy storeDescription falls through to storeDescriptionEn', () {
+    test('empty storeDescription falls through to storeDescriptionEn', () {
       final model = UserModel.fromJson({
         'id': 1,
         'email': 'v@test.com',
@@ -93,7 +93,7 @@ void main() {
       expect(model.storeDescription, 'English description');
     });
 
-    test('reads storeDescriptionEn then storeDescriptionAr when legacy absent', () {
+    test('reads storeDescriptionEn then storeDescriptionAr when canonical absent', () {
       final en = UserModel.fromJson({
         'id': 1,
         'email': 'v@test.com',
@@ -109,17 +109,15 @@ void main() {
       expect(ar.storeDescription, 'وصف المتجر');
     });
 
-    test('prefers storeDescriptionEn over legacy storeDescription when all set', () {
+    test('prefers storeDescription over bilingual fallback keys when all set', () {
       final model = UserModel.fromJson({
         'id': 1,
         'email': 'v@test.com',
-        'storeDescription': 'Legacy desc',
+        'storeDescription': 'Canonical desc',
         'storeDescriptionEn': 'Updated desc',
         'storeDescriptionAr': 'وصف',
       });
-      expect(model.storeDescription, 'Updated desc');
-      expect(model.storeDescriptionEn, 'Updated desc');
-      expect(model.storeDescriptionAr, 'وصف');
+      expect(model.storeDescription, 'Canonical desc');
     });
 
     test('whitespace-only alias values are treated as absent', () {
@@ -218,10 +216,8 @@ void main() {
         },
         'store': {
           'id': 1,
-          'nameEn': 'Store Name Updated',
-          'nameAr': 'اسم المتجر المعدل',
-          'descriptionEn': 'Store Description Updated',
-          'descriptionAr': 'وصف المتجر المعدل',
+          'name': 'Store Name Updated',
+          'description': 'Store Description Updated',
           'whatsAppNumber': '01012345677',
           'cityId': 2,
           'governorateId': 2,
@@ -246,11 +242,8 @@ void main() {
       expect(model.name, 'Updated Name');
       expect(model.fullNameAr, 'الاسم المحدث');
       expect(model.storeId, 1);
-      expect(model.storeNameEn, 'Store Name Updated');
       expect(model.storeName, 'Store Name Updated');
-      expect(model.storeDescriptionEn, 'Store Description Updated');
       expect(model.storeDescription, 'Store Description Updated');
-      expect(model.storeDescriptionAr, 'وصف المتجر المعدل');
       expect(model.whatsappNumber, '01012345677');
       expect(model.storeCityId, 2);
       expect(model.storeGovernmentId, 2);
@@ -267,6 +260,40 @@ void main() {
       expect(model.governorate, 'Cairo Governorate');
       expect(model.role, UserRole.vendor);
       expect(model.storeId, isNotNull);
+    });
+
+    test('falls back to nested store nameEn/descriptionEn when name is absent', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'email': 'vendor@test.com',
+          'fullName': 'Vendor',
+        },
+        'store': {
+          'id': 2,
+          'nameEn': 'Old English Name',
+          'descriptionEn': 'Old English description',
+        },
+      });
+      expect(model.storeName, 'Old English Name');
+      expect(model.storeDescription, 'Old English description');
+    });
+
+    test('skips blank nested store.name and uses nameEn', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'email': 'vendor@test.com',
+          'fullName': 'Vendor',
+        },
+        'store': {
+          'id': 3,
+          'name': '  ',
+          'nameEn': 'Fallback Name',
+          'description': '',
+          'descriptionEn': 'Fallback description',
+        },
+      });
+      expect(model.storeName, 'Fallback Name');
+      expect(model.storeDescription, 'Fallback description');
     });
 
     test('still reads legacy governmentId when governorateId is absent', () {

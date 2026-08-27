@@ -228,10 +228,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'confirmPassword': params.confirmPassword,
         if (params.dateOfBirth != null)
           'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
-        'storeNameEn': params.storeNameEn,
-        'storeNameAr': params.storeNameAr,
-        'storeDescriptionEn': params.storeDescriptionEn,
-        'storeDescriptionAr': params.storeDescriptionAr,
+        'storeName': params.storeName,
+        'storeDescription': params.storeDescription,
         'storeCategoryId': params.storeCategoryId,
         'storeCityId': params.storeCityId,
         // Wire key CONFIRMED (Postman collection): the vendor-register
