@@ -32,6 +32,7 @@ mixin _$ProfileState {
   String get editStoreName => throw _privateConstructorUsedError;
   String get editStoreNameAr => throw _privateConstructorUsedError;
   String get editStoreCategory => throw _privateConstructorUsedError;
+  int? get editStoreCategoryId => throw _privateConstructorUsedError;
   String get editStoreDescription => throw _privateConstructorUsedError;
   String get editStoreDescriptionAr => throw _privateConstructorUsedError;
   String get editStoreCity => throw _privateConstructorUsedError;
@@ -86,6 +87,7 @@ abstract class $ProfileStateCopyWith<$Res> {
       String editStoreName,
       String editStoreNameAr,
       String editStoreCategory,
+      int? editStoreCategoryId,
       String editStoreDescription,
       String editStoreDescriptionAr,
       String editStoreCity,
@@ -142,6 +144,7 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? editStoreName = null,
     Object? editStoreNameAr = null,
     Object? editStoreCategory = null,
+    Object? editStoreCategoryId = freezed,
     Object? editStoreDescription = null,
     Object? editStoreDescriptionAr = null,
     Object? editStoreCity = null,
@@ -231,6 +234,10 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
           ? _value.editStoreCategory
           : editStoreCategory // ignore: cast_nullable_to_non_nullable
               as String,
+      editStoreCategoryId: freezed == editStoreCategoryId
+          ? _value.editStoreCategoryId
+          : editStoreCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
       editStoreDescription: null == editStoreDescription
           ? _value.editStoreDescription
           : editStoreDescription // ignore: cast_nullable_to_non_nullable
@@ -364,6 +371,7 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       String editStoreName,
       String editStoreNameAr,
       String editStoreCategory,
+      int? editStoreCategoryId,
       String editStoreDescription,
       String editStoreDescriptionAr,
       String editStoreCity,
@@ -419,6 +427,7 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? editStoreName = null,
     Object? editStoreNameAr = null,
     Object? editStoreCategory = null,
+    Object? editStoreCategoryId = freezed,
     Object? editStoreDescription = null,
     Object? editStoreDescriptionAr = null,
     Object? editStoreCity = null,
@@ -508,6 +517,10 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
           ? _value.editStoreCategory
           : editStoreCategory // ignore: cast_nullable_to_non_nullable
               as String,
+      editStoreCategoryId: freezed == editStoreCategoryId
+          ? _value.editStoreCategoryId
+          : editStoreCategoryId // ignore: cast_nullable_to_non_nullable
+              as int?,
       editStoreDescription: null == editStoreDescription
           ? _value.editStoreDescription
           : editStoreDescription // ignore: cast_nullable_to_non_nullable
@@ -624,6 +637,7 @@ class _$ProfileStateImpl implements _ProfileState {
       this.editStoreName = '',
       this.editStoreNameAr = '',
       this.editStoreCategory = '',
+      this.editStoreCategoryId,
       this.editStoreDescription = '',
       this.editStoreDescriptionAr = '',
       this.editStoreCity = '',
@@ -694,6 +708,8 @@ class _$ProfileStateImpl implements _ProfileState {
   @override
   @JsonKey()
   final String editStoreCategory;
+  @override
+  final int? editStoreCategoryId;
   @override
   @JsonKey()
   final String editStoreDescription;
@@ -769,7 +785,7 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   String toString() {
-    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editStoreCityId: $editStoreCityId, editStoreGovernmentId: $editStoreGovernmentId, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
+    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreNameAr: $editStoreNameAr, editStoreCategory: $editStoreCategory, editStoreCategoryId: $editStoreCategoryId, editStoreDescription: $editStoreDescription, editStoreDescriptionAr: $editStoreDescriptionAr, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editStoreCityId: $editStoreCityId, editStoreGovernmentId: $editStoreGovernmentId, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
   }
 
   @override
@@ -807,6 +823,8 @@ class _$ProfileStateImpl implements _ProfileState {
                 other.editStoreNameAr == editStoreNameAr) &&
             (identical(other.editStoreCategory, editStoreCategory) ||
                 other.editStoreCategory == editStoreCategory) &&
+            (identical(other.editStoreCategoryId, editStoreCategoryId) ||
+                other.editStoreCategoryId == editStoreCategoryId) &&
             (identical(other.editStoreDescription, editStoreDescription) ||
                 other.editStoreDescription == editStoreDescription) &&
             (identical(other.editStoreDescriptionAr, editStoreDescriptionAr) ||
@@ -875,6 +893,7 @@ class _$ProfileStateImpl implements _ProfileState {
         editStoreName,
         editStoreNameAr,
         editStoreCategory,
+        editStoreCategoryId,
         editStoreDescription,
         editStoreDescriptionAr,
         editStoreCity,
@@ -925,6 +944,7 @@ abstract class _ProfileState implements ProfileState {
       final String editStoreName,
       final String editStoreNameAr,
       final String editStoreCategory,
+      final int? editStoreCategoryId,
       final String editStoreDescription,
       final String editStoreDescriptionAr,
       final String editStoreCity,
@@ -981,6 +1001,8 @@ abstract class _ProfileState implements ProfileState {
   String get editStoreNameAr;
   @override
   String get editStoreCategory;
+  @override
+  int? get editStoreCategoryId;
   @override
   String get editStoreDescription;
   @override

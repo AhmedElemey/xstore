@@ -64,6 +64,7 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editStoreName.trim() == (u.storeName ?? '').trim() &&
       s.editStoreNameAr.trim() == (u.storeNameAr ?? '').trim() &&
       s.editStoreCategory.trim() == (u.storeCategory ?? '').trim() &&
+      s.editStoreCategoryId == u.storeCategoryId &&
       s.editStoreDescription.trim() ==
           (u.storeDescriptionEn ?? u.storeDescription ?? '').trim() &&
       s.editStoreDescriptionAr.trim() ==
@@ -413,6 +414,21 @@ class ProfileNotifier extends _$ProfileNotifier {
     final next = state.copyWith(
       editStoreCityId: cityId,
       editStoreGovernmentId: governorateId,
+    );
+    final u = next.user;
+    state = next.copyWith(
+      hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true,
+      fieldErrors: {},
+    );
+  }
+
+  /// Sets the picked store category id + display label together — mirrors
+  /// [updateStoreLocation]. `editStoreCategory` (id-less) is display-only;
+  /// [toUpdateProfileRequest] sends `editStoreCategoryId`.
+  void updateStoreCategory(int categoryId, String label) {
+    final next = state.copyWith(
+      editStoreCategoryId: categoryId,
+      editStoreCategory: label,
     );
     final u = next.user;
     state = next.copyWith(

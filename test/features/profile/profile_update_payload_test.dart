@@ -158,6 +158,7 @@ void main() {
         editLongitude: '31.235700',
         editDateOfBirth: DateTime(1990, 3, 20),
         editStoreName: 'Tech Hub',
+        editStoreCategoryId: 3,
         editStoreCityId: 10,
         editStoreGovernmentId: 2,
         editWhatsapp: '01012345678',

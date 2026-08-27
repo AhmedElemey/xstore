@@ -16,6 +16,8 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
+import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
+import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../providers/profile_verification_provider.dart';
@@ -34,15 +36,6 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
-  static const List<String> _storeCategoryOptions = [
-    'Fashion',
-    'Electronics',
-    'Home',
-    'Beauty',
-    'Sports',
-    'Other',
-  ];
-
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
@@ -64,7 +57,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _town = TextEditingController();
   final _detailAddress = TextEditingController();
 
-  String _category = '';
+  int? _categoryId;
   DateTime? _dob;
   var _synced = false;
 
@@ -110,9 +103,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         : '';
     _storeName.text = s.editStoreName;
     _storeNameAr.text = s.editStoreNameAr;
-    _category = s.editStoreCategory;
-    _storeCategory.text =
-        _category.isEmpty ? context.l10n.requiredField : _category;
+    _categoryId = s.editStoreCategoryId;
+    _storeCategory.text = s.editStoreCategory.isEmpty
+        ? context.l10n.requiredField
+        : s.editStoreCategory;
     _storeDescription.text = s.editStoreDescription;
     _storeDescriptionAr.text = s.editStoreDescriptionAr;
     _storeCity.text = s.editStoreCity;
@@ -136,7 +130,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     n.updateField('location', _location.text);
     n.updateField('storeName', _storeName.text);
     n.updateField('storeNameAr', _storeNameAr.text);
-    n.updateField('storeCategory', _category);
     n.updateField('storeDescription', _storeDescription.text);
     n.updateField('storeDescriptionAr', _storeDescriptionAr.text);
     n.updateField('storeCity', _storeCity.text);
@@ -155,39 +148,68 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _pickCategory() async {
     await showAnimatedBottomSheet<void>(
       context: context,
-      builder: (ctx) => Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-        child: SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Text(
-                  context.l10n.storeCategoryLabel,
-                  style: AppTypography.titleMedium,
+      builder: (ctx) => Consumer(
+        builder: (ctx, ref, _) {
+          final async = ref.watch(allCatalogCategoriesProvider);
+          return Material(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            clipBehavior: Clip.antiAlias,
+            child: SafeArea(
+              child: async.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(AppSpacing.x2l),
+                  child: Center(child: CircularProgressIndicator.adaptive()),
+                ),
+                error: (_, __) => Padding(
+                  padding: const EdgeInsets.all(AppSpacing.x2l),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.l10n.genericError),
+                      const Gap(AppSpacing.sm),
+                      TextButton(
+                        onPressed: () =>
+                            ref.invalidate(allCatalogCategoriesProvider),
+                        child: Text(context.l10n.retry),
+                      ),
+                    ],
+                  ),
+                ),
+                data: (items) => ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Text(
+                        context.l10n.storeCategoryLabel,
+                        style: AppTypography.titleMedium,
+                      ),
+                    ),
+                    for (final c in items)
+                      ListTile(
+                        title: Text(c.name.resolve(context.isArabic)),
+                        trailing: _categoryId == c.id
+                            ? const Icon(Icons.check)
+                            : null,
+                        onTap: () {
+                          final label = c.name.resolve(context.isArabic);
+                          setState(() {
+                            _categoryId = c.id;
+                            _storeCategory.text = label;
+                          });
+                          ref
+                              .read(profileNotifierProvider.notifier)
+                              .updateStoreCategory(c.id, label);
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                  ],
                 ),
               ),
-              for (final c in _storeCategoryOptions)
-                ListTile(
-                  title: Text(c),
-                  trailing: _category == c ? const Icon(Icons.check) : null,
-                  onTap: () {
-                    setState(() {
-                      _category = c;
-                      _storeCategory.text = c;
-                    });
-                    ref
-                        .read(profileNotifierProvider.notifier)
-                        .updateField('storeCategory', c);
-                    Navigator.pop(ctx);
-                  },
-                ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
