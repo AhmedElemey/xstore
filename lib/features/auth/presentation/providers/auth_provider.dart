@@ -245,9 +245,9 @@ class Auth extends _$Auth {
         .persistSessionUser(user);
     ref.read(guestModeProvider.notifier).disable();
     state = result.fold((_) => AsyncData(user), (_) => AsyncData(user));
-    syncFcmDeviceTokenWithBackend(ref);
-    prefetchProfileData(ref);
-    syncDeliveryBackendSession(ref);
+    syncFcmDeviceTokenWithBackend(ref, user: user);
+    prefetchProfileData(ref, user: user);
+    syncDeliveryBackendSession(ref, user: user);
     ref
         .read(analyticsServiceProvider)
         .track(
@@ -268,9 +268,9 @@ class Auth extends _$Auth {
   }) {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
-    syncFcmDeviceTokenWithBackend(ref);
-    prefetchProfileData(ref);
-    syncDeliveryBackendSession(ref);
+    syncFcmDeviceTokenWithBackend(ref, user: user);
+    prefetchProfileData(ref, user: user);
+    syncDeliveryBackendSession(ref, user: user);
     ref
         .read(analyticsServiceProvider)
         .track(

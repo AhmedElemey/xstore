@@ -125,6 +125,8 @@ void main() {
           authRepositoryProvider.overrideWith(
             (ref) => _RestoredSessionAuthRepo(),
           ),
+          fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
+          fcmPushHandlingProvider.overrideWith((ref) {}),
         ],
       );
       addTearDown(container.dispose);

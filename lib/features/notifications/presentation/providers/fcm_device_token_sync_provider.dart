@@ -15,8 +15,11 @@ import 'notifications_dependencies.dart';
 part 'fcm_device_token_sync_provider.g.dart';
 
 /// Fire-and-forget: fetch/persist the FCM token and register it with the
-/// backend when a session exists. Mirrors [prefetchProfileData] — pass
-/// [user] from inside `Auth.build()` while auth is still Loading.
+/// backend when a session exists. Mirrors [prefetchProfileData] — always
+/// pass [user] when calling from within `Auth` itself (build/setUser/
+/// adoptSession): reading `authProvider` via `Auth`'s own `ref` trips
+/// Riverpod's self-dependency assert regardless of sync/async timing, so
+/// deferring the read does not avoid it.
 void syncFcmDeviceTokenWithBackend(Ref ref, {UserEntity? user}) {
   unawaited(_syncFcmDeviceTokenWithBackend(ref, user: user));
 }
@@ -25,8 +28,6 @@ Future<void> _syncFcmDeviceTokenWithBackend(
   Ref ref, {
   UserEntity? user,
 }) async {
-  // When [user] is omitted, defer the auth read so callers inside
-  // Auth.build() don't hit Riverpod's self-dependency assert.
   final sessionUser = user ??
       await Future(() => ref.read(authProvider).valueOrNull);
   if (sessionUser == null) return;
@@ -87,12 +88,19 @@ Future<void> _unregisterFcmDeviceTokenOnLogout(Ref ref) async {
 }
 
 /// Subscribes to [FirebaseMessaging.onTokenRefresh] for the app lifetime.
+/// Best-effort: devices without Google Play Services (common in the target
+/// market) can throw here — that must never take down auth session restore,
+/// which reads this provider from `Auth.build()`.
 @Riverpod(keepAlive: true)
 void fcmDeviceTokenSync(FcmDeviceTokenSyncRef ref) {
-  final subscription = FirebaseMessaging.instance.onTokenRefresh.listen(
-    (token) => unawaited(_onTokenRefresh(ref, token)),
-  );
-  ref.onDispose(subscription.cancel);
+  try {
+    final subscription = FirebaseMessaging.instance.onTokenRefresh.listen(
+      (token) => unawaited(_onTokenRefresh(ref, token)),
+    );
+    ref.onDispose(subscription.cancel);
+  } catch (e) {
+    if (kDebugMode) debugPrint('FCM: onTokenRefresh subscription failed: $e');
+  }
 }
 
 Future<void> _onTokenRefresh(Ref ref, String token) async {

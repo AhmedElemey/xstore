@@ -32,6 +32,10 @@ void main() {
   group('ProfileRemoteDataSource updateAvatar', () {
     test(
       'POSTs multipart to the generic uploads endpoint with field `file`',
+      skip: MockConfig.useMock
+          ? 'Requires MOCK=false — MOCK=true short-circuits to mock data '
+              'before the request reaches the interceptor'
+          : false,
       () async {
         final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
         final interceptor = _CapturingInterceptor();
@@ -233,7 +237,9 @@ void main() {
         expect(u.location, '12 Abbas El Akkad');
         expect(u.detailAddress, '12 Abbas El Akkad');
         expect(u.dateOfBirth, DateTime.parse('1990-03-20'));
-        expect(u.storeCity, isNull);
+        // Legacy free-text field, not part of this request — the vendor
+        // mock backfills it from mockVendorUser like storeName/location/etc.
+        expect(u.storeCity, 'Cairo');
         expect(u.town, 'Nasr City');
         expect(u.governorate, 'Cairo');
         expect(u.latitude, 30.0444);
