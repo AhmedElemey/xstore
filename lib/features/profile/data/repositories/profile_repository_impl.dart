@@ -76,9 +76,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> deleteAccount() async {
+  Future<Either<Failure, Unit>> deleteAccount({
+    required String password,
+    required String confirmationText,
+  }) async {
     try {
-      await _remote.deleteAccount();
+      await _remote.deleteAccount(
+        password: password,
+        confirmationText: confirmationText,
+      );
       return const Right(unit);
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));

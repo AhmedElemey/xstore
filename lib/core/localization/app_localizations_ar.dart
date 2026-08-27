@@ -66,6 +66,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get codeSentTo => 'الكود اتبعت على';
 
   @override
+  String get verifyYourEmail => 'تحقق من بريدك الإلكتروني';
+
+  @override
+  String get profileEmailNotVerified => 'بريدك الإلكتروني غير موثّق';
+
+  @override
+  String get profilePhoneNotVerified => 'رقم هاتفك غير موثّق';
+
+  @override
+  String get verifyNow => 'وثّق الآن';
+
+  @override
   String get changeNumber => 'غيّر الرقم';
 
   @override

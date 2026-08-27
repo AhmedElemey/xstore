@@ -57,8 +57,11 @@ class ProfileMenuBlocks extends ConsumerWidget {
     await showAnimatedDialog<void>(
       context: context,
       child: DeleteAccountDialog(
-        onConfirm: () =>
-            ref.read(profileNotifierProvider.notifier).deleteAccount(),
+        onConfirm: (password, confirmationText) =>
+            ref.read(profileNotifierProvider.notifier).deleteAccount(
+                  password: password,
+                  confirmationText: confirmationText,
+                ),
       ),
     );
   }

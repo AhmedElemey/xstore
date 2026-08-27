@@ -66,6 +66,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get codeSentTo => 'Code sent to';
 
   @override
+  String get verifyYourEmail => 'Verify your email';
+
+  @override
+  String get profileEmailNotVerified => 'Your email is not verified';
+
+  @override
+  String get profilePhoneNotVerified => 'Your phone number is not verified';
+
+  @override
+  String get verifyNow => 'Verify Now';
+
+  @override
   String get changeNumber => 'Change';
 
   @override
