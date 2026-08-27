@@ -16,7 +16,7 @@ import '../providers/profile_verification_provider.dart';
 /// Sends and verifies a backend OTP for either the profile email or phone
 /// field (`send-email-otp`/`verify-email` or `send-phone-otp`/`verify-phone`),
 /// then refreshes the profile so the caller sees the new isEmailVerified /
-/// isPhoneNumberVerified flags. Pushed from EditProfileScreen with
+/// isPhoneVerified flags. Pushed from EditProfileScreen with
 /// `extra: ProfileVerificationArgs(...)`; pops `true` on success.
 class ProfileVerificationScreen extends ConsumerStatefulWidget {
   const ProfileVerificationScreen({super.key, required this.args});

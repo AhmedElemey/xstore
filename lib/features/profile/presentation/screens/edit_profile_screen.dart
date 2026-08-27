@@ -521,7 +521,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           PhoneInputField(
             controller: _phone,
             suffix: _VerificationStatus(
-              verified: s.profile?.isPhoneNumberVerified ?? false,
+              verified: s.profile?.isPhoneVerified ?? false,
               onVerify: _phone.text.trim().isEmpty ? null : _verifyPhone,
             ),
             onChanged: (v) => ref

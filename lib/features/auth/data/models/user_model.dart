@@ -12,7 +12,7 @@ class ProfileResponseWire {
     this.isEmailVerificationRequired = false,
     this.isPhoneVerificationRequired = false,
     this.isEmailVerified = false,
-    this.isPhoneNumberVerified = false,
+    this.isPhoneVerified = false,
     this.hasStore = false,
   });
 
@@ -20,7 +20,7 @@ class ProfileResponseWire {
   final bool isEmailVerificationRequired;
   final bool isPhoneVerificationRequired;
   final bool isEmailVerified;
-  final bool isPhoneNumberVerified;
+  final bool isPhoneVerified;
   final bool hasStore;
 }
 
@@ -137,12 +137,17 @@ ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
         data['isEmailVerificationRequired'] as bool? ?? false,
     isPhoneVerificationRequired:
         data['isPhoneVerificationRequired'] as bool? ?? false,
-    // CONFIRMED (live get-profile response): isEmailVerified/isPhoneVerified
-    // are top-level siblings of `user`/`store`, same as the
-    // isXVerificationRequired flags above — NOT nested inside `user`.
-    isEmailVerified: data['isEmailVerified'] as bool? ?? false,
-    isPhoneNumberVerified: data['isPhoneNumberVerified'] as bool? ??
-        data['isPhoneVerified'] as bool? ??
+    // CONFIRMED (live get-profile): isEmailVerified/isPhoneVerified are
+    // top-level siblings of `user`/`store`. Fall back to the nested user
+    // object and the older isPhoneNumberVerified key if a payload still
+    // sends them there.
+    isEmailVerified: data['isEmailVerified'] as bool? ??
+        userJson['isEmailVerified'] as bool? ??
+        false,
+    isPhoneVerified: data['isPhoneVerified'] as bool? ??
+        data['isPhoneNumberVerified'] as bool? ??
+        userJson['isPhoneVerified'] as bool? ??
+        userJson['isPhoneNumberVerified'] as bool? ??
         false,
     hasStore: hasStore,
   );
@@ -287,8 +292,9 @@ class UserModel with _$UserModel {
       phoneNumber: json['phoneNumber'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
       role: parseRole(),
-      // CONFIRMED: real response sends isEmailVerified/isPhoneVerified
-      // alongside isVerified — isVerified is still the field to use here.
+      // isVerified lives on the user object. isEmailVerified/isPhoneVerified
+      // are top-level profile-wrapper flags — parsed in parseProfileResponse,
+      // not here.
       isVerified: json['isVerified'] as bool? ?? false,
       rating: (json['rating'] as num?)?.toDouble(),
       totalSales: json['totalSales'] as int?,

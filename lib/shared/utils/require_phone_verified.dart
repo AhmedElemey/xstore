@@ -15,7 +15,7 @@ import '../../features/profile/presentation/providers/profile_provider.dart';
 /// caller aborts the action either way.
 Future<bool> requirePhoneVerified(BuildContext context, WidgetRef ref) async {
   final profileState = ref.read(profileNotifierProvider);
-  if (profileState.profile?.isPhoneNumberVerified ?? false) return true;
+  if (profileState.profile?.isPhoneVerified ?? false) return true;
 
   final phone = profileState.profile?.user.phoneNumber ??
       ref.read(authProvider).valueOrNull?.phoneNumber ??
