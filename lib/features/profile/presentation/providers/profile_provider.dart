@@ -99,6 +99,12 @@ class ProfileNotifier extends _$ProfileNotifier {
   /// Coalesces concurrent tab-open / prefetch / edit-screen refreshes.
   Future<void>? _inFlightRefresh;
 
+  /// Bumped on every fetch actually started (forced or not). Lets a
+  /// `force: true` caller (e.g. right after verifying email/phone) guarantee
+  /// its own fetch's result is the one that lands in state, even if an
+  /// older, already-in-flight refresh resolves after it.
+  var _refreshRequestId = 0;
+
   /// Skips back-to-back get-profile calls (login prefetch + profile tab, etc.).
   DateTime? _lastRefreshAt;
   static const _minRefreshInterval = Duration(seconds: 30);
@@ -156,15 +162,21 @@ class ProfileNotifier extends _$ProfileNotifier {
       return;
     }
 
-    final existing = _inFlightRefresh;
-    if (existing != null) {
-      if (kDebugMode) {
-        debugPrint('[ProfileNotifier] refresh coalesced — awaiting in-flight');
+    if (!force) {
+      final existing = _inFlightRefresh;
+      if (existing != null) {
+        if (kDebugMode) {
+          debugPrint('[ProfileNotifier] refresh coalesced — awaiting in-flight');
+        }
+        return existing;
       }
-      return existing;
     }
 
-    final future = _refreshProfileDataImpl(sessionUser);
+    // force: true always starts its own fetch rather than piggybacking on
+    // whatever's already in flight — a refresh right after verifying
+    // email/phone must not resolve to data fetched before that verification.
+    final requestId = ++_refreshRequestId;
+    final future = _refreshProfileDataImpl(sessionUser, requestId);
     _inFlightRefresh = future;
     try {
       await future;
@@ -175,19 +187,19 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
   }
 
-  Future<void> _refreshProfileDataImpl(UserEntity sessionUser) async {
+  Future<void> _refreshProfileDataImpl(UserEntity sessionUser, int requestId) async {
     final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     try {
       final prefs = await ref.read(sharedPreferencesProvider.future);
-      if (epoch != _sessionEpoch) return;
+      if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
       final push = prefs.getBool(PrefsKeys.profilePushNotifications) ?? true;
       final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
       final themeMode = ref.read(appThemeModeProvider);
 
       final result =
           await ref.read(getProfileUseCaseProvider).call(sessionUser);
-      if (epoch != _sessionEpoch) return;
+      if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
       result.fold(
         (f) {
           final message = f.toString();
@@ -219,7 +231,7 @@ class ProfileNotifier extends _$ProfileNotifier {
         },
       );
     } catch (e) {
-      if (epoch != _sessionEpoch) return;
+      if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
