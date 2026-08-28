@@ -163,7 +163,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         child: ListingOptionsSheet(
           listing: listing,
           onEdit: () {
-            context.go(AppRoutes.listingAdd);
+            context.go(AppRoutes.listingAdd, extra: listing);
           },
           onPause: () => ref
               .read(myListingsNotifierProvider.notifier)

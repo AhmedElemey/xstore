@@ -770,6 +770,12 @@ abstract class AppLocalizations {
   /// **'🚀 Publish Listing'**
   String get publishListing;
 
+  /// No description provided for @updateListing.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Listing'**
+  String get updateListing;
+
   /// No description provided for @saveDraft.
   ///
   /// In en, this message translates to:

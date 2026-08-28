@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
 
 /// Horizontal photo strip: add tile, previews, reorder via long-press drag.
 /// Gallery selection fills remaining slots (max 5) in one shot.
@@ -19,9 +20,15 @@ class PhotoUploadSection extends StatelessWidget {
     required this.onOpenPicker,
     required this.onRemove,
     required this.onReorder,
+    this.existingUrls = const [],
   });
 
   final List<String> paths;
+
+  /// Remote photos already on the listing being edited. Shown read-only —
+  /// there is no confirmed per-image delete endpoint, so these are not
+  /// removable here; adding new local [paths] fills the remaining slots.
+  final List<String> existingUrls;
   final String? errorText;
   final VoidCallback onOpenPicker;
   final void Function(int index) onRemove;
@@ -34,7 +41,7 @@ class PhotoUploadSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showAdd = paths.length < 5;
+    final showAdd = existingUrls.length + paths.length < 5;
     final hasError = errorText != null && errorText!.isNotEmpty;
 
     return Column(
@@ -61,13 +68,21 @@ class PhotoUploadSection extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                for (var i = 0; i < existingUrls.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.md),
+                    child: _ExistingPhotoTile(
+                      url: existingUrls[i],
+                      isCover: i == 0 && paths.isEmpty,
+                    ),
+                  ),
                 for (var i = 0; i < paths.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(right: AppSpacing.md),
                     child: _PhotoTile(
                       path: paths[i],
                       index: i,
-                      isCover: i == 0,
+                      isCover: existingUrls.isEmpty && i == 0,
                       onRemove: () => onRemove(i),
                       onReorder: onReorder,
                     ),
@@ -159,6 +174,63 @@ class _AddPhotoTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Read-only tile for a photo already hosted on the listing being edited —
+/// no remove/drag affordance, since there is no confirmed per-image delete
+/// endpoint (see [PhotoUploadSection.existingUrls]).
+class _ExistingPhotoTile extends StatelessWidget {
+  const _ExistingPhotoTile({required this.url, required this.isCover});
+
+  final String url;
+  final bool isCover;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: PhotoUploadSection.tile,
+      height: PhotoUploadSection.tile,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Semantics(
+            label: context.l10n.listingPhotoSectionTitle,
+            image: true,
+            child: AppCachedNetworkImage(
+              imageUrl: url,
+              fit: BoxFit.cover,
+              memCacheWidth: (PhotoUploadSection.tile * 2).round(),
+            ),
+          ),
+          if (isCover)
+            Positioned(
+              left: 6,
+              bottom: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.materialGreen600,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  context.l10n.listingPhotoCoverBadge,
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: AppTypography.rem(0.6875),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

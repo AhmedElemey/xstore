@@ -30,6 +30,7 @@ abstract final class AnalyticsEvents {
   // the marketplace loop, see docs_business/launch_todos/03_funnel_metrics.md
   // Phase C.
   static const String listingPublished = 'listing_published';
+  static const String listingUpdated = 'listing_updated';
   static const String listingStatusChanged = 'listing_status_changed';
   static const String listingResubmitted = 'listing_resubmitted';
   static const String listingDeleted = 'listing_deleted';

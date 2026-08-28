@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../domain/entities/listing_entity.dart';
+
 part 'listing_form_state.freezed.dart';
 
 @freezed
@@ -32,5 +34,15 @@ class ListingFormState with _$ListingFormState {
     @Default(<String, String>{}) Map<String, String> errors,
     /// Incremented when a draft is loaded from storage (for controller sync).
     @Default(0) int draftRevision,
+    /// Remote photo URLs already on the listing being edited (empty when
+    /// creating). Not resubmitted as files — see `submit()`'s comment on
+    /// how an empty [photoPaths] preserves them on update.
+    @Default(<String>[]) List<String> existingImageUrls,
+    /// Non-empty when this form is editing an existing listing rather than
+    /// creating a new one; drives `submit()`'s create-vs-update branch.
+    @Default('') String editingListingId,
+    /// The listing's current status when editing, resent unchanged on
+    /// update (editing never silently changes status).
+    ListingStatus? editingStatus,
   }) = _ListingFormState;
 }

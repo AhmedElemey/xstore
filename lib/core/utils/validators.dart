@@ -144,7 +144,9 @@ abstract final class Validators {
       double.tryParse(raw.replaceAll(RegExp(r','), ''));
 
   static bool listingFormHasErrors(ListingFormValidationInput input) {
-    if (input.photoPaths.isEmpty) return true;
+    if (input.photoPaths.isEmpty && input.existingPhotoCount == 0) {
+      return true;
+    }
     final name = input.name.trim();
     if (name.isEmpty || name.length > 100) return true;
     final price = parseMoneyInput(input.priceInput);
@@ -169,7 +171,7 @@ abstract final class Validators {
     ListingFormValidationInput input,
   ) {
     final err = <String, String>{};
-    if (input.photoPaths.isEmpty) {
+    if (input.photoPaths.isEmpty && input.existingPhotoCount == 0) {
       err['photos'] = l10n.listingValidationPhotosRequired;
     }
     final name = input.name.trim();
@@ -230,6 +232,7 @@ class ListingFormValidationInput {
     required this.location,
     required this.shippingAvailable,
     required this.shippingCostInput,
+    this.existingPhotoCount = 0,
   });
 
   final List<String> photoPaths;
@@ -243,6 +246,10 @@ class ListingFormValidationInput {
   final String location;
   final bool shippingAvailable;
   final String shippingCostInput;
+
+  /// Remote photos already on the listing being edited — counts toward the
+  /// "at least one photo" requirement alongside newly picked [photoPaths].
+  final int existingPhotoCount;
 }
 
 /// Egypt phone normalization and E.164 helpers (non-UI).

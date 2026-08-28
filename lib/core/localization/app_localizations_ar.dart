@@ -346,6 +346,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get publishListing => '🚀 نشر الإعلان';
 
   @override
+  String get updateListing => 'تحديث الإعلان';
+
+  @override
   String get saveDraft => 'حفظ مسودة';
 
   @override
