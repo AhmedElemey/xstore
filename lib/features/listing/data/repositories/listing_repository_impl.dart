@@ -14,10 +14,8 @@ class ListingRepositoryImpl implements ListingRepository {
 
   @override
   Future<Either<Failure, ListingEntity>> createListing({
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -33,10 +31,8 @@ class ListingRepositoryImpl implements ListingRepository {
   }) async {
     try {
       final model = await _remote.createListing(
-        titleEn: titleEn,
-        titleAr: titleAr,
-        descriptionEn: descriptionEn,
-        descriptionAr: descriptionAr,
+        title: title,
+        description: description,
         price: price,
         compareAtPrice: compareAtPrice,
         categoryId: categoryId,
@@ -77,10 +73,8 @@ class ListingRepositoryImpl implements ListingRepository {
   @override
   Future<Either<Failure, ListingEntity>> updateListing({
     required String id,
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -98,10 +92,8 @@ class ListingRepositoryImpl implements ListingRepository {
     try {
       final model = await _remote.updateListing(
         id: id,
-        titleEn: titleEn,
-        titleAr: titleAr,
-        descriptionEn: descriptionEn,
-        descriptionAr: descriptionAr,
+        title: title,
+        description: description,
         price: price,
         compareAtPrice: compareAtPrice,
         categoryId: categoryId,

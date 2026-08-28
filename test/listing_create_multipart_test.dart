@@ -31,10 +31,12 @@ class _CapturingInterceptor extends Interceptor {
 }
 
 void main() {
-  // CONFIRMED against the xStoreEcommerce Postman collection: POST/PUT
-  // /api/listings are multipart/form-data, not flat JSON. This guards that
-  // contract (array-style Attributes[i].Key/Value, inline imageFiles) so a
-  // future refactor can't silently regress back to a JSON body.
+  // CONFIRMED against the backend's `CreateListingRequest` C# DTO:
+  // POST/PUT /api/listings are multipart/form-data with a single
+  // `title`/`description` (not a bilingual pair) and `condition` as the
+  // C# enum member name string (not the numeric wire code GET responses
+  // use). This guards that contract (array-style Attributes[i].Key/Value,
+  // inline imageFiles) so a future refactor can't silently regress it.
   group('ListingRemoteDataSource createListing multipart contract', () {
     late Dio dio;
     late _CapturingInterceptor interceptor;
@@ -60,10 +62,8 @@ void main() {
         ..writeAsBytesSync(const [0, 1, 2, 3]);
 
       await datasource.createListing(
-        titleEn: 'New Product',
-        titleAr: 'منتج جديد',
-        descriptionEn: 'Product description',
-        descriptionAr: 'وصف المنتج',
+        title: 'New Product',
+        description: 'Product description',
         price: 99.99,
         compareAtPrice: 129.99,
         categoryId: 1,
@@ -81,8 +81,8 @@ void main() {
       expect(formData, isNotNull);
       final fields = {for (final f in formData!.fields) f.key: f.value};
 
-      expect(fields['titleEn'], 'New Product');
-      expect(fields['titleAr'], 'منتج جديد');
+      expect(fields['title'], 'New Product');
+      expect(fields['description'], 'Product description');
       expect(fields['price'], '99.99');
       expect(fields['compareAtPrice'], '129.99');
       expect(fields['categoryId'], '1');
@@ -91,7 +91,7 @@ void main() {
       expect(fields['shippingAvailable'], 'true');
       expect(fields['shippingCost'], '5.99');
       expect(fields['location'], 'Cairo');
-      expect(fields['condition'], '1');
+      expect(fields['condition'], 'New');
       expect(fields['Attributes[0].Key'], 'Color');
       expect(fields['Attributes[0].Value'], 'Red');
 
@@ -100,12 +100,38 @@ void main() {
       expect(formData.files.single.value.filename, 'photo1.jpg');
     });
 
+    test('sends the condition enum member name for every condition', () async {
+      final cases = {
+        ListingCondition.newItem: 'New',
+        ListingCondition.likeNew: 'LikeNew',
+        ListingCondition.good: 'Good',
+        ListingCondition.usedForParts: 'UsedForParts',
+      };
+      for (final entry in cases.entries) {
+        await datasource.createListing(
+          title: 'Product',
+          description: 'desc',
+          price: 10,
+          categoryId: 2,
+          condition: entry.key,
+          brand: '',
+          stockQuantity: 1,
+          shippingAvailable: false,
+          shippingCost: 0,
+          location: 'Giza',
+          attributes: const {},
+        );
+        final fields = {
+          for (final f in interceptor.capturedFormData!.fields) f.key: f.value,
+        };
+        expect(fields['condition'], entry.value);
+      }
+    });
+
     test('omits attribute keys and imageFiles parts when none are given', () async {
       await datasource.createListing(
-        titleEn: 'No Photo',
-        titleAr: 'بدون صورة',
-        descriptionEn: 'desc',
-        descriptionAr: 'وصف',
+        title: 'No Photo',
+        description: 'desc',
         price: 10,
         categoryId: 2,
         condition: ListingCondition.good,
@@ -126,10 +152,8 @@ void main() {
 
     test('multiple attributes get sequential indices', () async {
       await datasource.createListing(
-        titleEn: 'Multi Attr',
-        titleAr: 'خصائص متعددة',
-        descriptionEn: 'desc',
-        descriptionAr: 'وصف',
+        title: 'Multi Attr',
+        description: 'desc',
         price: 10,
         categoryId: 2,
         condition: ListingCondition.good,
@@ -158,10 +182,8 @@ void main() {
       ];
 
       await datasource.createListing(
-        titleEn: 'Too Many Photos',
-        titleAr: 'صور كثيرة',
-        descriptionEn: 'desc',
-        descriptionAr: 'وصف',
+        title: 'Too Many Photos',
+        description: 'desc',
         price: 10,
         categoryId: 2,
         condition: ListingCondition.good,
@@ -181,10 +203,8 @@ void main() {
       final missingPath = '${tmpDir.path}/does_not_exist.jpg';
 
       await datasource.createListing(
-        titleEn: 'Stale Draft',
-        titleAr: 'مسودة قديمة',
-        descriptionEn: 'desc',
-        descriptionAr: 'وصف',
+        title: 'Stale Draft',
+        description: 'desc',
         price: 10,
         categoryId: 2,
         condition: ListingCondition.good,

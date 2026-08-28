@@ -5,10 +5,8 @@ import '../entities/listing_entity.dart';
 
 abstract interface class ListingRepository {
   Future<Either<Failure, ListingEntity>> createListing({
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -27,10 +25,8 @@ abstract interface class ListingRepository {
 
   Future<Either<Failure, ListingEntity>> updateListing({
     required String id,
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,

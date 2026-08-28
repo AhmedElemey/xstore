@@ -10,10 +10,8 @@ class CreateListingUseCase {
   final ListingRepository _repository;
 
   Future<Either<Failure, ListingEntity>> call({
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -28,10 +26,8 @@ class CreateListingUseCase {
     List<String> imagePaths = const [],
   }) {
     return _repository.createListing(
-      titleEn: titleEn,
-      titleAr: titleAr,
-      descriptionEn: descriptionEn,
-      descriptionAr: descriptionAr,
+      title: title,
+      description: description,
       price: price,
       compareAtPrice: compareAtPrice,
       categoryId: categoryId,

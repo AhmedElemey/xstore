@@ -11,10 +11,8 @@ import '../models/listing_model.dart';
 
 abstract interface class ListingRemoteDataSource {
   Future<ListingModel> createListing({
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -33,10 +31,8 @@ abstract interface class ListingRemoteDataSource {
 
   Future<ListingModel> updateListing({
     required String id,
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -89,23 +85,27 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   /// writes can ever carry more than this many photos.
   static const int _maxImagesPerListing = 5;
 
-  // CONFIRMED against the xStoreEcommerce Postman collection (POST/PUT
-  // Create/Update Listing): both write endpoints are multipart/form-data,
-  // NOT flat JSON — the earlier "flat JSON, int condition" contract was
-  // superseded. Attributes bind as an indexed list (`Attributes[i].Key` /
-  // `Attributes[i].Value`, matching ASP.NET's default List<T> form
-  // binder), and images attach inline as repeated `imageFiles` parts —
-  // there is no separate pre-upload-then-URL step for listings.
-  // `condition`/`status`/`subcategoryId` aren't shown in the collection's
-  // example bodies but are kept here: extra unbound form keys are ignored
-  // by ASP.NET model binding (confirmed pattern elsewhere in this repo),
-  // and dropping them would silently break condition filtering / the
-  // pause-resume status mutation if the backend DOES bind them.
+  // CONFIRMED against the backend's `CreateListingRequest` C# DTO: both
+  // write endpoints are multipart/form-data, NOT flat JSON, and bind a
+  // single `Title`/`Description` — NOT the bilingual `titleEn`/`titleAr`/
+  // `descriptionEn`/`descriptionAr` this used to send (those were silently
+  // dropped as unbound extra keys; Title/Description reached the backend
+  // empty on every create/update until this fix). `Condition` is a plain
+  // `string?` (the C# enum member name — see `listingConditionToWireString`),
+  // not the numeric wire code GET responses use. Attributes still bind as
+  // an indexed list (`Attributes[i].Key`/`Attributes[i].Value`, matching
+  // ASP.NET's default `List<T>` form binder for a `[FromForm]` complex
+  // list) — the DTO's `[JsonPropertyName]` on `ListingAttribute` only
+  // matters for JSON-body binding and doesn't affect this multipart form.
+  // Images attach inline as repeated `imageFiles` parts — there is no
+  // separate pre-upload-then-URL step for listings. `status`/
+  // `subcategoryId` aren't on the DTO shown but are kept here: extra
+  // unbound form keys are ignored by ASP.NET model binding (confirmed
+  // pattern elsewhere in this repo), and dropping them would silently
+  // break the pause-resume status mutation if the backend DOES bind them.
   Future<FormData> _listingFormData({
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -123,15 +123,13 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   }) async {
     final fields = <String, dynamic>{
       if (id != null) 'id': id,
-      'titleEn': titleEn,
-      'titleAr': titleAr,
-      'descriptionEn': descriptionEn,
-      'descriptionAr': descriptionAr,
+      'title': title,
+      'description': description,
       'price': price.toString(),
       if (compareAtPrice != null) 'compareAtPrice': compareAtPrice.toString(),
       'categoryId': categoryId.toString(),
       if (subcategoryId != null) 'subcategoryId': subcategoryId.toString(),
-      'condition': listingConditionToWire(condition).toString(),
+      'condition': listingConditionToWireString(condition),
       if (brand.isNotEmpty) 'brand': brand,
       'stockQuantity': stockQuantity.toString(),
       'shippingAvailable': shippingAvailable.toString(),
@@ -165,10 +163,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
 
   @override
   Future<ListingModel> createListing({
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -186,10 +182,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.apiListings,
         data: await _listingFormData(
-          titleEn: titleEn,
-          titleAr: titleAr,
-          descriptionEn: descriptionEn,
-          descriptionAr: descriptionAr,
+          title: title,
+          description: description,
           price: price,
           compareAtPrice: compareAtPrice,
           categoryId: categoryId,
@@ -216,18 +210,20 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       if (_isOffline(e)) {
         final model = ListingModel(
           id: 'local-${DateTime.now().microsecondsSinceEpoch}',
-          title: titleEn,
-          description: descriptionEn,
+          title: title,
+          description: description,
           price: price,
           status: 'pending',
           // Offline scaffold only — imagePaths are local filesystem paths,
           // not hosted URLs, and imageUrls here feeds network-image
           // widgets, so it must stay empty until a real upload succeeds.
           imageUrls: const [],
-          titleEn: titleEn,
-          titleAr: titleAr,
-          descriptionEn: descriptionEn,
-          descriptionAr: descriptionAr,
+          // No separate Arabic variant exists anymore (backend collapsed
+          // to a single Title/Description) — titleAr/descriptionAr default
+          // to '' and are never displayed (see listing_card.dart, which
+          // only ever reads `title`).
+          titleEn: title,
+          descriptionEn: description,
           compareAtPrice: compareAtPrice,
           categoryId: categoryId,
           subcategoryId: subcategoryId,
@@ -274,10 +270,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   @override
   Future<ListingModel> updateListing({
     required String id,
-    required String titleEn,
-    required String titleAr,
-    required String descriptionEn,
-    required String descriptionAr,
+    required String title,
+    required String description,
     required double price,
     double? compareAtPrice,
     required int categoryId,
@@ -299,10 +293,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
         ApiEndpoints.apiListings,
         data: await _listingFormData(
           id: id,
-          titleEn: titleEn,
-          titleAr: titleAr,
-          descriptionEn: descriptionEn,
-          descriptionAr: descriptionAr,
+          title: title,
+          description: description,
           price: price,
           compareAtPrice: compareAtPrice,
           categoryId: categoryId,
@@ -331,14 +323,17 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           throw const ServerException('Listing not found');
         }
         final updated = _localMine[idx].copyWith(
-          title: titleEn,
-          description: descriptionEn,
+          title: title,
+          description: description,
           price: price,
           status: listingStatusToWire(status).toString(),
-          titleEn: titleEn,
-          titleAr: titleAr,
-          descriptionEn: descriptionEn,
-          descriptionAr: descriptionAr,
+          titleEn: title,
+          // titleAr/descriptionAr intentionally omitted — no separate
+          // Arabic variant exists anymore, and unlike the create scaffold
+          // (a fresh model) this copyWith's base already carries whatever
+          // that cached listing had; overwriting to '' would erase it
+          // instead of leaving it as an inert, undisplayed legacy value.
+          descriptionEn: description,
           compareAtPrice: compareAtPrice,
           categoryId: categoryId,
           subcategoryId: subcategoryId,

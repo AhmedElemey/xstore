@@ -446,13 +446,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
 
       final useCase = ref.read(createListingUseCaseProvider);
       final result = await useCase(
-        // ASSUMPTION: single-language form input for now — same string sent
-        // for both En/Ar variants until the form gains a dedicated Arabic
-        // title/description field.
-        titleEn: state.name.trim(),
-        titleAr: state.name.trim(),
-        descriptionEn: state.description.trim(),
-        descriptionAr: state.description.trim(),
+        // CONFIRMED (backend `CreateListingRequest` DTO): a single
+        // Title/Description, not a bilingual pair.
+        title: state.name.trim(),
+        description: state.description.trim(),
         price: price,
         compareAtPrice: (compareAt != null && compareAt > 0) ? compareAt : null,
         categoryId: categoryId,

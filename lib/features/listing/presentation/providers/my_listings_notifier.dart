@@ -123,13 +123,11 @@ class MyListingsNotifier extends _$MyListingsNotifier {
       nextStatus: ListingStatus.active,
       runMutation: () => ref.read(updateListingUseCaseProvider).call(
             id: listing.id,
-            titleEn:
+            title:
                 listing.titleEn.isNotEmpty ? listing.titleEn : listing.title,
-            titleAr: listing.titleAr,
-            descriptionEn: listing.descriptionEn.isNotEmpty
+            description: listing.descriptionEn.isNotEmpty
                 ? listing.descriptionEn
                 : listing.description,
-            descriptionAr: listing.descriptionAr,
             price: listing.price,
             compareAtPrice: listing.compareAtPrice,
             categoryId: listing.categoryId ?? 0,

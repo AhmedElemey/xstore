@@ -123,6 +123,26 @@ int listingConditionToWire(ListingCondition c) {
   }
 }
 
+/// CONFIRMED against the backend's `CreateListingRequest` C# DTO: unlike
+/// GET responses (which serialize `condition` as the numeric wire code),
+/// create/update bind `Condition` as a plain `string?` — the C# enum
+/// member name, parsed server-side (most likely `Enum.TryParse`). Send the
+/// exact member name, not the display label (`listingConditionLabel`
+/// returns spaced/slashed labels like 'Used / For Parts' meant for UI, not
+/// the wire) and not the numeric code used for reads.
+String listingConditionToWireString(ListingCondition c) {
+  switch (c) {
+    case ListingCondition.newItem:
+      return 'New';
+    case ListingCondition.likeNew:
+      return 'LikeNew';
+    case ListingCondition.good:
+      return 'Good';
+    case ListingCondition.usedForParts:
+      return 'UsedForParts';
+  }
+}
+
 /// Parses any condition representation — wire code ('1'..'4'), canonical
 /// display token ('Used / For Parts'), legacy draft token ('Used'), or
 /// backend enum name ('UsedForParts'). Null for unknown or backend-unset
