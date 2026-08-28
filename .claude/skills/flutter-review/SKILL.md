@@ -860,3 +860,8 @@ Rules for the log:
 - **What happened:** `addTearDown(() => debugDefaultTargetPlatformOverride = null)` still failed Flutter's `_verifyInvariants` — that check runs after the test body and before tearDowns.
 - **Rule:** Clear `debugDefaultTargetPlatformOverride` (and other foundation debug flags) in a `try/finally` around the test body, not only in `addTearDown`.
 - **Where it applies:** Widget tests that override `TargetPlatform` (iOS context-menu, Cupertino chrome).
+
+### 2026-08-28 — Drop listen-driven test helpers when the listen goes away
+- **What happened:** Analytics stopped `ref.listen(authProvider)` in favor of `bindSession`, and `_EmittingAuth` was deleted, but `'queues logout when the session goes from signed-in to signed-out'` still constructed `_EmittingAuth` and called `emit(null)` — undefined identifier, and the old assertion no longer matches production (logout is `track` then `bindSession(null)` in `Auth.logout`).
+- **Rule:** When replacing `ref.listen(authProvider)` with an explicit push (`bindSession`, `user:` args), rewrite or delete every test that drove the listener through a fake emit helper. Do not restore the helper so the old test compiles — drive the new production sequence instead.
+- **Where it applies:** `test/analytics_service_test.dart` and any future test that used a fake notifier `emit` solely to fire a removed `ref.listen`.

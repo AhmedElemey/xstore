@@ -16,7 +16,6 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
-import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
