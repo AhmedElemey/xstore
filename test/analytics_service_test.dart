@@ -172,15 +172,17 @@ void main() {
 
   test('queues logout when the session goes from signed-in to signed-out',
       () async {
-    final auth = _EmittingAuth(_user());
     buildContainer(
-      auth: auth,
+      auth: FakeAuth(_user()),
+      sessionUser: _user(),
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     await service.ready;
     expect(service.queuedEventNames, isEmpty);
 
-    auth.emit(null);
+    // Auth.logout tracks then bindSession(null); the event must stay queued.
+    service.track(AnalyticsEvents.logout);
+    service.bindSession(null);
     expect(service.queuedEventNames, [AnalyticsEvents.logout]);
   });
 
