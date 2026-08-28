@@ -13,6 +13,8 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../data/models/listing_model.dart'
@@ -30,6 +32,18 @@ part 'listing_form_notifier.g.dart';
 const _draftKey = 'xstore_listing_form_draft';
 const _maxPhotos = 5;
 const _currencyCode = 'EGP';
+
+/// The location string attached to a new listing — the vendor's registered
+/// store city (falling back to governorate), never retyped per listing.
+/// Empty when the vendor hasn't set a store location yet. Shared between
+/// [ListingFormNotifier] (validation/submit) and the add-listing screen
+/// (read-only display) so both derive it the same way.
+String vendorListingLocation(UserEntity? user) {
+  if (user == null) return '';
+  final city = user.storeCity?.trim() ?? '';
+  if (city.isNotEmpty) return city;
+  return user.storeWilaya?.trim() ?? '';
+}
 
 @riverpod
 class ListingFormNotifier extends _$ListingFormNotifier {
@@ -248,8 +262,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         state = state.copyWith(brand: value as String, errors: e);
       case 'quantity':
         state = state.copyWith(quantity: value as int, errors: e);
-      case 'location':
-        state = state.copyWith(location: value as String, errors: e);
       case 'shippingAvailable':
         state = state.copyWith(shippingAvailable: value as bool, errors: e);
       case 'shippingCostInput':
@@ -352,12 +364,17 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         subcategoryId: state.subcategoryId,
         condition: state.condition,
         quantity: state.quantity,
-        location: state.location,
+        location: profileLocationLabel,
         shippingAvailable: state.shippingAvailable,
         shippingCostInput: state.shippingCostInput,
         compareAtPriceInput: state.compareAtPriceInput,
         subcategoryRequired: _subcategoryRequired,
       );
+
+  /// The vendor's registered store location, resolved from their profile —
+  /// see [vendorListingLocation]. Empty means the vendor hasn't set one yet.
+  String get profileLocationLabel =>
+      vendorListingLocation(ref.read(authProvider).valueOrNull);
 
   /// False only when the selected category is confirmed (from the live
   /// catalog tree) to have no subcategories — otherwise a vendor picking
@@ -445,7 +462,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         stockQuantity: state.quantity,
         shippingAvailable: state.shippingAvailable,
         shippingCost: shippingCost,
-        location: state.location.trim(),
+        location: profileLocationLabel,
         attributes: attributesMap,
         // CONFIRMED (Postman collection): images attach inline as
         // multipart `imageFiles` parts on the create request itself.

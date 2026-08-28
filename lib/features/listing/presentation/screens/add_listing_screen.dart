@@ -11,6 +11,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../commission/domain/entities/commission_breakdown.dart';
@@ -47,7 +48,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _compare = TextEditingController();
   final _description = TextEditingController();
   final _brand = TextEditingController();
-  final _location = TextEditingController();
   final _shippingCost = TextEditingController();
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
@@ -61,7 +61,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _compare.dispose();
     _description.dispose();
     _brand.dispose();
-    _location.dispose();
     _shippingCost.dispose();
     for (final c in _attrKeys) {
       c.dispose();
@@ -78,7 +77,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _compare.text = s.compareAtPriceInput;
     _description.text = s.description;
     _brand.text = s.brand;
-    _location.text = s.location;
     _shippingCost.text = s.shippingCostInput;
     _syncAttributeControllers(s.attributes);
   }
@@ -151,6 +149,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     );
   }
 
+  void _showSetLocationSnackbar() {
+    AppSnackbar.show(
+      context,
+      message: context.l10n.listingErrorStoreLocationRequired,
+      backgroundColor: AppColors.error,
+      action: SnackBarAction(
+        label: context.l10n.setStoreLocation,
+        textColor: AppColors.white,
+        onPressed: () => context.push(AppRoutes.profileEdit),
+      ),
+    );
+  }
+
   Future<void> _publish() async {
     // Proactive check — the backend 403s "Account must be verified to
     // create listings" for an unverified phone; check first instead of
@@ -159,12 +170,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (!mounted) return;
 
     final notifier = ref.read(listingFormNotifierProvider.notifier);
+    // The listing's location now comes from the vendor's own profile
+    // (never retyped per listing) — block early with the same actionable
+    // message the backend's lat/lng gate already uses, instead of a
+    // hidden field-level validation error with no field left to show it on.
+    if (notifier.profileLocationLabel.isEmpty) {
+      _showSetLocationSnackbar();
+      return;
+    }
     notifier.updateField('name', _name.text);
     notifier.updateField('priceInput', _price.text);
     notifier.updateField('compareAtPriceInput', _compare.text);
     notifier.updateField('description', _description.text);
     notifier.updateField('brand', _brand.text);
-    notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
     final retryLabel = context.l10n.retry;
@@ -179,16 +197,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     }
     final err = ref.read(listingFormNotifierProvider).errors['submit'];
     if (err == storeLocationRequiredErrorCode) {
-      AppSnackbar.show(
-        context,
-        message: context.l10n.listingErrorStoreLocationRequired,
-        backgroundColor: AppColors.error,
-        action: SnackBarAction(
-          label: context.l10n.setStoreLocation,
-          textColor: AppColors.white,
-          onPressed: () => context.push(AppRoutes.profileEdit),
-        ),
-      );
+      _showSetLocationSnackbar();
       return;
     }
     if (err != null) {
@@ -215,6 +224,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         ref.watch(allCatalogCategoriesProvider).valueOrNull ??
             const <CatalogCategoryEntity>[];
     final isArabic = ref.watch(appIsArabicProvider);
+    // Watched (not read) so the read-only location row updates as soon as
+    // the vendor sets their store location in profile and comes back.
+    final vendorLocation =
+        vendorListingLocation(ref.watch(authProvider).valueOrNull);
 
     ref.listen<ListingFormState>(listingFormNotifierProvider, (prev, next) {
       if (prev?.draftRevision != next.draftRevision) {
@@ -246,7 +259,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     notifier.updateField('compareAtPriceInput', _compare.text);
                     notifier.updateField('description', _description.text);
                     notifier.updateField('brand', _brand.text);
-                    notifier.updateField('location', _location.text);
                     notifier.updateField(
                       'shippingCostInput',
                       _shippingCost.text,
@@ -314,7 +326,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     form: form,
                     notifier: notifier,
                     errors: err,
-                    locationController: _location,
+                    vendorLocation: vendorLocation,
                     shippingCostController: _shippingCost,
                     attrKeyControllers: _attrKeys,
                     attrValueControllers: _attrVals,
@@ -678,7 +690,7 @@ class _ListingShippingAttributesSection extends StatelessWidget {
     required this.form,
     required this.notifier,
     required this.errors,
-    required this.locationController,
+    required this.vendorLocation,
     required this.shippingCostController,
     required this.attrKeyControllers,
     required this.attrValueControllers,
@@ -687,7 +699,7 @@ class _ListingShippingAttributesSection extends StatelessWidget {
   final ListingFormState form;
   final ListingFormNotifier notifier;
   final Map<String, String?> errors;
-  final TextEditingController locationController;
+  final String vendorLocation;
   final TextEditingController shippingCostController;
   final List<TextEditingController> attrKeyControllers;
   final List<TextEditingController> attrValueControllers;
@@ -706,13 +718,18 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           onChanged: (q) => notifier.updateField('quantity', q),
         ),
         const Gap(AppSpacing.lg),
-        ListingFormField(
+        // Sourced from the vendor's own profile — never retyped per
+        // listing. Tapping it jumps to Edit Profile to change it.
+        _PickerField(
           label: context.l10n.listingFormLocationLabel,
-          controller: locationController,
-          hint: context.l10n.listingFormLocationHint,
-          prefix: const Icon(LucideIcons.mapPin, size: 22),
-          errorText: errors['location'],
-          onChanged: (v) => notifier.updateField('location', v),
+          value: vendorLocation.isEmpty
+              ? context.l10n.setStoreLocation
+              : vendorLocation,
+          valueIsPlaceholder: vendorLocation.isEmpty,
+          errorText: vendorLocation.isEmpty
+              ? context.l10n.listingErrorStoreLocationRequired
+              : errors['location'],
+          onTap: () => context.push(AppRoutes.profileEdit),
         ),
         const Gap(AppSpacing.lg),
         SwitchListTile.adaptive(
