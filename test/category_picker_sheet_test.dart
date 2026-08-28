@@ -339,4 +339,48 @@ void main() {
       expect(find.text('Parts'), findsWidgets);
     },
   );
+
+  testWidgets('add listing platform fee is always 2 EGP', (tester) async {
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _app(
+        extraOverrides: [
+          authProvider.overrideWith(
+            () => FakeAuth(
+              const UserEntity(
+                id: 'v1',
+                name: 'Vendor',
+                email: 'v@test.com',
+                phoneNumber: '01000000000',
+                role: UserRole.vendor,
+              ),
+            ),
+          ),
+          vendorCommissionWalletProvider.overrideWith(
+            (ref) async => _emptyWallet,
+          ),
+        ],
+        home: const AddListingScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final priceColumn = find
+        .ancestor(of: find.text('Price *'), matching: find.byType(Column))
+        .first;
+    await tester.enterText(
+      find.descendant(of: priceColumn, matching: find.byType(TextField)),
+      '1000',
+    );
+    await tester.pump();
+
+    expect(find.textContaining('You earn'), findsOneWidget);
+    expect(find.textContaining('998.00'), findsOneWidget);
+    expect(find.textContaining('2.00'), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
+  });
 }

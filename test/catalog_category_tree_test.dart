@@ -67,6 +67,32 @@ void main() {
       expect(subcategoriesOf([model.toEntity()], 7).single.name.en, 'Parts');
     });
 
+    test('drops inactive children and accepts subCategories alias', () {
+      final model = CatalogCategoryModel.fromJson({
+        'id': 1,
+        'nameEn': 'Electronics',
+        'nameAr': 'إلكترونيات',
+        'isActive': true,
+        'subCategories': [
+          {
+            'id': 11,
+            'nameEn': 'Phones',
+            'nameAr': 'هواتف',
+            'isActive': true,
+            'parentId': 1,
+          },
+          {
+            'id': 12,
+            'nameEn': 'Hidden',
+            'nameAr': 'مخفي',
+            'isActive': false,
+            'parentId': 1,
+          },
+        ],
+      });
+      expect(model.children.map((c) => c.nameEn), ['Phones']);
+    });
+
     test('treats parentId 0 as top-level', () {
       final model = CatalogCategoryModel.fromJson({
         'id': 1,

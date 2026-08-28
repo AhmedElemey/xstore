@@ -39,7 +39,7 @@ class CatalogCategoryRemoteDataSourceImpl
       for (final row in _unwrap(response.data)) {
         try {
           final model = CatalogCategoryModel.fromJson(row);
-          if (model.id != 0) parsed.add(model);
+          if (model.id != 0 && model.isActive) parsed.add(model);
         } catch (_) {}
       }
       return parsed;
