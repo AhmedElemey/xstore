@@ -48,13 +48,13 @@ class XstoreBottomNav extends ConsumerWidget {
         : 0;
 
     // Tab sets mirror the shell branches per role in app_router.dart —
-    // keep both lists in sync when adding a tab.
+    // keep both lists in sync when adding a tab. Vendors have no Home/Explore
+    // tab — they don't browse the marketplace inside their own shell.
     final labels = switch (role) {
       UserRole.vendor => [
-          context.l10n.navHome,
-          context.l10n.navExplore,
-          context.l10n.navAddListing,
           context.l10n.incomingOrders,
+          context.l10n.navAddListing,
+          context.l10n.navWallet,
           context.l10n.navProfile,
         ],
       UserRole.courier => [
@@ -73,10 +73,9 @@ class XstoreBottomNav extends ConsumerWidget {
 
     final icons = switch (role) {
       UserRole.vendor => [
-          LucideIcons.home,
-          LucideIcons.search,
-          LucideIcons.plusCircle,
           LucideIcons.list,
+          LucideIcons.plusCircle,
+          LucideIcons.wallet,
           LucideIcons.user,
         ],
       UserRole.courier => [
@@ -114,7 +113,7 @@ class XstoreBottomNav extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: List.generate(labels.length, (index) {
                 final selected = shell.currentIndex == index;
-                final accentMid = isVendor && index == 2;
+                final accentMid = isVendor && index == 1;
                 final inactiveColor = accentMid && !selected
                     ? AppColors.accent
                     : context.textSecondary;

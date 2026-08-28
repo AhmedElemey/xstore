@@ -890,6 +890,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navAddListing => 'إضافة إعلان';
 
   @override
+  String get navWallet => 'المحفظة';
+
+  @override
+  String get walletGoodStanding => 'رسوم المنصة الخاصة بك محدثة.';
+
+  @override
   String get exploreSearchPlaceholder => 'ابحث في الإعلانات…';
 
   @override

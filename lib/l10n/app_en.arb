@@ -315,6 +315,8 @@
   "navProfile": "Profile",
   "navCart": "Cart",
   "navAddListing": "Add Listing",
+  "navWallet": "Wallet",
+  "walletGoodStanding": "Your platform fees are up to date.",
   "exploreSearchPlaceholder": "Search listings…",
   "clearAllFilters": "Clear All",
   "filters": "Filters",

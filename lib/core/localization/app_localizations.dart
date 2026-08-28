@@ -1820,6 +1820,18 @@ abstract class AppLocalizations {
   /// **'Add Listing'**
   String get navAddListing;
 
+  /// No description provided for @navWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get navWallet;
+
+  /// No description provided for @walletGoodStanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Your platform fees are up to date.'**
+  String get walletGoodStanding;
+
   /// No description provided for @exploreSearchPlaceholder.
   ///
   /// In en, this message translates to:

@@ -119,6 +119,7 @@ void main() {
         '${AppRoutes.vendorOrders}/ord_1',
         AppRoutes.incomingOrders,
         AppRoutes.storeHours,
+        AppRoutes.vendorWallet,
         AppRoutes.earnings,
         AppRoutes.analytics,
       ]) {
@@ -147,7 +148,24 @@ void main() {
             needsRoleSelection: false,
             matchedLocation: loc,
           ),
-          AppRoutes.home,
+          // Vendors have no /home tab — their shell lands on Incoming Orders.
+          AppRoutes.vendorOrders,
+          reason: 'vendor should be redirected from $loc',
+        );
+      }
+    });
+
+    test('vendor navigating to /home or /explore lands on its own shell '
+        'home (Incoming Orders) — those tabs only exist in the consumer '
+        'shell', () {
+      for (final loc in [AppRoutes.home, AppRoutes.explore]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: AsyncValue.data(_vendor()),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          AppRoutes.vendorOrders,
           reason: 'vendor should be redirected from $loc',
         );
       }
@@ -216,6 +234,7 @@ void main() {
       for (final (user, loc) in [
         (_vendor(), AppRoutes.listingAdd),
         (_vendor(), AppRoutes.storeHours),
+        (_vendor(), AppRoutes.vendorWallet),
         (_vendor(), AppRoutes.incomingOrders),
         // Vendors open consumer order detail via incoming orders.
         (_vendor(), AppRoutes.orderPath('ord_1')),
