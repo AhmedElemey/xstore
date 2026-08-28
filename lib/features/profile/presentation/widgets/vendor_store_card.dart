@@ -10,7 +10,8 @@ import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../../../../shared/utils/public_seller_stats.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class VendorStoreCard extends ConsumerWidget {
@@ -25,7 +26,8 @@ class VendorStoreCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isOpen = ref.watch(storeHoursNotifierProvider.select((s) => s.isStoreOpen));
+    // TODO(phase-2): Store/active hours deferred to next phase.
+    // final isOpen = ref.watch(storeHoursNotifierProvider.select((s) => s.isStoreOpen));
     final u = profile.user;
     final storeName = u.storeName ?? u.name;
     final category = u.storeCategory ?? '';
@@ -119,38 +121,39 @@ class VendorStoreCard extends ConsumerWidget {
               ),
             ],
           ),
-          const Gap(AppSpacing.sm),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: isOpen ? AppColors.success : AppColors.error,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const Gap(AppSpacing.xs),
-                Text(
-                  isOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: isOpen ? AppColors.success : AppColors.error,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // TODO(phase-2): Store/active hours deferred to next phase.
+          // const Gap(AppSpacing.sm),
+          // Container(
+          //   padding: const EdgeInsets.symmetric(
+          //     horizontal: AppSpacing.sm,
+          //     vertical: AppSpacing.xs,
+          //   ),
+          //   decoration: BoxDecoration(
+          //     color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
+          //     borderRadius: BorderRadius.circular(6),
+          //   ),
+          //   child: Row(
+          //     mainAxisSize: MainAxisSize.min,
+          //     children: [
+          //       Container(
+          //         width: 6,
+          //         height: 6,
+          //         decoration: BoxDecoration(
+          //           color: isOpen ? AppColors.success : AppColors.error,
+          //           shape: BoxShape.circle,
+          //         ),
+          //       ),
+          //       const Gap(AppSpacing.xs),
+          //       Text(
+          //         isOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
+          //         style: AppTypography.labelSmall.copyWith(
+          //           color: isOpen ? AppColors.success : AppColors.error,
+          //           fontWeight: FontWeight.w600,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

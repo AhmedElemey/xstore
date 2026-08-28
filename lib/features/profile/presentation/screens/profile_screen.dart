@@ -20,7 +20,8 @@ import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/profile_verification_banner.dart';
 import '../widgets/vendor_store_card.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
 
@@ -40,7 +41,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _scroll = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureProfileLoaded();
-      ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
+      // TODO(phase-2): Store/active hours deferred to next phase.
+      // ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
     });
   }
 
