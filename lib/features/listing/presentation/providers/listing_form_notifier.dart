@@ -17,6 +17,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../data/models/listing_model.dart'
     show listingConditionFromToken;
 import '../../domain/entities/listing_entity.dart';
@@ -33,17 +34,37 @@ const _draftKey = 'xstore_listing_form_draft';
 const _maxPhotos = 5;
 const _currencyCode = 'EGP';
 
-/// The location string attached to a new listing — the vendor's registered
-/// store city (falling back to governorate), never retyped per listing.
-/// Empty when the vendor hasn't set a store location yet. Shared between
-/// [ListingFormNotifier] (validation/submit) and the add-listing screen
-/// (read-only display) so both derive it the same way.
+/// Display string for a listing's location, copied from the vendor's
+/// profile store object — never typed per listing.
+///
+/// Prefers the Google/user address on the store, then city + governorate
+/// names. Empty when the profile has no location text (coordinates may
+/// still be set — see [vendorHasStoreLocation]).
 String vendorListingLocation(UserEntity? user) {
   if (user == null) return '';
-  final city = user.storeCity?.trim() ?? '';
+  String t(String? value) => value?.trim() ?? '';
+
+  final google = t(user.location);
+  if (google.isNotEmpty) return google;
+  final userAddress = t(user.detailAddress);
+  if (userAddress.isNotEmpty) return userAddress;
+
+  final city = t(user.storeCity);
+  final wilaya = t(user.storeWilaya);
+  if (city.isNotEmpty && wilaya.isNotEmpty) return '$city, $wilaya';
   if (city.isNotEmpty) return city;
-  return user.storeWilaya?.trim() ?? '';
+  if (wilaya.isNotEmpty) return wilaya;
+
+  final town = t(user.town);
+  final gov = t(user.governorate);
+  if (town.isNotEmpty && gov.isNotEmpty) return '$town, $gov';
+  if (town.isNotEmpty) return town;
+  return gov;
 }
+
+/// Backend create-listing 403s unless the vendor store has lat/lng.
+bool vendorHasStoreLocation(UserEntity? user) =>
+    user != null && user.latitude != null && user.longitude != null;
 
 @riverpod
 class ListingFormNotifier extends _$ListingFormNotifier {
@@ -365,16 +386,23 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         condition: state.condition,
         quantity: state.quantity,
         location: profileLocationLabel,
+        hasStoreLocation: vendorHasStoreLocation(_vendorUser),
         shippingAvailable: state.shippingAvailable,
         shippingCostInput: state.shippingCostInput,
         compareAtPriceInput: state.compareAtPriceInput,
         subcategoryRequired: _subcategoryRequired,
       );
 
+  /// Loaded get-profile user (store location object) when present, else
+  /// the session user. Profile is the source of truth for store lat/lng
+  /// and address fields after login — auth restore may not have them yet.
+  UserEntity? get _vendorUser =>
+      ref.read(profileNotifierProvider).profile?.user ??
+      ref.read(authProvider).valueOrNull;
+
   /// The vendor's registered store location, resolved from their profile —
   /// see [vendorListingLocation]. Empty means the vendor hasn't set one yet.
-  String get profileLocationLabel =>
-      vendorListingLocation(ref.read(authProvider).valueOrNull);
+  String get profileLocationLabel => vendorListingLocation(_vendorUser);
 
   /// False only when the selected category is confirmed (from the live
   /// catalog tree) to have no subcategories — otherwise a vendor picking

@@ -392,9 +392,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final compare = _num(json['compareAtPrice'] ?? json['compare_at_price']);
     final stock = (json['stockQuantity'] ?? json['stock'] ?? json['quantity'])
         as num?;
-    final loc = (json['locationLine'] ??
-            json['location'] ??
-            _locationFromParts(json))
+    final loc = (json['locationLine'] ?? json['location'] ?? _locationFromParts(json))
         .toString();
 
     // CONFIRMED against a live backend: listing detail sends flat
@@ -447,11 +445,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   }
 
   String _locationFromParts(Map<String, dynamic> json) {
-    final city = json['city']?.toString() ?? '';
-    final wilaya = json['wilaya']?.toString() ?? '';
-    final country = json['country']?.toString() ?? '';
-    final parts = [city, wilaya, country].where((e) => e.isNotEmpty).join(', ');
-    return parts.isEmpty ? '' : '📍 $parts';
+    String t(dynamic value) => value?.toString().trim() ?? '';
+
+    final userAddress = t(json['detailedAddressByUser']);
+    if (userAddress.isNotEmpty) return userAddress;
+    final googleAddress = t(json['detailedAddressByGoogleMaps']);
+    if (googleAddress.isNotEmpty) return googleAddress;
+    final gov = t(json['governorateNameEn']);
+    if (gov.isNotEmpty) return gov;
+    final govAr = t(json['governorateNameAr']);
+    if (govAr.isNotEmpty) return govAr;
+    final parts = [t(json['city']), t(json['wilaya']), t(json['country'])]
+        .where((e) => e.isNotEmpty)
+        .join(', ');
+    return parts;
   }
 
   ProductSellerEntity? _parseFlatSeller(Map<String, dynamic> json) {

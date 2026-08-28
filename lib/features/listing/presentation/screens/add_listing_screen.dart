@@ -11,6 +11,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
@@ -19,6 +20,7 @@ import '../../../commission/presentation/providers/commission_config_provider.da
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../../commission/presentation/widgets/commission_breakdown_card.dart';
 import '../../../commission/presentation/widgets/vendor_commission_alert_banner.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../data/listing_categories_data.dart';
 import '../providers/listing_form_notifier.dart';
 import '../providers/listing_form_state.dart';
@@ -52,6 +54,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
   late final FocusNode _brandFocus = FocusNode();
+
+  /// Store location lives on get-profile (`profile.profile`), not the
+  /// auth session restored from a token. Watch both so publish gating
+  /// updates after edit-profile.
+  UserEntity? get _vendorProfileUser =>
+      ref.read(profileNotifierProvider).profile?.user ??
+      ref.read(authProvider).valueOrNull;
 
   @override
   void dispose() {
@@ -170,11 +179,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (!mounted) return;
 
     final notifier = ref.read(listingFormNotifierProvider.notifier);
-    // The listing's location now comes from the vendor's own profile
-    // (never retyped per listing) — block early with the same actionable
-    // message the backend's lat/lng gate already uses, instead of a
-    // hidden field-level validation error with no field left to show it on.
-    if (notifier.profileLocationLabel.isEmpty) {
+    // Location comes from the vendor profile store object (lat/lng), not
+    // a per-listing field. Block early with the same "Set location" CTA
+    // the backend 403 uses.
+    if (!vendorHasStoreLocation(_vendorProfileUser)) {
       _showSetLocationSnackbar();
       return;
     }
@@ -224,10 +232,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         ref.watch(allCatalogCategoriesProvider).valueOrNull ??
             const <CatalogCategoryEntity>[];
     final isArabic = ref.watch(appIsArabicProvider);
-    // Watched (not read) so the read-only location row updates as soon as
-    // the vendor sets their store location in profile and comes back.
-    final vendorLocation =
-        vendorListingLocation(ref.watch(authProvider).valueOrNull);
+    // Rebuild when get-profile lands so canSubmit sees store lat/lng.
+    ref.watch(profileNotifierProvider.select((s) => s.profile?.user));
+    ref.watch(authProvider);
 
     ref.listen<ListingFormState>(listingFormNotifierProvider, (prev, next) {
       if (prev?.draftRevision != next.draftRevision) {
@@ -326,7 +333,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     form: form,
                     notifier: notifier,
                     errors: err,
-                    vendorLocation: vendorLocation,
                     shippingCostController: _shippingCost,
                     attrKeyControllers: _attrKeys,
                     attrValueControllers: _attrVals,
@@ -691,7 +697,6 @@ class _ListingShippingAttributesSection extends StatelessWidget {
     required this.form,
     required this.notifier,
     required this.errors,
-    required this.vendorLocation,
     required this.shippingCostController,
     required this.attrKeyControllers,
     required this.attrValueControllers,
@@ -700,7 +705,6 @@ class _ListingShippingAttributesSection extends StatelessWidget {
   final ListingFormState form;
   final ListingFormNotifier notifier;
   final Map<String, String?> errors;
-  final String vendorLocation;
   final TextEditingController shippingCostController;
   final List<TextEditingController> attrKeyControllers;
   final List<TextEditingController> attrValueControllers;
@@ -717,20 +721,6 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           quantity: form.quantity,
           errorText: errors['quantity'],
           onChanged: (q) => notifier.updateField('quantity', q),
-        ),
-        const Gap(AppSpacing.lg),
-        // Sourced from the vendor's own profile — never retyped per
-        // listing. Tapping it jumps to Edit Profile to change it.
-        _PickerField(
-          label: context.l10n.listingFormLocationLabel,
-          value: vendorLocation.isEmpty
-              ? context.l10n.setStoreLocation
-              : vendorLocation,
-          valueIsPlaceholder: vendorLocation.isEmpty,
-          errorText: vendorLocation.isEmpty
-              ? context.l10n.listingErrorStoreLocationRequired
-              : errors['location'],
-          onTap: () => context.push(AppRoutes.profileEdit),
         ),
         const Gap(AppSpacing.lg),
         SwitchListTile.adaptive(

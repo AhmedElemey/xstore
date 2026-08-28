@@ -159,7 +159,7 @@ abstract final class Validators {
     }
     if (input.condition.isEmpty) return true;
     if (input.quantity < 1) return true;
-    if (input.location.trim().isEmpty) return true;
+    if (!_listingLocationOk(input)) return true;
     if (input.shippingAvailable) {
       final sc = parseMoneyInput(input.shippingCostInput);
       if (sc == null || sc < 0) return true;
@@ -214,7 +214,7 @@ abstract final class Validators {
     if (input.quantity < 1) {
       err['quantity'] = l10n.listingValidationQuantityMin;
     }
-    if (input.location.trim().isEmpty) {
+    if (!_listingLocationOk(input)) {
       err['location'] = l10n.listingValidationLocationRequired;
     }
     if (input.shippingAvailable) {
@@ -250,6 +250,7 @@ class ListingFormValidationInput {
     required this.shippingCostInput,
     this.compareAtPriceInput = '',
     this.subcategoryRequired = true,
+    this.hasStoreLocation,
   });
 
   final List<String> photoPaths;
@@ -270,6 +271,16 @@ class ListingFormValidationInput {
   /// satisfy the requirement. Defaults true (unknown/loading categories
   /// stay conservative and still require one).
   final bool subcategoryRequired;
+
+  /// When set, location is valid iff this is true (vendor profile has
+  /// store lat/lng). When null, [location] being non-empty is enough —
+  /// keeps existing tests that only pass a city string.
+  final bool? hasStoreLocation;
+}
+
+bool _listingLocationOk(ListingFormValidationInput input) {
+  if (input.hasStoreLocation != null) return input.hasStoreLocation!;
+  return input.location.trim().isNotEmpty;
 }
 
 /// Egypt phone normalization and E.164 helpers (non-UI).

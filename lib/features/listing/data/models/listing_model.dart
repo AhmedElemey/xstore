@@ -46,7 +46,17 @@ Map<String, dynamic> _normalizeListingJson(Map<String, dynamic> json) {
   m['stockQuantity'] = m['stockQuantity'] ?? m['stock'] ?? m['quantity'] ?? 0;
   m['shippingAvailable'] = m['shippingAvailable'] ?? false;
   m['shippingCost'] = m['shippingCost'] ?? 0.0;
-  m['location'] = m['location'] ?? '';
+  // Listing-level `location` is optional; GET also echoes the vendor
+  // store location object (from profile) as governorate/address fields.
+  final loc = m['location']?.toString().trim() ?? '';
+  m['location'] = loc.isNotEmpty
+      ? loc
+      : (m['detailedAddressByUser'] ??
+              m['detailedAddressByGoogleMaps'] ??
+              m['governorateNameEn'] ??
+              m['governorateNameAr'] ??
+              '')
+          .toString();
   m['attributes'] = m['attributes'] is Map
       ? (m['attributes'] as Map)
           .map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''))
