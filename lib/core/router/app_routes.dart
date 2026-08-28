@@ -25,6 +25,7 @@ abstract final class AppRoutes {
   static const profileVerification = '/profile/verify';
   static const orders = '/orders';
   static const vendorOrders = '/vendor-orders';
+  static const vendorWallet = '/vendor-wallet';
   /// Vendor stack route (same [OrdersScreen] as consumer tab).
   static const incomingOrders = '/incoming-orders';
   static const orderDetail = '/order';
@@ -61,21 +62,23 @@ abstract final class AppRoutes {
   static String chatThread(String threadId) => '/chat/$threadId';
 }
 
-/// Vendor-only areas: listing management, incoming orders, store tooling.
-/// Guarded centrally in `computeXStoreAuthRedirect` — consumers who deep-link
-/// or navigate here are sent back to home.
+/// Vendor-only areas: listing management, incoming orders, wallet, store
+/// tooling. Guarded centrally in `computeXStoreAuthRedirect` — consumers who
+/// deep-link or navigate here are sent back to their role's home.
 bool isVendorRestrictedRoute(String location) {
   return location.startsWith('/listing') ||
       location.startsWith(AppRoutes.vendorOrders) ||
       location == AppRoutes.incomingOrders ||
       location == AppRoutes.storeHours ||
+      location == AppRoutes.vendorWallet ||
       location == AppRoutes.earnings ||
       location == AppRoutes.analytics;
 }
 
 /// Consumer-only areas: the buying flow. Vendors don't shop in this app
-/// (their shell has no cart/wishlist/orders tabs), so a vendor landing here
-/// via deep link or stale navigation is sent back to home.
+/// (their shell has no home/explore/cart/wishlist/orders tabs), so a vendor
+/// landing here via deep link or stale navigation is sent back to Incoming
+/// Orders.
 ///
 /// `/order/:id` is deliberately NOT here — vendors open it too, via
 /// `/incoming-orders` → [OrdersScreen] → `OrderCard`.

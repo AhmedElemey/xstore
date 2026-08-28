@@ -889,6 +889,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAddListing => 'Add Listing';
 
   @override
+  String get navWallet => 'Wallet';
+
+  @override
+  String get walletGoodStanding => 'Your platform fees are up to date.';
+
+  @override
   String get exploreSearchPlaceholder => 'Search listings…';
 
   @override

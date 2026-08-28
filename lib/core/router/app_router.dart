@@ -18,6 +18,7 @@ import '../../features/auth/presentation/providers/phone_auth_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
 import '../../features/delivery/presentation/screens/courier_deliveries_screen.dart';
@@ -117,27 +118,18 @@ List<StatefulShellBranch> _consumerShellBranches() => [
       ),
     ];
 
+// Vendors have no marketplace-browsing tabs — Home/Explore are consumer-only.
+// Order matches xstore_bottom_nav.dart's vendor label/icon lists: keep both
+// in sync when adding/reordering a tab.
 List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.home,
+            path: AppRoutes.vendorOrders,
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const HomeScreen(),
-            ),
-          ),
-        ],
-      ),
-      StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.explore,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ExploreScreen(),
+              const VendorOrdersScreen(),
             ),
           ),
         ],
@@ -157,11 +149,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.vendorOrders,
+            path: AppRoutes.vendorWallet,
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const VendorOrdersScreen(),
+              const VendorWalletScreen(),
             ),
           ),
         ],
