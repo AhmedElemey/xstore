@@ -407,7 +407,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   }
 }
 
-class _ListingPhotosBasicsSection extends ConsumerWidget {
+class _ListingPhotosBasicsSection extends StatelessWidget {
   const _ListingPhotosBasicsSection({
     required this.form,
     required this.notifier,
@@ -431,10 +431,8 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
   final bool showCompareWarn;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final price = Validators.parseMoneyInput(form.priceInput);
-    final categoryId = int.tryParse(form.categoryId);
-    final feeEgp = ref.watch(commissionFeeEgpForCategoryProvider(categoryId));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -469,7 +467,10 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
         if (price != null && price > 0) ...[
           const Gap(AppSpacing.sm),
           CommissionBreakdownCard(
-            breakdown: CommissionBreakdown.forPrice(price, feeEgp: feeEgp),
+            breakdown: CommissionBreakdown.forPrice(
+              price,
+              feeEgp: kStarterCommissionFeeEgp,
+            ),
             currencyCode: notifier.currencyCode,
           ),
         ],

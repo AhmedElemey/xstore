@@ -121,7 +121,7 @@ class _CatalogPickerBody extends ConsumerWidget {
                 data: (all) {
                   final parent = parentId;
                   final items = parent == null
-                      ? all
+                      ? topLevelCategories(all)
                       : subcategoriesOf(all, parent);
                   if (items.isEmpty) {
                     return Center(

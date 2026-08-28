@@ -7,16 +7,14 @@ import '../../../orders/presentation/providers/orders_dependencies.dart';
 
 part 'commission_config_provider.g.dart';
 
-/// Fallback flat commission fee (EGP per order), used while
-/// [vendorCommissionSnapshot] is loading, failed, or the session has no
-/// vendor identity (mock mode included — mock has no real backend truth).
-/// The real value is admin-configured; see [vendorCommissionSnapshot] for
-/// where it's actually sourced.
+/// Flat platform fee (EGP per order). Product rule: always 2 EGP — not a
+/// percentage of price, and not [OrderStatsEntity.commissionValueOnOrder]
+/// (that field is 0 when unset, so `??` cannot treat it as "use the
+/// fallback").
 const double kStarterCommissionFeeEgp = 2.0;
 
-/// Fallback weekly vendor owed-balance thresholds (EGP) — see
-/// [kStarterCommissionFeeEgp] for when these apply instead of the real,
-/// admin-configured values.
+/// Fallback weekly vendor owed-balance thresholds (EGP) used while
+/// [vendorCommissionSnapshot] is loading or has no values.
 const double kCommissionWarnThresholdEgp = 100.0;
 const double kCommissionPauseThresholdEgp = 200.0;
 
@@ -47,11 +45,12 @@ Future<OrderStatsEntity?> vendorCommissionSnapshot(
   return result.fold((_) => null, (stats) => stats);
 }
 
+/// Flat 2 EGP regardless of [categoryId]. The family argument is kept so
+/// existing call sites compile; the fee is not per-category.
 @riverpod
 double commissionFeeEgpForCategory(
   CommissionFeeEgpForCategoryRef ref,
   int? categoryId,
 ) {
-  final snapshot = ref.watch(vendorCommissionSnapshotProvider).valueOrNull;
-  return snapshot?.commissionValueOnOrder ?? kStarterCommissionFeeEgp;
+  return kStarterCommissionFeeEgp;
 }

@@ -7,11 +7,14 @@ class CatalogCategoryModel {
     required this.nameEn,
     required this.nameAr,
     this.parentId,
+    this.isActive = true,
     this.children = const [],
   });
 
   factory CatalogCategoryModel.fromJson(Map<String, dynamic> json) {
-    final rawChildren = json['children'];
+    final rawChildren = json['children'] ??
+        json['subCategories'] ??
+        json['subcategories'];
     final children = rawChildren is List
         ? rawChildren
             .whereType<Map>()
@@ -20,6 +23,7 @@ class CatalogCategoryModel {
                 Map<String, dynamic>.from(e),
               ),
             )
+            .where((c) => c.isActive && c.id != 0)
             .toList()
         : const <CatalogCategoryModel>[];
     final parentId = _asInt(json['parentId']);
@@ -28,6 +32,7 @@ class CatalogCategoryModel {
       nameEn: _asString(json['nameEn']) ?? _asString(json['name']) ?? '',
       nameAr: _asString(json['nameAr']) ?? '',
       parentId: parentId == null || parentId == 0 ? null : parentId,
+      isActive: json['isActive'] is bool ? json['isActive'] as bool : true,
       children: children,
     );
   }
@@ -48,6 +53,7 @@ class CatalogCategoryModel {
   final String nameEn;
   final String nameAr;
   final int? parentId;
+  final bool isActive;
   final List<CatalogCategoryModel> children;
 }
 

@@ -163,4 +163,34 @@ void main() {
       expect(models.map((e) => e.id), [7, 4]);
     },
   );
+
+  test(
+    'skips inactive top-level categories',
+    skip: skipMock,
+    () async {
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
+        ..httpClientAdapter = _Adapter(
+          jsonEncode([
+            {
+              'id': 7,
+              'nameEn': 'Automotive',
+              'nameAr': 'السيارات',
+              'isActive': true,
+              'children': <dynamic>[],
+            },
+            {
+              'id': 99,
+              'nameEn': 'Hidden',
+              'nameAr': 'مخفي',
+              'isActive': false,
+              'children': <dynamic>[],
+            },
+          ]),
+        );
+      final ds = CatalogCategoryRemoteDataSourceImpl(dio);
+
+      final models = await ds.getCategories();
+      expect(models.map((e) => e.id), [7]);
+    },
+  );
 }
