@@ -49,6 +49,8 @@ abstract final class AppRoutes {
   static const product = '/product';
   static const sellerProfile = '/seller';
   static String sellerPath(String sellerId) => '$sellerProfile/$sellerId';
+  // TODO(phase-2): Store/active hours deferred to next phase — route
+  // currently redirects to profile (see app_router.dart).
   static const storeHours = '/store-hours';
   static const listingAdd = '/listing/add';
   static const listingMy = '/listing/my';

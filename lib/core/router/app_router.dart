@@ -41,7 +41,8 @@ import '../../features/profile/presentation/providers/profile_verification_provi
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
-import '../../features/store/presentation/screens/store_hours_screen.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
@@ -527,13 +528,11 @@ GoRouter goRouter(GoRouterRef ref) {
           const AddressesInfoScreen(),
         ),
       ),
+      // TODO(phase-2): Store/active hours screen deferred to next phase.
+      // Route redirects to profile in the meantime instead of dead-ending.
       GoRoute(
         path: AppRoutes.storeHours,
-        pageBuilder: (context, state) => slideUpTransition(
-          context,
-          state,
-          const StoreHoursScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.help,
