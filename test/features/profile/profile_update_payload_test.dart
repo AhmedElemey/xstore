@@ -160,6 +160,27 @@ void main() {
       expect(body['instagramPage'], 'techhub');
       expect(body['facebookPage'], 'techhub.eg');
     });
+
+    test('sends the picked storeCategoryId, not the loaded user id', () {
+      const user = UserEntity(
+        id: '1',
+        name: 'Vendor',
+        email: 'v@test.com',
+        phoneNumber: '010',
+        role: UserRole.vendor,
+        storeCategoryId: 2,
+        storeCategory: 'Fashion',
+      );
+      final state = ProfileState(
+        profile: ProfileEntity(user: user),
+        editStoreCategoryId: 5,
+        editStoreCategory: 'Sports',
+      );
+
+      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+
+      expect(body['storeCategoryId'], 5);
+    });
   });
 
   group('mock profile save → fetch round-trip', () {

@@ -15,6 +15,7 @@ class PhoneInputField extends StatelessWidget {
     required this.onChanged,
     this.errorText,
     this.enabled = true,
+    this.readOnly = false,
     this.suffix,
   });
 
@@ -22,6 +23,7 @@ class PhoneInputField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String? errorText;
   final bool enabled;
+  final bool readOnly;
 
   /// Trailing widget inside the field (e.g. a Verify action). Replaces the
   /// clear button so the row stays on one line.
@@ -65,18 +67,21 @@ class PhoneInputField extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: TextFormField(
                 controller: controller,
-                onChanged: (value) {
-                  final normalized = _normalizeEgyptInput(value);
-                  if (controller.text != normalized) {
-                    controller.value = TextEditingValue(
-                      text: normalized,
-                      selection: TextSelection.collapsed(
-                        offset: normalized.length,
-                      ),
-                    );
-                  }
-                  onChanged(normalized);
-                },
+                readOnly: readOnly,
+                onChanged: readOnly
+                    ? null
+                    : (value) {
+                        final normalized = _normalizeEgyptInput(value);
+                        if (controller.text != normalized) {
+                          controller.value = TextEditingValue(
+                            text: normalized,
+                            selection: TextSelection.collapsed(
+                              offset: normalized.length,
+                            ),
+                          );
+                        }
+                        onChanged(normalized);
+                      },
                 enabled: enabled,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
@@ -101,7 +106,7 @@ class PhoneInputField extends StatelessWidget {
                   ),
                 
                   suffixIcon: suffix ??
-                      (controller.text.isNotEmpty
+                      (!readOnly && controller.text.isNotEmpty
                           ? IconButton(
                               onPressed: () {
                                 controller.clear();

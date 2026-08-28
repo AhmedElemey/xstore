@@ -55,7 +55,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _town = TextEditingController();
   final _detailAddress = TextEditingController();
 
-  int? _categoryId;
   DateTime? _dob;
   var _synced = false;
 
@@ -98,10 +97,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ? DateFormat.yMMMd().format(s.editDateOfBirth!)
         : '';
     _storeName.text = s.editStoreName;
-    _categoryId = s.editStoreCategoryId;
-    _storeCategory.text = s.editStoreCategory.isEmpty
-        ? context.l10n.requiredField
-        : s.editStoreCategory;
+    _storeCategory.text = _storeCategoryLabel(s);
     _storeDescription.text = s.editStoreDescription;
     _storeCity.text = s.editStoreCity;
     _storeWilaya.text = s.editStoreWilaya;
@@ -138,65 +134,69 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _pickCategory() async {
-    await showAnimatedBottomSheet<void>(
+    final id = await showAnimatedBottomSheet<int>(
       context: context,
       builder: (ctx) => Consumer(
         builder: (ctx, ref, _) {
           final async = ref.watch(allCatalogCategoriesProvider);
+          final selectedId = ref.watch(
+            profileNotifierProvider.select((s) => s.editStoreCategoryId),
+          );
+          final height = MediaQuery.sizeOf(context).height * 0.55;
           return Material(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             clipBehavior: Clip.antiAlias,
             child: SafeArea(
-              child: async.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(AppSpacing.x2l),
-                  child: Center(child: CircularProgressIndicator.adaptive()),
-                ),
-                error: (_, __) => Padding(
-                  padding: const EdgeInsets.all(AppSpacing.x2l),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+              child: SizedBox(
+                height: height,
+                child: async.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                  error: (_, __) => Padding(
+                    padding: const EdgeInsets.all(AppSpacing.x2l),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(context.l10n.genericError),
+                        const Gap(AppSpacing.sm),
+                        TextButton(
+                          onPressed: () =>
+                              ref.invalidate(allCatalogCategoriesProvider),
+                          child: Text(context.l10n.retry),
+                        ),
+                      ],
+                    ),
+                  ),
+                  data: (items) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(context.l10n.genericError),
-                      const Gap(AppSpacing.sm),
-                      TextButton(
-                        onPressed: () =>
-                            ref.invalidate(allCatalogCategoriesProvider),
-                        child: Text(context.l10n.retry),
+                      Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Text(
+                          context.l10n.storeCategoryLabel,
+                          style: AppTypography.titleMedium,
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: items.length,
+                          itemBuilder: (_, i) {
+                            final c = items[i];
+                            return ListTile(
+                              title: Text(c.name.resolve(context.isArabic)),
+                              trailing: selectedId == c.id
+                                  ? const Icon(Icons.check)
+                                  : null,
+                              onTap: () => Navigator.pop(ctx, c.id),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
-                ),
-                data: (items) => ListView(
-                  shrinkWrap: true,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Text(
-                        context.l10n.storeCategoryLabel,
-                        style: AppTypography.titleMedium,
-                      ),
-                    ),
-                    for (final c in items)
-                      ListTile(
-                        title: Text(c.name.resolve(context.isArabic)),
-                        trailing: _categoryId == c.id
-                            ? const Icon(Icons.check)
-                            : null,
-                        onTap: () {
-                          final label = c.name.resolve(context.isArabic);
-                          setState(() {
-                            _categoryId = c.id;
-                            _storeCategory.text = label;
-                          });
-                          ref
-                              .read(profileNotifierProvider.notifier)
-                              .updateStoreCategory(c.id, label);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                  ],
                 ),
               ),
             ),
@@ -204,6 +204,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         },
       ),
     );
+    if (!mounted || id == null) return;
+    final categories =
+        ref.read(allCatalogCategoriesProvider).valueOrNull ?? const [];
+    final cat = _catalogCategoryById(categories, id);
+    final label = cat?.name.resolve(context.isArabic) ?? '';
+    setState(() {
+      _storeCategory.text =
+          label.isEmpty ? context.l10n.requiredField : label;
+    });
+    ref.read(profileNotifierProvider.notifier).updateStoreCategory(id, label);
+  }
+
+  String _storeCategoryLabel(ProfileState s) {
+    final id = s.editStoreCategoryId;
+    final categories = ref.read(allCatalogCategoriesProvider).valueOrNull;
+    if (id != null && categories != null) {
+      final cat = _catalogCategoryById(categories, id);
+      if (cat != null) return cat.name.resolve(context.isArabic);
+    }
+    if (s.editStoreCategory.isEmpty) return context.l10n.requiredField;
+    return s.editStoreCategory;
   }
 
   Future<void> _pickDob() async {
@@ -518,6 +539,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           const Gap(AppSpacing.md),
           TextField(
             controller: _email,
+            readOnly: isVendor,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               prefixIcon: const Icon(LucideIcons.mail),
@@ -529,11 +551,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   const BoxConstraints(minWidth: 0, minHeight: 0),
               border: const OutlineInputBorder(),
             ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('email', v),
+            onChanged: isVendor
+                ? null
+                : (v) => ref
+                    .read(profileNotifierProvider.notifier)
+                    .updateField('email', v),
           ),
           const Gap(AppSpacing.md),
           PhoneInputField(
             controller: _phone,
+            readOnly: isVendor,
             suffix: _VerificationStatus(
               verified: s.profile?.isPhoneVerified ?? false,
               onVerify: _phone.text.trim().isEmpty ? null : _verifyPhone,
@@ -746,6 +773,19 @@ class _VerificationStatus extends StatelessWidget {
       child: Text(context.l10n.verify),
     );
   }
+}
+
+CatalogCategoryEntity? _catalogCategoryById(
+  List<CatalogCategoryEntity> all,
+  int id,
+) {
+  for (final c in all) {
+    if (c.id == id) return c;
+    for (final child in c.children) {
+      if (child.id == id) return child;
+    }
+  }
+  return null;
 }
 
 /// "Governorate - City" from the location saved at register, used as the

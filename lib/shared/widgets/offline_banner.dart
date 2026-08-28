@@ -18,13 +18,13 @@ class OfflineBannerHost extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final online = ref.watch(isOnlineProvider);
 
+    // Instant show/hide (no CrossFade). Animating this Column's height
+    // rebuilds every route and can remount iOS SystemContextMenu after the
+    // text input connection is already gone.
     return Column(
       children: [
-        AnimatedCrossFade(
-          duration: const Duration(milliseconds: 200),
-          crossFadeState:
-              online ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          firstChild: Material(
+        if (!online)
+          Material(
             color: AppColors.warning,
             child: SafeArea(
               bottom: false,
@@ -55,8 +55,6 @@ class OfflineBannerHost extends ConsumerWidget {
               ),
             ),
           ),
-          secondChild: const SizedBox.shrink(),
-        ),
         Expanded(child: child),
       ],
     );

@@ -262,6 +262,45 @@ void main() {
       expect(model.storeId, isNotNull);
     });
 
+    test('reads nested storeCategory object when scalar id/name are absent', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'email': 'vendor@test.com',
+          'fullName': 'Vendor',
+        },
+        'store': {
+          'id': 4,
+          'storeCategory': {
+            'id': 5,
+            'nameEn': 'Sports',
+            'nameAr': 'رياضة',
+          },
+        },
+      });
+      expect(model.storeCategoryId, 5);
+      expect(model.storeCategory, 'Sports');
+    });
+
+    test('prefers storeCategoryId scalar over nested storeCategory.id', () {
+      final model = userModelFromProfileResponse({
+        'user': {
+          'email': 'vendor@test.com',
+          'fullName': 'Vendor',
+        },
+        'store': {
+          'id': 5,
+          'storeCategoryId': 9,
+          'storeCategoryNameEn': 'Books',
+          'storeCategory': {
+            'id': 2,
+            'nameEn': 'Fashion',
+          },
+        },
+      });
+      expect(model.storeCategoryId, 9);
+      expect(model.storeCategory, 'Books');
+    });
+
     test('falls back to nested store nameEn/descriptionEn when name is absent', () {
       final model = userModelFromProfileResponse({
         'user': {

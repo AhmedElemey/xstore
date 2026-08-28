@@ -62,7 +62,6 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editLocation.trim() == (u.location ?? '').trim() &&
       s.editFullNameAr.trim() == (u.fullNameAr ?? '').trim() &&
       s.editStoreName.trim() == (u.storeName ?? '').trim() &&
-      s.editStoreCategory.trim() == (u.storeCategory ?? '').trim() &&
       s.editStoreCategoryId == u.storeCategoryId &&
       s.editStoreDescription.trim() ==
           (u.storeDescription ?? '').trim() &&

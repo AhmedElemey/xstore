@@ -26,11 +26,20 @@ class XstoreApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'xStore',
       builder: (context, child) {
-        final scaler = MediaQuery.textScalerOf(context);
-        return Theme(
-          data: AppTheme.withScaledTextSpacing(Theme.of(context), scaler),
-          child: OfflineBannerHost(
-            child: child ?? const SizedBox.shrink(),
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+          // iOS SystemContextMenu.build asserts an active TextInputConnection
+          // (readOnly fields, SelectableText, parent rebuilds). Flutter-drawn
+          // AdaptiveTextSelectionToolbar does not. See Flutter #170521.
+          data: media.copyWith(supportsShowingSystemContextMenu: false),
+          child: Theme(
+            data: AppTheme.withScaledTextSpacing(
+              Theme.of(context),
+              media.textScaler,
+            ),
+            child: OfflineBannerHost(
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         );
       },

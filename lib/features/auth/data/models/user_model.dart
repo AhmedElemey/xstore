@@ -111,9 +111,20 @@ void mergeStoreJsonIntoUser(
   );
   put('whatsAppNumber', store['whatsAppNumber']);
   _flattenLocationIntoUser(user, store);
-  put('storeCategoryId', store['storeCategoryId']);
+  put(
+    'storeCategoryId',
+    _optInt(store['storeCategoryId']) ?? _nestedId(store['storeCategory']),
+  );
   put('storeLogoUrl', store['storeLogoUrl']);
-  put('storeCategory', store['storeCategoryNameEn']);
+  put(
+    'storeCategory',
+    firstNonBlank([
+      store['storeCategoryNameEn'],
+      store['storeCategoryNameAr'],
+      store['storeCategory'] is String ? store['storeCategory'] : null,
+      _nestedPlaceName(store['storeCategory']),
+    ]),
+  );
   put('instagramPage', store['instagramPage']);
   put('facebookPage', store['facebookPage']);
   put('latitude', store['lat']);
