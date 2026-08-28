@@ -10,8 +10,9 @@ import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/public_seller_stats.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// import '../../../store/presentation/providers/store_hours_provider.dart';
+// import '../../../auth/presentation/providers/auth_provider.dart';
 
 class SellerCard extends ConsumerWidget {
   const SellerCard({
@@ -28,13 +29,15 @@ class SellerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final authUser = ref.watch(authProvider).valueOrNull;
-    final isOwnStore = authUser != null && authUser.id.isNotEmpty && authUser.id == seller.id;
-    final ownHours = isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
-    final otherHours =
-        isOwnStore ? null : ref.watch(sellerStoreHoursProvider(seller.id)).valueOrNull;
-    final isOpen = ownHours?.isStoreOpen ?? otherHours?.isStoreOpen ?? false;
-    final message = ownHours?.current?.temporaryMessage ?? otherHours?.temporaryMessage;
+    // TODO(phase-2): Store/active hours deferred to next phase — open/closed
+    // badge and closed-store messaging removed until it ships.
+    // final authUser = ref.watch(authProvider).valueOrNull;
+    // final isOwnStore = authUser != null && authUser.id.isNotEmpty && authUser.id == seller.id;
+    // final ownHours = isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
+    // final otherHours =
+    //     isOwnStore ? null : ref.watch(sellerStoreHoursProvider(seller.id)).valueOrNull;
+    // final isOpen = ownHours?.isStoreOpen ?? otherHours?.isStoreOpen ?? false;
+    // final message = ownHours?.current?.temporaryMessage ?? otherHours?.temporaryMessage;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Material(
@@ -74,35 +77,36 @@ class SellerCard extends ConsumerWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const Gap(AppSpacing.xs),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: isOpen ? AppColors.success : AppColors.error,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const Gap(AppSpacing.xs),
-                              Text(
-                                isOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: isOpen ? AppColors.success : AppColors.error,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (!isOpen && message != null && message.isNotEmpty)
-                            Text(
-                              message,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
+                          // TODO(phase-2): Store/active hours deferred to next phase.
+                          // const Gap(AppSpacing.xs),
+                          // Row(
+                          //   children: [
+                          //     Container(
+                          //       width: 8,
+                          //       height: 8,
+                          //       decoration: BoxDecoration(
+                          //         color: isOpen ? AppColors.success : AppColors.error,
+                          //         shape: BoxShape.circle,
+                          //       ),
+                          //     ),
+                          //     const Gap(AppSpacing.xs),
+                          //     Text(
+                          //       isOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
+                          //       style: theme.textTheme.labelSmall?.copyWith(
+                          //         color: isOpen ? AppColors.success : AppColors.error,
+                          //         fontWeight: FontWeight.w700,
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          // if (!isOpen && message != null && message.isNotEmpty)
+                          //   Text(
+                          //     message,
+                          //     style: theme.textTheme.bodySmall?.copyWith(
+                          //       color: theme.colorScheme.onSurfaceVariant,
+                          //       fontStyle: FontStyle.italic,
+                          //     ),
+                          //   ),
                           const Gap(AppSpacing.xs),
                           Text(
                             publicSellerStatsLabel(
@@ -152,21 +156,22 @@ class SellerCard extends ConsumerWidget {
                 ],
                   ],),
               
-                if (!isOpen) ...[
-                  const Gap(AppSpacing.sm),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    ),
-                    child: Text(
-                      context.l10n.storeClosedWarning,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-                ],
+                // TODO(phase-2): Store/active hours deferred to next phase.
+                // if (!isOpen) ...[
+                //   const Gap(AppSpacing.sm),
+                //   Container(
+                //     width: double.infinity,
+                //     padding: const EdgeInsets.all(AppSpacing.sm),
+                //     decoration: BoxDecoration(
+                //       color: AppColors.warning.withValues(alpha: 0.15),
+                //       borderRadius: BorderRadius.circular(AppSpacing.sm),
+                //     ),
+                //     child: Text(
+                //       context.l10n.storeClosedWarning,
+                //       style: theme.textTheme.bodySmall,
+                //     ),
+                //   ),
+                // ],
               ],
             ),
           ),
