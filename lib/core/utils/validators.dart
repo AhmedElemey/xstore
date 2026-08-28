@@ -152,13 +152,22 @@ abstract final class Validators {
     final desc = input.description.trim();
     if (desc.isEmpty || desc.length > 1000) return true;
     if (input.categoryId.isEmpty) return true;
-    if (input.subcategoryId.isEmpty && input.categoryId.isNotEmpty) return true;
+    if (input.subcategoryRequired &&
+        input.subcategoryId.isEmpty &&
+        input.categoryId.isNotEmpty) {
+      return true;
+    }
     if (input.condition.isEmpty) return true;
     if (input.quantity < 1) return true;
     if (input.location.trim().isEmpty) return true;
     if (input.shippingAvailable) {
       final sc = parseMoneyInput(input.shippingCostInput);
       if (sc == null || sc < 0) return true;
+    }
+    final compareAtInput = input.compareAtPriceInput.trim();
+    if (compareAtInput.isNotEmpty) {
+      final compareAt = parseMoneyInput(compareAtInput);
+      if (compareAt == null || compareAt <= price) return true;
     }
     return false;
   }
@@ -194,7 +203,9 @@ abstract final class Validators {
     if (input.categoryId.isEmpty) {
       err['category'] = l10n.listingValidationCategoryRequired;
     }
-    if (input.subcategoryId.isEmpty && input.categoryId.isNotEmpty) {
+    if (input.subcategoryRequired &&
+        input.subcategoryId.isEmpty &&
+        input.categoryId.isNotEmpty) {
       err['subcategory'] = l10n.listingValidationSubcategoryRequired;
     }
     if (input.condition.isEmpty) {
@@ -210,6 +221,13 @@ abstract final class Validators {
       final sc = parseMoneyInput(input.shippingCostInput);
       if (sc == null || sc < 0) {
         err['shippingCost'] = l10n.listingValidationShippingCost;
+      }
+    }
+    final compareAtInput = input.compareAtPriceInput.trim();
+    if (compareAtInput.isNotEmpty) {
+      final compareAt = parseMoneyInput(compareAtInput);
+      if (compareAt == null || (price != null && compareAt <= price)) {
+        err['compareAtPrice'] = l10n.listingValidationCompareAtPrice;
       }
     }
     return err;
@@ -230,6 +248,8 @@ class ListingFormValidationInput {
     required this.location,
     required this.shippingAvailable,
     required this.shippingCostInput,
+    this.compareAtPriceInput = '',
+    this.subcategoryRequired = true,
   });
 
   final List<String> photoPaths;
@@ -243,6 +263,13 @@ class ListingFormValidationInput {
   final String location;
   final bool shippingAvailable;
   final String shippingCostInput;
+  final String compareAtPriceInput;
+
+  /// Whether a subcategory must be picked. False for a category with no
+  /// subcategories on the live taxonomy — otherwise the vendor could never
+  /// satisfy the requirement. Defaults true (unknown/loading categories
+  /// stay conservative and still require one).
+  final bool subcategoryRequired;
 }
 
 /// Egypt phone normalization and E.164 helpers (non-UI).

@@ -13,11 +13,13 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../data/models/listing_model.dart'
     show listingConditionFromToken;
 import '../../domain/entities/listing_entity.dart';
 import '../data/listing_categories_data.dart';
+import '../utils/catalog_category_tree.dart';
 import 'listing_dependencies.dart';
 import 'listing_form_state.dart';
 import 'listing_form_state_extensions.dart';
@@ -224,9 +226,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
           errors: e,
         );
       case 'compareAtPriceInput':
+        final ce = Map<String, String>.from(e)..remove('compareAtPrice');
         state = state.copyWith(
           compareAtPriceInput: _formatPriceInput(value as String),
-          errors: e,
+          errors: ce,
         );
       case 'category':
       case 'categoryId':
@@ -352,7 +355,24 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         location: state.location,
         shippingAvailable: state.shippingAvailable,
         shippingCostInput: state.shippingCostInput,
+        compareAtPriceInput: state.compareAtPriceInput,
+        subcategoryRequired: _subcategoryRequired,
       );
+
+  /// False only when the selected category is confirmed (from the live
+  /// catalog tree) to have no subcategories — otherwise a vendor picking
+  /// that category could never satisfy a subcategory requirement. Stays
+  /// `true` while categories haven't loaded yet or the id can't be
+  /// resolved, matching the previous always-required behavior.
+  bool get _subcategoryRequired {
+    final categoryId = int.tryParse(state.categoryId);
+    if (categoryId == null) return true;
+    final categories = ref.read(allCatalogCategoriesProvider).valueOrNull;
+    if (categories == null) return true;
+    final category = catalogCategoryById(categories, categoryId);
+    if (category == null) return true;
+    return category.children.isNotEmpty;
+  }
 
   /// Whether all required fields satisfy validation (no errors written to state).
   bool get canSubmit =>

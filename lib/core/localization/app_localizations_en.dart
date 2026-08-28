@@ -2940,6 +2940,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingValidationPriceInvalid => 'Enter a valid price';
 
   @override
+  String get listingValidationCompareAtPrice =>
+      'Compare-at price must be greater than the selling price';
+
+  @override
   String get listingValidationDescriptionRequired => 'Description is required';
 
   @override

@@ -305,6 +305,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       isArabic,
                       form.subcategoryId,
                     ),
+                    hasSubcategories: _hasSubcategories(
+                      catalogCategories,
+                      form.categoryId,
+                    ),
                   ),
                   _ListingShippingAttributesSection(
                     form: form,
@@ -372,6 +376,22 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     }
     return catalogCategoryById(categories, intId)?.name.resolve(isArabic) ??
         context.l10n.listingSelectSubcategory;
+  }
+
+  /// Whether the selected category has subcategories to pick from — a
+  /// category with none (leaf top-level category) must not show a
+  /// subcategory picker the vendor could never satisfy. Defaults `true`
+  /// while categories haven't loaded/resolved yet, matching the notifier's
+  /// conservative default so the field is never hidden while still marked
+  /// required.
+  bool _hasSubcategories(
+    List<CatalogCategoryEntity> categories,
+    String categoryId,
+  ) {
+    final intId = int.tryParse(categoryId);
+    if (intId == null) return true;
+    return catalogCategoryById(categories, intId)?.children.isNotEmpty ??
+        true;
   }
 }
 
@@ -456,6 +476,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           hint: '0.00',
           prefixText: '${notifier.currencyCode} ',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          errorText: errors['compareAtPrice'],
           onChanged: (v) => notifier.updateField('compareAtPriceInput', v),
         ),
         Text(
@@ -503,6 +524,7 @@ class _ListingCategoryBrandSection extends StatelessWidget {
     required this.brandFocusNode,
     required this.categoryDisplay,
     required this.subcategoryDisplay,
+    required this.hasSubcategories,
   });
 
   final ListingFormState form;
@@ -512,6 +534,7 @@ class _ListingCategoryBrandSection extends StatelessWidget {
   final FocusNode brandFocusNode;
   final String categoryDisplay;
   final String subcategoryDisplay;
+  final bool hasSubcategories;
 
   @override
   Widget build(BuildContext context) {
@@ -536,7 +559,7 @@ class _ListingCategoryBrandSection extends StatelessWidget {
           ),
         ),
         const Gap(AppSpacing.lg),
-        if (form.categoryId.isNotEmpty) ...[
+        if (form.categoryId.isNotEmpty && hasSubcategories) ...[
           _PickerField(
             label: context.l10n.listingFormSubcategoryLabel,
             value: subcategoryDisplay,

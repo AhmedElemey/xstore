@@ -199,5 +199,67 @@ void main() {
       );
       expect(Validators.listingFormHasErrors(input), isFalse);
     });
+
+    ListingFormValidationInput baseInput({
+      String compareAtPriceInput = '',
+      bool subcategoryRequired = true,
+      String subcategoryId = 's',
+    }) =>
+        ListingFormValidationInput(
+          photoPaths: const ['p'],
+          name: 'Shoes',
+          priceInput: '100',
+          description: 'Nice',
+          categoryId: 'c',
+          subcategoryId: subcategoryId,
+          condition: 'new',
+          quantity: 1,
+          location: 'Cairo',
+          shippingAvailable: false,
+          shippingCostInput: '',
+          compareAtPriceInput: compareAtPriceInput,
+          subcategoryRequired: subcategoryRequired,
+        );
+
+    test('compareAtPrice omitted is valid', () {
+      final input = baseInput();
+      expect(Validators.listingFormHasErrors(input), isFalse);
+      expect(Validators.listingFormErrors(l10n, input)['compareAtPrice'], isNull);
+    });
+
+    test('compareAtPrice below price is rejected', () {
+      final input = baseInput(compareAtPriceInput: '50');
+      expect(Validators.listingFormHasErrors(input), isTrue);
+      expect(
+        Validators.listingFormErrors(l10n, input)['compareAtPrice'],
+        l10n.listingValidationCompareAtPrice,
+      );
+    });
+
+    test('compareAtPrice equal to price is rejected', () {
+      final input = baseInput(compareAtPriceInput: '100');
+      expect(Validators.listingFormHasErrors(input), isTrue);
+    });
+
+    test('compareAtPrice above price is valid', () {
+      final input = baseInput(compareAtPriceInput: '150');
+      expect(Validators.listingFormHasErrors(input), isFalse);
+      expect(Validators.listingFormErrors(l10n, input)['compareAtPrice'], isNull);
+    });
+
+    test('subcategory required by default when category is set', () {
+      final input = baseInput(subcategoryId: '');
+      expect(Validators.listingFormHasErrors(input), isTrue);
+      expect(
+        Validators.listingFormErrors(l10n, input)['subcategory'],
+        l10n.listingValidationSubcategoryRequired,
+      );
+    });
+
+    test('subcategory not required for a leaf category', () {
+      final input = baseInput(subcategoryId: '', subcategoryRequired: false);
+      expect(Validators.listingFormHasErrors(input), isFalse);
+      expect(Validators.listingFormErrors(l10n, input)['subcategory'], isNull);
+    });
   });
 }

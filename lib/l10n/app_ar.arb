@@ -1245,6 +1245,7 @@
   "listingValidationNameRequired": "اسم المنتج مطلوب",
   "listingValidationNameMax": "أقصى 100 حرف",
   "listingValidationPriceInvalid": "اكتب سعر صحيح",
+  "listingValidationCompareAtPrice": "سعر ما قبل الخصم لازم يكون أكبر من سعر البيع",
   "listingValidationDescriptionRequired": "الوصف مطلوب",
   "listingValidationDescriptionMax": "أقصى 1000 حرف",
   "listingValidationCategoryRequired": "اختار التصنيف",

@@ -2930,6 +2930,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingValidationPriceInvalid => 'اكتب سعر صحيح';
 
   @override
+  String get listingValidationCompareAtPrice =>
+      'سعر ما قبل الخصم لازم يكون أكبر من سعر البيع';
+
+  @override
   String get listingValidationDescriptionRequired => 'الوصف مطلوب';
 
   @override

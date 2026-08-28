@@ -1245,6 +1245,7 @@
   "listingValidationNameRequired": "Product name is required",
   "listingValidationNameMax": "Max 100 characters",
   "listingValidationPriceInvalid": "Enter a valid price",
+  "listingValidationCompareAtPrice": "Compare-at price must be greater than the selling price",
   "listingValidationDescriptionRequired": "Description is required",
   "listingValidationDescriptionMax": "Max 1000 characters",
   "listingValidationCategoryRequired": "Select a category",

@@ -5690,6 +5690,12 @@ abstract class AppLocalizations {
   /// **'Enter a valid price'**
   String get listingValidationPriceInvalid;
 
+  /// No description provided for @listingValidationCompareAtPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare-at price must be greater than the selling price'**
+  String get listingValidationCompareAtPrice;
+
   /// No description provided for @listingValidationDescriptionRequired.
   ///
   /// In en, this message translates to:
