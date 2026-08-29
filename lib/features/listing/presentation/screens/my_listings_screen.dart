@@ -15,6 +15,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../../commission/presentation/widgets/vendor_commission_alert_banner.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../providers/listing_dependencies.dart';
 import '../providers/my_listings_notifier.dart';
 import '../providers/my_listings_state.dart';
 import '../widgets/listing_card_grid.dart';
@@ -152,6 +153,21 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     AppSnackbar.success(context, context.l10n.resubmitSuccess);
   }
 
+  /// The listing already on this screen comes from the my-listings list
+  /// response, which may only carry a summary shape — refetch the full
+  /// detail (category/condition/brand/stock/shipping/location/attributes)
+  /// by id before opening the edit form so every field is actually
+  /// prefilled, falling back to the summary entity if the fetch fails.
+  Future<void> _openEdit(ListingEntity listing) async {
+    final result =
+        await ref.read(getListingByIdUseCaseProvider).call(listing.id);
+    if (!mounted) return;
+    result.fold(
+      (_) => context.go(AppRoutes.listingAdd, extra: listing),
+      (full) => context.go(AppRoutes.listingAdd, extra: full),
+    );
+  }
+
   void _showOptions(ListingEntity listing) {
     showAnimatedBottomSheet<void>(
       context: context,
@@ -162,9 +178,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         clipBehavior: Clip.antiAlias,
         child: ListingOptionsSheet(
           listing: listing,
-          onEdit: () {
-            context.go(AppRoutes.listingAdd, extra: listing);
-          },
+          onEdit: () => _openEdit(listing),
           onPause: () => ref
               .read(myListingsNotifierProvider.notifier)
               .pauseListing(listing.id),

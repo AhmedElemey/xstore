@@ -25,6 +25,10 @@ abstract interface class ListingRepository {
 
   Future<Either<Failure, List<ListingEntity>>> getMyListings();
 
+  /// Fetches the full listing shape by id, for hydrating the edit form with
+  /// real data regardless of what [getMyListings]'s list response carries.
+  Future<Either<Failure, ListingEntity>> getListingById(String id);
+
   Future<Either<Failure, ListingEntity>> updateListing({
     required String id,
     required String titleEn,

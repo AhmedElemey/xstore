@@ -8,6 +8,7 @@ import '../../domain/repositories/listing_repository.dart';
 import '../../domain/usecases/create_listing_usecase.dart';
 import '../../domain/usecases/deactivate_listing_usecase.dart';
 import '../../domain/usecases/delete_listing_usecase.dart';
+import '../../domain/usecases/get_listing_by_id_usecase.dart';
 import '../../domain/usecases/get_my_listings_usecase.dart';
 import '../../domain/usecases/resubmit_listing_usecase.dart';
 import '../../domain/usecases/update_listing_usecase.dart';
@@ -39,6 +40,11 @@ CreateListingUseCase createListingUseCase(CreateListingUseCaseRef ref) {
 @riverpod
 GetMyListingsUseCase getMyListingsUseCase(GetMyListingsUseCaseRef ref) {
   return GetMyListingsUseCase(ref.watch(listingRepositoryProvider));
+}
+
+@riverpod
+GetListingByIdUseCase getListingByIdUseCase(GetListingByIdUseCaseRef ref) {
+  return GetListingByIdUseCase(ref.watch(listingRepositoryProvider));
 }
 
 @riverpod

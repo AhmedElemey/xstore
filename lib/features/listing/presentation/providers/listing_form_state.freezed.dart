@@ -590,7 +590,12 @@ class _$ListingFormStateImpl implements _ListingFormState {
   @override
   @JsonKey()
   final int draftRevision;
+
+  /// Remote photo URLs already on the listing being edited (empty when
+  /// creating). Not resubmitted as files — see `submit()`'s comment on
+  /// how an empty [photoPaths] preserves them on update.
   final List<String> _existingImageUrls;
+
   /// Remote photo URLs already on the listing being edited (empty when
   /// creating). Not resubmitted as files — see `submit()`'s comment on
   /// how an empty [photoPaths] preserves them on update.
@@ -665,28 +670,28 @@ class _$ListingFormStateImpl implements _ListingFormState {
 
   @override
   int get hashCode => Object.hashAll([
-      runtimeType,
-      const DeepCollectionEquality().hash(_photoPaths),
-      name,
-      priceInput,
-      compareAtPriceInput,
-      description,
-      categoryId,
-      subcategoryId,
-      condition,
-      brand,
-      quantity,
-      location,
-      shippingCostInput,
-      shippingAvailable,
-      const DeepCollectionEquality().hash(_attributes),
-      isSubmitting,
-      const DeepCollectionEquality().hash(_errors),
-      draftRevision,
-      const DeepCollectionEquality().hash(_existingImageUrls),
-      editingListingId,
-      editingStatus,
-    ]);
+        runtimeType,
+        const DeepCollectionEquality().hash(_photoPaths),
+        name,
+        priceInput,
+        compareAtPriceInput,
+        description,
+        categoryId,
+        subcategoryId,
+        condition,
+        brand,
+        quantity,
+        location,
+        shippingCostInput,
+        shippingAvailable,
+        const DeepCollectionEquality().hash(_attributes),
+        isSubmitting,
+        const DeepCollectionEquality().hash(_errors),
+        draftRevision,
+        const DeepCollectionEquality().hash(_existingImageUrls),
+        editingListingId,
+        editingStatus
+      ]);
 
   @JsonKey(ignore: true)
   @override
