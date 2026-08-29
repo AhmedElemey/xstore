@@ -89,6 +89,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         // longer echoes `otp`.
         if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
           AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+        } else {
+          AppSnackbar.success(
+            context,
+            context.l10n.resetCodeSentConfirmation(widget.email),
+          );
         }
       },
     );
