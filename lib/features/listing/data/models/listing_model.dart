@@ -256,6 +256,16 @@ ListingStatus _listingStatusFromDto(String value) {
   }
 }
 
+/// Consumer catalog (Home / Explore) only shows Active listings.
+/// Backend `ListingStatus.Active = 2`. Missing/empty status is treated as
+/// live so older response shapes still parse.
+bool isPublicLiveListingStatus(Object? raw) {
+  if (raw == null) return true;
+  final s = raw.toString().trim();
+  if (s.isEmpty) return true;
+  return _listingStatusFromDto(s) == ListingStatus.active;
+}
+
 extension ListingModelX on ListingModel {
   ListingEntity toEntity() => ListingEntity(
         id: id,

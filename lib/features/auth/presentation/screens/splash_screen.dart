@@ -66,19 +66,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await maybeShowLocationPermissionPrompt(context, ref);
     if (!mounted) return;
 
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    if (!mounted) return;
+
     final user = ref.read(authProvider).valueOrNull;
     if (user != null) {
+      // A restored session means this device already passed first-run.
+      // Write the flag so a later logout/cold start cannot re-show
+      // onboarding (e.g. iOS keychain survived reinstall, prefs did not).
+      await prefs.setBool(PrefsKeys.onboardingComplete, true);
+      if (!mounted) return;
       context.go(AppRoutes.home);
       return;
     }
-
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    if (!mounted) return;
 
     // Returning guest: re-enter browse mode directly. enable() sets the
     // provider state synchronously, so the router redirect sees it before
     // the navigation below is evaluated.
     if (prefs.getBool(PrefsKeys.guestMode) ?? false) {
+      await prefs.setBool(PrefsKeys.onboardingComplete, true);
       await ref.read(guestModeProvider.notifier).enable();
       if (!mounted) return;
       context.go(AppRoutes.home);

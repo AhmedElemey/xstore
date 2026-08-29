@@ -1,13 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/notification_bell_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -107,11 +105,13 @@ class _ProfileSliverAppBarState extends State<ProfileSliverAppBar> {
         ),
       ),
       actions: [
-        IconButton(
-          icon:  Icon(LucideIcons.settings,color: AppColors.white,),
-          onPressed: () => context.push(AppRoutes.notificationSettings),
-          tooltip: context.l10n.settings,
-        ),
+        // TODO(phase-2): Settings gear opened notification prefs — hide
+        // until that screen ships for real.
+        // IconButton(
+        //   icon: Icon(LucideIcons.settings, color: AppColors.white),
+        //   onPressed: () => context.push(AppRoutes.notificationSettings),
+        //   tooltip: context.l10n.settings,
+        // ),
         NotificationBellButton(
           icon: LucideIcons.bell,
           color: AppColors.white,

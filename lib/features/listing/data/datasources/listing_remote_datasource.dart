@@ -101,15 +101,16 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   // CONFIRMED against the xStoreEcommerce Postman collection (POST/PUT
   // Create/Update Listing): both write endpoints are multipart/form-data,
   // NOT flat JSON — the earlier "flat JSON, int condition" contract was
-  // superseded. Attributes bind as an indexed list (`Attributes[i].Key` /
-  // `Attributes[i].Value`, matching ASP.NET's default List<T> form
-  // binder), and images attach inline as repeated `imageFiles` parts —
-  // there is no separate pre-upload-then-URL step for listings.
+  // superseded. The write DTO's required fields are `title` / `description`
+  // (FluentValidation: "'Title' must not be empty" if `title` is absent —
+  // `titleEn`/`titleAr` do NOT bind to `Title`). Keep sending the En/Ar
+  // keys too: extra unbound form keys are ignored by ASP.NET. Attributes
+  // bind as an indexed list (`Attributes[i].Key` / `Attributes[i].Value`),
+  // and images attach inline as repeated `imageFiles` parts.
   // `condition`/`status`/`subcategoryId` aren't shown in the collection's
-  // example bodies but are kept here: extra unbound form keys are ignored
-  // by ASP.NET model binding (confirmed pattern elsewhere in this repo),
-  // and dropping them would silently break condition filtering / the
-  // pause-resume status mutation if the backend DOES bind them.
+  // example bodies but are kept here: dropping them would silently break
+  // condition filtering / the pause-resume status mutation if the backend
+  // DOES bind them.
   Future<FormData> _listingFormData({
     required String titleEn,
     required String titleAr,
@@ -132,6 +133,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   }) async {
     final fields = <String, dynamic>{
       if (id != null) 'id': id,
+      'title': titleEn.isNotEmpty ? titleEn : titleAr,
+      'description': descriptionEn.isNotEmpty ? descriptionEn : descriptionAr,
       'titleEn': titleEn,
       'titleAr': titleAr,
       'descriptionEn': descriptionEn,

@@ -52,7 +52,8 @@ class XstoreBottomNav extends ConsumerWidget {
     // tab — they don't browse the marketplace inside their own shell.
     final labels = switch (role) {
       UserRole.vendor => [
-          context.l10n.incomingOrders,
+          context.l10n.navOrders,
+          context.l10n.myListings,
           context.l10n.navAddListing,
           context.l10n.navWallet,
           context.l10n.navProfile,
@@ -74,6 +75,7 @@ class XstoreBottomNav extends ConsumerWidget {
     final icons = switch (role) {
       UserRole.vendor => [
           LucideIcons.list,
+          LucideIcons.layoutGrid,
           LucideIcons.plusCircle,
           LucideIcons.wallet,
           LucideIcons.user,
@@ -113,7 +115,8 @@ class XstoreBottomNav extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: List.generate(labels.length, (index) {
                 final selected = shell.currentIndex == index;
-                final accentMid = isVendor && index == 1;
+                // Add Listing sits in the middle of the 5-tab vendor bar.
+                final accentMid = isVendor && index == 2;
                 final inactiveColor = accentMid && !selected
                     ? AppColors.accent
                     : context.textSecondary;

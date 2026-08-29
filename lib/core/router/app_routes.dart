@@ -39,10 +39,17 @@ abstract final class AppRoutes {
   static const changePassword = '/change-password';
   /// Inbox / activity feed.
   static const notifications = '/notifications';
-  /// Push & email preference toggles.
+  // TODO(phase-2): Notification prefs deferred — route currently redirects
+  // to profile (see app_router.dart). `/settings` aliases the same path.
   static const notificationSettings = '/notification-settings';
+  // TODO(phase-2): Payment methods deferred — route currently redirects
+  // to profile (see app_router.dart).
   static const paymentMethods = '/payment-methods';
+  // TODO(phase-2): Address book deferred — route currently redirects
+  // to profile (see app_router.dart).
   static const addresses = '/addresses';
+  // TODO(phase-2): Help center deferred — route currently redirects
+  // to profile (see app_router.dart).
   static const help = '/help';
   static const terms = '/terms';
   static const privacy = '/privacy';
@@ -115,7 +122,6 @@ bool isGuestAccessibleRoute(String location) {
       location == AppRoutes.explore ||
       location.startsWith('${AppRoutes.product}/') ||
       location.startsWith('${AppRoutes.sellerProfile}/') ||
-      location == AppRoutes.help ||
       location == AppRoutes.terms ||
       location == AppRoutes.privacy;
 }

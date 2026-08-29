@@ -28,10 +28,18 @@ class SearchResultModel with _$SearchResultModel {
   factory SearchResultModel.fromJson(Map<String, dynamic> json) =>
       _$SearchResultModelFromJson(json);
 
-  /// Map a listing-shaped API object (same shape as [ListingModel]) into search tiles.
+  /// Map a listing-shaped API object (same shape as [ListingModel] / live
+  /// `ListingDto`) into search tiles.
   factory SearchResultModel.fromListingLike(Map<String, dynamic> json) {
     final id = (json['id'] ?? '').toString();
-    final title = (json['title'] ?? json['name'] ?? '').toString();
+    // Live GET /api/home and GET /api/listings/{id} send `title`; the DTO
+    // in some backend versions sends `titleEn`/`titleAr` with no flat title.
+    final title = (json['title'] ??
+            json['titleEn'] ??
+            json['name'] ??
+            json['titleAr'] ??
+            '')
+        .toString();
     final price = _readDouble(json['price']);
     final compare = _nullableDouble(json['compareAtPrice'] ?? json['compare_at_price']);
     final images = json['imageUrls'];
@@ -52,6 +60,11 @@ class SearchResultModel with _$SearchResultModel {
       verified = m['verified'] == true || m['isVerified'] == true;
       sellerRating = _readDouble(m['rating'] ?? m['averageRating']);
     }
+    if (sellerName.isEmpty) {
+      sellerName = (json['storeName'] ?? json['userName'] ?? '')
+          .toString()
+          .trim();
+    }
     final listingRating = _readDouble(json['rating'] ?? json['averageRating']);
     final rating =
         listingRating != 0 ? listingRating : sellerRating;
@@ -66,8 +79,10 @@ class SearchResultModel with _$SearchResultModel {
         json['conditionLabel'] ?? json['condition'],
       ),
       category: _readString(json, const [
+        'categoryNameEn',
         'categoryLabel',
         'category',
+        'categoryNameAr',
       ]),
       rating: rating,
       reviewCount: _reviewCount(json),
@@ -76,9 +91,11 @@ class SearchResultModel with _$SearchResultModel {
       location: _readString(json, const [
         'location',
         'city',
+        'governorateNameEn',
+        'governorateNameAr',
       ]),
-      hasShipping: json['shippingAvailable'] != false &&
-          json['hasShipping'] != false,
+      hasShipping: json['shippingAvailable'] == true ||
+          json['hasShipping'] == true,
     );
   }
 }

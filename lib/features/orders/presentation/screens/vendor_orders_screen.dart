@@ -18,6 +18,7 @@ import '../widgets/vendor_order_card.dart';
 import '../widgets/vendor_order_filter_tabs.dart';
 import '../widgets/vendor_order_sort_row.dart';
 import '../widgets/vendor_order_stats_banner.dart';
+import '../../../../shared/widgets/pulsing_animation_builder.dart';
 import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
 
 class VendorOrdersScreen extends ConsumerStatefulWidget {
@@ -26,8 +27,7 @@ class VendorOrdersScreen extends ConsumerStatefulWidget {
   ConsumerState<VendorOrdersScreen> createState() => _VendorOrdersScreenState();
 }
 
-class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
-    with SingleTickerProviderStateMixin {
+class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
   Future<DeliveryMethod?> _pickDeliveryMethod() => showModalBottomSheet<DeliveryMethod>(
         context: context,
         isScrollControlled: true,
@@ -36,26 +36,22 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
 
   final _scroll = ScrollController();
   final _search = TextEditingController();
-  late final AnimationController _pulse = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1000),
-  )..repeat(reverse: true);
   var _searching = false;
 
   @override
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ref.read(vendorOrdersProvider.notifier).fetchOrders(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(vendorOrdersProvider.notifier).fetchOrders();
+    });
   }
 
   @override
   void dispose() {
     _scroll.dispose();
     _search.dispose();
-    _pulse.dispose();
     super.dispose();
   }
 
@@ -142,10 +138,10 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                   Text(context.l10n.ordersIncomingTitle),
                   if (pendingCount > 0) ...[
                     const SizedBox(width: AppSpacing.xs),
-                    AnimatedBuilder(
-                      animation: _pulse,
-                      builder: (_, child) => Transform.scale(
-                        scale: 1 + 0.16 * math.sin(_pulse.value * math.pi),
+                    PulsingAnimationBuilder(
+                      duration: const Duration(milliseconds: 1000),
+                      builder: (_, animation, child) => Transform.scale(
+                        scale: 1 + 0.16 * math.sin(animation.value * math.pi),
                         child: child,
                       ),
                       child: const Icon(
@@ -258,7 +254,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen>
                                       const SizedBox(height: AppSpacing.md),
                                       OutlinedButton(
                                         onPressed: () =>
-                                            context.push(AppRoutes.listingMy),
+                                            context.go(AppRoutes.listingMy),
                                         child: Text(context.l10n.menuMyListings),
                                       ),
                                     ],

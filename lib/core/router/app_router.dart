@@ -13,9 +13,6 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/auth/presentation/providers/guest_mode_provider.dart';
-import '../../features/auth/presentation/providers/phone_auth_provider.dart';
-import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
@@ -39,7 +36,6 @@ import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/profile_verification_screen.dart';
 import '../../features/profile/presentation/providers/profile_verification_provider.dart';
-import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
 // TODO(phase-2): Re-enable once store/active hours ships.
@@ -51,72 +47,35 @@ import '../../features/wishlist/presentation/screens/wishlist_screen.dart';
 import '../../shared/widgets/xstore_bottom_nav.dart';
 import '../analytics/analytics_service.dart';
 import '../animations/page_transitions.dart';
-import '../network/server_error_provider.dart';
 import 'app_routes.dart';
 import 'router_notifier.dart';
 
 part 'app_router.g.dart';
 
+/// Shell tabs must use [GoRoute.builder], not [GoRoute.pageBuilder].
+/// `CustomTransitionPage(key: state.pageKey)` inside [StatefulShellRoute.indexedStack]
+/// re-inserts the same GlobalKeys while the IndexedStack still holds them
+/// (Duplicate GlobalKey / `_ElementLifecycle.inactive` on the shell).
+GoRoute _shellTab(String path, Widget child) => GoRoute(
+      path: path,
+      builder: (context, state) => child,
+    );
+
 List<StatefulShellBranch> _consumerShellBranches() => [
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.home,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const HomeScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.home, const HomeScreen())],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.explore,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ExploreScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.explore, const ExploreScreen())],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.wishlist,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const WishlistScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.wishlist, const WishlistScreen())],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.orders,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const OrdersScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.orders, const OrdersScreen())],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.profile,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ProfileScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.profile, const ProfileScreen())],
       ),
     ];
 
@@ -125,104 +84,70 @@ List<StatefulShellBranch> _consumerShellBranches() => [
 // in sync when adding/reordering a tab.
 List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.vendorOrders,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const VendorOrdersScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.vendorOrders, const VendorOrdersScreen())],
+      ),
+      StatefulShellBranch(
+        routes: [_shellTab(AppRoutes.listingMy, const MyListingsScreen())],
       ),
       StatefulShellBranch(
         routes: [
           GoRoute(
             path: AppRoutes.listingAdd,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              AddListingScreen(
-                editingListing: state.extra as ListingEntity?,
-              ),
+            builder: (context, state) => AddListingScreen(
+              editingListing: state.extra as ListingEntity?,
             ),
           ),
         ],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.vendorWallet,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const VendorWalletScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.vendorWallet, const VendorWalletScreen())],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.profile,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ProfileScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.profile, const ProfileScreen())],
       ),
     ];
 
 List<StatefulShellBranch> _courierShellBranches() => [
       StatefulShellBranch(
         routes: [
-          GoRoute(
-            path: AppRoutes.deliveries,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const CourierDeliveriesScreen(),
-            ),
-          ),
+          _shellTab(AppRoutes.deliveries, const CourierDeliveriesScreen()),
         ],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.courierCash,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const CourierCashScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.courierCash, const CourierCashScreen())],
       ),
       StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.profile,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ProfileScreen(),
-            ),
-          ),
-        ],
+        routes: [_shellTab(AppRoutes.profile, const ProfileScreen())],
       ),
     ];
+
+String _routerInitialLocation(AsyncValue<UserEntity?> auth) {
+  return auth.when(
+    data: (user) {
+      if (user == null) return AppRoutes.login;
+      if (user.isCourier) return AppRoutes.deliveries;
+      if (user.isVendor) return AppRoutes.vendorOrders;
+      return AppRoutes.home;
+    },
+    loading: () => AppRoutes.splash,
+    error: (_, __) => AppRoutes.login,
+  );
+}
 
 @Riverpod(keepAlive: true)
 GoRouter goRouter(GoRouterRef ref) {
   final refresh = ref.watch(routerNotifierProvider);
-  // Only rebuild the route tree when the role's tab set changes — not on every
-  // auth refresh, or login would recreate GoRouter and reset to [initialLocation].
-  final role = ref.watch(
-    authProvider.select((auth) => auth.valueOrNull?.role ?? UserRole.consumer),
-  );
+  // Read (don't watch) the signed-in role. Watching `role ?? consumer`
+  // treats vendor/courier logout as a role switch, recreates this
+  // GoRouter, and remounts splash. Invalidate only when a *signed-in*
+  // role actually changes (login as a different role).
+  final role = ref.read(authProvider).valueOrNull?.role ?? UserRole.consumer;
+  ref.listen<AsyncValue<UserEntity?>>(authProvider, (previous, next) {
+    final nextRole = next.valueOrNull?.role;
+    if (nextRole != null && nextRole != role) {
+      ref.invalidateSelf();
+    }
+  });
   final shellBranches = switch (role) {
     UserRole.vendor => _vendorShellBranches(),
     UserRole.courier => _courierShellBranches(),
@@ -230,25 +155,15 @@ GoRouter goRouter(GoRouterRef ref) {
   };
 
   final router = GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: _routerInitialLocation(ref.read(authProvider)),
     refreshListenable: refresh,
     errorBuilder: (context, state) => AppErrorScreen(
       onRetry: () => context.go(AppRoutes.home),
     ),
-    redirect: (context, state) {
-      if (ref.read(serverErrorProvider) &&
-          state.matchedLocation != AppRoutes.serverError) {
-        return AppRoutes.serverError;
-      }
-      return computeXStoreAuthRedirect(
-        auth: ref.read(authProvider),
-        needsRoleSelection: ref.read(socialAuthProvider).needsRoleSelection,
-        matchedLocation: state.matchedLocation,
-        holdRegisterForVendorSuccess:
-            ref.read(registerNotifierProvider).showVendorSuccessOverlay,
-        isGuest: ref.read(guestModeProvider),
-      );
-    },
+    // Session reads go through [refresh], not this provider's ref.
+    // Login can mark goRouter outdated (role watch) before it rebuilds;
+    // `ref.read` here would assert. See RouterNotifier.redirectFor.
+    redirect: (context, state) => refresh.redirectFor(state.matchedLocation),
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -329,11 +244,7 @@ GoRouter goRouter(GoRouterRef ref) {
           state,
           const OtpScreen(),
         ),
-        redirect: (context, state) {
-          final phoneState = ref.read(phoneAuthProvider);
-          if (phoneState.verificationId == null) return AppRoutes.login;
-          return null;
-        },
+        redirect: (context, state) => refresh.otpGateRedirect(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -376,14 +287,6 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const MyPackageRequestsScreen(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.listingMy,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const MyListingsScreen(),
         ),
       ),
       GoRoute(
@@ -465,7 +368,7 @@ GoRouter goRouter(GoRouterRef ref) {
       ),
       GoRoute(
         path: AppRoutes.settings,
-        redirect: (_, __) => AppRoutes.notificationSettings,
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.analytics,
@@ -503,33 +406,24 @@ GoRouter goRouter(GoRouterRef ref) {
           const NotificationsScreen(),
         ),
       ),
+      // TODO(phase-2): Notification settings deferred (local-only prefs).
       GoRoute(
         path: AppRoutes.notificationSettings,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const NotificationSettingsScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: '/chat/:threadId',
         redirect: (_, __) => AppRoutes.notifications,
       ),
+      // TODO(phase-2): Payment methods & address book deferred to next phase.
+      // Routes redirect to profile so deep links don't land on placeholders.
       GoRoute(
         path: AppRoutes.paymentMethods,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const PaymentMethodsInfoScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.addresses,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const AddressesInfoScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       // TODO(phase-2): Store/active hours screen deferred to next phase.
       // Route redirects to profile in the meantime instead of dead-ending.
@@ -537,13 +431,11 @@ GoRouter goRouter(GoRouterRef ref) {
         path: AppRoutes.storeHours,
         redirect: (_, __) => AppRoutes.profile,
       ),
+      // TODO(phase-2): Help center deferred to next phase.
+      // Route redirects to profile so deep links don't land on a placeholder.
       GoRoute(
         path: AppRoutes.help,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const HelpCenterInfoScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.terms,
@@ -576,5 +468,9 @@ GoRouter goRouter(GoRouterRef ref) {
   );
 
   ref.read(analyticsServiceProvider).attachRouter(router);
+  ref.onDispose(() {
+    // After this frame so MaterialApp can drop [routerConfig] first.
+    WidgetsBinding.instance.addPostFrameCallback((_) => router.dispose());
+  });
   return router;
 }

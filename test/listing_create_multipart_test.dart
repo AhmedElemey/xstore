@@ -81,6 +81,8 @@ void main() {
       expect(formData, isNotNull);
       final fields = {for (final f in formData!.fields) f.key: f.value};
 
+      expect(fields['title'], 'New Product');
+      expect(fields['description'], 'Product description');
       expect(fields['titleEn'], 'New Product');
       expect(fields['titleAr'], 'منتج جديد');
       expect(fields['price'], '99.99');
@@ -122,6 +124,9 @@ void main() {
       expect(formData!.files, isEmpty);
       expect(formData.fields.any((f) => f.key.startsWith('Attributes')), isFalse);
       expect(formData.fields.any((f) => f.key == 'brand'), isFalse);
+      final fields = {for (final f in formData.fields) f.key: f.value};
+      expect(fields['title'], 'No Photo');
+      expect(fields['description'], 'desc');
     });
 
     test('multiple attributes get sequential indices', () async {

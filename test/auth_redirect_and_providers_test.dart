@@ -67,6 +67,38 @@ void main() {
   });
 
   group('computeXStoreAuthRedirect', () {
+    test('unauthenticated splash and onboarding stay put (cold start)', () {
+      for (final loc in [AppRoutes.splash, AppRoutes.onboarding, AppRoutes.login]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: const AsyncValue.data(null),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          isNull,
+          reason: 'cold start must not bounce $loc to another auth screen',
+        );
+      }
+    });
+
+    test('unauthenticated vendor/courier home routes to login, not splash', () {
+      for (final loc in [
+        AppRoutes.vendorOrders,
+        AppRoutes.deliveries,
+        AppRoutes.profile,
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: const AsyncValue.data(null),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          AppRoutes.login,
+          reason: 'logout from $loc must land on login, not splash/onboarding',
+        );
+      }
+    });
+
     test('unauthenticated routes to login from protected screens', () {
       expect(
         computeXStoreAuthRedirect(
@@ -178,7 +210,6 @@ void main() {
         '${AppRoutes.product}/lst_1',
         '${AppRoutes.product}/lst_1/reviews',
         '${AppRoutes.sellerProfile}/v99',
-        AppRoutes.help,
         AppRoutes.login, // guest can always go sign in for real
       ]) {
         expect(

@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/guest_mode_provider.dart';
+import '../../features/auth/presentation/providers/phone_auth_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../network/server_error_provider.dart';
 import 'app_routes.dart';
@@ -15,7 +16,9 @@ part 'router_notifier.g.dart';
 ///
 /// Auth-based redirects (including vendor route guard) are centralized in
 /// [computeXStoreAuthRedirect] so they live next to this notifier, which
-/// [watch]es [authProvider] and notifies the router when session changes.
+/// [Ref.listen]s to [authProvider] and notifies the router when session
+/// changes. GoRouter redirect callbacks must read session through
+/// [RouterNotifier.redirectFor], never `goRouter`'s own `ref`.
 @Riverpod(keepAlive: true)
 RouterNotifier routerNotifier(RouterNotifierRef ref) {
   return RouterNotifier(ref);
@@ -120,6 +123,33 @@ final class RouterNotifier extends Listenable {
 
   final Ref _ref;
   final List<VoidCallback> _listeners = [];
+
+  /// Auth/session reads for GoRouter redirect. Must use this notifier's
+  /// [Ref], not `goRouter`'s: `goRouter` watches the role, so a login that
+  /// changes it marks that provider outdated, and `ref.read` in its redirect
+  /// closure then asserts. This ref only [Ref.listen]s, so it stays valid
+  /// for same-frame `context.go`.
+  String? redirectFor(String matchedLocation) {
+    if (_ref.read(serverErrorProvider) &&
+        matchedLocation != AppRoutes.serverError) {
+      return AppRoutes.serverError;
+    }
+    return computeXStoreAuthRedirect(
+      auth: _ref.read(authProvider),
+      needsRoleSelection: _ref.read(socialAuthProvider).needsRoleSelection,
+      matchedLocation: matchedLocation,
+      holdRegisterForVendorSuccess:
+          _ref.read(registerNotifierProvider).showVendorSuccessOverlay,
+      isGuest: _ref.read(guestModeProvider),
+    );
+  }
+
+  String? otpGateRedirect() {
+    if (_ref.read(phoneAuthProvider).verificationId == null) {
+      return AppRoutes.login;
+    }
+    return null;
+  }
 
   void _notify() {
     for (final listener in List<VoidCallback>.from(_listeners)) {

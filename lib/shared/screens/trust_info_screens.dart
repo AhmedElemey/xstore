@@ -78,6 +78,7 @@ class TrustInfoAction {
   final VoidCallback onPressed;
 }
 
+// TODO(phase-2): Re-enable once saved payment methods ships.
 class PaymentMethodsInfoScreen extends StatelessWidget {
   const PaymentMethodsInfoScreen({super.key});
 
@@ -97,6 +98,7 @@ class PaymentMethodsInfoScreen extends StatelessWidget {
   }
 }
 
+// TODO(phase-2): Re-enable once the address book ships.
 class AddressesInfoScreen extends StatelessWidget {
   const AddressesInfoScreen({super.key});
 
@@ -144,6 +146,7 @@ class PrivacyInfoScreen extends StatelessWidget {
 
 /// Consumer widget: the help screen is guest-browsable, so its
 /// account-bound shortcuts go through [requireLogin].
+// TODO(phase-2): Re-enable once a real help center ships.
 class HelpCenterInfoScreen extends ConsumerWidget {
   const HelpCenterInfoScreen({super.key});
 
@@ -158,7 +161,7 @@ class HelpCenterInfoScreen extends ConsumerWidget {
           label: context.l10n.trustInfoHelpViewOrders,
           onPressed: () {
             if (!requireLogin(context, ref)) return;
-            context.push(AppRoutes.orders);
+            context.go(AppRoutes.orders);
           },
         ),
         TrustInfoAction(

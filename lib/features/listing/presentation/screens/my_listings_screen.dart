@@ -252,11 +252,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         centerTitle: true,
         backgroundColor: context.surfaceColor,
         surfaceTintColor: AppColors.transparent,
-        title: Text('My Listings'),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
-        ),
+        title: Text(context.l10n.myListings),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.search),

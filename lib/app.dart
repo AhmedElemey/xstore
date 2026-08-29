@@ -23,6 +23,9 @@ class XstoreApp extends ConsumerWidget {
     final useArabicFont = language == AppLanguage.arabic;
 
     return MaterialApp.router(
+      // Role-changing login replaces [GoRouter]. Remount so the old
+      // navigator GlobalKeys deactivate before the new shell inflates.
+      key: ObjectKey(router),
       debugShowCheckedModeBanner: false,
       title: 'xStore',
       builder: (context, child) {
