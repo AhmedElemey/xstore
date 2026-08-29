@@ -299,6 +299,7 @@ mixin _$ExploreState {
   bool get hasMore => throw _privateConstructorUsedError;
   int get page => throw _privateConstructorUsedError;
   bool get isSearching => throw _privateConstructorUsedError;
+  String? get error => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ExploreStateCopyWith<ExploreState> get copyWith =>
@@ -321,7 +322,8 @@ abstract class $ExploreStateCopyWith<$Res> {
       bool isLoadingMore,
       bool hasMore,
       int page,
-      bool isSearching});
+      bool isSearching,
+      String? error});
 
   $FilterStateCopyWith<$Res> get filters;
 }
@@ -349,6 +351,7 @@ class _$ExploreStateCopyWithImpl<$Res, $Val extends ExploreState>
     Object? hasMore = null,
     Object? page = null,
     Object? isSearching = null,
+    Object? error = freezed,
   }) {
     return _then(_value.copyWith(
       query: null == query
@@ -391,6 +394,10 @@ class _$ExploreStateCopyWithImpl<$Res, $Val extends ExploreState>
           ? _value.isSearching
           : isSearching // ignore: cast_nullable_to_non_nullable
               as bool,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 
@@ -421,7 +428,8 @@ abstract class _$$ExploreStateImplCopyWith<$Res>
       bool isLoadingMore,
       bool hasMore,
       int page,
-      bool isSearching});
+      bool isSearching,
+      String? error});
 
   @override
   $FilterStateCopyWith<$Res> get filters;
@@ -448,6 +456,7 @@ class __$$ExploreStateImplCopyWithImpl<$Res>
     Object? hasMore = null,
     Object? page = null,
     Object? isSearching = null,
+    Object? error = freezed,
   }) {
     return _then(_$ExploreStateImpl(
       query: null == query
@@ -490,6 +499,10 @@ class __$$ExploreStateImplCopyWithImpl<$Res>
           ? _value.isSearching
           : isSearching // ignore: cast_nullable_to_non_nullable
               as bool,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -507,7 +520,8 @@ class _$ExploreStateImpl implements _ExploreState {
       this.isLoadingMore = false,
       this.hasMore = true,
       this.page = 1,
-      this.isSearching = false})
+      this.isSearching = false,
+      this.error})
       : _results = results,
         _suggestions = suggestions;
 
@@ -553,10 +567,12 @@ class _$ExploreStateImpl implements _ExploreState {
   @override
   @JsonKey()
   final bool isSearching;
+  @override
+  final String? error;
 
   @override
   String toString() {
-    return 'ExploreState(query: $query, results: $results, suggestions: $suggestions, filters: $filters, sortOption: $sortOption, viewMode: $viewMode, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, isSearching: $isSearching)';
+    return 'ExploreState(query: $query, results: $results, suggestions: $suggestions, filters: $filters, sortOption: $sortOption, viewMode: $viewMode, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, isSearching: $isSearching, error: $error)';
   }
 
   @override
@@ -578,7 +594,8 @@ class _$ExploreStateImpl implements _ExploreState {
             (identical(other.hasMore, hasMore) || other.hasMore == hasMore) &&
             (identical(other.page, page) || other.page == page) &&
             (identical(other.isSearching, isSearching) ||
-                other.isSearching == isSearching));
+                other.isSearching == isSearching) &&
+            (identical(other.error, error) || other.error == error));
   }
 
   @override
@@ -593,7 +610,8 @@ class _$ExploreStateImpl implements _ExploreState {
       isLoadingMore,
       hasMore,
       page,
-      isSearching);
+      isSearching,
+      error);
 
   @JsonKey(ignore: true)
   @override
@@ -613,7 +631,8 @@ abstract class _ExploreState implements ExploreState {
       final bool isLoadingMore,
       final bool hasMore,
       final int page,
-      final bool isSearching}) = _$ExploreStateImpl;
+      final bool isSearching,
+      final String? error}) = _$ExploreStateImpl;
 
   @override
   String get query;
@@ -635,6 +654,8 @@ abstract class _ExploreState implements ExploreState {
   int get page;
   @override
   bool get isSearching;
+  @override
+  String? get error;
   @override
   @JsonKey(ignore: true)
   _$$ExploreStateImplCopyWith<_$ExploreStateImpl> get copyWith =>

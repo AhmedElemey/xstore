@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
@@ -18,6 +19,7 @@ import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
 import '../widgets/explore_empty_state.dart';
+import '../widgets/explore_error_state.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/product_grid_card.dart';
 import '../widgets/product_list_card.dart';
@@ -80,6 +82,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           viewMode: s.viewMode,
           isSearching: s.isSearching,
           isLoadingMore: s.isLoadingMore,
+          error: s.error,
         ),
       ),
     );
@@ -278,6 +281,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               ),
               if (state.isSearching)
                 const SliverFillRemaining(child: ExploreSkeleton())
+              else if (state.results.isEmpty && state.error != null)
+                SliverFillRemaining(
+                  child: ExploreErrorState(
+                    error: state.error,
+                    onRetry: () => notifier.search(state.query),
+                  ),
+                )
               else if (state.results.isEmpty)
                 SliverFillRemaining(
                   child: ExploreEmptyState(
@@ -346,6 +356,20 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(AppSpacing.x2l),
                     child: Center(child: CircularProgressIndicator.adaptive()),
+                  ),
+                )
+              else if (state.results.isNotEmpty && state.error != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Center(
+                      child: TextButton(
+                        onPressed: () => notifier.loadMore(),
+                        child: Text(
+                          '${resolveAppError(context, state.error)} · ${context.l10n.retry}',
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               SliverToBoxAdapter(child: SizedBox(height: AppSpacing.x3l)),

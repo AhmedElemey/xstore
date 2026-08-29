@@ -115,8 +115,8 @@ class Explore extends _$Explore {
         );
     if (_disposed) return;
     result.fold(
-      (_) {
-        state = state.copyWith(isSearching: false, results: []);
+      (f) {
+        state = state.copyWith(isSearching: false, results: [], error: f.toString());
       },
       (list) {
         final filtered = _clientFilter(list);
@@ -126,6 +126,7 @@ class Explore extends _$Explore {
           results: sorted,
           hasMore: list.length >= ExploreRemoteDataSourceImpl.pageSize,
           page: 1,
+          error: null,
         );
         final trimmed = q.trim();
         if (trimmed.isNotEmpty) {
@@ -157,7 +158,7 @@ class Explore extends _$Explore {
         );
     if (_disposed) return;
     result.fold(
-      (_) => state = state.copyWith(isLoadingMore: false),
+      (f) => state = state.copyWith(isLoadingMore: false, error: f.toString()),
       (list) {
         final filtered = _clientFilter(list);
         final merged = [...state.results, ...filtered];
@@ -166,6 +167,7 @@ class Explore extends _$Explore {
           results: _sort(merged),
           page: next,
           hasMore: list.length >= ExploreRemoteDataSourceImpl.pageSize,
+          error: null,
         );
       },
     );
