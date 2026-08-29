@@ -15,7 +15,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../data/models/listing_model.dart'
-    show listingConditionFromToken;
+    show listingConditionFromToken, listingConditionLabel;
 import '../../domain/entities/listing_entity.dart';
 import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
@@ -38,17 +38,75 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   // throws an unhandled StateError.
   var _disposed = false;
 
+  // Set synchronously by AddListingScreen.initState() right after this
+  // notifier is first created (via prepareForEdit), i.e. before any
+  // microtask — including _loadDraft's — has had a chance to run. Lets
+  // _loadDraft skip itself so a saved create-flow draft never clobbers the
+  // listing being edited. The actual state hydration happens separately
+  // in loadForEdit, deferred past initState so it never writes `state`
+  // synchronously during a widget build phase (Riverpod forbids that).
+  ListingEntity? _pendingEditEntity;
+
   String get currencyCode => _currencyCode;
 
   @override
   ListingFormState build() {
     _disposed = false;
+    _pendingEditEntity = null;
     ref.onDispose(() => _disposed = true);
     Future.microtask(_loadDraft);
     return const ListingFormState();
   }
 
+  /// Marks this form as editing [listing] so the pending draft-load skips
+  /// itself. Must be called synchronously right after this notifier is
+  /// first read (see the field doc above) — it only sets a plain field,
+  /// never `state`, so it is safe to call from `initState()`.
+  void prepareForEdit(ListingEntity listing) {
+    _pendingEditEntity = listing;
+  }
+
+  /// Hydrates the form from an existing listing for editing. Call this
+  /// deferred (e.g. `Future(() => ...)`), never synchronously from a
+  /// widget's `initState`/`build` — see the 2026-08-26 Riverpod-lifecycle
+  /// lesson in flutter-review SKILL.md.
+  void loadForEdit(ListingEntity listing) {
+    if (_disposed) return;
+    final compareAt = listing.compareAtPrice;
+    final shipping = listing.shippingCost;
+    final next = ListingFormState(
+      name: listing.titleEn.isNotEmpty ? listing.titleEn : listing.title,
+      priceInput: _formatPriceInput(listing.price.toStringAsFixed(2)),
+      compareAtPriceInput: (compareAt != null && compareAt > 0)
+          ? _formatPriceInput(compareAt.toStringAsFixed(2))
+          : '',
+      description: listing.descriptionEn.isNotEmpty
+          ? listing.descriptionEn
+          : listing.description,
+      categoryId: listing.categoryId?.toString() ?? '',
+      subcategoryId: listing.subcategoryId?.toString() ?? '',
+      condition:
+          listing.condition != null ? listingConditionLabel(listing.condition!) : '',
+      brand: listing.brand,
+      quantity: listing.stockQuantity < 1 ? 1 : listing.stockQuantity,
+      location: listing.location,
+      shippingCostInput:
+          shipping > 0 ? _formatPriceInput(shipping.toStringAsFixed(2)) : '',
+      shippingAvailable: listing.shippingAvailable,
+      attributes: [
+        for (final entry in listing.attributes.entries)
+          AttributeEntry(key: entry.key, value: entry.value),
+      ],
+      existingImageUrls: listing.imageUrls,
+      editingListingId: listing.id,
+      editingStatus: listing.status,
+      draftRevision: state.draftRevision + 1,
+    );
+    state = next;
+  }
+
   Future<void> _loadDraft() async {
+    if (_pendingEditEntity != null) return;
     try {
       final prefs = await ref.read(sharedPreferencesProvider.future);
       if (_disposed) return;
@@ -352,6 +410,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         location: state.location,
         shippingAvailable: state.shippingAvailable,
         shippingCostInput: state.shippingCostInput,
+        existingPhotoCount: state.existingImageUrls.length,
       );
 
   /// Whether all required fields satisfy validation (no errors written to state).
@@ -407,30 +466,61 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         return false;
       }
 
-      final useCase = ref.read(createListingUseCaseProvider);
-      final result = await useCase(
-        // ASSUMPTION: single-language form input for now — same string sent
-        // for both En/Ar variants until the form gains a dedicated Arabic
-        // title/description field.
-        titleEn: state.name.trim(),
-        titleAr: state.name.trim(),
-        descriptionEn: state.description.trim(),
-        descriptionAr: state.description.trim(),
-        price: price,
-        compareAtPrice: (compareAt != null && compareAt > 0) ? compareAt : null,
-        categoryId: categoryId,
-        subcategoryId: subcategoryId,
-        condition: condition,
-        brand: state.brand.trim(),
-        stockQuantity: state.quantity,
-        shippingAvailable: state.shippingAvailable,
-        shippingCost: shippingCost,
-        location: state.location.trim(),
-        attributes: attributesMap,
-        // CONFIRMED (Postman collection): images attach inline as
-        // multipart `imageFiles` parts on the create request itself.
-        imagePaths: state.photoPaths,
-      );
+      final isEditing = state.editingListingId.isNotEmpty;
+      final result = isEditing
+          ? await ref.read(updateListingUseCaseProvider).call(
+                id: state.editingListingId,
+                // ASSUMPTION: single-language form input for now — same
+                // string sent for both En/Ar variants until the form gains
+                // a dedicated Arabic title/description field.
+                titleEn: state.name.trim(),
+                titleAr: state.name.trim(),
+                descriptionEn: state.description.trim(),
+                descriptionAr: state.description.trim(),
+                price: price,
+                compareAtPrice:
+                    (compareAt != null && compareAt > 0) ? compareAt : null,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                condition: condition,
+                brand: state.brand.trim(),
+                stockQuantity: state.quantity,
+                shippingAvailable: state.shippingAvailable,
+                shippingCost: shippingCost,
+                location: state.location.trim(),
+                attributes: attributesMap,
+                // New local photos only. Empty preserves the listing's
+                // existing hosted images — same convention already relied
+                // on by resumeListing (see my_listings_notifier.dart);
+                // whether the backend appends or replaces when non-empty
+                // is unconfirmed, same caveat as that call site.
+                imagePaths: state.photoPaths,
+                status: state.editingStatus ?? ListingStatus.active,
+              )
+          : await ref.read(createListingUseCaseProvider).call(
+                // ASSUMPTION: single-language form input for now — same
+                // string sent for both En/Ar variants until the form gains
+                // a dedicated Arabic title/description field.
+                titleEn: state.name.trim(),
+                titleAr: state.name.trim(),
+                descriptionEn: state.description.trim(),
+                descriptionAr: state.description.trim(),
+                price: price,
+                compareAtPrice:
+                    (compareAt != null && compareAt > 0) ? compareAt : null,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                condition: condition,
+                brand: state.brand.trim(),
+                stockQuantity: state.quantity,
+                shippingAvailable: state.shippingAvailable,
+                shippingCost: shippingCost,
+                location: state.location.trim(),
+                attributes: attributesMap,
+                // CONFIRMED (Postman collection): images attach inline as
+                // multipart `imageFiles` parts on the create request itself.
+                imagePaths: state.photoPaths,
+              );
 
       if (_disposed) return false;
       var success = false;
@@ -447,7 +537,9 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         (listing) {
           success = true;
           ref.read(analyticsServiceProvider).track(
-            AnalyticsEvents.listingPublished,
+            isEditing
+                ? AnalyticsEvents.listingUpdated
+                : AnalyticsEvents.listingPublished,
             properties: {
               AnalyticsProps.itemId: listing.id,
               AnalyticsProps.category: listing.categoryLabel,

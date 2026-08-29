@@ -343,6 +343,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publishListing => '🚀 Publish Listing';
 
   @override
+  String get updateListing => 'Update Listing';
+
+  @override
   String get saveDraft => 'Save Draft';
 
   @override

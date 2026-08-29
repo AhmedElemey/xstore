@@ -11,6 +11,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../domain/entities/listing_entity.dart';
 import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../commission/domain/entities/commission_breakdown.dart';
@@ -35,7 +36,11 @@ import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
-  const AddListingScreen({super.key});
+  const AddListingScreen({super.key, this.editingListing});
+
+  /// When non-null, the form opens prefilled with this listing's data and
+  /// `submit()` updates it instead of creating a new one.
+  final ListingEntity? editingListing;
 
   @override
   ConsumerState<AddListingScreen> createState() => _AddListingScreenState();
@@ -52,6 +57,58 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
   late final FocusNode _brandFocus = FocusNode();
+
+  // `/listing/add` is a StatefulShellRoute branch — go_router keeps its
+  // Page/State alive across navigations to the same path, so tapping
+  // "Edit" on a second listing (or "New Listing" after editing one) can
+  // reuse this exact State instead of remounting it. Track what we last
+  // synced so didUpdateWidget can react to that change; initState alone
+  // would miss it.
+  bool _hasSyncedEditingListing = false;
+  String? _syncedEditingListingId;
+
+  void _syncEditingListing() {
+    final editing = widget.editingListing;
+    final id = editing?.id;
+    final isFirstSync = !_hasSyncedEditingListing;
+    if (_hasSyncedEditingListing && id == _syncedEditingListingId) return;
+    _hasSyncedEditingListing = true;
+    _syncedEditingListingId = id;
+
+    if (editing != null) {
+      // Synchronous field-only flag (see prepareForEdit's doc) so the
+      // notifier's own pending draft-load skips itself — must run before
+      // any microtask, hence called here rather than deferred.
+      ref.read(listingFormNotifierProvider.notifier).prepareForEdit(editing);
+      // The actual state write is deferred past this build/lifecycle
+      // callback — Riverpod forbids modifying provider state synchronously
+      // from initState/didUpdateWidget.
+      Future(() {
+        if (!mounted) return;
+        ref.read(listingFormNotifierProvider.notifier).loadForEdit(editing);
+      });
+    } else if (!isFirstSync) {
+      // Switched from editing a listing back to "New Listing" while this
+      // screen's state was reused — clear the stale edit state so submit()
+      // creates instead of updating the previously-edited listing.
+      Future(() {
+        if (!mounted) return;
+        ref.read(listingFormNotifierProvider.notifier).reset();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _syncEditingListing();
+  }
+
+  @override
+  void didUpdateWidget(covariant AddListingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncEditingListing();
+  }
 
   @override
   void dispose() {
@@ -167,13 +224,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
+    final isEditing = ref.read(listingFormNotifierProvider).editingListingId.isNotEmpty;
     final retryLabel = context.l10n.retry;
     final ok = await notifier.submit(context.l10n);
     if (!mounted) {
       return;
     }
     if (ok) {
-      AppSnackbar.success(context, 'Listing published successfully');
+      AppSnackbar.success(
+        context,
+        isEditing
+            ? 'Listing updated successfully'
+            : 'Listing published successfully',
+      );
       context.go(AppRoutes.listingMy);
       return;
     }
@@ -227,6 +290,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     });
 
     final err = form.errors;
+    final isEditing = form.editingListingId.isNotEmpty;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -234,35 +298,39 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         backgroundColor: context.backgroundColor,
         surfaceTintColor: AppColors.transparent,
         centerTitle: true,
-        title: Text(context.l10n.addListing),
+        title: Text(isEditing ? context.l10n.editListingMenu : context.l10n.addListing),
         actions: [
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.textSecondary),
-            onPressed: form.isSubmitting
-                ? null
-                : () async {
-                    notifier.updateField('name', _name.text);
-                    notifier.updateField('priceInput', _price.text);
-                    notifier.updateField('compareAtPriceInput', _compare.text);
-                    notifier.updateField('description', _description.text);
-                    notifier.updateField('brand', _brand.text);
-                    notifier.updateField('location', _location.text);
-                    notifier.updateField(
-                      'shippingCostInput',
-                      _shippingCost.text,
-                    );
-                    await notifier.saveDraft();
-                    if (!context.mounted) {
-                      return;
-                    }
-                    // ignore: use_build_context_synchronously
-                    AppSnackbar.success(
-                      context,
-                      context.l10n.listingDraftSaved,
-                    );
-                  },
-            child: Text(context.l10n.saveDraft),
-          ),
+          // Drafts are a create-flow concept only — editing an existing
+          // listing writes straight to the server via Update Listing.
+          if (!isEditing)
+            TextButton(
+              style:
+                  TextButton.styleFrom(foregroundColor: context.textSecondary),
+              onPressed: form.isSubmitting
+                  ? null
+                  : () async {
+                      notifier.updateField('name', _name.text);
+                      notifier.updateField('priceInput', _price.text);
+                      notifier.updateField('compareAtPriceInput', _compare.text);
+                      notifier.updateField('description', _description.text);
+                      notifier.updateField('brand', _brand.text);
+                      notifier.updateField('location', _location.text);
+                      notifier.updateField(
+                        'shippingCostInput',
+                        _shippingCost.text,
+                      );
+                      await notifier.saveDraft();
+                      if (!context.mounted) {
+                        return;
+                      }
+                      // ignore: use_build_context_synchronously
+                      AppSnackbar.success(
+                        context,
+                        context.l10n.listingDraftSaved,
+                      );
+                    },
+              child: Text(context.l10n.saveDraft),
+            ),
         ],
       ),
       body: Column(
@@ -330,7 +398,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                 AppSpacing.lg,
               ),
               child: _PublishBar(
-                publishLabel: context.l10n.publishListing,
+                publishLabel: isEditing
+                    ? context.l10n.updateListing
+                    : context.l10n.publishListing,
                 enabled: canSubmit && !form.isSubmitting,
                 loading: form.isSubmitting,
                 onPressed: _publish,
@@ -408,6 +478,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
       children: [
         PhotoUploadSection(
           paths: form.photoPaths,
+          existingUrls: form.existingImageUrls,
           errorText: errors['photos'],
           onOpenPicker: openPhotoPicker,
           onRemove: notifier.removePhoto,

@@ -174,6 +174,19 @@ mixin _$ListingFormState {
   /// Incremented when a draft is loaded from storage (for controller sync).
   int get draftRevision => throw _privateConstructorUsedError;
 
+  /// Remote photo URLs already on the listing being edited (empty when
+  /// creating). Not resubmitted as files — see `submit()`'s comment on
+  /// how an empty [photoPaths] preserves them on update.
+  List<String> get existingImageUrls => throw _privateConstructorUsedError;
+
+  /// Non-empty when this form is editing an existing listing rather than
+  /// creating a new one; drives `submit()`'s create-vs-update branch.
+  String get editingListingId => throw _privateConstructorUsedError;
+
+  /// The listing's current status when editing, resent unchanged on
+  /// update (editing never silently changes status).
+  ListingStatus? get editingStatus => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $ListingFormStateCopyWith<ListingFormState> get copyWith =>
       throw _privateConstructorUsedError;
@@ -202,7 +215,10 @@ abstract class $ListingFormStateCopyWith<$Res> {
       List<AttributeEntry> attributes,
       bool isSubmitting,
       Map<String, String> errors,
-      int draftRevision});
+      int draftRevision,
+      List<String> existingImageUrls,
+      String editingListingId,
+      ListingStatus? editingStatus});
 }
 
 /// @nodoc
@@ -235,6 +251,9 @@ class _$ListingFormStateCopyWithImpl<$Res, $Val extends ListingFormState>
     Object? isSubmitting = null,
     Object? errors = null,
     Object? draftRevision = null,
+    Object? existingImageUrls = null,
+    Object? editingListingId = null,
+    Object? editingStatus = freezed,
   }) {
     return _then(_value.copyWith(
       photoPaths: null == photoPaths
@@ -305,6 +324,18 @@ class _$ListingFormStateCopyWithImpl<$Res, $Val extends ListingFormState>
           ? _value.draftRevision
           : draftRevision // ignore: cast_nullable_to_non_nullable
               as int,
+      existingImageUrls: null == existingImageUrls
+          ? _value.existingImageUrls
+          : existingImageUrls // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      editingListingId: null == editingListingId
+          ? _value.editingListingId
+          : editingListingId // ignore: cast_nullable_to_non_nullable
+              as String,
+      editingStatus: freezed == editingStatus
+          ? _value.editingStatus
+          : editingStatus // ignore: cast_nullable_to_non_nullable
+              as ListingStatus?,
     ) as $Val);
   }
 }
@@ -334,7 +365,10 @@ abstract class _$$ListingFormStateImplCopyWith<$Res>
       List<AttributeEntry> attributes,
       bool isSubmitting,
       Map<String, String> errors,
-      int draftRevision});
+      int draftRevision,
+      List<String> existingImageUrls,
+      String editingListingId,
+      ListingStatus? editingStatus});
 }
 
 /// @nodoc
@@ -365,6 +399,9 @@ class __$$ListingFormStateImplCopyWithImpl<$Res>
     Object? isSubmitting = null,
     Object? errors = null,
     Object? draftRevision = null,
+    Object? existingImageUrls = null,
+    Object? editingListingId = null,
+    Object? editingStatus = freezed,
   }) {
     return _then(_$ListingFormStateImpl(
       photoPaths: null == photoPaths
@@ -435,6 +472,18 @@ class __$$ListingFormStateImplCopyWithImpl<$Res>
           ? _value.draftRevision
           : draftRevision // ignore: cast_nullable_to_non_nullable
               as int,
+      existingImageUrls: null == existingImageUrls
+          ? _value._existingImageUrls
+          : existingImageUrls // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      editingListingId: null == editingListingId
+          ? _value.editingListingId
+          : editingListingId // ignore: cast_nullable_to_non_nullable
+              as String,
+      editingStatus: freezed == editingStatus
+          ? _value.editingStatus
+          : editingStatus // ignore: cast_nullable_to_non_nullable
+              as ListingStatus?,
     ));
   }
 }
@@ -459,10 +508,14 @@ class _$ListingFormStateImpl implements _ListingFormState {
       final List<AttributeEntry> attributes = const <AttributeEntry>[],
       this.isSubmitting = false,
       final Map<String, String> errors = const <String, String>{},
-      this.draftRevision = 0})
+      this.draftRevision = 0,
+      final List<String> existingImageUrls = const <String>[],
+      this.editingListingId = '',
+      this.editingStatus})
       : _photoPaths = photoPaths,
         _attributes = attributes,
-        _errors = errors;
+        _errors = errors,
+        _existingImageUrls = existingImageUrls;
 
   /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
   final List<String> _photoPaths;
@@ -537,10 +590,33 @@ class _$ListingFormStateImpl implements _ListingFormState {
   @override
   @JsonKey()
   final int draftRevision;
+  final List<String> _existingImageUrls;
+  /// Remote photo URLs already on the listing being edited (empty when
+  /// creating). Not resubmitted as files — see `submit()`'s comment on
+  /// how an empty [photoPaths] preserves them on update.
+  @override
+  @JsonKey()
+  List<String> get existingImageUrls {
+    if (_existingImageUrls is EqualUnmodifiableListView)
+      return _existingImageUrls;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_existingImageUrls);
+  }
+
+  /// Non-empty when this form is editing an existing listing rather than
+  /// creating a new one; drives `submit()`'s create-vs-update branch.
+  @override
+  @JsonKey()
+  final String editingListingId;
+
+  /// The listing's current status when editing, resent unchanged on
+  /// update (editing never silently changes status).
+  @override
+  final ListingStatus? editingStatus;
 
   @override
   String toString() {
-    return 'ListingFormState(photoPaths: $photoPaths, name: $name, priceInput: $priceInput, compareAtPriceInput: $compareAtPriceInput, description: $description, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, quantity: $quantity, location: $location, shippingCostInput: $shippingCostInput, shippingAvailable: $shippingAvailable, attributes: $attributes, isSubmitting: $isSubmitting, errors: $errors, draftRevision: $draftRevision)';
+    return 'ListingFormState(photoPaths: $photoPaths, name: $name, priceInput: $priceInput, compareAtPriceInput: $compareAtPriceInput, description: $description, categoryId: $categoryId, subcategoryId: $subcategoryId, condition: $condition, brand: $brand, quantity: $quantity, location: $location, shippingCostInput: $shippingCostInput, shippingAvailable: $shippingAvailable, attributes: $attributes, isSubmitting: $isSubmitting, errors: $errors, draftRevision: $draftRevision, existingImageUrls: $existingImageUrls, editingListingId: $editingListingId, editingStatus: $editingStatus)';
   }
 
   @override
@@ -578,11 +654,17 @@ class _$ListingFormStateImpl implements _ListingFormState {
                 other.isSubmitting == isSubmitting) &&
             const DeepCollectionEquality().equals(other._errors, _errors) &&
             (identical(other.draftRevision, draftRevision) ||
-                other.draftRevision == draftRevision));
+                other.draftRevision == draftRevision) &&
+            const DeepCollectionEquality()
+                .equals(other._existingImageUrls, _existingImageUrls) &&
+            (identical(other.editingListingId, editingListingId) ||
+                other.editingListingId == editingListingId) &&
+            (identical(other.editingStatus, editingStatus) ||
+                other.editingStatus == editingStatus));
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
       runtimeType,
       const DeepCollectionEquality().hash(_photoPaths),
       name,
@@ -600,7 +682,11 @@ class _$ListingFormStateImpl implements _ListingFormState {
       const DeepCollectionEquality().hash(_attributes),
       isSubmitting,
       const DeepCollectionEquality().hash(_errors),
-      draftRevision);
+      draftRevision,
+      const DeepCollectionEquality().hash(_existingImageUrls),
+      editingListingId,
+      editingStatus,
+    ]);
 
   @JsonKey(ignore: true)
   @override
@@ -628,7 +714,10 @@ abstract class _ListingFormState implements ListingFormState {
       final List<AttributeEntry> attributes,
       final bool isSubmitting,
       final Map<String, String> errors,
-      final int draftRevision}) = _$ListingFormStateImpl;
+      final int draftRevision,
+      final List<String> existingImageUrls,
+      final String editingListingId,
+      final ListingStatus? editingStatus}) = _$ListingFormStateImpl;
 
   @override
 
@@ -668,6 +757,22 @@ abstract class _ListingFormState implements ListingFormState {
 
   /// Incremented when a draft is loaded from storage (for controller sync).
   int get draftRevision;
+  @override
+
+  /// Remote photo URLs already on the listing being edited (empty when
+  /// creating). Not resubmitted as files — see `submit()`'s comment on
+  /// how an empty [photoPaths] preserves them on update.
+  List<String> get existingImageUrls;
+  @override
+
+  /// Non-empty when this form is editing an existing listing rather than
+  /// creating a new one; drives `submit()`'s create-vs-update branch.
+  String get editingListingId;
+  @override
+
+  /// The listing's current status when editing, resent unchanged on
+  /// update (editing never silently changes status).
+  ListingStatus? get editingStatus;
   @override
   @JsonKey(ignore: true)
   _$$ListingFormStateImplCopyWith<_$ListingFormStateImpl> get copyWith =>

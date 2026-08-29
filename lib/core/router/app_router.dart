@@ -26,6 +26,7 @@ import '../../features/delivery/presentation/screens/my_package_requests_screen.
 import '../../features/delivery/presentation/screens/send_package_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/listing/domain/entities/listing_entity.dart';
 import '../../features/listing/presentation/screens/add_listing_screen.dart';
 import '../../features/listing/presentation/screens/my_listings_screen.dart';
 import '../../features/orders/presentation/screens/order_detail_screen.dart';
@@ -142,7 +143,9 @@ List<StatefulShellBranch> _vendorShellBranches() => [
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const AddListingScreen(),
+              AddListingScreen(
+                editingListing: state.extra as ListingEntity?,
+              ),
             ),
           ),
         ],
