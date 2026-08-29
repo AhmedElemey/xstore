@@ -37,7 +37,7 @@ class PhoneAuthState {
   final bool isVerifyingOtp;
   final bool isNewUser;
 
-  /// See [SendOtpResult.debugOtp] — the fixed mock-mode test code, if any.
+  /// See [sendLoginOtp] — the debug OTP echoed by the backend, if any.
   final String? debugOtp;
 
   PhoneAuthState copyWith({

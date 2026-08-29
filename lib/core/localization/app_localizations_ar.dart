@@ -790,6 +790,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get storeJoinedPrefix => 'انضم ';
 
   @override
+  String get storeUnavailableNow => 'المتجر ده مش متاح دلوقتي';
+
+  @override
   String get followStore => 'تابع المتجر';
 
   @override

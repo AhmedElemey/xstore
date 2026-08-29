@@ -36,10 +36,9 @@ abstract final class ApiEndpoints {
   /// [vendorRegister]; only the unused RegisterUseCase path references it.
   static const String register = '/auth/register';
 
-  // TODO(backend): no social/phone token-exchange routes exist yet.
+  // TODO(backend): no social token-exchange route exists yet.
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';
-  static const String phoneLogin = '/auth/phone';
 
   /// Legacy store-hours module — not on the confirmed `/api` contract; hosted
   /// backend returns 404 until deployed. See `store_hours_datasource.dart`.

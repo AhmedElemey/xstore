@@ -28,6 +28,7 @@ import '../../../../shared/utils/public_seller_stats.dart';
 import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 // TODO(phase-2): Re-enable once store/active hours ships.
 // import '../../../store/presentation/providers/store_hours_provider.dart';
 // import '../../../store/presentation/widgets/store_hours_summary_card.dart';
@@ -68,6 +69,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
           setState(() {
             _error = f.toString();
             _loadingMore = false;
+            _loading = false;
+            // Don't render a header-only store when the listings call
+            // failed — the data isn't available.
+            if (replace) _profile = null;
           });
         }
       },
@@ -224,11 +229,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     if (_error != null && _profile == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.x2l),
-            child: Text(_error!, textAlign: TextAlign.center),
-          ),
+        body: ErrorStateWidget(
+          message: context.l10n.storeUnavailableNow,
+          retryLabel: context.l10n.retry,
+          onRetry: _refresh,
         ),
       );
     }

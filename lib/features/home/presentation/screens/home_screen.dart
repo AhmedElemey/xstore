@@ -113,7 +113,10 @@ class HomeScreen extends ConsumerWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   banners.toWidget(
-                    data: (data) => HeroBannerCarousel(banners: data).scaleIn(
+                    data: (data) => HeroBannerCarousel(
+                      banners: data,
+                      onBannerTap: (url) => context.go(url),
+                    ).scaleIn(
                       delay: const Duration(milliseconds: 100),
                     ),
                     loading: () => const _BannerShimmer(),

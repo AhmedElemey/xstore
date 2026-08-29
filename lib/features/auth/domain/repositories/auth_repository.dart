@@ -5,12 +5,9 @@ import '../entities/auth_token_pair.dart';
 import '../entities/consumer_register_params.dart';
 import '../entities/login_params.dart';
 import '../entities/register_params.dart';
-import '../entities/send_otp_params.dart';
-import '../entities/send_otp_result.dart';
 import '../entities/social_auth_result.dart';
 import '../entities/user_entity.dart';
 import '../entities/vendor_register_params.dart';
-import '../entities/verify_otp_params.dart';
 
 abstract interface class AuthRepository {
   Future<Either<Failure, UserEntity?>> restoreSession();
@@ -31,8 +28,8 @@ abstract interface class AuthRepository {
     required String newPassword,
     required String confirmNewPassword,
   });
-  /// Right payload is the debug OTP echoed by the backend, if present (no
-  /// real email gateway wired up yet) — null once one exists.
+  /// Right payload is the debug OTP only when the API actually returned
+  /// an `otp` field. Live forgot-password no longer echoes it.
   Future<Either<Failure, String?>> forgotPassword(String email);
   Future<Either<Failure, Unit>> verifyForgotPasswordOtp({
     required String email,
@@ -52,9 +49,9 @@ abstract interface class AuthRepository {
   });
 
   /// Backend-driven phone OTP (`/api/auth/send-phone-otp` / `verify-phone`)
-  /// — distinct from [sendOtp]/[verifyOtp] below (Firebase-based). Not
-  /// wired into any screen yet; see PhoneAuthDatasource for the active flow.
-  /// Right payload is the debug OTP echoed by the backend, if present.
+  /// for verifying an already-signed-in user's number. Distinct from
+  /// passwordless login (`sendLoginOtp` / `loginWithOtp`).
+  /// Right payload is the debug OTP only when the API returned an `otp` field.
   Future<Either<Failure, String?>> sendPhoneOtpBackend(String phoneNumber);
   Future<Either<Failure, Unit>> verifyPhoneOtpBackend({
     required String phoneNumber,
@@ -84,8 +81,6 @@ abstract interface class AuthRepository {
   Future<Either<Failure, SocialAuthResult>> signInWithApple();
   Future<Either<Failure, SocialAuthResult>> signInWithFacebook();
   Future<Either<Failure, Unit>> signOutSocial();
-  Future<Either<Failure, SendOtpResult>> sendOtp(SendOtpParams params);
-  Future<Either<Failure, UserEntity>> verifyOtp(VerifyOtpParams params);
 
   Future<Either<Failure, Unit>> logout();
 

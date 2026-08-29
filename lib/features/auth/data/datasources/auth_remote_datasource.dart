@@ -33,9 +33,9 @@ abstract interface class AuthRemoteDataSource {
     required String newPassword,
     required String confirmNewPassword,
   });
-  /// Returns the debug OTP echoed back by the backend, if present (the
-  /// server includes it in the response body while no real email/SMS
-  /// gateway is wired up). Null once a real gateway is in place.
+  /// Returns the debug OTP only when the response body includes a
+  /// non-empty `otp` field. Live forgot-password / send-email-otp /
+  /// send-phone-otp no longer echo it; send-login-otp still may.
   Future<String?> forgotPassword(String email);
   Future<void> verifyForgotPasswordOtp({
     required String email,
@@ -80,12 +80,6 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel?> loginWithSocialToken({
     required String provider,
     required String idToken,
-  });
-
-  /// Exchanges a Firebase phone-auth ID token for a backend session.
-  Future<UserModel> loginWithPhoneToken({
-    required String firebaseIdToken,
-    required String phoneNumber,
   });
 }
 
@@ -329,7 +323,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {'email': email},
         options: ApiAuthHeaders.public(),
       );
-      return response.data?['otp'] as String?;
+      return _optionalDebugOtp(response.data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -387,7 +381,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {'email': email},
         options: ApiAuthHeaders.authenticated(),
       );
-      return response.data?['otp'] as String?;
+      return _optionalDebugOtp(response.data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -419,7 +413,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {'phoneNumber': phoneNumber},
         options: ApiAuthHeaders.authenticated(),
       );
-      return response.data?['otp'] as String?;
+      return _optionalDebugOtp(response.data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -464,7 +458,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {'phoneNumber': phoneNumber},
         options: ApiAuthHeaders.public(),
       );
-      return response.data?['otp'] as String?;
+      return _optionalDebugOtp(response.data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -563,32 +557,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  @override
-  Future<UserModel> loginWithPhoneToken({
-    required String firebaseIdToken,
-    required String phoneNumber,
-  }) async {
-    if (MockConfig.useMock) {
-      final model = mockConsumerUserModel(phoneNumber: phoneNumber);
-      return MockConfig.simulate(model);
+  /// Live send-email-otp / send-phone-otp / forgot-password no longer
+  /// include `otp`. Only return a value when that key is actually present
+  /// and non-empty — never invent a debug code.
+  static String? _optionalDebugOtp(Map<String, dynamic>? data) {
+    if (data == null || !data.containsKey('otp')) return null;
+    final raw = data['otp'];
+    if (raw is String) {
+      final trimmed = raw.trim();
+      return trimmed.isEmpty ? null : trimmed;
     }
-
-    try {
-      // TODO(backend): confirm payload keys (`firebaseIdToken`, `phoneNumber`).
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.phoneLogin,
-        data: {
-          'firebaseIdToken': firebaseIdToken,
-          'phoneNumber': phoneNumber,
-        },
-      );
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty response');
-      }
-      return UserModel.fromJson(data);
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
+    if (raw is num) return raw.toString();
+    return null;
   }
 }

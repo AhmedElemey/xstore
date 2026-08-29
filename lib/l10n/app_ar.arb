@@ -284,6 +284,7 @@
   "statStoreActive": "نشط",
   "storeMetaLinePrefix": "منذ ",
   "storeJoinedPrefix": "انضم ",
+  "storeUnavailableNow": "المتجر ده مش متاح دلوقتي",
   "followStore": "تابع المتجر",
   "share": "مشاركة",
   "storeDescriptionHeading": "عن المتجر",

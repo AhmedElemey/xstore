@@ -9,7 +9,6 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
-import '../../../../core/network/legacy_route_options.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
@@ -243,23 +242,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   final Dio _dio;
 
-  static bool _isLegacyRouteMissing(DioException e) =>
-      e.response?.statusCode == 404;
-
-  Options get _legacyOptions => LegacyRouteOptions.allowNotFound();
-
-  ProfileModel _fallbackVendorStoreProfile(String sellerId) {
-    return ProfileModel(
-      user: UserModel(
-        id: sellerId,
-        name: '',
-        email: '',
-        phoneNumber: '',
-        role: UserRole.vendor,
-      ),
-    );
-  }
-
   UserEntity _mergeVendorMock(UserEntity session) {
     final base = mockVendorUser;
     return session.copyWith(
@@ -363,14 +345,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
     try {
       // NOT in the confirmed backend contract — no public store-profile
-      // route exists in the xStoreEcommerce API yet; fails until added.
+      // route exists in the xStoreEcommerce API yet. A 404 is a real miss,
+      // not an empty store: callers must surface an error instead of a
+      // blank shell built from this missing resource.
       final response = await _dio.get<Map<String, dynamic>>(
         '${ApiEndpoints.users}/$sellerId/store',
-        options: _legacyOptions,
+        options: ApiAuthHeaders.public(),
       );
-      if (LegacyRouteOptions.isNotFound(response)) {
-        return _fallbackVendorStoreProfile(sellerId);
-      }
       final data = response.data;
       if (data == null) throw const ServerException('Empty store');
       final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
@@ -382,9 +363,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         responseRatePercent: data['responseRatePercent'] as int? ?? 0,
       );
     } on DioException catch (e) {
-      if (_isLegacyRouteMissing(e)) {
-        return _fallbackVendorStoreProfile(sellerId);
-      }
       throw ServerException(e.message ?? 'Network error');
     }
   }
@@ -606,6 +584,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       // NOT in the confirmed backend contract — /api/listings has no
       // seller filter, so a buyer can't fetch another vendor's listings yet.
+      // A 404 is a real miss, not "this seller has zero listings."
       final response = await _dio.get<Map<String, dynamic>>(
         '${ApiEndpoints.users}/$sellerId/listings',
         queryParameters: {
@@ -613,15 +592,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           'page': page,
           'pageSize': pageSize,
         },
-        options: _legacyOptions,
+        options: ApiAuthHeaders.public(),
       );
-      if (LegacyRouteOptions.isNotFound(response)) return [];
       final list = response.data?['items'] as List<dynamic>? ?? [];
       return list
           .map((e) => ListingModel.fromJson(Map<String, dynamic>.from(e as Map)).toEntity())
           .toList();
     } on DioException catch (e) {
-      if (_isLegacyRouteMissing(e)) return [];
       throw ServerException(e.message ?? 'Network error');
     }
   }

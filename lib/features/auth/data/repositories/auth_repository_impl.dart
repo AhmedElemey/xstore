@@ -13,15 +13,11 @@ import '../../domain/entities/auth_token_pair.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/register_params.dart';
-import '../../domain/entities/send_otp_params.dart';
-import '../../domain/entities/send_otp_result.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/vendor_register_params.dart';
-import '../../domain/entities/verify_otp_params.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
-import '../datasources/phone_auth_datasource.dart';
 import '../datasources/social_auth_datasource.dart';
 import '../../../../core/utils/jwt_payload.dart';
 import '../models/user_model.dart';
@@ -30,18 +26,15 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remote,
     required SocialAuthDatasource social,
-    required PhoneAuthDatasource phone,
     required FlutterSecureStorage secureStorage,
     FirebaseAuth? firebaseAuth,
   })  : _remote = remote,
         _social = social,
-        _phone = phone,
         _secureStorage = secureStorage,
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final AuthRemoteDataSource _remote;
   final SocialAuthDatasource _social;
-  final PhoneAuthDatasource _phone;
   final FlutterSecureStorage _secureStorage;
   final FirebaseAuth _firebaseAuth;
 
@@ -481,48 +474,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(Failure.socialAuth(e.message));
     } catch (e) {
       return Left(Failure.socialAuth(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, SendOtpResult>> sendOtp(SendOtpParams params) async {
-    try {
-      final result = await _phone.sendOtp(e164Number: params.e164Number);
-      return Right(result);
-    } on PhoneAuthException catch (e) {
-      return Left(Failure.phoneAuth(e.message));
-    } catch (e) {
-      return Left(Failure.phoneAuth(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, UserEntity>> verifyOtp(VerifyOtpParams params) async {
-    try {
-      await _phone.verifyOtp(
-        verificationId: params.verificationId,
-        otpCode: params.otpCode,
-        phoneNumber: params.phoneNumber,
-      );
-      final firebaseIdToken = await _requireFirebaseIdToken();
-      final model = await _remote.loginWithPhoneToken(
-        firebaseIdToken: firebaseIdToken,
-        phoneNumber: params.phoneNumber,
-      );
-      await _persistUser(model);
-      return Right(model.toEntity());
-    } on PhoneAuthException catch (e) {
-      return Left(Failure.phoneAuth(e.message));
-    } on AuthException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.phoneAuth(e.toString()));
     }
   }
 

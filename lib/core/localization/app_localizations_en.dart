@@ -789,6 +789,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeJoinedPrefix => 'Joined ';
 
   @override
+  String get storeUnavailableNow => 'This store isn\'t available right now';
+
+  @override
   String get followStore => 'Follow Store';
 
   @override

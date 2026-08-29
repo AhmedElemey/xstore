@@ -4,12 +4,9 @@ import 'package:xstore/features/auth/domain/entities/auth_token_pair.dart';
 import 'package:xstore/features/auth/domain/entities/consumer_register_params.dart';
 import 'package:xstore/features/auth/domain/entities/login_params.dart';
 import 'package:xstore/features/auth/domain/entities/register_params.dart';
-import 'package:xstore/features/auth/domain/entities/send_otp_params.dart';
-import 'package:xstore/features/auth/domain/entities/send_otp_result.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/domain/entities/vendor_register_params.dart';
-import 'package:xstore/features/auth/domain/entities/verify_otp_params.dart';
 import 'package:xstore/features/auth/domain/repositories/auth_repository.dart';
 
 class StubAuthRepository implements AuthRepository {
@@ -130,10 +127,6 @@ class StubAuthRepository implements AuthRepository {
       const Right(unit);
 
   @override
-  Future<Either<Failure, SendOtpResult>> sendOtp(SendOtpParams params) async =>
-      Left(Failure.phoneAuth('stub'));
-
-  @override
   Future<Either<Failure, SocialAuthResult>> signInWithApple() async =>
       Left(Failure.socialAuth('stub'));
 
@@ -147,10 +140,6 @@ class StubAuthRepository implements AuthRepository {
 
   @override
   Future<Either<Failure, Unit>> signOutSocial() async => const Right(unit);
-
-  @override
-  Future<Either<Failure, UserEntity>> verifyOtp(VerifyOtpParams params) async =>
-      Left(Failure.phoneAuth('stub'));
 
   @override
   Future<Either<Failure, String?>> sendLoginOtp(String phoneNumber) async =>

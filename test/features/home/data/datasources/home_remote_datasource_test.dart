@@ -94,6 +94,7 @@ void main() {
       expect(result[0].imageUrl, 'https://example.test/b1.jpg');
       expect(result[0].actionUrl, 'https://example.test/promo');
       expect(result[1].title, 'New arrivals');
+      expect(result[1].actionUrl, isNull);
     });
 
     test('drops entries missing id or image instead of crashing', () async {

@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:xstore/features/auth/data/datasources/phone_auth_datasource.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
 import 'package:xstore/features/auth/data/models/user_model.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
@@ -41,8 +40,6 @@ class _FakeSocial extends Fake implements SocialAuthDatasource {
     }
   }
 }
-
-class _FakePhone extends Fake implements PhoneAuthDatasource {}
 
 class _MemStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String?> store = {};
@@ -106,7 +103,6 @@ void main() {
     repo = AuthRepositoryImpl(
       remote: remote,
       social: social,
-      phone: _FakePhone(),
       secureStorage: storage,
       firebaseAuth: _FakeFirebaseAuth(),
     );

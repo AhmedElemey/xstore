@@ -7,16 +7,13 @@ import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:xstore/features/auth/data/datasources/phone_auth_datasource.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
 import 'package:xstore/features/auth/data/models/user_model.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/consumer_register_params.dart';
-import 'package:xstore/features/auth/domain/entities/send_otp_result.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/domain/entities/vendor_register_params.dart';
-import 'package:xstore/features/auth/domain/entities/verify_otp_params.dart';
 
 class _FakeUser implements User {
   const _FakeUser();
@@ -47,8 +44,6 @@ class _FakeFirebaseAuth implements FirebaseAuth {
 class _RecordingRemote implements AuthRemoteDataSource {
   String? lastSocialProvider;
   String? lastSocialIdToken;
-  String? lastPhoneIdToken;
-  String? lastPhoneNumber;
   String? lastGoogleIdToken;
   bool? lastGoogleAsVendor;
 
@@ -60,9 +55,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
 
   final UserModel socialResponse = mockConsumerUserModel(
     email: 'social@xstore.com',
-  );
-  final UserModel phoneResponse = mockConsumerUserModel(
-    phoneNumber: '01012345678',
   );
   final UserModel consumerRegisterResponse = mockConsumerUserModel(
     email: 'new-consumer@xstore.com',
@@ -160,16 +152,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithPhoneToken({
-    required String firebaseIdToken,
-    required String phoneNumber,
-  }) async {
-    lastPhoneIdToken = firebaseIdToken;
-    lastPhoneNumber = phoneNumber;
-    return phoneResponse;
-  }
-
-  @override
   Future<String?> sendLoginOtp(String phoneNumber) =>
       throw UnimplementedError();
 
@@ -210,31 +192,6 @@ class _FakeSocial implements SocialAuthDatasource {
   Future<void> signOutSocial() async {}
 }
 
-class _FakePhone implements PhoneAuthDatasource {
-  @override
-  Future<SendOtpResult> sendOtp({
-    required String e164Number,
-    int? resendToken,
-  }) =>
-      throw UnimplementedError();
-
-  @override
-  Future<UserEntity> verifyOtp({
-    required String verificationId,
-    required String otpCode,
-    required String phoneNumber,
-  }) async =>
-      const UserEntity(
-        id: 'phone-firebase-uid',
-        name: 'Phone User',
-        email: '',
-        phoneNumber: '01012345678',
-        role: UserRole.consumer,
-        isVerified: true,
-        joinedAt: null,
-      );
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -257,7 +214,6 @@ void main() {
           isNewUser: false,
         ),
       ),
-      phone: _FakePhone(),
       secureStorage: storage,
       firebaseAuth: _FakeFirebaseAuth(_FakeUser()),
     );
@@ -303,7 +259,6 @@ void main() {
               isNewUser: true,
             ),
           ),
-          phone: _FakePhone(),
           secureStorage: storage,
           firebaseAuth: _FakeFirebaseAuth(_FakeUser()),
         );
@@ -334,7 +289,6 @@ void main() {
               isNewUser: false,
             ),
           ),
-          phone: _FakePhone(),
           secureStorage: storage,
           firebaseAuth: _FakeFirebaseAuth(_FakeUser()),
         );
@@ -343,25 +297,6 @@ void main() {
 
         expect(result.isRight(), isTrue);
         expect(remote.lastSocialProvider, 'facebook');
-        expect(await readStoredToken(), 'mock-token-consumer');
-      },
-      skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
-    );
-
-    test(
-      'verifyOtp exchanges Firebase ID token and persists backend token',
-      () async {
-        final result = await repository.verifyOtp(
-          const VerifyOtpParams(
-            verificationId: 'vid',
-            otpCode: '123456',
-            phoneNumber: '01012345678',
-          ),
-        );
-
-        expect(result.isRight(), isTrue);
-        expect(remote.lastPhoneIdToken, 'firebase-id-token-test');
-        expect(remote.lastPhoneNumber, '01012345678');
         expect(await readStoredToken(), 'mock-token-consumer');
       },
       skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
@@ -471,7 +406,6 @@ void main() {
       defaultRepository = AuthRepositoryImpl(
         remote: remote,
         social: SocialAuthDatasourceImpl(),
-        phone: PhoneAuthDatasourceImpl(),
         secureStorage: storage,
       );
     });
@@ -488,24 +422,6 @@ void main() {
           expect(social.idToken, 'mock-google-id-token');
         });
         expect(await storage.read(key: PrefsKeys.authToken), isNull);
-      },
-      skip: MockConfig.useMock ? false : 'Requires MOCK=true (default)',
-    );
-
-    test(
-      'verifyOtp succeeds without injected FirebaseAuth when MOCK=true',
-      () async {
-        final result = await defaultRepository.verifyOtp(
-          const VerifyOtpParams(
-            verificationId: 'mock_verification_id_12345',
-            otpCode: '123456',
-            phoneNumber: '01012345678',
-          ),
-        );
-
-        expect(result.isRight(), isTrue);
-        expect(remote.lastPhoneIdToken, 'mock-firebase-id-token');
-        expect(await storage.read(key: PrefsKeys.authToken), 'mock-token-consumer');
       },
       skip: MockConfig.useMock ? false : 'Requires MOCK=true (default)',
     );

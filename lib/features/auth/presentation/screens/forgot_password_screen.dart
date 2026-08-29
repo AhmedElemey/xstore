@@ -68,8 +68,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       },
       (debugOtp) {
         setState(() => _isLoading = false);
-        // The backend echoes the OTP in the response while no real
-        // email gateway is wired up — surface it for debugging only.
+        // Live forgot-password no longer echoes `otp` (same as
+        // send-email-otp / send-phone-otp). Only surface a debug snackbar
+        // when the API actually returned one.
         if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
           AppSnackbar.info(context, 'Debug OTP: $debugOtp');
         }

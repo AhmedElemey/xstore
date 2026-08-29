@@ -3,9 +3,9 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../repositories/auth_repository.dart';
 
-/// Server-driven phone OTP (`/api/auth/send-phone-otp`) — distinct from the
-/// existing Firebase-based phone auth flow (`sendOtp`/`PhoneAuthDatasource`).
-/// Not wired into any screen yet; see auth_repository.dart for context.
+/// Server-driven phone OTP (`/api/auth/send-phone-otp`) for verifying an
+/// already-signed-in user's number. Distinct from passwordless login
+/// (`sendLoginOtp` / `loginWithOtp`).
 class SendPhoneOtpBackendUseCase {
   const SendPhoneOtpBackendUseCase(this._repository);
 

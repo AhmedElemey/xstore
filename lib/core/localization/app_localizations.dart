@@ -1634,6 +1634,12 @@ abstract class AppLocalizations {
   /// **'Joined '**
   String get storeJoinedPrefix;
 
+  /// No description provided for @storeUnavailableNow.
+  ///
+  /// In en, this message translates to:
+  /// **'This store isn\'t available right now'**
+  String get storeUnavailableNow;
+
   /// No description provided for @followStore.
   ///
   /// In en, this message translates to:

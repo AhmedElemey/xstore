@@ -85,6 +85,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       (failure) => AppSnackbar.error(context, context.l10n.errorGeneric),
       (debugOtp) {
         _startResendCooldown();
+        // Same gate as [ForgotPasswordScreen]: live forgot-password no
+        // longer echoes `otp`.
         if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
           AppSnackbar.info(context, 'Debug OTP: $debugOtp');
         }

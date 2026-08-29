@@ -10,9 +10,9 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 
 /// Verifies the signed-in user's phone number via the backend OTP flow
-/// (`send-phone-otp` / `verify-phone`) — distinct from the Firebase-based
-/// login OTP flow. Used where an action requires phone verification the
-/// user hasn't completed yet (e.g. placing an order).
+/// (`send-phone-otp` / `verify-phone`) — distinct from passwordless login
+/// (`send-login-otp` / `login-with-otp`). Used where an action requires
+/// phone verification the user hasn't completed yet (e.g. placing an order).
 ///
 /// Returns true if the phone was successfully verified, false otherwise.
 Future<bool> verifyPhoneNow(

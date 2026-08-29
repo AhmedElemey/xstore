@@ -68,22 +68,6 @@ final socialAuthDatasourceProvider = Provider<SocialAuthDatasource>.internal(
 );
 
 typedef SocialAuthDatasourceRef = ProviderRef<SocialAuthDatasource>;
-String _$phoneAuthDatasourceHash() =>
-    r'b29af017b466e83a83b6ac2b45e89d913fede96f';
-
-/// See also [phoneAuthDatasource].
-@ProviderFor(phoneAuthDatasource)
-final phoneAuthDatasourceProvider = Provider<PhoneAuthDatasource>.internal(
-  phoneAuthDatasource,
-  name: r'phoneAuthDatasourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$phoneAuthDatasourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef PhoneAuthDatasourceRef = ProviderRef<PhoneAuthDatasource>;
 String _$loginUseCaseHash() => r'e5d70fa1e5543d7d6609678d0835d0c67d436c2d';
 
 /// See also [loginUseCase].
@@ -358,36 +342,6 @@ final facebookSignInUseCaseProvider =
 
 typedef FacebookSignInUseCaseRef
     = AutoDisposeProviderRef<FacebookSignInUseCase>;
-String _$sendOtpUseCaseHash() => r'fbd0c87c4dfe6467bb555b44ec7bcff159df4765';
-
-/// See also [sendOtpUseCase].
-@ProviderFor(sendOtpUseCase)
-final sendOtpUseCaseProvider = AutoDisposeProvider<SendOtpUseCase>.internal(
-  sendOtpUseCase,
-  name: r'sendOtpUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$sendOtpUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef SendOtpUseCaseRef = AutoDisposeProviderRef<SendOtpUseCase>;
-String _$verifyOtpUseCaseHash() => r'05aec30c3b50e51ce73ec7db4506db57803a0cf3';
-
-/// See also [verifyOtpUseCase].
-@ProviderFor(verifyOtpUseCase)
-final verifyOtpUseCaseProvider = AutoDisposeProvider<VerifyOtpUseCase>.internal(
-  verifyOtpUseCase,
-  name: r'verifyOtpUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$verifyOtpUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef VerifyOtpUseCaseRef = AutoDisposeProviderRef<VerifyOtpUseCase>;
 String _$sendLoginOtpUseCaseHash() =>
     r'e6025345e5b49a993511ca6ee2a7999008faed15';
 

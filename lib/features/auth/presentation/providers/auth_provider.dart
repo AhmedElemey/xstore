@@ -11,7 +11,6 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/datasources/social_auth_datasource.dart';
-import '../../data/datasources/phone_auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
@@ -34,8 +33,6 @@ import '../../domain/usecases/verify_phone_otp_backend_usecase.dart';
 import '../../domain/usecases/apple_sign_in_usecase.dart';
 import '../../domain/usecases/facebook_sign_in_usecase.dart';
 import '../../domain/usecases/google_sign_in_usecase.dart';
-import '../../domain/usecases/send_otp_usecase.dart';
-import '../../domain/usecases/verify_otp_usecase.dart';
 import '../../domain/usecases/send_login_otp_usecase.dart';
 import '../../domain/usecases/login_with_otp_usecase.dart';
 import '../../domain/usecases/google_login_usecase.dart';
@@ -64,7 +61,6 @@ AuthRepository authRepository(AuthRepositoryRef ref) {
   return AuthRepositoryImpl(
     remote: ref.watch(authRemoteDataSourceProvider),
     social: ref.watch(socialAuthDatasourceProvider),
-    phone: ref.watch(phoneAuthDatasourceProvider),
     secureStorage: ref.watch(secureStorageProvider),
   );
 }
@@ -72,11 +68,6 @@ AuthRepository authRepository(AuthRepositoryRef ref) {
 @Riverpod(keepAlive: true)
 SocialAuthDatasource socialAuthDatasource(SocialAuthDatasourceRef ref) {
   return SocialAuthDatasourceImpl();
-}
-
-@Riverpod(keepAlive: true)
-PhoneAuthDatasource phoneAuthDatasource(PhoneAuthDatasourceRef ref) {
-  return PhoneAuthDatasourceImpl();
 }
 
 @riverpod
@@ -165,16 +156,6 @@ AppleSignInUseCase appleSignInUseCase(AppleSignInUseCaseRef ref) {
 @riverpod
 FacebookSignInUseCase facebookSignInUseCase(FacebookSignInUseCaseRef ref) {
   return FacebookSignInUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-SendOtpUseCase sendOtpUseCase(SendOtpUseCaseRef ref) {
-  return SendOtpUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-VerifyOtpUseCase verifyOtpUseCase(VerifyOtpUseCaseRef ref) {
-  return VerifyOtpUseCase(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
@@ -461,8 +442,9 @@ class RegisterNotifier extends _$RegisterNotifier {
         storeSlug: slugifyStoreName(storeName),
       );
     }
-    if (storeCategory != null)
+    if (storeCategory != null) {
       next = next.copyWith(storeCategory: storeCategory);
+    }
     if (storeDescription != null) {
       final t = storeDescription.length > 300
           ? storeDescription.substring(0, 300)
@@ -478,8 +460,9 @@ class RegisterNotifier extends _$RegisterNotifier {
     if (storeGovernmentId != null) {
       next = next.copyWith(storeGovernmentId: storeGovernmentId);
     }
-    if (whatsappNumber != null)
+    if (whatsappNumber != null) {
       next = next.copyWith(whatsappNumber: whatsappNumber);
+    }
     state = next.copyWith(stepErrors: {}, error: null);
   }
 

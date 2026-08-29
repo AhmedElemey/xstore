@@ -284,6 +284,7 @@
   "statStoreActive": "Active",
   "storeMetaLinePrefix": "Since ",
   "storeJoinedPrefix": "Joined ",
+  "storeUnavailableNow": "This store isn't available right now",
   "followStore": "Follow Store",
   "share": "Share",
   "storeDescriptionHeading": "About the store",

@@ -10,9 +10,17 @@ import '../../../../shared/widgets/pulsing_dot.dart';
 import '../../domain/entities/banner_entity.dart';
 
 class HeroBannerCarousel extends StatefulWidget {
-  const HeroBannerCarousel({super.key, required this.banners});
+  const HeroBannerCarousel({
+    super.key,
+    required this.banners,
+    this.onBannerTap,
+  });
 
   final List<BannerEntity> banners;
+
+  /// Called only for banners whose [BannerEntity.actionUrl] is non-empty.
+  /// Live `/api/banners` currently omit that field — those stay inert.
+  final void Function(String actionUrl)? onBannerTap;
 
   @override
   State<HeroBannerCarousel> createState() => _HeroBannerCarouselState();
@@ -84,6 +92,49 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
             onPageChanged: (index) => _currentPage.value = index,
             itemBuilder: (context, index) {
               final b = widget.banners[index];
+              final actionUrl = b.actionUrl?.trim();
+              final tappable =
+                  actionUrl != null && actionUrl.isNotEmpty;
+              final card = ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.lg),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AppCachedNetworkImage(
+                      imageUrl: b.imageUrl,
+                      fit: BoxFit.cover,
+                      memCacheHeight: (bannerHeight * 3).round(),
+                      placeholder: (_, __) =>
+                          ColoredBox(color: context.textDisabled),
+                      errorWidget: (_, __, ___) => ColoredBox(
+                        color: context.textDisabled,
+                        child: Icon(
+                          LucideIcons.imageOff,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: AppSpacing.lg,
+                      bottom: AppSpacing.lg,
+                      child: Text(
+                        b.title,
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(
+                              shadows: [
+                                Shadow(
+                                  blurRadius: AppSpacing.sm,
+                                  color: context.textPrimary.withValues(
+                                    alpha: 0.45,
+                                  ),
+                                ),
+                              ],
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
               return AnimatedBuilder(
                 animation: _pageController,
                 builder: (context, child) {
@@ -102,47 +153,13 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSpacing.lg),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        AppCachedNetworkImage(
-                          imageUrl: b.imageUrl,
-                          fit: BoxFit.cover,
-                          memCacheHeight: (bannerHeight * 3).round(),
-                          placeholder: (_, __) =>
-                              ColoredBox(color: context.textDisabled),
-                          errorWidget: (_, __, ___) => ColoredBox(
-                            color: context.textDisabled,
-                            child: Icon(
-                              LucideIcons.imageOff,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: AppSpacing.lg,
-                          bottom: AppSpacing.lg,
-                          child: Text(
-                            b.title,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: AppSpacing.sm,
-                                      color: context.textPrimary.withValues(
-                                        alpha: 0.45,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: tappable
+                      ? GestureDetector(
+                          key: ValueKey<String>('banner-action-${b.id}'),
+                          onTap: () => widget.onBannerTap?.call(actionUrl),
+                          child: card,
+                        )
+                      : card,
                 ),
               );
             },
