@@ -3206,6 +3206,54 @@ abstract class AppLocalizations {
   /// **'Edit'**
   String get checkoutEdit;
 
+  /// No description provided for @checkoutEditAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Address'**
+  String get checkoutEditAddress;
+
+  /// No description provided for @checkoutRemoveAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get checkoutRemoveAddress;
+
+  /// No description provided for @checkoutRemoveAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove address?'**
+  String get checkoutRemoveAddressTitle;
+
+  /// No description provided for @checkoutRemoveAddressBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This address will be removed from your saved list.'**
+  String get checkoutRemoveAddressBody;
+
+  /// No description provided for @checkoutAddressesDeviceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device only, until an account-wide address book ships.'**
+  String get checkoutAddressesDeviceOnly;
+
+  /// No description provided for @checkoutErrorAddressName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the recipient\'s name'**
+  String get checkoutErrorAddressName;
+
+  /// No description provided for @checkoutErrorAddressStreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a street address'**
+  String get checkoutErrorAddressStreet;
+
+  /// No description provided for @checkoutErrorAddressCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a city'**
+  String get checkoutErrorAddressCity;
+
   /// No description provided for @checkoutPaymentTitle.
   ///
   /// In en, this message translates to:

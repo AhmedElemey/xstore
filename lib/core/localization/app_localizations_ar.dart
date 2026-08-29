@@ -1583,6 +1583,32 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutEdit => 'تعديل';
 
   @override
+  String get checkoutEditAddress => 'تعديل العنوان';
+
+  @override
+  String get checkoutRemoveAddress => 'إزالة';
+
+  @override
+  String get checkoutRemoveAddressTitle => 'إزالة العنوان؟';
+
+  @override
+  String get checkoutRemoveAddressBody =>
+      'سيتم إزالة هذا العنوان من قائمتك المحفوظة.';
+
+  @override
+  String get checkoutAddressesDeviceOnly =>
+      'محفوظ على هذا الجهاز فقط، حتى يتم إطلاق دفتر عناوين مرتبط بحسابك.';
+
+  @override
+  String get checkoutErrorAddressName => 'أدخل اسم المستلم';
+
+  @override
+  String get checkoutErrorAddressStreet => 'أدخل عنوان الشارع';
+
+  @override
+  String get checkoutErrorAddressCity => 'أدخل المدينة';
+
+  @override
   String get checkoutPaymentTitle => 'طريقة الدفع';
 
   @override

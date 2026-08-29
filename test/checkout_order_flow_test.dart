@@ -62,6 +62,7 @@ import 'package:xstore/features/cart/presentation/providers/cart_state.dart';
 import 'package:xstore/features/cart/presentation/providers/checkout_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/checkout_state.dart';
 import 'package:xstore/features/cart/presentation/screens/checkout_screen.dart';
+import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
@@ -196,6 +197,33 @@ class _NoAddressCheckout extends Checkout {
   }
 }
 
+/// Seeds Checkout with one valid saved address synchronously. The real
+/// `build()` now loads any saved addresses from local storage
+/// asynchronously (there's no backend address book — see
+/// checkout_provider.dart), which these order-placement tests don't want to
+/// wait on and don't otherwise care about; they're exercising the
+/// place-order wire contract, not address persistence (covered by
+/// checkout_address_persistence_test.dart).
+class _SeededAddressCheckout extends Checkout {
+  @override
+  CheckoutState build() {
+    final s = super.build();
+    return s.copyWith(
+      savedAddresses: const [
+        OrderAddress(
+          fullName: 'Test Buyer',
+          phone: '01012345678',
+          street: '1 Test Street',
+          city: 'Cairo',
+          wilaya: 'Cairo',
+          isDefault: true,
+        ),
+      ],
+      selectedAddressIndex: 0,
+    );
+  }
+}
+
 /// Marks the consumer's phone as already verified so `requirePhoneVerified`
 /// (checkout_screen.dart's proactive gate, and the backend's own 400 for an
 /// unverified phone) doesn't intercept these order-creation-focused tests —
@@ -298,7 +326,11 @@ void main() {
 
       await tester.pumpWidget(
         _checkoutHarness(
-          _overrides(dio: _fakeDio(adapter), cartItems: [_seedItem()]),
+          _overrides(
+            dio: _fakeDio(adapter),
+            cartItems: [_seedItem()],
+            checkout: () => _SeededAddressCheckout(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -372,7 +404,11 @@ void main() {
         ),
       );
       final container = await _buildContainer(
-        _overrides(dio: _fakeDio(adapter), cartItems: [_seedItem()]),
+        _overrides(
+          dio: _fakeDio(adapter),
+          cartItems: [_seedItem()],
+          checkout: () => _SeededAddressCheckout(),
+        ),
       );
 
       final order = await container.read(checkoutProvider.notifier).placeOrder();
@@ -399,7 +435,11 @@ void main() {
         }, 400),
       );
       final container = await _buildContainer(
-        _overrides(dio: _fakeDio(adapter), cartItems: [_seedItem()]),
+        _overrides(
+          dio: _fakeDio(adapter),
+          cartItems: [_seedItem()],
+          checkout: () => _SeededAddressCheckout(),
+        ),
       );
 
       final order = await container.read(checkoutProvider.notifier).placeOrder();
@@ -422,7 +462,11 @@ void main() {
         }, 500),
       );
       final container = await _buildContainer(
-        _overrides(dio: _fakeDio(adapter), cartItems: [_seedItem()]),
+        _overrides(
+          dio: _fakeDio(adapter),
+          cartItems: [_seedItem()],
+          checkout: () => _SeededAddressCheckout(),
+        ),
       );
 
       final order = await container.read(checkoutProvider.notifier).placeOrder();
@@ -456,7 +500,11 @@ void main() {
         onRefreshFailed: () async => refreshFailedCalled = true,
       );
       final container = await _buildContainer(
-        _overrides(dio: dio, cartItems: [_seedItem()]),
+        _overrides(
+          dio: dio,
+          cartItems: [_seedItem()],
+          checkout: () => _SeededAddressCheckout(),
+        ),
       );
 
       final order = await container.read(checkoutProvider.notifier).placeOrder();

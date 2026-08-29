@@ -6,6 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/checkout_provider.dart';
 import 'checkout_add_address_sheet.dart';
+import 'checkout_remove_address_sheet.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutAddressSection extends ConsumerWidget {
@@ -83,9 +84,29 @@ class CheckoutAddressSection extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(context.l10n.checkoutEdit),
+                        Column(
+                          children: [
+                            TextButton(
+                              onPressed: () => showCheckoutAddAddressSheet(
+                                context,
+                                ref,
+                                existing: st.savedAddresses[i],
+                                editIndex: i,
+                              ),
+                              child: Text(context.l10n.checkoutEdit),
+                            ),
+                            TextButton(
+                              onPressed: () => showCheckoutRemoveAddressSheet(
+                                context,
+                                ref,
+                                i,
+                              ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.error,
+                              ),
+                              child: Text(context.l10n.checkoutRemoveAddress),
+                            ),
+                          ],
                         ),
                       ],
                     ),

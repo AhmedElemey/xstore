@@ -1582,6 +1582,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutEdit => 'Edit';
 
   @override
+  String get checkoutEditAddress => 'Edit Address';
+
+  @override
+  String get checkoutRemoveAddress => 'Remove';
+
+  @override
+  String get checkoutRemoveAddressTitle => 'Remove address?';
+
+  @override
+  String get checkoutRemoveAddressBody =>
+      'This address will be removed from your saved list.';
+
+  @override
+  String get checkoutAddressesDeviceOnly =>
+      'Saved on this device only, until an account-wide address book ships.';
+
+  @override
+  String get checkoutErrorAddressName => 'Enter the recipient\'s name';
+
+  @override
+  String get checkoutErrorAddressStreet => 'Enter a street address';
+
+  @override
+  String get checkoutErrorAddressCity => 'Enter a city';
+
+  @override
   String get checkoutPaymentTitle => 'Payment Method';
 
   @override
