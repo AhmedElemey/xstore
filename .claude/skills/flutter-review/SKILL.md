@@ -970,3 +970,9 @@ Rules for the log:
 - **What happened:** A Firebase `PhoneAuthDatasource` + `/auth/phone` token exchange sat beside the live passwordless login (`send-login-otp` / `login-with-otp`). Login's "Continue with phone" sheet already used the backend OTP notifier, not Firebase — but the names (`phoneAuthProvider`, `PhoneAuthDatasource`) looked like one path.
 - **Rule:** Before deleting an auth/datasource path, `rg` every `context.push`/`go` and notifier call site. Same-named providers can be the live flow. If any reachable entry still hits the old path, stop and flag it; don't delete a live login. After confirming it's unused, remove the datasource, use cases, and `ApiEndpoints` constant in the same change so nothing can be re-wired by accident.
 - **Where it applies:** Auth feature (`phone_auth_provider.dart` is backend OTP — keep; `phone_auth_datasource.dart` was Firebase — gone), any future "dead" login/register variant.
+
+### 2026-08-29 — Other-vendor store 404 is a real miss; do not test an empty-shell fallback
+- **What happened:** A coverage brief asked to assert that `GET /users/{id}/store` and `/users/{id}/listings` return an empty shell/list on 404. Last-round QA already removed that fallback so a missing route surfaces `ErrorStateWidget` instead of a blank store invented from a 404.
+- **Rule:** Tests of undeployed legacy routes must lock in the honesty decision already in the datasource. For `/users/*/store` and `/users/*/listings`, 404 must throw (`ServerException`); separately exercise the populated parser so it is ready if the backend ever ships the route. Do not reintroduce an empty-shell fallback the last QA round rejected.
+- **Where it applies:** `profile_remote_datasource.dart` `getVendorStoreProfile`/`fetchVendorStoreListings`, `vendor_store_screen.dart`, `test/features/profile/data/datasources/profile_remote_datasource_store_test.dart`.
+
