@@ -72,6 +72,24 @@ final getMyListingsUseCaseProvider =
 );
 
 typedef GetMyListingsUseCaseRef = AutoDisposeProviderRef<GetMyListingsUseCase>;
+String _$getListingByIdUseCaseHash() =>
+    r'e351a4d5c62e97aa9f8349b831d8611317083628';
+
+/// See also [getListingByIdUseCase].
+@ProviderFor(getListingByIdUseCase)
+final getListingByIdUseCaseProvider =
+    AutoDisposeProvider<GetListingByIdUseCase>.internal(
+  getListingByIdUseCase,
+  name: r'getListingByIdUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getListingByIdUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetListingByIdUseCaseRef
+    = AutoDisposeProviderRef<GetListingByIdUseCase>;
 String _$updateListingUseCaseHash() =>
     r'0003093fe073c386641dd45fb727e0805702e9b1';
 

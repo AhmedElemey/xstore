@@ -31,6 +31,15 @@ abstract interface class ListingRemoteDataSource {
 
   Future<List<ListingModel>> fetchMyListings();
 
+  /// Fetches the full listing shape by id — CONFIRMED live: this is the
+  /// same `GET /api/listings/{id}` route the product-detail/cart/wishlist
+  /// datasources already use, which returns the complete listing (category,
+  /// condition, brand, stock, shipping, location, attributes) rather than
+  /// whatever subset `fetchMyListings()`'s list response carries. Used to
+  /// hydrate the edit form with real data instead of the (possibly
+  /// summary-shaped) entity already on the My Listings screen.
+  Future<ListingModel> fetchListingById(String id);
+
   Future<ListingModel> updateListing({
     required String id,
     required String titleEn,
@@ -266,6 +275,29 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     } on DioException catch (e) {
       if (_isOffline(e)) {
         return List<ListingModel>.from(_localMine);
+      }
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<ListingModel> fetchListingById(String id) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.apiListingDetail(id),
+        options: ApiAuthHeaders.authenticated(),
+      );
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException('Empty response');
+      }
+      return ListingModel.fromJson(data);
+    } on DioException catch (e) {
+      if (_isOffline(e)) {
+        final idx = _localMine.indexWhere((e) => e.id == id);
+        if (idx != -1) {
+          return _localMine[idx];
+        }
       }
       throw mapDioException(e);
     }

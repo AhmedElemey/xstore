@@ -75,6 +75,20 @@ class ListingRepositoryImpl implements ListingRepository {
   }
 
   @override
+  Future<Either<Failure, ListingEntity>> getListingById(String id) async {
+    try {
+      final model = await _remote.fetchListingById(id);
+      return Right(model.toEntity());
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, ListingEntity>> updateListing({
     required String id,
     required String titleEn,
