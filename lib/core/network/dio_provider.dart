@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -16,6 +17,24 @@ import 'server_error_provider.dart';
 import 'token_refresh_interceptor.dart';
 
 part 'dio_provider.g.dart';
+
+/// Clears a session that the backend no longer recognizes (failed token
+/// refresh, or get-profile 404 "user not found" for the stored token) and
+/// forces the app back to a logged-out state — mirrors the manual logout
+/// cleanup in `Auth.logout()` minus the remote logout call, which is
+/// pointless for a session the backend already doesn't know about.
+Future<void> _clearInvalidSession(
+  Ref ref,
+  FlutterSecureStorage secureStorage,
+) async {
+  await secureStorage.delete(key: PrefsKeys.authToken);
+  await secureStorage.delete(key: PrefsKeys.authRefreshToken);
+  await secureStorage.delete(key: PrefsKeys.authUser);
+  resetProfileData(ref);
+  resetListingLocalCache(ref);
+  resetStoreHoursData(ref);
+  ref.invalidate(authProvider);
+}
 
 @Riverpod(keepAlive: true)
 Dio dio(DioRef ref) {
@@ -72,15 +91,7 @@ Dio dio(DioRef ref) {
     TokenRefreshInterceptor(
       dio: client,
       secureStorage: secureStorage,
-      onRefreshFailed: () async {
-        await secureStorage.delete(key: PrefsKeys.authToken);
-        await secureStorage.delete(key: PrefsKeys.authRefreshToken);
-        await secureStorage.delete(key: PrefsKeys.authUser);
-        resetProfileData(ref);
-        resetListingLocalCache(ref);
-        resetStoreHoursData(ref);
-        ref.invalidate(authProvider);
-      },
+      onRefreshFailed: () => _clearInvalidSession(ref, secureStorage),
     ),
   );
 
@@ -88,12 +99,23 @@ Dio dio(DioRef ref) {
   // full-page server-error screen instead of the failing screen's own inline
   // error UI. Errors still propagate to `handler.next` so existing
   // per-call `mapDioException` handling is unaffected.
+  //
+  // Also treats a 404 "user not found" from get-profile as an invalid
+  // session: restoreSession() trusts the locally-cached user without ever
+  // validating it against the backend, so a token for a deleted/foreign-
+  // environment account otherwise keeps getting resent on every request
+  // forever, 404ing silently with no way back to a clean logged-out state.
   client.interceptors.add(
     InterceptorsWrapper(
-      onError: (error, handler) {
+      onError: (error, handler) async {
         final code = error.response?.statusCode;
         if (code != null && code >= 500) {
           ref.read(serverErrorProvider.notifier).trigger();
+        }
+        if (code == 404 &&
+            error.requestOptions.path == ApiEndpoints.getProfile &&
+            error.requestOptions.headers.containsKey('X-Auth-Token')) {
+          await _clearInvalidSession(ref, secureStorage);
         }
         handler.next(error);
       },
