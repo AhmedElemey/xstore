@@ -154,9 +154,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get flashSale => '⚡ Flash Sale';
 
   @override
-  String get flashSaleBannerBody => 'Flash sale — limited time offers inside';
-
-  @override
   String get shopByCategory => 'Shop by Category';
 
   @override

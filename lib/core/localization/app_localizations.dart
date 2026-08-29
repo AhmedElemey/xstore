@@ -386,12 +386,6 @@ abstract class AppLocalizations {
   /// **'⚡ Flash Sale'**
   String get flashSale;
 
-  /// No description provided for @flashSaleBannerBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Flash sale — limited time offers inside'**
-  String get flashSaleBannerBody;
-
   /// No description provided for @shopByCategory.
   ///
   /// In en, this message translates to:

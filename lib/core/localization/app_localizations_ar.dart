@@ -154,9 +154,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get flashSale => '⚡ فلاش سيل';
 
   @override
-  String get flashSaleBannerBody => 'فلاش سيل — عروض محدودة الوقت';
-
-  @override
   String get shopByCategory => 'تسوق حسب الفئة';
 
   @override

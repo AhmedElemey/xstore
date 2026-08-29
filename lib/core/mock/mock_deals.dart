@@ -45,8 +45,3 @@ List<DealModel> get mockNewArrivalDealModels {
 /// Mock “recommended” slice (first 8 catalog items as deals).
 List<DealModel> get mockRecommendedDealModels =>
     mockListingModels.take(8).map<DealModel>(_dealFromListing).toList();
-
-/// Flash sale end time for countdown widgets (relative to app start).
-final flashSaleEndTime = DateTime.now().add(
-  const Duration(hours: 4, minutes: 23, seconds: 45),
-);
