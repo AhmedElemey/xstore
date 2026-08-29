@@ -4877,7 +4877,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetPasswordOtpSentTo.
   ///
   /// In en, this message translates to:
-  /// **'Enter the code sent to {email} and choose a new password'**
+  /// **'Enter the code sent to {email}'**
   String resetPasswordOtpSentTo(String email);
 
   /// No description provided for @resetPassword.

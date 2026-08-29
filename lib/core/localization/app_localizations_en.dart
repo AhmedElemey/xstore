@@ -2506,7 +2506,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String resetPasswordOtpSentTo(String email) {
-    return 'Enter the code sent to $email and choose a new password';
+    return 'Enter the code sent to $email';
   }
 
   @override

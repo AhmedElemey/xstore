@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -14,17 +13,27 @@ import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
-import '../providers/otp_resend_cooldown.dart';
 import '../widgets/auth_text_field.dart';
-import '../widgets/otp_input_field.dart';
-import '../widgets/otp_resend_row.dart';
 
-/// Second step of the forgot-password flow: enter the OTP sent to [email]
-/// plus a new password. See [ForgotPasswordScreen] for the first step.
-class ResetPasswordScreen extends ConsumerStatefulWidget {
-  const ResetPasswordScreen({required this.email, super.key});
+/// In-memory extra for [ResetPasswordScreen]. GoRouter does not serialize
+/// `extra`, so a cold deep link without it redirects to forgot-password.
+class ResetPasswordArgs {
+  const ResetPasswordArgs({
+    required this.email,
+    required this.otpToken,
+  });
 
   final String email;
+  final String otpToken;
+}
+
+/// Last step of forgot-password: new password + confirm, then
+/// `POST /api/auth/verify-forget-password-otp` with email, otpToken,
+/// newPassword, and confirmNewPassword.
+class ResetPasswordScreen extends ConsumerStatefulWidget {
+  const ResetPasswordScreen({required this.args, super.key});
+
+  final ResetPasswordArgs args;
 
   @override
   ConsumerState<ResetPasswordScreen> createState() =>
@@ -32,71 +41,19 @@ class ResetPasswordScreen extends ConsumerStatefulWidget {
 }
 
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
-  final _otp = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
-  final _cooldown = OtpResendCooldown();
+  var _passwordVisible = false;
+  var _confirmVisible = false;
   bool _isLoading = false;
-  bool _isResending = false;
-  int _resendCooldown = 60;
-  bool _canResend = false;
-  String? _otpError;
   String? _passwordError;
   String? _confirmError;
 
   @override
-  void initState() {
-    super.initState();
-    // The OTP was already sent by ForgotPasswordScreen right before this
-    // screen opened — start the same 60s cooldown other OTP screens use.
-    _startResendCooldown();
-  }
-
-  @override
   void dispose() {
-    _cooldown.cancel();
-    _otp.dispose();
     _password.dispose();
     _confirm.dispose();
     super.dispose();
-  }
-
-  void _startResendCooldown() {
-    _cooldown.start(
-      (remaining) {
-        if (!mounted) return;
-        setState(() {
-          _resendCooldown = remaining;
-          _canResend = remaining == 0;
-        });
-      },
-      isMounted: () => mounted,
-    );
-  }
-
-  Future<void> _resend() async {
-    if (!_canResend || _isResending) return;
-    setState(() => _isResending = true);
-    final result =
-        await ref.read(forgotPasswordUseCaseProvider).call(widget.email);
-    if (!mounted) return;
-    setState(() => _isResending = false);
-    result.fold(
-      (failure) => AppSnackbar.error(context, context.l10n.errorGeneric),
-      (debugOtp) {
-        _startResendCooldown();
-        // Same gate as [ForgotPasswordScreen]: live forgot-password no
-        // longer echoes `otp`.
-        if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
-          AppSnackbar.info(context, 'Debug OTP: $debugOtp');
-        } else {
-          AppSnackbar.success(
-            context,
-            context.l10n.resetCodeSentConfirmation(widget.email),
-          );
-        }
-      },
-    );
   }
 
   Future<void> _submit() async {
@@ -111,18 +68,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       _passwordError = passwordError;
       _confirmError = confirmError;
     });
-    if (_otp.text.length != 6 || passwordError != null || confirmError != null) {
-      return;
-    }
+    if (passwordError != null || confirmError != null) return;
 
-    setState(() {
-      _isLoading = true;
-      _otpError = null;
-    });
+    setState(() => _isLoading = true);
 
     final result = await ref.read(verifyForgotPasswordOtpUseCaseProvider).call(
-          email: widget.email,
-          otpToken: _otp.text,
+          email: widget.args.email,
+          otpToken: widget.args.otpToken,
           newPassword: _password.text,
           confirmNewPassword: _confirm.text,
         );
@@ -130,10 +82,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     if (!mounted) return;
     result.fold(
       (failure) {
-        setState(() {
-          _isLoading = false;
-          _otpError = failure.toString();
-        });
+        setState(() => _isLoading = false);
+        AppSnackbar.error(context, failure.toString());
       },
       (_) {
         setState(() => _isLoading = false);
@@ -170,36 +120,26 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               ),
               const Gap(AppSpacing.md),
               Text(
-                context.l10n.resetPasswordOtpSentTo(widget.email),
+                context.l10n.strongPasswordHint,
                 style: AppTypography.body15.copyWith(
                   height: 1.4,
                   color: context.textSecondary,
                 ),
               ),
               const Gap(AppSpacing.spacing28),
-              Center(
-                child: OtpInputField(
-                  controller: _otp,
-                  enabled: !_isLoading,
-                  errorText: _otpError,
-                  onCompleted: (_) => setState(() {}),
-                ),
-              ),
-              const Gap(AppSpacing.md),
-              Center(
-                child: OtpResendRow(
-                  canResend: _canResend,
-                  resendCooldown: _resendCooldown,
-                  isSending: _isResending,
-                  onResend: _resend,
-                ),
-              ),
-              const Gap(AppSpacing.xl),
               AuthTextField(
                 label: context.l10n.newPasswordRequired,
                 controller: _password,
-                obscureText: true,
+                obscureText: !_passwordVisible,
                 prefixIcon: const Icon(LucideIcons.lock),
+                suffixIcon: IconButton(
+                  onPressed: () =>
+                      setState(() => _passwordVisible = !_passwordVisible),
+                  icon: Icon(
+                    _passwordVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                    color: context.iconSecondary,
+                  ),
+                ),
                 errorText: _passwordError,
                 onChanged: (_) {
                   if (_passwordError != null) {
@@ -211,8 +151,16 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               AuthTextField(
                 label: context.l10n.confirmPasswordRequired,
                 controller: _confirm,
-                obscureText: true,
+                obscureText: !_confirmVisible,
                 prefixIcon: const Icon(LucideIcons.shieldCheck),
+                suffixIcon: IconButton(
+                  onPressed: () =>
+                      setState(() => _confirmVisible = !_confirmVisible),
+                  icon: Icon(
+                    _confirmVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                    color: context.iconSecondary,
+                  ),
+                ),
                 errorText: _confirmError,
                 onChanged: (_) {
                   if (_confirmError != null) {

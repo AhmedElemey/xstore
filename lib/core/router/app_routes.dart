@@ -8,6 +8,11 @@ abstract final class AppRoutes {
   /// Dedicated sign-in for platform couriers (phone + password / OTP).
   static const courierLogin = '/courier-login';
   static const forgotPassword = '/forgot-password';
+  /// Enter the email OTP sent by [forgotPassword]. Extra is the email
+  /// [String]; missing extra redirects back to [forgotPassword].
+  static const forgotPasswordOtp = '/forgot-password/otp';
+  /// Choose a new password after the OTP step. Extra is a
+  /// `ResetPasswordArgs`; missing extra redirects back to [forgotPassword].
   static const resetPassword = '/reset-password';
   static const otp = '/otp';
   /// Full-page fallback shown for any HTTP 5xx API response — see

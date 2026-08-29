@@ -79,7 +79,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             context.l10n.resetCodeSentConfirmation(email),
           );
         }
-        context.push(AppRoutes.resetPassword, extra: email);
+        context.push(AppRoutes.forgotPasswordOtp, extra: email);
       },
     );
   }

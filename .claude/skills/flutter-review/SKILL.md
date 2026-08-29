@@ -981,3 +981,18 @@ Rules for the log:
 - **Rule:** Email and phone on Edit Profile are not free-text. Tapping the field (consumers) prompts for the new value then reuses `ProfileVerificationScreen`; Save still OTP-gates a value that differs from `profile.user` (revert-to-original needs no OTP). Do not add email/phone to `UpdateProfileRequest` — the live PUT ignores them, matching the commented-out contract. After OTP, `refreshProfileData(preserveEdits: true)` so `applyFromProfile` cannot wipe in-progress edits. Badge "Verified" off the *typed* value (session OTP or stored+flag), not the stale `isEmailVerified`/`isPhoneVerified` flags alone. Phone still requires a verified email first (`send-phone-otp` 400s otherwise).
 - **Where it applies:** `edit_profile_screen.dart` `_changeEmail` / `_changePhone` / `_save`, `phone_input_field.dart` `onTap`, `profile_provider.dart` `refreshProfileData(preserveEdits:)`, `profile_verification_screen.dart`; do not send email/phone on `updateProfileWireFields`. Vendors stay read-only with no change tap.
 
+### 2026-08-30 — Forgot-password OTP/reset screens must be in isAuthRoute
+- **What happened:** After a successful `POST /api/auth/forgot-password`, the app pushed `/reset-password`, but `computeXStoreAuthRedirect` only listed `/forgot-password` as an unauthenticated auth route — so logged-out users were bounced to login and never reached the OTP or new-password steps.
+- **Rule:** Adding a GoRoute on the pre-login stack is not enough. Every screen in that flow (email, OTP, reset-password, and any future one) must also be listed in `isAuthRoute`. Grep `computeXStoreAuthRedirect` whenever you add an auth-stack path. `POST /api/auth/verify-forget-password-otp` takes email + otpToken + newPassword + confirmNewPassword in one body — collect OTP on its own screen, then submit all four from the password screen; do not invent a separate verify-OTP call.
+- **Where it applies:** `router_notifier.dart` `isAuthRoute`, `app_router.dart` forgot-password routes, `forgot_password_otp_screen.dart`, `reset_password_screen.dart`.
+
+### 2026-08-30 — OTP screens with a resend cooldown cannot pumpAndSettle
+- **What happened:** A widget test of the forgot-password OTP screen hung because `OtpResendCooldown`'s `Timer.periodic` never lets the test clock settle.
+- **Rule:** Screens that start a resend cooldown in `initState` must be driven with `pump()` / `pump(Duration)`, not `pumpAndSettle()`.
+- **Where it applies:** Widget tests of any screen using `OtpResendCooldown` (forgot-password OTP, login OTP, profile email/phone verification).
+
+### 2026-08-30 — Password fields get the same eye toggle as login
+- **What happened:** Reset-password shipped `obscureText: true` with no visibility toggle, even though login, register, and change-password already use the eye / eye-off suffix.
+- **Rule:** Any new password `AuthTextField` copies that suffix (`IconButton` + `LucideIcons.eye` / `eyeOff`, `obscureText` flipped by a per-field bool). Do not ship a password field that can only be typed blind when sibling auth screens already show the toggle.
+- **Where it applies:** `reset_password_screen.dart`, `change_password_screen.dart`, `login_screen.dart`, `register_screen.dart`; any future password input.
+

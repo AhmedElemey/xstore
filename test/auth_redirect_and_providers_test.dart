@@ -81,6 +81,24 @@ void main() {
       }
     });
 
+    test('unauthenticated forgot-password stack stays put', () {
+      for (final loc in [
+        AppRoutes.forgotPassword,
+        AppRoutes.forgotPasswordOtp,
+        AppRoutes.resetPassword,
+      ]) {
+        expect(
+          computeXStoreAuthRedirect(
+            auth: const AsyncValue.data(null),
+            needsRoleSelection: false,
+            matchedLocation: loc,
+          ),
+          isNull,
+          reason: 'forgot-password flow must not bounce $loc to login',
+        );
+      }
+    });
+
     test('unauthenticated vendor/courier home routes to login, not splash', () {
       for (final loc in [
         AppRoutes.vendorOrders,

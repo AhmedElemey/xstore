@@ -1093,7 +1093,7 @@
   "changePasswordSuccess": "تم تغيير كلمة المرور.",
   "confirmPasswordRequired": "تأكيد كلمة المرور *",
   "resetPasswordTitle": "إعادة تعيين كلمة المرور",
-  "resetPasswordOtpSentTo": "أدخل الكود المرسل إلى {email} واختر كلمة مرور جديدة",
+  "resetPasswordOtpSentTo": "أدخل الكود المرسل إلى {email}",
   "@resetPasswordOtpSentTo": {
     "placeholders": {
       "email": {

@@ -50,7 +50,9 @@ String? computeXStoreAuthRedirect({
       loc == AppRoutes.socialRoleSelect ||
       loc == AppRoutes.otp ||
       loc == AppRoutes.courierLogin ||
-      loc == AppRoutes.forgotPassword;
+      loc == AppRoutes.forgotPassword ||
+      loc == AppRoutes.forgotPasswordOtp ||
+      loc == AppRoutes.resetPassword;
 
   return auth.when(
     data: (user) {

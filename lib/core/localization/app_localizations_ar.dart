@@ -2502,7 +2502,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String resetPasswordOtpSentTo(String email) {
-    return 'أدخل الكود المرسل إلى $email واختر كلمة مرور جديدة';
+    return 'أدخل الكود المرسل إلى $email';
   }
 
   @override

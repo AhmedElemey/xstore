@@ -82,14 +82,24 @@ class StubAuthRepository implements AuthRepository {
   Future<Either<Failure, String?>> forgotPassword(String email) async =>
       _forgotPasswordResult;
 
+  String? lastVerifyForgotEmail;
+  String? lastVerifyForgotOtpToken;
+  String? lastVerifyForgotNewPassword;
+  String? lastVerifyForgotConfirm;
+
   @override
   Future<Either<Failure, Unit>> verifyForgotPasswordOtp({
     required String email,
     required String otpToken,
     required String newPassword,
     required String confirmNewPassword,
-  }) async =>
-      _verifyForgotPasswordOtpResult;
+  }) async {
+    lastVerifyForgotEmail = email;
+    lastVerifyForgotOtpToken = otpToken;
+    lastVerifyForgotNewPassword = newPassword;
+    lastVerifyForgotConfirm = confirmNewPassword;
+    return _verifyForgotPasswordOtpResult;
+  }
 
   @override
   Future<Either<Failure, AuthTokenPair>> refreshToken(String token) async =>

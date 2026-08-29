@@ -1092,7 +1092,7 @@
   "changePasswordSuccess": "Your password was changed.",
   "confirmPasswordRequired": "Confirm Password *",
   "resetPasswordTitle": "Reset Password",
-  "resetPasswordOtpSentTo": "Enter the code sent to {email} and choose a new password",
+  "resetPasswordOtpSentTo": "Enter the code sent to {email}",
   "@resetPasswordOtpSentTo": {
     "placeholders": {
       "email": {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/auth/presentation/screens/forgot_password_otp_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
@@ -230,11 +231,33 @@ GoRouter goRouter(GoRouterRef ref) {
         ),
       ),
       GoRoute(
-        path: AppRoutes.resetPassword,
+        path: AppRoutes.forgotPasswordOtp,
+        redirect: (_, state) {
+          final email = state.extra;
+          if (email is! String || email.isEmpty) {
+            return AppRoutes.forgotPassword;
+          }
+          return null;
+        },
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          ResetPasswordScreen(email: state.extra as String? ?? ''),
+          ForgotPasswordOtpScreen(email: state.extra as String),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        redirect: (_, state) {
+          // Extra is in-memory only — a cold deep link has nothing to verify.
+          if (state.extra is! ResetPasswordArgs) {
+            return AppRoutes.forgotPassword;
+          }
+          return null;
+        },
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          ResetPasswordScreen(args: state.extra as ResetPasswordArgs),
         ),
       ),
       GoRoute(

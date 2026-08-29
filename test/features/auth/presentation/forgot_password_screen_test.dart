@@ -20,8 +20,8 @@ Widget _harness(StubAuthRepository repo) {
         builder: (_, __) => const ForgotPasswordScreen(),
       ),
       GoRoute(
-        path: AppRoutes.resetPassword,
-        builder: (_, __) => const Scaffold(body: Text('reset-password')),
+        path: AppRoutes.forgotPasswordOtp,
+        builder: (_, __) => const Scaffold(body: Text('forgot-otp')),
       ),
     ],
   );
@@ -44,7 +44,7 @@ Widget _harness(StubAuthRepository repo) {
 
 Future<void> _submitEmail(WidgetTester tester) async {
   await tester.enterText(find.byType(TextField), 'jane@test.com');
-  await tester.tap(find.text('Send Reset Link'));
+  await tester.tap(find.text('Send Reset Code'));
   await tester.pumpAndSettle();
 }
 
@@ -58,7 +58,7 @@ void main() {
     await _submitEmail(tester);
 
     expect(find.textContaining('Debug OTP'), findsNothing);
-    expect(find.text('reset-password'), findsOneWidget);
+    expect(find.text('forgot-otp'), findsOneWidget);
   });
 
   testWidgets('shows a debug OTP snackbar only when the API returned otp',
