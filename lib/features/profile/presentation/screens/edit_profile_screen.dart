@@ -58,6 +58,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   DateTime? _dob;
   var _synced = false;
 
+  /// Contact values that completed OTP on this screen (the typed new
+  /// email/phone, not necessarily what get-profile currently stores).
+  String? _otpVerifiedEmail;
+  String? _otpVerifiedPhone;
+
   @override
   void initState() {
     super.initState();
@@ -151,9 +156,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               child: SizedBox(
                 height: height,
                 child: async.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator.adaptive()),
                   error: (_, __) => Padding(
                     padding: const EdgeInsets.all(AppSpacing.x2l),
                     child: Column(
@@ -210,8 +214,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final cat = _catalogCategoryById(categories, id);
     final label = cat?.name.resolve(context.isArabic) ?? '';
     setState(() {
-      _storeCategory.text =
-          label.isEmpty ? context.l10n.requiredField : label;
+      _storeCategory.text = label.isEmpty ? context.l10n.requiredField : label;
     });
     ref.read(profileNotifierProvider.notifier).updateStoreCategory(id, label);
   }
@@ -240,7 +243,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _dob = dateOnly;
       _dobText.text = DateFormat.yMMMd().format(dateOnly);
     });
-    ref.read(profileNotifierProvider.notifier).updateField('dateOfBirth', dateOnly);
+    ref
+        .read(profileNotifierProvider.notifier)
+        .updateField('dateOfBirth', dateOnly);
   }
 
   Future<void> _avatarSheet() async {
@@ -278,7 +283,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 leading: const Icon(LucideIcons.trash2),
                 title: Text(context.l10n.removePhoto),
                 onTap: () {
-                  ref.read(profileNotifierProvider.notifier).markAvatarRemoved();
+                  ref
+                      .read(profileNotifierProvider.notifier)
+                      .markAvatarRemoved();
                   Navigator.pop(ctx);
                   setState(() {});
                 },
@@ -327,7 +334,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 leading: const Icon(LucideIcons.trash2),
                 title: Text(context.l10n.removePhoto),
                 onTap: () {
-                  ref.read(profileNotifierProvider.notifier).markStoreLogoRemoved();
+                  ref
+                      .read(profileNotifierProvider.notifier)
+                      .markStoreLogoRemoved();
                   Navigator.pop(ctx);
                   setState(() {});
                 },
@@ -346,6 +355,66 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       AppSnackbar.error(context, dobErr);
       return;
     }
+
+    final s = ref.read(profileNotifierProvider);
+    final storedEmail = s.profile?.user.email ?? '';
+    final storedPhone = s.profile?.user.phoneNumber ?? '';
+
+    // Live probe 2026-08-30: PUT update-profile ignores email/phone (200,
+    // stored values unchanged). A changed contact is proven via the existing
+    // ProfileVerificationScreen OTP flow; saveProfile still runs after so
+    // other dirty fields persist on the same path.
+    if (editProfileContactNeedsOtp(
+      typed: _email.text,
+      stored: storedEmail,
+      sessionVerified: _otpVerifiedEmail,
+      ignoreCase: true,
+    )) {
+      final formatErr = Validators.registerEmail(context.l10n, _email.text);
+      if (formatErr != null) {
+        AppSnackbar.error(context, formatErr);
+        return;
+      }
+      final proceed = await _confirmContactOtp(
+        title: context.l10n.verifyYourEmail,
+        body: context.l10n.verifyNewEmailToSave,
+      );
+      if (proceed != true || !mounted) return;
+      final ok = await _verifyEmail();
+      if (!ok || !mounted) return;
+    }
+
+    if (editProfileContactNeedsOtp(
+      typed: AppValidators.normalizeEgyptLocal(_phone.text),
+      stored: AppValidators.normalizeEgyptLocal(storedPhone),
+      sessionVerified: _otpVerifiedPhone == null
+          ? null
+          : AppValidators.normalizeEgyptLocal(_otpVerifiedPhone!),
+    )) {
+      final formatErr = Validators.egyptPhone(
+        context.l10n,
+        AppValidators.normalizeEgyptLocal(_phone.text),
+      );
+      if (formatErr != null) {
+        AppSnackbar.error(context, formatErr);
+        return;
+      }
+      // send-phone-otp 400s until email is verified — keep that gate.
+      if (!_typedEmailIsVerified(ref.read(profileNotifierProvider))) {
+        final ok = await _verifyEmail();
+        if (!ok || !mounted) return;
+      }
+      final proceed = await _confirmContactOtp(
+        title: context.l10n.verifyYourNumber,
+        body: context.l10n.verifyNewPhoneToSave,
+      );
+      if (proceed != true || !mounted) return;
+      final ok = await _verifyPhone();
+      if (!ok || !mounted) return;
+    }
+
+    if (!mounted) return;
+    _pushFieldsToNotifier();
     await ref.read(profileNotifierProvider.notifier).saveProfile();
     if (!mounted) return;
     final err = ref.read(profileNotifierProvider).error;
@@ -357,9 +426,113 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     Navigator.of(context).pop();
   }
 
-  Future<void> _verifyEmail() async {
-    final email = _email.text.trim();
-    if (email.isEmpty) return;
+  Future<bool?> _confirmContactOtp({
+    required String title,
+    required String body,
+  }) {
+    return showAnimatedDialog<bool>(
+      context: context,
+      child: AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n.verify),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _typedEmailIsVerified(ProfileState s) {
+    final typed = _email.text.trim();
+    if (typed.isEmpty) return false;
+    if (_otpVerifiedEmail != null &&
+        typed.toLowerCase() == _otpVerifiedEmail!.trim().toLowerCase()) {
+      return true;
+    }
+    final stored = (s.profile?.user.email ?? '').trim();
+    return typed.toLowerCase() == stored.toLowerCase() &&
+        (s.profile?.isEmailVerified ?? false);
+  }
+
+  bool _typedPhoneIsVerified(ProfileState s) {
+    final typed = AppValidators.normalizeEgyptLocal(_phone.text);
+    if (typed.isEmpty) return false;
+    if (_otpVerifiedPhone != null &&
+        typed == AppValidators.normalizeEgyptLocal(_otpVerifiedPhone!)) {
+      return true;
+    }
+    final stored = AppValidators.normalizeEgyptLocal(
+      s.profile?.user.phoneNumber ?? '',
+    );
+    return typed == stored && (s.profile?.isPhoneVerified ?? false);
+  }
+
+  Future<void> _changeEmail() async {
+    final next = await _promptNewEmail();
+    if (next == null || !mounted) return;
+    await _verifyEmail(contact: next);
+  }
+
+  Future<void> _changePhone() async {
+    if (!_typedEmailIsVerified(ref.read(profileNotifierProvider))) {
+      await _verifyPhone();
+      return;
+    }
+    final next = await _promptNewPhone();
+    if (next == null || !mounted) return;
+    await _verifyPhone(contact: next);
+  }
+
+  Future<String?> _promptNewEmail() {
+    return showAnimatedDialog<String>(
+      context: context,
+      child: EditProfileContactValueDialog(
+        title: context.l10n.verifyYourEmail,
+        initialText: _email.text.trim(),
+        fieldBuilder: (ctx, controller) => TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            labelText: ctx.l10n.email,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        normalize: (raw) => raw.trim(),
+        validate: (value) => Validators.registerEmail(context.l10n, value),
+      ),
+    );
+  }
+
+  Future<String?> _promptNewPhone() {
+    return showAnimatedDialog<String>(
+      context: context,
+      child: EditProfileContactValueDialog(
+        title: context.l10n.verifyYourNumber,
+        initialText: AppValidators.normalizeEgyptLocal(_phone.text),
+        fieldBuilder: (ctx, controller) =>
+            PhoneInputField(controller: controller, onChanged: (_) {}),
+        normalize: AppValidators.normalizeEgyptLocal,
+        validate: (value) => Validators.egyptPhone(context.l10n, value),
+      ),
+    );
+  }
+
+  Future<bool> _verifyEmail({String? contact}) async {
+    final email = (contact ?? _email.text).trim();
+    if (email.isEmpty) return false;
+    final formatErr = Validators.registerEmail(context.l10n, email);
+    if (formatErr != null) {
+      AppSnackbar.error(context, formatErr);
+      return false;
+    }
     final verified = await context.push<bool>(
       AppRoutes.profileVerification,
       extra: ProfileVerificationArgs(
@@ -367,14 +540,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         contactValue: email,
       ),
     );
-    if (!mounted || verified != true) return;
-    setState(() => _syncFromState(ref.read(profileNotifierProvider)));
+    if (!mounted || verified != true) return false;
+    setState(() {
+      _otpVerifiedEmail = email;
+      _email.text = email;
+    });
+    ref.read(profileNotifierProvider.notifier).updateField('email', email);
+    return true;
   }
 
-  Future<void> _verifyPhone() async {
-    final isEmailVerified =
-        ref.read(profileNotifierProvider).profile?.isEmailVerified ?? false;
-    if (!isEmailVerified) {
+  Future<bool> _verifyPhone({String? contact}) async {
+    if (!_typedEmailIsVerified(ref.read(profileNotifierProvider))) {
       final proceed = await showAnimatedDialog<bool>(
         context: context,
         child: AlertDialog(
@@ -392,12 +568,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ],
         ),
       );
-      if (proceed != true || !mounted) return;
+      if (proceed != true || !mounted) return false;
       await _verifyEmail();
-      return;
+      return false;
     }
-    final phone = _phone.text.trim();
-    if (phone.isEmpty) return;
+    final phone = AppValidators.normalizeEgyptLocal(contact ?? _phone.text);
+    if (phone.isEmpty) return false;
+    final formatErr = Validators.egyptPhone(context.l10n, phone);
+    if (formatErr != null) {
+      AppSnackbar.error(context, formatErr);
+      return false;
+    }
     final verified = await context.push<bool>(
       AppRoutes.profileVerification,
       extra: ProfileVerificationArgs(
@@ -405,8 +586,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         contactValue: phone,
       ),
     );
-    if (!mounted || verified != true) return;
-    setState(() => _syncFromState(ref.read(profileNotifierProvider)));
+    if (!mounted || verified != true) return false;
+    setState(() {
+      _otpVerifiedPhone = phone;
+      _phone.text = phone;
+    });
+    ref.read(profileNotifierProvider.notifier).updateField('phone', phone);
+    return true;
   }
 
   @override
@@ -534,40 +720,47 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               prefixIcon: const Icon(LucideIcons.user),
               border: const OutlineInputBorder(),
             ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('name', v),
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('name', v),
           ),
           const Gap(AppSpacing.md),
           TextField(
             controller: _email,
-            readOnly: isVendor,
+            readOnly: true,
             keyboardType: TextInputType.emailAddress,
+            onTap: isVendor ? null : _changeEmail,
             decoration: InputDecoration(
               prefixIcon: const Icon(LucideIcons.mail),
               suffixIcon: _VerificationStatus(
-                verified: s.profile?.isEmailVerified ?? false,
-                onVerify: _email.text.trim().isEmpty ? null : _verifyEmail,
+                verified: _typedEmailIsVerified(s),
+                onVerify: _email.text.trim().isEmpty
+                    ? null
+                    : () {
+                        _verifyEmail();
+                      },
               ),
-              suffixIconConstraints:
-                  const BoxConstraints(minWidth: 0, minHeight: 0),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 0,
+                minHeight: 0,
+              ),
               border: const OutlineInputBorder(),
             ),
-            onChanged: isVendor
-                ? null
-                : (v) => ref
-                    .read(profileNotifierProvider.notifier)
-                    .updateField('email', v),
           ),
           const Gap(AppSpacing.md),
           PhoneInputField(
             controller: _phone,
-            readOnly: isVendor,
+            readOnly: true,
+            onTap: isVendor ? null : _changePhone,
             suffix: _VerificationStatus(
-              verified: s.profile?.isPhoneVerified ?? false,
-              onVerify: _phone.text.trim().isEmpty ? null : _verifyPhone,
+              verified: _typedPhoneIsVerified(s),
+              onVerify: _phone.text.trim().isEmpty
+                  ? null
+                  : () {
+                      _verifyPhone();
+                    },
             ),
-            onChanged: (v) => ref
-                .read(profileNotifierProvider.notifier)
-                .updateField('phone', v.replaceAll(RegExp(r'\D'), '')),
+            onChanged: (_) {},
           ),
           const Gap(AppSpacing.md),
           TextField(
@@ -602,7 +795,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
-            Text(context.l10n.storeInformation, style: AppTypography.titleMedium),
+            Text(
+              context.l10n.storeInformation,
+              style: AppTypography.titleMedium,
+            ),
             const Gap(AppSpacing.md),
             Center(
               child: Column(
@@ -613,7 +809,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ),
                   const Gap(AppSpacing.sm),
                   ProfileAvatarPicker(
-                    name: _storeName.text.isNotEmpty ? _storeName.text : (u?.name ?? ''),
+                    name: _storeName.text.isNotEmpty
+                        ? _storeName.text
+                        : (u?.name ?? ''),
                     imageUrl: s.storeLogoRemoved ? null : u?.storeLogoUrl,
                     imageFile: s.editStoreLogoFile,
                     diameter: 100,
@@ -630,7 +828,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 prefixIcon: const Icon(LucideIcons.store),
                 border: const OutlineInputBorder(),
               ),
-              onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('storeName', v),
+              onChanged: (v) => ref
+                  .read(profileNotifierProvider.notifier)
+                  .updateField('storeName', v),
             ),
             const Gap(AppSpacing.md),
             TextField(
@@ -652,8 +852,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 prefixIcon: const Icon(LucideIcons.fileText),
                 border: const OutlineInputBorder(),
               ),
-              onChanged: (v) =>
-                  ref.read(profileNotifierProvider.notifier).updateField('storeDescription', v),
+              onChanged: (v) => ref
+                  .read(profileNotifierProvider.notifier)
+                  .updateField('storeDescription', v),
             ),
             const Gap(AppSpacing.md),
             PhoneInputField(
@@ -681,7 +882,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               prefixText: '@',
               border: const OutlineInputBorder(),
             ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('instagram', v),
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('instagram', v),
           ),
           const Gap(AppSpacing.md),
           TextField(
@@ -691,7 +894,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               prefixText: 'fb.com/',
               border: const OutlineInputBorder(),
             ),
-            onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('facebook', v),
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('facebook', v),
           ),
           const Gap(AppSpacing.x3l),
           DecoratedBox(
@@ -715,12 +920,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             height: 22,
                             child: CircularProgressIndicator.adaptive(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.white,
+                              ),
                             ),
                           )
                         : Text(
                             context.l10n.saveChanges,
-                            style: AppTypography.labelLarge.copyWith(color: AppColors.white),
+                            style: AppTypography.labelLarge.copyWith(
+                              color: AppColors.white,
+                            ),
                           ),
                   ),
                 ),
@@ -730,6 +939,77 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           const Gap(AppSpacing.x3l),
         ],
       ),
+    );
+  }
+}
+
+/// Prompt for a new email/phone. Owns its [TextEditingController] so dispose
+/// happens in [State.dispose] after the animated route is gone — disposing
+/// when [showAnimatedDialog] returns is too early (exit animation still
+/// holds the TextField).
+class EditProfileContactValueDialog extends StatefulWidget {
+  const EditProfileContactValueDialog({
+    super.key,
+    required this.title,
+    required this.initialText,
+    required this.fieldBuilder,
+    required this.normalize,
+    required this.validate,
+  });
+
+  final String title;
+  final String initialText;
+  final Widget Function(BuildContext context, TextEditingController controller)
+      fieldBuilder;
+  final String Function(String raw) normalize;
+  final String? Function(String value) validate;
+
+  @override
+  State<EditProfileContactValueDialog> createState() =>
+      _EditProfileContactValueDialogState();
+}
+
+class _EditProfileContactValueDialogState
+    extends State<EditProfileContactValueDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final value = widget.normalize(_controller.text);
+    final err = widget.validate(value);
+    if (err != null) {
+      AppSnackbar.error(context, err);
+      return;
+    }
+    Navigator.pop(context, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: widget.fieldBuilder(context, _controller),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: Text(context.l10n.verify),
+        ),
+      ],
     );
   }
 }
@@ -753,7 +1033,9 @@ class _VerificationStatus extends StatelessWidget {
             const Gap(AppSpacing.xs),
             Text(
               context.l10n.verified,
-              style: AppTypography.labelSmall.copyWith(color: AppColors.success),
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.success,
+              ),
             ),
           ],
         ),
@@ -773,6 +1055,26 @@ class _VerificationStatus extends StatelessWidget {
       child: Text(context.l10n.verify),
     );
   }
+}
+
+/// True when [typed] is a non-empty contact value different from [stored]
+/// that has not already been OTP-verified this Edit Profile session.
+bool editProfileContactNeedsOtp({
+  required String typed,
+  required String stored,
+  String? sessionVerified,
+  bool ignoreCase = false,
+}) {
+  String norm(String value) {
+    final t = value.trim();
+    return ignoreCase ? t.toLowerCase() : t;
+  }
+
+  final t = norm(typed);
+  if (t.isEmpty) return false;
+  if (t == norm(stored)) return false;
+  if (sessionVerified != null && t == norm(sessionVerified)) return false;
+  return true;
 }
 
 CatalogCategoryEntity? _catalogCategoryById(

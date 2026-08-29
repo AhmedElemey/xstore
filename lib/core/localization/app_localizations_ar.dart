@@ -100,6 +100,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'يرجى التحقق من بريدك الإلكتروني قبل تغيير رقم هاتفك أو التحقق منه.';
 
   @override
+  String get verifyNewEmailToSave =>
+      'يرجى التحقق من بريدك الإلكتروني الجديد لحفظ هذا التغيير.';
+
+  @override
+  String get verifyNewPhoneToSave =>
+      'يرجى التحقق من رقم هاتفك الجديد لحفظ هذا التغيير.';
+
+  @override
   String get emailVerifiedSuccess => 'تم التحقق من البريد الإلكتروني';
 
   @override

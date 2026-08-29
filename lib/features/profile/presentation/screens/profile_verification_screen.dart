@@ -15,9 +15,10 @@ import '../providers/profile_verification_provider.dart';
 
 /// Sends and verifies a backend OTP for either the profile email or phone
 /// field (`send-email-otp`/`verify-email` or `send-phone-otp`/`verify-phone`),
-/// then refreshes the profile so the caller sees the new isEmailVerified /
-/// isPhoneVerified flags. Pushed from EditProfileScreen with
-/// `extra: ProfileVerificationArgs(...)`; pops `true` on success.
+/// then refreshes the profile (preserving in-progress Edit Profile fields)
+/// so the caller sees the new isEmailVerified / isPhoneVerified flags.
+/// Pushed from EditProfileScreen with `extra: ProfileVerificationArgs(...)`;
+/// pops `true` on success.
 class ProfileVerificationScreen extends ConsumerStatefulWidget {
   const ProfileVerificationScreen({super.key, required this.args});
 
@@ -74,7 +75,7 @@ class _ProfileVerificationScreenState
   Future<void> _handleVerified() async {
     await ref
         .read(profileNotifierProvider.notifier)
-        .refreshProfileData(force: true);
+        .refreshProfileData(force: true, preserveEdits: true);
     if (!mounted) return;
     final isEmail = widget.args.target == ProfileVerificationTarget.email;
     AppSnackbar.success(
@@ -92,26 +93,28 @@ class _ProfileVerificationScreenState
     final isEmail = args.target == ProfileVerificationTarget.email;
     final state = ref.watch(profileVerificationProvider(args));
 
-    ref.listen<ProfileVerificationState>(
-      profileVerificationProvider(args),
-      (prev, next) {
-        if (prev?.verified != true && next.verified) {
-          _handleVerified();
-          return;
-        }
-        if (kDebugMode &&
-            prev?.debugOtp != next.debugOtp &&
-            next.debugOtp != null &&
-            next.debugOtp!.isNotEmpty) {
-          AppSnackbar.info(context, 'Debug OTP: ${next.debugOtp}');
-        }
-      },
-    );
+    ref.listen<ProfileVerificationState>(profileVerificationProvider(args), (
+      prev,
+      next,
+    ) {
+      if (prev?.verified != true && next.verified) {
+        _handleVerified();
+        return;
+      }
+      if (kDebugMode &&
+          prev?.debugOtp != next.debugOtp &&
+          next.debugOtp != null &&
+          next.debugOtp!.isNotEmpty) {
+        AppSnackbar.info(context, 'Debug OTP: ${next.debugOtp}');
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isEmail ? context.l10n.verifyYourEmail : context.l10n.verifyYourNumber,
+          isEmail
+              ? context.l10n.verifyYourEmail
+              : context.l10n.verifyYourNumber,
         ),
       ),
       body: SafeArea(
@@ -122,8 +125,9 @@ class _ProfileVerificationScreenState
             children: [
               Text(
                 '${context.l10n.codeSentTo} ${args.contactValue}',
-                style: AppTypography.bodyMedium
-                    .copyWith(color: context.textSecondary),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textSecondary,
+                ),
               ),
               const Gap(AppSpacing.xl),
               Center(

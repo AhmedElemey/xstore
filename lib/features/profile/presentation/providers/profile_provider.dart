@@ -50,8 +50,7 @@ bool _sameCalendarDate(DateTime? a, DateTime? b) {
 bool _isDarkTheme(ThemeMode mode) {
   if (mode == ThemeMode.dark) return true;
   if (mode == ThemeMode.light) return false;
-  return SchedulerBinding
-          .instance.platformDispatcher.platformBrightness ==
+  return SchedulerBinding.instance.platformDispatcher.platformBrightness ==
       Brightness.dark;
 }
 
@@ -63,15 +62,16 @@ bool _profileEditEqualsUser(ProfileState s, UserEntity u) {
       s.editFullNameAr.trim() == (u.fullNameAr ?? '').trim() &&
       s.editStoreName.trim() == (u.storeName ?? '').trim() &&
       s.editStoreCategoryId == u.storeCategoryId &&
-      s.editStoreDescription.trim() ==
-          (u.storeDescription ?? '').trim() &&
+      s.editStoreDescription.trim() == (u.storeDescription ?? '').trim() &&
       s.editStoreCity.trim() == (u.storeCity ?? '').trim() &&
       s.editStoreWilaya.trim() == (u.storeWilaya ?? '').trim() &&
       s.editStoreCityId == u.storeCityId &&
       s.editStoreGovernmentId == u.storeGovernmentId &&
       s.editWhatsapp.trim() == (u.whatsappNumber ?? '').trim() &&
-      s.editLatitude.trim() == ((u.latitude == null) ? '' : u.latitude!.toStringAsFixed(6)) &&
-      s.editLongitude.trim() == ((u.longitude == null) ? '' : u.longitude!.toStringAsFixed(6)) &&
+      s.editLatitude.trim() ==
+          ((u.latitude == null) ? '' : u.latitude!.toStringAsFixed(6)) &&
+      s.editLongitude.trim() ==
+          ((u.longitude == null) ? '' : u.longitude!.toStringAsFixed(6)) &&
       s.editGovernorate.trim() == (u.governorate ?? '').trim() &&
       s.editTown.trim() == (u.town ?? '').trim() &&
       s.editDetailAddress.trim() == (u.detailAddress ?? '').trim() &&
@@ -126,7 +126,16 @@ class ProfileNotifier extends _$ProfileNotifier {
   /// user while `authProvider` is still Loading (see [prefetchProfileData]).
   ///
   /// Pass [force: true] for pull-to-refresh and post-save reloads.
-  Future<void> refreshProfileData({UserEntity? user, bool force = false}) async {
+  ///
+  /// [preserveEdits] updates `profile` (verification flags / server user)
+  /// without copying those values into the edit form. Edit Profile's OTP
+  /// screen uses this so verifying a new email/phone cannot wipe in-progress
+  /// field edits via [ProfileState.applyFromProfile].
+  Future<void> refreshProfileData({
+    UserEntity? user,
+    bool force = false,
+    bool preserveEdits = false,
+  }) async {
     final sessionUser = user ?? ref.read(authProvider).valueOrNull;
     if (sessionUser == null) {
       state = const ProfileState();
@@ -163,7 +172,9 @@ class ProfileNotifier extends _$ProfileNotifier {
       final existing = _inFlightRefresh;
       if (existing != null) {
         if (kDebugMode) {
-          debugPrint('[ProfileNotifier] refresh coalesced — awaiting in-flight');
+          debugPrint(
+            '[ProfileNotifier] refresh coalesced — awaiting in-flight',
+          );
         }
         return existing;
       }
@@ -173,7 +184,11 @@ class ProfileNotifier extends _$ProfileNotifier {
     // whatever's already in flight — a refresh right after verifying
     // email/phone must not resolve to data fetched before that verification.
     final requestId = ++_refreshRequestId;
-    final future = _refreshProfileDataImpl(sessionUser, requestId);
+    final future = _refreshProfileDataImpl(
+      sessionUser,
+      requestId,
+      preserveEdits,
+    );
     _inFlightRefresh = future;
     try {
       await future;
@@ -184,7 +199,11 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
   }
 
-  Future<void> _refreshProfileDataImpl(UserEntity sessionUser, int requestId) async {
+  Future<void> _refreshProfileDataImpl(
+    UserEntity sessionUser,
+    int requestId,
+    bool preserveEdits,
+  ) async {
     final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -194,15 +213,15 @@ class ProfileNotifier extends _$ProfileNotifier {
       final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
       final themeMode = ref.read(appThemeModeProvider);
 
-      final result =
-          await ref.read(getProfileUseCaseProvider).call(sessionUser);
+      final result = await ref
+          .read(getProfileUseCaseProvider)
+          .call(sessionUser);
       if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
       result.fold(
         (f) {
           final message = f.toString();
           if (message == rateLimitErrorCode) {
-            _rateLimitedUntil =
-                DateTime.now().add(_rateLimitCooldown);
+            _rateLimitedUntil = DateTime.now().add(_rateLimitCooldown);
           }
           state = state.copyWith(isLoading: false, error: message);
         },
@@ -217,6 +236,17 @@ class ProfileNotifier extends _$ProfileNotifier {
           }
           _lastRefreshAt = DateTime.now();
           _rateLimitedUntil = null;
+          if (preserveEdits && state.profile != null) {
+            final next = state.copyWith(
+              profile: profile,
+              isLoading: false,
+              error: null,
+            );
+            state = next.copyWith(
+              hasChanges: !_profileEditEqualsUser(next, profile.user),
+            );
+            return;
+          }
           state = state
               .applyFromProfile(
                 profile,
@@ -297,14 +327,24 @@ class ProfileNotifier extends _$ProfileNotifier {
         return;
     }
     final u = next.user;
-    final changed =
-        u != null ? !_profileEditEqualsUser(next, u) : next.hasChanges;
-    state = next.copyWith(hasChanges: changed, fieldErrors: {}, locationError: null, locationAction: null);
+    final changed = u != null
+        ? !_profileEditEqualsUser(next, u)
+        : next.hasChanges;
+    state = next.copyWith(
+      hasChanges: changed,
+      fieldErrors: {},
+      locationError: null,
+      locationAction: null,
+    );
   }
 
   Future<void> detectCurrentLocation() async {
     final epoch = _sessionEpoch;
-    state = state.copyWith(isDetectingLocation: true, locationError: null, locationAction: null);
+    state = state.copyWith(
+      isDetectingLocation: true,
+      locationError: null,
+      locationAction: null,
+    );
     try {
       final result = await LocationService().getCurrentLocation();
       if (epoch != _sessionEpoch) return;
@@ -321,7 +361,9 @@ class ProfileNotifier extends _$ProfileNotifier {
         locationAction: null,
       );
       final u = next.user;
-      state = next.copyWith(hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true);
+      state = next.copyWith(
+        hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true,
+      );
     } on XStoreLocationServiceDisabledException {
       if (epoch != _sessionEpoch) return;
       state = state.copyWith(
@@ -368,7 +410,9 @@ class ProfileNotifier extends _$ProfileNotifier {
       editDetailAddress: googleAddress,
     );
     final u = next.user;
-    state = next.copyWith(hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true);
+    state = next.copyWith(
+      hasChanges: u != null ? !_profileEditEqualsUser(next, u) : true,
+    );
   }
 
   /// Best-effort, silent location auto-fill for app-entry bootstrap (splash).
@@ -468,10 +512,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   void markAvatarRemoved() {
-    final cleared = state.copyWith(
-      editAvatarFile: null,
-      avatarRemoved: true,
-    );
+    final cleared = state.copyWith(editAvatarFile: null, avatarRemoved: true);
     final u = cleared.user;
     state = cleared.copyWith(
       hasChanges: u != null && !_profileEditEqualsUser(cleared, u),
@@ -559,10 +600,9 @@ class ProfileNotifier extends _$ProfileNotifier {
       );
     }
 
-    final res = await ref.read(updateProfileUseCaseProvider).call(
-          request,
-          sessionUser: u0,
-        );
+    final res = await ref
+        .read(updateProfileUseCaseProvider)
+        .call(request, sessionUser: u0);
     if (epoch != _sessionEpoch) return;
     UserEntity? updatedUser;
     final profileFailed = res.fold(
@@ -578,16 +618,14 @@ class ProfileNotifier extends _$ProfileNotifier {
     if (profileFailed) return;
 
     final updated = updatedUser!;
-    final persist =
-        await ref.read(authRepositoryProvider).persistSessionUser(updated);
+    final persist = await ref
+        .read(authRepositoryProvider)
+        .persistSessionUser(updated);
     if (epoch != _sessionEpoch) return;
-    final persistFailed = persist.fold(
-      (c) {
-        state = state.copyWith(isUpdating: false, error: c.toString());
-        return true;
-      },
-      (_) => false,
-    );
+    final persistFailed = persist.fold((c) {
+      state = state.copyWith(isUpdating: false, error: c.toString());
+      return true;
+    }, (_) => false);
     if (persistFailed) return;
 
     ref.invalidate(authProvider);
@@ -602,9 +640,9 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   Future<void> toggleDarkMode(bool enabled) async {
     final epoch = _sessionEpoch;
-    await ref.read(appThemeModeProvider.notifier).setTheme(
-          enabled ? ThemeMode.dark : ThemeMode.light,
-        );
+    await ref
+        .read(appThemeModeProvider.notifier)
+        .setTheme(enabled ? ThemeMode.dark : ThemeMode.light);
     if (epoch != _sessionEpoch) return;
     state = state.copyWith(isDarkMode: enabled);
   }
@@ -635,17 +673,13 @@ class ProfileNotifier extends _$ProfileNotifier {
     required String confirmationText,
   }) async {
     final epoch = _sessionEpoch;
-    final remote = await ref.read(deleteAccountUseCaseProvider).call(
-          password: password,
-          confirmationText: confirmationText,
-        );
+    final remote = await ref
+        .read(deleteAccountUseCaseProvider)
+        .call(password: password, confirmationText: confirmationText);
     if (epoch != _sessionEpoch) return false;
-    return remote.fold(
-      (f) {
-        state = state.copyWith(error: f.toString());
-        return false;
-      },
-      (_) => true,
-    );
+    return remote.fold((f) {
+      state = state.copyWith(error: f.toString());
+      return false;
+    }, (_) => true);
   }
 }

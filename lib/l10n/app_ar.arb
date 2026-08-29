@@ -30,6 +30,8 @@
   "otpSessionExpired": "انتهت صلاحية الكود. اطلب كود جديد.",
   "verify": "تحقق",
   "verifyEmailBeforePhone": "يرجى التحقق من بريدك الإلكتروني قبل تغيير رقم هاتفك أو التحقق منه.",
+  "verifyNewEmailToSave": "يرجى التحقق من بريدك الإلكتروني الجديد لحفظ هذا التغيير.",
+  "verifyNewPhoneToSave": "يرجى التحقق من رقم هاتفك الجديد لحفظ هذا التغيير.",
   "emailVerifiedSuccess": "تم التحقق من البريد الإلكتروني",
   "phoneVerifiedSuccess": "تم التحقق من رقم الهاتف",
   "smsRatesNote": "قد يتم تطبيق رسوم SMS عادية",

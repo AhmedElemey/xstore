@@ -30,6 +30,8 @@
   "otpSessionExpired": "Code expired. Request a new one.",
   "verify": "Verify",
   "verifyEmailBeforePhone": "Please verify your email before changing or verifying your phone number.",
+  "verifyNewEmailToSave": "You changed your email. Verify the new address to save this change.",
+  "verifyNewPhoneToSave": "You changed your phone number. Verify the new number to save this change.",
   "emailVerifiedSuccess": "Email verified",
   "phoneVerifiedSuccess": "Phone number verified",
   "smsRatesNote": "Standard SMS rates may apply",

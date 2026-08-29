@@ -278,6 +278,18 @@ abstract class AppLocalizations {
   /// **'Please verify your email before changing or verifying your phone number.'**
   String get verifyEmailBeforePhone;
 
+  /// No description provided for @verifyNewEmailToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed your email. Verify the new address to save this change.'**
+  String get verifyNewEmailToSave;
+
+  /// No description provided for @verifyNewPhoneToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed your phone number. Verify the new number to save this change.'**
+  String get verifyNewPhoneToSave;
+
   /// No description provided for @emailVerifiedSuccess.
   ///
   /// In en, this message translates to:
@@ -4481,7 +4493,7 @@ abstract class AppLocalizations {
   /// No description provided for @forgotPasswordSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email and we'll send you a verification code to reset your password'**
+  /// **'Enter your email and we\'ll send you a verification code to reset your password'**
   String get forgotPasswordSubtitle;
 
   /// No description provided for @sendResetCode.
@@ -4499,7 +4511,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetCodeSentConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'We've sent a verification code to {email}'**
+  /// **'We\'ve sent a verification code to {email}'**
   String resetCodeSentConfirmation(String email);
 
   /// No description provided for @rememberMe.

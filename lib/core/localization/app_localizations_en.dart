@@ -100,6 +100,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please verify your email before changing or verifying your phone number.';
 
   @override
+  String get verifyNewEmailToSave =>
+      'You changed your email. Verify the new address to save this change.';
+
+  @override
+  String get verifyNewPhoneToSave =>
+      'You changed your phone number. Verify the new number to save this change.';
+
+  @override
   String get emailVerifiedSuccess => 'Email verified';
 
   @override

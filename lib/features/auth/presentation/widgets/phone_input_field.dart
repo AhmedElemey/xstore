@@ -17,6 +17,7 @@ class PhoneInputField extends StatelessWidget {
     this.enabled = true,
     this.readOnly = false,
     this.suffix,
+    this.onTap,
   });
 
   final TextEditingController controller;
@@ -28,6 +29,10 @@ class PhoneInputField extends StatelessWidget {
   /// Trailing widget inside the field (e.g. a Verify action). Replaces the
   /// clear button so the row stays on one line.
   final Widget? suffix;
+
+  /// Called when the field is tapped. Used with [readOnly] for "tap to
+  /// change" flows that must not accept inline typing.
+  final VoidCallback? onTap;
 
   String _normalizeEgyptInput(String value) {
     final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -57,10 +62,12 @@ class PhoneInputField extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Container(
               decoration: BoxDecoration(
-                 color: AppColors.transparent,
+                color: AppColors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: errorText != null ? AppColors.error : context.borderColor,
+                  color: errorText != null
+                      ? AppColors.error
+                      : context.borderColor,
                   width: 1.5,
                 ),
               ),
@@ -68,6 +75,7 @@ class PhoneInputField extends StatelessWidget {
               child: TextFormField(
                 controller: controller,
                 readOnly: readOnly,
+                onTap: onTap,
                 onChanged: readOnly
                     ? null
                     : (value) {
@@ -88,24 +96,29 @@ class PhoneInputField extends StatelessWidget {
                   FilteringTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(11),
                 ],
-                style: AppTypography.bodyLarge.copyWith(color: context.textPrimary),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: context.textPrimary,
+                ),
                 decoration: InputDecoration(
-                  fillColor:  AppColors.transparent,
+                  fillColor: AppColors.transparent,
                   hintText: '01012345678',
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(right: 8),
                     child: Icon(LucideIcons.phone),
                   ),
-                  prefixIconConstraints:
-                      const BoxConstraints(minWidth: 24, minHeight: 24),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 24,
+                    minHeight: 24,
+                  ),
                   prefixText: '🇪🇬 +20 ',
                   prefixStyle: AppTypography.bodyMedium.copyWith(
                     color: context.textPrimary,
-                    
+
                     fontWeight: FontWeight.w600,
                   ),
-                
-                  suffixIcon: suffix ??
+
+                  suffixIcon:
+                      suffix ??
                       (!readOnly && controller.text.isNotEmpty
                           ? IconButton(
                               onPressed: () {
@@ -128,7 +141,9 @@ class PhoneInputField extends StatelessWidget {
                   disabledBorder: InputBorder.none,
                   errorBorder: InputBorder.none,
                   focusedErrorBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.inputContentPaddingH),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.inputContentPaddingH,
+                  ),
                   isDense: true,
                 ),
               ),
