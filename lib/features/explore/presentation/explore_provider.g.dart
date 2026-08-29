@@ -6,7 +6,7 @@ part of 'explore_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$exploreHash() => r'23619f583486b33bc89219f6a846543fdfc882d5';
+String _$exploreHash() => r'b62188ad7b1132c2748502bfc2ef26d9f8bfc5e2';
 
 /// See also [Explore].
 @ProviderFor(Explore)

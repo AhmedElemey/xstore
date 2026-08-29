@@ -46,7 +46,6 @@ abstract final class AppStrings {
   static const hotDeals = '🔥 Hot Deals';
   static const newArrivals = '✨ New Arrivals';
   static const flashSale = '⚡ Flash Sale';
-  static const flashSaleBannerBody = 'Flash sale — limited time offers inside';
   static const shopByCategory = 'Shop by Category';
   static const recommended = '👤 Recommended for You';
   static const recommendedSubtitle = 'Based on your browsing';

@@ -42,5 +42,6 @@ class ExploreState with _$ExploreState {
     @Default(true) bool hasMore,
     @Default(1) int page,
     @Default(false) bool isSearching,
+    String? error,
   }) = _ExploreState;
 }

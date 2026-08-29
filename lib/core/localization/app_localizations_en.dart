@@ -154,9 +154,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get flashSale => '⚡ Flash Sale';
 
   @override
-  String get flashSaleBannerBody => 'Flash sale — limited time offers inside';
-
-  @override
   String get shopByCategory => 'Shop by Category';
 
   @override
@@ -890,6 +887,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navAddListing => 'Add Listing';
+
+  @override
+  String get navWallet => 'Wallet';
+
+  @override
+  String get walletGoodStanding => 'Your platform fees are up to date.';
 
   @override
   String get exploreSearchPlaceholder => 'Search listings…';

@@ -28,8 +28,9 @@ import '../../../../shared/utils/public_seller_stats.dart';
 import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
-import '../../../store/presentation/widgets/store_hours_summary_card.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// import '../../../store/presentation/providers/store_hours_provider.dart';
+// import '../../../store/presentation/widgets/store_hours_summary_card.dart';
 
 class VendorStoreScreen extends ConsumerStatefulWidget {
   const VendorStoreScreen({super.key, required this.sellerId});
@@ -244,9 +245,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
         authUser.id.isNotEmpty &&
         authUser.id == widget.sellerId &&
         authUser.hasStore;
-    final storeHoursState =
-        isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
-    final isOpen = storeHoursState?.isStoreOpen ?? false;
+    // TODO(phase-2): Store/active hours deferred to next phase.
+    // final storeHoursState =
+    //     isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
+    // final isOpen = storeHoursState?.isStoreOpen ?? false;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -326,24 +328,25 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                     ),
                                   ),
                                   const Gap(AppSpacing.xs),
-                                  if (isOwnStore && storeHoursState != null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: AppSpacing.sm,
-                                        vertical: AppSpacing.xs,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(999),
-                                      ),
-                                      child: Text(
-                                        isOpen ? '● ${context.l10n.storeOpenNow}' : '● ${context.l10n.storeClosedNow}',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: isOpen ? AppColors.success : AppColors.error,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
+                                  // TODO(phase-2): Store/active hours deferred to next phase.
+                                  // if (isOwnStore && storeHoursState != null)
+                                  //   Container(
+                                  //     padding: const EdgeInsets.symmetric(
+                                  //       horizontal: AppSpacing.sm,
+                                  //       vertical: AppSpacing.xs,
+                                  //     ),
+                                  //     decoration: BoxDecoration(
+                                  //       color: (isOpen ? AppColors.success : AppColors.error).withValues(alpha: 0.15),
+                                  //       borderRadius: BorderRadius.circular(999),
+                                  //     ),
+                                  //     child: Text(
+                                  //       isOpen ? '● ${context.l10n.storeOpenNow}' : '● ${context.l10n.storeClosedNow}',
+                                  //       style: AppTypography.labelSmall.copyWith(
+                                  //         color: isOpen ? AppColors.success : AppColors.error,
+                                  //         fontWeight: FontWeight.w700,
+                                  //       ),
+                                  //     ),
+                                  //   ),
                                   Text(
                                     '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
                                     '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
@@ -424,20 +427,21 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                     ),
                   ),
                 ),
-              if (isOwnStore && storeHoursState?.current != null)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(context.l10n.storeHours, style: AppTypography.titleMedium),
-                        const Gap(AppSpacing.sm),
-                        StoreHoursSummaryCard(schedule: storeHoursState!.current!.schedule),
-                      ],
-                    ),
-                  ),
-                ),
+              // TODO(phase-2): Store/active hours deferred to next phase.
+              // if (isOwnStore && storeHoursState?.current != null)
+              //   SliverToBoxAdapter(
+              //     child: Padding(
+              //       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+              //       child: Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         children: [
+              //           Text(context.l10n.storeHours, style: AppTypography.titleMedium),
+              //           const Gap(AppSpacing.sm),
+              //           StoreHoursSummaryCard(schedule: storeHoursState!.current!.schedule),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 48,

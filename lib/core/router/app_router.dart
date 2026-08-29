@@ -18,6 +18,7 @@ import '../../features/auth/presentation/providers/phone_auth_provider.dart';
 import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
 import '../../features/delivery/presentation/screens/courier_deliveries_screen.dart';
@@ -41,7 +42,8 @@ import '../../features/profile/presentation/providers/profile_verification_provi
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
-import '../../features/store/presentation/screens/store_hours_screen.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
@@ -118,27 +120,18 @@ List<StatefulShellBranch> _consumerShellBranches() => [
       ),
     ];
 
+// Vendors have no marketplace-browsing tabs — Home/Explore are consumer-only.
+// Order matches xstore_bottom_nav.dart's vendor label/icon lists: keep both
+// in sync when adding/reordering a tab.
 List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.home,
+            path: AppRoutes.vendorOrders,
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const HomeScreen(),
-            ),
-          ),
-        ],
-      ),
-      StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: AppRoutes.explore,
-            pageBuilder: (context, state) => fadeScaleTransition(
-              context,
-              state,
-              const ExploreScreen(),
+              const VendorOrdersScreen(),
             ),
           ),
         ],
@@ -160,11 +153,11 @@ List<StatefulShellBranch> _vendorShellBranches() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: AppRoutes.vendorOrders,
+            path: AppRoutes.vendorWallet,
             pageBuilder: (context, state) => fadeScaleTransition(
               context,
               state,
-              const VendorOrdersScreen(),
+              const VendorWalletScreen(),
             ),
           ),
         ],
@@ -538,13 +531,11 @@ GoRouter goRouter(GoRouterRef ref) {
           const AddressesInfoScreen(),
         ),
       ),
+      // TODO(phase-2): Store/active hours screen deferred to next phase.
+      // Route redirects to profile in the meantime instead of dead-ending.
       GoRoute(
         path: AppRoutes.storeHours,
-        pageBuilder: (context, state) => slideUpTransition(
-          context,
-          state,
-          const StoreHoursScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.help,

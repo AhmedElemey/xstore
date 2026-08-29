@@ -26,7 +26,6 @@ import '../providers/new_arrivals_provider.dart';
 import '../providers/recommended_provider.dart';
 import '../widgets/category_chip_row.dart';
 import '../widgets/featured_categories_banner.dart';
-import '../widgets/flash_sale_banner.dart';
 import '../widgets/hero_banner_carousel.dart';
 import '../widgets/home_header.dart';
 import '../widgets/hot_deals_section.dart';
@@ -123,16 +122,6 @@ class HomeScreen extends ConsumerWidget {
                       onRetry: () => ref.invalidate(bannersProvider),
                     ),
                   ),
-                  const Gap(AppSpacing.lg),
-                  FlashSaleBanner()
-                      .animate()
-                      .fadeIn(duration: AppAnimations.medium)
-                      .slideX(
-                        begin: -0.05,
-                        end: 0,
-                        duration: AppAnimations.medium,
-                        curve: AppAnimations.enter,
-                      ),
                   const Gap(AppSpacing.lg),
                   Text(
                     context.l10n.shopByCategory,

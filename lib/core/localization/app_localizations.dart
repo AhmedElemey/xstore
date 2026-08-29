@@ -386,12 +386,6 @@ abstract class AppLocalizations {
   /// **'⚡ Flash Sale'**
   String get flashSale;
 
-  /// No description provided for @flashSaleBannerBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Flash sale — limited time offers inside'**
-  String get flashSaleBannerBody;
-
   /// No description provided for @shopByCategory.
   ///
   /// In en, this message translates to:
@@ -1825,6 +1819,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Listing'**
   String get navAddListing;
+
+  /// No description provided for @navWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get navWallet;
+
+  /// No description provided for @walletGoodStanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Your platform fees are up to date.'**
+  String get walletGoodStanding;
 
   /// No description provided for @exploreSearchPlaceholder.
   ///
