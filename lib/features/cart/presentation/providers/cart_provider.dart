@@ -379,6 +379,8 @@ class Cart extends _$Cart {
         final key = switch (f) {
           ValidationFailure(:final message) when message == 'minOrder' =>
             'minOrder',
+          ValidationFailure(:final message) when message == 'unavailable' =>
+            'unavailable',
           ValidationFailure() => 'invalid',
           _ => 'invalid',
         };

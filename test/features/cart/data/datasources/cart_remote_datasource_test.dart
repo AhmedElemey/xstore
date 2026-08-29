@@ -33,13 +33,6 @@ class _ScriptedInterceptor extends Interceptor {
   }
 }
 
-DioException _badResponse(RequestOptions options, int statusCode) =>
-    DioException(
-      requestOptions: options,
-      type: DioExceptionType.badResponse,
-      response: Response(requestOptions: options, statusCode: statusCode),
-    );
-
 CartItemEntity _cartItem({
   String id = 'cart_item_1',
   String listingId = 'listing_1',
@@ -81,11 +74,11 @@ Map<String, dynamic> _fullCartJson() => {
       'quantity': 1,
       'maxQuantity': 3,
       'category': 'Electronics',
-      'condition': 'Like New',
+      'condition': 'New',
       'shippingAvailable': true,
       'shippingCost': 0,
       'isAvailable': true,
-      'addedAt': '2026-08-01T10:00:00.000Z',
+      'addedAt': '2026-08-01T00:00:00.000',
     },
   ],
   'couponCode': 'SAVE10',
@@ -93,7 +86,6 @@ Map<String, dynamic> _fullCartJson() => {
     'code': 'SAVE10',
     'discountType': 'percentage',
     'discountValue': 10,
-    'maxDiscount': 5000,
     'isValid': true,
     'message': '',
   },
@@ -114,8 +106,15 @@ void main() {
     return d;
   }
 
-  group('getCart', () {
-    test('GETs /cart/{consumerId} and parses items/coupon/totals', () async {
+  setUp(() {
+    CartRemoteDataSourceImpl.clearSessionCache();
+    dio = buildDio((_) => null);
+    datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+  });
+
+  group('in-memory cart (live has no /cart API)', () {
+    test('getCart returns the empty session snapshot without hitting the network',
+        () async {
       RequestOptions? captured;
       dio = buildDio((options) {
         captured = options;
@@ -125,45 +124,13 @@ void main() {
 
       final result = await datasource.getCart('consumer_1');
 
-      expect(captured!.method, 'GET');
-      expect(captured!.path, '/cart/consumer_1');
-      expect(result.id, 'cart_main');
-      expect(result.items, hasLength(1));
-      expect(result.items.single.listingId, 'listing_1');
-      expect(result.items.single.vendorRating, 4.8);
-      expect(result.coupon?.code, 'SAVE10');
-      expect(result.coupon?.discountType, DiscountType.percentage);
-      expect(result.subtotal, 95000);
-      expect(result.total, 85500);
+      expect(captured, isNull);
+      expect(result.items, isEmpty);
+      expect(result.consumerId, 'consumer_1');
     });
 
-    test('throws ServerException on an empty response body', () async {
-      dio = buildDio((_) => null);
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
-      expect(
-        () => datasource.getCart('consumer_1'),
-        throwsA(isA<ServerException>()),
-      );
-    });
-
-    test('wraps any DioException as ServerException (no type-specific mapping)',
+    test('addOrUpdateItem stores the line locally and getCart reads it back',
         () async {
-      dio = buildDio((options) => _badResponse(options, 401));
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
-      // Unlike WishlistRemoteDataSource (which uses mapDioException and
-      // would throw UnauthorizedException for a 401), CartRemoteDataSource
-      // catches every DioException the same way.
-      expect(
-        () => datasource.getCart('consumer_1'),
-        throwsA(isA<ServerException>()),
-      );
-    });
-  });
-
-  group('addOrUpdateItem', () {
-    test('POSTs the full item map to /cart/{consumerId}/items', () async {
       RequestOptions? captured;
       dio = buildDio((options) {
         captured = options;
@@ -175,72 +142,68 @@ void main() {
         consumerId: 'consumer_1',
         item: _cartItem(),
       );
+      final result = await datasource.getCart('consumer_1');
 
-      expect(captured!.method, 'POST');
-      expect(captured!.path, '/cart/consumer_1/items');
-      final body = captured!.data as Map<String, dynamic>;
-      expect(body['listingId'], 'listing_1');
-      expect(body['price'], 95000);
-      expect(body['quantity'], 1);
+      expect(captured, isNull);
+      expect(result.items, hasLength(1));
+      expect(result.items.single.listingId, 'listing_1');
+      expect(result.items.single.quantity, 1);
     });
-  });
 
-  group('removeItem', () {
-    test('DELETEs /cart/{consumerId}/items/{itemId}', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return _fullCartJson();
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
-      await datasource.removeItem(consumerId: 'consumer_1', itemId: 'cart_item_1');
-
-      expect(captured!.method, 'DELETE');
-      expect(captured!.path, '/cart/consumer_1/items/cart_item_1');
+    test('addOrUpdateItem of the same listing increases quantity up to max',
+        () async {
+      await datasource.addOrUpdateItem(
+        consumerId: 'consumer_1',
+        item: _cartItem(),
+      );
+      await datasource.addOrUpdateItem(
+        consumerId: 'consumer_1',
+        item: _cartItem(),
+      );
+      final result = await datasource.getCart('consumer_1');
+      expect(result.items.single.quantity, 2);
     });
-  });
 
-  group('updateQuantity', () {
-    test('PATCHes {quantity} to /cart/{consumerId}/items/{itemId}', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return _fullCartJson();
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+    test('removeItem drops the line from the session snapshot', () async {
+      await datasource.addOrUpdateItem(
+        consumerId: 'consumer_1',
+        item: _cartItem(),
+      );
+      await datasource.removeItem(
+        consumerId: 'consumer_1',
+        itemId: 'cart_item_1',
+      );
+      final result = await datasource.getCart('consumer_1');
+      expect(result.items, isEmpty);
+    });
 
+    test('updateQuantity patches the local line', () async {
+      await datasource.addOrUpdateItem(
+        consumerId: 'consumer_1',
+        item: _cartItem(),
+      );
       await datasource.updateQuantity(
         consumerId: 'consumer_1',
         itemId: 'cart_item_1',
         quantity: 3,
       );
-
-      expect(captured!.method, 'PATCH');
-      expect(captured!.path, '/cart/consumer_1/items/cart_item_1');
-      expect(captured!.data, {'quantity': 3});
+      final result = await datasource.getCart('consumer_1');
+      expect(result.items.single.quantity, 3);
     });
-  });
 
-  group('clearCart', () {
-    test('DELETEs /cart/{consumerId}', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return _fullCartJson();
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
+    test('clearCart empties the session snapshot', () async {
+      await datasource.addOrUpdateItem(
+        consumerId: 'consumer_1',
+        item: _cartItem(),
+      );
       await datasource.clearCart('consumer_1');
-
-      expect(captured!.method, 'DELETE');
-      expect(captured!.path, '/cart/consumer_1');
+      final result = await datasource.getCart('consumer_1');
+      expect(result.items, isEmpty);
     });
   });
 
   group('applyCoupon', () {
-    test('POSTs the trimmed code + eligibleSubtotal to /cart/coupons/apply',
-        () async {
+    test('live mode rejects coupons without hitting the network', () async {
       RequestOptions? captured;
       dio = buildDio((options) {
         captured = options;
@@ -254,32 +217,18 @@ void main() {
       });
       datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
 
-      final result = await datasource.applyCoupon(
-        code: '  save10  ',
-        eligibleSubtotal: 6000,
-      );
-
-      expect(captured!.method, 'POST');
-      expect(captured!.path, '/cart/coupons/apply');
-      expect(captured!.data, {'code': 'save10', 'eligibleSubtotal': 6000.0});
-      expect(result.code, 'SAVE10');
-      expect(result.discountType, DiscountType.percentage);
-    });
-
-    test('wraps a DioException as CouponException, not ServerException',
-        () async {
-      dio = buildDio((options) => _badResponse(options, 422));
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
       expect(
-        () => datasource.applyCoupon(code: 'BAD', eligibleSubtotal: 100),
-        throwsA(isA<CouponException>()),
+        () => datasource.applyCoupon(code: 'SAVE10', eligibleSubtotal: 6000),
+        throwsA(
+          isA<CouponException>().having((e) => e.message, 'message', 'unavailable'),
+        ),
       );
+      expect(captured, isNull);
     });
   });
 
   group('removeCoupon', () {
-    test('DELETEs /cart/{consumerId}/coupon', () async {
+    test('clears the local coupon without hitting the network', () async {
       RequestOptions? captured;
       dio = buildDio((options) {
         captured = options;
@@ -288,9 +237,7 @@ void main() {
       datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
 
       await datasource.removeCoupon('consumer_1');
-
-      expect(captured!.method, 'DELETE');
-      expect(captured!.path, '/cart/consumer_1/coupon');
+      expect(captured, isNull);
     });
   });
 
@@ -462,6 +409,70 @@ void main() {
       expect(result.items.map((e) => e.listingId), ['listing_1', 'listing_2']);
       expect(result.subtotal, 190000);
       expect(result.notes, 'Ring the bell');
+    });
+
+    test('clears the in-memory cart after a successful live placeOrder',
+        () async {
+      await datasource.addOrUpdateItem(
+        consumerId: 'consumer_1',
+        item: _cartItem(),
+      );
+      expect((await datasource.getCart('consumer_1')).items, hasLength(1));
+
+      final orders = StubOrdersRemoteDataSource(
+        onCreateOrder: ({
+          required listingId,
+          required quantity,
+          required latitude,
+          required longitude,
+          required fallbackItem,
+          required fallbackAddress,
+          required fallbackPayment,
+          notes,
+        }) async {
+          return OrderModel(
+            id: 'order_$listingId',
+            consumerId: 'consumer_1',
+            consumerName: 'Jane',
+            consumerPhone: '0100',
+            vendorId: 'vendor_1',
+            vendorName: 'Ahmed',
+            vendorStoreName: 'Ahmed Store',
+            items: [fallbackItem],
+            status: OrderStatus.pending,
+            paymentMethod: fallbackPayment,
+            deliveryAddress: fallbackAddress,
+            subtotal: fallbackItem.total,
+            shippingCost: 0,
+            discount: 0,
+            total: fallbackItem.total,
+            createdAt: DateTime(2026, 8, 1),
+            updatedAt: DateTime(2026, 8, 1),
+          );
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, orders);
+
+      await datasource.placeOrder(
+        PlaceOrderParams(
+          consumerId: 'consumer_1',
+          items: [_cartItem()],
+          deliveryAddress: const OrderAddress(
+            fullName: 'Jane',
+            phone: '0100',
+            street: 'St',
+            city: 'Cairo',
+            wilaya: 'Cairo',
+          ),
+          paymentMethod: PaymentMethod.cashOnDelivery,
+          subtotal: 95000,
+          shippingTotal: 0,
+          discount: 0,
+          total: 95000,
+        ),
+      );
+
+      expect((await datasource.getCart('consumer_1')).items, isEmpty);
     });
   });
 }

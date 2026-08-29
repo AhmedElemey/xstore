@@ -234,8 +234,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       AppSnackbar.success(
         context,
         isEditing
-            ? 'Listing updated successfully'
-            : 'Listing published successfully',
+            ? context.l10n.listingUpdatedSuccess
+            : context.l10n.listingPublishedSuccess,
       );
       context.go(AppRoutes.listingMy);
       return;
@@ -250,6 +250,19 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
           label: context.l10n.setStoreLocation,
           textColor: AppColors.white,
           onPressed: () => context.push(AppRoutes.profileEdit),
+        ),
+      );
+      return;
+    }
+    if (err == accountNotVerifiedErrorCode) {
+      AppSnackbar.show(
+        context,
+        message: context.l10n.listingErrorAccountNotVerified,
+        backgroundColor: AppColors.error,
+        action: SnackBarAction(
+          label: context.l10n.verifyNow,
+          textColor: AppColors.white,
+          onPressed: () => _publish(),
         ),
       );
       return;

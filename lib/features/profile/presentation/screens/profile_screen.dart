@@ -167,8 +167,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               if (profile != null &&
-                  (profile.isEmailVerificationRequired ||
-                      profile.isPhoneVerificationRequired))
+                  ((!profile.isEmailVerified && u.email.isNotEmpty) ||
+                      (!profile.isPhoneVerified && u.phoneNumber.isNotEmpty)))
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
@@ -179,9 +179,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: ProfileVerificationBanner(
                       email: u.email,
-                      phoneNumber: u.phoneNumber,
-                      showEmailPrompt: profile.isEmailVerificationRequired,
-                      showPhonePrompt: profile.isPhoneVerificationRequired,
+                      showEmailPrompt:
+                          !profile.isEmailVerified && u.email.isNotEmpty,
+                      showPhonePrompt: !profile.isPhoneVerified &&
+                          u.phoneNumber.isNotEmpty,
                     ),
                   ),
                 ),

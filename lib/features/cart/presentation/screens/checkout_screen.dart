@@ -4,9 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../auth/presentation/widgets/phone_verification_sheet.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import '../widgets/checkout_address_section.dart';
@@ -46,8 +45,22 @@ class CheckoutScreen extends ConsumerWidget {
         final c = ref.read(cartProvider);
         final errorCode = ck.error ?? c.error;
         if (errorCode == phoneNotVerifiedErrorCode) {
-          final phone = ref.read(authProvider).valueOrNull?.phoneNumber ?? '';
-          final verified = await verifyPhoneNow(context, ref, phone);
+          // Profile already marked verified but the backend still 400'd —
+          // don't recurse requirePhoneVerified (it would return true
+          // immediately and loop). Surface the error instead.
+          final alreadyVerified = ref
+                  .read(profileNotifierProvider)
+                  .profile
+                  ?.isPhoneVerified ??
+              false;
+          if (alreadyVerified) {
+            AppSnackbar.error(
+              context,
+              checkoutErrorMessage(context, errorCode),
+            );
+            return;
+          }
+          final verified = await requirePhoneVerified(context, ref);
           if (!context.mounted) return;
           if (verified) {
             await onPrimary();

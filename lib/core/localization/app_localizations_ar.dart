@@ -1511,6 +1511,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartCouponInvalid => 'كود الخصم غير صحيح';
 
   @override
+  String get cartCouponUnavailable => 'كوبونات الخصم غير متاحة حالياً';
+
+  @override
   String get cartCouponMinOrder => 'الحد الأدنى للطلب 5,000 ج.م';
 
   @override
@@ -2995,6 +2998,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get listingErrorStoreLocationRequired =>
       'حدد موقع متجرك الأول عشان تقدر تنشر إعلان';
+
+  @override
+  String get listingPublishedSuccess => 'تم نشر الإعلان بنجاح';
+
+  @override
+  String get listingUpdatedSuccess => 'تم تحديث الإعلان بنجاح';
+
+  @override
+  String get listingErrorAccountNotVerified =>
+      'وثّق بريدك ورقم هاتفك قبل نشر إعلان';
 
   @override
   String get setStoreLocation => 'تحديد الموقع';

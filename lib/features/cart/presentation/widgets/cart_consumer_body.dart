@@ -14,6 +14,7 @@ import 'cart_summary_card.dart';
 import 'cart_vendor_group.dart';
 import 'coupon_input_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeletons/cart_skeleton.dart';
 
 class CartConsumerBody extends ConsumerWidget {
@@ -31,6 +32,13 @@ class CartConsumerBody extends ConsumerWidget {
     }
 
     if (items.isEmpty) {
+      if (error != null) {
+        return ErrorStateWidget(
+          message: resolveAppError(context, error),
+          retryLabel: context.l10n.retry,
+          onRetry: () => ref.read(cartProvider.notifier).fetchCart(),
+        );
+      }
       return const CartEmptyState();
     }
     final childCount = groups.length + 7;

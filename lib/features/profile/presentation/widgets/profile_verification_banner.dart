@@ -4,26 +4,23 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../auth/presentation/widgets/email_verification_sheet.dart';
-import '../../../auth/presentation/widgets/phone_verification_sheet.dart';
 import '../providers/profile_provider.dart';
 
-/// Surfaces `isEmailVerificationRequired`/`isPhoneVerificationRequired` from
-/// GET `/api/auth/get-profile` — previously parsed onto [ProfileEntity] but
-/// never shown anywhere. Tapping "Verify Now" opens the existing (until now
-/// unwired) backend OTP sheets and refreshes profile data on success so the
-/// flag clears.
+/// Surfaces unverified email/phone from GET `/api/auth/get-profile`.
+/// Live responses expose `isEmailVerified`/`isPhoneVerified`, not the
+/// `*VerificationRequired` flags. Phone "Verify Now" runs email-then-phone
+/// because `send-phone-otp` 400s until email is verified.
 class ProfileVerificationBanner extends ConsumerWidget {
   const ProfileVerificationBanner({
     super.key,
     required this.email,
-    required this.phoneNumber,
     required this.showEmailPrompt,
     required this.showPhonePrompt,
   });
 
   final String email;
-  final String phoneNumber;
   final bool showEmailPrompt;
   final bool showPhonePrompt;
 
@@ -53,7 +50,7 @@ class ProfileVerificationBanner extends ConsumerWidget {
           _VerificationRow(
             message: context.l10n.profilePhoneNotVerified,
             onVerify: () async {
-              final ok = await verifyPhoneNow(context, ref, phoneNumber);
+              final ok = await requirePhoneVerified(context, ref);
               if (ok) await _onVerified(ref);
             },
           ),

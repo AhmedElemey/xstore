@@ -233,7 +233,11 @@ class _VerifiedProfile extends ProfileNotifier {
   ProfileState build() {
     super.build();
     return ProfileState(
-      profile: ProfileEntity(user: _consumer(), isPhoneVerified: true),
+      profile: ProfileEntity(
+        user: _consumer(),
+        isEmailVerified: true,
+        isPhoneVerified: true,
+      ),
     );
   }
 }

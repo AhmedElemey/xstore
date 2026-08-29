@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
@@ -73,7 +74,8 @@ class _PhoneVerificationSheetState
     result.fold(
       (f) => setState(() {
         _isSending = false;
-        _error = context.l10n.errorGeneric;
+        _codeSent = false;
+        _error = resolveAppError(context, f.toString());
       }),
       (otp) {
         setState(() {
@@ -130,7 +132,9 @@ class _PhoneVerificationSheetState
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                '${context.l10n.codeSentTo} ${widget.phoneNumber}',
+                _codeSent
+                    ? '${context.l10n.codeSentTo} ${widget.phoneNumber}'
+                    : widget.phoneNumber,
                 style: AppTypography.bodyMedium,
               ),
               const SizedBox(height: AppSpacing.lg),

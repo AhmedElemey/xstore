@@ -33,6 +33,8 @@ class CouponInputRow extends ConsumerWidget {
     String? errText;
     if (cart.couponErrorKey == 'minOrder') {
       errText = context.l10n.cartCouponMinOrder;
+    } else if (cart.couponErrorKey == 'unavailable') {
+      errText = context.l10n.cartCouponUnavailable;
     } else if (cart.couponErrorKey == 'invalid') {
       errText = context.l10n.cartCouponInvalid;
     }

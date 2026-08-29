@@ -89,8 +89,8 @@ void main() {
 
       final mapped = mapDioException(err);
 
-      expect(mapped, isA<UnauthorizedException>());
-      expect(mapped.message, 'Account must be verified to create listings.');
+      expect(mapped, isA<ServerException>());
+      expect(mapped.message, accountNotVerifiedErrorCode);
     });
 
     test('400 "verify your phone" maps to the stable phoneNotVerified code', () {
@@ -138,6 +138,32 @@ void main() {
 
       expect(mapped, isA<ServerException>());
       expect(mapped.message, storeLocationRequiredErrorCode);
+    });
+
+    test(
+      '400 email-before-phone OTP maps to the stable emailRequiredBeforePhone code',
+      () {
+      final err = DioException(
+        requestOptions: RequestOptions(path: '/api/auth/send-phone-otp'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/auth/send-phone-otp'),
+          statusCode: 400,
+          data: {
+            'isSuccess': false,
+            'data': null,
+            'errorEn':
+                'Please add and verify your email address before requesting a phone OTP.',
+            'errorAr': 'يرجى تأكيد البريد',
+            'statusCode': 400,
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      final mapped = mapDioException(err);
+
+      expect(mapped, isA<ServerException>());
+      expect(mapped.message, emailRequiredBeforePhoneErrorCode);
     });
 
     test('500 replaces opaque EF SaveChanges boilerplate', () {

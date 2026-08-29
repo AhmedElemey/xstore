@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
 import 'package:xstore/features/profile/presentation/screens/profile_screen.dart';
@@ -24,6 +25,28 @@ class _ErrorProfileNotifier extends ProfileNotifier {
   @override
   ProfileState build() =>
       const ProfileState(error: 'Network unavailable. Please check your connection and try again.');
+}
+
+class _UnverifiedProfileNotifier extends ProfileNotifier {
+  @override
+  ProfileState build() => ProfileState(
+        profile: ProfileEntity(
+          user: _sessionUser,
+          isEmailVerified: false,
+          isPhoneVerified: false,
+        ),
+      );
+}
+
+class _VerifiedProfileNotifier extends ProfileNotifier {
+  @override
+  ProfileState build() => ProfileState(
+        profile: ProfileEntity(
+          user: _sessionUser,
+          isEmailVerified: true,
+          isPhoneVerified: true,
+        ),
+      );
 }
 
 class _EmptyIdentityAuth extends Auth {
@@ -98,6 +121,39 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ErrorStateWidget), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'shows verification banner when email and phone are unverified',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          authOverride: FakeAuth(_sessionUser),
+          profileOverride: _UnverifiedProfileNotifier.new,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your email is not verified'), findsOneWidget);
+      expect(find.text('Your phone number is not verified'), findsOneWidget);
+      expect(find.text('Verify Now'), findsNWidgets(2));
+    },
+  );
+
+  testWidgets(
+    'hides verification banner when email and phone are already verified',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          authOverride: FakeAuth(_sessionUser),
+          profileOverride: _VerifiedProfileNotifier.new,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your email is not verified'), findsNothing);
+      expect(find.text('Your phone number is not verified'), findsNothing);
     },
   );
 }

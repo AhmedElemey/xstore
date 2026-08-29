@@ -1510,6 +1510,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartCouponInvalid => 'Invalid coupon code';
 
   @override
+  String get cartCouponUnavailable => 'Coupons aren\'t available yet';
+
+  @override
   String get cartCouponMinOrder => 'Minimum order 5,000 EGP required';
 
   @override
@@ -3005,6 +3008,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listingErrorStoreLocationRequired =>
       'Set your store\'s location before publishing a listing';
+
+  @override
+  String get listingPublishedSuccess => 'Listing published successfully';
+
+  @override
+  String get listingUpdatedSuccess => 'Listing updated successfully';
+
+  @override
+  String get listingErrorAccountNotVerified =>
+      'Verify your email and phone before publishing a listing';
 
   @override
   String get setStoreLocation => 'Set location';

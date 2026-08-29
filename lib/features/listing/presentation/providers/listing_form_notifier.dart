@@ -594,9 +594,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   String _listingSubmitErrorMessage(Failure failure, AppLocalizations l10n) {
     final raw = failure.toString();
     // Passed through as the stable code, not translated here — the screen
-    // detects it to show an actionable "Set location" CTA instead of a
-    // plain Retry snackbar.
+    // detects it to show an actionable CTA (set location / verify account)
+    // instead of a plain Retry snackbar.
     if (raw == storeLocationRequiredErrorCode) return raw;
+    if (raw == accountNotVerifiedErrorCode) return raw;
     if (raw.contains('could not save your changes') ||
         raw.contains('saving the entity changes')) {
       return l10n.listingPublishServerError;

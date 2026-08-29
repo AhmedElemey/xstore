@@ -3062,6 +3062,12 @@ abstract class AppLocalizations {
   /// **'Invalid coupon code'**
   String get cartCouponInvalid;
 
+  /// No description provided for @cartCouponUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons aren\'t available yet'**
+  String get cartCouponUnavailable;
+
   /// No description provided for @cartCouponMinOrder.
   ///
   /// In en, this message translates to:
@@ -5815,6 +5821,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set your store\'s location before publishing a listing'**
   String get listingErrorStoreLocationRequired;
+
+  /// No description provided for @listingPublishedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing published successfully'**
+  String get listingPublishedSuccess;
+
+  /// No description provided for @listingUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing updated successfully'**
+  String get listingUpdatedSuccess;
+
+  /// No description provided for @listingErrorAccountNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email and phone before publishing a listing'**
+  String get listingErrorAccountNotVerified;
 
   /// No description provided for @setStoreLocation.
   ///

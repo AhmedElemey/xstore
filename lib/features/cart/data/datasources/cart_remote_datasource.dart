@@ -54,15 +54,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   final Dio _dio;
   final OrdersRemoteDataSource _orders;
-  static const _cartPath = '/cart';
 
   static final List<CartItemEntity> _items = [];
   static CouponEntity? _coupon;
   static String? _couponCodeInput;
 
-  /// Drops the mock in-memory cart. Called on logout/user switch so cart
-  /// contents never survive into the next account (mock mode only — live
-  /// mode always fetches from the API).
+  /// Drops the in-memory cart. Called on logout/user switch so cart
+  /// contents never survive into the next account. Live mode has no cart
+  /// API (`GET`/`POST` `/cart` 404); mock and live share this session store.
   static void clearSessionCache() {
     _items.clear();
     _coupon = null;
@@ -314,72 +313,42 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     return int.tryParse(v?.toString() ?? '') ?? fallback;
   }
 
-  @override
-  Future<CartEntity> getCart(String consumerId) async {
+  Future<CartEntity> _localCart(String consumerId) {
     if (MockConfig.useMock) {
       return MockConfig.simulate(_snapshot(consumerId));
     }
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '$_cartPath/$consumerId',
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty cart response');
-      return _cartFromMap(consumerId, data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to fetch cart');
-    }
+    return Future<CartEntity>.value(_snapshot(consumerId));
+  }
+
+  @override
+  Future<CartEntity> getCart(String consumerId) {
+    return _localCart(consumerId);
   }
 
   @override
   Future<CartEntity> addOrUpdateItem({
     required String consumerId,
     required CartItemEntity item,
-  }) async {
-    if (MockConfig.useMock) {
-      _ensureMockSeed();
-      final idx = _items.indexWhere((e) => e.listingId == item.listingId);
-      if (idx >= 0) {
-        final cur = _items[idx];
-        final nextQty = (cur.quantity + item.quantity).clamp(1, cur.maxQuantity);
-        _items[idx] = cur.copyWith(quantity: nextQty);
-      } else {
-        _items.add(item);
-      }
-      return MockConfig.simulate(_snapshot(consumerId));
+  }) {
+    if (MockConfig.useMock) _ensureMockSeed();
+    final idx = _items.indexWhere((e) => e.listingId == item.listingId);
+    if (idx >= 0) {
+      final cur = _items[idx];
+      final nextQty = (cur.quantity + item.quantity).clamp(1, cur.maxQuantity);
+      _items[idx] = cur.copyWith(quantity: nextQty);
+    } else {
+      _items.add(item);
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        '$_cartPath/$consumerId/items',
-        data: _cartItemToMap(item),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty cart response');
-      return _cartFromMap(consumerId, data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to update cart');
-    }
+    return _localCart(consumerId);
   }
 
   @override
   Future<CartEntity> removeItem({
     required String consumerId,
     required String itemId,
-  }) async {
-    if (MockConfig.useMock) {
-      _items.removeWhere((e) => e.id == itemId);
-      return MockConfig.simulate(_snapshot(consumerId));
-    }
-    try {
-      final response = await _dio.delete<Map<String, dynamic>>(
-        '$_cartPath/$consumerId/items/$itemId',
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty cart response');
-      return _cartFromMap(consumerId, data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to remove cart item');
-    }
+  }) {
+    _items.removeWhere((e) => e.id == itemId);
+    return _localCart(consumerId);
   }
 
   @override
@@ -387,52 +356,27 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     required String consumerId,
     required String itemId,
     required int quantity,
-  }) async {
-    if (MockConfig.useMock) {
-      final idx = _items.indexWhere((e) => e.id == itemId);
-      if (idx >= 0) {
-        if (quantity <= 0) {
-          _items.removeAt(idx);
-        } else {
-          final cur = _items[idx];
-          _items[idx] = cur.copyWith(
-            quantity: quantity.clamp(1, cur.maxQuantity),
-          );
-        }
+  }) {
+    final idx = _items.indexWhere((e) => e.id == itemId);
+    if (idx >= 0) {
+      if (quantity <= 0) {
+        _items.removeAt(idx);
+      } else {
+        final cur = _items[idx];
+        _items[idx] = cur.copyWith(
+          quantity: quantity.clamp(1, cur.maxQuantity),
+        );
       }
-      return MockConfig.simulate(_snapshot(consumerId));
     }
-    try {
-      final response = await _dio.patch<Map<String, dynamic>>(
-        '$_cartPath/$consumerId/items/$itemId',
-        data: {'quantity': quantity},
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty cart response');
-      return _cartFromMap(consumerId, data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to update item quantity');
-    }
+    return _localCart(consumerId);
   }
 
   @override
-  Future<CartEntity> clearCart(String consumerId) async {
-    if (MockConfig.useMock) {
-      _items.clear();
-      _coupon = null;
-      _couponCodeInput = null;
-      return MockConfig.simulate(_snapshot(consumerId));
-    }
-    try {
-      final response = await _dio.delete<Map<String, dynamic>>(
-        '$_cartPath/$consumerId',
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty cart response');
-      return _cartFromMap(consumerId, data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to clear cart');
-    }
+  Future<CartEntity> clearCart(String consumerId) {
+    _items.clear();
+    _coupon = null;
+    _couponCodeInput = null;
+    return _localCart(consumerId);
   }
 
   @override
@@ -440,82 +384,60 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     required String code,
     required double eligibleSubtotal,
   }) async {
-    if (MockConfig.useMock) {
-      await MockConfig.simulate(null);
-      final upper = code.trim().toUpperCase();
-      if (upper == 'SAVE10') {
-        if (eligibleSubtotal < 5000) {
-          throw CouponException('minOrder');
-        }
-        final c = CouponEntity(
-          code: upper,
-          discountType: DiscountType.percentage,
-          discountValue: 10,
-          maxDiscount: 5000,
-          isValid: true,
-          message: '',
-        );
-        _coupon = c;
-        _couponCodeInput = upper;
-        return c;
-      }
-      if (upper == 'FREE500') {
-        final c = CouponEntity(
-          code: upper,
-          discountType: DiscountType.fixed,
-          discountValue: 500,
-          isValid: true,
-          message: 'FREE500',
-        );
-        _coupon = c;
-        _couponCodeInput = upper;
-        return c;
-      }
-      if (upper == 'WELCOME') {
-        final c = CouponEntity(
-          code: upper,
-          discountType: DiscountType.percentage,
-          discountValue: 15,
-          maxDiscount: 3000,
-          isValid: true,
-          message: 'WELCOME',
-        );
-        _coupon = c;
-        _couponCodeInput = upper;
-        return c;
-      }
-      throw CouponException('invalid');
+    if (!MockConfig.useMock) {
+      throw CouponException('unavailable');
     }
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        '$_cartPath/coupons/apply',
-        data: {'code': code.trim(), 'eligibleSubtotal': eligibleSubtotal},
+    await MockConfig.simulate(null);
+    final upper = code.trim().toUpperCase();
+    if (upper == 'SAVE10') {
+      if (eligibleSubtotal < 5000) {
+        throw CouponException('minOrder');
+      }
+      final c = CouponEntity(
+        code: upper,
+        discountType: DiscountType.percentage,
+        discountValue: 10,
+        maxDiscount: 5000,
+        isValid: true,
+        message: '',
       );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty coupon response');
-      return _couponFromMap(data);
-    } on DioException catch (e) {
-      throw CouponException(e.message ?? 'invalid');
+      _coupon = c;
+      _couponCodeInput = upper;
+      return c;
     }
+    if (upper == 'FREE500') {
+      final c = CouponEntity(
+        code: upper,
+        discountType: DiscountType.fixed,
+        discountValue: 500,
+        isValid: true,
+        message: 'FREE500',
+      );
+      _coupon = c;
+      _couponCodeInput = upper;
+      return c;
+    }
+    if (upper == 'WELCOME') {
+      final c = CouponEntity(
+        code: upper,
+        discountType: DiscountType.percentage,
+        discountValue: 15,
+        maxDiscount: 3000,
+        isValid: true,
+        message: 'WELCOME',
+      );
+      _coupon = c;
+      _couponCodeInput = upper;
+      return c;
+    }
+    throw CouponException('invalid');
   }
 
   @override
-  Future<CartEntity> removeCoupon(String consumerId) async {
-    if (MockConfig.useMock) {
-      _coupon = null;
-      _couponCodeInput = null;
-      return MockConfig.simulate(_snapshot(consumerId));
-    }
-    try {
-      final response = await _dio.delete<Map<String, dynamic>>(
-        '$_cartPath/$consumerId/coupon',
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty cart response');
-      return _cartFromMap(consumerId, data);
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to remove coupon');
-    }
+  Future<CartEntity> removeCoupon(String consumerId) {
+    _coupon = null;
+    _couponCodeInput = null;
+    return _localCart(consumerId);
   }
 
   @override
@@ -616,6 +538,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     // item list from all of them, totals from the already-known cart
     // context (more reliable than summing unconfirmed per-order totals).
     final first = createdOrders.first.toEntity();
+    _items.clear();
+    _coupon = null;
+    _couponCodeInput = null;
     return first.copyWith(
       items: createdOrders.expand((o) => o.items).map((m) => m.toEntity()).toList(),
       subtotal: params.subtotal,
@@ -643,100 +568,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       throw ServerException(e.message ?? 'Failed to load listing');
     }
   }
-
-  CartEntity _cartFromMap(String consumerId, Map<String, dynamic> json) {
-    final items = (json['items'] as List<dynamic>? ?? const [])
-        .whereType<Map>()
-        .map((e) => _cartItemFromMap(Map<String, dynamic>.from(e)))
-        .toList();
-    return CartEntity(
-      id: (json['id'] ?? 'cart_$consumerId').toString(),
-      consumerId: (json['consumerId'] ?? consumerId).toString(),
-      items: items,
-      selectedItemIds: {},
-      couponCode: json['couponCode'] as String?,
-      coupon: json['coupon'] is Map<String, dynamic>
-          ? _couponFromMap(json['coupon'] as Map<String, dynamic>)
-          : null,
-      subtotal: _num(json['subtotal']),
-      shippingTotal: _num(json['shippingTotal']),
-      discount: _num(json['discount']),
-      total: _num(json['total']),
-      itemCount: (json['itemCount'] as num?)?.toInt() ?? items.length,
-    );
-  }
-
-  CartItemEntity _cartItemFromMap(Map<String, dynamic> json) {
-    return CartItemEntity(
-      id: (json['id'] ?? '').toString(),
-      listingId: (json['listingId'] ?? '').toString(),
-      listingName: (json['listingName'] ?? '').toString(),
-      listingImage: (json['listingImage'] ?? '').toString(),
-      listingSlug: (json['listingSlug'] ?? '').toString(),
-      vendorId: (json['vendorId'] ?? '').toString(),
-      vendorName: (json['vendorName'] ?? '').toString(),
-      vendorStoreName: (json['vendorStoreName'] ?? '').toString(),
-      vendorAvatar: (json['vendorAvatar'] ?? '').toString(),
-      vendorRating: json['vendorRating'] == null
-          ? null
-          : _num(json['vendorRating']),
-      vendorVerified: json['vendorVerified'] != false,
-      price: _num(json['price']),
-      compareAtPrice: json['compareAtPrice'] == null
-          ? null
-          : _num(json['compareAtPrice']),
-      quantity: (json['quantity'] as num?)?.toInt() ?? 1,
-      maxQuantity: (json['maxQuantity'] as num?)?.toInt() ?? 1,
-      category: (json['category'] ?? '').toString(),
-      condition: (json['condition'] ?? '').toString(),
-      shippingAvailable: json['shippingAvailable'] != false,
-      shippingCost: _num(json['shippingCost']),
-      isAvailable: json['isAvailable'] != false,
-      addedAt:
-          DateTime.tryParse((json['addedAt'] ?? '').toString()) ?? DateTime.now(),
-    );
-  }
-
-  CouponEntity _couponFromMap(Map<String, dynamic> json) {
-    final type = (json['discountType'] ?? '').toString().toLowerCase();
-    return CouponEntity(
-      code: (json['code'] ?? '').toString(),
-      discountType: type == 'fixed'
-          ? DiscountType.fixed
-          : DiscountType.percentage,
-      discountValue: _num(json['discountValue']),
-      minOrderAmount: json['minOrderAmount'] == null
-          ? null
-          : _num(json['minOrderAmount']),
-      maxDiscount:
-          json['maxDiscount'] == null ? null : _num(json['maxDiscount']),
-      isValid: json['isValid'] != false,
-      message: (json['message'] ?? '').toString(),
-    );
-  }
-
-  Map<String, dynamic> _cartItemToMap(CartItemEntity item) => {
-        'id': item.id,
-        'listingId': item.listingId,
-        'listingName': item.listingName,
-        'listingImage': item.listingImage,
-        'listingSlug': item.listingSlug,
-        'vendorId': item.vendorId,
-        'vendorName': item.vendorName,
-        'vendorStoreName': item.vendorStoreName,
-        'vendorAvatar': item.vendorAvatar,
-        'vendorRating': item.vendorRating,
-        'vendorVerified': item.vendorVerified,
-        'price': item.price,
-        'compareAtPrice': item.compareAtPrice,
-        'quantity': item.quantity,
-        'maxQuantity': item.maxQuantity,
-        'category': item.category,
-        'condition': item.condition,
-        'shippingAvailable': item.shippingAvailable,
-        'shippingCost': item.shippingCost,
-        'isAvailable': item.isAvailable,
-      };
 
   double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
 }

@@ -21,13 +21,20 @@ AppException mapDioException(DioException e) {
       final code = e.response?.statusCode;
       final serverMessage = _serverErrorMessage(e.response?.data);
       if (code == 401 || code == 403) {
-        // CONFIRMED (live probe, 2026-08-14): POST /api/listings 403s with
-        // this exact text when the vendor's store has no saved lat/lng —
-        // a distinct, actionable case (route to the location step) rather
-        // than a generic "unauthorized".
-        if (serverMessage != null &&
-            serverMessage.toLowerCase().contains('store location')) {
-          return const ServerException(storeLocationRequiredErrorCode);
+        if (serverMessage != null) {
+          final lower = serverMessage.toLowerCase();
+          // CONFIRMED (live probe, 2026-08-14): POST /api/listings 403s
+          // with this text when the vendor's store has no saved lat/lng.
+          if (lower.contains('store location')) {
+            return const ServerException(storeLocationRequiredErrorCode);
+          }
+          // Live probe 2026-08-29: the same endpoint now 403s with
+          // "Account must be verified to create listings." when email/
+          // phone aren't verified — not a session/auth failure.
+          if (lower.contains('account must be verified') ||
+              lower.contains('verified to create listings')) {
+            return const ServerException(accountNotVerifiedErrorCode);
+          }
         }
         return UnauthorizedException(serverMessage ?? e.message);
       }
@@ -39,9 +46,19 @@ AppException mapDioException(DioException e) {
         // this exact text for a consumer who hasn't verified their phone —
         // a distinct, actionable case the app should route to phone
         // verification rather than show as a generic failure.
-        if (serverMessage != null &&
-            serverMessage.toLowerCase().contains('verify your phone')) {
-          return const ServerException(phoneNotVerifiedErrorCode);
+        if (serverMessage != null) {
+          final lower = serverMessage.toLowerCase();
+          if (lower.contains('verify your phone')) {
+            return const ServerException(phoneNotVerifiedErrorCode);
+          }
+          // Live probe 2026-08-29: send-phone-otp 400s until email is
+          // added and verified — surface a stable code the OTP sheet
+          // can map to l10n instead of errorGeneric.
+          if (lower.contains('email') &&
+              (lower.contains('before requesting a phone') ||
+                  lower.contains('phone otp'))) {
+            return const ServerException(emailRequiredBeforePhoneErrorCode);
+          }
         }
         final message =
             _validationMessage(e.response?.data) ?? serverMessage;
