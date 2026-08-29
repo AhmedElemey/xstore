@@ -72,6 +72,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         // email gateway is wired up — surface it for debugging only.
         if (kDebugMode && debugOtp != null && debugOtp.isNotEmpty) {
           AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+        } else {
+          AppSnackbar.success(
+            context,
+            context.l10n.resetCodeSentConfirmation(email),
+          );
         }
         context.push(AppRoutes.resetPassword, extra: email);
       },
@@ -106,7 +111,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
               const Gap(AppSpacing.md),
               Text(
-                "Enter your email and we'll send you a reset link",
+                context.l10n.forgotPasswordSubtitle,
                 style: AppTypography.body15.copyWith(
                   height: 1.4,
                   color: context.textSecondary,
@@ -114,7 +119,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
               const Gap(AppSpacing.spacing28),
               AuthTextField(
-                label: 'Email',
+                label: context.l10n.email,
                 hint: context.l10n.enterEmailHint,
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
@@ -128,14 +133,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               ),
               const Spacer(),
               XstoreButton(
-                label: 'Send Reset Link',
+                label: context.l10n.sendResetCode,
                 isLoading: _isLoading,
                 onPressed: _isLoading ? null : _sendResetLink,
               ),
               TextButton(
                 onPressed: () => context.go(AppRoutes.login),
                 child: Text(
-                  'Back to Login',
+                  context.l10n.backToLogin,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,

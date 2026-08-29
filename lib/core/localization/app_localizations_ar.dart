@@ -2264,6 +2264,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forgotPassword => 'نسيت كلمة المرور؟';
 
   @override
+  String get forgotPasswordSubtitle =>
+      'أدخل بريدك الإلكتروني وهنبعتلك كود للتحقق عشان تعيد ضبط كلمة المرور';
+
+  @override
+  String get sendResetCode => 'إرسال كود إعادة التعيين';
+
+  @override
+  String get backToLogin => 'الرجوع لتسجيل الدخول';
+
+  @override
+  String resetCodeSentConfirmation(String email) {
+    return 'بعتنا كود تحقق إلى $email';
+  }
+
+  @override
   String get rememberMe => 'ابقى متسجل';
 
   @override

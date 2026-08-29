@@ -1009,6 +1009,17 @@
   "passwordMask": "********",
   "minSixChars": "Min 6 characters",
   "forgotPassword": "Forgot Password?",
+  "forgotPasswordSubtitle": "Enter your email and we'll send you a verification code to reset your password",
+  "sendResetCode": "Send Reset Code",
+  "backToLogin": "Back to Login",
+  "resetCodeSentConfirmation": "We've sent a verification code to {email}",
+  "@resetCodeSentConfirmation": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "rememberMe": "Remember me",
   "continueWithPhoneNumber": "Continue with Phone Number",
   "dontHaveAccount": "Don't have an account?",

@@ -1010,6 +1010,17 @@
   "passwordMask": "[AR] ********",
   "minSixChars": "6 أحرف على الأقل",
   "forgotPassword": "نسيت كلمة المرور؟",
+  "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني وهنبعتلك كود للتحقق عشان تعيد ضبط كلمة المرور",
+  "sendResetCode": "إرسال كود إعادة التعيين",
+  "backToLogin": "الرجوع لتسجيل الدخول",
+  "resetCodeSentConfirmation": "بعتنا كود تحقق إلى {email}",
+  "@resetCodeSentConfirmation": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "rememberMe": "ابقى متسجل",
   "continueWithPhoneNumber": "كمل برقم الموبايل",
   "dontHaveAccount": "معندكش حساب؟",
