@@ -37,7 +37,7 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>.internal(
 );
 
 typedef AuthRemoteDataSourceRef = ProviderRef<AuthRemoteDataSource>;
-String _$authRepositoryHash() => r'9ab3beee89662971f91d8f47f12540c812b6e712';
+String _$authRepositoryHash() => r'af35c01c0718d366e72ac525bb918347fc190d87';
 
 /// See also [authRepository].
 @ProviderFor(authRepository)
@@ -393,7 +393,7 @@ final googleLoginUseCaseProvider =
 );
 
 typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
-String _$authHash() => r'095c31c4b173bff210a74d2f8a8126a9db77de32';
+String _$authHash() => r'd22d2a8bab0138b678fa54a0e80edc2d6b030378';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -407,7 +407,7 @@ final authProvider = AsyncNotifierProvider<Auth, UserEntity?>.internal(
 );
 
 typedef _$Auth = AsyncNotifier<UserEntity?>;
-String _$loginNotifierHash() => r'107cb1f9390eea7e75a518f258079a81044be084';
+String _$loginNotifierHash() => r'ea55cb13c70a14354c2a330803037e8fd098657a';
 
 /// See also [LoginNotifier].
 @ProviderFor(LoginNotifier)
@@ -423,7 +423,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'8d7a65cc846d90ff1ee7491e0f2ab000f38c2308';
+String _$registerNotifierHash() => r'351a80401a4173ee148c3e24bfeb861a1f72a27b';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)
