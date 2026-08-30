@@ -1,6 +1,6 @@
 # Launch to-do — business documentation
 
-One document per strategic action from the xStore business flow review (six launch to-dos).
+One document per strategic action from the xStore business flow review.
 
 | # | File | Topic |
 |---|------|--------|
@@ -10,6 +10,7 @@ One document per strategic action from the xStore business flow review (six laun
 | 4 | [04_trust_menu_hygiene.md](./04_trust_menu_hygiene.md) | Profile menu / Coming Soon trust |
 | 5 | [05_whatsapp_conversion.md](./05_whatsapp_conversion.md) | WhatsApp as official seller contact |
 | 6 | [06_push_lifecycle.md](./06_push_lifecycle.md) | Push on order lifecycle |
+| 7 | [07_deep_linking.md](./07_deep_linking.md) | Universal/App Links for shared product links |
 
 **Owner:** Ahmed Taha  
 **Product:** xStore — Egypt marketplace (EGP, COD-first)  
