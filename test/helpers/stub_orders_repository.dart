@@ -23,7 +23,15 @@ class StubOrdersRepository implements OrdersRepository {
       required String? vendorId,
       required bool isVendorSession,
     })? getOrderDetailResult,
-  })  : _getOrderDetail =
+    Either<Failure, OrderEntity> Function(
+      String orderId,
+      String reason,
+      bool isVendorSession,
+    )? cancelOrderResult,
+  })  : _cancel =
+            cancelOrderResult ??
+                ((_, __, ___) => Left(Failure.server('stub cancel'))),
+        _getOrderDetail =
             getOrderDetailResult ??
                 (({
                   required orderId,
@@ -80,6 +88,11 @@ class StubOrdersRepository implements OrdersRepository {
     required String? vendorId,
     required bool isVendorSession,
   }) _getOrderDetail;
+  final Either<Failure, OrderEntity> Function(
+    String orderId,
+    String reason,
+    bool isVendorSession,
+  ) _cancel;
 
   @override
   Future<Either<Failure, List<OrderEntity>>> getConsumerOrders({
@@ -143,7 +156,7 @@ class StubOrdersRepository implements OrdersRepository {
     required String reason,
     required bool isVendorSession,
   }) async =>
-      Left(Failure.server('stub'));
+      Future.value(_cancel(orderId, reason, isVendorSession));
 
   @override
   Future<Either<Failure, OrderEntity>> confirmOrder({
