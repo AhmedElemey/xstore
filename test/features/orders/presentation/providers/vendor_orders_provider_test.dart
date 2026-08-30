@@ -324,4 +324,117 @@ void main() {
       expect(container.read(vendorOrdersProvider).pendingCount, 1);
     });
   });
+
+  group('VendorOrdersNotifier stats recompute (VendorOrderStatsBanner inputs)', () {
+    test('pendingCount and activeCount shift as an order is confirmed then shipped',
+        () async {
+      final pending = _order(id: 'order_1');
+      final other = _order(id: 'order_2', status: OrderStatus.processing);
+      final container = await _containerWith(
+        StubOrdersRepository(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right([pending, other]),
+          confirmOrderResult: (orderId, method) =>
+              Right(pending.copyWith(status: OrderStatus.confirmed)),
+          markShippedResult: (orderId, info) => Right(
+            pending.copyWith(status: OrderStatus.shipped),
+          ),
+        ),
+      );
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+
+      expect(container.read(vendorOrdersProvider).pendingCount, 1);
+      expect(container.read(vendorOrdersProvider).activeCount, 1);
+      expect(container.read(vendorOrdersProvider).totalCount, 2);
+
+      await notifier.confirmOrder('order_1', DeliveryMethod.self);
+      expect(container.read(vendorOrdersProvider).pendingCount, 0);
+      expect(
+        container.read(vendorOrdersProvider).activeCount,
+        2,
+        reason: 'confirmed and processing both count as active',
+      );
+
+      await notifier.markShipped('order_1', const ShippingInfo());
+      expect(
+        container.read(vendorOrdersProvider).activeCount,
+        2,
+        reason: 'shipped still counts as active',
+      );
+      expect(container.read(vendorOrdersProvider).totalCount, 2);
+    });
+
+    test('rejecting a pending order drops pendingCount without touching activeCount',
+        () async {
+      final pending = _order(id: 'order_1');
+      final container = await _containerWith(
+        StubOrdersRepository(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right([pending]),
+          rejectOrderResult: (orderId, reason) => Right(
+            pending.copyWith(status: OrderStatus.cancelled, cancelReason: reason),
+          ),
+        ),
+      );
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+      expect(container.read(vendorOrdersProvider).pendingCount, 1);
+
+      await notifier.rejectOrder('order_1', 'Out of stock');
+
+      expect(container.read(vendorOrdersProvider).pendingCount, 0);
+      expect(container.read(vendorOrdersProvider).activeCount, 0);
+      expect(
+        container.read(vendorOrdersProvider).totalCount,
+        1,
+        reason: 'a cancelled order stays in the list, just uncounted in either bucket',
+      );
+    });
+
+    test('totalRevenue only ever reflects delivered orders already in the fetched page',
+        () async {
+      // VendorOrdersNotifier has no self-service "mark delivered" action —
+      // markDeliveredUseCase is only reachable from the consumer/courier
+      // notifiers (orders_provider.dart / courier_deliveries_provider.dart).
+      // So a vendor's confirm/reject/ship actions can never themselves move
+      // totalRevenue; it only reflects whatever the last fetch already
+      // contained as delivered. Locks in that reality rather than one this
+      // notifier can't actually produce.
+      final delivered = _order(id: 'order_1', status: OrderStatus.delivered);
+      final pending = _order(id: 'order_2');
+      final container = await _containerWith(
+        StubOrdersRepository(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right([delivered, pending]),
+          confirmOrderResult: (orderId, method) =>
+              Right(pending.copyWith(status: OrderStatus.confirmed)),
+        ),
+      );
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+
+      expect(container.read(vendorOrdersProvider).totalRevenue, 500);
+
+      await notifier.confirmOrder('order_2', DeliveryMethod.self);
+
+      expect(
+        container.read(vendorOrdersProvider).totalRevenue,
+        500,
+        reason: 'confirming a different order must not change delivered revenue',
+      );
+    });
+  });
 }
