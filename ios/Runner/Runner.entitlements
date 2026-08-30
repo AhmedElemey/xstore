@@ -4,5 +4,14 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<!-- Universal Links. Requires apple-app-site-association (with the real
+	     Apple Team ID) hosted at
+	     https://xstore.com/.well-known/apple-app-site-association — see
+	     docs_business/launch_todos/07_deep_linking.md. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:xstore.com</string>
+		<string>applinks:www.xstore.com</string>
+	</array>
 </dict>
 </plist>
