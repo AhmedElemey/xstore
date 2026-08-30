@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
@@ -21,6 +23,16 @@ Future<void> bootstrap(AppFlavor flavor) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.forFlavor(flavor),
   );
+  // Disabled while developing locally so debug-only crashes never pollute
+  // production dashboards; enabled for profile/release builds and CI.
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    !kDebugMode,
+  );
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   await FirebaseAppCheck.instance.activate(
     androidProvider:
         flavor.isDev ? AndroidProvider.debug : AndroidProvider.playIntegrity,
