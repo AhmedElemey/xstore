@@ -7,6 +7,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../product/domain/entities/review_write_params.dart';
+import '../../../product/presentation/providers/product_dependencies.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'delivery_method_sheet.dart';
@@ -300,7 +302,7 @@ class OrderCard extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _reviewSheet(context),
+                onPressed: () => _reviewSheet(context, ref),
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
@@ -531,9 +533,10 @@ class OrderCard extends ConsumerWidget {
     );
   }
 
-  void _reviewSheet(BuildContext context) {
+  Future<void> _reviewSheet(BuildContext context, WidgetRef ref) async {
     var stars = 5;
-    showModalBottomSheet<void>(
+    var reviewText = '';
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -568,6 +571,7 @@ class OrderCard extends ConsumerWidget {
                     ),
                   ),
                   TextField(
+                    onChanged: (v) => reviewText = v,
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: context.l10n.ordersReviewHint,
@@ -575,11 +579,33 @@ class OrderCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   FilledButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      // Matches product_reviews_screen.dart's own write-review
+                      // validation: an empty comment blocks submission rather
+                      // than sending a blank one.
+                      final comment = reviewText.trim();
+                      if (comment.isEmpty) return;
+                      final listingId = order.items.isEmpty
+                          ? null
+                          : order.items.first.listingId;
                       Navigator.pop(ctx);
-                      AppSnackbar.success(
-                        context,
-                        context.l10n.ordersReviewThanks,
+                      if (listingId == null) return;
+                      final result =
+                          await ref.read(createReviewUseCaseProvider).call(
+                        listingId: listingId,
+                        params: ReviewWriteParams(
+                          rating: stars.toDouble(),
+                          comment: comment,
+                        ),
+                      );
+                      if (!context.mounted) return;
+                      result.fold(
+                        (failure) =>
+                            AppSnackbar.error(context, failure.toString()),
+                        (_) => AppSnackbar.success(
+                          context,
+                          context.l10n.ordersReviewThanks,
+                        ),
                       );
                     },
                     child: Text(context.l10n.ordersSubmitReview),

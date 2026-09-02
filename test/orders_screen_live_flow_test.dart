@@ -664,10 +664,27 @@ void main() {
     'consumer leaves a review from a delivered order',
     skip: MockConfig.useMock,
     (tester) async {
+      // Captured and asserted on AFTER the pump loop — see the note on the
+      // "Mark as Processing" test above about expect() inside a Dio
+      // interceptor hanging the test instead of failing it.
+      RequestOptions? postRequest;
       final dio = _fakeDio({
         'GET ${ApiEndpoints.ordersMe}': (_) => [
-          _consumerOrderJson(id: '506', status: 'delivered'),
+          _consumerOrderJson(id: '506', status: 'delivered', listingId: '9003'),
         ],
+        // _reviewSheet posts through the same product-review endpoint the
+        // product detail screen uses (ProductRemoteDataSourceImpl.createReview),
+        // keyed off the order's (single) listing.
+        'POST ${ApiEndpoints.apiListingReviews('9003')}': (options) {
+          postRequest = options;
+          return {
+            'id': 'review_1',
+            'userId': 'consumer_1',
+            'userName': 'Test Buyer',
+            'rating': 5,
+            'comment': 'Great product, fast delivery!',
+          };
+        },
       });
 
       final container = await _pumpReady(tester, [
@@ -683,9 +700,7 @@ void main() {
       await _settle(tester);
 
       // The review sheet — a real user rating it and typing a comment
-      // before submitting. Reviews aren't wired to a backend endpoint yet
-      // (see order_card.dart's _reviewSheet), so this only exercises the
-      // sheet's own UI flow through to its local "thanks" confirmation.
+      // before submitting.
       expect(find.text('Leave a review'), findsOneWidget);
       await tester.enterText(
         find.byType(TextField),
@@ -694,6 +709,11 @@ void main() {
       await tester.tap(find.text('Submit Review'));
       await _settle(tester);
 
+      expect(postRequest, isNotNull);
+      expect(postRequest!.data, {
+        'rating': 5.0,
+        'comment': 'Great product, fast delivery!',
+      });
       expect(find.text('Thanks for your review!'), findsOneWidget);
 
       await _awaitAnalyticsReady(container);
