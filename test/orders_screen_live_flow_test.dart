@@ -202,8 +202,11 @@ Map<String, dynamic> _consumerOrderJson({String status = 'pending'}) => {
   'updatedAt': '2026-08-01T00:00:00.000Z',
 };
 
-Map<String, dynamic> _vendorOrderJson({String status = 'confirmed'}) => {
-  'id': '900',
+Map<String, dynamic> _vendorOrderJson({
+  String id = '900',
+  String status = 'confirmed',
+}) => {
+  'id': id,
   'consumerId': 'consumer_2',
   'consumerName': 'Nadia Mansouri',
   'consumerPhone': '01022223333',
@@ -327,6 +330,70 @@ void main() {
         find.text('Mark as Shipped'),
         findsOneWidget,
         reason: 'a processing order moves on to Mark as Shipped',
+      );
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'vendor confirms a pending order after choosing a delivery method',
+    skip: MockConfig.useMock,
+    (tester) async {
+      // Captured and asserted on AFTER the pump loop — see the note on the
+      // "Mark as Processing" test above about expect() inside a Dio
+      // interceptor hanging the test instead of failing it.
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(id: '901', status: 'pending')],
+          'totalCount': 1,
+          'pendingCount': 1,
+          'confirmedCount': 0,
+          'totalRevenue': 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          return _vendorOrderJson(id: '901', status: 'confirmed');
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('Incoming Orders'), findsOneWidget);
+      // The button label carries a leading checkmark glyph ("✓ Confirm
+      // Order") — match on the stable substring rather than the exact
+      // string, same as create_listing_test.dart's `textContaining` use.
+      expect(find.textContaining('Confirm Order'), findsOneWidget);
+
+      await tester.tap(find.textContaining('Confirm Order'));
+      await _settle(tester);
+
+      // Accepting a pending order first asks the vendor how it'll be
+      // delivered — a real user picking "self" here.
+      expect(find.text('How will this order be delivered?'), findsOneWidget);
+      await tester.tap(find.text('Deliver it myself'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [901],
+        'status': 'confirmed',
+      });
+
+      expect(
+        find.textContaining('Confirm Order'),
+        findsNothing,
+        reason: 'a confirmed order no longer offers Confirm Order',
+      );
+      expect(
+        find.text('Mark as Processing'),
+        findsOneWidget,
+        reason: 'a confirmed order moves on to Mark as Processing',
       );
 
       await _awaitAnalyticsReady(container);
