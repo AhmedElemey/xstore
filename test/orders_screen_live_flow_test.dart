@@ -25,6 +25,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/analytics/analytics_service.dart';
@@ -32,8 +33,10 @@ import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
+import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/cart/data/datasources/cart_remote_datasource.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
 import 'package:xstore/features/orders/presentation/screens/orders_screen.dart';
 
@@ -121,6 +124,42 @@ Widget _harness(List<Override> overrides) => ProviderScope(
   ),
 );
 
+/// Variant with a real `GoRouter` for the "View Details" flow, which
+/// navigates via `context.push(AppRoutes.orderPath(id))` — a plain
+/// `MaterialApp` (no router) has no `GoRouter` ancestor for that call to
+/// find. Mirrors checkout_order_flow_test.dart's `_checkoutHarness`: a
+/// stub destination route is enough to prove the navigation happened.
+Widget _routedHarness(List<Override> overrides) {
+  final router = GoRouter(
+    initialLocation: '/orders-under-test',
+    routes: [
+      GoRoute(
+        path: '/orders-under-test',
+        builder: (context, state) => const Scaffold(body: OrdersScreen()),
+      ),
+      GoRoute(
+        path: '${AppRoutes.orderDetail}/:id',
+        builder: (context, state) => Scaffold(
+          body: Text('order-detail-${state.pathParameters['id']}'),
+        ),
+      ),
+    ],
+  );
+  return ProviderScope(
+    overrides: overrides,
+    child: MaterialApp.router(
+      routerConfig: router,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
+  );
+}
+
 /// Pumps the screen, then explicitly (re-)fetches orders once `authProvider`
 /// has actually resolved. `ConsumerOrdersView`/`VendorOrdersView` fire their
 /// one-shot `fetchOrders()` from an `initState` postFrameCallback — a
@@ -138,9 +177,10 @@ Widget _harness(List<Override> overrides) => ProviderScope(
 /// against a scripted Dio.
 Future<ProviderContainer> _pumpReady(
   WidgetTester tester,
-  List<Override> overrides,
-) async {
-  await tester.pumpWidget(_harness(overrides));
+  List<Override> overrides, {
+  Widget Function(List<Override>) harness = _harness,
+}) async {
+  await tester.pumpWidget(harness(overrides));
   await tester.pump();
   final container = ProviderScope.containerOf(
     tester.element(find.byType(OrdersScreen)),
@@ -184,8 +224,12 @@ Future<void> _awaitAnalyticsReady(ProviderContainer container) async {
   await container.read(analyticsServiceProvider).ready;
 }
 
-Map<String, dynamic> _consumerOrderJson({String status = 'pending'}) => {
-  'id': '501',
+Map<String, dynamic> _consumerOrderJson({
+  String id = '501',
+  String status = 'pending',
+  String listingId = '9001',
+}) => {
+  'id': id,
   'consumerId': 'consumer_1',
   'consumerName': 'Test Buyer',
   'consumerPhone': '01012345678',
@@ -193,7 +237,7 @@ Map<String, dynamic> _consumerOrderJson({String status = 'pending'}) => {
   'vendorName': 'Ahmed',
   'vendorStoreName': 'Ahmed Store',
   'status': status,
-  'listingId': '9001',
+  'listingId': listingId,
   'listingName': 'Wireless Earbuds',
   'quantity': 1,
   'price': 50000,
@@ -233,6 +277,11 @@ void main() {
     // has no mock handler registered otherwise.
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
+    // Cart's in-memory _items list is a static field shared across every
+    // test in this isolate (see the 2026-09-02 skill lesson on
+    // cart_remote_datasource_test.dart) — the reorder test below adds to
+    // it, so start each test from a clean slate.
+    CartRemoteDataSourceImpl.clearSessionCache();
   });
 
   testWidgets(
@@ -520,6 +569,132 @@ void main() {
         findsOneWidget,
         reason: 'a shipped order moves on to View Tracking',
       );
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'consumer taps View Details on a processing order and navigates to order detail',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '504', status: 'processing'),
+        ],
+      });
+
+      final container = await _pumpReady(
+        tester,
+        [
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ],
+        harness: _routedHarness,
+      );
+      await _settle(tester);
+
+      expect(find.text('My Orders'), findsOneWidget);
+      expect(find.text('View Details'), findsOneWidget);
+
+      await tester.tap(find.text('View Details'));
+      await _settle(tester);
+
+      expect(
+        find.text('order-detail-504'),
+        findsOneWidget,
+        reason: 'View Details should push AppRoutes.orderPath(order.id)',
+      );
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'consumer reorders a delivered order, adding its listing back to the live cart',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '505', status: 'delivered'),
+        ],
+        // The reorder flow re-adds each order line by calling
+        // CartRepositoryImpl.addFromListing, which GETs the listing before
+        // adding it to the (in-memory, live-mode) cart.
+        'GET ${ApiEndpoints.apiListingDetail('9001')}': (_) => {
+          'id': '9001',
+          'title': 'Wireless Earbuds',
+          'price': 50000,
+          'imageUrl': 'https://example.test/earbuds.jpg',
+          'category': 'Electronics',
+          'condition': 'New',
+          'seller': {
+            'id': 'vendor_1',
+            'name': 'Ahmed',
+            'storeName': 'Ahmed Store',
+            'rating': 4.8,
+            'verified': true,
+          },
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('My Orders'), findsOneWidget);
+      expect(find.text('Reorder'), findsOneWidget);
+
+      await tester.tap(find.text('Reorder'));
+      await _settle(tester);
+
+      expect(
+        find.text('Added to cart!'),
+        findsOneWidget,
+        reason: 'a successful reorder confirms with the addedToCart snackbar',
+      );
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'consumer leaves a review from a delivered order',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '506', status: 'delivered'),
+        ],
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('My Orders'), findsOneWidget);
+      expect(find.text('Leave Review'), findsOneWidget);
+
+      await tester.tap(find.text('Leave Review'));
+      await _settle(tester);
+
+      // The review sheet — a real user rating it and typing a comment
+      // before submitting. Reviews aren't wired to a backend endpoint yet
+      // (see order_card.dart's _reviewSheet), so this only exercises the
+      // sheet's own UI flow through to its local "thanks" confirmation.
+      expect(find.text('Leave a review'), findsOneWidget);
+      await tester.enterText(
+        find.byType(TextField),
+        'Great product, fast delivery!',
+      );
+      await tester.tap(find.text('Submit Review'));
+      await _settle(tester);
+
+      expect(find.text('Thanks for your review!'), findsOneWidget);
 
       await _awaitAnalyticsReady(container);
     },
