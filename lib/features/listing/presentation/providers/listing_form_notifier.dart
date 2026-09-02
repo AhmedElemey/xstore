@@ -17,7 +17,6 @@ import '../../../commission/presentation/providers/vendor_commission_wallet_prov
 import '../../data/models/listing_model.dart'
     show listingConditionFromToken, listingConditionLabel;
 import '../../domain/entities/listing_entity.dart';
-import '../data/listing_categories_data.dart';
 import 'listing_dependencies.dart';
 import 'listing_form_state.dart';
 import 'listing_form_state_extensions.dart';
@@ -288,15 +287,24 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         );
       case 'category':
       case 'categoryId':
+        e.remove('subcategory');
+        e.remove('subcategoryId');
+        e.remove('brand');
         state = state.copyWith(
           categoryId: value as String,
           subcategoryId: '',
           attributes: const [],
+          brand: '',
           errors: e,
         );
       case 'subcategory':
       case 'subcategoryId':
-        state = state.copyWith(subcategoryId: value as String, errors: e);
+        e.remove('brand');
+        state = state.copyWith(
+          subcategoryId: value as String,
+          brand: '',
+          errors: e,
+        );
       case 'condition':
         state = state.copyWith(condition: value as String, errors: e);
       case 'brand':
@@ -574,17 +582,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     });
   }
 
-  List<String> brandSuggestionsFor(String query) {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) {
-      return ListingCategoriesData.brandSuggestions.take(8).toList();
-    }
-    return ListingCategoriesData.brandSuggestions
-        .where((b) => b.toLowerCase().contains(q))
-        .take(8)
-        .toList();
-  }
-
   void clearSubmitError() {
     state = state.copyWith(
       errors: _clearKey(state.errors, 'submit'),
@@ -606,14 +603,21 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   }
 
   void reset() {
-    state = const ListingFormState();
+    if (_disposed) return;
+    // Bump draftRevision so AddListingScreen's listen re-applies empty
+    // text to its controllers. A bare `const ListingFormState()` keeps
+    // revision 0, which looks like "no change" when the user typed into
+    // the fields without ever loading a draft (the usual publish path).
+    state = ListingFormState(draftRevision: state.draftRevision + 1);
   }
 
   Future<void> _completePublishSuccess() async {
+    if (_disposed) return;
+    // Reset first so the still-mounted shell tab clears immediately —
+    // don't wait on SharedPreferences or the controllers stay filled.
+    reset();
+    ref.invalidate(myListingsNotifierProvider);
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.remove(_draftKey);
-    if (_disposed) return;
-    state = const ListingFormState();
-    ref.invalidate(myListingsNotifierProvider);
   }
 }

@@ -44,6 +44,8 @@ class LocationService {
       ),
     );
 
+    // Ignore Cupertino / non-Egypt fixes for API headers (backend 400s
+    // "Coordinates must be within Egypt bounds"). Cairo stays in the cache.
     AppLocationCache.set(position.latitude, position.longitude);
 
     try {
@@ -74,9 +76,8 @@ class LocationService {
 
   static String formatCoordinate(double coord) => coord.toStringAsFixed(6);
 
-  static bool isInEgypt(double lat, double lng) {
-    return lat >= 22.0 && lat <= 31.7 && lng >= 25.0 && lng <= 37.0;
-  }
+  static bool isInEgypt(double lat, double lng) =>
+      AppLocationCache.isInEgypt(lat, lng);
 
   static bool isValidLatitude(String value) {
     final d = double.tryParse(value);

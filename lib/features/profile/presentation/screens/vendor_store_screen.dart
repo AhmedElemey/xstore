@@ -19,6 +19,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
+import '../../../listing/presentation/providers/listing_dependencies.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../providers/profile_dependencies.dart';
@@ -45,6 +46,7 @@ class VendorStoreScreen extends ConsumerStatefulWidget {
 class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   ProfileEntity? _profile;
   final List<ListingEntity> _listings = [];
+  List<ListingEntity>? _ownListingsCache;
   String? _error;
   var _loading = true;
   var _loadingMore = false;
@@ -55,7 +57,20 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
 
   static const _pageSize = 10;
 
+  bool _isOwnStore(UserEntity? authUser) {
+    return authUser != null &&
+        authUser.hasStore &&
+        authUser.id.isNotEmpty &&
+        authUser.id == widget.sellerId;
+  }
+
   Future<void> _fetchPage(int page, {bool replace = false}) async {
+    final authUser = ref.read(authProvider).valueOrNull;
+    if (_isOwnStore(authUser)) {
+      await _fetchOwnListingsPage(page, replace: replace);
+      return;
+    }
+
     final repo = ref.read(profileRepositoryProvider);
     final res = await repo.fetchVendorStoreListings(
       sellerId: widget.sellerId,
@@ -63,36 +78,82 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
       page: page,
       pageSize: _pageSize,
     );
+    if (!mounted) return;
     res.fold(
-      (f) {
-        if (mounted) {
-          setState(() {
-            _error = f.toString();
-            _loadingMore = false;
-            _loading = false;
-            // Don't render a header-only store when the listings call
-            // failed — the data isn't available.
-            if (replace) _profile = null;
-          });
-        }
+      (_) {
+        setState(() {
+          _loadingMore = false;
+          _loading = false;
+          if (replace) {
+            _listings.clear();
+            _hasMore = false;
+          }
+        });
       },
       (items) {
-        if (mounted) {
-          setState(() {
-            if (replace) {
-              _listings
-                ..clear()
-                ..addAll(items);
-            } else {
-              _listings.addAll(items);
-            }
-            _hasMore = items.length == _pageSize;
-            _loadingMore = false;
-            _loading = false;
-          });
-        }
+        setState(() {
+          if (replace) {
+            _listings
+              ..clear()
+              ..addAll(items);
+          } else {
+            _listings.addAll(items);
+          }
+          _hasMore = items.length == _pageSize;
+          _loadingMore = false;
+          _loading = false;
+        });
       },
     );
+  }
+
+  /// Own storefront: `GET /users/{id}/listings` is not on the live API.
+  /// `GET /api/listings/my-listings` is the confirmed vendor list.
+  Future<void> _fetchOwnListingsPage(int page, {required bool replace}) async {
+    if (_ownListingsCache == null) {
+      final result = await ref.read(listingRepositoryProvider).getMyListings();
+      if (!mounted) return;
+      final failed = result.fold(
+        (_) {
+          setState(() {
+            _loading = false;
+            _loadingMore = false;
+            _hasMore = false;
+            if (replace) _listings.clear();
+          });
+          return true;
+        },
+        (items) {
+          _ownListingsCache = items;
+          return false;
+        },
+      );
+      if (failed) return;
+    }
+
+    var rows = _ownListingsCache ?? const <ListingEntity>[];
+    if (_category != 'all') {
+      rows = [
+        for (final e in rows)
+          if (e.categoryLabel == _category) e,
+      ];
+    }
+    final start = page * _pageSize;
+    final slice = start >= rows.length
+        ? const <ListingEntity>[]
+        : rows.skip(start).take(_pageSize).toList();
+    setState(() {
+      if (replace) {
+        _listings
+          ..clear()
+          ..addAll(slice);
+      } else {
+        _listings.addAll(slice);
+      }
+      _hasMore = start + slice.length < rows.length;
+      _loading = false;
+      _loadingMore = false;
+    });
   }
 
   Future<void> _bootstrap() async {
@@ -101,14 +162,15 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
       _error = null;
     });
     final repo = ref.read(profileRepositoryProvider);
-    final authUser = ref.read(authProvider).valueOrNull;
-    final isOwnStore = authUser != null &&
-        authUser.id.isNotEmpty &&
-        authUser.id == widget.sellerId &&
-        authUser.hasStore;
+    var authUser = ref.read(authProvider).valueOrNull;
+    if (authUser == null) {
+      authUser = await ref.read(authProvider.future);
+      if (!mounted) return;
+    }
+    final isOwnStore = _isOwnStore(authUser);
 
     final profRes = isOwnStore
-        ? await _loadOwnStoreProfile(repo, authUser)
+        ? await _loadOwnStoreProfile(repo, authUser!)
         : await repo.getVendorStoreProfile(widget.sellerId);
     final failed = profRes.fold(
       (f) {
@@ -150,10 +212,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.profileHeaderGradientEnd,
-          ],
+          colors: [AppColors.primary, AppColors.profileHeaderGradientEnd],
         ),
       ),
     );
@@ -168,6 +227,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   Future<void> _refresh() async {
     setState(() {
       _listings.clear();
+      _ownListingsCache = null;
       _page = 0;
       _hasMore = true;
     });
@@ -186,7 +246,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   }
 
   bool _handleScroll(ScrollNotification n) {
-    if (_loadingMore || !_hasMore || n.metrics.axis != Axis.vertical) return false;
+    if (_loadingMore || !_hasMore || n.metrics.axis != Axis.vertical) {
+      return false;
+    }
     if (n.metrics.pixels >= n.metrics.maxScrollExtent - 280) {
       setState(() => _loadingMore = true);
       final nextPage = _page + 1;
@@ -198,19 +260,24 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
 
   Future<void> _openStoreWhatsApp(String? phone, String storeName) async {
     final text = context.l10n.whatsappStorePrefill(storeName);
-    final opened = await launchWhatsApp(phone: phone ?? '', prefilledText: text);
+    final opened = await launchWhatsApp(
+      phone: phone ?? '',
+      prefilledText: text,
+    );
     if (!mounted) return;
     if (!opened) {
       AppSnackbar.info(context, context.l10n.whatsappSellerUnavailable);
       return;
     }
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.whatsappSellerTap,
-      properties: {
-        AnalyticsProps.source: 'store',
-        AnalyticsProps.sellerId: widget.sellerId,
-      },
-    );
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          AnalyticsEvents.whatsappSellerTap,
+          properties: {
+            AnalyticsProps.source: 'store',
+            AnalyticsProps.sellerId: widget.sellerId,
+          },
+        );
   }
 
   Set<String> get _categories {
@@ -224,7 +291,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading && _profile == null && _error == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
     if (_error != null && _profile == null) {
       return Scaffold(
@@ -245,10 +314,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final banner = storePhoto ?? MockImages.banner(widget.sellerId.hashCode);
     final desc = u.storeDescription ?? '';
     final authUser = ref.watch(authProvider).valueOrNull;
-    final isOwnStore = authUser != null &&
-        authUser.id.isNotEmpty &&
-        authUser.id == widget.sellerId &&
-        authUser.hasStore;
+    final isOwnStore = _isOwnStore(authUser);
     // TODO(phase-2): Store/active hours deferred to next phase.
     // final storeHoursState =
     //     isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
@@ -311,7 +377,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                   : null,
                               child: storePhoto == null
                                   ? Text(
-                                      name.isNotEmpty ? name[0].toUpperCase() : '?',
+                                      name.isNotEmpty
+                                          ? name[0].toUpperCase()
+                                          : '?',
                                       style: AppTypography.titleLarge.copyWith(
                                         color: AppColors.white,
                                       ),
@@ -355,7 +423,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                     '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
                                     '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
                                     style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.white.withValues(alpha: 0.9),
+                                      color: AppColors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
                                     ),
                                   ),
                                   const Gap(AppSpacing.sm),
@@ -384,7 +454,8 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                       ],
                                       IconButton.filled(
                                         style: IconButton.styleFrom(
-                                          backgroundColor: AppColors.white.withValues(alpha: 0.2),
+                                          backgroundColor: AppColors.white
+                                              .withValues(alpha: 0.2),
                                           foregroundColor: AppColors.white,
                                         ),
                                         onPressed: () => Share.share(name),
@@ -411,21 +482,33 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
               if (desc.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(context.l10n.storeDescriptionHeading, style: AppTypography.titleMedium),
+                        Text(
+                          context.l10n.storeDescriptionHeading,
+                          style: AppTypography.titleMedium,
+                        ),
                         const Gap(AppSpacing.sm),
                         Text(
                           desc,
                           maxLines: _descExpanded ? null : 3,
-                          overflow: _descExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                          overflow: _descExpanded
+                              ? TextOverflow.visible
+                              : TextOverflow.ellipsis,
                           style: AppTypography.bodyMedium,
                         ),
                         TextButton(
-                          onPressed: () => setState(() => _descExpanded = !_descExpanded),
-                          child: Text(_descExpanded ? context.l10n.readLess : context.l10n.readMore),
+                          onPressed: () =>
+                              setState(() => _descExpanded = !_descExpanded),
+                          child: Text(
+                            _descExpanded
+                                ? context.l10n.readLess
+                                : context.l10n.readMore,
+                          ),
                         ),
                       ],
                     ),
@@ -451,7 +534,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                   height: 48,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
                     children: [
                       ChoiceChip(
                         label: Text(context.l10n.allCategoriesChip),
@@ -474,7 +559,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
               ),
               const SliverToBoxAdapter(child: Gap(AppSpacing.md)),
               if (_listings.isEmpty && !_loading)
-                 SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(AppSpacing.x3l),
                     child: Center(child: Text(context.l10n.emptyInbox)),
@@ -482,28 +567,31 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: AppSpacing.md,
-                      crossAxisSpacing: AppSpacing.md,
-                      childAspectRatio: 0.58,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) {
-                        final item = _listings[i];
-                        final img = item.imageUrls.isNotEmpty ? item.imageUrls.first : null;
-                        return ProductCard(
-                          title: item.title,
-                          price: item.price,
-                          imageUrl: img,
-                          listingId: item.id,
-                          onTap: () => context.push('${AppRoutes.product}/${item.id}'),
-                        );
-                      },
-                      childCount: _listings.length,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: AppSpacing.md,
+                          crossAxisSpacing: AppSpacing.md,
+                          childAspectRatio: 0.58,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, i) {
+                      final item = _listings[i];
+                      final img = item.imageUrls.isNotEmpty
+                          ? item.imageUrls.first
+                          : null;
+                      return ProductCard(
+                        title: item.title,
+                        price: item.price,
+                        imageUrl: img,
+                        listingId: item.id,
+                        onTap: () =>
+                            context.push('${AppRoutes.product}/${item.id}'),
+                      );
+                    }, childCount: _listings.length),
                   ),
                 ),
               SliverToBoxAdapter(
@@ -533,20 +621,14 @@ class _VendorStoreStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final u = profile.user;
     final cells = [
-      (
-        '${profile.storeActiveListings}',
-        context.l10n.vendorStoreStatListings,
-      ),
+      ('${profile.storeActiveListings}', context.l10n.vendorStoreStatListings),
       (
         u.totalSales != null && u.totalSales! > 0
             ? '${u.totalSales}'
             : context.l10n.newSellerEmDash,
         context.l10n.vendorStoreStatSales,
       ),
-      (
-        '${profile.responseRatePercent}%',
-        context.l10n.vendorStoreStatResponse,
-      ),
+      ('${profile.responseRatePercent}%', context.l10n.vendorStoreStatResponse),
       (
         u.rating != null && u.rating! > 0
             ? u.rating!.toStringAsFixed(1)
@@ -556,7 +638,10 @@ class _VendorStoreStatsCard extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.lg,
+        horizontal: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.lg),

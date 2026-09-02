@@ -67,20 +67,20 @@ class OrderItemTile extends StatelessWidget {
                 Wrap(
                   spacing: AppSpacing.sm,
                   children: [
-                    Chip(
-                      label: Text(item.category),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor:
-                          context.backgroundColor,
-                      side: BorderSide.none,
-                    ),
-                    Chip(
-                      label: Text(item.condition),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor:
-                          context.backgroundColor,
-                      side: BorderSide.none,
-                    ),
+                    if (item.category.trim().isNotEmpty)
+                      Chip(
+                        label: Text(item.category),
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: context.backgroundColor,
+                        side: BorderSide.none,
+                      ),
+                    if (item.condition.trim().isNotEmpty)
+                      Chip(
+                        label: Text(item.condition),
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: context.backgroundColor,
+                        side: BorderSide.none,
+                      ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xs),

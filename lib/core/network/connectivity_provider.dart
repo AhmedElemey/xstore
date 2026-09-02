@@ -45,6 +45,12 @@ class IsOnlineNotifier extends StateNotifier<bool> {
     state = results.any((r) => r != ConnectivityResult.none);
   }
 
+  @visibleForTesting
+  void debugSetOnline(bool online) {
+    if (!mounted) return;
+    state = online;
+  }
+
   void _disablePlugin() {
     if (!_pluginAvailable) return;
     _pluginAvailable = false;

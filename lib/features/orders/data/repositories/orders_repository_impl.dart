@@ -87,10 +87,35 @@ class OrdersRepositoryImpl implements OrdersRepository {
         if (row == null) return Left(Failure.notFound('Order'));
         return Right(row.toEntity());
       }
-      final row = await _remote.getOrderById(orderId);
-      if (row == null) return Left(Failure.notFound('Order'));
+      if (consumerId == null || consumerId.isEmpty) {
+        return Left(Failure.unauthorized());
+      }
+      // GET /orders/me/{id} is consumer-scoped but its payload was never
+      // live-probed — it may 404, wrap `{data:…}`, or omit consumerId.
+      // The orders list already rendered this row; fall back to it.
+      OrderModel? row;
+      Object? byIdError;
+      try {
+        row = await _remote.getOrderById(orderId);
+      } catch (e) {
+        byIdError = e;
+      }
+      if (row == null) {
+        final rows = await _remote.getConsumerOrders(
+          consumerId: consumerId,
+          page: 1,
+          pageSize: 100,
+        );
+        row = rows.where((e) => e.id == orderId).firstOrNull;
+      }
+      if (row == null) {
+        if (byIdError != null) return Left(Failure.server(byIdError.toString()));
+        return Left(Failure.notFound('Order'));
+      }
       final e = row.toEntity();
-      if (e.consumerId != consumerId) return Left(Failure.unauthorized());
+      if (e.consumerId.isNotEmpty && e.consumerId != consumerId) {
+        return Left(Failure.unauthorized());
+      }
       return Right(e);
     } catch (e) {
       return Left(Failure.server(e.toString()));

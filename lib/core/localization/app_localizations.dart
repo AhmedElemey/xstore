@@ -1013,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @listingBrandHint.
   ///
   /// In en, this message translates to:
-  /// **'Start typing…'**
+  /// **'Brand name'**
   String get listingBrandHint;
 
   /// No description provided for @listingSectionStockShipping.

@@ -109,5 +109,28 @@ void main() {
 
       expect(fee, 3.5);
     });
+
+    test('falls back to the starter fee when the backend echoes 0', () async {
+      final container = _containerFor(
+        mockVendorUser,
+        repo: StubOrdersRepository(
+          getVendorStatsResult: ({required vendorId}) => const Right(
+            OrderStatsEntity(
+              pendingCount: 0,
+              activeCount: 0,
+              monthCount: 0,
+              totalCount: 0,
+              totalRevenue: 0,
+              commissionValueOnOrder: 0,
+            ),
+          ),
+        ),
+      );
+      await container.read(vendorCommissionSnapshotProvider.future);
+
+      final fee = container.read(commissionFeeEgpForCategoryProvider(null));
+
+      expect(fee, kStarterCommissionFeeEgp);
+    });
   });
 }

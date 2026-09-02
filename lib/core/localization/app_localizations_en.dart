@@ -475,7 +475,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingBrandOptional => 'Brand (optional)';
 
   @override
-  String get listingBrandHint => 'Start typing…';
+  String get listingBrandHint => 'Brand name';
 
   @override
   String get listingSectionStockShipping => 'Stock & Shipping';

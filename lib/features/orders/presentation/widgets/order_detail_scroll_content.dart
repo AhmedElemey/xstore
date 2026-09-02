@@ -261,14 +261,22 @@ class _AddressCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(address.street, style: AppTypography.bodyMedium),
-          Text(
-            '${address.city}, ${address.wilaya}${address.postalCode != null ? ' ${address.postalCode}' : ''}',
-            style: AppTypography.bodyMedium,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text('📞 ${address.phone}', style: AppTypography.bodyMedium),
+          if (address.street.trim().isNotEmpty)
+            Text(address.street, style: AppTypography.bodyMedium),
+          if (address.city.trim().isNotEmpty ||
+              address.wilaya.trim().isNotEmpty)
+            Text(
+              [
+                if (address.city.trim().isNotEmpty) address.city,
+                if (address.wilaya.trim().isNotEmpty) address.wilaya,
+                if (address.postalCode != null) address.postalCode,
+              ].join(', '),
+              style: AppTypography.bodyMedium,
+            ),
+          if (address.phone.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text('📞 ${address.phone}', style: AppTypography.bodyMedium),
+          ],
         ],
       ),
     );
@@ -304,7 +312,9 @@ class _SellerSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.vendorStoreName,
+                        order.vendorStoreName.isNotEmpty
+                            ? order.vendorStoreName
+                            : order.vendorName,
                         style: AppTypography.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -323,8 +333,11 @@ class _SellerSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             XstoreButton(
               label: context.l10n.visitStore,
-              onPressed: () =>
-                  context.push('${AppRoutes.sellerProfile}/${order.vendorId}'),
+              onPressed: order.vendorId.trim().isEmpty
+                  ? null
+                  : () => context.push(
+                      '${AppRoutes.sellerProfile}/${order.vendorId}',
+                    ),
             ),
           ],
         ),
@@ -346,7 +359,10 @@ class _BuyerSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.l10n.ordersBuyerInfo, style: AppTypography.titleMedium),
+            Text(
+              context.l10n.ordersBuyerInfo,
+              style: AppTypography.titleMedium,
+            ),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -404,8 +420,9 @@ class _BuyerSection extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(
                 onPressed: () async {
-                  final opened =
-                      await launchWhatsApp(phone: order.consumerPhone);
+                  final opened = await launchWhatsApp(
+                    phone: order.consumerPhone,
+                  );
                   if (!opened && context.mounted) {
                     AppSnackbar.info(
                       context,

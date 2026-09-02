@@ -11,10 +11,12 @@ class RemoveFromWishlistUseCase {
   Future<Either<Failure, Unit>> call({
     required String consumerId,
     required String listingId,
+    String? wishlistItemId,
   }) {
     return _repository.removeFromWishlist(
       consumerId: consumerId,
       listingId: listingId,
+      wishlistItemId: wishlistItemId,
     );
   }
 }

@@ -1,22 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:xstore/core/error/exceptions.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/profile/data/datasources/profile_remote_datasource.dart';
 
-/// Resolves (or rejects) every request with a scripted value instead of
-/// hitting the network — same approach as the wishlist datasource tests.
 class _ScriptedInterceptor extends Interceptor {
   _ScriptedInterceptor(this._respond);
 
   final Object? Function(RequestOptions options) _respond;
-  RequestOptions? captured;
+  final captured = <RequestOptions>[];
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    captured = options;
+    captured.add(options);
     final result = _respond(options);
     if (result is DioException) {
       handler.reject(result);
@@ -28,12 +25,6 @@ class _ScriptedInterceptor extends Interceptor {
   }
 }
 
-DioException _notFound(RequestOptions options) => DioException(
-      requestOptions: options,
-      type: DioExceptionType.badResponse,
-      response: Response(requestOptions: options, statusCode: 404),
-    );
-
 DioException _badResponse(RequestOptions options, int statusCode) =>
     DioException(
       requestOptions: options,
@@ -41,217 +32,203 @@ DioException _badResponse(RequestOptions options, int statusCode) =>
       response: Response(requestOptions: options, statusCode: statusCode),
     );
 
-Map<String, dynamic> _populatedStoreJson() => {
-      'user': {
-        'id': 42,
-        'fullName': 'Ahmed Vendor',
-        'email': 'vendor@test.com',
-        'phoneNumber': '01012345678',
-        'roleName': 'Vendor',
-        'storeName': 'Tech Hub',
-        'avatarUrl': 'https://example.test/avatar.jpg',
-      },
-      'storeViewCount': 2400,
-      'storeSaveCount': 89,
-      'storeActiveListings': 18,
-      'responseRatePercent': 91,
-    };
-
 Map<String, dynamic> _listingJson({
   int id = 7,
+  int userId = 42,
   String title = 'Desk Lamp',
+  String storeName = 'Tech Hub',
+  String userName = 'Ahmed Vendor',
   num price = 250,
-}) =>
-    {
-      'id': id,
-      'titleEn': title,
-      'title': title,
-      'description': 'A lamp',
-      'price': price,
-      'status': 2,
-      'userId': 42,
-      'imageUrls': ['https://example.test/lamp.jpg'],
-      'category': 'Home',
-    };
+  String category = 'Home',
+}) => {
+  'id': id,
+  'titleEn': title,
+  'title': title,
+  'description': 'A lamp',
+  'price': price,
+  'status': 2,
+  'userId': userId,
+  'userName': userName,
+  'userAvatar': 'https://example.test/avatar.jpg',
+  'storeName': storeName,
+  'imageUrls': ['https://example.test/lamp.jpg'],
+  'category': category,
+  'location': 'Cairo',
+};
 
 void main() {
-  late Dio dio;
   late ProfileRemoteDataSourceImpl datasource;
+  late _ScriptedInterceptor interceptor;
 
-  Dio buildDio(Object? Function(RequestOptions options) respond) {
+  ProfileRemoteDataSourceImpl datasourceFor(
+    Object? Function(RequestOptions options) respond,
+  ) {
     final d = Dio(BaseOptions(baseUrl: 'https://example.test'));
-    d.interceptors.add(_ScriptedInterceptor(respond));
-    return d;
+    interceptor = _ScriptedInterceptor(respond);
+    d.interceptors.add(interceptor);
+    return ProfileRemoteDataSourceImpl(d);
   }
+
+  final skipMock = MockConfig.useMock
+      ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
+      : false;
 
   group('getVendorStoreProfile', () {
     test(
-      'GETs /users/{id}/store and parses a populated store head',
-      skip: MockConfig.useMock
-          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
-          : false,
+      'builds the store head from GET /api/listings filtered by userId',
       () async {
-        RequestOptions? captured;
-        dio = buildDio((options) {
-          captured = options;
-          return _populatedStoreJson();
-        });
-        datasource = ProfileRemoteDataSourceImpl(dio);
+        datasource = datasourceFor(
+          (_) => {
+            'items': [
+              _listingJson(userId: 99, storeName: 'Other'),
+              _listingJson(),
+            ],
+          },
+        );
 
-        final result = await datasource.getVendorStoreProfile('v1');
+        final result = await datasource.getVendorStoreProfile('42');
 
-        expect(captured!.method, 'GET');
-        expect(captured!.path, '${ApiEndpoints.users}/v1/store');
+        expect(interceptor.captured.single.path, ApiEndpoints.apiListings);
         expect(result.user.id, '42');
-        expect(result.user.name, 'Ahmed Vendor');
         expect(result.user.storeName, 'Tech Hub');
+        expect(result.user.name, 'Tech Hub');
+        expect(result.user.avatarUrl, 'https://example.test/avatar.jpg');
         expect(result.user.role, UserRole.vendor);
-        expect(result.storeViewCount, 2400);
-        expect(result.storeSaveCount, 89);
-        expect(result.storeActiveListings, 18);
-        expect(result.responseRatePercent, 91);
+        expect(result.storeActiveListings, 1);
       },
+      skip: skipMock,
     );
 
     test(
-      'GET /users/{id}/store 404 throws instead of an empty fallback profile',
-      skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
+      'falls back to GET /api/home when nearby listings miss the seller',
       () async {
-        // Last-round QA (2026-08-29): this legacy route is not deployed.
-        // A 404 is a real miss — callers must surface ErrorStateWidget, not
-        // a blank shell built from a missing resource.
-        dio = buildDio(_notFound);
-        datasource = ProfileRemoteDataSourceImpl(dio);
+        datasource = datasourceFor((options) {
+          if (options.path == ApiEndpoints.home) {
+            return {
+              'newArrivals': [_listingJson()],
+              'recommendedForYou': <dynamic>[],
+              'hotDeals': <dynamic>[],
+            };
+          }
+          return {'items': <dynamic>[]};
+        });
 
-        expect(
-          () => datasource.getVendorStoreProfile('v1'),
-          throwsA(isA<ServerException>()),
-        );
+        final result = await datasource.getVendorStoreProfile('42');
+
+        expect(interceptor.captured.map((e) => e.path), [
+          ApiEndpoints.apiListings,
+          ApiEndpoints.home,
+        ]);
+        expect(result.user.storeName, 'Tech Hub');
+        expect(result.storeActiveListings, 1);
       },
+      skip: skipMock,
     );
 
     test(
-      'throws ServerException on an empty response body',
-      skip: MockConfig.useMock
-          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
-          : false,
+      'still returns a store head when the seller has no public listings',
       () async {
-        dio = buildDio((_) => null);
-        datasource = ProfileRemoteDataSourceImpl(dio);
+        datasource = datasourceFor((options) {
+          if (options.path == ApiEndpoints.home) {
+            return {
+              'newArrivals': <dynamic>[],
+              'recommendedForYou': <dynamic>[],
+              'hotDeals': <dynamic>[],
+            };
+          }
+          return {'items': <dynamic>[]};
+        });
 
-        expect(
-          () => datasource.getVendorStoreProfile('v1'),
-          throwsA(isA<ServerException>()),
-        );
+        final result = await datasource.getVendorStoreProfile('42');
+
+        expect(result.user.id, '42');
+        expect(result.user.name, '42');
+        expect(result.storeActiveListings, 0);
       },
+      skip: skipMock,
     );
   });
 
   group('fetchVendorStoreListings', () {
     test(
-      'GETs /users/{id}/listings with page/pageSize/category and parses items',
-      skip: MockConfig.useMock
-          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
-          : false,
+      'returns that seller\'s catalog rows and pages them locally',
       () async {
-        RequestOptions? captured;
-        dio = buildDio((options) {
-          captured = options;
-          return {
+        datasource = datasourceFor(
+          (_) => {
             'items': [
               _listingJson(),
               _listingJson(id: 8, title: 'Chair', price: 400),
+              _listingJson(userId: 99, id: 9, title: 'Other vendor'),
             ],
-          };
-        });
-        datasource = ProfileRemoteDataSourceImpl(dio);
+          },
+        );
 
-        final result = await datasource.fetchVendorStoreListings(
-          sellerId: 'v1',
-          categoryLabel: 'Home',
+        final page0 = await datasource.fetchVendorStoreListings(
+          sellerId: '42',
           page: 0,
-          pageSize: 10,
+          pageSize: 1,
         );
-
-        expect(captured!.method, 'GET');
-        expect(captured!.path, '${ApiEndpoints.users}/v1/listings');
-        expect(captured!.queryParameters, {
-          'category': 'Home',
-          'page': 0,
-          'pageSize': 10,
-        });
-        expect(result, hasLength(2));
-        expect(result.first.id, '7');
-        expect(result.first.title, 'Desk Lamp');
-        expect(result.first.price, 250);
-        expect(result.first.vendorId, '42');
-        expect(result.first.imageUrls, ['https://example.test/lamp.jpg']);
-        expect(result.last.title, 'Chair');
-      },
-    );
-
-    test(
-      'omits the category query param when no filter is passed',
-      skip: MockConfig.useMock
-          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
-          : false,
-      () async {
-        RequestOptions? captured;
-        dio = buildDio((options) {
-          captured = options;
-          return {'items': <dynamic>[]};
-        });
-        datasource = ProfileRemoteDataSourceImpl(dio);
-
-        final result = await datasource.fetchVendorStoreListings(
-          sellerId: 'v1',
+        final page1 = await datasource.fetchVendorStoreListings(
+          sellerId: '42',
           page: 1,
-          pageSize: 20,
+          pageSize: 1,
         );
 
-        expect(captured!.queryParameters, {'page': 1, 'pageSize': 20});
-        expect(result, isEmpty);
-      },
-    );
-
-    test(
-      'GET /users/{id}/listings 404 throws instead of an empty list',
-      skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
-      () async {
-        // Same honesty rule as getVendorStoreProfile: a missing route is
-        // not "this seller has zero listings."
-        dio = buildDio(_notFound);
-        datasource = ProfileRemoteDataSourceImpl(dio);
-
+        expect(page0, hasLength(1));
+        expect(page0.first.title, 'Desk Lamp');
+        expect(page0.first.vendorId, '42');
+        expect(page1.single.title, 'Chair');
         expect(
-          () => datasource.fetchVendorStoreListings(
-            sellerId: 'v1',
-            page: 0,
-            pageSize: 10,
-          ),
-          throwsA(isA<ServerException>()),
+          interceptor.captured.where((e) => e.path == ApiEndpoints.apiListings),
+          hasLength(1),
         );
       },
+      skip: skipMock,
     );
 
-    test(
-      'maps a 500 response to a ServerException',
-      skip: MockConfig.useMock
-          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
-          : false,
-      () async {
-        dio = buildDio((options) => _badResponse(options, 500));
-        datasource = ProfileRemoteDataSourceImpl(dio);
+    test('filters by categoryLabel after the catalog fetch', () async {
+      datasource = datasourceFor(
+        (_) => {
+          'items': [
+            _listingJson(),
+            _listingJson(id: 8, title: 'Phone', category: 'Electronics'),
+          ],
+        },
+      );
 
-        expect(
-          () => datasource.fetchVendorStoreListings(
-            sellerId: 'v1',
-            page: 0,
-            pageSize: 10,
-          ),
-          throwsA(isA<ServerException>()),
-        );
-      },
-    );
+      final result = await datasource.fetchVendorStoreListings(
+        sellerId: '42',
+        categoryLabel: 'Home',
+        page: 0,
+        pageSize: 10,
+      );
+
+      expect(result, hasLength(1));
+      expect(result.single.title, 'Desk Lamp');
+    }, skip: skipMock);
+
+    test('falls back to GET /api/home when nearby listings 500', () async {
+      datasource = datasourceFor((options) {
+        if (options.path == ApiEndpoints.home) {
+          return {
+            'newArrivals': [_listingJson()],
+            'recommendedForYou': <dynamic>[],
+            'hotDeals': <dynamic>[],
+          };
+        }
+        return _badResponse(options, 500);
+      });
+
+      final result = await datasource.getVendorStoreProfile('42');
+      final listings = await datasource.fetchVendorStoreListings(
+        sellerId: '42',
+        page: 0,
+        pageSize: 10,
+      );
+
+      expect(result.user.storeName, 'Tech Hub');
+      expect(listings, hasLength(1));
+      expect(listings.single.title, 'Desk Lamp');
+    }, skip: skipMock);
   });
 }

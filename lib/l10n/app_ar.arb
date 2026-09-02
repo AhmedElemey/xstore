@@ -166,7 +166,7 @@
   "listingSelectSubcategory": "اختر الفئة الفرعية",
   "listingConditionFieldLabel": "الحالة *",
   "listingBrandOptional": "الماركة (اختياري)",
-  "listingBrandHint": "ابدأ الكتابة…",
+  "listingBrandHint": "اسم الماركة",
   "listingSectionStockShipping": "المخزون والشحن",
   "listingFormLocationLabel": "الموقع *",
   "listingFormLocationHint": "المدينة، المنطقة",

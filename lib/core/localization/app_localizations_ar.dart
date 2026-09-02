@@ -475,7 +475,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingBrandOptional => 'الماركة (اختياري)';
 
   @override
-  String get listingBrandHint => 'ابدأ الكتابة…';
+  String get listingBrandHint => 'اسم الماركة';
 
   @override
   String get listingSectionStockShipping => 'المخزون والشحن';

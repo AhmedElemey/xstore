@@ -166,7 +166,7 @@
   "listingSelectSubcategory": "Select subcategory",
   "listingConditionFieldLabel": "Condition *",
   "listingBrandOptional": "Brand (optional)",
-  "listingBrandHint": "Start typing…",
+  "listingBrandHint": "Brand name",
   "listingSectionStockShipping": "Stock & Shipping",
   "listingFormLocationLabel": "Location *",
   "listingFormLocationHint": "City, Region",
