@@ -4,8 +4,8 @@
 #
 # WHAT THIS DOES
 # -----------------------------------------------------------------------------
-# Runs on every push / pull request to main or dev (and manually) to guarantee
-# the app stays healthy on BOTH platforms. Three parallel jobs:
+# Runs on every push / pull request to main (and manually) to guarantee the app
+# stays healthy on BOTH platforms. Three parallel jobs:
 #
 #   1. analyze-and-test   (ubuntu)  — codegen, `flutter analyze`, `flutter test`
 #                                     (MOCK=false default + MOCK=true for mock data paths)
@@ -46,9 +46,9 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
-    branches: [main, dev]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
