@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/exceptions.dart';
+import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/features/cart/data/datasources/cart_remote_datasource.dart';
 import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
@@ -112,6 +113,16 @@ void main() {
     datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
   });
 
+  // Every group below (except removeCoupon, which behaves identically in
+  // both modes) exercises the LIVE, non-mock code paths — scripting Dio and
+  // asserting no seeded mock data leaks in. Under MOCK=true,
+  // `_ensureMockSeed()` populates the same static `_items` list with demo
+  // rows on first `getCart`/`buildLineFromListing` call regardless of
+  // `clearSessionCache()` in setUp, so these assertions don't hold.
+  final skipMock = MockConfig.useMock
+      ? 'Requires MOCK=false — exercises the live (non-seeded) datasource path'
+      : false;
+
   group('in-memory cart (live has no /cart API)', () {
     test('getCart returns the empty session snapshot without hitting the network',
         () async {
@@ -200,7 +211,7 @@ void main() {
       final result = await datasource.getCart('consumer_1');
       expect(result.items, isEmpty);
     });
-  });
+  }, skip: skipMock);
 
   group('applyCoupon', () {
     test('live mode rejects coupons without hitting the network', () async {
@@ -225,7 +236,7 @@ void main() {
       );
       expect(captured, isNull);
     });
-  });
+  }, skip: skipMock);
 
   group('removeCoupon', () {
     test('clears the local coupon without hitting the network', () async {
@@ -302,7 +313,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('placeOrder', () {
     test('throws ServerException immediately for an empty cart (no orders call)',
@@ -474,5 +485,5 @@ void main() {
 
       expect((await datasource.getCart('consumer_1')).items, isEmpty);
     });
-  });
+  }, skip: skipMock);
 }
