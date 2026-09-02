@@ -12,7 +12,9 @@ String _$routerNotifierHash() => r'23b4308e42eecac7df5e6226dadc7624cf7f04ac';
 ///
 /// Auth-based redirects (including vendor route guard) are centralized in
 /// [computeXStoreAuthRedirect] so they live next to this notifier, which
-/// [watch]es [authProvider] and notifies the router when session changes.
+/// [Ref.listen]s to [authProvider] and notifies the router when session
+/// changes. GoRouter redirect callbacks must read session through
+/// [RouterNotifier.redirectFor], never `goRouter`'s own `ref`.
 ///
 /// Copied from [routerNotifier].
 @ProviderFor(routerNotifier)

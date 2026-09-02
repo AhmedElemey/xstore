@@ -11,7 +11,48 @@ class StubOrdersRepository implements OrdersRepository {
     FutureOrEitherOrderStats? getVendorStatsResult,
     Either<Failure, OrderEntity> Function(String orderId, DeliveryMethod method)?
         confirmOrderResult,
-  })  : _getConsumer =
+    Either<Failure, OrderEntity> Function(String orderId, String reason)?
+        rejectOrderResult,
+    Either<Failure, OrderEntity> Function(String orderId)? markProcessingResult,
+    Either<Failure, OrderEntity> Function(String orderId, ShippingInfo info)?
+        markShippedResult,
+    Either<Failure, OrderEntity> Function(String orderId)? markDeliveredResult,
+    Either<Failure, OrderEntity> Function({
+      required String orderId,
+      required String? consumerId,
+      required String? vendorId,
+      required bool isVendorSession,
+    })? getOrderDetailResult,
+    Either<Failure, OrderEntity> Function(
+      String orderId,
+      String reason,
+      bool isVendorSession,
+    )? cancelOrderResult,
+  })  : _cancel =
+            cancelOrderResult ??
+                ((_, __, ___) => Left(Failure.server('stub cancel'))),
+        _getOrderDetail =
+            getOrderDetailResult ??
+                (({
+                  required orderId,
+                  required consumerId,
+                  required vendorId,
+                  required isVendorSession,
+                }) =>
+                    Left(Failure.server('stub detail'))),
+        _reject =
+            rejectOrderResult ??
+                ((_, __) => Left(Failure.server('stub reject'))),
+        _markProcessing =
+            markProcessingResult ??
+                ((_) => Left(Failure.server('stub markProcessing'))),
+        _markShipped =
+            markShippedResult ??
+                ((_, __) => Left(Failure.server('stub markShipped'))),
+        _markDelivered =
+            markDeliveredResult ??
+                ((_) => Left(Failure.server('stub markDelivered'))),
+        _getConsumer =
             getConsumerOrdersResult ??
                 (({required consumerId, required page, required pageSize}) =>
                     Left(Failure.network('stub consumer orders'))),
@@ -36,6 +77,22 @@ class StubOrdersRepository implements OrdersRepository {
   final FutureOrEitherOrderStats _getStats;
   final Either<Failure, OrderEntity> Function(String orderId, DeliveryMethod method)
       _confirm;
+  final Either<Failure, OrderEntity> Function(String orderId, String reason) _reject;
+  final Either<Failure, OrderEntity> Function(String orderId) _markProcessing;
+  final Either<Failure, OrderEntity> Function(String orderId, ShippingInfo info)
+      _markShipped;
+  final Either<Failure, OrderEntity> Function(String orderId) _markDelivered;
+  final Either<Failure, OrderEntity> Function({
+    required String orderId,
+    required String? consumerId,
+    required String? vendorId,
+    required bool isVendorSession,
+  }) _getOrderDetail;
+  final Either<Failure, OrderEntity> Function(
+    String orderId,
+    String reason,
+    bool isVendorSession,
+  ) _cancel;
 
   @override
   Future<Either<Failure, List<OrderEntity>>> getConsumerOrders({
@@ -80,7 +137,12 @@ class StubOrdersRepository implements OrdersRepository {
     required String? vendorId,
     required bool isVendorSession,
   }) async =>
-      Left(Failure.server('stub detail'));
+      Future.value(_getOrderDetail(
+        orderId: orderId,
+        consumerId: consumerId,
+        vendorId: vendorId,
+        isVendorSession: isVendorSession,
+      ));
 
   @override
   Future<Either<Failure, OrderStatsEntity>> getVendorOrderStats({
@@ -94,7 +156,7 @@ class StubOrdersRepository implements OrdersRepository {
     required String reason,
     required bool isVendorSession,
   }) async =>
-      Left(Failure.server('stub'));
+      Future.value(_cancel(orderId, reason, isVendorSession));
 
   @override
   Future<Either<Failure, OrderEntity>> confirmOrder({
@@ -108,22 +170,22 @@ class StubOrdersRepository implements OrdersRepository {
     required String orderId,
     required String reason,
   }) async =>
-      Left(Failure.server('stub'));
+      Future.value(_reject(orderId, reason));
 
   @override
   Future<Either<Failure, OrderEntity>> markProcessing(String orderId) async =>
-      Left(Failure.server('stub'));
+      Future.value(_markProcessing(orderId));
 
   @override
   Future<Either<Failure, OrderEntity>> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
   }) async =>
-      Left(Failure.server('stub'));
+      Future.value(_markShipped(orderId, shippingInfo));
 
   @override
   Future<Either<Failure, OrderEntity>> markDelivered(String orderId) async =>
-      Left(Failure.server('stub'));
+      Future.value(_markDelivered(orderId));
 
   @override
   Future<Either<Failure, Unit>> updateDeliveryLocation({
