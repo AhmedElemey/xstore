@@ -51,6 +51,14 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       _isVendor ? ref.read(authProvider).valueOrNull?.id : null;
 
   Future<void> fetchOrder() async {
+    // Mirrors OrdersNotifier.fetchOrders' guard: initState's postFrameCallback
+    // can fire before authProvider has resolved even once (a cold-start deep
+    // link straight to order detail, or — in tests — a widget pumped before
+    // an async auth override settles). Without this, a still-loading auth
+    // state reads as "no user", the use case call comes back
+    // Failure.unauthorized(), and the screen flashes a spurious error the
+    // real, already-signed-in user never should have seen.
+    if (ref.read(authProvider).valueOrNull == null) return;
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(getOrderDetailUseCaseProvider).call(
           orderId: state.orderId,
