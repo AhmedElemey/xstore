@@ -399,4 +399,129 @@ void main() {
       await _awaitAnalyticsReady(container);
     },
   );
+
+  testWidgets(
+    'vendor rejects a pending order with a reason',
+    skip: MockConfig.useMock,
+    (tester) async {
+      // Captured and asserted on AFTER the pump loop — see the note on the
+      // "Mark as Processing" test above about expect() inside a Dio
+      // interceptor hanging the test instead of failing it.
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(id: '902', status: 'pending')],
+          'totalCount': 1,
+          'pendingCount': 1,
+          'confirmedCount': 0,
+          'totalRevenue': 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          return _vendorOrderJson(id: '902', status: 'cancelled');
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('Incoming Orders'), findsOneWidget);
+      expect(find.text('Reject'), findsOneWidget);
+
+      await tester.tap(find.text('Reject'));
+      await _settle(tester);
+
+      expect(find.text('Reject order'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'Out of stock');
+      await tester.tap(find.text('Confirm'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [902],
+        'status': 'cancelled',
+      });
+
+      expect(
+        find.text('Reject'),
+        findsNothing,
+        reason: 'a rejected (cancelled) order no longer offers Reject',
+      );
+      expect(
+        find.text('View Details'),
+        findsOneWidget,
+        reason: 'cancelled orders fall back to a View Details action',
+      );
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'vendor ships a processing order with tracking info',
+    skip: MockConfig.useMock,
+    (tester) async {
+      // Captured and asserted on AFTER the pump loop — see the note on the
+      // "Mark as Processing" test above about expect() inside a Dio
+      // interceptor hanging the test instead of failing it.
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(id: '903', status: 'processing')],
+          'totalCount': 1,
+          'pendingCount': 0,
+          'confirmedCount': 1,
+          'totalRevenue': 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          return _vendorOrderJson(id: '903', status: 'shipped');
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('Incoming Orders'), findsOneWidget);
+      expect(find.text('Mark as Shipped'), findsOneWidget);
+
+      await tester.tap(find.text('Mark as Shipped'));
+      await _settle(tester);
+
+      // The "Add Tracking Info" sheet — a real user filling in the
+      // tracking number and courier before confirming the shipment.
+      expect(find.text('Add Tracking Info'), findsOneWidget);
+      final textFields = find.byType(TextField);
+      expect(textFields, findsNWidgets(2));
+      await tester.enterText(textFields.at(0), 'XS-TRACK-903');
+      await tester.enterText(textFields.at(1), 'xStore Logistics');
+      await tester.tap(find.text('Confirm Shipment'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [903],
+        'status': 'shipped',
+      });
+
+      expect(
+        find.text('Mark as Shipped'),
+        findsNothing,
+        reason: 'a shipped order no longer offers Mark as Shipped',
+      );
+      expect(
+        find.text('View Tracking'),
+        findsOneWidget,
+        reason: 'a shipped order moves on to View Tracking',
+      );
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
 }

@@ -395,13 +395,17 @@ class OrderCard extends ConsumerWidget {
     WidgetRef ref,
     OrdersNotifier notifier,
   ) async {
-    final ctrl = TextEditingController();
+    // No TextEditingController: a controller disposed right after
+    // showDialog's Future resolves races the dialog's own exit transition,
+    // which still has a live TextField/EditableText referencing it —
+    // "A TextEditingController was used after being disposed."
+    var reasonText = '';
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.ordersRejectDialogTitle),
         content: TextField(
-          controller: ctrl,
+          onChanged: (v) => reasonText = v,
           decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
         ),
         actions: [
@@ -416,8 +420,7 @@ class OrderCard extends ConsumerWidget {
         ],
       ),
     );
-    final reason = ctrl.text.trim();
-    ctrl.dispose();
+    final reason = reasonText.trim();
     if (ok == true && context.mounted) {
       await notifier.rejectOrder(
         order.id,
@@ -433,8 +436,13 @@ class OrderCard extends ConsumerWidget {
     WidgetRef ref,
     OrdersNotifier notifier,
   ) async {
-    final trackCtrl = TextEditingController();
-    final courierCtrl = TextEditingController();
+    // No TextEditingControllers: disposing them right after
+    // showModalBottomSheet's Future resolves races the sheet's own exit
+    // transition, which still has live TextFields/EditableTexts
+    // referencing them — "A TextEditingController was used after being
+    // disposed." Same fix as _rejectFlow's dialog above.
+    var trackingNumber = '';
+    var courierName = '';
     DateTime? eta = DateTime.now().add(const Duration(days: 2));
     await showModalBottomSheet<void>(
       context: context,
@@ -458,13 +466,13 @@ class OrderCard extends ConsumerWidget {
                       style: AppTypography.titleMedium),
                   const SizedBox(height: AppSpacing.md),
                   TextField(
-                    controller: trackCtrl,
+                    onChanged: (v) => trackingNumber = v,
                     decoration: InputDecoration(
                       labelText: context.l10n.ordersTrackingNumberLabel,
                     ),
                   ),
                   TextField(
-                    controller: courierCtrl,
+                    onChanged: (v) => courierName = v,
                     decoration: InputDecoration(
                       labelText: context.l10n.ordersCourierNameLabel,
                     ),
@@ -493,12 +501,12 @@ class OrderCard extends ConsumerWidget {
                       await notifier.markShipped(
                         order.id,
                         ShippingInfo(
-                          trackingNumber: trackCtrl.text.trim().isEmpty
+                          trackingNumber: trackingNumber.trim().isEmpty
                               ? null
-                              : trackCtrl.text.trim(),
-                          courierName: courierCtrl.text.trim().isEmpty
+                              : trackingNumber.trim(),
+                          courierName: courierName.trim().isEmpty
                               ? null
-                              : courierCtrl.text.trim(),
+                              : courierName.trim(),
                           estimatedDelivery: eta,
                         ),
                       );
@@ -512,8 +520,6 @@ class OrderCard extends ConsumerWidget {
         );
       },
     );
-    trackCtrl.dispose();
-    courierCtrl.dispose();
     if (context.mounted) _errSnack(context, ref);
   }
 
@@ -527,7 +533,6 @@ class OrderCard extends ConsumerWidget {
 
   void _reviewSheet(BuildContext context) {
     var stars = 5;
-    final text = TextEditingController();
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -563,7 +568,6 @@ class OrderCard extends ConsumerWidget {
                     ),
                   ),
                   TextField(
-                    controller: text,
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: context.l10n.ordersReviewHint,
@@ -586,7 +590,7 @@ class OrderCard extends ConsumerWidget {
           },
         );
       },
-    ).whenComplete(text.dispose);
+    );
   }
 
   Future<String?> _cancelReasonDialog(BuildContext context) async {
