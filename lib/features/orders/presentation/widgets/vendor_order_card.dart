@@ -42,11 +42,19 @@ class VendorOrderCard extends StatelessWidget {
           border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
           boxShadow: [BoxShadow(color: context.cardShadowColor, blurRadius: 12)],
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (pending) Container(width: 3, color: AppColors.warning),
-            Expanded(
+        // IntrinsicHeight: this card renders inside a ListView.separated
+        // item, which gives the Row an unbounded height — CrossAxisAlignment
+        // .stretch on a Row needs a bounded cross-axis (height) constraint
+        // to stretch the pending-order accent bar into, or every render
+        // throws "BoxConstraints forces an infinite height." Wrapping in
+        // IntrinsicHeight gives the Row a real height to stretch into,
+        // computed from its own content.
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (pending) Container(width: 3, color: AppColors.warning),
+              Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
@@ -143,6 +151,7 @@ class VendorOrderCard extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

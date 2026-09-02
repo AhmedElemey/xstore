@@ -241,30 +241,47 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                       children: [
                         SizedBox(
                           height: MediaQuery.sizeOf(context).height * 0.6,
-                          child: selectedFilter == null
-                              ? Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      OrderEmptyState(
-                                        title: context.l10n.vendorOrdersEmptyTitle,
-                                        subtitle: context.l10n
-                                            .vendorOrdersEmptySubtitle,
-                                      ),
-                                      const SizedBox(height: AppSpacing.md),
-                                      OutlinedButton(
-                                        onPressed: () =>
-                                            context.go(AppRoutes.listingMy),
-                                        child: Text(context.l10n.menuMyListings),
-                                      ),
-                                    ],
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final content = selectedFilter == null
+                                  ? Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        OrderEmptyState(
+                                          title: context.l10n.vendorOrdersEmptyTitle,
+                                          subtitle: context.l10n
+                                              .vendorOrdersEmptySubtitle,
+                                        ),
+                                        const SizedBox(height: AppSpacing.md),
+                                        OutlinedButton(
+                                          onPressed: () =>
+                                              context.go(AppRoutes.listingMy),
+                                          child: Text(context.l10n.menuMyListings),
+                                        ),
+                                      ],
+                                    )
+                                  : OrderEmptyState(
+                                      title: context.l10n.vendorNoStatusOrders,
+                                      subtitle: context.l10n.vendorNoStatusOrdersSubtitle,
+                                      filterActive: true,
+                                    );
+                              // A fixed-fraction height can be shorter than
+                              // this content's natural height on a short
+                              // viewport or with larger accessibility text
+                              // scaling — SingleChildScrollView plus a
+                              // minHeight-constrained Center keeps that from
+                              // turning into a RenderFlex overflow while
+                              // still centering the content when it fits.
+                              return SingleChildScrollView(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: constraints.maxHeight,
                                   ),
-                                )
-                              : OrderEmptyState(
-                                  title: context.l10n.vendorNoStatusOrders,
-                                  subtitle: context.l10n.vendorNoStatusOrdersSubtitle,
-                                  filterActive: true,
+                                  child: Center(child: content),
                                 ),
+                              );
+                            },
+                          ),
                         ),
                       ],
                     )
