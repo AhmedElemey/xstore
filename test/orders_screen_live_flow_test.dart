@@ -82,6 +82,29 @@ Dio _fakeDio(Map<String, Object? Function(RequestOptions)> routes) {
   return d;
 }
 
+/// A scripted-route handler that fails the request with a server error in
+/// the CONFIRMED `{isSuccess, data, errorEn, errorAr, statusCode}` envelope
+/// `dio_error_mapper.dart` reads — same shape as
+/// checkout_order_flow_test.dart's 500 scenario.
+DioException _serverErrorResponse(
+  RequestOptions options, {
+  int statusCode = 500,
+  required String errorEn,
+}) => DioException(
+  requestOptions: options,
+  type: DioExceptionType.badResponse,
+  response: Response(
+    requestOptions: options,
+    statusCode: statusCode,
+    data: {
+      'isSuccess': false,
+      'data': null,
+      'errorEn': errorEn,
+      'statusCode': statusCode,
+    },
+  ),
+);
+
 class _FakeAuth extends Auth {
   _FakeAuth(this._user);
   final UserEntity? _user;
@@ -715,6 +738,92 @@ void main() {
         'comment': 'Great product, fast delivery!',
       });
       expect(find.text('Thanks for your review!'), findsOneWidget);
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'consumer sees the server error when submitting a review fails',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '507', status: 'delivered', listingId: '9004'),
+        ],
+        'POST ${ApiEndpoints.apiListingReviews('9004')}': (options) =>
+            _serverErrorResponse(
+              options,
+              errorEn: 'Failed to submit review. Please try again.',
+            ),
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('Leave Review'), findsOneWidget);
+      await tester.tap(find.text('Leave Review'));
+      await _settle(tester);
+
+      expect(find.text('Leave a review'), findsOneWidget);
+      await tester.enterText(
+        find.byType(TextField),
+        'Great product, fast delivery!',
+      );
+      await tester.tap(find.text('Submit Review'));
+      await _settle(tester);
+
+      expect(
+        find.text('Failed to submit review. Please try again.'),
+        findsOneWidget,
+        reason: 'a failed review submission surfaces the server error, '
+            'not the success snackbar',
+      );
+      expect(find.text('Thanks for your review!'), findsNothing);
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'submitting a review with an empty comment is a no-op — no request, sheet stays open',
+    skip: MockConfig.useMock,
+    (tester) async {
+      // Deliberately no POST route scripted for the reviews endpoint: if
+      // the empty-comment guard in _reviewSheet ever regressed and let a
+      // blank review through, the request would hit _RoutedInterceptor's
+      // "unscripted request" rejection instead of silently succeeding.
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '508', status: 'delivered'),
+        ],
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('Leave Review'), findsOneWidget);
+      await tester.tap(find.text('Leave Review'));
+      await _settle(tester);
+
+      expect(find.text('Leave a review'), findsOneWidget);
+      // Leaves the comment field empty and taps Submit directly.
+      await tester.tap(find.text('Submit Review'));
+      await _settle(tester);
+
+      expect(
+        find.text('Leave a review'),
+        findsOneWidget,
+        reason: 'an empty comment should block submission and keep the '
+            'sheet open, matching product_reviews_screen.dart\'s own rule',
+      );
+      expect(find.text('Thanks for your review!'), findsNothing);
 
       await _awaitAnalyticsReady(container);
     },
