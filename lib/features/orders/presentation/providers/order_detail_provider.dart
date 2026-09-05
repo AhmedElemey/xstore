@@ -107,9 +107,11 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       updatedAt: now,
     );
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
-    final result = await ref
-        .read(confirmOrderUseCaseProvider)
-        .call(orderId: state.orderId, method: method);
+    final result = await ref.read(confirmOrderUseCaseProvider).call(
+          orderId: state.orderId,
+          method: method,
+          vendorId: _vendorId,
+        );
     _finalizeMutation(result, prev, deliveryMethod: method);
   }
 
@@ -126,6 +128,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     final result = await ref.read(rejectOrderUseCaseProvider).call(
           orderId: state.orderId,
           reason: reason,
+          vendorId: _vendorId,
         );
     _finalizeMutation(result, prev, reason: reason);
   }
@@ -138,8 +141,9 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       updatedAt: DateTime.now(),
     );
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
-    final result =
-        await ref.read(markProcessingUseCaseProvider).call(state.orderId);
+    final result = await ref
+        .read(markProcessingUseCaseProvider)
+        .call(state.orderId, vendorId: _vendorId);
     _finalizeMutation(result, prev);
   }
 
@@ -162,6 +166,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     final result = await ref.read(markShippedUseCaseProvider).call(
           orderId: state.orderId,
           shippingInfo: info,
+          vendorId: _vendorId,
         );
     _finalizeMutation(result, prev);
   }
