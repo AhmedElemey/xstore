@@ -81,8 +81,7 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 // phase 2 — out of scope for phase 1 launch.
                 // if (o.deliveryMethod == DeliveryMethod.platform &&
                 //     o.status != OrderStatus.cancelled &&
-                //     o.status != OrderStatus.delivered &&
-                //     o.status != OrderStatus.refunded) ...[
+                //     o.status != OrderStatus.delivered) ...[
                 //   _Card(
                 //     child: Column(
                 //       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +189,6 @@ class _StatusHeader extends StatelessWidget {
       OrderStatus.shipped => context.l10n.vendorStatusShipped,
       OrderStatus.delivered => context.l10n.vendorStatusDelivered,
       OrderStatus.cancelled => context.l10n.vendorStatusCancelled,
-      OrderStatus.refunded => context.l10n.vendorStatusRefunded,
     };
     return Container(
       width: double.infinity,

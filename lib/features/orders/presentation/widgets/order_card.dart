@@ -258,7 +258,6 @@ class OrderCard extends ConsumerWidget {
           );
         case OrderStatus.delivered:
         case OrderStatus.cancelled:
-        case OrderStatus.refunded:
           return SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -329,7 +328,6 @@ class OrderCard extends ConsumerWidget {
           ),
         );
       case OrderStatus.processing:
-      case OrderStatus.refunded:
         return SizedBox(
           width: double.infinity,
           child: OutlinedButton(

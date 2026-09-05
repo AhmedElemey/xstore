@@ -390,7 +390,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [900],
-        'status': 'processing',
+        'status': 2,
       });
 
       expect(
@@ -454,7 +454,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [901],
-        'status': 'confirmed',
+        'status': 1,
       });
 
       expect(
@@ -514,7 +514,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [902],
-        'status': 'cancelled',
+        'status': 5,
       });
 
       expect(
@@ -579,7 +579,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [903],
-        'status': 'shipped',
+        'status': 3,
       });
 
       expect(
@@ -824,6 +824,105 @@ void main() {
             'sheet open, matching product_reviews_screen.dart\'s own rule',
       );
       expect(find.text('Thanks for your review!'), findsNothing);
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'leaving and returning to the orders tab refetches the list',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var meGets = 0;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) {
+          meGets++;
+          return [_consumerOrderJson()];
+        },
+      });
+
+      final router = GoRouter(
+        initialLocation: AppRoutes.home,
+        routes: [
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, shell) => Scaffold(
+              body: shell,
+              bottomNavigationBar: Row(
+                children: [
+                  TextButton(
+                    onPressed: () => shell.goBranch(0),
+                    child: const Text('nav-home'),
+                  ),
+                  TextButton(
+                    onPressed: () => shell.goBranch(1),
+                    child: const Text('nav-orders'),
+                  ),
+                ],
+              ),
+            ),
+            branches: [
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.home,
+                    builder: (_, __) => const Text('home-tab'),
+                  ),
+                ],
+              ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: AppRoutes.orders,
+                    builder: (_, __) => const OrdersScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authProvider.overrideWith(() => _FakeAuth(_consumer())),
+            dioProvider.overrideWithValue(dio),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pump();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+        listen: false,
+      );
+      await container.read(authProvider.future);
+
+      await tester.tap(find.text('nav-orders'));
+      await _settle(tester);
+      expect(meGets, greaterThanOrEqualTo(1));
+      final afterFirst = meGets;
+
+      await tester.tap(find.text('nav-home'));
+      await tester.pump();
+      await tester.tap(find.text('nav-orders'));
+      await _settle(tester);
+
+      expect(
+        meGets,
+        greaterThan(afterFirst),
+        reason: 'IndexedStack keeps OrdersScreen alive; coming back to the '
+            'tab must hit GET /orders/me again',
+      );
 
       await _awaitAnalyticsReady(container);
     },

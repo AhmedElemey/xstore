@@ -138,8 +138,6 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
       error: null,
       page: 1,
       hasMore: true,
-      orders: const [],
-      filteredOrders: const [],
     );
     final result = await ref.read(getVendorOrdersUseCaseProvider).call(
           vendorId: vendorId,

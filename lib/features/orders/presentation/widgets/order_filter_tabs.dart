@@ -76,7 +76,6 @@ class OrderFilterTabs extends ConsumerWidget {
     OrderStatus.shipped => context.l10n.ordersFilterShipped,
     OrderStatus.delivered => context.l10n.ordersFilterDelivered,
     OrderStatus.cancelled => context.l10n.ordersFilterCancelled,
-    OrderStatus.refunded => context.l10n.ordersFilterRefunded,
   };
 
   Widget _chip(

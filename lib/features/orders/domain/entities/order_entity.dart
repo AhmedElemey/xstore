@@ -4,6 +4,9 @@ import 'order_item_entity.dart';
 
 part 'order_entity.freezed.dart';
 
+/// C# `OrderStatus { Pending=0, Confirmed=1, Processing=2, Shipped=3,
+/// Delivered=4, Cancelled=5 }`. Unlike listing condition, **0 is a real
+/// member** (Pending), not "unset".
 enum OrderStatus {
   pending,
   confirmed,
@@ -11,8 +14,46 @@ enum OrderStatus {
   shipped,
   delivered,
   cancelled,
-  refunded,
 }
+
+int orderStatusToWire(OrderStatus status) => switch (status) {
+      OrderStatus.pending => 0,
+      OrderStatus.confirmed => 1,
+      OrderStatus.processing => 2,
+      OrderStatus.shipped => 3,
+      OrderStatus.delivered => 4,
+      OrderStatus.cancelled => 5,
+    };
+
+/// Parses the C# numeric code, a numeric string, or a name (`pending`,
+/// `Pending`). `rejected` is treated as cancelled. Unknown values are null.
+OrderStatus? orderStatusFromWire(Object? raw) {
+  if (raw == null) return null;
+  if (raw is num) return _orderStatusFromCode(raw.toInt());
+  final s = raw.toString().trim();
+  if (s.isEmpty) return null;
+  final asInt = int.tryParse(s);
+  if (asInt != null) return _orderStatusFromCode(asInt);
+  return switch (s.toLowerCase()) {
+    'pending' => OrderStatus.pending,
+    'confirmed' => OrderStatus.confirmed,
+    'processing' => OrderStatus.processing,
+    'shipped' => OrderStatus.shipped,
+    'delivered' => OrderStatus.delivered,
+    'cancelled' || 'rejected' => OrderStatus.cancelled,
+    _ => null,
+  };
+}
+
+OrderStatus? _orderStatusFromCode(int code) => switch (code) {
+      0 => OrderStatus.pending,
+      1 => OrderStatus.confirmed,
+      2 => OrderStatus.processing,
+      3 => OrderStatus.shipped,
+      4 => OrderStatus.delivered,
+      5 => OrderStatus.cancelled,
+      _ => null,
+    };
 
 enum PaymentMethod {
   cashOnDelivery,
@@ -134,5 +175,24 @@ extension OrderEntityX on OrderEntity {
       return 'XS-2024-$padded';
     }
     return id;
+  }
+
+  /// Mutation responses (cancel 2xx with no order body) omit line items.
+  /// Keep the snapshot the UI already has and only take status fields.
+  OrderEntity takingStatusFrom(OrderEntity incoming) {
+    if (incoming.items.isNotEmpty || items.isEmpty) return incoming;
+    return copyWith(
+      status: incoming.status,
+      cancelReason: incoming.cancelReason ?? cancelReason,
+      cancelledAt: incoming.cancelledAt ?? cancelledAt,
+      updatedAt: incoming.updatedAt,
+      confirmedAt: incoming.confirmedAt ?? confirmedAt,
+      shippedAt: incoming.shippedAt ?? shippedAt,
+      deliveredAt: incoming.deliveredAt ?? deliveredAt,
+      deliveryMethod: incoming.deliveryMethod ?? deliveryMethod,
+      trackingNumber: incoming.trackingNumber ?? trackingNumber,
+      courierName: incoming.courierName ?? courierName,
+      estimatedDelivery: incoming.estimatedDelivery ?? estimatedDelivery,
+    );
   }
 }

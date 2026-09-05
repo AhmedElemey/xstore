@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/features/orders/data/datasources/orders_remote_datasource.dart';
+import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 
 class _ScriptedInterceptor extends Interceptor {
   _ScriptedInterceptor(this._respond);
@@ -173,6 +174,51 @@ void main() {
         );
 
         expect(await ds.getOrderById('missing'), isNull);
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'does not parse a Result envelope with data: null as an order',
+      () async {
+        final ds = datasourceFor(
+          (_) => {
+            'isSuccess': false,
+            'data': null,
+            'errorEn': 'Order not found',
+            'statusCode': 404,
+          },
+        );
+
+        expect(await ds.getOrderById('2'), isNull);
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'parses C# OrderStatus integer codes',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            return {
+              'id': 9,
+              'titleEn': 'Spare listing',
+              'price': 10,
+              'imageUrls': ['https://cdn.example/x.jpg'],
+              'userId': 7,
+              'userName': 'Store',
+            };
+          }
+          return {
+            'id': 42,
+            'status': 3,
+            'listingId': 9,
+            'quantity': 1,
+          };
+        });
+
+        final order = await ds.getOrderById('42');
+        expect(order?.status, OrderStatus.shipped);
       },
       skip: skipMock,
     );

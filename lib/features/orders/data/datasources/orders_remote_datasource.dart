@@ -592,12 +592,15 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return MockConfig.simulate(null);
     }
     try {
-      // CONFIRMED route: GET /orders/me/{id} (consumer-scoped). The
-      // payload shape was never live-probed — unwrap `{data|Data}` and
-      // tolerate 404 so the repository can fall back to GET /orders/me.
+      // CONFIRMED route: GET /orders/me/{id} (consumer-scoped). Live 404
+      // "Order not found" is expected for cancelled orders (they also drop
+      // off GET /orders/me) — tolerate it so the repository can fall back
+      // to the list without an ERROR log.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.orderMeById(orderId),
+        options: LegacyRouteOptions.allowNotFound(),
       );
+      if (LegacyRouteOptions.isNotFound(response)) return null;
       final map = _asOrderMap(response.data);
       if (map == null) return null;
       final parsed = _orderFromApiMap(map);
@@ -713,24 +716,34 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       // confirm/reject — there's no vendor-specific cancel route.
       return _setVendorOrderStatus(
         orderId: orderId,
-        status: 'cancelled',
+        status: OrderStatus.cancelled,
         localReason: reason,
       );
     }
     try {
-      // CONFIRMED route: POST /orders/{id}/cancel. No documented request
-      // body — the reason is applied locally for display only.
+      // CONFIRMED route: POST /orders/{id}/cancel. A bodyless POST omits
+      // Content-Type and the live ASP.NET API returns 415; send the
+      // user-collected reason as JSON (same `reason` key as delivery
+      // cancel). Live cancel then 404s GET /orders/me/{id} and drops the
+      // row from GET /orders/me — do not refetch; keep a cancelled stub
+      // when the 2xx body is a Result envelope with no order.
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.orderCancel(orderId),
+        data: {'reason': reason},
       );
-      final data = response.data;
-      final parsed = data != null
-          ? _orderFromApiMap(data)
-          : (await getOrderById(orderId));
-      if (parsed == null) throw const ServerException('Empty order response');
+      final map = _asOrderMap(response.data);
+      final parsed = map != null &&
+              (_optString(map, 'id') ?? _optString(map, 'orderId')) != null
+          ? _orderFromApiMap(map)
+          : _orderFromApiMap({
+              'id': orderId,
+              'status': 'cancelled',
+              'cancelReason': reason,
+            });
       return parsed.copyWith(
         status: OrderStatus.cancelled,
         cancelReason: parsed.cancelReason ?? reason,
+        cancelledAt: parsed.cancelledAt ?? DateTime.now(),
       );
     } on DioException catch (e) {
       throw mapDioException(e);
@@ -758,14 +771,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   /// Every vendor status transition (confirm/reject/processing/shipped/
-  /// delivered/cancel) goes through this one bulk endpoint. UNCONFIRMED
-  /// beyond `"confirmed"` (the only value shown in the collection's
-  /// example body) — the other values below are the app's existing enum
-  /// names lowercased, matching that one confirmed convention. Verify
-  /// the full enum with the backend before this ships to production.
+  /// delivered/cancel) goes through this one bulk endpoint. Wire `status`
+  /// is the C# `OrderStatus` int (Pending=0 … Cancelled=5).
   Future<OrderModel> _setVendorOrderStatus({
     required String orderId,
-    required String status,
+    required OrderStatus status,
     String? localReason,
     DeliveryMethod? localDeliveryMethod,
     ShippingInfo? localShippingInfo,
@@ -775,7 +785,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ApiEndpoints.vendorOrdersStatus,
         data: {
           'orderIds': [int.tryParse(orderId) ?? orderId],
-          'status': status,
+          'status': orderStatusToWire(status),
         },
       );
       final data = response.data;
@@ -786,7 +796,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       final base = parsedFromResponse ?? await getOrderById(orderId);
       if (base == null) throw const ServerException('Empty order response');
       return base.copyWith(
-        status: _statusFromWire(status) ?? base.status,
+        status: status,
         cancelReason: localReason ?? base.cancelReason,
         deliveryMethod: localDeliveryMethod ?? base.deliveryMethod,
         trackingNumber:
@@ -823,7 +833,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     // "required for production" audit: this needs a backend field.
     return _setVendorOrderStatus(
       orderId: orderId,
-      status: 'confirmed',
+      status: OrderStatus.confirmed,
       localDeliveryMethod: method,
     );
   }
@@ -853,7 +863,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     // rejection-reason field is documented on this endpoint either.
     return _setVendorOrderStatus(
       orderId: orderId,
-      status: 'cancelled',
+      status: OrderStatus.cancelled,
       localReason: reason,
     );
   }
@@ -871,7 +881,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    return _setVendorOrderStatus(orderId: orderId, status: 'processing');
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: OrderStatus.processing,
+    );
   }
 
   @override
@@ -903,7 +916,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     // confirmOrder's delivery method.
     return _setVendorOrderStatus(
       orderId: orderId,
-      status: 'shipped',
+      status: OrderStatus.shipped,
       localShippingInfo: shippingInfo,
     );
   }
@@ -922,7 +935,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    return _setVendorOrderStatus(orderId: orderId, status: 'delivered');
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: OrderStatus.delivered,
+    );
   }
 
   @override
@@ -980,19 +996,6 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
   }
 
-  static const _statusWireValues = {
-    'pending': OrderStatus.pending,
-    'confirmed': OrderStatus.confirmed,
-    'processing': OrderStatus.processing,
-    'shipped': OrderStatus.shipped,
-    'delivered': OrderStatus.delivered,
-    'cancelled': OrderStatus.cancelled,
-    'rejected': OrderStatus.cancelled,
-    'refunded': OrderStatus.refunded,
-  };
-
-  OrderStatus? _statusFromWire(String raw) =>
-      _statusWireValues[raw.toLowerCase()];
 
   /// Parses a single order object from the API. UNCONFIRMED field shape
   /// (see the doc on [ApiEndpoints.orders]) — tolerant of both a
@@ -1028,8 +1031,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       items = _itemFromFlatOrder(data, fallbackItems, listing: listing);
     }
 
-    final statusRaw = _optString(data, 'status') ?? '';
-    final status = _statusFromWire(statusRaw) ?? OrderStatus.pending;
+    final status =
+        orderStatusFromWire(_envelopeValue(data, 'status')) ??
+            OrderStatus.pending;
 
     final computedTotal = items.fold<double>(0, (a, b) => a + b.total);
 
@@ -1401,8 +1405,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     final nested = map['data'] ?? map['Data'];
     if (nested is Map) return _asOrderMap(nested);
-    if (map.isEmpty) return null;
-    return map;
+    // `{isSuccess, data: null, errorEn}` is a Result envelope, not an order.
+    return null;
   }
 
   String? _optString(Map<String, dynamic> m, String camel) {

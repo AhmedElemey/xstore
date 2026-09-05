@@ -25,8 +25,7 @@ class VendorOrderActionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     if (order.status == OrderStatus.shipped ||
         order.status == OrderStatus.delivered ||
-        order.status == OrderStatus.cancelled ||
-        order.status == OrderStatus.refunded) {
+        order.status == OrderStatus.cancelled) {
       return const SizedBox.shrink();
     }
     return SafeArea(

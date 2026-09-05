@@ -63,6 +63,7 @@ class OrdersNotifier extends _$OrdersNotifier {
   List<OrderStatus> get _consumerFilters => const [
         OrderStatus.pending,
         OrderStatus.confirmed,
+        OrderStatus.processing,
         OrderStatus.shipped,
         OrderStatus.delivered,
         OrderStatus.cancelled,
@@ -77,15 +78,20 @@ class OrdersNotifier extends _$OrdersNotifier {
         OrderStatus.cancelled,
       ];
 
+  var _fetchEpoch = 0;
+
   Future<void> fetchOrders() async {
+    final epoch = ++_fetchEpoch;
+    // Keep the current list on screen while refetching so tab revisits
+    // and pull-to-refresh do not flash an empty skeleton.
     state = state.copyWith(
       isLoading: true,
       error: null,
       page: 1,
-      orders: [],
       hasMore: true,
     );
     if (_user == null) {
+      if (epoch != _fetchEpoch) return;
       state = state.copyWith(isLoading: false);
       return;
     }
@@ -95,6 +101,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       final statsResult = await ref
           .read(getVendorOrderStatsUseCaseProvider)
           .call(_vendorId!);
+      if (epoch != _fetchEpoch) return;
       stats = statsResult.fold((_) => null, (s) => s);
     }
 
@@ -110,6 +117,7 @@ class OrdersNotifier extends _$OrdersNotifier {
               pageSize: _pageSize,
             );
 
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (f) => state = state.copyWith(
         isLoading: false,
@@ -479,11 +487,13 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   void _mergeOrder(OrderEntity o) {
+    if (o.id.isEmpty) return;
     final idx = state.orders.indexWhere((e) => e.id == o.id);
     if (idx < 0) {
       state = state.copyWith(orders: [...state.orders, o]);
     } else {
-      final next = [...state.orders]..[idx] = o;
+      final next = [...state.orders]
+        ..[idx] = state.orders[idx].takingStatusFrom(o);
       state = state.copyWith(orders: next);
     }
     _recomputeDerived();

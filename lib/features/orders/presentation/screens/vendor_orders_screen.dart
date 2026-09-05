@@ -38,6 +38,9 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
   final _search = TextEditingController();
   var _searching = false;
 
+  GoRouterDelegate? _delegate;
+  var _onThisRoute = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +52,36 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final router = GoRouter.maybeOf(context);
+    final next = router?.routerDelegate;
+    if (identical(next, _delegate)) return;
+    _delegate?.removeListener(_onRoute);
+    _delegate = next;
+    _delegate?.addListener(_onRoute);
+    _onThisRoute = _isThisRoute(router);
+  }
+
+  bool _isThisRoute(GoRouter? router) {
+    if (router == null) return false;
+    return router.routerDelegate.currentConfiguration.uri.path ==
+        AppRoutes.vendorOrders;
+  }
+
+  void _onRoute() {
+    if (!mounted) return;
+    final router = GoRouter.maybeOf(context);
+    final now = _isThisRoute(router);
+    if (now && !_onThisRoute) {
+      ref.read(vendorOrdersProvider.notifier).fetchOrders();
+    }
+    _onThisRoute = now;
+  }
+
+  @override
   void dispose() {
+    _delegate?.removeListener(_onRoute);
     _scroll.dispose();
     _search.dispose();
     super.dispose();

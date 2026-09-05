@@ -251,7 +251,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [920],
-        'status': 'confirmed',
+        'status': 1,
       });
       // Appears twice: the inline _Urgent card's action AND the fixed
       // bottom VendorOrderActionSheet both render the same

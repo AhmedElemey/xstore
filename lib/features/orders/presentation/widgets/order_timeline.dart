@@ -74,7 +74,6 @@ class OrderTimeline extends StatelessWidget {
         OrderStatus.processing => 2,
         OrderStatus.shipped => 3,
         OrderStatus.delivered => 4,
-        OrderStatus.refunded => 4,
         OrderStatus.cancelled => 0,
       };
 
