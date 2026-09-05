@@ -719,14 +719,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     try {
       // CONFIRMED route: POST /orders/{id}/cancel. No documented request
-      // body — the reason is applied locally for display only.
-      final response = await _dio.post<Map<String, dynamic>>(
+      // body — the reason is applied locally for display only. Response
+      // shape was never live-probed either, so unwrap a possible
+      // `{data|Data: {...}}` Result envelope the same way getOrderById
+      // does on this same resource, and accept a non-Map body (a bare
+      // success string, or no body at all) instead of throwing.
+      final response = await _dio.post<dynamic>(
         ApiEndpoints.orderCancel(orderId),
       );
-      final data = response.data;
-      final parsed = data != null
-          ? _orderFromApiMap(data)
-          : (await getOrderById(orderId));
+      final map = _asOrderMap(response.data);
+      final parsed =
+          map != null ? _orderFromApiMap(map) : (await getOrderById(orderId));
       if (parsed == null) throw const ServerException('Empty order response');
       return parsed.copyWith(
         status: OrderStatus.cancelled,
