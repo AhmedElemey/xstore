@@ -162,6 +162,7 @@ class StubOrdersRepository implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) async =>
       Future.value(_confirm(orderId, method));
 
@@ -169,17 +170,22 @@ class StubOrdersRepository implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) async =>
       Future.value(_reject(orderId, reason));
 
   @override
-  Future<Either<Failure, OrderEntity>> markProcessing(String orderId) async =>
+  Future<Either<Failure, OrderEntity>> markProcessing(
+    String orderId, {
+    String? vendorId,
+  }) async =>
       Future.value(_markProcessing(orderId));
 
   @override
   Future<Either<Failure, OrderEntity>> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) async =>
       Future.value(_markShipped(orderId, shippingInfo));
 

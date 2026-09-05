@@ -122,6 +122,7 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
   Future<OrderModel> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) =>
       throw UnimplementedError();
 
@@ -129,16 +130,19 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
   Future<OrderModel> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) =>
       throw UnimplementedError();
 
   @override
-  Future<OrderModel> markProcessing(String orderId) => throw UnimplementedError();
+  Future<OrderModel> markProcessing(String orderId, {String? vendorId}) =>
+      throw UnimplementedError();
 
   @override
   Future<OrderModel> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) =>
       throw UnimplementedError();
 

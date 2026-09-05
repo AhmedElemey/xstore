@@ -136,6 +136,7 @@ class _SharedOrdersRepository implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) async {
     final now = DateTime.now();
     final next = _requireById(orderId).copyWith(
@@ -152,6 +153,7 @@ class _SharedOrdersRepository implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) async {
     final now = DateTime.now();
     final next = _requireById(orderId).copyWith(
@@ -165,7 +167,10 @@ class _SharedOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<Either<Failure, OrderEntity>> markProcessing(String orderId) async {
+  Future<Either<Failure, OrderEntity>> markProcessing(
+    String orderId, {
+    String? vendorId,
+  }) async {
     final next = _requireById(
       orderId,
     ).copyWith(status: OrderStatus.processing, updatedAt: DateTime.now());
@@ -177,6 +182,7 @@ class _SharedOrdersRepository implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) async {
     final now = DateTime.now();
     final next = _requireById(orderId).copyWith(

@@ -12,7 +12,12 @@ class RejectOrderUseCase {
   Future<Either<Failure, OrderEntity>> call({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) {
-    return _repository.rejectOrder(orderId: orderId, reason: reason);
+    return _repository.rejectOrder(
+      orderId: orderId,
+      reason: reason,
+      vendorId: vendorId,
+    );
   }
 }

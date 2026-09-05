@@ -49,18 +49,21 @@ abstract interface class OrdersRemoteDataSource {
   Future<OrderModel> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   });
 
   Future<OrderModel> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   });
 
-  Future<OrderModel> markProcessing(String orderId);
+  Future<OrderModel> markProcessing(String orderId, {String? vendorId});
 
   Future<OrderModel> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   });
 
   Future<OrderModel> markDelivered(String orderId);
@@ -726,8 +729,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       // user-collected reason as JSON (same `reason` key as delivery
       // cancel). Live cancel then 404s GET /orders/me/{id} and drops the
       // row from GET /orders/me — do not refetch; keep a cancelled stub
-      // when the 2xx body is a Result envelope with no order.
-      final response = await _dio.post<Map<String, dynamic>>(
+      // when the 2xx body is a Result envelope with no order. post<dynamic>
+      // so a non-Map body (bare success string) does not type-cast-throw.
+      final response = await _dio.post<dynamic>(
         ApiEndpoints.orderCancel(orderId),
         data: {'reason': reason},
       );
@@ -779,6 +783,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     String? localReason,
     DeliveryMethod? localDeliveryMethod,
     ShippingInfo? localShippingInfo,
+    String? vendorId,
   }) async {
     try {
       final response = await _dio.put<Map<String, dynamic>>(
@@ -788,12 +793,26 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           'status': orderStatusToWire(status),
         },
       );
+      // Same Result-envelope risk as cancelOrder: unwrap a possible
+      // `{data|Data: {...}}` wrap via _asOrderMap instead of assuming the
+      // order fields sit at the response's top level.
       final data = response.data;
+      final unwrapped =
+          (data != null && data['orders'] == null) ? _asOrderMap(data) : null;
       final parsedFromResponse =
-          (data != null && data['orders'] == null && data['id'] != null)
-              ? _orderFromApiMap(data)
-              : null;
-      final base = parsedFromResponse ?? await getOrderById(orderId);
+          unwrapped != null ? _orderFromApiMap(unwrapped) : null;
+      // Fallback hydration: GET /orders/me/{id} is consumer-scoped, so it's
+      // the wrong lookup for a vendor session — search the vendor's own
+      // order list instead when we know who the vendor is (mirrors
+      // OrdersRepositoryImpl.getOrderDetail's vendor branch). Callers that
+      // don't pass vendorId (courier's markShipped/markDelivered, the
+      // unreachable vendor branch of cancelOrder) keep the old fallback.
+      final base = parsedFromResponse ??
+          (vendorId != null
+              ? (await getVendorOrders(vendorId: vendorId, page: 1, pageSize: 100))
+                  .where((o) => o.id == orderId)
+                  .firstOrNull
+              : await getOrderById(orderId));
       if (base == null) throw const ServerException('Empty order response');
       return base.copyWith(
         status: status,
@@ -814,6 +833,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   Future<OrderModel> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
@@ -835,6 +855,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       orderId: orderId,
       status: OrderStatus.confirmed,
       localDeliveryMethod: method,
+      vendorId: vendorId,
     );
   }
 
@@ -842,6 +863,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   Future<OrderModel> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
@@ -865,11 +887,12 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       orderId: orderId,
       status: OrderStatus.cancelled,
       localReason: reason,
+      vendorId: vendorId,
     );
   }
 
   @override
-  Future<OrderModel> markProcessing(String orderId) async {
+  Future<OrderModel> markProcessing(String orderId, {String? vendorId}) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
       if (row == null) throw StateError('order');
@@ -884,6 +907,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     return _setVendorOrderStatus(
       orderId: orderId,
       status: OrderStatus.processing,
+      vendorId: vendorId,
     );
   }
 
@@ -891,6 +915,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   Future<OrderModel> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
@@ -918,6 +943,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       orderId: orderId,
       status: OrderStatus.shipped,
       localShippingInfo: shippingInfo,
+      vendorId: vendorId,
     );
   }
 

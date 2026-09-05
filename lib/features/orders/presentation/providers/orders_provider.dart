@@ -332,7 +332,7 @@ class OrdersNotifier extends _$OrdersNotifier {
         confirmedAt: DateTime.now(), deliveryMethod: method,);
     final result = await ref
         .read(confirmOrderUseCaseProvider)
-        .call(orderId: orderId, method: method);
+        .call(orderId: orderId, method: method, vendorId: _vendorId);
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -358,6 +358,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     final result = await ref.read(rejectOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
+          vendorId: _vendorId,
         );
     result.fold(
       (failure) {
@@ -374,8 +375,9 @@ class OrdersNotifier extends _$OrdersNotifier {
   Future<void> markProcessing(String orderId) async {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.processing);
-    final result =
-        await ref.read(markProcessingUseCaseProvider).call(orderId);
+    final result = await ref
+        .read(markProcessingUseCaseProvider)
+        .call(orderId, vendorId: _vendorId);
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -414,6 +416,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     final result = await ref.read(markShippedUseCaseProvider).call(
           orderId: orderId,
           shippingInfo: info,
+          vendorId: _vendorId,
         );
     result.fold(
       (failure) {

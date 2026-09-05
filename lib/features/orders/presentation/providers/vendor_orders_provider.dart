@@ -213,7 +213,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     _optimisticStatus(orderId, OrderStatus.confirmed, deliveryMethod: method);
     final result = await ref
         .read(confirmOrderUseCaseProvider)
-        .call(orderId: orderId, method: method);
+        .call(orderId: orderId, method: method, vendorId: _vendorId);
     if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -250,6 +250,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     final result = await ref.read(rejectOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
+          vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
     return result.fold((failure) {
@@ -266,7 +267,9 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
   Future<bool> markProcessing(String orderId) async {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.processing);
-    final result = await ref.read(markProcessingUseCaseProvider).call(orderId);
+    final result = await ref
+        .read(markProcessingUseCaseProvider)
+        .call(orderId, vendorId: _vendorId);
     if (!mounted) return result.isRight();
     return result.fold((failure) {
       state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -305,6 +308,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     final result = await ref.read(markShippedUseCaseProvider).call(
           orderId: orderId,
           shippingInfo: info,
+          vendorId: _vendorId,
         );
     if (!mounted) return result.isRight();
     return result.fold((failure) {
