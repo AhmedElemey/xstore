@@ -19,6 +19,7 @@ import '../widgets/vendor_order_filter_tabs.dart';
 import '../widgets/vendor_order_sort_row.dart';
 import '../widgets/vendor_order_stats_banner.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
 
 class VendorOrdersScreen extends ConsumerStatefulWidget {
@@ -38,9 +39,6 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
   final _search = TextEditingController();
   var _searching = false;
 
-  GoRouterDelegate? _delegate;
-  var _onThisRoute = false;
-
   @override
   void initState() {
     super.initState();
@@ -52,36 +50,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final router = GoRouter.maybeOf(context);
-    final next = router?.routerDelegate;
-    if (identical(next, _delegate)) return;
-    _delegate?.removeListener(_onRoute);
-    _delegate = next;
-    _delegate?.addListener(_onRoute);
-    _onThisRoute = _isThisRoute(router);
-  }
-
-  bool _isThisRoute(GoRouter? router) {
-    if (router == null) return false;
-    return router.routerDelegate.currentConfiguration.uri.path ==
-        AppRoutes.vendorOrders;
-  }
-
-  void _onRoute() {
-    if (!mounted) return;
-    final router = GoRouter.maybeOf(context);
-    final now = _isThisRoute(router);
-    if (now && !_onThisRoute) {
-      ref.read(vendorOrdersProvider.notifier).fetchOrders();
-    }
-    _onThisRoute = now;
-  }
-
-  @override
   void dispose() {
-    _delegate?.removeListener(_onRoute);
     _scroll.dispose();
     _search.dispose();
     super.dispose();
@@ -143,7 +112,10 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
         ref.read(vendorOrdersProvider.notifier).clearError();
       }
     });
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.vendorOrders,
+      onReentry: (ref) => ref.read(vendorOrdersProvider.notifier).fetchOrders(),
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         backgroundColor: context.surfaceColor,
@@ -406,6 +378,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

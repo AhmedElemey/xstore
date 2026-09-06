@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
@@ -39,11 +41,15 @@ class WishlistScreen extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: SafeArea(
-        bottom: false,
-        child: const WishlistConsumerBody(),
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.wishlist,
+      onReentry: (ref) => ref.read(wishlistProvider.notifier).fetchWishlist(),
+      child: Scaffold(
+        backgroundColor: context.backgroundColor,
+        body: SafeArea(
+          bottom: false,
+          child: const WishlistConsumerBody(),
+        ),
       ),
     );
   }

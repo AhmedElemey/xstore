@@ -4,8 +4,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/courier_order_flow.dart';
 import '../providers/courier_cash_wallet_provider.dart';
@@ -19,7 +21,10 @@ class CourierCashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final walletAsync = ref.watch(courierCashWalletProvider);
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.courierCash,
+      onReentry: (ref) => ref.invalidate(courierCashWalletProvider),
+      child: Scaffold(
       appBar: AppBar(title: Text(context.l10n.courierCashScreenTitle)),
       body: walletAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -158,6 +163,7 @@ class CourierCashScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

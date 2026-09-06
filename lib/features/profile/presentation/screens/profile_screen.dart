@@ -23,6 +23,7 @@ import '../widgets/vendor_store_card.dart';
 // TODO(phase-2): Re-enable once store/active hours ships.
 // import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -93,7 +94,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isVendor = u.hasStore;
     final sellerId = u.id.isNotEmpty ? u.id : user.id;
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.profile,
+      onReentry: (ref) =>
+          ref.read(profileNotifierProvider.notifier).refreshProfileData(),
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       body: RefreshIndicator(
         onRefresh: _onRefresh,
@@ -253,6 +258,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           ],
         ),
+      ),
       ),
     );
   }

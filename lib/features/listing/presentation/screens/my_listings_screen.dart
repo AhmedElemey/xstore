@@ -27,6 +27,7 @@ import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
 import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
@@ -245,7 +246,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       }
     });
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.listingMy,
+      onReentry: (ref) =>
+          ref.read(myListingsNotifierProvider.notifier).fetchListings(),
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -342,6 +347,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
