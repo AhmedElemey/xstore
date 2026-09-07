@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/whatsapp.dart';
+import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_order_detail_provider.dart';
 import '../widgets/delivery_method_sheet.dart';
@@ -69,13 +74,11 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 _StatusHeader(order: o),
                 const SizedBox(height: AppSpacing.lg),
-                if (o.status == OrderStatus.pending || o.status == OrderStatus.confirmed || o.status == OrderStatus.processing) _Urgent(order: o, onConfirm: () => _confirmWithMethodPicker(notifier), onReject: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => RejectOrderSheet(onConfirm: notifier.rejectOrder)), onProcessing: notifier.markProcessing, onShipped: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => ShippingInfoSheet(onConfirm: notifier.markShipped))),
-                const SizedBox(height: AppSpacing.lg),
                 _Card(child: OrderTimeline(order: o)),
                 const SizedBox(height: AppSpacing.lg),
-                _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersBuyerInfo, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), Text(o.consumerName), InkWell(onTap: () => launchUrl(Uri(scheme: 'tel', path: o.consumerPhone)), child: Text(o.consumerPhone, style: TextStyle(color: AppColors.primary))), Text('${o.deliveryAddress.city}, ${o.deliveryAddress.wilaya}')])),
+                _BuyerInfoCard(order: o),
                 const SizedBox(height: AppSpacing.lg),
-                _Card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(context.l10n.ordersDeliveryAddressTitle, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: AppSpacing.sm), Text(o.deliveryAddress.fullName), Text(o.deliveryAddress.street), Text('${o.deliveryAddress.city}, ${o.deliveryAddress.wilaya}'), TextButton(onPressed: () {}, child: Text(context.l10n.vendorViewOnMap))])),
+                _DeliveryAddressCard(address: o.deliveryAddress),
                 const SizedBox(height: AppSpacing.lg),
                 // Package delivery ("request custom delivery") deferred to
                 // phase 2 — out of scope for phase 1 launch.
@@ -110,36 +113,7 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 _Card(child: OrderPriceBreakdown(order: o, vendorMode: true)),
                 if (o.status == OrderStatus.shipped) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  _Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(context.l10n.vendorShippingInfoTitle,
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: AppSpacing.sm),
-                        Row(
-                          children: [
-                            Expanded(child: Text(o.trackingNumber ?? '—')),
-                            IconButton(
-                              tooltip: MaterialLocalizations.of(context)
-                                  .copyButtonLabel,
-                              onPressed: () {
-                                if ((o.trackingNumber ?? '').isNotEmpty) {
-                                  Clipboard.setData(
-                                    ClipboardData(text: o.trackingNumber!),
-                                  );
-                                  context
-                                      .showSnack(context.l10n.ordersTrackingCopied);
-                                }
-                              },
-                              icon: const Icon(Icons.copy_rounded),
-                            ),
-                          ],
-                        ),
-                        Text(o.courierName ?? '—'),
-                      ],
-                    ),
-                  ),
+                  _ShippingInfoCard(order: o),
                 ],
                 if (o.status == OrderStatus.cancelled) ...[
                   const SizedBox(height: AppSpacing.lg),
@@ -176,6 +150,212 @@ class _Card extends StatelessWidget {
       );
 }
 
+class _BuyerInfoCard extends StatelessWidget {
+  const _BuyerInfoCard({required this.order});
+  final OrderEntity order;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = order.consumerName.trim();
+    final phone = order.consumerPhone.trim();
+    final letter = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.l10n.ordersBuyerInfo, style: AppTypography.titleMedium),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              ClipOval(
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: order.consumerAvatar.trim().isNotEmpty
+                      ? AppCachedNetworkImage(
+                          imageUrl: order.consumerAvatar,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 96,
+                          memCacheHeight: 96,
+                          placeholder: (_, __) => _letterBox(letter),
+                          errorWidget: (_, __, ___) => _letterBox(letter),
+                        )
+                      : _letterBox(letter),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (name.isNotEmpty)
+                      Text(
+                        name,
+                        style: AppTypography.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    if (phone.isNotEmpty)
+                      InkWell(
+                        onTap: () async {
+                          final uri = Uri(scheme: 'tel', path: phone);
+                          if (await canLaunchUrl(uri)) await launchUrl(uri);
+                        },
+                        child: Text(
+                          phone,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (phone.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            OutlinedButton(
+              onPressed: () async {
+                final opened = await launchWhatsApp(phone: phone);
+                if (!opened && context.mounted) {
+                  AppSnackbar.info(
+                    context,
+                    context.l10n.whatsappSellerUnavailable,
+                  );
+                }
+              },
+              child: Text(context.l10n.ordersWhatsapp),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _letterBox(String letter) {
+    return ColoredBox(
+      color: AppColors.primary,
+      child: Center(
+        child: Text(
+          letter,
+          style: AppTypography.titleMedium.copyWith(color: AppColors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeliveryAddressCard extends StatelessWidget {
+  const _DeliveryAddressCard({required this.address});
+  final OrderAddress address;
+
+  @override
+  Widget build(BuildContext context) {
+    final street = address.street.trim();
+    final cityLine = [
+      if (address.city.trim().isNotEmpty) address.city.trim(),
+      if (address.wilaya.trim().isNotEmpty) address.wilaya.trim(),
+      if (address.postalCode != null && address.postalCode!.trim().isNotEmpty)
+        address.postalCode!.trim(),
+    ].join(', ');
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.ordersDeliveryAddressTitle,
+            style: AppTypography.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (street.isNotEmpty)
+            Text(street, style: AppTypography.bodyMedium),
+          if (cityLine.isNotEmpty) ...[
+            if (street.isNotEmpty) const SizedBox(height: AppSpacing.xs),
+            Text(cityLine, style: AppTypography.bodyMedium),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ShippingInfoCard extends StatelessWidget {
+  const _ShippingInfoCard({required this.order});
+  final OrderEntity order;
+
+  @override
+  Widget build(BuildContext context) {
+    final tracking = order.trackingNumber?.trim() ?? '';
+    final courier = order.courierName?.trim() ?? '';
+    final eta = order.estimatedDelivery;
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.vendorShippingInfoTitle,
+            style: AppTypography.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (tracking.isNotEmpty)
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.ordersTrackingNumberLabel,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: context.textSecondary,
+                        ),
+                      ),
+                      Text(tracking, style: AppTypography.bodyMedium),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip:
+                      MaterialLocalizations.of(context).copyButtonLabel,
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: tracking));
+                    context.showSnack(context.l10n.ordersTrackingCopied);
+                  },
+                  icon: const Icon(Icons.copy_rounded),
+                ),
+              ],
+            ),
+          if (courier.isNotEmpty) ...[
+            if (tracking.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+            Text(
+              context.l10n.ordersCourierNameLabel,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textSecondary,
+              ),
+            ),
+            Text(courier, style: AppTypography.bodyMedium),
+          ],
+          if (eta != null) ...[
+            if (tracking.isNotEmpty || courier.isNotEmpty)
+              const SizedBox(height: AppSpacing.sm),
+            Text(
+              context.l10n.ordersEstimatedDeliveryLabel,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textSecondary,
+              ),
+            ),
+            Text(
+              DateFormat('EEEE, MMM d, yyyy').format(eta.toLocal()),
+              style: AppTypography.bodyMedium,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _StatusHeader extends StatelessWidget {
   const _StatusHeader({required this.order});
   final OrderEntity order;
@@ -192,16 +372,21 @@ class _StatusHeader extends StatelessWidget {
     };
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(AppSpacing.lg)),
-      child: Text(text, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.white, fontWeight: FontWeight.w700)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: c,
+        borderRadius: BorderRadius.circular(AppSpacing.md),
+      ),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: AppColors.white,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
     );
   }
-}
-
-class _Urgent extends StatelessWidget {
-  const _Urgent({required this.order, required this.onConfirm, required this.onReject, required this.onProcessing, required this.onShipped});
-  final OrderEntity order; final VoidCallback onConfirm; final VoidCallback onReject; final VoidCallback onProcessing; final VoidCallback onShipped;
-  @override
-  Widget build(BuildContext context) => _Card(child: order.status == OrderStatus.pending ? Row(children: [Expanded(child: OutlinedButton(onPressed: onReject, child: Text(context.l10n.vendorRejectOrder))), const SizedBox(width: AppSpacing.sm), Expanded(child: FilledButton(onPressed: onConfirm, style: FilledButton.styleFrom(backgroundColor: AppColors.success), child: Text(context.l10n.vendorConfirmOrder)))]) : order.status == OrderStatus.confirmed ? FilledButton(onPressed: onProcessing, child: Text(context.l10n.vendorMarkProcessing)) : FilledButton(onPressed: onShipped, child: Text(context.l10n.vendorMarkShipped)));
 }

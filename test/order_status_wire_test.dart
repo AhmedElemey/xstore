@@ -16,6 +16,15 @@ void main() {
       expect(orderStatusToWire(OrderStatus.cancelled), 5);
     });
 
+    test('PUT /vendor/orders/status sends the C# enum name', () {
+      expect(orderStatusToWireName(OrderStatus.pending), 'Pending');
+      expect(orderStatusToWireName(OrderStatus.confirmed), 'Confirmed');
+      expect(orderStatusToWireName(OrderStatus.processing), 'Processing');
+      expect(orderStatusToWireName(OrderStatus.shipped), 'Shipped');
+      expect(orderStatusToWireName(OrderStatus.delivered), 'Delivered');
+      expect(orderStatusToWireName(OrderStatus.cancelled), 'Cancelled');
+    });
+
     test('every status round-trips wire → enum → wire', () {
       for (final s in OrderStatus.values) {
         final wire = orderStatusToWire(s);

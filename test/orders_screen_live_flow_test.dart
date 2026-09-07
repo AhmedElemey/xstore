@@ -390,7 +390,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [900],
-        'status': 2,
+        'status': 'Processing',
       });
 
       expect(
@@ -454,7 +454,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [901],
-        'status': 1,
+        'status': 'Confirmed',
       });
 
       expect(
@@ -514,7 +514,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [902],
-        'status': 5,
+        'status': 'Cancelled',
       });
 
       expect(
@@ -579,7 +579,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [903],
-        'status': 3,
+        'status': 'Shipped',
       });
 
       expect(

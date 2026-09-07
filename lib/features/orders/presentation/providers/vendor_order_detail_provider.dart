@@ -61,10 +61,22 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
         isLoading: false,
         error: failure.toString(),
       ),
-      (order) => state = state.copyWith(
-        isLoading: false,
-        order: order,
-      ),
+      (order) {
+        final prev = state.order;
+        var next = order;
+        if (prev != null &&
+            (next.trackingNumber == null ||
+                next.trackingNumber!.trim().isEmpty) &&
+            prev.trackingNumber != null &&
+            prev.trackingNumber!.trim().isNotEmpty) {
+          next = next.copyWith(
+            trackingNumber: prev.trackingNumber,
+            courierName: next.courierName ?? prev.courierName,
+            estimatedDelivery: next.estimatedDelivery ?? prev.estimatedDelivery,
+          );
+        }
+        state = state.copyWith(isLoading: false, order: next);
+      },
     );
   }
 
@@ -74,7 +86,6 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
         .confirmOrder(orderId, method);
     if (!mounted) return ok;
     if (ok) {
-      ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
     }
     return ok;
@@ -84,7 +95,6 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
     final ok = await ref.read(vendorOrdersProvider.notifier).rejectOrder(orderId, reason);
     if (!mounted) return ok;
     if (ok) {
-      ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
     }
     return ok;
@@ -94,18 +104,35 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
     final ok = await ref.read(vendorOrdersProvider.notifier).markProcessing(orderId);
     if (!mounted) return ok;
     if (ok) {
-      ref.invalidate(vendorOrdersProvider);
       await fetchOrder();
     }
     return ok;
   }
 
   Future<bool> markShipped(ShippingInfo info) async {
+    final previous = state.order;
     final ok = await ref.read(vendorOrdersProvider.notifier).markShipped(orderId, info);
     if (!mounted) return ok;
     if (ok) {
-      ref.invalidate(vendorOrdersProvider);
-      await fetchOrder();
+      final tn = info.trackingNumber?.trim();
+      final base = state.order ?? previous;
+      if (base != null) {
+        state = state.copyWith(
+          isLoading: false,
+          order: base.copyWith(
+            status: OrderStatus.shipped,
+            trackingNumber: (tn != null && tn.isNotEmpty)
+                ? tn
+                : (base.trackingNumber ?? 'XS-TRACK-$orderId'),
+            courierName: info.courierName ?? base.courierName,
+            estimatedDelivery:
+                info.estimatedDelivery ?? base.estimatedDelivery,
+            shippedAt: base.shippedAt ?? DateTime.now(),
+          ),
+        );
+      } else {
+        await fetchOrder();
+      }
     }
     return ok;
   }

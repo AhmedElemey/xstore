@@ -121,9 +121,163 @@ void main() {
         expect(order?.deliveryAddress.street, '12 Nile St');
         expect(order?.deliveryAddress.city, 'Cairo');
         expect(order?.deliveryAddress.wilaya, 'Cairo');
+        expect(order?.consumerName, 'Jane Doe');
+        expect(order?.consumerPhone, '01001234567');
         expect(order?.vendorId, '77');
         expect(order?.vendorStoreName, 'Cairo Fashion Hub');
         expect(order?.vendorAvatar, 'https://cdn.example/k.jpg');
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'reads nested buyer for consumerName without using listing userName',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('should not hydrate when the order already has snapshots');
+          }
+          return {
+            'id': 42,
+            'status': 'pending',
+            'quantity': 1,
+            'listing': {
+              'id': 9,
+              'titleEn': 'Nike Air Max',
+              'price': 1250,
+              'imageUrls': ['https://cdn.example/nike.jpg'],
+              'userId': 77,
+              'userName': 'Karim',
+              'storeName': 'Cairo Fashion Hub',
+            },
+            'buyer': {
+              'id': 15,
+              'fullName': 'Nadia Mansouri',
+              'phoneNumber': '01022223333',
+              'userImageUrl': 'https://cdn.example/n.jpg',
+            },
+            'deliveryAddress': {
+              'street': '12 Nile St',
+              'city': 'Cairo',
+              'governorate': 'Giza',
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('42');
+
+        expect(order?.consumerId, '15');
+        expect(order?.consumerName, 'Nadia Mansouri');
+        expect(order?.consumerPhone, '01022223333');
+        expect(order?.consumerAvatar, 'https://cdn.example/n.jpg');
+        expect(order?.vendorName, 'Karim');
+        expect(order?.deliveryAddress.street, '12 Nile St');
+        expect(order?.deliveryAddress.city, 'Cairo');
+        expect(order?.deliveryAddress.wilaya, 'Giza');
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'reads order-root fullName as the buyer, not listing userName',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('should not hydrate when the order already has snapshots');
+          }
+          return {
+            'id': 7,
+            'status': 'pending',
+            'quantity': 1,
+            'phoneNumber': '01019890451',
+            'fullName': 'Ahmed Taha',
+            'listing': {
+              'id': 9,
+              'titleEn': 'Nike Air Max',
+              'price': 1250,
+              'imageUrls': ['https://cdn.example/nike.jpg'],
+              'userId': 77,
+              'userName': 'Karim',
+              'storeName': 'Cairo Fashion Hub',
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('7');
+
+        expect(order?.consumerName, 'Ahmed Taha');
+        expect(order?.consumerPhone, '01019890451');
+        expect(order?.vendorName, 'Karim');
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'reads nested order user as the buyer when that user is not the vendor',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('should not hydrate when the order already has snapshots');
+          }
+          return {
+            'id': 7,
+            'status': 'pending',
+            'quantity': 1,
+            'phoneNumber': '01019890451',
+            'user': {
+              'id': 15,
+              'fullName': 'Ahmed Taha',
+              'phoneNumber': '01019890451',
+            },
+            'listing': {
+              'id': 9,
+              'titleEn': 'Nike Air Max',
+              'price': 1250,
+              'imageUrls': ['https://cdn.example/nike.jpg'],
+              'userId': 77,
+              'userName': 'Karim',
+              'storeName': 'Cairo Fashion Hub',
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('7');
+
+        expect(order?.consumerId, '15');
+        expect(order?.consumerName, 'Ahmed Taha');
+        expect(order?.consumerPhone, '01019890451');
+        expect(order?.vendorName, 'Karim');
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'reads storeImageUrl from nested listing as the shop avatar',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('should not hydrate when storeImageUrl is already on the listing');
+          }
+          return {
+            'id': 42,
+            'status': 'pending',
+            'quantity': 1,
+            'listing': {
+              'id': 9,
+              'titleEn': 'Nike Air Max',
+              'price': 1250,
+              'imageUrls': ['https://cdn.example/nike.jpg'],
+              'storeImageUrl': 'https://cdn.example/shop.jpg',
+              'storeName': 'Cairo Fashion Hub',
+              'userId': 77,
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('42');
+
+        expect(order?.vendorAvatar, 'https://cdn.example/shop.jpg');
+        expect(order?.vendorStoreName, 'Cairo Fashion Hub');
       },
       skip: skipMock,
     );

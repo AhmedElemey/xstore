@@ -6,9 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 
-import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/app_dialogs.dart';
-import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -160,8 +158,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   /// by id before opening the edit form so every field is actually
   /// prefilled, falling back to the summary entity if the fetch fails.
   Future<void> _openEdit(ListingEntity listing) async {
-    final result =
-        await ref.read(getListingByIdUseCaseProvider).call(listing.id);
+    final result = await ref
+        .read(getListingByIdUseCaseProvider)
+        .call(listing.id);
     if (!mounted) return;
     result.fold(
       (_) => context.go(AppRoutes.listingAdd, extra: listing),
@@ -191,8 +190,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               context: context,
               builder: (_) => Material(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 clipBehavior: Clip.antiAlias,
                 child: ListingStatsSheet(listing: listing),
               ),
@@ -299,8 +299,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               children: [
                 Consumer(
                   builder: (context, ref, _) {
-                    final wallet =
-                        ref.watch(vendorCommissionWalletProvider).valueOrNull;
+                    final wallet = ref
+                        .watch(vendorCommissionWalletProvider)
+                        .valueOrNull;
                     if (wallet == null) return const SizedBox.shrink();
                     return VendorCommissionAlertBanner(wallet: wallet);
                   },
@@ -433,8 +434,6 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 key: ValueKey(item.id),
                 listing: item,
                 onOpenMenu: () => _showOptions(item),
-              ).fadeSlideIn(
-                delay: AppAnimations.staggerDelayCapped(i),
               ),
             );
           },
@@ -456,8 +455,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.md,
-          crossAxisSpacing: AppSpacing.md,
+          mainAxisSpacing: 0,
+          crossAxisSpacing: 0,
           childAspectRatio: 0.72,
         ),
         itemCount: filtered.length,
@@ -468,8 +467,6 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               key: ValueKey(item.id),
               listing: item,
               onOpenMenu: () => _showOptions(item),
-            ).fadeSlideIn(
-              delay: AppAnimations.staggerDelayCapped(i),
             ),
           );
         },
@@ -477,4 +474,3 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     );
   }
 }
-

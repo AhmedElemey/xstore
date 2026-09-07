@@ -25,6 +25,18 @@ int orderStatusToWire(OrderStatus status) => switch (status) {
       OrderStatus.cancelled => 5,
     };
 
+/// C# `OrderStatus` member name. `PUT /vendor/orders/status` binds
+/// `status` as `System.String` — an int 400s with `$.status` plus a
+/// cascading `request` required error.
+String orderStatusToWireName(OrderStatus status) => switch (status) {
+      OrderStatus.pending => 'Pending',
+      OrderStatus.confirmed => 'Confirmed',
+      OrderStatus.processing => 'Processing',
+      OrderStatus.shipped => 'Shipped',
+      OrderStatus.delivered => 'Delivered',
+      OrderStatus.cancelled => 'Cancelled',
+    };
+
 /// Parses the C# numeric code, a numeric string, or a name (`pending`,
 /// `Pending`). `rejected` is treated as cancelled. Unknown values are null.
 OrderStatus? orderStatusFromWire(Object? raw) {

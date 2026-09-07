@@ -40,75 +40,101 @@ class ListingCardList extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
-    return Container(
+    final accent = listingStatusAccent(context, listing.status);
+    final radius = BorderRadius.circular(16);
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
+        borderRadius: radius,
         boxShadow: [
           BoxShadow(
             color: context.cardShadowColor,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListingThumbnail(imageUrl: thumb, size: 80, borderRadius: 10),
-            const Gap(AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    listing.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.body15.copyWith(
-                      fontWeight: FontWeight.w500,
+      child: Material(
+        color: context.surfaceColor,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: Ink(
+          decoration: BoxDecoration(
+            border: Border.all(color: accent.withValues(alpha: 0.45)),
+            borderRadius: radius,
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListingThumbnail(
+                      imageUrl: thumb,
+                      size: 80,
+                      borderRadius: 10,
                     ),
-                  ),
-                  const Gap(AppSpacing.sm),
-                  Text(
-                    context.formatCurrency(listing.price),
-                    style: AppTypography.body15.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Gap(AppSpacing.xs),
-                  Text(
-                    _metaLine,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const Gap(AppSpacing.sm),
-                  StatusBadge(status: listing.status),
-                  if (listing.postedAt != null) ...[
-                    const Gap(AppSpacing.xs),
-                    Text(
-                      'Posted ${Formatters.shortDate(listing.postedAt!)}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant
-                            .withValues(alpha: 0.75),
+                    const Gap(AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            listing.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.body15.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Gap(AppSpacing.sm),
+                          Text(
+                            context.formatCurrency(listing.price),
+                            style: AppTypography.body15.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Gap(AppSpacing.xs),
+                          Text(
+                            _metaLine,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const Gap(AppSpacing.sm),
+                          StatusBadge(status: listing.status),
+                          if (listing.postedAt != null) ...[
+                            const Gap(AppSpacing.xs),
+                            Text(
+                              'Posted ${Formatters.shortDate(listing.postedAt!)}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.75),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
+                    IconButton(
+                      icon: const Icon(LucideIcons.moreVertical, size: 18),
+                      onPressed: onOpenMenu,
+                    ),
                   ],
-                ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(LucideIcons.moreVertical,size: 18,),
-              onPressed: onOpenMenu,
-            ),
-          ],
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 4,
+                child: ColoredBox(color: accent),
+              ),
+            ],
+          ),
         ),
       ),
     );

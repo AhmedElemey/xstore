@@ -29,7 +29,8 @@ class VendorOrdersScreen extends ConsumerStatefulWidget {
 }
 
 class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
-  Future<DeliveryMethod?> _pickDeliveryMethod() => showModalBottomSheet<DeliveryMethod>(
+  Future<DeliveryMethod?> _pickDeliveryMethod() =>
+      showModalBottomSheet<DeliveryMethod>(
         context: context,
         isScrollControlled: true,
         builder: (_) => const DeliveryMethodSheet(),
@@ -91,6 +92,9 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
     );
     final isLoading = ref.watch(
       vendorOrdersProvider.select((s) => s.isLoading),
+    );
+    final hasOrders = ref.watch(
+      vendorOrdersProvider.select((s) => s.orders.isNotEmpty),
     );
     final statusCounts = ref.watch(
       vendorOrdersProvider.select((s) {
@@ -230,7 +234,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
             cancelledCount: statusCounts.cancelled,
             onTap: ref.read(vendorOrdersProvider.notifier).applyFilter,
           ),
-           const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
           VendorOrderSortRow(
             sort: sortOption,
             count: filteredOrders.length,
@@ -239,7 +243,9 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: ref.read(vendorOrdersProvider.notifier).refreshOrders,
-              child:  filteredOrders.isEmpty
+              child: isLoading && !hasOrders
+                  ? const VendorOrdersSkeleton()
+                  : filteredOrders.isEmpty
                   ? ListView(
                       cacheExtent: 300,
                       children: [
@@ -252,21 +258,28 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         OrderEmptyState(
-                                          title: context.l10n.vendorOrdersEmptyTitle,
-                                          subtitle: context.l10n
+                                          title: context
+                                              .l10n
+                                              .vendorOrdersEmptyTitle,
+                                          subtitle: context
+                                              .l10n
                                               .vendorOrdersEmptySubtitle,
                                         ),
                                         const SizedBox(height: AppSpacing.md),
                                         OutlinedButton(
                                           onPressed: () =>
                                               context.go(AppRoutes.listingMy),
-                                          child: Text(context.l10n.menuMyListings),
+                                          child: Text(
+                                            context.l10n.menuMyListings,
+                                          ),
                                         ),
                                       ],
                                     )
                                   : OrderEmptyState(
                                       title: context.l10n.vendorNoStatusOrders,
-                                      subtitle: context.l10n.vendorNoStatusOrdersSubtitle,
+                                      subtitle: context
+                                          .l10n
+                                          .vendorNoStatusOrdersSubtitle,
                                       filterActive: true,
                                     );
                               // A fixed-fraction height can be shorter than
@@ -289,8 +302,6 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                         ),
                       ],
                     )
-                 : isLoading 
-                  ? const VendorOrdersSkeleton()
                   : ListView.separated(
                       controller: _scroll,
                       padding: const EdgeInsets.all(AppSpacing.lg),

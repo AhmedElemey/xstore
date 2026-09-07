@@ -59,30 +59,26 @@ class OrderItemTile extends StatelessWidget {
                   item.listingName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.titleSmall.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  children: [
-                    if (item.category.trim().isNotEmpty)
-                      Chip(
-                        label: Text(item.category),
-                        visualDensity: VisualDensity.compact,
-                        backgroundColor: context.backgroundColor,
-                        side: BorderSide.none,
-                      ),
-                    if (item.condition.trim().isNotEmpty)
-                      Chip(
-                        label: Text(item.condition),
-                        visualDensity: VisualDensity.compact,
-                        backgroundColor: context.backgroundColor,
-                        side: BorderSide.none,
-                      ),
-                  ],
-                ),
+                if (item.category.trim().isNotEmpty ||
+                    item.condition.trim().isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    [
+                      if (item.category.trim().isNotEmpty) item.category.trim(),
+                      if (item.condition.trim().isNotEmpty)
+                        item.condition.trim(),
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   '${context.formatCurrency(item.price)} × ${item.quantity} = ${context.formatCurrency(item.total)}',
@@ -90,14 +86,17 @@ class OrderItemTile extends StatelessWidget {
                     color: context.textSecondary,
                   ),
                 ),
-                TextButton(
-                  onPressed: () =>
+                const SizedBox(height: AppSpacing.xs),
+                InkWell(
+                  onTap: () =>
                       context.push('${AppRoutes.product}/${item.listingId}'),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    foregroundColor: AppColors.primary,
+                  child: Text(
+                    context.l10n.ordersViewProduct,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  child: Text(context.l10n.ordersViewProduct),
                 ),
                 if (showStockHint)
                   Text(

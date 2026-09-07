@@ -23,84 +23,120 @@ class ListingCardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
-    return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ListingThumbnail(
-                imageUrl: thumb,
-                width: double.infinity,
-                height: 140,
-                borderRadius: 0,
-              ),
-              Positioned(
-                top: AppSpacing.md,
-                right: AppSpacing.md,
-                child: StatusBadge(status: listing.status, compact: true),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.md,
-              AppSpacing.xs,
-              AppSpacing.md,
+    final accent = listingStatusAccent(context, listing.status);
+    final radius = BorderRadius.circular(16);
+    // Inset so the drop shadow sits inside the grid cell and isn't
+    // covered by the neighboring tile.
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: [
+            BoxShadow(
+              color: context.cardShadowColor,
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+        child: Material(
+          color: context.surfaceColor,
+          borderRadius: radius,
+          clipBehavior: Clip.antiAlias,
+          child: Ink(
+            decoration: BoxDecoration(
+              border: Border.all(color: accent.withValues(alpha: 0.45)),
+              borderRadius: radius,
+            ),
+            child: Stack(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        listing.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.body15.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 140,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ListingThumbnail(
+                            imageUrl: thumb,
+                            width: double.infinity,
+                            height: 140,
+                            borderRadius: 0,
+                          ),
+                          Positioned(
+                            top: AppSpacing.md,
+                            right: AppSpacing.md,
+                            child: StatusBadge(
+                              status: listing.status,
+                              compact: true,
+                            ),
+                          ),
+                        ],
                       ),
-                      const Gap(AppSpacing.sm),
-                      Text(
-                        context.formatCurrency(listing.price),
-                        style: AppTypography.body15.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.md,
+                        AppSpacing.md,
+                        AppSpacing.xs,
+                        AppSpacing.md,
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  listing.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.body15.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Gap(AppSpacing.sm),
+                                Text(
+                                  context.formatCurrency(listing.price),
+                                  style: AppTypography.body15.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              LucideIcons.moreVertical,
+                              size: 18,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 20,
+                              minHeight: 20,
+                            ),
+                            onPressed: onOpenMenu,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(LucideIcons.moreVertical, size: 18),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),
-                  onPressed: onOpenMenu,
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 4,
+                  child: ColoredBox(color: accent),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

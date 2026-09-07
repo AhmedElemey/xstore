@@ -134,7 +134,7 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     final vendorId = _vendorId;
     if (vendorId == null) return;
     state = state.copyWith(
-      isLoading: true,
+      isLoading: state.orders.isEmpty,
       error: null,
       page: 1,
       hasMore: true,

@@ -5,12 +5,17 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+Color listingStatusAccent(BuildContext context, ListingStatus status) =>
+    switch (status) {
+      ListingStatus.pending => AppColors.warning,
+      ListingStatus.active => AppColors.success,
+      ListingStatus.sold => AppColors.primary,
+      ListingStatus.rejected => AppColors.error,
+      ListingStatus.paused || ListingStatus.draft => context.textSecondary,
+    };
+
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({
-    super.key,
-    required this.status,
-    this.compact = false,
-  });
+  const StatusBadge({super.key, required this.status, this.compact = false});
 
   final ListingStatus status;
   final bool compact;
@@ -27,8 +32,14 @@ class StatusBadge extends StatelessWidget {
     };
     final (bg, fg) = _colors(context, status);
     final pad = compact
-        ? const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs)
-        : const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm);
+        ? const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          )
+        : const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          );
     final fontSize = compact ? 11.0 : 12.0;
     return Container(
       padding: pad,
@@ -39,10 +50,10 @@ class StatusBadge extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w700,
-              fontSize: fontSize,
-            ),
+          color: fg,
+          fontWeight: FontWeight.w700,
+          fontSize: fontSize,
+        ),
       ),
     );
   }
@@ -50,30 +61,18 @@ class StatusBadge extends StatelessWidget {
   (Color bg, Color fg) _colors(BuildContext context, ListingStatus s) {
     switch (s) {
       case ListingStatus.active:
-        return (
-          AppColors.success.withValues(alpha: 0.15),
-          AppColors.success,
-        );
+        return (AppColors.success.withValues(alpha: 0.15), AppColors.success);
       case ListingStatus.pending:
-        return (
-          AppColors.warning.withValues(alpha: 0.18),
-          AppColors.warning,
-        );
+        return (AppColors.warning.withValues(alpha: 0.18), AppColors.warning);
       case ListingStatus.paused:
         return (
           context.textDisabled.withValues(alpha: 0.35),
           context.textSecondary,
         );
       case ListingStatus.sold:
-        return (
-          AppColors.primary.withValues(alpha: 0.12),
-          AppColors.primary,
-        );
+        return (AppColors.primary.withValues(alpha: 0.12), AppColors.primary);
       case ListingStatus.rejected:
-        return (
-          AppColors.error.withValues(alpha: 0.12),
-          AppColors.error,
-        );
+        return (AppColors.error.withValues(alpha: 0.12), AppColors.error);
       case ListingStatus.draft:
         return (
           context.textDisabled.withValues(alpha: 0.45),

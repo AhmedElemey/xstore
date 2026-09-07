@@ -212,7 +212,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [910],
-        'status': 1,
+        'status': 'Confirmed',
       });
       expect(find.text('Order confirmed'), findsOneWidget);
       expect(
@@ -264,7 +264,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [911],
-        'status': 5,
+        'status': 'Cancelled',
       });
       expect(find.text('Order rejected. Buyer notified.'), findsOneWidget);
     },
