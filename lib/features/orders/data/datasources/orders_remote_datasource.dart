@@ -1357,19 +1357,13 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   bool _needsListingSnap(OrderModel o) {
-    final needsVendor = o.vendorId.isEmpty &&
-        o.vendorName.isEmpty &&
-        o.vendorStoreName.isEmpty;
-    final needsAvatar = o.vendorAvatar.isEmpty;
-    final needsItem = o.items.isEmpty ||
-        o.items.any(
-          (i) =>
-              i.listingName.isEmpty || i.listingImage.isEmpty || i.price <= 0,
-        );
-    final needsAddress = o.deliveryAddress.street.isEmpty &&
-        o.deliveryAddress.city.isEmpty &&
-        o.deliveryAddress.wilaya.isEmpty;
-    return needsVendor || needsAvatar || needsItem || needsAddress;
+    // Sold/paused/cancelled listings 404 on public GET /api/listings/{id}.
+    // Only fetch when a line is missing the fields the card actually shows.
+    return o.items.any(
+      (i) =>
+          i.listingId.isNotEmpty &&
+          (i.listingName.isEmpty || i.listingImage.isEmpty || i.price <= 0),
+    );
   }
 
   Future<void> _ensureListingSnap(String listingId) async {
@@ -1377,16 +1371,30 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListingDetail(listingId),
+        options: LegacyRouteOptions.allowNotFound(),
       );
-      final map = _asOrderMap(response.data) ?? _asMap(response.data);
-      if (map == null) return;
-      if (_listingSnapCache.length >= _listingSnapCacheCap) {
-        _listingSnapCache.remove(_listingSnapCache.keys.first);
+      if (LegacyRouteOptions.isNotFound(response)) {
+        _rememberListingSnap(listingId, const <String, dynamic>{});
+        return;
       }
-      _listingSnapCache[listingId] = map;
-    } on DioException {
-      // Order still renders with whatever the order payload had.
+      final map = _asOrderMap(response.data) ?? _asMap(response.data);
+      if (map == null || map['isSuccess'] == false) {
+        _rememberListingSnap(listingId, const <String, dynamic>{});
+        return;
+      }
+      _rememberListingSnap(listingId, map);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        _rememberListingSnap(listingId, const <String, dynamic>{});
+      }
     }
+  }
+
+  void _rememberListingSnap(String listingId, Map<String, dynamic> map) {
+    if (_listingSnapCache.length >= _listingSnapCacheCap) {
+      _listingSnapCache.remove(_listingSnapCache.keys.first);
+    }
+    _listingSnapCache[listingId] = map;
   }
 
   OrderModel _applyListingSnap(OrderModel o) {
@@ -1398,7 +1406,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     for (var i = 0; i < o.items.length; i++) {
       final item = o.items[i];
       final snap = snaps[i];
-      if (snap == null) {
+      if (snap == null || snap.isEmpty) {
         items.add(item);
         continue;
       }
@@ -1427,7 +1435,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ),
       );
     }
-    final firstSnap = snaps.whereType<Map<String, dynamic>>().firstOrNull;
+    final firstSnap = snaps
+        .whereType<Map<String, dynamic>>()
+        .where((m) => m.isNotEmpty)
+        .firstOrNull;
     var next = o.copyWith(items: items);
     if (firstSnap != null) {
       next = next.copyWith(

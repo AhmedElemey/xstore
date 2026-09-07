@@ -1939,13 +1939,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorViewAnalytics => 'عرض التحليلات';
 
   @override
-  String get vendorStatPendingOrders => 'طلبات معلقة';
+  String get vendorStatPendingOrders => 'معلقة';
 
   @override
-  String get vendorStatActiveOrders => 'طلبات نشطة';
+  String get vendorStatActiveOrders => 'نشطة';
 
   @override
-  String get vendorStatTotalOrders => 'إجمالي الطلبات';
+  String get vendorStatTotalOrders => 'إجمالي';
 
   @override
   String get vendorStatRevenue => 'الإيرادات';

@@ -3911,19 +3911,19 @@ abstract class AppLocalizations {
   /// No description provided for @vendorStatPendingOrders.
   ///
   /// In en, this message translates to:
-  /// **'Pending Orders'**
+  /// **'Pending'**
   String get vendorStatPendingOrders;
 
   /// No description provided for @vendorStatActiveOrders.
   ///
   /// In en, this message translates to:
-  /// **'Active Orders'**
+  /// **'Active'**
   String get vendorStatActiveOrders;
 
   /// No description provided for @vendorStatTotalOrders.
   ///
   /// In en, this message translates to:
-  /// **'Total Orders'**
+  /// **'Total'**
   String get vendorStatTotalOrders;
 
   /// No description provided for @vendorStatRevenue.

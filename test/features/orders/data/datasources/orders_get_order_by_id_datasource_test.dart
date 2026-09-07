@@ -283,6 +283,74 @@ void main() {
     );
 
     test(
+      'does not GET /api/listings/{id} just to fill a missing shop avatar',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('sold listings 404 — do not hydrate for avatar');
+          }
+          return {
+            'id': 42,
+            'status': 'pending',
+            'quantity': 1,
+            'listing': {
+              'id': 9,
+              'titleEn': 'Nike Air Max',
+              'price': 1250,
+              'imageUrls': ['https://cdn.example/nike.jpg'],
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('42');
+
+        expect(order?.items.single.listingName, 'Nike Air Max');
+        expect(order?.items.single.listingImage, 'https://cdn.example/nike.jpg');
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'keeps the order when the listing snapshot GET returns 404',
+      () async {
+        var listingGets = 0;
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            listingGets++;
+            return DioException(
+              requestOptions: options,
+              type: DioExceptionType.badResponse,
+              response: Response(
+                requestOptions: options,
+                statusCode: 404,
+                data: {
+                  'isSuccess': false,
+                  'data': null,
+                  'errorEn': 'Listing not found.',
+                  'statusCode': 404,
+                },
+              ),
+            );
+          }
+          return {
+            'id': 42,
+            'status': 'pending',
+            'listingId': 9,
+            'quantity': 1,
+            'total': 50,
+          };
+        });
+
+        final order = await ds.getOrderById('42');
+
+        expect(order?.id, '42');
+        expect(order?.items.single.listingId, '9');
+        expect(listingGets, 1);
+      },
+      skip: skipMock,
+    );
+
+    test(
       'treats an empty items array as the flat listingId shape',
       () async {
         final ds = datasourceFor((options) {

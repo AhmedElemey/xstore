@@ -652,9 +652,9 @@ abstract final class AppStrings {
   static const vendorSearchHint = 'Search by order ID or buyer name';
   static const vendorConfirmAllPending = 'Confirm All Pending';
   static const vendorViewAnalytics = 'View Analytics';
-  static const vendorStatPendingOrders = 'Pending Orders';
-  static const vendorStatActiveOrders = 'Active Orders';
-  static const vendorStatTotalOrders = 'Total Orders';
+  static const vendorStatPendingOrders = 'Pending';
+  static const vendorStatActiveOrders = 'Active';
+  static const vendorStatTotalOrders = 'Total';
   static const vendorStatRevenue = 'Revenue';
   static const vendorConfirmAllPendingTitle = 'Confirm all pending orders?';
   static String vendorOrdersConfirmed(int n) => '$n orders confirmed successfully';

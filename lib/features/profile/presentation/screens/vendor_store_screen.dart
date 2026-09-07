@@ -17,9 +17,9 @@ import '../../../../core/mock/mock_images.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import '../../../listing/presentation/providers/listing_dependencies.dart';
+import '../../../listing/presentation/widgets/listing_card_grid.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../providers/profile_dependencies.dart';
@@ -574,20 +574,15 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          mainAxisSpacing: AppSpacing.md,
-                          crossAxisSpacing: AppSpacing.md,
-                          childAspectRatio: 0.58,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                          childAspectRatio: 0.82,
                         ),
                     delegate: SliverChildBuilderDelegate((context, i) {
                       final item = _listings[i];
-                      final img = item.imageUrls.isNotEmpty
-                          ? item.imageUrls.first
-                          : null;
-                      return ProductCard(
-                        title: item.title,
-                        price: item.price,
-                        imageUrl: img,
-                        listingId: item.id,
+                      return ListingCardGrid(
+                        listing: item,
+                        imageHeight: 110,
                         onTap: () =>
                             context.push('${AppRoutes.product}/${item.id}'),
                       );

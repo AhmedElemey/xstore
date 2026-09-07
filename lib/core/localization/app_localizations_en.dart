@@ -1938,13 +1938,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorViewAnalytics => 'View Analytics';
 
   @override
-  String get vendorStatPendingOrders => 'Pending Orders';
+  String get vendorStatPendingOrders => 'Pending';
 
   @override
-  String get vendorStatActiveOrders => 'Active Orders';
+  String get vendorStatActiveOrders => 'Active';
 
   @override
-  String get vendorStatTotalOrders => 'Total Orders';
+  String get vendorStatTotalOrders => 'Total';
 
   @override
   String get vendorStatRevenue => 'Revenue';

@@ -1113,7 +1113,7 @@ Rules for the log:
 
 ### 2026-09-02 — Live orders snapshot listing/address/store, they are not mock field names
 - **What happened:** Order detail opened but items, delivery address, and Sold by were blank. `POST /api/orders` only sends `{listingId, quantity, latitude, longitude}`; GET echoes that flat shape (or `items: []` plus a nested `listing`), not `listingName`/`deliveryAddress`/`vendorStoreName`. The parser treated an empty `items` list as "no lines" and never read `listing.titleEn` / `userName` / nested address.
-- **Rule:** Parse order display fields from nested `listing`/`deliveryAddress`/`seller` using the confirmed listing keys (`titleEn`, `imageUrls`, `userId`/`userName`/`userAvatar`, `storeName`). If `items` is empty, fall back to the flat `listingId` line. When name/image/store/address are still blank, fill from `GET /api/listings/{id}` (same DTO as product detail). Do not map listing `userId` onto `consumerId`.
+- **Rule:** Parse order display fields from nested `listing`/`deliveryAddress`/`seller` using the confirmed listing keys (`titleEn`, `imageUrls`, `userId`/`userName`/`userAvatar`, `storeName`). If `items` is empty, fall back to the flat `listingId` line. Only `GET /api/listings/{id}` when a line is missing name, image, or price — not for seller avatar/address. Sold/paused listings 404 with `Listing not found.`; use `LegacyRouteOptions.allowNotFound()` and cache the miss so Incoming Orders does not log Dio ERROR. Do not map listing `userId` onto `consumerId`.
 - **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap` / `_hydrateOrders`; order detail item/address/sold-by UI.
 
 ### 2026-09-02 — Visit Store uses the live listings catalog, not `/users/{id}/store`
@@ -1342,7 +1342,7 @@ Rules for the log:
 ### 2026-09-07 — Incoming Orders cards share one drop shadow
 - **What happened:** The user wanted every order card on vendor home to match the pending card (order #6): same lift, same 4px accent bar, same tinted outline. Putting that shadow on the stats banner was the wrong surface. Confirmed/processing/shipped looked flat because only pending painted the bar and warning border. Wrapping My Listings grid in `Ink`/`DecoratedBox` without filling the cell passed `width: double.infinity` into `memCacheWidth.round()` (`Infinity or NaN toInt`). The list cards were left on a single `Container` decoration, so they did not pick up the order-card wrap. A rewrite of the grid also dropped the status badge `Stack`.
 - **Rule:** Every `VendorOrderCard` uses the same chrome: `cardShadowColor` shadow (`blurRadius: 10`, offset `(0, 3)`) outside clip, a 4px left bar, and a 45% status-color border (`orderStatusColor`). Status only changes the accent color and the action row. My Listings grid and list cards copy that chrome via `listingStatusAccent`. Inset grid tiles with `Padding` inside the cell so neighbors do not cover the shadow. Never set `clipBehavior: Clip.none` on the My Listings `ListView`/`GridView` — that lets cards paint over the pinned filter/sort header while scrolling. Keep the default clip; the inset is what preserves the shadow.
-- **Where it applies:** `vendor_order_card.dart`, `listing_card_grid.dart`, `listing_card_list.dart`, `status_badge.dart` `listingStatusAccent`, `listing_thumbnail.dart`, `my_listings_screen.dart`.
+- **Where it applies:** `vendor_order_card.dart`, `listing_card_grid.dart`, `listing_card_list.dart`, `status_badge.dart` `listingStatusAccent`, `listing_thumbnail.dart`, `my_listings_screen.dart`, `vendor_store_screen.dart`.
 
 ### 2026-09-08 — Add-listing photo copy sits under the strip
 - **What happened:** "Product Photos" / "Add 1–5 photos" sat above the add-photo tile, so the first thing on the form was a heading, not the images. The user then asked to put "Product Photos" back above the strip.
@@ -1354,10 +1354,30 @@ Rules for the log:
 - **Rule:** The vendor order-count banner is a solid `Color.lerp(surface, primary, 0.9)` fill — not full primary, not `indigoTint50`. Pending stays warning; other figures and Confirm All use white for contrast on the 90% mix.
 - **Where it applies:** `vendor_order_stats_banner.dart`.
 
+### 2026-09-08 — Vendor home stats labels drop the word "orders"
+- **What happened:** The Incoming Orders stats card labeled the counts "Pending Orders", "Active Orders", and "Total Orders", which wrapped and felt noisy on the compact row.
+- **Rule:** Those three banner labels are one word: Pending / Active / Total (`معلقة` / `نشطة` / `إجمالي`). Keep "orders" out of `vendorStatPendingOrders`, `vendorStatActiveOrders`, and `vendorStatTotalOrders`.
+- **Where it applies:** `app_en.arb` / `app_ar.arb` vendor stat keys; `vendor_order_stats_banner.dart`.
+
 ### 2026-09-08 — Vendor home "Needs Action" sort is a toolbar, not a boxed dropdown
 - **What happened:** Incoming Orders sat a default `DropdownButton` inside a bordered surface card, so the default sort ("Needs Action") looked like a second, uglier control under the filter chips.
 - **Rule:** Incoming Orders and My Listings sort controls are a compact `Sort by` + `PopupMenuButton` line — no bordered container and no Material `DropdownButton`. Incoming Orders puts the count on the right and uses warning color when the sort is `needsAction`; My Listings puts the list/grid toggles on the right at 18px with `AppSpacing.xs` padding so they match the sort chevron, not default 24px icons in `md` pads.
 - **Where it applies:** `vendor_order_sort_row.dart`, `listing_sort_bar.dart`.
+
+### 2026-09-08 — Manage Store product tiles use listing grid cards, not tall ProductCards
+- **What happened:** Profile → Manage Store rendered `ProductCard` in a `childAspectRatio: 0.58` sliver grid, so tiles were taller and flatter than Home/My Listings.
+- **Rule:** `VendorStoreScreen` uses `ListingCardGrid` (same shadow, 4px status bar, inset padding) with `imageHeight: 110` and grid `childAspectRatio: 0.82`. Tap opens product detail; do not put the My Listings overflow menu on the storefront. Do not stretch `ProductCard` with `Expanded` in a tall cell.
+- **Where it applies:** `vendor_store_screen.dart`, `listing_card_grid.dart`.
+
+### 2026-09-08 — Own-listing product detail hides buyer chrome
+- **What happened:** Opening a product from Manage Store (the vendor's own store) still showed quantity, Chat, and Buy Now — buyer actions on a listing the viewer already owns.
+- **Rule:** Product detail buyer chrome (quantity row, sticky Chat / Add to cart / Buy Now) is for other people's listings. Compare the session user id to `listing.vendorId` (fallback `seller.id`), not `isVendor` alone — a vendor shopping another store still sees buy actions.
+- **Where it applies:** `product_detail_screen.dart`.
+
+### 2026-09-08 — Hide Profile Manage Store, keep the code
+- **What happened:** Manage Store from Profile opened the public product-detail storefront, which is the wrong vendor flow.
+- **Rule:** The Profile `VendorStoreCard` Manage Store button stays in source as a comment (same as deferred store hours). Do not delete `onManageStore` or `AppRoutes.sellerPath`. After commenting a CTA, analyze the file — `sellerId` was only used by that callback.
+- **Where it applies:** `vendor_store_card.dart`, `profile_screen.dart`.
 
 
 

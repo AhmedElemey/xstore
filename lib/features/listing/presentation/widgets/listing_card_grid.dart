@@ -14,11 +14,15 @@ class ListingCardGrid extends StatelessWidget {
   const ListingCardGrid({
     super.key,
     required this.listing,
-    required this.onOpenMenu,
+    this.onOpenMenu,
+    this.onTap,
+    this.imageHeight = 140,
   });
 
   final ListingEntity listing;
-  final VoidCallback onOpenMenu;
+  final VoidCallback? onOpenMenu;
+  final VoidCallback? onTap;
+  final double imageHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -44,25 +48,27 @@ class ListingCardGrid extends StatelessWidget {
           color: context.surfaceColor,
           borderRadius: radius,
           clipBehavior: Clip.antiAlias,
-          child: Ink(
-            decoration: BoxDecoration(
-              border: Border.all(color: accent.withValues(alpha: 0.45)),
-              borderRadius: radius,
-            ),
-            child: Stack(
+          child: InkWell(
+            onTap: onTap,
+            child: Ink(
+              decoration: BoxDecoration(
+                border: Border.all(color: accent.withValues(alpha: 0.45)),
+                borderRadius: radius,
+              ),
+              child: Stack(
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(
-                      height: 140,
+                      height: imageHeight,
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
                           ListingThumbnail(
                             imageUrl: thumb,
                             width: double.infinity,
-                            height: 140,
+                            height: imageHeight,
                             borderRadius: 0,
                           ),
                           Positioned(
@@ -109,18 +115,19 @@ class ListingCardGrid extends StatelessWidget {
                               ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              LucideIcons.moreVertical,
-                              size: 18,
+                          if (onOpenMenu != null)
+                            IconButton(
+                              icon: const Icon(
+                                LucideIcons.moreVertical,
+                                size: 18,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 20,
+                                minHeight: 20,
+                              ),
+                              onPressed: onOpenMenu,
                             ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 20,
-                              minHeight: 20,
-                            ),
-                            onPressed: onOpenMenu,
-                          ),
                         ],
                       ),
                     ),
@@ -134,6 +141,7 @@ class ListingCardGrid extends StatelessWidget {
                   child: ColoredBox(color: accent),
                 ),
               ],
+            ),
             ),
           ),
         ),

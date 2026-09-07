@@ -92,7 +92,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final u = profile?.user ?? user;
     final isVendor = u.hasStore;
-    final sellerId = u.id.isNotEmpty ? u.id : user.id;
+    // final sellerId = u.id.isNotEmpty ? u.id : user.id;
 
     return RouteReentryRefresh(
       isTarget: (location) => location == AppRoutes.profile,
@@ -238,9 +238,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: VendorStoreCard(
                       profile: profile,
-                      onManageStore: sellerId.isEmpty
-                          ? null
-                          : () => context.push(AppRoutes.sellerPath(sellerId)),
+                      // Hidden on the card; keep the route wired for restore.
+                      // onManageStore: sellerId.isEmpty
+                      //     ? null
+                      //     : () => context.push(AppRoutes.sellerPath(sellerId)),
                     ),
                   ),
                 ),
