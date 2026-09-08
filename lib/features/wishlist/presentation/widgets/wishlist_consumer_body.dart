@@ -10,8 +10,9 @@ import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
 import 'move_all_to_cart_bar.dart';
 import 'wishlist_empty_state.dart';
-import 'wishlist_grid_card.dart';
-import 'wishlist_header_bar.dart';
+// Select + list/grid + sort toolbar lives in wishlist_header_bar.dart —
+// uncomment the WishlistHeaderBar line below (and this import) to restore.
+// import 'wishlist_header_bar.dart';
 import 'wishlist_item_card.dart';
 import 'wishlist_price_drop_banner.dart';
 import 'wishlist_selection_bar.dart';
@@ -54,7 +55,6 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
           isSelectionMode: s.isSelectionMode,
           selectedItemIds: s.selectedItemIds,
           selectedFilter: s.selectedFilter,
-          viewMode: s.viewMode,
           error: s.error,
         ),
       ),
@@ -76,9 +76,10 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const WishlistHeaderBar(),
         const WishlistPriceDropBanner(),
         const WishlistSortRow(),
+        // Select + list/grid + sort toolbar — kept in code, hidden for now.
+        // const WishlistHeaderBar(),
         Expanded(
           child: loading
               ? const WishlistSkeleton()
@@ -105,7 +106,6 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       bool isSelectionMode,
       Set<String> selectedItemIds,
       WishlistFilter selectedFilter,
-      WishlistViewMode viewMode,
       String? error,
     }) state,
     Wishlist notifier,
@@ -124,34 +124,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       );
     }
 
-    if (state.viewMode == WishlistViewMode.list) {
-      return ListView.separated(
-        physics: const AlwaysScrollableScrollPhysics(),
-        cacheExtent: 1000,
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.md,
-          AppSpacing.md,
-          AppSpacing.x4l,
-        ),
-        itemCount: filtered.length,
-        separatorBuilder: (_, __) => const Gap(AppSpacing.md),
-        itemBuilder: (context, i) {
-          final item = filtered[i];
-          return RepaintBoundary(
-            child: WishlistItemCard(
-              key: ValueKey<String>('wishlist-list-item-${item.id}'),
-              item: item,
-              selectionMode: state.isSelectionMode,
-              selected: state.selectedItemIds.contains(item.id),
-              onToggleSelect: () => notifier.toggleItemSelection(item.id),
-            ),
-          );
-        },
-      );
-    }
-
-    return GridView.builder(
+    return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       cacheExtent: 1000,
       padding: const EdgeInsets.fromLTRB(
@@ -160,18 +133,13 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
         AppSpacing.md,
         AppSpacing.x4l,
       ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 0.58,
-      ),
       itemCount: filtered.length,
+      separatorBuilder: (_, __) => const Gap(AppSpacing.md),
       itemBuilder: (context, i) {
         final item = filtered[i];
         return RepaintBoundary(
-          child: WishlistGridCard(
-            key: ValueKey<String>('wishlist-grid-item-${item.id}'),
+          child: WishlistItemCard(
+            key: ValueKey<String>('wishlist-list-item-${item.id}'),
             item: item,
             selectionMode: state.isSelectionMode,
             selected: state.selectedItemIds.contains(item.id),

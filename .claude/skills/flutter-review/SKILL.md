@@ -1341,8 +1341,8 @@ Rules for the log:
 
 ### 2026-09-07 — Incoming Orders cards share one drop shadow
 - **What happened:** The user wanted every order card on vendor home to match the pending card (order #6): same lift, same 4px accent bar, same tinted outline. Putting that shadow on the stats banner was the wrong surface. Confirmed/processing/shipped looked flat because only pending painted the bar and warning border. Wrapping My Listings grid in `Ink`/`DecoratedBox` without filling the cell passed `width: double.infinity` into `memCacheWidth.round()` (`Infinity or NaN toInt`). The list cards were left on a single `Container` decoration, so they did not pick up the order-card wrap. A rewrite of the grid also dropped the status badge `Stack`.
-- **Rule:** Every `VendorOrderCard` uses the same chrome: `cardShadowColor` shadow (`blurRadius: 10`, offset `(0, 3)`) outside clip, a 4px left bar, and a 45% status-color border (`orderStatusColor`). Status only changes the accent color and the action row. My Listings grid and list cards copy that chrome via `listingStatusAccent`. Inset grid tiles with `Padding` inside the cell so neighbors do not cover the shadow. Never set `clipBehavior: Clip.none` on the My Listings `ListView`/`GridView` — that lets cards paint over the pinned filter/sort header while scrolling. Keep the default clip; the inset is what preserves the shadow.
-- **Where it applies:** `vendor_order_card.dart`, `listing_card_grid.dart`, `listing_card_list.dart`, `status_badge.dart` `listingStatusAccent`, `listing_thumbnail.dart`, `my_listings_screen.dart`, `vendor_store_screen.dart`.
+- **Rule:** Every order list card (`VendorOrderCard` and consumer `OrderCard`) uses the same chrome: `cardShadowColor` shadow (`blurRadius: 10`, offset `(0, 3)`) outside clip, a 4px left bar, and a 45% status-color border (`orderStatusColor`). Status only changes the accent color and the action row. My Listings grid and list cards copy that chrome via `listingStatusAccent`. Wishlist list cards and Explore `ProductListCard` use the same chrome (primary accent, or success when compare-at price shows a drop). Inset grid tiles with `Padding` inside the cell so neighbors do not cover the shadow. Never set `clipBehavior: Clip.none` on the My Listings `ListView`/`GridView` — that lets cards paint over the pinned filter/sort header while scrolling. Keep the default clip; the inset is what preserves the shadow.
+- **Where it applies:** `vendor_order_card.dart`, `order_card.dart`, `wishlist_item_card.dart`, `product_list_card.dart`, `listing_card_grid.dart`, `listing_card_list.dart`, `status_badge.dart` `listingStatusAccent`, `listing_thumbnail.dart`, `my_listings_screen.dart`, `vendor_store_screen.dart`.
 
 ### 2026-09-08 — Add-listing photo copy sits under the strip
 - **What happened:** "Product Photos" / "Add 1–5 photos" sat above the add-photo tile, so the first thing on the form was a heading, not the images. The user then asked to put "Product Photos" back above the strip.
@@ -1378,6 +1378,26 @@ Rules for the log:
 - **What happened:** Manage Store from Profile opened the public product-detail storefront, which is the wrong vendor flow.
 - **Rule:** The Profile `VendorStoreCard` Manage Store button stays in source as a comment (same as deferred store hours). Do not delete `onManageStore` or `AppRoutes.sellerPath`. After commenting a CTA, analyze the file — `sellerId` was only used by that callback.
 - **Where it applies:** `vendor_store_card.dart`, `profile_screen.dart`.
+
+### 2026-09-08 — Wishlist app bar is title-only; actions sit under sort
+- **What happened:** Wishlist put Select + list/grid + sort icons in a custom top header, unlike Explore's title-only `AppBar` with controls below the filters.
+- **Rule:** Consumer Wishlist uses a title-only `AppBar` (`navWishlist`, or selected-count while selecting). List view only in the body. The Select + list/grid + sort toolbar (`WishlistHeaderBar`) stays in source but is commented out in `WishlistConsumerBody` (including Select) — uncomment the import + widget to restore. Sort still works via the Recently Added chip.
+- **Where it applies:** `wishlist_screen.dart`, `wishlist_header_bar.dart`, `wishlist_consumer_body.dart`, `wishlist_state.dart`, `wishlist_provider.dart`.
+
+### 2026-09-08 — Wishlist card text is a short hierarchy, not a stack
+- **What happened:** List wishlist cards stacked title, chips, price-drop line, price, rating, vendor, and shipping beside a 90px thumb — cramped and hard to scan.
+- **Rule:** Wishlist list cards use cart-like hierarchy: title → price (+ strike / `-N%`) → store name (+ verified) on its own line → `★ rating (count)` with shipping/pickup on the same row (trailing); actions under a divider. Do not show `condition · category` under the title (often looks like raw IDs). Drop redundant badge copy (price-drop badge on the image is enough). Wishlist is list-only (no grid card).
+- **Where it applies:** `wishlist_item_card.dart`.
+
+### 2026-09-08 — Scroll-controlled filter sheet must pin its header
+- **What happened:** Explore's filter bottom sheet used `isScrollControlled: true` with an unbounded `SingleChildScrollView`, so tall content grew the sheet past the viewport and the Filters title tucked under the status bar.
+- **Rule:** Explore (and any shell-tab) filter sheets must use `useRootNavigator: true` — otherwise the sheet stays in the tab navigator, the shell bottom nav stays visible, and the Filters title/X sit under the status bar / Dynamic Island. Capture `MediaQuery.viewPaddingOf(callerContext).top` before `showModalBottomSheet` and pass it into the sheet body (padding inside the sheet is often zeroed). Constrain height with that top inset + bottom viewPadding/viewInsets; pin title and Apply/Reset; scroll the middle.
+- **Where it applies:** `filter_bottom_sheet.dart`; any tall sheet opened from a `StatefulShellRoute` tab.
+
+### 2026-09-08 — Shipped order twin actions stay compact and equal
+- **What happened:** Consumer shipped cards put "Track Order" beside "✓ Confirm Receipt"; the emoji-in-label made the filled button crowd/overflow in equal `Expanded` slots.
+- **Rule:** Pair Track + Confirm Receipt with compact `ButtonStyle` (equal `Expanded`, `maxLines: 1`, ellipsis). Put the check as an `Icon`, not inside the l10n string (`ordersConfirmReceipt` is plain "Confirm Receipt" / "تأكيد الاستلام").
+- **Where it applies:** `order_card.dart`, `order_action_buttons.dart`, `app_en.arb` / `app_ar.arb` `ordersConfirmReceipt`.
 
 
 

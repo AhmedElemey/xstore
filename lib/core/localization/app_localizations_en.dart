@@ -1098,7 +1098,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersDeliveryLocationUpdated => 'Delivery location updated';
 
   @override
-  String get ordersConfirmReceipt => '✓ Confirm Receipt';
+  String get ordersConfirmReceipt => 'Confirm Receipt';
 
   @override
   String get ordersLeaveReview => 'Leave Review';

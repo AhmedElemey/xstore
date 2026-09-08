@@ -2237,7 +2237,7 @@ abstract class AppLocalizations {
   /// No description provided for @ordersConfirmReceipt.
   ///
   /// In en, this message translates to:
-  /// **'✓ Confirm Receipt'**
+  /// **'Confirm Receipt'**
   String get ordersConfirmReceipt;
 
   /// No description provided for @ordersLeaveReview.

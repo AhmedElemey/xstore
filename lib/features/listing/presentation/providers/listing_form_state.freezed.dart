@@ -171,7 +171,9 @@ mixin _$ListingFormState {
   bool get isSubmitting => throw _privateConstructorUsedError;
   Map<String, String> get errors => throw _privateConstructorUsedError;
 
-  /// Incremented when a draft is loaded from storage (for controller sync).
+  /// Bumped when a draft is loaded, the form is reset, or publish
+  /// succeeds — Add Listing listens for this to re-sync its
+  /// TextEditingControllers (the tab stays mounted in the vendor shell).
   int get draftRevision => throw _privateConstructorUsedError;
 
   /// Remote photo URLs already on the listing being edited (empty when
@@ -586,7 +588,9 @@ class _$ListingFormStateImpl implements _ListingFormState {
     return EqualUnmodifiableMapView(_errors);
   }
 
-  /// Incremented when a draft is loaded from storage (for controller sync).
+  /// Bumped when a draft is loaded, the form is reset, or publish
+  /// succeeds — Add Listing listens for this to re-sync its
+  /// TextEditingControllers (the tab stays mounted in the vendor shell).
   @override
   @JsonKey()
   final int draftRevision;
@@ -760,7 +764,9 @@ abstract class _ListingFormState implements ListingFormState {
   Map<String, String> get errors;
   @override
 
-  /// Incremented when a draft is loaded from storage (for controller sync).
+  /// Bumped when a draft is loaded, the form is reset, or publish
+  /// succeeds — Add Listing listens for this to re-sync its
+  /// TextEditingControllers (the tab stays mounted in the vendor shell).
   int get draftRevision;
   @override
 

@@ -1099,7 +1099,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersDeliveryLocationUpdated => 'تم تحديث موقع التوصيل';
 
   @override
-  String get ordersConfirmReceipt => '✓ تأكيد الاستلام';
+  String get ordersConfirmReceipt => 'تأكيد الاستلام';
 
   @override
   String get ordersLeaveReview => 'اترك تقييم';

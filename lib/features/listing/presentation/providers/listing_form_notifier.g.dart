@@ -7,7 +7,7 @@ part of 'listing_form_notifier.dart';
 // **************************************************************************
 
 String _$listingFormNotifierHash() =>
-    r'9380fef5754c6f773f6ab470578034202088671e';
+    r'98bc25c1d78745ffe468cf64485a1b877faa39f4';
 
 /// See also [ListingFormNotifier].
 @ProviderFor(ListingFormNotifier)

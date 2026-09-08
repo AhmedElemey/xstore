@@ -320,7 +320,7 @@ abstract final class AppStrings {
   static const ordersTrackOrder = 'Track Order';
   static const ordersViewDetails = 'View Details';
   static const ordersCancelOrder = 'Cancel Order';
-  static const ordersConfirmReceipt = '✓ Confirm Receipt';
+  static const ordersConfirmReceipt = 'Confirm Receipt';
   static const ordersLeaveReview = 'Leave Review';
   static const ordersReorder = 'Reorder';
   static const ordersRejectOrder = 'Reject';

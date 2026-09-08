@@ -384,7 +384,7 @@
   "ordersCancelOrder": "Cancel Order",
   "ordersUpdateDeliveryLocation": "Update delivery location",
   "ordersDeliveryLocationUpdated": "Delivery location updated",
-  "ordersConfirmReceipt": "✓ Confirm Receipt",
+  "ordersConfirmReceipt": "Confirm Receipt",
   "ordersLeaveReview": "Leave Review",
   "ordersReorder": "Reorder",
   "ordersRejectOrder": "Reject",
