@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// Last-known device coordinates, sent as `X-Latitude`/`X-Longitude` headers
@@ -11,20 +12,47 @@ import 'package:geolocator/geolocator.dart';
 /// startup (no permission prompt — returns null if never granted), and kept
 /// current whenever [LocationService.getCurrentLocation] succeeds anywhere
 /// in the app (edit-profile GPS detect, register store step, etc).
+///
+/// CONFIRMED (live, 2026-09-01): the backend also 400s
+/// `"Coordinates must be within Egypt bounds"` when those headers are a
+/// real GPS fix outside Egypt (iOS Simulator defaults to Cupertino). Only
+/// Egypt-bounded coordinates are stored; otherwise the Cairo fallback is
+/// sent.
 abstract final class AppLocationCache {
   static double? _latitude;
   static double? _longitude;
 
-  /// Cairo — used only until a real fix (last-known or fresh) is available,
-  /// so location-gated endpoints never hard-fail for a user who hasn't
-  /// granted location yet.
-  static const double _fallbackLatitude = 30.0444;
-  static const double _fallbackLongitude = 31.2357;
+  /// Cairo — used until a real in-Egypt fix is available, and whenever the
+  /// OS last-known / simulator GPS is outside Egypt.
+  static const double fallbackLatitude = 30.0444;
+  static const double fallbackLongitude = 31.2357;
 
-  static double get latitude => _latitude ?? _fallbackLatitude;
-  static double get longitude => _longitude ?? _fallbackLongitude;
+  static double get latitude {
+    final lat = _latitude;
+    final lng = _longitude;
+    if (lat == null || lng == null || !isInEgypt(lat, lng)) {
+      return fallbackLatitude;
+    }
+    return lat;
+  }
+
+  static double get longitude {
+    final lat = _latitude;
+    final lng = _longitude;
+    if (lat == null || lng == null || !isInEgypt(lat, lng)) {
+      return fallbackLongitude;
+    }
+    return lng;
+  }
+
+  /// Approximate Egypt bounding box used by the live API (and
+  /// [LocationService.isInEgypt]).
+  static bool isInEgypt(double lat, double lng) {
+    return lat >= 22.0 && lat <= 31.7 && lng >= 25.0 && lng <= 37.0;
+  }
 
   static void set(double latitude, double longitude) {
+    if (!isInEgypt(latitude, longitude)) return;
     _latitude = latitude;
     _longitude = longitude;
   }
@@ -45,5 +73,11 @@ abstract final class AppLocationCache {
     } catch (_) {
       // Best-effort only — the request-time fallback covers this.
     }
+  }
+
+  @visibleForTesting
+  static void debugReset() {
+    _latitude = null;
+    _longitude = null;
   }
 }

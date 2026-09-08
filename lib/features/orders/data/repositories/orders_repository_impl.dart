@@ -87,10 +87,35 @@ class OrdersRepositoryImpl implements OrdersRepository {
         if (row == null) return Left(Failure.notFound('Order'));
         return Right(row.toEntity());
       }
-      final row = await _remote.getOrderById(orderId);
-      if (row == null) return Left(Failure.notFound('Order'));
+      if (consumerId == null || consumerId.isEmpty) {
+        return Left(Failure.unauthorized());
+      }
+      // GET /orders/me/{id} is consumer-scoped but its payload was never
+      // live-probed — it may 404, wrap `{data:…}`, or omit consumerId.
+      // The orders list already rendered this row; fall back to it.
+      OrderModel? row;
+      Object? byIdError;
+      try {
+        row = await _remote.getOrderById(orderId);
+      } catch (e) {
+        byIdError = e;
+      }
+      if (row == null) {
+        final rows = await _remote.getConsumerOrders(
+          consumerId: consumerId,
+          page: 1,
+          pageSize: 100,
+        );
+        row = rows.where((e) => e.id == orderId).firstOrNull;
+      }
+      if (row == null) {
+        if (byIdError != null) return Left(Failure.server(byIdError.toString()));
+        return Left(Failure.notFound('Order'));
+      }
       final e = row.toEntity();
-      if (e.consumerId != consumerId) return Left(Failure.unauthorized());
+      if (e.consumerId.isNotEmpty && e.consumerId != consumerId) {
+        return Left(Failure.unauthorized());
+      }
       return Right(e);
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -130,9 +155,14 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) async {
     try {
-      final row = await _remote.confirmOrder(orderId: orderId, method: method);
+      final row = await _remote.confirmOrder(
+        orderId: orderId,
+        method: method,
+        vendorId: vendorId,
+      );
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -143,9 +173,14 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) async {
     try {
-      final row = await _remote.rejectOrder(orderId: orderId, reason: reason);
+      final row = await _remote.rejectOrder(
+        orderId: orderId,
+        reason: reason,
+        vendorId: vendorId,
+      );
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -153,9 +188,12 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<Either<Failure, OrderEntity>> markProcessing(String orderId) async {
+  Future<Either<Failure, OrderEntity>> markProcessing(
+    String orderId, {
+    String? vendorId,
+  }) async {
     try {
-      final row = await _remote.markProcessing(orderId);
+      final row = await _remote.markProcessing(orderId, vendorId: vendorId);
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -166,11 +204,13 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) async {
     try {
       final row = await _remote.markShipped(
         orderId: orderId,
         shippingInfo: shippingInfo,
+        vendorId: vendorId,
       );
       return Right(row.toEntity());
     } catch (e) {

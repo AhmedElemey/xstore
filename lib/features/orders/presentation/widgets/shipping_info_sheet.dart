@@ -15,76 +15,73 @@ class ShippingInfoSheet extends StatefulWidget {
 }
 
 class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
-  static const _couriers = <String>[
-    'Algérie Poste',
-    'Yalidine Express',
-    'Zr Express',
-    'Maystro Delivery',
-    'Guepex',
-    'Other',
-  ];
-
   final _trackingCtrl = TextEditingController();
-  final _noteCtrl = TextEditingController();
-  String? _courier = _couriers.first;
-  DateTime? _date;
+  final _courierCtrl = TextEditingController();
+  late DateTime _date;
   var _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _date = DateTime(now.year, now.month, now.day).add(const Duration(days: 2));
+  }
 
   @override
   void dispose() {
     _trackingCtrl.dispose();
-    _noteCtrl.dispose();
+    _courierCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final canSubmit = _date != null;
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg + MediaQuery.viewInsetsOf(context).bottom,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.l10n.vendorShippingInfoTitle, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.md),
+            Text(
+              context.l10n.vendorShippingInfoTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: AppSpacing.lg),
             TextField(
               controller: _trackingCtrl,
-              decoration: InputDecoration(hintText: context.l10n.vendorTrackingHint),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            DropdownButtonFormField<String>(
-              initialValue: _courier,
-              items: _couriers
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (v) => setState(() => _courier = v),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton(
-              onPressed: () async {
-                final now = DateTime.now();
-                final picked = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime(now.year, now.month, now.day),
-                  lastDate: now.add(const Duration(days: 30)),
-                  initialDate: now.add(const Duration(days: 2)),
-                );
-                if (picked != null) setState(() => _date = picked);
-              },
-              child: Text(
-                _date == null
-                    ? context.l10n.ordersEstimatedDeliveryLabel
-                    : DateFormat('EEEE, MMM d, yyyy').format(_date!),
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                labelText: context.l10n.ordersTrackingNumberLabel,
+                hintText: context.l10n.vendorTrackingHint,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             TextField(
-              controller: _noteCtrl,
-              maxLines: 3,
-              maxLength: 200,
+              controller: _courierCtrl,
+              textInputAction: TextInputAction.next,
               decoration: InputDecoration(
-                hintText: context.l10n.vendorShippingNoteHint,
+                labelText: context.l10n.ordersCourierNameLabel,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            OutlinedButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 30)),
+                  initialDate: _date,
+                );
+                if (picked != null) setState(() => _date = picked);
+              },
+              child: Text(
+                '${context.l10n.ordersEstimatedDeliveryLabel}: '
+                '${DateFormat('EEEE, MMM d, yyyy').format(_date)}',
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -99,15 +96,18 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: FilledButton(
-                    onPressed: !canSubmit || _loading
+                    onPressed: _loading
                         ? null
                         : () async {
                             final navigator = Navigator.of(context);
+                            final tracking = _trackingCtrl.text.trim();
+                            final courier = _courierCtrl.text.trim();
                             setState(() => _loading = true);
                             await widget.onConfirm(
                               ShippingInfo(
-                                trackingNumber: _trackingCtrl.text.trim(),
-                                courierName: _courier == 'Other' ? null : _courier,
+                                trackingNumber:
+                                    tracking.isEmpty ? null : tracking,
+                                courierName: courier.isEmpty ? null : courier,
                                 estimatedDelivery: _date,
                               ),
                             );

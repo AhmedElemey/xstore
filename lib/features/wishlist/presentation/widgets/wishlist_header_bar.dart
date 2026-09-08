@@ -10,6 +10,10 @@ import '../providers/wishlist_state.dart';
 import 'wishlist_sort_sheet.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Toolbar under [WishlistSortRow]: Select + list/grid + sort.
+///
+/// Hidden for now — kept in source so it can be restored by uncommenting
+/// `WishlistHeaderBar` in [WishlistConsumerBody].
 class WishlistHeaderBar extends ConsumerWidget {
   const WishlistHeaderBar({super.key});
 
@@ -19,7 +23,6 @@ class WishlistHeaderBar extends ConsumerWidget {
       wishlistProvider.select(
         (s) => (
           itemCount: s.items.length,
-          selectedCount: s.selectedItemIds.length,
           isSelectionMode: s.isSelectionMode,
           viewMode: s.viewMode,
         ),
@@ -27,45 +30,35 @@ class WishlistHeaderBar extends ConsumerWidget {
     );
     final notifier = ref.read(wishlistProvider.notifier);
     final n = state.itemCount;
-    final sel = state.selectedCount;
+
+    if (n == 0) {
+      return const SizedBox.shrink();
+    }
 
     return Material(
       color: context.surfaceColor,
       elevation: 0,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xs,
           AppSpacing.xs,
           AppSpacing.sm,
-          AppSpacing.sm,
-          AppSpacing.sm,
+          AppSpacing.xs,
         ),
         child: Row(
           children: [
-            if (n > 0)
-              TextButton(
-                onPressed: notifier.toggleSelectionMode,
-                child: Text(
-                  state.isSelectionMode
-                      ? context.l10n.wishlistCancelSelect
-                      : context.l10n.wishlistSelect,
-                  style: AppTypography.labelLarge.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            Expanded(
+            TextButton(
+              onPressed: notifier.toggleSelectionMode,
               child: Text(
                 state.isSelectionMode
-                    ? context.l10n.wishlistSelectedCount(sel)
-                    : context.l10n.wishlistAppBarTitle(n),
-                style: AppTypography.titleMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: context.textPrimary,
+                    ? context.l10n.wishlistCancelSelect
+                    : context.l10n.wishlistSelect,
+                style: AppTypography.labelLarge.copyWith(
+                  color: AppColors.primary,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
+            const Spacer(),
             IconButton(
               tooltip: state.viewMode == WishlistViewMode.list
                   ? context.l10n.wishlistGridContentDesc

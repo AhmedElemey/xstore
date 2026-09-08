@@ -12,7 +12,12 @@ class ConfirmOrderUseCase {
   Future<Either<Failure, OrderEntity>> call({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) {
-    return _repository.confirmOrder(orderId: orderId, method: method);
+    return _repository.confirmOrder(
+      orderId: orderId,
+      method: method,
+      vendorId: vendorId,
+    );
   }
 }

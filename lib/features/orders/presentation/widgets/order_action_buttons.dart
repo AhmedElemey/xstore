@@ -107,7 +107,6 @@ class OrderActionButtons extends ConsumerWidget {
       case OrderStatus.shipped:
       case OrderStatus.delivered:
       case OrderStatus.cancelled:
-      case OrderStatus.refunded:
         return const SizedBox.shrink();
     }
   }
@@ -177,10 +176,18 @@ class OrderActionButtons extends ConsumerWidget {
           ],
         );
       case OrderStatus.shipped:
+        final compact = ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          ),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
         return Row(
           children: [
             Expanded(
               child: OutlinedButton(
+                style: compact,
                 onPressed: busy
                     ? null
                     : () => AppSnackbar.show(
@@ -188,12 +195,18 @@ class OrderActionButtons extends ConsumerWidget {
                           message: order.trackingNumber ??
                               context.l10n.ordersTrackOnCourier,
                         ),
-                child: Text(context.l10n.ordersTrackOrder),
+                child: Text(
+                  context.l10n.ordersTrackOrder,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: FilledButton(
+                style: compact,
                 onPressed: busy
                     ? null
                     : () async {
@@ -204,7 +217,22 @@ class OrderActionButtons extends ConsumerWidget {
                           _err(context, ref, orderId);
                         }
                       },
-                child: Text(context.l10n.ordersConfirmReceipt),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check, size: AppSpacing.lg),
+                    const SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        context.l10n.ordersConfirmReceipt,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -243,7 +271,6 @@ class OrderActionButtons extends ConsumerWidget {
           onPressed: () => context.go(AppRoutes.explore),
         );
       case OrderStatus.processing:
-      case OrderStatus.refunded:
         return const SizedBox.shrink();
     }
   }

@@ -69,6 +69,20 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     return c;
   }
 
+  void _openFilters(
+    BuildContext context,
+    FilterState filters,
+    List<String> categoryOptions,
+  ) {
+    showExploreFilterBottomSheet(
+      context: context,
+      initial: filters,
+      categoryOptions: categoryOptions,
+      onApply: ref.read(exploreProvider.notifier).applyFilters,
+      onReset: ref.read(exploreProvider.notifier).resetFilters,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(
@@ -99,11 +113,28 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             .toList() ??
         const <String>[];
 
+    final filterCount = _filterCount(state.filters);
+
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         title: Text(context.l10n.navExplore),
         backgroundColor: context.backgroundColor,
+        actions: [
+          IconButton(
+            tooltip: context.l10n.filters,
+            onPressed: () => _openFilters(
+              context,
+              state.filters,
+              categoryOptions,
+            ),
+            icon: Badge(
+              isLabelVisible: filterCount > 0,
+              label: Text('$filterCount'),
+              child: const Icon(LucideIcons.slidersHorizontal),
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         color: AppColors.primary,
@@ -160,19 +191,23 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             children: [
                               const Gap(AppSpacing.md),
                               const RecentSearchesHeader(),
-                              Wrap(
-                                spacing: AppSpacing.sm,
-                                children: recent
-                                    .map(
-                                      (t) => ActionChip(
-                                        label: Text(t),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    for (var i = 0; i < recent.length; i++) ...[
+                                      if (i > 0)
+                                        const SizedBox(width: AppSpacing.sm),
+                                      ActionChip(
+                                        label: Text(recent[i]),
                                         onPressed: () {
-                                          _q.text = t;
-                                          notifier.onQueryChanged(t);
+                                          _q.text = recent[i];
+                                          notifier.onQueryChanged(recent[i]);
                                         },
                                       ),
-                                    )
-                                    .toList(),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ],
                           );
@@ -183,7 +218,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       const Gap(AppSpacing.lg),
                       ActiveFiltersRow(
                         filters: state.filters,
-                        activeFilterCount: _filterCount(state.filters),
                         onRemoveCategory: (c) {
                           final next = List<String>.from(state.filters.categories)
                             ..remove(c);
@@ -195,13 +229,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           notifier.applyFilters(state.filters.copyWith(conditions: next));
                         },
                         onClearAll: notifier.resetFilters,
-                        onOpenFilters: () => showExploreFilterBottomSheet(
-                          context: context,
-                          initial: state.filters,
-                          categoryOptions: categoryOptions,
-                          onApply: notifier.applyFilters,
-                          onReset: notifier.resetFilters,
-                        ),
                       ),
                       const Gap(AppSpacing.md),
                       Row(

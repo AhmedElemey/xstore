@@ -12,7 +12,12 @@ class MarkShippedUseCase {
   Future<Either<Failure, OrderEntity>> call({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) {
-    return _repository.markShipped(orderId: orderId, shippingInfo: shippingInfo);
+    return _repository.markShipped(
+      orderId: orderId,
+      shippingInfo: shippingInfo,
+      vendorId: vendorId,
+    );
   }
 }

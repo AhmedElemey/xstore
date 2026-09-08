@@ -53,13 +53,6 @@ class PhotoUploadSection extends StatelessWidget {
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.listingPhotoSectionSubtitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
         const Gap(AppSpacing.lg),
         SizedBox(
           height: tile + 8,
@@ -98,6 +91,13 @@ class PhotoUploadSection extends StatelessWidget {
                   ),
               ],
             ),
+          ),
+        ),
+        const Gap(AppSpacing.lg),
+        Text(
+          context.l10n.listingPhotoSectionSubtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         if (hasError)
@@ -305,8 +305,7 @@ class _PhotoTile extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Semantics(
-            label:
-                '${context.l10n.listingPhotoSectionTitle} ${index + 1}',
+            label: '${context.l10n.listingPhotoSectionTitle} ${index + 1}',
             image: true,
             child: Image.file(File(path), fit: BoxFit.cover),
           ),
@@ -315,7 +314,10 @@ class _PhotoTile extends StatelessWidget {
               left: 6,
               bottom: 6,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.materialGreen600,
                   borderRadius: BorderRadius.circular(20),

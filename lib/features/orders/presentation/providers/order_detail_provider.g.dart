@@ -7,7 +7,7 @@ part of 'order_detail_provider.dart';
 // **************************************************************************
 
 String _$orderDetailNotifierHash() =>
-    r'511b379678889a1a1d48d4841d09696d659cf7be';
+    r'9c3618067678a54f3fc2033cb85fc9a469536613';
 
 /// Copied from Dart SDK
 class _SystemHash {

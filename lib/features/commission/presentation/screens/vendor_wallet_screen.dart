@@ -5,7 +5,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../domain/entities/vendor_commission_wallet.dart';
 import '../providers/commission_config_provider.dart';
 import '../providers/vendor_commission_wallet_provider.dart';
@@ -24,7 +26,13 @@ class VendorWalletScreen extends ConsumerWidget {
     final wallet = ref.watch(vendorCommissionWalletProvider).valueOrNull;
     final feePerOrder = ref.watch(commissionFeeEgpForCategoryProvider(null));
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.vendorWallet,
+      onReentry: (ref) {
+        ref.invalidate(vendorCommissionSnapshotProvider);
+        ref.invalidate(vendorCommissionWalletProvider);
+      },
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         backgroundColor: context.surfaceColor,
@@ -70,6 +78,7 @@ class VendorWalletScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

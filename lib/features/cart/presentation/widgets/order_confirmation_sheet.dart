@@ -66,44 +66,50 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
       ),
       child: Column(
         children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.85, end: 1),
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.elasticOut,
-            builder: (context, s, child) =>
-                Transform.scale(scale: s, child: child),
-            child: Icon(
-              Icons.celebration_rounded,
-              size: AppSpacing.x4l * 2,
-              color: AppColors.success,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.85, end: 1),
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.elasticOut,
+                  builder: (context, s, child) =>
+                      Transform.scale(scale: s, child: child),
+                  child: Icon(
+                    Icons.celebration_rounded,
+                    size: AppSpacing.x4l * 2,
+                    color: AppColors.success,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  context.l10n.orderPlacedTitle,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.titleLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  context.l10n.orderPlacedNumber(widget.orderId),
+                  style: AppTypography.titleMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  context.l10n.orderTrackCta,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: context.textSecondary,
+                    height: 1.45,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            context.l10n.orderPlacedTitle,
-            textAlign: TextAlign.center,
-            style: AppTypography.titleLarge.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            context.l10n.orderPlacedNumber(widget.orderId),
-            style: AppTypography.titleMedium.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            context.l10n.orderTrackCta,
-            textAlign: TextAlign.center,
-            style: AppTypography.bodyMedium.copyWith(
-              color: context.textSecondary,
-              height: 1.45,
-            ),
-          ),
-          const Spacer(),
           XstoreButton(
             label: context.l10n.orderTrackCta,
             onPressed: () {

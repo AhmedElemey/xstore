@@ -37,34 +37,27 @@ class OrderDetailScrollContent extends ConsumerWidget {
       delegate: SliverChildListDelegate([
         _StatusBanner(order: order),
         Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: OrderTimeline(order: order),
-        ),
-        Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              context.l10n.ordersItemsSectionCount(order.items.length),
-              style: AppTypography.titleMedium,
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Column(
-            children: order.items.map((i) => OrderItemTile(item: i)).toList(),
-          ),
+          child: _WhiteCard(child: OrderTimeline(order: order)),
         ),
         const SizedBox(height: AppSpacing.lg),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Text(
-            context.l10n.ordersDeliveryAddressTitle,
-            style: AppTypography.titleMedium,
+          child: _WhiteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.l10n.ordersItemsSectionCount(order.items.length),
+                  style: AppTypography.titleMedium,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                for (final it in order.items) OrderItemTile(item: it),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.lg),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: _AddressCard(address: order.deliveryAddress),
@@ -164,14 +157,20 @@ class _StatusBanner extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(_iconFor(order.status), color: AppColors.white, size: 32),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            orderStatusLabel(context, order.status),
-            style: AppTypography.titleCompact.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Icon(_iconFor(order.status), color: AppColors.white, size: 28),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  orderStatusLabel(context, order.status),
+                  style: AppTypography.titleCompact.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -204,7 +203,6 @@ class _StatusBanner extends StatelessWidget {
     OrderStatus.shipped => Icons.local_shipping_outlined,
     OrderStatus.delivered => Icons.verified_rounded,
     OrderStatus.cancelled => Icons.cancel_outlined,
-    OrderStatus.refunded => Icons.replay_rounded,
   };
 
   String _subtitle(BuildContext context, OrderStatus s) => switch (s) {
@@ -214,7 +212,6 @@ class _StatusBanner extends StatelessWidget {
     OrderStatus.shipped => context.l10n.statusSubtitleShipped,
     OrderStatus.delivered => context.l10n.statusSubtitleDelivered,
     OrderStatus.cancelled => context.l10n.statusSubtitleCancelled,
-    OrderStatus.refunded => context.l10n.statusSubtitleRefunded,
   };
 }
 
@@ -251,24 +248,39 @@ class _AddressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final name = address.fullName.trim();
+    final street = address.street.trim();
+    final cityLine = [
+      if (address.city.trim().isNotEmpty) address.city.trim(),
+      if (address.wilaya.trim().isNotEmpty) address.wilaya.trim(),
+      if (address.postalCode != null && address.postalCode!.trim().isNotEmpty)
+        address.postalCode!.trim(),
+    ].join(', ');
+    final phone = address.phone.trim();
     return _WhiteCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '📍 ${address.fullName}',
-            style: AppTypography.bodyLarge.copyWith(
-              fontWeight: FontWeight.w700,
+            context.l10n.ordersDeliveryAddressTitle,
+            style: AppTypography.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (name.isNotEmpty)
+            Text(
+              name,
+              style: AppTypography.bodyLarge.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(address.street, style: AppTypography.bodyMedium),
-          Text(
-            '${address.city}, ${address.wilaya}${address.postalCode != null ? ' ${address.postalCode}' : ''}',
-            style: AppTypography.bodyMedium,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text('📞 ${address.phone}', style: AppTypography.bodyMedium),
+          if (street.isNotEmpty)
+            Text(street, style: AppTypography.bodyMedium),
+          if (cityLine.isNotEmpty)
+            Text(cityLine, style: AppTypography.bodyMedium),
+          if (phone.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(phone, style: AppTypography.bodyMedium),
+          ],
         ],
       ),
     );
@@ -292,11 +304,11 @@ class _SellerSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: order.vendorAvatar.isNotEmpty
-                      ? AppNetworkImage.network(order.vendorAvatar)
-                      : null,
+                _ShopAvatar(
+                  imageUrl: order.vendorAvatar,
+                  name: order.vendorStoreName.isNotEmpty
+                      ? order.vendorStoreName
+                      : order.vendorName,
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
@@ -304,7 +316,9 @@ class _SellerSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.vendorStoreName,
+                        order.vendorStoreName.isNotEmpty
+                            ? order.vendorStoreName
+                            : order.vendorName,
                         style: AppTypography.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -323,10 +337,53 @@ class _SellerSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             XstoreButton(
               label: context.l10n.visitStore,
-              onPressed: () =>
-                  context.push('${AppRoutes.sellerProfile}/${order.vendorId}'),
+              onPressed: order.vendorId.trim().isEmpty
+                  ? null
+                  : () => context.push(
+                      '${AppRoutes.sellerProfile}/${order.vendorId}',
+                    ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShopAvatar extends StatelessWidget {
+  const _ShopAvatar({required this.imageUrl, required this.name});
+
+  final String imageUrl;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final letter = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    return ClipOval(
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: imageUrl.trim().isNotEmpty
+            ? AppCachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                memCacheWidth: 96,
+                memCacheHeight: 96,
+                placeholder: (_, __) => _letterBox(letter),
+                errorWidget: (_, __, ___) => _letterBox(letter),
+              )
+            : _letterBox(letter),
+      ),
+    );
+  }
+
+  Widget _letterBox(String letter) {
+    return ColoredBox(
+      color: AppColors.primary,
+      child: Center(
+        child: Text(
+          letter,
+          style: AppTypography.titleMedium.copyWith(color: AppColors.white),
         ),
       ),
     );
@@ -346,7 +403,10 @@ class _BuyerSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.l10n.ordersBuyerInfo, style: AppTypography.titleMedium),
+            Text(
+              context.l10n.ordersBuyerInfo,
+              style: AppTypography.titleMedium,
+            ),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -404,8 +464,9 @@ class _BuyerSection extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(
                 onPressed: () async {
-                  final opened =
-                      await launchWhatsApp(phone: order.consumerPhone);
+                  final opened = await launchWhatsApp(
+                    phone: order.consumerPhone,
+                  );
                   if (!opened && context.mounted) {
                     AppSnackbar.info(
                       context,

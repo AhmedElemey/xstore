@@ -18,45 +18,63 @@ class OfflineBannerHost extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final online = ref.watch(isOnlineProvider);
 
-    // Instant show/hide (no CrossFade). Animating this Column's height
-    // rebuilds every route and can remount iOS SystemContextMenu after the
-    // text input connection is already gone.
-    return Column(
+    // Stack, not Column+Expanded. Flex as a parent of the navigator remounts
+    // Overlay inherited widgets (`_dependents.isEmpty`) when the banner's
+    // height changes — even with a stable child index and a keyed Expanded.
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        if (!online)
-          Material(
-            color: AppColors.warning,
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.sm,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      LucideIcons.wifiOff,
-                      size: AppSpacing.lg,
-                      color: AppColors.white,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        context.l10n.noInternet,
-                        style: AppTypography.labelLarge.copyWith(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+        child,
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _OfflineStrip(visible: !online),
+        ),
+      ],
+    );
+  }
+}
+
+class _OfflineStrip extends StatelessWidget {
+  const _OfflineStrip({required this.visible});
+
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!visible) return const SizedBox.shrink();
+
+    return Material(
+      color: AppColors.warning,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                LucideIcons.wifiOff,
+                size: AppSpacing.lg,
+                color: AppColors.white,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  context.l10n.noInternet,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        Expanded(child: child),
-      ],
+        ),
+      ),
     );
   }
 }

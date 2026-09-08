@@ -168,9 +168,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
         final notifier =
             ref.read(productDetailProvider(widget.productId).notifier);
-        final isVendor = ref.watch(
-          authProvider.select((a) => a.valueOrNull?.isVendor == true),
+        final sessionUser = ref.watch(
+          authProvider.select((a) => a.valueOrNull),
         );
+        final isVendor = sessionUser?.isVendor == true;
+        final ownerId = listing.vendorId.isNotEmpty
+            ? listing.vendorId
+            : (data.seller?.id ?? '');
+        final isOwnListing = sessionUser != null &&
+            sessionUser.id.isNotEmpty &&
+            ownerId.isNotEmpty &&
+            sessionUser.id == ownerId;
         final reviewSummary = data.reviewSummary;
 
         return Scaffold(
@@ -294,17 +302,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                   ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  SliverToBoxAdapter(
-                    child: QuantitySelector(
-                      quantity: data.quantity,
-                      maxQuantity: data.stockQuantity,
-                      onDecrement: notifier.decrementQuantity,
-                      onIncrement: notifier.incrementQuantity,
-                    ).fadeSlideIn(
-                      delay: const Duration(milliseconds: 280),
+                  if (!isOwnListing) ...[
+                    SliverToBoxAdapter(
+                      child: QuantitySelector(
+                        quantity: data.quantity,
+                        maxQuantity: data.stockQuantity,
+                        onDecrement: notifier.decrementQuantity,
+                        onIncrement: notifier.incrementQuantity,
+                      ).fadeSlideIn(
+                        delay: const Duration(milliseconds: 280),
+                      ),
                     ),
-                  ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                    const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                  ],
                   SliverToBoxAdapter(
                     child: SimilarProductsSection(
                       products: data.similarProducts,
@@ -327,17 +337,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: AppSpacing.x4l * 2 +
-                          AppSpacing.x3l +
-                          MediaQuery.paddingOf(context).bottom +
-                          MediaQuery.viewInsetsOf(context).bottom,
+                      height: isOwnListing
+                          ? AppSpacing.x3l +
+                              MediaQuery.paddingOf(context).bottom
+                          : AppSpacing.x4l * 2 +
+                              AppSpacing.x3l +
+                              MediaQuery.paddingOf(context).bottom +
+                              MediaQuery.viewInsetsOf(context).bottom,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          bottomNavigationBar: AnimatedPadding(
+          bottomNavigationBar: isOwnListing
+              ? null
+              : AnimatedPadding(
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOut,
             padding: EdgeInsets.only(

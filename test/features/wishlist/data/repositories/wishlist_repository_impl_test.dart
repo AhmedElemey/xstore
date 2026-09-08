@@ -9,11 +9,8 @@ import 'package:xstore/features/wishlist/domain/entities/wishlist_item_entity.da
 import '../../../../helpers/stub_cart_repository.dart';
 import '../../../../helpers/stub_wishlist_remote_datasource.dart';
 
-CartEntity _emptyCart(String consumerId) => CartEntity(
-      id: 'cart_stub',
-      consumerId: consumerId,
-      items: const [],
-    );
+CartEntity _emptyCart(String consumerId) =>
+    CartEntity(id: 'cart_stub', consumerId: consumerId, items: const []);
 
 WishlistItemEntity _item({
   String id = 'wish_1',
@@ -74,31 +71,33 @@ void main() {
   });
 
   group('addToWishlist', () {
-    test('passes the consumer/listing ids through and returns the added item',
-        () async {
-      final added = _item(listingId: 'listing_9');
-      final repo = WishlistRepositoryImpl(
-        StubWishlistRemoteDataSource(
-          onAddToWishlist: ({required consumerId, required listingId}) async {
-            expect(consumerId, 'consumer_1');
-            expect(listingId, 'listing_9');
-            return added;
-          },
-        ),
-        StubCartRepository(),
-      );
+    test(
+      'passes the consumer/listing ids through and returns the added item',
+      () async {
+        final added = _item(listingId: 'listing_9');
+        final repo = WishlistRepositoryImpl(
+          StubWishlistRemoteDataSource(
+            onAddToWishlist: ({required consumerId, required listingId}) async {
+              expect(consumerId, 'consumer_1');
+              expect(listingId, 'listing_9');
+              return added;
+            },
+          ),
+          StubCartRepository(),
+        );
 
-      final result = await repo.addToWishlist(
-        consumerId: 'consumer_1',
-        listingId: 'listing_9',
-      );
+        final result = await repo.addToWishlist(
+          consumerId: 'consumer_1',
+          listingId: 'listing_9',
+        );
 
-      expect(result.isRight(), isTrue);
-      result.fold(
-        (_) => fail('expected Right'),
-        (item) => expect(item.listingId, 'listing_9'),
-      );
-    });
+        expect(result.isRight(), isTrue);
+        result.fold(
+          (_) => fail('expected Right'),
+          (item) => expect(item.listingId, 'listing_9'),
+        );
+      },
+    );
 
     test('maps a thrown exception to Failure.server', () async {
       final repo = WishlistRepositoryImpl(
@@ -123,32 +122,43 @@ void main() {
   });
 
   group('removeFromWishlist', () {
-    test('passes the consumer/listing ids through and returns Right(unit)',
-        () async {
-      final repo = WishlistRepositoryImpl(
-        StubWishlistRemoteDataSource(
-          onRemoveFromWishlist: ({required consumerId, required listingId}) async {
-            expect(consumerId, 'consumer_1');
-            expect(listingId, 'listing_9');
-          },
-        ),
-        StubCartRepository(),
-      );
+    test(
+      'passes the consumer/listing ids through and returns Right(unit)',
+      () async {
+        final repo = WishlistRepositoryImpl(
+          StubWishlistRemoteDataSource(
+            onRemoveFromWishlist:
+                ({
+                  required consumerId,
+                  required listingId,
+                  wishlistItemId,
+                }) async {
+                  expect(consumerId, 'consumer_1');
+                  expect(listingId, 'listing_9');
+                },
+          ),
+          StubCartRepository(),
+        );
 
-      final result = await repo.removeFromWishlist(
-        consumerId: 'consumer_1',
-        listingId: 'listing_9',
-      );
+        final result = await repo.removeFromWishlist(
+          consumerId: 'consumer_1',
+          listingId: 'listing_9',
+        );
 
-      expect(result.isRight(), isTrue);
-      result.fold((_) => fail('expected Right'), (u) => expect(u, unit));
-    });
+        expect(result.isRight(), isTrue);
+        result.fold((_) => fail('expected Right'), (u) => expect(u, unit));
+      },
+    );
 
     test('maps a thrown exception to Failure.server', () async {
       final repo = WishlistRepositoryImpl(
         StubWishlistRemoteDataSource(
-          onRemoveFromWishlist: ({required consumerId, required listingId}) async =>
-              throw const UnauthorizedException('nope'),
+          onRemoveFromWishlist:
+              ({
+                required consumerId,
+                required listingId,
+                wishlistItemId,
+              }) async => throw const UnauthorizedException('nope'),
         ),
         StubCartRepository(),
       );
@@ -198,53 +208,49 @@ void main() {
   });
 
   group('moveListingToCart', () {
-    test('delegates to CartRepository.addFromListing and discards the cart',
-        () async {
-      String? capturedConsumerId;
-      String? capturedListingId;
-      int? capturedQuantity;
-      final repo = WishlistRepositoryImpl(
-        StubWishlistRemoteDataSource(),
-        StubCartRepository(
-          addFromListingResult: ({
-            required consumerId,
-            required listingId,
-            required quantity,
-          }) {
-            capturedConsumerId = consumerId;
-            capturedListingId = listingId;
-            capturedQuantity = quantity;
-            return Right(_emptyCart(consumerId));
-          },
-        ),
-      );
+    test(
+      'delegates to CartRepository.addFromListing and discards the cart',
+      () async {
+        String? capturedConsumerId;
+        String? capturedListingId;
+        int? capturedQuantity;
+        final repo = WishlistRepositoryImpl(
+          StubWishlistRemoteDataSource(),
+          StubCartRepository(
+            addFromListingResult:
+                ({required consumerId, required listingId, required quantity}) {
+                  capturedConsumerId = consumerId;
+                  capturedListingId = listingId;
+                  capturedQuantity = quantity;
+                  return Right(_emptyCart(consumerId));
+                },
+          ),
+        );
 
-      final result = await repo.moveListingToCart(
-        consumerId: 'consumer_1',
-        listingId: 'listing_9',
-        quantity: 2,
-      );
+        final result = await repo.moveListingToCart(
+          consumerId: 'consumer_1',
+          listingId: 'listing_9',
+          quantity: 2,
+        );
 
-      expect(result.isRight(), isTrue);
-      result.fold((_) => fail('expected Right'), (u) => expect(u, unit));
-      expect(capturedConsumerId, 'consumer_1');
-      expect(capturedListingId, 'listing_9');
-      expect(capturedQuantity, 2);
-    });
+        expect(result.isRight(), isTrue);
+        result.fold((_) => fail('expected Right'), (u) => expect(u, unit));
+        expect(capturedConsumerId, 'consumer_1');
+        expect(capturedListingId, 'listing_9');
+        expect(capturedQuantity, 2);
+      },
+    );
 
     test('defaults quantity to 1 when not specified', () async {
       int? capturedQuantity;
       final repo = WishlistRepositoryImpl(
         StubWishlistRemoteDataSource(),
         StubCartRepository(
-          addFromListingResult: ({
-            required consumerId,
-            required listingId,
-            required quantity,
-          }) {
-            capturedQuantity = quantity;
-            return Right(_emptyCart(consumerId));
-          },
+          addFromListingResult:
+              ({required consumerId, required listingId, required quantity}) {
+                capturedQuantity = quantity;
+                return Right(_emptyCart(consumerId));
+              },
         ),
       );
 
@@ -260,12 +266,9 @@ void main() {
       final repo = WishlistRepositoryImpl(
         StubWishlistRemoteDataSource(),
         StubCartRepository(
-          addFromListingResult: ({
-            required consumerId,
-            required listingId,
-            required quantity,
-          }) =>
-              Left(Failure.validation('out of stock')),
+          addFromListingResult:
+              ({required consumerId, required listingId, required quantity}) =>
+                  Left(Failure.validation('out of stock')),
         ),
       );
 
@@ -283,23 +286,26 @@ void main() {
   });
 
   group('stubFromListingId', () {
-    test('returns the remote-built preview unwrapped (not an Either)', () async {
-      final preview = _item(listingId: 'listing_1');
-      final repo = WishlistRepositoryImpl(
-        StubWishlistRemoteDataSource(
-          onBuildFromListingId: (listingId, {wishId}) async {
-            expect(listingId, 'listing_1');
-            expect(wishId, isNull);
-            return preview;
-          },
-        ),
-        StubCartRepository(),
-      );
+    test(
+      'returns the remote-built preview unwrapped (not an Either)',
+      () async {
+        final preview = _item(listingId: 'listing_1');
+        final repo = WishlistRepositoryImpl(
+          StubWishlistRemoteDataSource(
+            onBuildFromListingId: (listingId, {wishId}) async {
+              expect(listingId, 'listing_1');
+              expect(wishId, isNull);
+              return preview;
+            },
+          ),
+          StubCartRepository(),
+        );
 
-      final result = await repo.stubFromListingId('listing_1');
+        final result = await repo.stubFromListingId('listing_1');
 
-      expect(result, preview);
-    });
+        expect(result, preview);
+      },
+    );
 
     test('propagates a thrown exception unwrapped', () async {
       final repo = WishlistRepositoryImpl(

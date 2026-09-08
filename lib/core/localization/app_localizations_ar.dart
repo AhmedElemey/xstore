@@ -475,7 +475,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingBrandOptional => 'الماركة (اختياري)';
 
   @override
-  String get listingBrandHint => 'ابدأ الكتابة…';
+  String get listingBrandHint => 'اسم الماركة';
 
   @override
   String get listingSectionStockShipping => 'المخزون والشحن';
@@ -1099,7 +1099,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersDeliveryLocationUpdated => 'تم تحديث موقع التوصيل';
 
   @override
-  String get ordersConfirmReceipt => '✓ تأكيد الاستلام';
+  String get ordersConfirmReceipt => 'تأكيد الاستلام';
 
   @override
   String get ordersLeaveReview => 'اترك تقييم';
@@ -1939,13 +1939,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorViewAnalytics => 'عرض التحليلات';
 
   @override
-  String get vendorStatPendingOrders => 'طلبات معلقة';
+  String get vendorStatPendingOrders => 'معلقة';
 
   @override
-  String get vendorStatActiveOrders => 'طلبات نشطة';
+  String get vendorStatActiveOrders => 'نشطة';
 
   @override
-  String get vendorStatTotalOrders => 'إجمالي الطلبات';
+  String get vendorStatTotalOrders => 'إجمالي';
 
   @override
   String get vendorStatRevenue => 'الإيرادات';

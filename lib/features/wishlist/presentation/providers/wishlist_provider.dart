@@ -50,9 +50,7 @@ class Wishlist extends _$Wishlist {
         Future.microtask(fetchWishlist);
       } else {
         _sessionEpoch++;
-        Future.microtask(
-          () => state = const WishlistState(),
-        );
+        Future.microtask(() => state = const WishlistState());
       }
     });
     return const WishlistState();
@@ -104,8 +102,8 @@ class Wishlist extends _$Wishlist {
       case WishlistSortOption.nameAZ:
         list.sort(
           (a, b) => a.listingName.toLowerCase().compareTo(
-                b.listingName.toLowerCase(),
-              ),
+            b.listingName.toLowerCase(),
+          ),
         );
         break;
     }
@@ -178,10 +176,9 @@ class Wishlist extends _$Wishlist {
       wishlistedListingIds: {...state.wishlistedListingIds, listingId},
     );
     _applyFilterSort();
-    final r = await ref.read(addToWishlistUseCaseProvider).call(
-          consumerId: id,
-          listingId: listingId,
-        );
+    final r = await ref
+        .read(addToWishlistUseCaseProvider)
+        .call(consumerId: id, listingId: listingId);
     if (epoch != _sessionEpoch) return;
     r.fold(
       (f) {
@@ -193,16 +190,20 @@ class Wishlist extends _$Wishlist {
         _applyFilterSort();
       },
       (e) {
-        final without = state.items.where((x) => x.listingId != listingId).toList();
+        final without = state.items
+            .where((x) => x.listingId != listingId)
+            .toList();
         state = state.copyWith(
           items: [...without, e],
           wishlistedListingIds: {...state.wishlistedListingIds, listingId},
         );
         _applyFilterSort();
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.wishlistAdd,
-          properties: {AnalyticsProps.itemId: listingId},
-        );
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.wishlistAdd,
+              properties: {AnalyticsProps.itemId: listingId},
+            );
       },
     );
   }
@@ -217,17 +218,19 @@ class Wishlist extends _$Wishlist {
     final snapshot = List<WishlistItemEntity>.from(state.items);
     final snapIds = Set<String>.from(state.wishlistedListingIds);
     final idx = snapshot.indexWhere((e) => e.listingId == listingId);
-    if (idx < 0) return;
-    final removed = snapshot[idx];
+    final removed = idx >= 0 ? snapshot[idx] : null;
     state = state.copyWith(
       items: snapshot.where((e) => e.listingId != listingId).toList(),
       wishlistedListingIds: {...snapIds}..remove(listingId),
       lastRemoved: showUndo ? removed : null,
     );
     _applyFilterSort();
-    final r = await ref.read(removeFromWishlistUseCaseProvider).call(
+    final r = await ref
+        .read(removeFromWishlistUseCaseProvider)
+        .call(
           consumerId: id,
           listingId: listingId,
+          wishlistItemId: removed?.id,
         );
     if (epoch != _sessionEpoch) return;
     r.fold(
@@ -241,10 +244,12 @@ class Wishlist extends _$Wishlist {
         _applyFilterSort();
       },
       (_) {
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.wishlistRemove,
-          properties: {AnalyticsProps.itemId: listingId},
-        );
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.wishlistRemove,
+              properties: {AnalyticsProps.itemId: listingId},
+            );
       },
     );
   }
@@ -255,25 +260,20 @@ class Wishlist extends _$Wishlist {
     if (last == null || id == null) return;
     final epoch = _sessionEpoch;
     state = state.copyWith(lastRemoved: null);
-    final r = await ref.read(addToWishlistUseCaseProvider).call(
-          consumerId: id,
-          listingId: last.listingId,
-        );
+    final r = await ref
+        .read(addToWishlistUseCaseProvider)
+        .call(consumerId: id, listingId: last.listingId);
     if (epoch != _sessionEpoch) return;
-    r.fold(
-      (f) => state = state.copyWith(error: f.toString()),
-      (e) {
-        final without = state.items.where((x) => x.listingId != e.listingId).toList();
-        state = state.copyWith(
-          items: [...without, e],
-          wishlistedListingIds: {
-            ...state.wishlistedListingIds,
-            e.listingId,
-          },
-        );
-        _applyFilterSort();
-      },
-    );
+    r.fold((f) => state = state.copyWith(error: f.toString()), (e) {
+      final without = state.items
+          .where((x) => x.listingId != e.listingId)
+          .toList();
+      state = state.copyWith(
+        items: [...without, e],
+        wishlistedListingIds: {...state.wishlistedListingIds, e.listingId},
+      );
+      _applyFilterSort();
+    });
   }
 
   Future<void> removeByItemId(String wishItemId) async {
@@ -292,10 +292,9 @@ class Wishlist extends _$Wishlist {
     }
     final epoch = _sessionEpoch;
     state = state.copyWith(isUpdating: true, error: null);
-    final r = await ref.read(moveToCartUseCaseProvider).call(
-          consumerId: id,
-          listingId: listingId,
-        );
+    final r = await ref
+        .read(moveToCartUseCaseProvider)
+        .call(consumerId: id, listingId: listingId);
     if (epoch != _sessionEpoch) return;
     state = state.copyWith(isUpdating: false);
     var ok = false;
@@ -322,10 +321,9 @@ class Wishlist extends _$Wishlist {
     final targets = state.items.where((e) => e.isAvailable).toList();
     state = state.copyWith(isUpdating: true, error: null);
     for (final e in targets) {
-      await ref.read(moveToCartUseCaseProvider).call(
-            consumerId: id,
-            listingId: e.listingId,
-          );
+      await ref
+          .read(moveToCartUseCaseProvider)
+          .call(consumerId: id, listingId: e.listingId);
       if (epoch != _sessionEpoch) return;
     }
     state = state.copyWith(isUpdating: false);
@@ -340,14 +338,10 @@ class Wishlist extends _$Wishlist {
     // Same confirmed POST /api/wishlist/{consumerId}/items route as
     // toggleWishlist — the backend builds the denormalized wishlist entry
     // itself, so no client-built payload is needed.
-    final r = await ref.read(addToWishlistUseCaseProvider).call(
-          consumerId: id,
-          listingId: item.listingId,
-        );
-    await r.fold(
-      (_) async {},
-      (_) async => fetchWishlist(),
-    );
+    final r = await ref
+        .read(addToWishlistUseCaseProvider)
+        .call(consumerId: id, listingId: item.listingId);
+    await r.fold((_) async {}, (_) async => fetchWishlist());
   }
 
   void applyFilter(WishlistFilter f) {
@@ -411,10 +405,7 @@ class Wishlist extends _$Wishlist {
       await removeByItemId(id);
       if (epoch != _sessionEpoch) return;
     }
-    state = state.copyWith(
-      isSelectionMode: false,
-      selectedItemIds: {},
-    );
+    state = state.copyWith(isSelectionMode: false, selectedItemIds: {});
   }
 
   Future<void> addSelectedToCart() async {
@@ -427,10 +418,9 @@ class Wishlist extends _$Wishlist {
         .toList();
     state = state.copyWith(isUpdating: true);
     for (final e in selected) {
-      await ref.read(moveToCartUseCaseProvider).call(
-            consumerId: id,
-            listingId: e.listingId,
-          );
+      await ref
+          .read(moveToCartUseCaseProvider)
+          .call(consumerId: id, listingId: e.listingId);
       if (epoch != _sessionEpoch) return;
     }
     state = state.copyWith(
