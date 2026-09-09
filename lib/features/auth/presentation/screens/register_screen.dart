@@ -16,9 +16,9 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
-import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
-import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../store_categories/domain/entities/store_category_entity.dart';
+import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -722,16 +722,16 @@ class _StepStore extends ConsumerWidget {
           ),
         ),
         const Gap(AppSpacing.sm),
-        _lookupDropdown<CatalogCategoryEntity>(
+        _lookupDropdown<StoreCategoryEntity>(
           context: context,
-          async: ref.watch(allCatalogCategoriesProvider),
+          async: ref.watch(allStoreCategoriesProvider),
           value: s.storeCategoryId,
           idOf: (e) => e.id,
           labelOf: (e) => e.name.resolve(isArabic),
           hint: context.l10n.storeSellHint,
           errorText: s.stepErrors['storeCategory'],
           onChanged: (v) => n.updateField(storeCategoryId: v),
-          onRetry: () => ref.invalidate(allCatalogCategoriesProvider),
+          onRetry: () => ref.invalidate(allStoreCategoriesProvider),
         ),
         const Gap(AppSpacing.lg),
         AuthTextField(

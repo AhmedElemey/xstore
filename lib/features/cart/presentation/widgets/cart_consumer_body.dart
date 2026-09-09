@@ -9,7 +9,7 @@ import '../providers/cart_provider.dart';
 import 'cart_checkout_bar.dart';
 import 'cart_empty_state.dart';
 import 'cart_recommended_strip.dart';
-import 'cart_select_all_row.dart';
+// import 'cart_select_all_row.dart';
 import 'cart_summary_card.dart';
 import 'cart_vendor_group.dart';
 import 'coupon_input_row.dart';
@@ -41,7 +41,11 @@ class CartConsumerBody extends ConsumerWidget {
       }
       return const CartEmptyState();
     }
-    final childCount = groups.length + 7;
+    // Select-all header stays in source (`cart_select_all_row.dart`) but is
+    // hidden for now — uncomment the import + index-0 branch below to restore.
+    // When restoring, set childCount back to `groups.length + 7` and shift
+    // vendor indices to `index - 1` / `groups.length + 1` again.
+    final childCount = groups.length + 6;
 
     return ColoredBox(
       color: context.backgroundColor,
@@ -77,9 +81,9 @@ class CartConsumerBody extends ConsumerWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        if (index == 0) return const CartSelectAllRow();
-                        if (index <= groups.length) {
-                          final group = groups[index - 1];
+                        // if (index == 0) return const CartSelectAllRow();
+                        if (index < groups.length) {
+                          final group = groups[index];
                           return Padding(
                             padding:
                                 const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -93,7 +97,7 @@ class CartConsumerBody extends ConsumerWidget {
                             ),
                           );
                         }
-                        final tail = index - (groups.length + 1);
+                        final tail = index - groups.length;
                         switch (tail) {
                           case 0:
                             return const CouponInputRow();

@@ -437,11 +437,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingCompareAtTitle => 'Compare-at price (optional)';
 
   @override
-  String get listingCompareAtHelper => 'Original price for discount display';
+  String get listingCompareAtHelper =>
+      'Original price shown as a strikethrough for discounts. Leave empty if none. Must be greater than the selling price.';
 
   @override
   String get listingCompareAtWarning =>
-      'Compare-at price is lower than your selling price.';
+      'Compare-at price must be greater than your selling price.';
 
   @override
   String get listingDescriptionLabel => 'Description *';

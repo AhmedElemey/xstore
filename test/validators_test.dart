@@ -199,5 +199,32 @@ void main() {
       );
       expect(Validators.listingFormHasErrors(input), isFalse);
     });
+
+    test('compare-at must be strictly greater than price', () {
+      ListingFormValidationInput input({required String compareAt}) =>
+          ListingFormValidationInput(
+            photoPaths: const ['p'],
+            name: 'Shoes',
+            priceInput: '10',
+            compareAtPriceInput: compareAt,
+            description: 'Nice',
+            categoryId: 'c',
+            subcategoryId: 's',
+            condition: 'new',
+            quantity: 1,
+            location: 'Cairo',
+            shippingAvailable: false,
+            shippingCostInput: '',
+          );
+
+      expect(Validators.listingFormHasErrors(input(compareAt: '')), isFalse);
+      expect(Validators.listingFormHasErrors(input(compareAt: '11')), isFalse);
+      expect(Validators.listingFormHasErrors(input(compareAt: '10')), isTrue);
+      expect(Validators.listingFormHasErrors(input(compareAt: '9')), isTrue);
+      expect(
+        Validators.listingFormErrors(l10n, input(compareAt: '10'))['compareAt'],
+        l10n.listingCompareAtWarning,
+      );
+    });
   });
 }

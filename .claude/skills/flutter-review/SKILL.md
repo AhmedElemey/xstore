@@ -752,10 +752,10 @@ Rules for the log:
 - **Rule:** Treat any 2xx from `POST /api/analytics/events` as "this batch delivered — `removeRange` it and persist." Do not drop the rest of the queue. Do not drop on 404.
 - **Where it applies:** `analytics_service.dart` `_runFlush`.
 
-### 2026-08-25 — Vendor register store category uses GET /api/categories
-- **What happened:** The vendor store-setup dropdown watched `allStoreCategoriesProvider` (`/api/storecategories`) while listings/home already used `allCatalogCategoriesProvider`.
-- **Rule:** Vendor `storeCategoryId` is a catalog category id. Watch `allCatalogCategoriesProvider` (`GET /api/categories`) for that dropdown — do not fetch `/api/storecategories`. Show the top-level list as returned; do not flatten `children` into the register dropdown.
-- **Where it applies:** `register_screen.dart` store-setup dropdown; any future store-category picker.
+### 2026-08-25 — Vendor register store category uses GET /api/storecategories (corrected 2026-09-08)
+- **What happened:** An earlier change switched the vendor store-setup dropdown to `allCatalogCategoriesProvider` (`GET /api/categories`). Live vendor create then failed with `StoreCategory with Id 10 not found` when selecting catalog "Other" (id 10) — backend validates `storeCategoryId` against the StoreCategory table, not catalog categories. Mock "Other/Mixed" is store-category id 9, confirming the two ID spaces diverge.
+- **Rule:** Vendor `storeCategoryId` is a **store** category id. Watch `allStoreCategoriesProvider` (`GET /api/storecategories`) on register and edit-profile store pickers — never `allCatalogCategoriesProvider` (`GET /api/categories`). Catalog categories stay for listings/home/explore product taxonomy only.
+- **Where it applies:** `register_screen.dart` store-setup dropdown; `edit_profile_screen.dart` `_pickCategory` / `_storeCategoryLabel`; any future store-category picker.
 
 ### 2026-08-26 — isEmailVerified/isPhoneNumberVerified: extend ProfileEntity, not UserEntity/UserModel, when there's no SDK to regenerate codegen
 - **What happened:** Building the email/phone OTP verification flow in Edit Profile needed to surface `isEmailVerified`/`isPhoneNumberVerified` (sent by the backend alongside `isVerified` on the user object, per an existing-but-previously-unwired code comment in `user_model.dart`). `UserEntity`/`UserModel` are freezed classes with ~1000-line generated mirrors each (`user_entity.freezed.dart`, `user_model.freezed.dart`), and this session had no `flutter`/`dart` binary anywhere on disk to run `build_runner`. Adding two fields there would have meant hand-editing ~14 call sites across two giant generated files with no way to verify the result compiles. Instead, the two flags were added only to `ProfileEntity` (a 21-line source / ~360-line generated freezed file with a fraction of the fields) — architecturally justified since `ProfileEntity` already carries the sibling `isEmailVerificationRequired`/`isPhoneVerificationRequired` flags from the exact same wrapper response, parsed in the same `parseProfileResponse` function. `ProfileResponseWire` and `ProfileModel` (both hand-written, non-freezed classes) needed no codegen at all.
@@ -1409,7 +1409,28 @@ Rules for the log:
 - **Rule:** When a merge conflict lands on a screen that both branches redesigned, read BOTH full versions before resolving — check whether each branch's changes are visual-only, data/logic-only, or both, since "take theirs" or "take ours" silently drops whichever category the other branch touched. A screen's own git-blame/recent-commit list (`git log --oneline -- <file>`) is worth checking before starting a redesign in case parallel work already touched the same file.
 - **Where it applies:** `vendor_store_screen.dart`; any screen with independent design and data-fetching workstreams that could land in parallel branches.
 
-### 2026-09-09 — A UI redesign commit can leave an already-merged screen test asserting removed copy; CI catches it, the fix is the test, not the widget
-- **What happened:** Merging `dev` into `main` (fast-forward, no conflicts) still left CI's `Analyze & Test` job red: `wishlist_screen_live_flow_test.dart` asserted `find.text('My Wishlist (1)')`, but an earlier `dev` commit ("Polish orders, wishlist, and explore card UI and chrome") had deliberately redesigned `WishlistScreen` to show a plain, count-less AppBar title (`context.l10n.navWishlist`, "Wishlist") and hid `WishlistHeaderBar`'s old "My Wishlist (n)" counted title behind a `SizedBox.shrink()` when the list is non-empty (its own doc comment: "Hidden for now — kept in source"). The test (added 2026-09-02) predated that redesign by six days and was never updated in the same commit that changed the UI it was asserting on — a clean, conflict-free git merge doesn't catch this kind of drift, only actually running the test suite does.
-- **Rule:** When CI fails after a merge that itself introduced no conflicts, don't assume the failure is spurious — trace whether a later commit on the merged-in branch intentionally changed the UI/behavior an existing test asserts on (`git log --follow` on both the test file and the widget file it exercises, compare dates). If the production code's current behavior is the deliberate, intended design (confirmed via a code comment or commit message explaining the change), fix the stale test to match current behavior — don't revert the redesign to make an old assertion pass again.
-- **Where it applies:** `wishlist_screen_live_flow_test.dart` (fixed: asserts the AppBar's plain "Wishlist" title instead of the now-hidden counted title); any future post-merge CI failure — check for this shape (test predates a later, intentional UI change) before assuming a real regression.
+### 2026-09-08 — Vendor store avatar: name beside circle; logo ≠ banner
+- **What happened:** After the overlapping-avatar redesign, shop name sat under the circle (right side empty) and the initial letter clipped inside `CircleAvatar`. Store logo was also reused as the full-bleed banner, and `storeLogoUrl` ignored API aliases like `storeImageUrl`.
+- **Rule:** Overlapping store avatar keeps name/subtitle indented beside it (`left: 2*radius + gap`). Fit initials with `FittedBox`. Banner stays a decorative mock/separate URL — never the store logo. Parse `storeLogoUrl` via `firstNonBlank(storeLogoUrl, storeImageUrl, logoUrl, imageUrl)`.
+- **Where it applies:** `vendor_store_screen.dart`, `user_model.dart` `mergeStoreJsonIntoUser`.
+- **Correction 2026-09-08:** Product asked to remove the banner photo under back/share. Vendor storefront now uses a plain pinned `SliverAppBar` (back + share only) and an inline avatar+name row in the profile card — no `FlexibleSpaceBar` / banner image / avatar overlap.
+
+### 2026-09-08 — Listing CompareAtPrice must be strictly greater than Price
+- **What happened:** Creating a listing with compare-at ≤ selling price returned 400 `'CompareAtPrice' must be greater than 'Price'`. The form only warned when compare-at was lower (not equal) and still allowed submit.
+- **Rule:** Optional compare-at may be omitted; if set it must be strictly `> price`. Validate client-side before create/update; never send a compareAt that is ≤ price. Live warning and field error copy must match the backend rule (greater than), not only "lower than".
+- **Where it applies:** `validators.dart` listing form validation, `listing_form_notifier.dart` submit payload, add-listing compare-at UI.
+
+### 2026-09-08 — Cart Select All row: comment out, do not delete
+- **What happened:** Product asked to hide the consumer cart top Select All row without removing the feature from the codebase.
+- **Rule:** Keep `cart_select_all_row.dart` and selection logic; only comment out the import + index-0 `CartSelectAllRow` usage in `CartConsumerBody` (and adjust `childCount` / vendor index offsets). Uncomment those lines to restore. Per-item checkboxes and default selection remain.
+- **Where it applies:** `cart_consumer_body.dart`, `cart_select_all_row.dart`.
+
+### 2026-09-08 — Cart vendor header: comment out, do not delete
+- **What happened:** Product asked to hide the per-vendor cart header container (store name + rating / "New Seller", including the already-hashed item count) without deleting it.
+- **Rule:** Comment out the whole `Material` vendor header in `CartVendorGroupBlock`; leave cart item cards. Uncomment the block to restore. Do not delete the wired seller-profile `InkWell` or `newSeller` / rating subtitle.
+- **Where it applies:** `cart_vendor_group.dart`.
+
+### 2026-09-08 — Cart item shows store name; compare-at sits beside price
+- **What happened:** After hiding the vendor group header, store context was missing on cart lines; compare-at (strikethrough) sat on its own line under the selling price. Later, product asked for an Amazon-style cart card layout.
+- **Rule:** Each `CartItemCard` uses existing cart fields only (title, `vendorStoreName`, price/compare-at, shipping, availability, condition/category, qty, remove, save-for-later) — no fake social proof, returns, share, or promo badges. Layout: checkbox on image; details column; price + strikethrough on one row; shipping under price; pill qty + outlined action pills. Restyle `QuantityControl` as a single bordered pill (trash/minus · qty · plus).
+- **Where it applies:** `cart_item_card.dart`, `quantity_control.dart`.

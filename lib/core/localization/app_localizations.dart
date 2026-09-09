@@ -941,13 +941,13 @@ abstract class AppLocalizations {
   /// No description provided for @listingCompareAtHelper.
   ///
   /// In en, this message translates to:
-  /// **'Original price for discount display'**
+  /// **'Original price shown as a strikethrough for discounts. Leave empty if none. Must be greater than the selling price.'**
   String get listingCompareAtHelper;
 
   /// No description provided for @listingCompareAtWarning.
   ///
   /// In en, this message translates to:
-  /// **'Compare-at price is lower than your selling price.'**
+  /// **'Compare-at price must be greater than your selling price.'**
   String get listingCompareAtWarning;
 
   /// No description provided for @listingDescriptionLabel.

@@ -438,10 +438,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingCompareAtTitle => 'سعر قبل الخصم (اختياري)';
 
   @override
-  String get listingCompareAtHelper => 'السعر الأصلي لعرض الخصم';
+  String get listingCompareAtHelper =>
+      'السعر الأصلي الذي يظهر مشطوبًا عند الخصم. اتركه فارغًا إن لم يكن هناك خصم. يجب أن يكون أكبر من سعر البيع.';
 
   @override
-  String get listingCompareAtWarning => 'سعر قبل الخصم أقل من سعر البيع.';
+  String get listingCompareAtWarning =>
+      'يجب أن يكون سعر قبل الخصم أكبر من سعر البيع.';
 
   @override
   String get listingDescriptionLabel => 'الوصف *';
