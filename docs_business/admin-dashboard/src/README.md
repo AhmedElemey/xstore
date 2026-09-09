@@ -3,13 +3,22 @@
 Deck-aligned design prototype (forest-green / cream / teal / amber).
 
 ## Files
-- `index.html` — markup (sidebar, topbar, container)
+- `index.html` — markup (sidebar, topbar, container, login screen)
 - `styles.css` — all styles + design tokens (CSS variables in `:root`)
+- `api.js` — backend API client (auth/JWT, fetch wrapper, one function per endpoint). See `../BACKEND_HANDOFF.md` for the wiring status of each view.
 - `app.js` — all views, drawers, forms, and interactions (plain script; functions are global so inline `onclick` works)
 
 ## Run
-Open `index.html` in any browser. No build step, no dependencies, works offline.
-Keep the three files in the same folder (relative paths).
+Serve the folder over HTTP (opening `index.html` via `file://` will hit the browser's CORS
+restrictions on `fetch`) — e.g. `python3 -m http.server 8000` from this directory, then open
+`http://localhost:8000`. No build step, no dependencies.
+
+On first load you'll see a login screen. Enter the API base URL (defaults to
+`http://localhost:5000`), an ADMINISTRATOR or SUPERADMIN phone number + password, and sign
+in — the JWT is stored in `localStorage` and sent as both `Authorization: Bearer` and
+`X-Auth-Token`, per the "xStoreEcommerce Admin & Super Admin" Postman collection. Most views
+now call the real backend; a handful (Delivery, Disputes, Coupons, Analytics, Team invites,
+push broadcasts) stay mock — see `../BACKEND_HANDOFF.md`'s wiring status table.
 
 Responsive: desktop ≥1050px (pinned sidebar), tablet/mobile below that
 (off-canvas sidebar via the ☰ button; tables scroll horizontally inside their cards).

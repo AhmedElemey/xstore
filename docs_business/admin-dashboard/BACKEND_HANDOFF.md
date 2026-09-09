@@ -1,8 +1,41 @@
 # xStore Admin Dashboard — Backend Handoff
 
-Front-end design prototype (no build step, plain HTML/CSS/JS). All data is currently
-hard-coded in `src/app.js` and all actions are simulated (toasts/drawers). This doc lists
-the endpoints and payload shapes the dashboard expects so the backend can wire it up.
+Front-end design prototype (no build step, plain HTML/CSS/JS). This doc originally listed
+the endpoints and payload shapes the dashboard *expected*, written before a real backend
+existed. A backend now exists (see the "xStoreEcommerce Admin & Super Admin" Postman
+collection) and `src/api.js` + `src/app.js` wire most of the dashboard to it — see the
+status table below. **The Postman collection and `src/api.js` are the source of truth for
+exact paths going forward; treat the endpoint list further down this file as historical
+context, not current fact** — several paths below (e.g. bare `/admin/...`) don't match the
+real API (`/api/admin/...`, and "Product Moderation" is really the **Listings** module).
+
+## Wiring status (this PR)
+
+Login via `POST /api/auth/login` gates the whole app; the JWT is sent as both
+`Authorization: Bearer` and `X-Auth-Token` per the collection's login script comment.
+
+| Area | Status | Notes |
+|---|---|---|
+| Auth / login | ✅ Wired | `api.js` → `Auth.login` |
+| Overview | ✅ Wired | `GET /api/admin/overview`; response field names guessed (see `api.js Overview.get`) — confirm with backend |
+| Product Moderation | ✅ Wired | Really the **Listings** module: `GET/PUT /api/admin/listings...`, `status=1` (Pending). Full description/specs/images aren't in the list response — the review drawer only shows summary fields |
+| Vendors — list/detail/approve/reject | ✅ Wired | `GET/PUT /api/admin/vendors...` |
+| Vendors — commission thresholds & settlement | ✅ Wired | `GET/PATCH /api/admin/vendors/{id}/commission`, `POST .../commission/settle` |
+| Vendors — suspend/reinstate | ⚠️ Mock only | No endpoint in the collection — UI still toggles locally with a banner saying so |
+| Vendor detail — listings/orders tabs | ✅ Wired (client-filtered) | No per-vendor listing/order endpoint exists — the dashboard fetches the full listings/orders lists and filters by vendor in the browser |
+| Listings — hot deal toggle | ✅ Wired | `PUT /api/admin/listings/{id}/hot-deal`, added to the vendor listing detail drawer |
+| Orders — list/detail/cancel | ✅ Wired | `GET/POST /api/admin/orders...`. **ADMINISTRATOR only** — a SUPERADMIN session will see a 403 banner instead of data |
+| Users / Customers | ✅ Wired (partial) | `GET /api/users?role=CONSUMER` for the list + detail drawer. No suspend/message endpoint in the collection, so those actions were removed rather than faked |
+| Categories | ✅ Wired (list assumed) | Create/update/status/delete match the collection exactly (multipart with an image field). **There's no `GET /api/categories` in the collection** — the list call assumes that path per the original handoff doc below; the UI shows an error banner if it 404s |
+| Content & Banners | ✅ Wired (list assumed) | Same shape as Categories: create/update/delete are exact; `GET /api/banners` is assumed, unconfirmed |
+| System Settings | ✅ Wired | `GET/PUT /api/admin/system-settings` — commission % + default warn/pause thresholds only |
+| Analytics, Delivery/Couriers, Delivery Requests, Disputes, Coupons, Team invites, Push broadcasts | ❌ Still mock | No matching endpoints in the collection — nav items for these stayed commented out (`PHASE 2`) as they already were before this PR |
+
+Response shapes for wired endpoints aren't in the Postman collection (no saved example
+bodies), so `api.js`'s mappers read several plausible key names (`nameEn`/`name`,
+`outstandingEgp`/`outstanding`, etc.) and fall back to `'—'`/`0` instead of throwing. Search
+`api.js` for `pick(` to see every guessed field name — confirm/adjust against the real
+backend responses.
 
 Base path assumed: `/admin` (admin-authenticated). Currency is EGP, payment is Cash on Delivery.
 

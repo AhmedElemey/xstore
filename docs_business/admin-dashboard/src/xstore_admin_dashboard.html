@@ -163,6 +163,17 @@
   .route b{font-weight:600}
   .route small{color:var(--text-3);display:block;font-size:12px}
 
+  /* Login screen */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px}
+  .login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 26px}
+  .login-error{background:var(--error-bg);color:#8A3A24;font-size:12.5px;font-weight:600;padding:10px 12px;border-radius:9px;margin-bottom:14px}
+
+  /* Async view states */
+  .state-card{text-align:center;padding:48px 24px;color:var(--text-2)}
+  .state-card.error{color:#8A3A24}
+  .state-card .btn{margin-top:14px}
+  .api-note{font-size:12px;color:var(--text-3);background:var(--line-soft);border-radius:9px;padding:10px 12px;margin-bottom:16px}
+
   /* ---------- responsive (keep last: these must override the base rules above) ---------- */
   .menu-btn{display:none}
   @media(max-width:1050px){
@@ -205,30 +216,44 @@
 </style>
 </head>
 <body>
-<div class="app">
+<!-- LOGIN SCREEN — shown when there's no stored JWT; see api.js (Auth) / app.js (login()) -->
+<div class="login-wrap" id="loginScreen">
+  <form class="login-card" id="loginForm" onsubmit="return handleLoginSubmit(event)">
+    <div class="brand" style="padding:0 0 18px"><div class="logo">x</div><div><b style="color:var(--text)">xStore</b><span style="color:var(--text-3)">Admin Console</span></div></div>
+    <div class="form-row"><label>API base URL</label><input id="liBase" placeholder="http://localhost:5000"></div>
+    <div class="form-row"><label>Phone number</label><input id="liPhone" placeholder="01012345678" required autocomplete="username"></div>
+    <div class="form-row"><label>Password</label><input id="liPass" type="password" placeholder="••••••••" required autocomplete="current-password"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);margin-bottom:14px"><input id="liRemember" type="checkbox" style="width:auto"> Remember me</label>
+    <div id="loginError" class="login-error" style="display:none"></div>
+    <button class="btn btn-p" id="loginSubmitBtn" type="submit" style="width:100%;justify-content:center">Sign in</button>
+    <p class="muted" style="font-size:11.5px;margin-top:14px;text-align:center">ADMINISTRATOR or SUPERADMIN accounts only.</p>
+  </form>
+</div>
+
+<div class="app" id="appShell" style="display:none">
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="brand"><div class="logo">x</div><div><b>xStore</b><span>Admin Console</span></div></div>
     <div class="nav" id="nav">
       <div class="nav-group">Overview</div>
       <a data-view="overview" class="active"><i data-ic="grid"></i><span>Dashboard</span></a>
-      <a data-view="analytics"><i data-ic="chart"></i><span>Analytics</span></a>
+      <!-- PHASE 2 — <a data-view="analytics"><i data-ic="chart"></i><span>Analytics</span></a> -->
       <div class="nav-group">Marketplace</div>
       <a data-view="moderation"><i data-ic="shield"></i><span>Product Moderation</span><span class="badge">5</span></a>
       <a data-view="vendors"><i data-ic="store"></i><span>Vendors</span><span class="badge">3</span></a>
       <a data-view="categories"><i data-ic="tag"></i><span>Categories</span></a>
       <a data-view="orders"><i data-ic="box"></i><span>Orders</span></a>
-      <a data-view="couriers"><i data-ic="truck"></i><span>Delivery</span><span class="badge">1</span></a>
-      <a data-view="packages"><i data-ic="send"></i><span>Delivery Requests</span><span class="badge">1</span></a>
-      <a data-view="disputes"><i data-ic="alert"></i><span>Disputes</span><span class="badge">6</span></a>
+      <!-- PHASE 2 — <a data-view="couriers"><i data-ic="truck"></i><span>Delivery</span><span class="badge">1</span></a> -->
+      <!-- PHASE 2 — <a data-view="packages"><i data-ic="send"></i><span>Delivery Requests</span><span class="badge">1</span></a> -->
+      <!-- PHASE 2 — <a data-view="disputes"><i data-ic="alert"></i><span>Disputes</span><span class="badge">6</span></a> -->
       <div class="nav-group">Growth</div>
       <a data-view="customers"><i data-ic="users"></i><span>Users</span></a>
-      <a data-view="coupons"><i data-ic="ticket"></i><span>Coupons</span></a>
+      <!-- PHASE 2 — <a data-view="coupons"><i data-ic="ticket"></i><span>Coupons</span></a> -->
       <a data-view="content"><i data-ic="image"></i><span>Content &amp; Banners</span></a>
       <div class="nav-group">System</div>
       <a data-view="settings"><i data-ic="cog"></i><span>Settings</span></a>
     </div>
-    <div class="side-foot"><div class="avatar">A</div><div><b style="color:#fff;font-size:13px">Ahmed (Owner)</b><small>Super Admin</small></div></div>
+    <div class="side-foot"><div class="avatar">A</div><div><b style="color:#fff;font-size:13px">Admin</b><small>Signed in</small></div></div>
   </aside>
 
   <!-- MAIN -->
@@ -240,6 +265,7 @@
       <div class="top-actions">
         <div class="icon-btn"><i data-ic="bell"></i><span class="dot"></span></div>
         <div class="icon-btn hide-sm"><i data-ic="help"></i></div>
+        <div class="icon-btn" id="logoutBtn" title="Sign out" onclick="handleLogout()">⏻</div>
         <div class="avatar" style="background:var(--primary)">A</div>
       </div>
     </div>
@@ -251,6 +277,271 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ---------- xStore Admin Dashboard — backend API client ----------
+ * Wraps the endpoints in ../BACKEND_HANDOFF.md / the "xStoreEcommerce Admin & Super
+ * Admin" Postman collection. No build step — plain script, everything hangs off the
+ * global `API` object so it can be called from inline onclick handlers like the rest
+ * of app.js.
+ *
+ * Response shapes are not pinned down by the Postman collection (no example bodies),
+ * so every mapper below reads several plausible key names (camelCase / PascalCase)
+ * and falls back to '—' rather than throwing. Treat docs_business/admin-dashboard/
+ * BACKEND_HANDOFF.md's "Wiring notes" section as the list of assumptions to confirm
+ * with the backend team.
+ */
+(function(global){
+'use strict';
+
+const BASE_KEY='xstore_admin_api_base';
+const TOKEN_KEY='xstore_admin_token';
+
+function getBaseUrl(){ return localStorage.getItem(BASE_KEY)||'http://localhost:5000'; }
+function setBaseUrl(v){ localStorage.setItem(BASE_KEY,(v||'').replace(/\/+$/,'')); }
+function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
+function setToken(t){ if(t) localStorage.setItem(TOKEN_KEY,t); }
+function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+class ApiError extends Error{
+ constructor(status,message,body){ super(message); this.status=status; this.body=body; }
+}
+
+function qs(params){
+ if(!params) return '';
+ const parts=Object.keys(params)
+   .filter(k=>params[k]!==undefined&&params[k]!==null&&params[k]!=='')
+   .map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k]));
+ return parts.length?'?'+parts.join('&'):'';
+}
+
+/* core request — sends the JWT via both headers per the collection description */
+async function request(path,{method='GET',params,body,isForm=false}={}){
+ const url=getBaseUrl()+path+qs(params);
+ const headers={};
+ const token=getToken();
+ if(token){ headers['Authorization']='Bearer '+token; headers['X-Auth-Token']=token; }
+ let payload=body;
+ if(body&&!isForm){ headers['Content-Type']='application/json'; payload=JSON.stringify(body); }
+ let res;
+ try{
+   res=await fetch(url,{method,headers,body:payload});
+ }catch(networkErr){
+   throw new ApiError(0,'Could not reach '+getBaseUrl()+' — check the API base URL and that the backend is running.',null);
+ }
+ if(res.status===401){
+   clearToken();
+   global.dispatchEvent(new CustomEvent('xstore:unauthorized'));
+   throw new ApiError(401,'Session expired — please sign in again.',null);
+ }
+ const text=await res.text();
+ let json=null;
+ if(text){ try{ json=JSON.parse(text); }catch(e){ json=null; } }
+ if(!res.ok){
+   const msg=(json&&(json.message||json.title||json.error))||res.statusText||('HTTP '+res.status);
+   throw new ApiError(res.status,msg,json);
+ }
+ return json;
+}
+
+/* ---------- response-shape helpers ---------- */
+const pick=(o,...keys)=>{ if(!o) return undefined; for(const k of keys){ if(o[k]!==undefined&&o[k]!==null) return o[k]; } return undefined; };
+const num=(v,fallback=0)=>{ const n=Number(v); return Number.isFinite(n)?n:fallback; };
+
+/* GET-list endpoints aren't documented with example bodies — accept a raw array or a
+ * common pagination envelope ({items|data|result|results|...}, total|totalCount|count). */
+function unwrapList(json){
+ if(Array.isArray(json)) return {items:json,total:json.length};
+ if(!json) return {items:[],total:0};
+ const items=pick(json,'items','data','result','results','vendors','users','listings','orders','categories','banners')||[];
+ const total=num(pick(json,'total','totalCount','count'),items.length);
+ return {items:Array.isArray(items)?items:[],total};
+}
+
+const id=o=>pick(o,'id','Id','_id');
+
+/* ---------- Auth ---------- */
+const Auth={
+ async login(phoneNumber,password,rememberMe){
+   const json=await request('/api/auth/login',{method:'POST',body:{phoneNumber,password,rememberMe:!!rememberMe}});
+   const token=pick(json,'token','Token','accessToken','jwt');
+   if(!token) throw new ApiError(200,'Login succeeded but no token was returned by the server.',json);
+   setToken(token);
+   return json;
+ },
+ isAuthenticated(){ return !!getToken(); },
+ logout(){ clearToken(); }
+};
+
+/* ---------- Overview ---------- */
+const Overview={
+ async get(from,to){
+   const json=await request('/api/admin/overview',{params:{from,to}});
+   return {
+     gmv30d:num(pick(json,'gmv30d','gmv','gmvEgp')),
+     orders30d:num(pick(json,'orders30d','ordersCount','orders')),
+     activeVendors:num(pick(json,'activeVendors','vendorsActive')),
+     pendingApprovals:num(pick(json,'pendingApprovals','pendingListings','pendingProducts')),
+     revenueTrend:pick(json,'revenueTrend','dailyRevenue','revenue')||[],
+     salesByCategory:pick(json,'salesByCategory','categorySales')||[],
+     raw:json
+   };
+ }
+};
+
+/* ---------- Users ---------- */
+const Users={
+ async list({keyword,role,isVerified,vendorStatus,page=1,pageSize=20}={}){
+   const json=await request('/api/users',{params:{keyword,role,isVerified,vendorStatus,page,pageSize}});
+   return unwrapList(json);
+ },
+ async get(userId){ return request('/api/users/'+userId); },
+ async approve(userId){ return request('/api/users/'+userId+'/approve',{method:'PUT'}); },
+ async reject(userId){ return request('/api/users/'+userId+'/reject',{method:'PUT'}); },
+ async settleCommission(userId,amountEgp){
+   return request('/api/users/'+userId+'/commission/settle',{method:'PUT',body:amountEgp!=null?{amountEgp}:{}});
+ }
+};
+
+/* VendorStatus enum from the collection: 1=Pending, 2=Approved, 3=Rejected */
+const VendorStatus={PENDING:1,APPROVED:2,REJECTED:3};
+/* ListingStatus enum: 0=Draft,1=Pending,2=Active,3=Paused,4=Sold,5=Rejected,6=Cancelled */
+const ListingStatus={DRAFT:0,PENDING:1,ACTIVE:2,PAUSED:3,SOLD:4,REJECTED:5,CANCELLED:6};
+/* OrderStatus enum: 0=Pending,1=Confirmed,2=Processing,3=Shipped,4=Delivered,5=Cancelled */
+const OrderStatus={PENDING:0,CONFIRMED:1,PROCESSING:2,SHIPPED:3,DELIVERED:4,CANCELLED:5};
+
+/* ---------- Vendors ---------- */
+const Vendors={
+ async list({keyword,vendorStatus,page=1,pageSize=20}={}){
+   const json=await request('/api/admin/vendors',{params:{keyword,vendorStatus,page,pageSize}});
+   return unwrapList(json);
+ },
+ async get(vendorId){ return request('/api/admin/vendors/'+vendorId); },
+ async commission(vendorId){
+   const json=await request('/api/admin/vendors/'+vendorId+'/commission');
+   return {
+     outstanding:num(pick(json,'outstandingEgp','outstanding')),
+     warn:num(pick(json,'warnThresholdEgp','warn')),
+     pause:num(pick(json,'pauseThresholdEgp','pause')),
+     raw:json
+   };
+ },
+ async updateCommissionThresholds(vendorId,warnThresholdEgp,pauseThresholdEgp){
+   return request('/api/admin/vendors/'+vendorId+'/commission',{method:'PATCH',body:{warnThresholdEgp,pauseThresholdEgp}});
+ },
+ async settleCommission(vendorId,amountEgp){
+   return request('/api/admin/vendors/'+vendorId+'/commission/settle',{method:'POST',body:amountEgp!=null?{amountEgp}:{}});
+ },
+ async approve(vendorId){ return request('/api/admin/vendors/'+vendorId+'/approve',{method:'PUT'}); },
+ async reject(vendorId){ return request('/api/admin/vendors/'+vendorId+'/reject',{method:'PUT'}); }
+};
+
+/* ---------- Listings (product moderation) ---------- */
+const Listings={
+ async list({page=1,pageSize=10,name,status}={}){
+   const json=await request('/api/admin/listings',{params:{page,pageSize,name,status}});
+   return unwrapList(json);
+ },
+ async approve(listingId){ return request('/api/admin/listings/'+listingId+'/approve',{method:'PUT'}); },
+ async reject(listingId,rejectionReason){
+   return request('/api/admin/listings/'+listingId+'/reject',{method:'PUT',body:{rejectionReason}});
+ },
+ async setHotDeal(listingId,isHotDeal){
+   return request('/api/admin/listings/'+listingId+'/hot-deal',{method:'PUT',body:{isHotDeal:!!isHotDeal}});
+ }
+};
+
+/* ---------- Orders (ADMINISTRATOR only — expect 403 for SUPERADMIN-only sessions) ---------- */
+const Orders={
+ async list({page=1,pageSize=10,status}={}){
+   const json=await request('/api/admin/orders',{params:{page,pageSize,status}});
+   return unwrapList(json);
+ },
+ async get(orderId){ return request('/api/admin/orders/'+orderId); },
+ async cancel(orderId,reason){ return request('/api/admin/orders/'+orderId+'/cancel',{method:'POST',body:{reason}}); }
+};
+
+/* ---------- Categories ----------
+ * The collection only documents the admin write actions (POST/PUT/status/DELETE) — it
+ * doesn't include a GET. BACKEND_HANDOFF.md says `GET /categories` is the server-driven
+ * taxonomy read; assumed here as `GET /api/categories`. Confirm with backend if this 404s. */
+const Categories={
+ async list(){
+   const json=await request('/api/categories');
+   return unwrapList(json).items;
+ },
+ async create({nameEn,nameAr,parentId,isActive,imageFile}){
+   const fd=new FormData();
+   fd.append('nameEn',nameEn); fd.append('nameAr',nameAr);
+   if(parentId) fd.append('parentId',parentId);
+   fd.append('isActive',String(!!isActive));
+   if(imageFile) fd.append('image',imageFile);
+   return request('/api/categories',{method:'POST',body:fd,isForm:true});
+ },
+ async update({categoryId,nameEn,nameAr,parentId,isActive,imageFile}){
+   const fd=new FormData();
+   fd.append('id',categoryId); fd.append('nameEn',nameEn); fd.append('nameAr',nameAr);
+   if(parentId) fd.append('parentId',parentId);
+   fd.append('isActive',String(!!isActive));
+   if(imageFile) fd.append('image',imageFile);
+   return request('/api/categories',{method:'PUT',body:fd,isForm:true});
+ },
+ async setStatus(categoryId,isActive){
+   return request('/api/categories/'+categoryId+'/status',{method:'PUT',body:{isActive:!!isActive}});
+ },
+ async remove(categoryId){ return request('/api/categories/'+categoryId,{method:'DELETE'}); }
+};
+
+/* ---------- Banners ---------- (same GET caveat as Categories) */
+const Banners={
+ async list(){
+   const json=await request('/api/banners');
+   return unwrapList(json).items;
+ },
+ async create({nameEn,nameAr,sortOrder,isActive,categoryIds,storeIds,imageFile}){
+   const fd=new FormData();
+   fd.append('nameEn',nameEn); fd.append('nameAr',nameAr); fd.append('sortOrder',String(sortOrder||0));
+   fd.append('isActive',String(!!isActive));
+   if(categoryIds) fd.append('categoryIds',categoryIds);
+   if(storeIds) fd.append('storeIds',storeIds);
+   if(imageFile) fd.append('image',imageFile);
+   return request('/api/banners',{method:'POST',body:fd,isForm:true});
+ },
+ async update({bannerId,nameEn,nameAr,sortOrder,isActive,categoryIds,storeIds,imageFile}){
+   const fd=new FormData();
+   fd.append('nameEn',nameEn); fd.append('nameAr',nameAr); fd.append('sortOrder',String(sortOrder||0));
+   fd.append('isActive',String(!!isActive));
+   if(categoryIds) fd.append('categoryIds',categoryIds);
+   if(storeIds) fd.append('storeIds',storeIds);
+   if(imageFile) fd.append('image',imageFile);
+   return request('/api/banners/'+bannerId,{method:'PUT',body:fd,isForm:true});
+ },
+ async remove(bannerId){ return request('/api/banners/'+bannerId,{method:'DELETE'}); }
+};
+
+/* ---------- System Settings ---------- */
+const Settings={
+ async get(){
+   const json=await request('/api/admin/system-settings');
+   return {
+     commissionValueOnOrder:num(pick(json,'commissionValueOnOrder')),
+     warnThresholdEgp:num(pick(json,'warnThresholdEgp')),
+     pauseThresholdEgp:num(pick(json,'pauseThresholdEgp')),
+     raw:json
+   };
+ },
+ async update({commissionValueOnOrder,warnThresholdEgp,pauseThresholdEgp}){
+   return request('/api/admin/system-settings',{method:'PUT',body:{commissionValueOnOrder,warnThresholdEgp,pauseThresholdEgp}});
+ }
+};
+
+global.API={
+ ApiError,getBaseUrl,setBaseUrl,getToken,isAuthenticated:Auth.isAuthenticated,
+ pick,num,id,
+ Auth,Overview,Users,Vendors,Listings,Orders,Categories,Banners,Settings,
+ VendorStatus,ListingStatus,OrderStatus
+};
+
+})(window);
+
 /* ---------- tiny icon set ---------- */
 function ic(n){const p={
  grid:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
@@ -281,10 +572,12 @@ const ini=s=>s.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const avatar=(s,r=9)=>`<span class="ua" style="background:${col(s)};border-radius:${r=='50'?'50%':r+'px'}">${ini(s)}</span>`;
 const EGP=n=>'EGP '+n.toLocaleString('en-US');
 
-/* ---------- data (grounded in xStore) ---------- */
-const CATS=[['Electronics','📱',4,842,true],['Fashion','👕',4,1290,true],['Home & Garden','🛋️',4,610,true],['Beauty','✨',3,455,true],['Sports','🏋️',3,288,true],['Toys','🧸',3,176,true],['Automotive','🚗',3,203,true],['Food & Drinks','🥤',3,134,false],['Books','📚',3,97,true],['Other','📦',1,58,true]];
+/* ---------- data (grounded in xStore) ----------
+ * CATS and BANNERS used to live here as hard-coded mocks; Categories and Content & Banners
+ * are now wired to the real API (see CATS_API / BANNERS_API below) so those mocks were
+ * removed. COUPONS and TEAM stay mock — there's no matching endpoint in the Postman
+ * collection (see BACKEND_HANDOFF.md's wiring status table). */
 const COUPONS=[['WELCOME50','50% off first order','Platform',312,true],['FREESHIP','Free delivery','Platform',890,true],['EID2026','EGP 100 off > EGP 1000','Seasonal',145,false]];
-const BANNERS=[['Ramadan Kareem — up to 40% off','Home hero','Active'],['Free delivery this week','Home strip','Active'],['New in: Electronics','Category banner','Scheduled']];
 const TEAM=[['Ahmed','Super Admin','Owner · full access'],['Ops Team','Moderator','Orders + disputes'],['Finance','Viewer','Read-only reports']];
 const VENDORS=[
  {n:'Cairo Tech Hub',owner:'Ahmed Salah',city:'Giza',cat:'Electronics',status:'active',products:214,gmv:486300,rating:4.7,vok:true,joined:'Jan 2026',wa:'+20 100 123 4567',email:'sales@cairotech.eg'},
@@ -326,14 +619,7 @@ const VLISTINGS={
   {t:'Yoga Mat',sub:'Fitness',price:450,cmp:0,stock:8,status:'live',sold:18,rating:4.0,emoji:'🧘'},
   {t:'Gym Gloves',sub:'Fitness',price:220,cmp:0,stock:30,status:'live',sold:11,rating:3.8,emoji:'🧤'}]
 };
-/* per-vendor commission wallet (mirrors VendorCommissionWallet) — thresholds are owner-configurable */
-const VCOMM={
- 0:{outstanding:60,warn:100,pause:200},   // healthy
- 1:{outstanding:135,warn:100,pause:200},  // warn
- 3:{outstanding:210,warn:100,pause:200},  // paused
- 4:{outstanding:40,warn:100,pause:200},   // healthy
- 6:{outstanding:180,warn:100,pause:200}}; // warn
-const vcomm=i=>VCOMM[i]||(VCOMM[i]={outstanding:0,warn:100,pause:200});
+/* commission wallet level — c is the real {outstanding,warn,pause} from API.Vendors.commission() */
 const commLevel=c=>c.outstanding>=c.pause?'paused':c.outstanding>=c.warn?'warn':'none';
 const PENDING=[
  {t:'iPhone 13 Pro 256GB',v:'Cairo Tech Hub',vok:true,cat:'Electronics',sub:'Phones & tablets',cond:'Like new',brand:'Apple',price:48999,cmp:52999,stock:7,loc:'Giza',ship:60,emoji:'📱',submitted:'2h ago',
@@ -383,7 +669,7 @@ const ORDERS=[
  {id:'XS-2026-4467',buyer:'Youssef Ali',phone:'+20 104 555 6677',addr:'3 Makram Ebeid, Nasr City, Cairo',vendor:'Cairo Tech Hub',status:'pending',items:[['Smart Watch Series 8',1,15499]]},
  {id:'XS-2026-4466',buyer:'Nour Ibrahim',phone:'+20 105 666 7788',addr:'40 Haram St, Giza',vendor:'Zamalek Boutique',status:'delivered',items:[['Silk Scarf',3,1250]]},
  {id:'XS-2026-4465',buyer:'Omar Sherif',phone:'+20 106 777 8899',addr:'7 Roxy Sq, Heliopolis, Cairo',vendor:'Heliopolis Sportswear',status:'cancelled',items:[['Running Shoes',1,890]]}];
-const orderTotal=o=>o.items.reduce((s,it)=>s+it[1]*it[2],0);
+const orderTotal=o=>o.total!=null?o.total:o.items.reduce((s,it)=>s+it[1]*it[2],0);
 const OSTAT={pending:['b-grey','Pending'],confirmed:['b-blue','Confirmed'],processing:['b-indigo','Processing'],shipped:['b-amber','Shipped'],delivered:['b-green','Delivered'],cancelled:['b-red','Cancelled']};
 const DISPUTES=[
  {id:'XS-2026-4402',buyer:'Layla Kamal',vendor:'Giza Gadgets',reason:'Item not as described',val:720,status:'open',note:'Buyer says the earbuds are a different model than listed. Photos attached to the claim.',sug:'Refund buyer'},
@@ -400,32 +686,194 @@ const CUSTOMERS=[
  {n:'Youssef Ali',city:'Cairo',orders:7,spend:51600,joined:'Mar 2026',phone:'+20 104 555 6677'},
  {n:'Nour Ibrahim',city:'Giza',orders:14,spend:42100,joined:'Feb 2026',phone:'+20 105 666 7788'}];
 
+/* ---------- API data mappers ----------
+ * The Postman collection doesn't include example response bodies, so these read
+ * several plausible key names and fall back to '—' / 0 rather than throwing. See
+ * BACKEND_HANDOFF.md for the shapes these are guessing at. */
+async function safeCall(fn,fallback){
+ try{ return {ok:true,data:await fn()}; }
+ catch(e){ return {ok:false,error:e,data:fallback}; }
+}
+function mapVendor(v){
+ const p=API.pick;
+ return {
+   id:API.id(v),
+   n:p(v,'name','businessName','n')||'—',
+   owner:p(v,'ownerName','owner')||'—',
+   city:p(v,'city')||'—',
+   cat:p(v,'category','categoryName','cat')||'—',
+   status:vendorStatusKey(p(v,'status','vendorStatus')),
+   products:API.num(p(v,'products','productsCount','listingsCount'),0),
+   gmv:API.num(p(v,'gmv','gmvEgp'),0),
+   rating:API.num(p(v,'rating'),0),
+   vok:!!p(v,'verified','isVerified'),
+   joined:p(v,'joined','joinedAt','createdAt')||'—',
+   wa:p(v,'whatsapp','phoneNumber','phone')||'—',
+   email:p(v,'email')||'—',
+   raw:v
+ };
+}
+function vendorStatusKey(s){
+ if(s===API.VendorStatus.PENDING||s==='Pending'||s==='pending') return 'pending';
+ if(s===API.VendorStatus.REJECTED||s==='Rejected'||s==='rejected') return 'rejected';
+ if(s==='Suspended'||s==='suspended') return 'suspended';
+ return 'active'; // Approved (2) and anything unrecognised renders as active
+}
+function mapListing(l){
+ const p=API.pick;
+ return {
+   id:API.id(l),
+   vendorId:p(l,'vendorId','storeId','sellerId'),
+   t:p(l,'title','name','productName')||'Untitled listing',
+   v:p(l,'vendorName','vendor','storeName')||'—',
+   vok:!!p(l,'vendorVerified'),
+   cat:p(l,'category','categoryName','sub','subcategory')||'—',
+   sub:p(l,'subcategory','sub')||'',
+   price:API.num(p(l,'price'),0),
+   cmp:API.num(p(l,'compareAt','compareAtPrice','cmp'),0),
+   stock:API.num(p(l,'stock','quantity'),0),
+   status:listingStatusKey(p(l,'status')),
+   sold:API.num(p(l,'sold30d','sold'),0),
+   rating:API.num(p(l,'rating'),0),
+   isHotDeal:!!p(l,'isHotDeal','hotDeal'),
+   emoji:'📦',
+   raw:l
+ };
+}
+function listingStatusKey(s){
+ const LS=API.ListingStatus;
+ if(s===LS.PENDING||s==='Pending') return 'pending';
+ if(s===LS.ACTIVE||s==='Active') return 'live';
+ if(s===LS.SOLD||s==='Sold') return 'out';
+ if(s===LS.REJECTED||s==='Rejected') return 'rejected';
+ if(s===LS.PAUSED||s==='Paused') return 'paused';
+ if(s===LS.CANCELLED||s==='Cancelled') return 'cancelled';
+ return 'pending';
+}
+function mapOrder(o){
+ const p=API.pick;
+ const items=p(o,'items')||[];
+ return {
+   id:API.id(o)!=null?String(API.id(o)):(p(o,'orderNumber','code')||'—'),
+   buyer:p(o,'buyer','buyerName','customerName')||'—',
+   phone:p(o,'phone','buyerPhone')||'—',
+   addr:p(o,'address','deliveryAddress')||'—',
+   vendor:p(o,'vendorName','vendor','storeName')||'—',
+   status:orderStatusKey(p(o,'status')),
+   total:API.num(p(o,'total','totalAmount','totalEgp','amount'),
+     Array.isArray(items)?items.reduce((s,it)=>s+API.num(p(it,'qty','quantity'),0)*API.num(p(it,'unitPrice','price'),0),0):0),
+   courier:p(o,'courierName','courier')||null,
+   items:Array.isArray(items)?items.map(it=>[p(it,'title','name')||'Item',API.num(p(it,'qty','quantity'),1),API.num(p(it,'unitPrice','price'),0)]):[],
+   raw:o
+ };
+}
+function orderStatusKey(s){
+ const OS=API.OrderStatus;
+ const map={};map[OS.PENDING]='pending';map[OS.CONFIRMED]='confirmed';map[OS.PROCESSING]='processing';map[OS.SHIPPED]='shipped';map[OS.DELIVERED]='delivered';map[OS.CANCELLED]='cancelled';
+ if(typeof s==='number'&&map[s]) return map[s];
+ if(typeof s==='string'&&OSTAT[s.toLowerCase()]) return s.toLowerCase();
+ return 'pending';
+}
+function mapUser(u){
+ const p=API.pick;
+ return {
+   id:API.id(u),
+   n:p(u,'name','fullName','userName')||'—',
+   phone:p(u,'phoneNumber','phone')||'—',
+   role:p(u,'role')||'—',
+   city:p(u,'city')||'—',
+   joined:p(u,'joined','createdAt')||'—',
+   isVerified:!!p(u,'isVerified','verified'),
+   raw:u
+ };
+}
+function mapCategory(c){
+ const p=API.pick;
+ return {id:API.id(c),nameEn:p(c,'nameEn','name')||'—',nameAr:p(c,'nameAr')||'',parentId:p(c,'parentId'),isActive:p(c,'isActive')!==false,imageUrl:p(c,'imageUrl','image'),raw:c};
+}
+function mapBanner(b){
+ const p=API.pick;
+ return {id:API.id(b),nameEn:p(b,'nameEn','name')||'—',nameAr:p(b,'nameAr')||'',sortOrder:API.num(p(b,'sortOrder'),0),isActive:p(b,'isActive')!==false,imageUrl:p(b,'imageUrl','image'),raw:b};
+}
+
+/* ---------- API-backed loaders — populate the same arrays the (unchanged) view
+ * builders below already render from, so approve/reject/etc. UI code paths that
+ * index into VENDORS[i] / ORDERS[i] / etc. keep working unmodified. ---------- */
+async function loadVendors(){
+ const res=await API.Vendors.list({pageSize:100});
+ VENDORS.length=0; VENDORS.push(...res.items.map(mapVendor));
+}
+async function loadListingsPending(){
+ const res=await API.Listings.list({pageSize:50,status:API.ListingStatus.PENDING});
+ PENDING.length=0; PENDING.push(...res.items.map(mapListing));
+}
+async function loadAllListings(){
+ const res=await API.Listings.list({pageSize:200});
+ return res.items.map(mapListing);
+}
+async function loadOrders(status){
+ const res=await API.Orders.list({pageSize:100,status});
+ ORDERS.length=0; ORDERS.push(...res.items.map(mapOrder));
+}
+async function loadCustomers(){
+ const res=await API.Users.list({pageSize:100,role:'CONSUMER'});
+ CUSTOMERS.length=0; CUSTOMERS.push(...res.items.map(u=>{
+   const m=mapUser(u);
+   return {n:m.n,city:m.city,orders:0,spend:0,joined:m.joined,phone:m.phone,id:m.id,raw:u};
+ }));
+}
+async function loadCategories(){
+ const items=await API.Categories.list();
+ CATS_API.length=0; CATS_API.push(...items.map(mapCategory));
+}
+async function loadBanners(){
+ const items=await API.Banners.list();
+ BANNERS_API.length=0; BANNERS_API.push(...items.map(mapBanner));
+}
+const CATS_API=[]; // real categories once loaded — see categories()
+const BANNERS_API=[]; // real banners once loaded — see content()
+
 /* ---------- view builders ---------- */
 const kpi=(ico,val,label,trend,dir,c)=>`<div class="card kpi"><div class="k-top"><div class="k-ico" style="background:${c}22;color:${c}">${ic(ico)}</div><span class="trend ${dir}">${trend}</span></div><div class="k-val">${val}</div><div class="k-label">${label}</div></div>`;
 
-function overview(){
- const catBars=CATS.slice(0,6).map(c=>{const pct=Math.round(c[3]/1290*100);return `<div class="bar-row"><span class="muted">${c[1]} ${c[0]}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><b class="r">${c[3]}</b></div>`}).join('');
- const rev=[62,58,71,69,84,78,96,102,94,115,108,124];
- const max=Math.max(...rev),pts=rev.map((v,i)=>`${20+i*(560/11)},${180-(v/max)*150}`).join(' ');
+async function overview(){
+ const ovRes=await safeCall(()=>API.Overview.get(),null);
+ const [pendRes,ordRes]=await Promise.all([
+   safeCall(()=>API.Listings.list({pageSize:4,status:API.ListingStatus.PENDING}),{items:[]}),
+   safeCall(()=>API.Orders.list({pageSize:5}),{items:[]})
+ ]);
+ const ov=ovRes.data;
+ const rev=(ov&&ov.revenueTrend&&ov.revenueTrend.length?ov.revenueTrend:[]).map(n=>API.num(n,0));
+ const max=Math.max(1,...rev);
+ const step=rev.length>1?560/(rev.length-1):0;
+ const pts=rev.map((v,i)=>`${20+i*step},${180-(v/max)*150}`).join(' ');
  const area=`20,180 ${pts} 580,180`;
- const pend=PENDING.slice(0,4).map((p,i)=>`<div class="list-row" style="cursor:pointer" onclick="go('moderation')">${avatar(p.v)}<div style="flex:1"><b>${p.t}</b><small class="muted">${p.v} · ${p.cat}</small></div><span class="badge-s b-amber">Pending</span></div>`).join('');
- const ords=ORDERS.slice(0,5).map((o,i)=>`<div class="list-row" style="cursor:pointer" onclick="go('orders')"><div style="flex:1"><b>${o.id}</b><small class="muted">${o.buyer}</small></div><span class="money">${EGP(orderTotal(o))}</span><span class="badge-s ${OSTAT[o.status][0]}" style="margin-left:12px">${OSTAT[o.status][1]}</span></div>`).join('');
+ const catSales=(ov&&ov.salesByCategory&&ov.salesByCategory.length)?ov.salesByCategory:[];
+ const catMax=Math.max(1,...catSales.map(c=>API.num(API.pick(c,'count','sales'),0)));
+ const catBars=catSales.length
+   ?catSales.map(c=>{const cnt=API.num(API.pick(c,'count','sales'),0),pct=Math.round(cnt/catMax*100);return `<div class="bar-row"><span class="muted">${esc(API.pick(c,'name','category')||'—')}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><b class="r">${cnt}</b></div>`}).join('')
+   :'<p class="muted" style="font-size:12.5px">No category sales returned by the API yet.</p>';
+ const pend=(pendRes.data.items||[]).map(mapListing).slice(0,4).map(p=>`<div class="list-row" style="cursor:pointer" onclick="go('moderation')">${avatar(p.v)}<div style="flex:1"><b>${esc(p.t)}</b><small class="muted">${esc(p.v)} · ${esc(p.cat)}</small></div><span class="badge-s b-amber">Pending</span></div>`).join('')
+   ||'<p class="muted" style="font-size:12.5px">Nothing pending review.</p>';
+ const ords=(ordRes.data.items||[]).map(mapOrder).slice(0,5).map(o=>`<div class="list-row" style="cursor:pointer" onclick="go('orders')"><div style="flex:1"><b>${esc(o.id)}</b><small class="muted">${esc(o.buyer)}</small></div><span class="money">${EGP(o.total)}</span><span class="badge-s ${OSTAT[o.status][0]}" style="margin-left:12px">${OSTAT[o.status][1]}</span></div>`).join('')
+   ||(ordRes.ok?'<p class="muted" style="font-size:12.5px">No recent orders.</p>':'<p class="muted" style="font-size:12.5px">'+esc(ordRes.error.message)+'</p>');
+ const apiNote=ovRes.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/overview: ${esc(ovRes.error.message)} — showing zeros.</div>`;
  return `
  <div class="page-head"><div><h2>Marketplace Overview</h2><p>Last 30 days · All vendors · EGP · Cash on Delivery</p></div>
-   <div style="display:flex;gap:10px"><button class="btn btn-g">Export</button><button class="btn btn-p" onclick="openAnnouncementForm()">+ New announcement</button></div></div>
+   <div style="display:flex;gap:10px"><button class="btn btn-g" onclick="go('overview')">Refresh</button><button class="btn btn-p" onclick="openAnnouncementForm()">+ New announcement</button></div></div>
+ ${apiNote}
  <div class="grid g-4">
-   ${kpi('chart',EGP(1240000).replace('EGP ','EGP '),'GMV (30d)','+14%','up','#2E5C6E')}
-   ${kpi('box','3,482','Orders (30d)','+9%','up','#C68A2E')}
-   ${kpi('store','128','Active vendors','+6','up','#3F7A5C')}
-   ${kpi('shield','17','Pending approvals','Action','down','#B4472E')}
+   ${kpi('chart',EGP(ov?ov.gmv30d:0),'GMV (30d)','','up','#2E5C6E')}
+   ${kpi('box',String(ov?ov.orders30d:0),'Orders (30d)','','up','#C68A2E')}
+   ${kpi('store',String(ov?ov.activeVendors:0),'Active vendors','','up','#3F7A5C')}
+   ${kpi('shield',String(ov?ov.pendingApprovals:0),'Pending approvals','Action','down','#B4472E')}
  </div>
  <div class="grid g-2 mt">
-   <div class="card"><div class="c-head"><h3>Revenue trend</h3><span class="badge-s b-green">▲ 14% vs last month</span></div>
-     <div class="c-body"><svg viewBox="0 0 600 190" width="100%" height="190">
+   <div class="card"><div class="c-head"><h3>Revenue trend</h3></div>
+     <div class="c-body">${rev.length>1?`<svg viewBox="0 0 600 190" width="100%" height="190">
        <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E5C6E" stop-opacity=".28"/><stop offset="1" stop-color="#2E5C6E" stop-opacity="0"/></linearGradient></defs>
        <polygon points="${area}" fill="url(#ag)"/><polyline points="${pts}" fill="none" stroke="#2E5C6E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-       ${rev.map((v,i)=>`<circle cx="${20+i*(560/11)}" cy="${180-(v/max)*150}" r="3" fill="#2E5C6E"/>`).join('')}
-     </svg><div class="legend"><span><i style="background:#2E5C6E"></i>Monthly GMV (EGP, thousands)</span></div></div></div>
+     </svg>`:'<p class="muted" style="font-size:12.5px">No revenue trend data yet.</p>'}<div class="legend"><span><i style="background:#2E5C6E"></i>Daily GMV (EGP)</span></div></div></div>
    <div class="card"><div class="c-head"><h3>Sales by category</h3></div><div class="c-body"><div class="bars">${catBars}</div></div></div>
  </div>
  <div class="grid g-2 mt">
@@ -434,65 +882,111 @@ function overview(){
  </div>`;
 }
 
-function moderation(){
+async function moderation(){
+ const res=await safeCall(()=>loadListingsPending(),null);
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/listings: ${esc(res.error.message)}</div>`;
  const rows=PENDING.map((p,i)=>`<div class="mod" id="mod-${i}" data-status="pending"><div class="thumb" style="cursor:pointer" onclick="productDrawer(${i})">${p.emoji}</div>
-   <div class="minfo" style="cursor:pointer" onclick="productDrawer(${i})"><b>${p.t}</b>
-     <p>${p.v}${p.vok?' <span class="badge-s b-green" style="padding:1px 7px">✓ verified</span>':' <span class="badge-s b-amber" style="padding:1px 7px">unverified</span>'} · <span class="badge-s b-grey">${p.cat}</span> · <span class="money">${EGP(p.price)}</span> · stock ${p.stock}</p>
-     <p class="muted" style="font-size:12px;margin-top:3px">Submitted ${p.submitted} · ${p.imgs.length} photos · ${p.cond}</p></div>
+   <div class="minfo" style="cursor:pointer" onclick="productDrawer(${i})"><b>${esc(p.t)}</b>
+     <p>${esc(p.v)}${p.vok?' <span class="badge-s b-green" style="padding:1px 7px">✓ verified</span>':' <span class="badge-s b-amber" style="padding:1px 7px">unverified</span>'} · <span class="badge-s b-grey">${esc(p.cat)}</span> · <span class="money">${EGP(p.price)}</span> · stock ${p.stock}</p></div>
    <div class="mactions">
      <button class="btn btn-g btn-sm" onclick="productDrawer(${i})">Details</button>
      <button class="btn btn-ok btn-sm" onclick="decide(${i},'approve')">✓ Approve</button>
      <button class="btn btn-no btn-sm" onclick="decide(${i},'reject')">✕ Reject</button>
    </div></div>`).join('');
  return `<div class="page-head"><div><h2>Product Moderation</h2><p>New listings go live only after admin approval — click any product to see full details</p></div>
-   <div class="tabs"><span class="chip active">Pending</span><span class="chip">Approved</span><span class="chip">Rejected</span></div></div>
+   <div class="tabs"><span class="chip active">Pending</span></div></div>
+   ${apiNote}
    <div class="grid g-4" style="margin-bottom:18px">
-     ${kpi('shield',String(PENDING.length),'Pending review','','down','#C68A2E')}
-     ${kpi('box','48','Approved (7d)','+12','up','#3F7A5C')}
-     ${kpi('alert','5','Rejected (7d)','','down','#B4472E')}
-     ${kpi('chart','3.2h','Avg review time','-0.4h','up','#2E5C6E')}</div>
-   <div class="grid" style="gap:14px" id="modList"><b id="pendCount" style="display:none">${PENDING.length}</b>${rows}</div>`;
+     ${kpi('shield',String(PENDING.length),'Pending review','','down','#C68A2E')}</div>
+   <div class="grid" style="gap:14px" id="modList">${rows||'<p class="muted">Nothing pending review.</p>'}</div>`;
 }
 
 function productDrawer(i){
- const p=PENDING[i];
- const imgs=p.imgs.map(e=>`<div style="width:74px;height:74px;border-radius:11px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:32px;flex:0 0 74px">${e}</div>`).join('');
- const specs=Object.keys(p.specs).map(k=>kv(k,p.specs[k])).join('');
+ const p=PENDING[i]; if(!p) return;
  const cmp=p.cmp?` <span style="text-decoration:line-through;color:var(--text-3);font-size:15px;font-weight:500">${EGP(p.cmp)}</span> <span class="badge-s b-red">-${Math.round((1-p.price/p.cmp)*100)}%</span>`:'';
- openDrawer('Review product',
-   `<div style="display:flex;gap:8px;overflow:auto;margin-bottom:16px">${imgs}</div>
-    <h3 style="font-size:17px;margin-bottom:6px">${p.t}</h3>
+ openDrawer('Review listing',
+   `<div style="width:74px;height:74px;border-radius:11px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px">${p.emoji}</div>
+    <h3 style="font-size:17px;margin-bottom:6px">${esc(p.t)}</h3>
     <div style="font-size:22px;font-weight:800;color:var(--primary)">${EGP(p.price)}${cmp}</div>
-    <div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-amber">Pending approval</span><span class="badge-s b-grey">${p.cond}</span><span class="badge-s b-indigo">Stock: ${p.stock}</span></div>
-    <p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:16px">${p.desc}</p>
-    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin-bottom:4px">Product details</h3>
-    ${kv('Vendor (business)',p.v+(p.vok?' · ✓ verified':' · unverified'))}${kv('Category',p.cat+' › '+p.sub)}${kv('Brand',p.brand)}${kv('Condition',p.cond)}${kv('Location',p.loc)}${kv('Shipping',p.ship?EGP(p.ship):'Free')}${kv('Submitted',p.submitted)}
-    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin:16px 0 4px">Specifications</h3>${specs}`,
-   `<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="decide(${i},'approve');closeDrawer()">Approve</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="decide(${i},'changes');closeDrawer()">Request changes</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="decide(${i},'reject');closeDrawer()">Reject</button>`);
+    <div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-amber">Pending approval</span><span class="badge-s b-indigo">Stock: ${p.stock}</span></div>
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin-bottom:4px">Listing details</h3>
+    ${kv('Vendor (business)',esc(p.v)+(p.vok?' · ✓ verified':' · unverified'))}${kv('Category',esc(p.cat)+(p.sub?' › '+esc(p.sub):''))}${kv('Stock',p.stock)}
+    <p class="muted" style="font-size:11.5px;margin-top:14px">Full description, images, and specs aren't exposed by the admin listings API — only the summary fields above.</p>`,
+   `<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="decide(${i},'approve');closeDrawer()">Approve</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="decide(${i},'reject');closeDrawer()">Reject</button>`);
 }
 
-function vendors(){
+async function vendors(){
+ const res=await safeCall(()=>loadVendors(),null);
+ return vendorsTableHtml(res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/vendors: ${esc(res.error.message)}</div>`);
+}
+function vendorsTableHtml(apiNote){
  const rows=VENDORS.map((v,i)=>{const st=v.status==='active'?'b-green':v.status==='pending'?'b-amber':'b-red';
    const act=v.status==='pending'?`<button class="btn btn-ok btn-sm" onclick="vdecide(${i},'approve')">Approve</button><button class="btn btn-no btn-sm" onclick="vdecide(${i},'reject')">Reject</button>`
      :v.status==='suspended'?`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'reinstate')">Reinstate</button>`
      :`<button class="btn btn-g btn-sm" onclick="vdecide(${i},'suspend')">Suspend</button>`;
-   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${v.n}'s listings">${avatar(v.n)}<div><b>${v.n}</b><small>${v.owner} · ${v.city}</small></div></div></td>
+   return `<tr data-status="${v.status}"><td><div class="u" style="cursor:pointer" onclick="openVendorProducts(${i})" title="View ${esc(v.n)}'s listings">${avatar(v.n)}<div><b>${esc(v.n)}</b><small>${esc(v.owner)} · ${esc(v.city)}</small></div></div></td>
      <td><span class="badge-s b-indigo">🏢 Business</span></td>
      <td><span class="badge-s ${st}"><span class="dotb" style="background:currentColor"></span>${v.status[0].toUpperCase()+v.status.slice(1)}</span></td>
      <td><a style="cursor:pointer;color:var(--primary);font-weight:600" onclick="openVendorProducts(${i})">${v.products||'—'}</a></td><td class="money">${v.gmv?EGP(v.gmv):'—'}</td><td>${v.rating?'⭐ '+v.rating:'—'}</td>
      <td class="r"><button class="btn btn-g btn-sm" onclick="openVendorProducts(${i})">Listings</button><button class="btn btn-g btn-sm" onclick="vendorDrawer(${i})">Details</button>${act}</td></tr>`}).join('');
  return `<div class="page-head"><div><h2>Vendors</h2><p><b>Business</b> accounts — sellers on the marketplace (role: vendor). Individual buyers are under <a data-jump="customers" style="color:var(--primary);cursor:pointer">Users</a>.</p></div>
    <div class="tabs"><span class="chip active">All</span><span class="chip">Pending</span><span class="chip">Active</span><span class="chip">Suspended</span></div></div>
-   <div class="card"><table><thead><tr><th>Vendor</th><th>Account type</th><th>Status</th><th>Products</th><th>GMV</th><th>Rating</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+   ${apiNote}
+   <div class="card"><table><thead><tr><th>Vendor</th><th>Account type</th><th>Status</th><th>Products</th><th>GMV</th><th>Rating</th><th class="r">Action</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="muted" style="text-align:center;padding:24px">No vendors.</td></tr>'}</tbody></table></div>`;
 }
 
-function categories(){
- const cards=CATS.map((c,i)=>`<div class="cat"><div class="ci">${c[1]}</div>
-   <div class="cmeta"><b>${c[0]}</b><small>${c[2]} subcategories · ${c[3]} live products</small></div>
-   <div class="switch ${c[4]?'':'off'}" onclick="this.classList.toggle('off');toast('${c[0]} '+(this.classList.contains('off')?'hidden':'visible'))"></div></div>`).join('');
- return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy (10 categories · 31 subcategories) — powers <b>GET /categories</b></p></div>
+async function categories(){
+ const res=await safeCall(()=>loadCategories(),null);
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/categories (this read endpoint isn't in the Postman collection — confirm the path with backend): ${esc(res.error.message)}</div>`;
+ const cards=CATS_API.map((c,i)=>`<div class="cat" style="flex-wrap:wrap">
+   <div class="ci">${c.imageUrl?`<img src="${esc(c.imageUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px" alt="">`:'📦'}</div>
+   <div class="cmeta"><b>${esc(c.nameEn)}</b><small>${esc(c.nameAr)}</small></div>
+   <div class="switch ${c.isActive?'':'off'}" onclick="toggleCategoryStatus(${i})" title="${c.isActive?'Active':'Hidden'}"></div>
+   <div style="display:flex;gap:6px"><button class="btn btn-g btn-sm" onclick="openCategoryForm(${i})">Edit</button><button class="btn btn-no btn-sm" onclick="deleteCategory(${i})">Delete</button></div></div>`).join('');
+ return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy — <code>/api/categories</code></p></div>
    <button class="btn btn-p" onclick="openCategoryForm()">+ Add category</button></div>
-   <div class="card"><div class="c-body"><div class="cat-grid">${cards}</div></div></div>`;
+   ${apiNote}
+   <div class="card"><div class="c-body"><div class="cat-grid">${cards||'<p class="muted">No categories yet.</p>'}</div></div></div>`;
+}
+function openCategoryForm(i){
+ const editing=i!=null,c=editing?CATS_API[i]:null;
+ const body=`<div class="form-row"><label>Name (English)</label><input id="catNameEn" value="${c?esc(c.nameEn):''}"></div>
+  <div class="form-row"><label>Name (Arabic)</label><input id="catNameAr" value="${c?esc(c.nameAr):''}"></div>
+  <div class="form-row"><label>Parent category (optional)</label><select id="catParent"><option value="">— none —</option>${CATS_API.filter(x=>!editing||x.id!==c.id).map(x=>`<option value="${esc(String(x.id))}"${c&&String(c.parentId)===String(x.id)?' selected':''}>${esc(x.nameEn)}</option>`).join('')}</select></div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);margin-bottom:14px"><input id="catActive" type="checkbox" style="width:auto"${!c||c.isActive?' checked':''}> Active</label>
+  <div class="form-row"><label>Image${editing?' (optional — replaces existing)':''}</label><input id="catImage" type="file" accept="image/png,image/jpeg,image/webp"></div>`;
+ openDrawer(editing?'Edit category':'Add category',body,
+  '<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" onclick="submitCategoryForm('+(editing?i:'null')+')">'+(editing?'Save changes':'Add category')+'</button>');
+}
+async function submitCategoryForm(i){
+ const nameEn=document.getElementById('catNameEn').value.trim();
+ const nameAr=document.getElementById('catNameAr').value.trim();
+ if(!nameEn||!nameAr){toast('Enter both English and Arabic names');return;}
+ const parentId=document.getElementById('catParent').value||undefined;
+ const isActive=document.getElementById('catActive').checked;
+ const files=document.getElementById('catImage').files;
+ const imageFile=files&&files[0]?files[0]:undefined;
+ try{
+   if(i!=null) await API.Categories.update({categoryId:CATS_API[i].id,nameEn,nameAr,parentId,isActive,imageFile});
+   else await API.Categories.create({nameEn,nameAr,parentId,isActive,imageFile});
+ }catch(e){ toast(e.message||'Save failed'); return; }
+ toast(i!=null?'Category updated ✓':'Category added ✓');
+ closeDrawer(); go('categories');
+}
+async function toggleCategoryStatus(i){
+ const c=CATS_API[i]; if(!c) return;
+ try{ await API.Categories.setStatus(c.id,!c.isActive); }
+ catch(e){ toast(e.message||'Action failed'); return; }
+ toast(c.isActive?'Category hidden':'Category visible ✓');
+ go('categories');
+}
+async function deleteCategory(i){
+ const c=CATS_API[i]; if(!c) return;
+ if(!confirm('Delete category "'+c.nameEn+'"? This cannot be undone.')) return;
+ try{ await API.Categories.remove(c.id); }
+ catch(e){ toast(e.message||'Delete failed'); return; }
+ toast('Category deleted');
+ go('categories');
 }
 
 /* which orders can still be handed to a platform courier */
@@ -502,17 +996,20 @@ function deliveryCell(o,i){
  if(courierAssignable(o)) return `<button class="btn btn-g btn-sm" onclick="assignCourierDrawer(${i})">Assign</button>`;
  return '<span class="muted" style="font-size:12px">Vendor</span>';
 }
-function orders(){
- const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td><td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
-   <td class="muted">${o.vendor}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
+async function orders(){
+ const res=await safeCall(()=>loadOrders(),null);
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/orders: ${esc(res.error.message)}${res.error.status===403?' — Orders is Administrator-only; a SUPERADMIN account can\'t see it.':''}</div>`;
+ const avgVal=ORDERS.length?Math.round(ORDERS.reduce((s,o)=>s+orderTotal(o),0)/ORDERS.length):0;
+ const rows=ORDERS.map((o,i)=>`<tr data-status="${o.status}"><td><b>${esc(o.id)}</b></td><td><div class="u">${avatar(o.buyer)}<b>${esc(o.buyer)}</b></div></td>
+   <td class="muted">${esc(o.vendor)}</td><td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
    <td>${deliveryCell(o,i)}</td>
    <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td><td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${i})">View</button></td></tr>`).join('');
  return `<div class="page-head"><div><h2>Orders</h2><p>Every order across the marketplace · payment: Cash on Delivery · 🚚 = Delivered by xStore</p></div>
    <div class="tabs" id="ordTabs"><span class="chip active">All</span><span class="chip">Pending</span><span class="chip">Processing</span><span class="chip">Shipped</span><span class="chip">Delivered</span><span class="chip">Cancelled</span></div></div>
+   ${apiNote}
    <div class="grid g-4" style="margin-bottom:18px">
-     ${kpi('box','3,482','Total orders','','up','#2E5C6E')}${kpi('chart','EGP 356','Avg order value','+3%','up','#3F7A5C')}
-     ${kpi('alert','12%','COD refusal rate','watch','down','#C68A2E')}${kpi('shield','98.1%','Fulfillment rate','+1%','up','#356F80')}</div>
-   <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Vendor</th><th>Total</th><th>Payment</th><th>Delivery</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+     ${kpi('box',String(ORDERS.length),'Orders loaded','','up','#2E5C6E')}${kpi('chart',EGP(avgVal),'Avg order value','','up','#3F7A5C')}</div>
+   <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Vendor</th><th>Total</th><th>Payment</th><th>Delivery</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="muted" style="text-align:center;padding:24px">No orders.</td></tr>'}</tbody></table></div>`;
 }
 
 function disputes(){
@@ -525,16 +1022,18 @@ function disputes(){
    <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Vendor</th><th>Reason</th><th>Value</th><th>Status</th><th class="r">Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-function customers(){
- const rows=CUSTOMERS.map((c,i)=>`<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${c.n}</b><small>role: consumer</small></div></div></td><td class="muted">${c.city}</td>
+async function customers(){
+ const res=await safeCall(()=>loadCustomers(),null);
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/users: ${esc(res.error.message)}</div>`;
+ const rows=CUSTOMERS.map((c,i)=>`<tr data-status="active"><td><div class="u" style="cursor:pointer" onclick="userDrawer(${i})">${avatar(c.n,'50')}<div><b>${esc(c.n)}</b><small>role: consumer</small></div></div></td><td class="muted">${esc(c.city)}</td>
+   <td class="muted">${esc(c.phone)}</td>
    <td><span class="badge-s b-blue">👤 Customer</span></td>
-   <td>${c.orders}</td><td class="money">${EGP(c.spend)}</td><td><span class="badge-s b-green">Active</span></td>
    <td class="r"><button class="btn btn-g btn-sm" onclick="userDrawer(${i})">Profile</button></td></tr>`).join('');
- return `<div class="page-head"><div><h2>Users</h2><p>Individual <b>customer</b> accounts — normal buyers (role: consumer). <b>Business</b> accounts are managed under <a data-jump="vendors" style="color:var(--primary);cursor:pointer">Vendors</a>.</p></div>
-   <button class="btn btn-g">Export CSV</button></div>
+ return `<div class="page-head"><div><h2>Users</h2><p>Individual <b>customer</b> accounts — normal buyers (role: consumer). <b>Business</b> accounts are managed under <a data-jump="vendors" style="color:var(--primary);cursor:pointer">Vendors</a>.</p></div></div>
    <div class="tabs" style="margin-bottom:18px"><span class="chip active">👤 Customers</span><span class="chip" data-jump="vendors">🏢 Business (vendors)</span></div>
-   <div class="grid g-3" style="margin-bottom:18px">${kpi('users','41,208','Total customers','+7%','up','#2E5C6E')}${kpi('chart','2.4','Orders per customer','+0.2','up','#C68A2E')}${kpi('box','63%','Repeat rate','+4%','up','#3F7A5C')}</div>
-   <div class="card"><table><thead><tr><th>User</th><th>City</th><th>Account type</th><th>Orders</th><th>Lifetime spend</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+   ${apiNote}
+   <div class="grid g-3" style="margin-bottom:18px">${kpi('users',String(CUSTOMERS.length),'Customers loaded','','up','#2E5C6E')}</div>
+   <div class="card"><table><thead><tr><th>User</th><th>City</th><th>Phone</th><th>Account type</th><th class="r"></th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="muted" style="text-align:center;padding:24px">No customers.</td></tr>'}</tbody></table></div>`;
 }
 
 /* ---------- delivery (courier pilot) ---------- */
@@ -749,16 +1248,18 @@ function coupons(){
      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="createCouponInline()">Create coupon</button></div></div></div>`;
 }
 
-function content(){
- const B=BANNERS;
- const rows=B.map((b,i)=>`<div class="banner"><div class="bimg"></div><div style="flex:1"><b>${b[0]}</b><br><small class="muted">${b[1]}</small></div><span class="badge-s ${b[2]==='Active'?'b-green':'b-amber'}">${b[2]}</span><button class="btn btn-g btn-sm" onclick="editBanner(${i})">Edit</button><button class="btn btn-no btn-sm" onclick="deleteBanner(${i})">Delete</button></div>`).join('');
- return `<div class="page-head"><div><h2>Content &amp; Banners</h2><p>Merchandise the app home feed and send push broadcasts</p></div><button class="btn btn-p" onclick="openBannerForm()">+ New banner</button></div>
-   <div class="split"><div class="card"><div class="c-head"><h3>Home banners</h3></div><div class="c-body" style="display:flex;flex-direction:column;gap:12px">${rows}</div></div>
-   <div class="card"><div class="c-head"><h3>Push broadcast</h3></div><div class="c-body">
-     <div class="form-row"><label>Title</label><input placeholder="Flash sale ends tonight!"></div>
-     <div class="form-row"><label>Audience</label><select><option>All buyers</option><option>Cairo / Giza</option><option>Lapsed buyers</option></select></div>
-     <div class="form-row"><label>Message</label><input placeholder="Up to 40% off electronics…"></div>
-     <button class="btn btn-p" style="width:100%;justify-content:center" onclick="sendBroadcast()">Send push</button></div></div></div>`;
+async function content(){
+ const res=await safeCall(()=>loadBanners(),null);
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/banners (this read endpoint isn't in the Postman collection — confirm the path with backend): ${esc(res.error.message)}</div>`;
+ const rows=BANNERS_API.map((b,i)=>`<div class="banner">
+   <div class="bimg" style="${b.imageUrl?`background:url('${esc(b.imageUrl)}') center/cover`:''}"></div>
+   <div style="flex:1"><b>${esc(b.nameEn)}</b><br><small class="muted">${esc(b.nameAr)} · sort ${b.sortOrder}</small></div>
+   <span class="badge-s ${b.isActive?'b-green':'b-amber'}">${b.isActive?'Active':'Inactive'}</span>
+   <button class="btn btn-g btn-sm" onclick="openBannerForm(${i})">Edit</button><button class="btn btn-no btn-sm" onclick="deleteBanner(${i})">Delete</button></div>`).join('');
+ return `<div class="page-head"><div><h2>Content &amp; Banners</h2><p>Merchandise the app home feed</p></div><button class="btn btn-p" onclick="openBannerForm()">+ New banner</button></div>
+   ${apiNote}
+   <div class="card"><div class="c-head"><h3>Home banners</h3></div><div class="c-body" style="display:flex;flex-direction:column;gap:12px">${rows||'<p class="muted">No banners yet.</p>'}</div></div>
+   <div class="card mt"><div class="c-body" style="font-size:12px;color:var(--text-3)">Push broadcasts aren't wired — <code>POST /admin/broadcasts</code> isn't in the current admin API.</div></div>`;
 }
 
 function analytics(){
@@ -772,14 +1273,35 @@ function analytics(){
    <div class="card"><div class="c-head"><h3>Top vendors by GMV</h3></div><div class="c-body" style="padding-top:6px">${top}</div></div></div>`;
 }
 
-function settings(){
+async function settings(){
+ const res=await safeCall(()=>API.Settings.get(),{commissionValueOnOrder:0,warnThresholdEgp:0,pauseThresholdEgp:0});
+ const s=res.data;
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/system-settings: ${esc(res.error.message)}</div>`;
+ const sysCard=`<div class="card"><div class="c-head"><h3>System settings</h3></div><div class="c-body">
+   <div class="form-row"><label>Commission per order (%)</label><input id="setCommission" inputmode="decimal" value="${s.commissionValueOnOrder}"></div>
+   <div class="form-row"><label>Default warn threshold (EGP)</label><input id="setWarn" inputmode="numeric" value="${s.warnThresholdEgp}"></div>
+   <div class="form-row"><label>Default pause threshold (EGP)</label><input id="setPause" inputmode="numeric" value="${s.pauseThresholdEgp}"></div>
+   <button class="btn btn-p" style="width:100%;justify-content:center" onclick="saveSystemSettings()">Save system settings</button></div></div>`;
  const toggles=[['Require admin approval before products go live',true],['Require admin approval for new vendors',true],['Cash on Delivery enabled',true],['Delivered by xStore — platform couriers collect COD (pilot)',true],['Online payment gateway (Paymob/Fawry)',false],['Guest browsing (no login)',false],['Allow vendor-level coupons',false]];
  const rows=toggles.map(t=>`<div class="list-row"><div style="flex:1"><b>${t[0]}</b></div><div class="switch ${t[1]?'':'off'}" onclick="this.classList.toggle('off')"></div></div>`).join('');
  return `<div class="page-head"><div><h2>Settings</h2><p>Marketplace rules &amp; launch configuration</p></div></div>
-   <div class="split"><div class="card"><div class="c-head"><h3>Marketplace policies</h3></div><div class="c-body" style="padding-top:4px">${rows}</div></div>
-   <div class="card"><div class="c-head"><h3>Roles &amp; access</h3></div><div class="c-body">
+   ${apiNote}
+   <div class="split">${sysCard}<div class="card"><div class="c-head"><h3>Roles &amp; access</h3></div><div class="c-body">
      ${TEAM.map(t=>`<div class="list-row">${avatar(t[0])}<div style="flex:1"><b>${t[0]}</b><small class="muted">${t[2]}</small></div><span class="badge-s ${t[1]==='Super Admin'?'b-indigo':t[1]==='Moderator'?'b-blue':'b-grey'}">${t[1]}</span></div>`).join('')}
-     <button class="btn btn-g mt" style="width:100%;justify-content:center" onclick="openInviteForm()">+ Invite team member</button></div></div></div>`;
+     <button class="btn btn-g mt" style="width:100%;justify-content:center" onclick="openInviteForm()">+ Invite team member</button>
+     <p class="muted" style="font-size:11px;margin-top:8px">Team invites aren't backed by an endpoint yet — local only.</p></div></div></div>
+   <div class="card mt"><div class="c-head"><h3>Marketplace policies</h3></div><div class="c-body" style="padding-top:4px">${rows}
+     <p class="muted" style="font-size:11px;margin-top:12px">These policy toggles aren't backed by an endpoint yet — local only.</p></div></div>`;
+}
+async function saveSystemSettings(){
+ const commissionValueOnOrder=parseFloat(document.getElementById('setCommission').value);
+ const warnThresholdEgp=parseFloat(document.getElementById('setWarn').value);
+ const pauseThresholdEgp=parseFloat(document.getElementById('setPause').value);
+ if([commissionValueOnOrder,warnThresholdEgp,pauseThresholdEgp].some(n=>isNaN(n)||n<0)){toast('Enter valid, non-negative numbers');return;}
+ try{ await API.Settings.update({commissionValueOnOrder,warnThresholdEgp,pauseThresholdEgp}); }
+ catch(e){ toast(e.message||'Save failed'); return; }
+ toast('System settings saved ✓');
+ go('settings');
 }
 
 const VIEWS={overview,analytics,moderation,vendors,categories,orders,couriers,packages,disputes,customers,coupons,content,settings};
@@ -793,20 +1315,57 @@ function syncOverlay(){
 function toggleSidebar(){document.querySelector('.sidebar').classList.toggle('open');syncOverlay();}
 function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');syncOverlay();}
 
-/* ---------- router ---------- */
-function go(v){
- document.getElementById('content').innerHTML=VIEWS[v]();
+/* ---------- router ----------
+ * VIEWS[v] may be sync (mock-only views) or async (views backed by API.js loaders,
+ * see "wired views" below) — go() awaits either. */
+let GO_SEQ=0;
+async function go(v){
+ const seq=++GO_SEQ;
  document.getElementById('topTitle').textContent=TITLES[v];
  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
  const s=document.getElementById('searchInput'); if(s) s.value='';
  closeSidebar();
  window.scrollTo(0,0);
+ const content=document.getElementById('content');
+ content.innerHTML=stateCard('Loading…');
+ let html;
+ try{
+   html=await VIEWS[v]();
+ }catch(err){
+   if(seq!==GO_SEQ) return;
+   content.innerHTML=stateCard(err&&err.message?err.message:'Something went wrong loading this page.',true,v);
+   return;
+ }
+ if(seq!==GO_SEQ) return; // a newer navigation started while this one was loading
+ content.innerHTML=html;
 }
+function stateCard(msg,isError,retryView){
+ return '<div class="card"><div class="c-body"><div class="state-card'+(isError?' error':'')+'">'
+   +(isError?'⚠️ ':'')+esc(msg)
+   +(isError&&retryView?'<div><button class="btn btn-g" onclick="go(\''+retryView+'\')">Retry</button></div>':'')
+   +'</div></div></div>';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
 
 /* ---------- toast + moderation ---------- */
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
-function decide(i,action){const el=document.getElementById('mod-'+i);if(!el)return;el.style.transition='.3s';el.style.opacity='0';el.style.transform='translateX(30px)';setTimeout(()=>{el.remove();const c=document.getElementById('pendCount');const n=c?Math.max(0,(+c.textContent)-1):0;if(c)c.textContent=n;const b=document.querySelector('#nav a[data-view=moderation] .badge');if(b){if(n>0)b.textContent=n;else b.remove();}},300);const msg={approve:'Product approved — now live ✓',reject:'Product rejected — vendor notified',changes:'Sent back to vendor for changes'};toast(msg[action]||'Done');}
+async function decide(i,action){
+ const p=PENDING[i]; if(!p)return;
+ let reason;
+ if(action==='reject'){
+   reason=prompt('Rejection reason (shown to the vendor):','');
+   if(reason===null) return; // cancelled
+ }
+ try{
+   if(action==='approve') await API.Listings.approve(p.id);
+   else if(action==='reject') await API.Listings.reject(p.id,reason||'');
+   else { toast('Not supported by the current API'); return; }
+ }catch(e){ toast(e.message||'Action failed'); return; }
+ const msg={approve:'Listing approved — now live ✓',reject:'Listing rejected — vendor notified'};
+ toast(msg[action]||'Done');
+ go('moderation'); // re-fetch so indices stay in sync with the server
+}
 
 /* ---------- detail drawer ---------- */
 function openDrawer(title,html,actions){
@@ -819,33 +1378,42 @@ const cellTxt=(tr,i)=>tr.children[i]?tr.children[i].innerText.trim():'';
 const kv=(k,v)=>'<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>';
 const secH=t=>'<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);margin:16px 0 4px">'+t+'</h3>';
 function orderDrawer(i){
- const o=ORDERS[i];
- const items=o.items.map(it=>kv(it[0]+' × '+it[1], EGP(it[1]*it[2]))).join('');
+ const o=ORDERS[i]; if(!o) return;
+ const items=o.items.map(it=>kv(esc(it[0])+' × '+it[1], EGP(it[1]*it[2]))).join('');
  const steps=['Pending','Confirmed','Processing','Shipped','Delivered'];
  const cur=steps.indexOf(OSTAT[o.status][1]);
  const tl=o.status==='cancelled'
    ?'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:var(--error)"></span><span style="color:var(--error)">Cancelled</span></div>'
    :steps.map((s,x)=>'<div class="list-row"><span class="dotb" style="width:11px;height:11px;background:'+(x<=cur?'var(--success)':'var(--line)')+'"></span><span style="'+(x<=cur?'':'color:var(--text-3)')+'">'+s+'</span></div>').join('');
- const canCancel=['pending','confirmed','processing'].indexOf(o.status)>-1;
+ const canCancel=o.status==='pending';
  const assignBtn=courierAssignable(o)
    ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer();assignCourierDrawer('+i+')">Assign courier</button>':'';
- openDrawer('Order '+o.id,
-   kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',o.buyer)+kv('Phone',o.phone)+kv('Vendor (business)',o.vendor)+kv('Payment','Cash on Delivery')
-   +kv('Delivery',o.courier?'🚚 Delivered by xStore — '+o.courier:'Vendor self-delivery')
-   +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+o.addr+'</p>'
+ openDrawer('Order '+esc(o.id),
+   kv('Status',OSTAT[o.status][1])+kv('Buyer (customer)',esc(o.buyer))+kv('Phone',esc(o.phone))+kv('Vendor (business)',esc(o.vendor))+kv('Payment','Cash on Delivery')
+   +kv('Delivery',o.courier?'🚚 Delivered by xStore — '+esc(o.courier):'Vendor self-delivery')
+   +secH('Delivery address')+'<p class="muted" style="font-size:13px">'+esc(o.addr)+'</p>'
    +secH('Items')+items+kv('<b>Total</b>','<b>'+EGP(orderTotal(o))+'</b>')
    +secH('Fulfilment timeline')+tl,
-   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to vendor\');closeDrawer()">Contact vendor</button>'+assignBtn
-   +(canCancel?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Order cancelled\');closeDrawer()">Cancel order</button>':'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'));
+   assignBtn
+   +(canCancel?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="cancelOrder('+i+')">Cancel order</button>':'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'));
+}
+async function cancelOrder(i){
+ const o=ORDERS[i]; if(!o) return;
+ const reason=prompt('Cancellation reason:','Cancelled by administrator');
+ if(reason===null) return;
+ try{ await API.Orders.cancel(o.id,reason); }
+ catch(e){ toast(e.message||'Cancel failed'); return; }
+ toast('Order cancelled');
+ closeDrawer(); go('orders');
 }
 function userDrawer(i){
- const c=CUSTOMERS[i];
+ const c=CUSTOMERS[i]; if(!c) return;
  openDrawer(c.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+c.n+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
-   +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span> <span class="badge-s b-green">Active</span></div>'
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(c.n,'50')+'<div><b style="font-size:16px">'+esc(c.n)+'</b><div class="muted" style="font-size:12.5px">Customer · role: consumer</div></div></div>'
+   +'<div style="margin-bottom:8px"><span class="badge-s b-blue">👤 Customer</span></div>'
    +secH('Account')
-   +kv('City',c.city)+kv('Phone',c.phone)+kv('Joined',c.joined)+kv('Total orders',c.orders)+kv('Lifetime spend',EGP(c.spend))+kv('Avg order',EGP(Math.round(c.spend/c.orders))),
-   '<button class="btn btn-p" style="flex:1;justify-content:center" onclick="toast(\'Message sent to customer\');closeDrawer()">Message</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Customer suspended\');closeDrawer()">Suspend</button>');
+   +kv('City',esc(c.city))+kv('Phone',esc(c.phone))+kv('Joined',esc(c.joined)),
+   '<p class="muted" style="font-size:11.5px;margin-top:4px">The current admin API has no suspend or messaging endpoint for consumer users yet.</p>');
 }
 function disputeDrawer(i){
  const d=DISPUTES[i];
@@ -857,26 +1425,38 @@ function disputeDrawer(i){
    '<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="toast(\'Buyer refunded ✓\');closeDrawer()">Refund buyer</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Partial refund issued\');closeDrawer()">Partial</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Claim rejected\');closeDrawer()">Reject</button>');
 }
 function vendorDrawer(i){
- const v=VENDORS[i];
- const sm={active:['b-green','Active'],pending:['b-amber','Pending approval'],suspended:['b-red','Suspended']}[v.status];
+ const v=VENDORS[i]; if(!v) return;
+ const sm={active:['b-green','Active'],pending:['b-amber','Pending approval'],suspended:['b-red','Suspended'],rejected:['b-red','Rejected']}[v.status]||['b-grey',v.status];
  const actions=v.status==='pending'
    ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'approve\')">Approve vendor</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'reject\')">Reject</button>'
    :v.status==='suspended'
    ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'reinstate\')">Reinstate</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
    :'<button class="btn btn-p" style="flex:1;justify-content:center" onclick="closeDrawer();openVendorProducts('+i+')">View listings</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="vdecide('+i+',\'suspend\')">Suspend</button>';
  openDrawer('Vendor — '+v.n,
-   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+v.n+'</b><div class="muted" style="font-size:12.5px">'+v.owner+' · '+v.city+'</div></div></div>'
+   '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+avatar(v.n)+'<div><b style="font-size:16px">'+esc(v.n)+'</b><div class="muted" style="font-size:12.5px">'+esc(v.owner)+' · '+esc(v.city)+'</div></div></div>'
    +'<div style="margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s b-indigo">🏢 Business</span><span class="badge-s '+sm[0]+'">'+sm[1]+'</span>'+(v.vok?'<span class="badge-s b-green">✓ verified</span>':'<span class="badge-s b-amber">unverified</span>')+'</div>'
    +secH('Business profile')
-   +kv('Owner',v.owner)+kv('Primary category',v.cat)+kv('Location',v.city)+kv('Joined',v.joined)+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')+kv('Wallet — owed to platform','<span style="color:'+(commLevel(vcomm(i))==='paused'?'#B4472E':commLevel(vcomm(i))==='warn'?'#C68A2E':'inherit')+'">'+EGP(vcomm(i).outstanding)+'</span>')
-   +secH('Contact')+kv('WhatsApp',v.wa)+kv('Email',v.email),
+   +kv('Owner',esc(v.owner))+kv('Primary category',esc(v.cat))+kv('Location',esc(v.city))+kv('Joined',esc(v.joined))+kv('Products',v.products||'—')+kv('GMV',v.gmv?EGP(v.gmv):'—')+kv('Rating',v.rating?'⭐ '+v.rating:'—')
+   +'<div style="margin-top:8px"><a style="cursor:pointer;color:var(--primary);font-size:12.5px;font-weight:600" onclick="closeDrawer();openVendorProducts('+i+',\'commission\')">View commission wallet →</a></div>'
+   +secH('Contact')+kv('WhatsApp',esc(v.wa))+kv('Email',esc(v.email)),
    actions);
 }
-function vdecide(i,action){
- if(action==='reject'){VENDORS.splice(i,1);toast('Vendor application rejected');closeDrawer();go('vendors');return;}
- const ns={approve:'active',suspend:'suspended',reinstate:'active'}[action];
- if(ns) VENDORS[i].status=ns;
- toast({approve:'Vendor approved — now selling ✓',suspend:'Vendor suspended',reinstate:'Vendor reinstated'}[action]||'Done');
+async function vdecide(i,action){
+ const v=VENDORS[i]; if(!v) return;
+ if(action==='suspend'||action==='reinstate'){
+   toast('The current admin API has no suspend/reinstate endpoint yet — showing locally only.');
+   v.status=action==='suspend'?'suspended':'active';
+   closeDrawer();
+   document.getElementById('content').innerHTML=vendorsTableHtml('');
+   document.getElementById('topTitle').textContent='Vendors';
+   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view==='vendors'));
+   return;
+ }
+ try{
+   if(action==='approve') await API.Vendors.approve(v.id);
+   else if(action==='reject') await API.Vendors.reject(v.id);
+ }catch(e){ toast(e.message||'Action failed'); return; }
+ toast({approve:'Vendor approved — now selling ✓',reject:'Vendor application rejected'}[action]||'Done');
  closeDrawer(); go('vendors');
  const pend=VENDORS.filter(x=>x.status==='pending').length;
  const b=document.querySelector('#nav a[data-view=vendors] .badge'); if(b){if(pend>0)b.textContent=pend;else b.remove();}
@@ -887,46 +1467,58 @@ const LSTAT={live:['b-green','Live'],pending:['b-amber','Pending'],out:['b-red',
 const emptyCard=(ico,title,sub)=>`<div class="card"><div class="c-body" style="text-align:center;padding:48px 24px">
    <div style="font-size:40px;margin-bottom:10px">${ico}</div><b style="font-size:15px">${title}</b>
    <p class="muted" style="font-size:13px;margin-top:4px">${sub}</p></div></div>`;
-function vendorProducts(i,tab){
- tab=tab||'listings';
+function vendorHeader(i,tab,listCount,ordCount){
  const v=VENDORS[i];
- const list=VLISTINGS[i]||[];
- const vOrders=ORDERS.map((o,idx)=>({o,idx})).filter(x=>x.o.vendor===v.n);
- const sm={active:['b-green','Active'],pending:['b-amber','Pending approval'],suspended:['b-red','Suspended']}[v.status];
- const header=`
+ const sm={active:['b-green','Active'],pending:['b-amber','Pending approval'],suspended:['b-red','Suspended'],rejected:['b-red','Rejected']}[v.status]||['b-grey',v.status];
+ return `
   <div style="margin-bottom:14px"><a class="btn btn-g btn-sm" style="cursor:pointer" onclick="go('vendors')">← Back to vendors</a></div>
   <div class="page-head">
     <div style="display:flex;align-items:center;gap:14px">${avatar(v.n)}
-      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${v.n} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
-      <p>${v.owner} · ${v.city} · ${v.cat} · joined ${v.joined}</p></div></div>
+      <div><h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${esc(v.n)} <span class="badge-s ${sm[0]}">${sm[1]}</span>${v.vok?'<span class="badge-s b-green">✓ verified</span>':''}</h2>
+      <p>${esc(v.owner)} · ${esc(v.city)} · ${esc(v.cat)} · joined ${esc(v.joined)}</p></div></div>
     <button class="btn btn-p" onclick="vendorDrawer(${i})">Vendor details</button></div>
   <div class="tabs" style="margin-bottom:18px">
-    <span class="chip ${tab==='listings'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'listings')">📦 Listings (${list.length})</span>
-    <span class="chip ${tab==='orders'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'orders')">🧾 Orders (${vOrders.length})</span>
+    <span class="chip ${tab==='listings'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'listings')">📦 Listings (${listCount})</span>
+    <span class="chip ${tab==='orders'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'orders')">🧾 Orders (${ordCount})</span>
     <span class="chip ${tab==='commission'?'active':''}" onclick="event.stopPropagation();openVendorProducts(${i},'commission')">💳 Commission</span>
   </div>`;
+}
+async function vendorProducts(i,tab){
+ tab=tab||'listings';
+ const v=VENDORS[i]; if(!v) return stateCard('Vendor not found',true);
 
- if(tab==='commission') return header+commissionPane(i);
+ if(tab==='commission') return vendorHeader(i,tab,(VLISTINGS[i]||[]).length,0)+await commissionPaneHtml(i);
+
+ const [listRes,ordRes]=await Promise.all([
+   safeCall(()=>API.Listings.list({pageSize:200}),{items:[]}),
+   safeCall(()=>loadOrders(),null)
+ ]);
+ const allListings=(listRes.data.items||[]).map(mapListing);
+ const list=allListings.filter(l=>(v.id!=null&&l.vendorId!=null)?String(l.vendorId)===String(v.id):l.v===v.n);
+ VLISTINGS[i]=list;
+ const vOrders=ORDERS.map((o,idx)=>({o,idx})).filter(x=>x.o.vendor===v.n);
+ const apiNote=(listRes.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/listings: ${esc(listRes.error.message)}</div>`)
+   +(ordRes.ok?`<div class="api-note">Note: there's no per-vendor order endpoint yet — this is the full order list filtered by vendor name client-side.</div>`:`<div class="api-note">⚠️ Couldn't load /api/admin/orders: ${esc(ordRes.error.message)}</div>`);
+ const header=vendorHeader(i,tab,list.length,vOrders.length);
 
  if(tab==='orders'){
    const delivered=vOrders.filter(x=>x.o.status==='delivered').length;
    const ordVal=vOrders.reduce((s,x)=>s+orderTotal(x.o),0);
    const kpis=`<div class="grid g-4" style="margin-bottom:18px">
-     ${kpi('box',String(vOrders.length),'Orders (30d)','','up','#2E5C6E')}
+     ${kpi('box',String(vOrders.length),'Orders','','up','#2E5C6E')}
      ${kpi('shield',String(delivered),'Delivered','','up','#3F7A5C')}
      ${kpi('alert',String(vOrders.length-delivered),'In progress','','down','#C68A2E')}
      ${kpi('chart',ordVal?EGP(ordVal):'—','Order value','','up','#356F80')}</div>`;
-   const rows=vOrders.map(({o,idx})=>`<tr data-status="${o.status}"><td><b>${o.id}</b></td>
-     <td><div class="u">${avatar(o.buyer)}<b>${o.buyer}</b></div></td>
-     <td class="muted">${o.items.map(it=>it[0]+' ×'+it[1]).join(', ')}</td>
+   const rows=vOrders.map(({o,idx})=>`<tr data-status="${o.status}"><td><b>${esc(o.id)}</b></td>
+     <td><div class="u">${avatar(o.buyer)}<b>${esc(o.buyer)}</b></div></td>
+     <td class="muted">${o.items.map(it=>esc(it[0])+' ×'+it[1]).join(', ')}</td>
      <td class="money">${EGP(orderTotal(o))}</td><td><span class="badge-s b-grey">COD</span></td>
      <td><span class="badge-s ${OSTAT[o.status][0]}">${OSTAT[o.status][1]}</span></td>
      <td class="r"><button class="btn btn-g btn-sm" onclick="orderDrawer(${idx})">View</button></td></tr>`).join('');
    const pane=vOrders.length
-     ?`<div class="tabs" style="margin-bottom:16px"><span class="chip active">All (${vOrders.length})</span><span class="chip">Pending</span><span class="chip">Processing</span><span class="chip">Shipped</span><span class="chip">Delivered</span><span class="chip">Cancelled</span></div>
-       <div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`
-     :emptyCard('🧾','No orders yet',v.status==='pending'?'This vendor is still pending approval and hasn’t received any orders.':'This vendor has no orders in the selected period.');
-   return header+kpis+pane;
+     ?`<div class="card"><table><thead><tr><th>Order</th><th>Buyer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`
+     :emptyCard('🧾','No orders yet',v.status==='pending'?'This vendor is still pending approval and hasn’t received any orders.':'This vendor has no orders right now.');
+   return header+apiNote+kpis+pane;
  }
 
  // listings tab
@@ -938,29 +1530,37 @@ function vendorProducts(i,tab){
    ${kpi('alert',String(pend),'Pending review','','down','#C68A2E')}
    ${kpi('chart',v.gmv?EGP(v.gmv):'—','GMV (30d)','','up','#356F80')}</div>`;
  const rows=list.map((p,pi)=>{const cmp=p.cmp?` <small style="text-decoration:line-through;color:var(--text-3)">${EGP(p.cmp)}</small>`:'';
-   return `<tr data-status="${p.status}"><td><div class="u" style="cursor:pointer" onclick="listingDrawer(${i},${pi})"><span class="ua" style="background:linear-gradient(135deg,#EAF0F1,#DAE6E9);font-size:18px">${p.emoji}</span><div><b>${p.t}</b><small>${p.sub}</small></div></div></td>
+   return `<tr data-status="${p.status}"><td><div class="u" style="cursor:pointer" onclick="listingDrawer(${i},${pi})"><span class="ua" style="background:linear-gradient(135deg,#EAF0F1,#DAE6E9);font-size:18px">${p.emoji}</span><div><b>${esc(p.t)}</b><small>${esc(p.sub)}</small></div></div></td>
      <td class="money">${EGP(p.price)}${cmp}</td>
      <td>${p.stock||'—'}</td>
      <td>${p.sold}</td>
      <td>${p.rating?'⭐ '+p.rating:'—'}</td>
-     <td><span class="badge-s ${LSTAT[p.status][0]}">${LSTAT[p.status][1]}</span></td>
+     <td><span class="badge-s ${LSTAT[p.status]?LSTAT[p.status][0]:'b-grey'}">${LSTAT[p.status]?LSTAT[p.status][1]:p.status}</span></td>
      <td class="r"><button class="btn btn-g btn-sm" onclick="listingDrawer(${i},${pi})">View</button></td></tr>`}).join('');
  const pane=list.length
-   ? `<div class="tabs" style="margin-bottom:16px"><span class="chip active">All (${list.length})</span><span class="chip">Live</span><span class="chip">Pending</span><span class="chip">Out of stock</span></div>
-      <div class="card"><table><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Sold (30d)</th><th>Rating</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`
+   ? `<div class="card"><table><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Sold (30d)</th><th>Rating</th><th>Status</th><th class="r"></th></tr></thead><tbody>${rows}</tbody></table></div>`
    : emptyCard('📦','No listings yet',v.status==='pending'?'This vendor is still pending approval and hasn’t published any products.':'This vendor has no products listed.');
- return header+kpis+pane;
+ return header+apiNote+kpis+pane;
 }
-function openVendorProducts(i,tab){
+async function openVendorProducts(i,tab){
  tab=tab||'listings';
- document.getElementById('content').innerHTML=vendorProducts(i,tab);
- document.getElementById('topTitle').textContent=VENDORS[i].n+(tab==='orders'?' · Orders':tab==='commission'?' · Commission':' · Listings');
+ const v=VENDORS[i]; if(!v) return;
+ document.getElementById('content').innerHTML=stateCard('Loading…');
+ document.getElementById('topTitle').textContent=v.n+(tab==='orders'?' · Orders':tab==='commission'?' · Commission':' · Listings');
  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view==='vendors'));
  const s=document.getElementById('searchInput'); if(s) s.value='';
  window.scrollTo(0,0);
+ try{
+   document.getElementById('content').innerHTML=await vendorProducts(i,tab);
+ }catch(e){
+   document.getElementById('content').innerHTML=stateCard(e.message||'Failed to load',true);
+ }
 }
-function commissionPane(i){
- const v=VENDORS[i],c=vcomm(i),lvl=commLevel(c);
+async function commissionPaneHtml(i){
+ const v=VENDORS[i];
+ const res=await safeCall(()=>API.Vendors.commission(v.id),{outstanding:0,warn:0,pause:0});
+ const c=res.data,lvl=commLevel(c);
+ const apiNote=res.ok?'':`<div class="api-note">⚠️ Couldn't load /api/admin/vendors/${esc(String(v.id))}/commission: ${esc(res.error.message)}</div>`;
  const badge={none:['b-green','Healthy'],warn:['b-amber','Warn — near limit'],paused:['b-red','Paused — publishing blocked']}[lvl];
  const banner=lvl==='none'?''
    :`<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;margin-bottom:18px;background:${lvl==='paused'?'var(--error-bg)':'var(--warning-bg)'};color:${lvl==='paused'?'#8A3A24':'#7E5A14'}">
@@ -973,7 +1573,7 @@ function commissionPane(i){
    ${kpi('chart',EGP(c.outstanding),'Outstanding balance','','down',lvl==='paused'?'#B4472E':lvl==='warn'?'#C68A2E':'#3F7A5C')}
    ${kpi('alert',EGP(c.warn),'Warn threshold','','up','#C68A2E')}
    ${kpi('shield',EGP(c.pause),'Pause threshold','','up','#B4472E')}
-   ${kpi('box','2%','Commission rate','flat','up','#356F80')}</div>`;
+   ${kpi('box','—','Commission rate','see Settings','up','#356F80')}</div>`;
  const form=`<div class="card"><div class="c-head"><h3>Weekly owed-balance thresholds (EGP)</h3><span class="badge-s ${badge[0]}">${badge[1]}</span></div>
    <div class="c-body">
      <div class="form-row"><label>Warn threshold — notify the vendor to pay</label><input id="warnTh" inputmode="numeric" value="${c.warn}"></div>
@@ -992,53 +1592,75 @@ function commissionPane(i){
        :`<div style="padding:14px 16px;background:var(--success-bg);color:#2C6347;border-radius:11px;font-size:13px;font-weight:600">✓ Wallet settled — nothing to collect.</div>`}</div></div>`;
  const info=`<div class="card"><div class="c-body" style="font-size:12.5px;line-height:1.7;color:var(--text-2)">
      <b style="color:var(--text)">How the wallet works</b>
-     <p style="margin-top:6px">xStore takes a flat <b>2%</b> commission per COD order. Unpaid commission accrues as the vendor's <b>outstanding balance</b>. When the vendor pays you, hit <b>Record payment</b> (partial) or <b>Mark fully paid</b> to reset the wallet to EGP 0.</p>
+     <p style="margin-top:6px">Unpaid commission accrues as the vendor's <b>outstanding balance</b>, settled weekly. When the vendor pays you, hit <b>Record payment</b> (partial) or <b>Mark fully paid</b> to reset the wallet to EGP 0.</p>
      <p style="margin-top:8px">Below warn → <span class="badge-s b-green">Healthy</span> · ≥ warn → <span class="badge-s b-amber">Warn</span> · ≥ pause → <span class="badge-s b-red">Paused</span> (publishing blocked).</p>
-     <p style="margin-top:8px">Backend: <code>POST /admin/vendors/{id}/commission/settle</code> · thresholds map to <code>warnThresholdEgp</code> / <code>pauseThresholdEgp</code>.</p></div></div>`;
- return kpis+banner+`<div class="split">${pay}${form}</div><div class="mt">${info}</div>`;
+     <p style="margin-top:8px">Backend: <code>POST /api/admin/vendors/{id}/commission/settle</code> · <code>PATCH /api/admin/vendors/{id}/commission</code>.</p></div></div>`;
+ return apiNote+kpis+banner+`<div class="split">${pay}${form}</div><div class="mt">${info}</div>`;
 }
-function resetWallet(i){
- const c=vcomm(i);
- if(c.outstanding===0){toast('Wallet already settled');return;}
- c.outstanding=0;
+async function resetWallet(i){
+ const v=VENDORS[i];
+ try{ await API.Vendors.settleCommission(v.id); }
+ catch(e){ toast(e.message||'Action failed'); return; }
  toast('Payment recorded — wallet reset to EGP 0 ✓');
  openVendorProducts(i,'commission');
 }
-function recordPayment(i){
- const c=vcomm(i);
+async function recordPayment(i){
+ const v=VENDORS[i];
  const amt=parseFloat(document.getElementById('payAmt').value);
  if(isNaN(amt)||amt<=0){toast('Enter a valid amount');document.getElementById('payAmt').focus();return;}
- c.outstanding=Math.max(0,Math.round((c.outstanding-amt)*100)/100);
- toast(c.outstanding===0?'Payment recorded — wallet settled ✓':'Payment recorded — '+EGP(c.outstanding)+' still owed');
+ try{ await API.Vendors.settleCommission(v.id,amt); }
+ catch(e){ toast(e.message||'Action failed'); return; }
+ toast('Payment recorded ✓');
  openVendorProducts(i,'commission');
 }
-function saveCommThresholds(i){
+async function saveCommThresholds(i){
+ const v=VENDORS[i];
  const warn=parseFloat(document.getElementById('warnTh').value);
  const pause=parseFloat(document.getElementById('pauseTh').value);
  if(isNaN(warn)||warn<0){toast('Enter a valid warn threshold');document.getElementById('warnTh').focus();return;}
  if(isNaN(pause)||pause<0){toast('Enter a valid pause threshold');document.getElementById('pauseTh').focus();return;}
  if(pause<warn){toast('Pause threshold must be ≥ warn threshold');document.getElementById('pauseTh').focus();return;}
- const c=vcomm(i); c.warn=warn; c.pause=pause;
+ try{ await API.Vendors.updateCommissionThresholds(v.id,warn,pause); }
+ catch(e){ toast(e.message||'Action failed'); return; }
  toast('Commission thresholds saved ✓');
  openVendorProducts(i,'commission');
 }
 function listingDrawer(vi,pi){
  const v=VENDORS[vi],p=(VLISTINGS[vi]||[])[pi]; if(!p)return;
- const st=LSTAT[p.status];
+ const st=LSTAT[p.status]||['b-grey',p.status];
  const cmp=p.cmp?' <span style="text-decoration:line-through;color:var(--text-3);font-size:15px;font-weight:500">'+EGP(p.cmp)+'</span> <span class="badge-s b-red">-'+Math.round((1-p.price/p.cmp)*100)+'%</span>':'';
+ const hotBtn='<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toggleHotDeal('+vi+','+pi+')">'+(p.isHotDeal?'Remove hot deal':'Mark hot deal')+'</button>';
  const act=p.status==='pending'
-   ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="toast(\'Listing approved — now live ✓\');closeDrawer()">Approve</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing rejected — vendor notified\');closeDrawer()">Reject</button>'
+   ?'<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="decideListing('+vi+','+pi+',\'approve\')">Approve</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="decideListing('+vi+','+pi+',\'reject\')">Reject</button>'
    :p.status==='live'
-   ?'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Opening listing editor…\');closeDrawer()">Edit</button><button class="btn btn-no" style="flex:1;justify-content:center" onclick="toast(\'Listing hidden from store\');closeDrawer()">Unpublish</button>'
-   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="toast(\'Restock reminder sent to vendor\');closeDrawer()">Nudge vendor</button><button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
- openDrawer('Listing — '+p.t,
+   ?hotBtn+'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>'
+   :'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Close</button>';
+ openDrawer('Listing — '+esc(p.t),
    '<div style="width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#EAF0F1,#DAE6E9);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:14px">'+p.emoji+'</div>'
-   +'<h3 style="font-size:17px;margin-bottom:6px">'+p.t+'</h3>'
+   +'<h3 style="font-size:17px;margin-bottom:6px">'+esc(p.t)+'</h3>'
    +'<div style="font-size:22px;font-weight:800;color:var(--primary)">'+EGP(p.price)+cmp+'</div>'
-   +'<div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s '+st[0]+'">'+st[1]+'</span><span class="badge-s b-indigo">Stock: '+p.stock+'</span><span class="badge-s b-grey">'+p.sold+' sold</span></div>'
+   +'<div style="margin:12px 0;display:flex;gap:6px;flex-wrap:wrap"><span class="badge-s '+st[0]+'">'+st[1]+'</span><span class="badge-s b-indigo">Stock: '+p.stock+'</span><span class="badge-s b-grey">'+p.sold+' sold</span>'+(p.isHotDeal?'<span class="badge-s b-amber">🔥 Hot deal</span>':'')+'</div>'
    +secH('Listing details')
-   +kv('Vendor (business)',v.n)+kv('Category',v.cat+' › '+p.sub)+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
+   +kv('Vendor (business)',esc(v.n))+kv('Category',esc(v.cat)+' › '+esc(p.sub))+kv('Price',EGP(p.price))+(p.cmp?kv('Compare-at',EGP(p.cmp)):'')+kv('In stock',p.stock)+kv('Sold (30d)',p.sold)+kv('Rating',p.rating?'⭐ '+p.rating:'—'),
    act);
+}
+async function decideListing(vi,pi,action){
+ const p=(VLISTINGS[vi]||[])[pi]; if(!p) return;
+ let reason;
+ if(action==='reject'){ reason=prompt('Rejection reason (shown to the vendor):',''); if(reason===null) return; }
+ try{
+   if(action==='approve') await API.Listings.approve(p.id);
+   else await API.Listings.reject(p.id,reason||'');
+ }catch(e){ toast(e.message||'Action failed'); return; }
+ toast(action==='approve'?'Listing approved — now live ✓':'Listing rejected — vendor notified');
+ closeDrawer(); openVendorProducts(vi,'listings');
+}
+async function toggleHotDeal(vi,pi){
+ const p=(VLISTINGS[vi]||[])[pi]; if(!p) return;
+ try{ await API.Listings.setHotDeal(p.id,!p.isHotDeal); }
+ catch(e){ toast(e.message||'Action failed'); return; }
+ toast(p.isHotDeal?'Removed from hot deals':'Marked as a hot deal ✓');
+ closeDrawer(); openVendorProducts(vi,'listings');
 }
 
 /* ---------- reusable add-form (opens in the drawer, actually adds) ---------- */
@@ -1055,15 +1677,35 @@ function formDrawer(title,fields,submitLabel,onSubmit,values){
  };
  openDrawer(title,body,'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" onclick="_submitForm()">'+submitLabel+'</button>');
 }
-function openCategoryForm(){formDrawer('Add category',
- [{label:'Category name',ph:'e.g. Groceries',required:true},{label:'Icon (emoji)',ph:'🛒'},{label:'Subcategories (comma-separated)',ph:'Fruits, Dairy, Bakery'}],
- 'Add category',v=>{const subs=v[2]?v[2].split(',').filter(x=>x.trim()).length:0;CATS.push([v[0],v[1]||'📦',subs,0,true]);toast('Category "'+v[0]+'" added ✓');closeDrawer();go('categories');});}
 function openCouponForm(){formDrawer('New coupon',
  [{label:'Code',ph:'SUMMER25',required:true},{label:'Offer description',ph:'25% off orders over EGP 500',required:true},{label:'Scope',type:'select',options:['Platform','Seasonal']}],
  'Create coupon',v=>{COUPONS.push([v[0].toUpperCase(),v[1],v[2],0,true]);toast('Coupon "'+v[0].toUpperCase()+'" created ✓');closeDrawer();go('coupons');});}
-function openBannerForm(){formDrawer('New banner',
- [{label:'Banner title',ph:'Summer Sale — up to 40% off',required:true},{label:'Placement',type:'select',options:['Home hero','Home strip','Category banner']},{label:'Status',type:'select',options:['Active','Scheduled']}],
- 'Add banner',v=>{BANNERS.push([v[0],v[1],v[2]]);toast('Banner added ✓');closeDrawer();go('content');});}
+function openBannerForm(i){
+ const editing=i!=null,b=editing?BANNERS_API[i]:null;
+ const body=`<div class="form-row"><label>Name (English)</label><input id="banNameEn" value="${b?esc(b.nameEn):''}"></div>
+  <div class="form-row"><label>Name (Arabic)</label><input id="banNameAr" value="${b?esc(b.nameAr):''}"></div>
+  <div class="form-row"><label>Sort order</label><input id="banSort" inputmode="numeric" value="${b?b.sortOrder:1}"></div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);margin-bottom:14px"><input id="banActive" type="checkbox" style="width:auto"${!b||b.isActive?' checked':''}> Active</label>
+  <div class="form-row"><label>Image${editing?' (optional — replaces existing)':' (required)'}</label><input id="banImage" type="file" accept="image/png,image/jpeg,image/webp"></div>`;
+ openDrawer(editing?'Edit banner':'New banner',body,
+  '<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" onclick="submitBannerForm('+(editing?i:'null')+')">'+(editing?'Save changes':'Add banner')+'</button>');
+}
+async function submitBannerForm(i){
+ const nameEn=document.getElementById('banNameEn').value.trim();
+ const nameAr=document.getElementById('banNameAr').value.trim();
+ if(!nameEn||!nameAr){toast('Enter both English and Arabic names');return;}
+ const sortOrder=parseInt(document.getElementById('banSort').value,10)||0;
+ const isActive=document.getElementById('banActive').checked;
+ const files=document.getElementById('banImage').files;
+ const imageFile=files&&files[0]?files[0]:undefined;
+ if(i==null&&!imageFile){toast('An image is required to create a banner');return;}
+ try{
+   if(i!=null) await API.Banners.update({bannerId:BANNERS_API[i].id,nameEn,nameAr,sortOrder,isActive,imageFile});
+   else await API.Banners.create({nameEn,nameAr,sortOrder,isActive,imageFile});
+ }catch(e){ toast(e.message||'Save failed'); return; }
+ toast(i!=null?'Banner updated ✓':'Banner added ✓');
+ closeDrawer(); go('content');
+}
 function openInviteForm(){formDrawer('Invite team member',
  [{label:'Full name',ph:'Full name',required:true},{label:'Email',ph:'name@xstore.eg',required:true},{label:'Role',type:'select',options:['Super Admin','Moderator','Viewer']}],
  'Send invite',v=>{const d={'Super Admin':'Full access','Moderator':'Orders + disputes','Viewer':'Read-only reports'}[v[2]]||'';TEAM.push([v[0],v[2],d]);toast('Invite sent to '+v[1]+' ✓');closeDrawer();go('settings');});}
@@ -1084,12 +1726,15 @@ function editCoupon(i){const c=COUPONS[i];formDrawer('Edit coupon',
  [{label:'Code',required:true},{label:'Offer description',required:true},{label:'Scope',type:'select',options:['Platform','Seasonal']}],
  'Save changes',v=>{COUPONS[i]=[v[0].toUpperCase(),v[1],v[2],c[3],c[4]];toast('Coupon "'+v[0].toUpperCase()+'" updated ✓');closeDrawer();go('coupons');},
  [c[0],c[1],c[2]]);}
-function editBanner(i){const b=BANNERS[i];formDrawer('Edit banner',
- [{label:'Banner title',required:true},{label:'Placement',type:'select',options:['Home hero','Home strip','Category banner']},{label:'Status',type:'select',options:['Active','Scheduled']}],
- 'Save changes',v=>{BANNERS[i]=[v[0],v[1],v[2]];toast('Banner updated ✓');closeDrawer();go('content');},
- [b[0],b[1],b[2]]);}
 function deleteCoupon(i){const c=COUPONS[i][0];COUPONS.splice(i,1);toast('Coupon "'+c+'" deleted');go('coupons');}
-function deleteBanner(i){BANNERS.splice(i,1);toast('Banner deleted');go('content');}
+async function deleteBanner(i){
+ const b=BANNERS_API[i]; if(!b) return;
+ if(!confirm('Delete banner "'+b.nameEn+'"? This cannot be undone.')) return;
+ try{ await API.Banners.remove(b.id); }
+ catch(e){ toast(e.message||'Delete failed'); return; }
+ toast('Banner deleted');
+ go('content');
+}
 
 /* ---------- filter chips ---------- */
 const STATUSES=['pending','confirmed','processing','shipped','delivered','cancelled','active','suspended','open','review','resolved','approved','rejected','live','out','off','submitted','priced','pickedup'];
@@ -1136,8 +1781,47 @@ document.getElementById('searchInput').addEventListener('input',e=>searchRows(e.
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeSidebar();}});
 
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
+
+/* ---------- auth gate ---------- */
+function showLogin(){
+ document.getElementById('appShell').style.display='none';
+ document.getElementById('loginScreen').style.display='flex';
+ document.getElementById('liBase').value=API.getBaseUrl();
+}
+function showApp(){
+ document.getElementById('loginScreen').style.display='none';
+ document.getElementById('appShell').style.display='flex';
+ go('overview');
+}
+async function handleLoginSubmit(ev){
+ ev.preventDefault();
+ const base=document.getElementById('liBase').value.trim();
+ if(base) API.setBaseUrl(base);
+ const phone=document.getElementById('liPhone').value.trim();
+ const pass=document.getElementById('liPass').value;
+ const remember=document.getElementById('liRemember').checked;
+ const err=document.getElementById('loginError'); err.style.display='none';
+ const btn=document.getElementById('loginSubmitBtn'); btn.disabled=true; btn.textContent='Signing in…';
+ try{
+   await API.Auth.login(phone,pass,remember);
+   showApp();
+ }catch(e){
+   err.textContent=e&&e.message?e.message:'Sign in failed.';
+   err.style.display='block';
+ }finally{
+   btn.disabled=false; btn.textContent='Sign in';
+ }
+ return false;
+}
+function handleLogout(){
+ API.Auth.logout();
+ toast('Signed out');
+ showLogin();
+}
+window.addEventListener('xstore:unauthorized',()=>{ toast('Session expired — please sign in again'); showLogin(); });
+
 /* boot */
-go('overview');
+if(API.isAuthenticated()) showApp(); else showLogin();
 
 </script>
 </body>
