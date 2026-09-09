@@ -25,7 +25,9 @@ class _CheckoutPaymentSectionState
   @override
   void initState() {
     super.initState();
-    _note = TextEditingController();
+    _note = TextEditingController(
+      text: ref.read(checkoutProvider).deliveryNote,
+    );
   }
 
   @override

@@ -65,7 +65,7 @@ class ProductGridCard extends StatelessWidget {
                           : ColoredBox(color: context.textDisabled),
                     ),
                     Positioned(
-                      left: AppSpacing.sm,
+                      right: AppSpacing.sm,
                       top: AppSpacing.sm,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -73,23 +73,18 @@ class ProductGridCard extends StatelessWidget {
                           vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              context.textPrimary.withValues(alpha: 0.65),
+                          color: context.isDark
+                              ? AppColors.primary.withValues(alpha: 0.2)
+                              : AppColors.indigoTint50,
                           borderRadius: BorderRadius.circular(AppSpacing.xs),
                         ),
                         child: Text(
                           item.condition,
-                          style: AppTypography.labelSmall
-                              .copyWith(color: context.surfaceColor),
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      right: AppSpacing.sm,
-                      top: AppSpacing.sm,
-                      child: WishHeartButton(
-                        listingId: item.id,
-                        size: AppSpacing.x2l,
                       ),
                     ),
                   ],
@@ -104,14 +99,18 @@ class ProductGridCard extends StatelessWidget {
                       item.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const Gap(AppSpacing.xs),
                     Row(
                       children: [
                         Text(
                           context.formatCurrency(item.price),
-                          style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
+                          style: AppTypography.labelLarge.copyWith(
+                            color: AppColors.primary,
+                          ),
                         ),
                         if (item.compareAtPrice != null) ...[
                           const Gap(AppSpacing.sm),
@@ -127,16 +126,6 @@ class ProductGridCard extends StatelessWidget {
                     const Gap(AppSpacing.xs),
                     Row(
                       children: [
-                        Icon(LucideIcons.star, size: AppSpacing.md, color: AppColors.warning),
-                        Text(
-                          ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
-                          style: AppTypography.bodySmall,
-                        ),
-                      ],
-                    ),
-                    const Gap(AppSpacing.xs),
-                    Row(
-                      children: [
                         Expanded(
                           child: Text(
                             item.sellerName,
@@ -145,23 +134,47 @@ class ProductGridCard extends StatelessWidget {
                             style: AppTypography.bodySmall,
                           ),
                         ),
-                        if (item.isSellerVerified)
-                          Icon(LucideIcons.badgeCheck, size: AppSpacing.lg, color: AppColors.primary),
+                        if (item.isSellerVerified) ...[
+                          const Gap(AppSpacing.xs),
+                          Icon(
+                            LucideIcons.badgeCheck,
+                            size: AppSpacing.lg,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                        const Gap(AppSpacing.sm),
+                        Icon(
+                          LucideIcons.star,
+                          size: AppSpacing.md,
+                          color: AppColors.warning,
+                        ),
+                        Text(
+                          ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
+                          style: AppTypography.bodySmall,
+                        ),
                       ],
                     ),
-                    if (showAddToCart) ...[
-                      const Gap(AppSpacing.md),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            onAddToCart();
-                          },
-                          child: Text(context.l10n.addToCart),
+                    const Gap(AppSpacing.md),
+                    Row(
+                      children: [
+                        WishHeartButton(
+                          listingId: item.id,
+                          size: AppSpacing.x2l,
                         ),
-                      ),
-                    ],
+                        if (showAddToCart) ...[
+                          const Gap(AppSpacing.sm),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                onAddToCart();
+                              },
+                              child: Text(context.l10n.addToCart),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ),

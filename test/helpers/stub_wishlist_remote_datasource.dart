@@ -8,38 +8,43 @@ import 'package:xstore/features/wishlist/domain/entities/wishlist_item_entity.da
 /// never silently exercises behavior it didn't configure.
 class StubWishlistRemoteDataSource implements WishlistRemoteDataSource {
   StubWishlistRemoteDataSource({
-    Future<List<WishlistItemEntity>> Function(String consumerId)?
-        onGetWishlist,
+    Future<List<WishlistItemEntity>> Function(String consumerId)? onGetWishlist,
     Future<WishlistItemEntity> Function({
       required String consumerId,
       required String listingId,
-    })? onAddToWishlist,
+    })?
+    onAddToWishlist,
     Future<void> Function({
       required String consumerId,
       required String listingId,
-    })? onRemoveFromWishlist,
+      String? wishlistItemId,
+    })?
+    onRemoveFromWishlist,
     Future<void> Function(String consumerId)? onClearWishlist,
     Future<WishlistItemEntity> Function(String listingId, {String? wishId})?
-        onBuildFromListingId,
-  })  : _onGetWishlist = onGetWishlist,
-        _onAddToWishlist = onAddToWishlist,
-        _onRemoveFromWishlist = onRemoveFromWishlist,
-        _onClearWishlist = onClearWishlist,
-        _onBuildFromListingId = onBuildFromListingId;
+    onBuildFromListingId,
+  }) : _onGetWishlist = onGetWishlist,
+       _onAddToWishlist = onAddToWishlist,
+       _onRemoveFromWishlist = onRemoveFromWishlist,
+       _onClearWishlist = onClearWishlist,
+       _onBuildFromListingId = onBuildFromListingId;
 
   final Future<List<WishlistItemEntity>> Function(String consumerId)?
-      _onGetWishlist;
+  _onGetWishlist;
   final Future<WishlistItemEntity> Function({
     required String consumerId,
     required String listingId,
-  })? _onAddToWishlist;
+  })?
+  _onAddToWishlist;
   final Future<void> Function({
     required String consumerId,
     required String listingId,
-  })? _onRemoveFromWishlist;
+    String? wishlistItemId,
+  })?
+  _onRemoveFromWishlist;
   final Future<void> Function(String consumerId)? _onClearWishlist;
   final Future<WishlistItemEntity> Function(String listingId, {String? wishId})?
-      _onBuildFromListingId;
+  _onBuildFromListingId;
 
   @override
   Future<List<WishlistItemEntity>> getWishlist(String consumerId) {
@@ -62,10 +67,15 @@ class StubWishlistRemoteDataSource implements WishlistRemoteDataSource {
   Future<void> removeFromWishlist({
     required String consumerId,
     required String listingId,
+    String? wishlistItemId,
   }) {
     final cb = _onRemoveFromWishlist;
     if (cb == null) throw UnimplementedError('removeFromWishlist not stubbed');
-    return cb(consumerId: consumerId, listingId: listingId);
+    return cb(
+      consumerId: consumerId,
+      listingId: listingId,
+      wishlistItemId: wishlistItemId,
+    );
   }
 
   @override

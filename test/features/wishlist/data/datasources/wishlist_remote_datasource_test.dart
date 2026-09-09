@@ -82,7 +82,10 @@ void main() {
       RequestOptions? captured;
       dio = buildDio((options) {
         captured = options;
-        return [_fullWishlistItemJson(), _fullWishlistItemJson(id: 'wish_2', listingId: 'listing_2')];
+        return [
+          _fullWishlistItemJson(),
+          _fullWishlistItemJson(id: 'wish_2', listingId: 'listing_2'),
+        ];
       });
       datasource = WishlistRemoteDataSourceImpl(dio);
 
@@ -106,6 +109,24 @@ void main() {
       expect(first.reviewCount, 12);
       expect(first.stockQuantity, 3);
       expect(first.addedAt, DateTime.parse('2026-08-01T10:00:00.000Z'));
+    });
+
+    test('parses a wrapped {data: []} envelope', () async {
+      dio = buildDio(
+        (_) => {
+          'isSuccess': true,
+          'data': [
+            _fullWishlistItemJson(),
+            _fullWishlistItemJson(id: 'wish_2', listingId: 'listing_2'),
+          ],
+        },
+      );
+      datasource = WishlistRemoteDataSourceImpl(dio);
+
+      final result = await datasource.getWishlist('consumer_1');
+
+      expect(result, hasLength(2));
+      expect(result.first.listingId, 'listing_1');
     });
 
     test('treats a zero rating as "no reviews yet" (null)', () async {
@@ -158,6 +179,55 @@ void main() {
       expect(result.listingName, 'Leather Jacket');
     });
 
+    test('unwraps a {data: item} envelope and keeps listingId', () async {
+      dio = buildDio(
+        (_) => {
+          'isSuccess': true,
+          'data': _fullWishlistItemJson(id: '15', listingId: 'listing_9'),
+        },
+      );
+      datasource = WishlistRemoteDataSourceImpl(dio);
+
+      final result = await datasource.addToWishlist(
+        consumerId: 'consumer_1',
+        listingId: 'listing_9',
+      );
+
+      expect(result.id, '15');
+      expect(result.listingId, 'listing_9');
+    });
+
+    test('treats 409 already-in-wishlist as the existing row', () async {
+      dio = buildDio((options) {
+        if (options.method == 'POST') {
+          return DioException(
+            requestOptions: options,
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: options,
+              statusCode: 409,
+              data: {
+                'isSuccess': false,
+                'data': null,
+                'errorEn': 'Item already in wishlist.',
+                'statusCode': 409,
+              },
+            ),
+          );
+        }
+        return [_fullWishlistItemJson(id: '15', listingId: 'listing_9')];
+      });
+      datasource = WishlistRemoteDataSourceImpl(dio);
+
+      final result = await datasource.addToWishlist(
+        consumerId: 'consumer_1',
+        listingId: 'listing_9',
+      );
+
+      expect(result.id, '15');
+      expect(result.listingId, 'listing_9');
+    });
+
     test('throws ServerException on an empty response body', () async {
       dio = buildDio((_) => null);
       datasource = WishlistRemoteDataSourceImpl(dio);
@@ -202,6 +272,30 @@ void main() {
       expect(captured!.method, 'DELETE');
       expect(captured!.path, '/api/wishlist/consumer_1/items/listing_9');
     });
+
+    test(
+      'also DELETEs the wishlist row id when it differs from listingId',
+      () async {
+        final paths = <String>[];
+        dio = buildDio((options) {
+          paths.add(options.path);
+          if (options.path.endsWith('/15')) return null;
+          return _badResponse(options, 404);
+        });
+        datasource = WishlistRemoteDataSourceImpl(dio);
+
+        await datasource.removeFromWishlist(
+          consumerId: 'consumer_1',
+          listingId: 'listing_9',
+          wishlistItemId: '15',
+        );
+
+        expect(paths, [
+          '/api/wishlist/consumer_1/items/15',
+          '/api/wishlist/consumer_1/items/listing_9',
+        ]);
+      },
+    );
 
     test('maps a 401 response to an UnauthorizedException', () async {
       dio = buildDio((options) => _badResponse(options, 401));
@@ -249,54 +343,59 @@ void main() {
   });
 
   group('buildFromListingId', () {
-    test('GETs /api/listings/{id} and reads a flat (unwrapped) payload', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return {
-          'id': 'listing_9',
-          'title': 'Wireless Earbuds',
-          'slug': 'wireless-earbuds',
-          'imageUrl': 'https://example.test/single.jpg',
-          'price': 25000,
-          'category': 'Electronics',
-          'condition': 'New',
-          'userId': 'vendor_42',
-          'userName': 'Sara',
-          'rating': 4.8,
-          'reviewCount': 7,
-          'stockQuantity': 5,
-          'shippingAvailable': true,
-        };
-      });
-      datasource = WishlistRemoteDataSourceImpl(dio);
+    test(
+      'GETs /api/listings/{id} and reads a flat (unwrapped) payload',
+      () async {
+        RequestOptions? captured;
+        dio = buildDio((options) {
+          captured = options;
+          return {
+            'id': 'listing_9',
+            'title': 'Wireless Earbuds',
+            'slug': 'wireless-earbuds',
+            'imageUrl': 'https://example.test/single.jpg',
+            'price': 25000,
+            'category': 'Electronics',
+            'condition': 'New',
+            'userId': 'vendor_42',
+            'userName': 'Sara',
+            'rating': 4.8,
+            'reviewCount': 7,
+            'stockQuantity': 5,
+            'shippingAvailable': true,
+          };
+        });
+        datasource = WishlistRemoteDataSourceImpl(dio);
 
-      final result = await datasource.buildFromListingId('listing_9');
+        final result = await datasource.buildFromListingId('listing_9');
 
-      expect(captured!.method, 'GET');
-      expect(captured!.path, '/api/listings/listing_9');
-      expect(result.listingId, 'listing_9');
-      expect(result.listingName, 'Wireless Earbuds');
-      expect(result.listingImages, ['https://example.test/single.jpg']);
-      // Flat userId/userName fallback (no nested seller/vendor object).
-      expect(result.vendorId, 'vendor_42');
-      expect(result.vendorName, 'Sara');
-      expect(result.vendorStoreName, 'Sara');
-      expect(result.rating, 4.8);
-      // Free shipping above the 20,000 threshold.
-      expect(result.shippingCost, 0.0);
-      expect(result.id, startsWith('wish_'));
-    });
+        expect(captured!.method, 'GET');
+        expect(captured!.path, '/api/listings/listing_9');
+        expect(result.listingId, 'listing_9');
+        expect(result.listingName, 'Wireless Earbuds');
+        expect(result.listingImages, ['https://example.test/single.jpg']);
+        // Flat userId/userName fallback (no nested seller/vendor object).
+        expect(result.vendorId, 'vendor_42');
+        expect(result.vendorName, 'Sara');
+        expect(result.vendorStoreName, 'Sara');
+        expect(result.rating, 4.8);
+        // Free shipping above the 20,000 threshold.
+        expect(result.shippingCost, 0.0);
+        expect(result.id, startsWith('wish_'));
+      },
+    );
 
     test('unwraps a nested {"listing": {...}} payload', () async {
-      dio = buildDio((_) => {
-        'listing': {
-          'id': 'listing_5',
-          'title': 'Desk Lamp',
-          'price': 1000,
-          'imageUrl': 'https://example.test/lamp.jpg',
+      dio = buildDio(
+        (_) => {
+          'listing': {
+            'id': 'listing_5',
+            'title': 'Desk Lamp',
+            'price': 1000,
+            'imageUrl': 'https://example.test/lamp.jpg',
+          },
         },
-      });
+      );
       datasource = WishlistRemoteDataSourceImpl(dio);
 
       final result = await datasource.buildFromListingId('listing_5');
@@ -308,18 +407,20 @@ void main() {
     });
 
     test('reads vendor/seller details from a nested seller object', () async {
-      dio = buildDio((_) => {
-        'id': 'listing_7',
-        'title': 'Backpack',
-        'price': 2000,
-        'seller': {
-          'id': 'vendor_7',
-          'name': 'Omar',
-          'storeName': 'Omar Bags',
-          'avatarUrl': 'https://example.test/omar.jpg',
-          'verified': true,
+      dio = buildDio(
+        (_) => {
+          'id': 'listing_7',
+          'title': 'Backpack',
+          'price': 2000,
+          'seller': {
+            'id': 'vendor_7',
+            'name': 'Omar',
+            'storeName': 'Omar Bags',
+            'avatarUrl': 'https://example.test/omar.jpg',
+            'verified': true,
+          },
         },
-      });
+      );
       datasource = WishlistRemoteDataSourceImpl(dio);
 
       final result = await datasource.buildFromListingId('listing_7');
@@ -332,7 +433,9 @@ void main() {
     });
 
     test('falls back to placeholders when no vendor info is present', () async {
-      dio = buildDio((_) => {'id': 'listing_8', 'title': 'Mystery Box', 'price': 500});
+      dio = buildDio(
+        (_) => {'id': 'listing_8', 'title': 'Mystery Box', 'price': 500},
+      );
       datasource = WishlistRemoteDataSourceImpl(dio);
 
       final result = await datasource.buildFromListingId('listing_8');

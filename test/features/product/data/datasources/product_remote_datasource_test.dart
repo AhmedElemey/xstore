@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/exceptions.dart';
+import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/features/product/data/datasources/product_remote_datasource.dart';
 import 'package:xstore/features/product/domain/entities/review_write_params.dart';
@@ -48,6 +49,14 @@ void main() {
     d.interceptors.add(_ScriptedInterceptor(respond));
     return d;
   }
+
+  // Every group in this file scripts Dio to exercise ProductRemoteDataSourceImpl's
+  // LIVE fetch/parse path. Under MOCK=true these methods short-circuit to
+  // the mock listing/review fixtures before Dio is ever touched, so these
+  // assertions don't hold.
+  final skipMock = MockConfig.useMock
+      ? 'Requires MOCK=false — exercises the live (non-mock) datasource path'
+      : false;
 
   group('fetchProductDetail', () {
     test('GETs /api/listings/{id} and reads a flat userId/userName/userAvatar seller',
@@ -125,7 +134,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('fetchSimilarProducts', () {
     test('GETs the similar-listings route and excludes the source product',
@@ -160,7 +169,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('fetchProductReviews', () {
     test('reads the {items, totalCount} envelope when present', () async {
@@ -238,7 +247,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('createReview', () {
     test('POSTs {rating, comment} and parses the created review', () async {
@@ -279,7 +288,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('updateReview', () {
     test('PUTs {rating, comment} to the specific review route', () async {
@@ -306,7 +315,7 @@ void main() {
       expect(captured!.path, ApiEndpoints.apiListingReview('listing_1', 'r9'));
       expect(result.comment, 'Updated');
     });
-  });
+  }, skip: skipMock);
 
   group('deleteReview', () {
     test('DELETEs the specific review route', () async {
@@ -332,5 +341,5 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 }

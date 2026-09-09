@@ -7,10 +7,7 @@ import '../../domain/repositories/wishlist_repository.dart';
 import '../datasources/wishlist_remote_datasource.dart';
 
 class WishlistRepositoryImpl implements WishlistRepository {
-  WishlistRepositoryImpl(
-    this._remote,
-    this._cartRepository,
-  );
+  WishlistRepositoryImpl(this._remote, this._cartRepository);
 
   final WishlistRemoteDataSource _remote;
   final CartRepository _cartRepository;
@@ -47,11 +44,13 @@ class WishlistRepositoryImpl implements WishlistRepository {
   Future<Either<Failure, Unit>> removeFromWishlist({
     required String consumerId,
     required String listingId,
+    String? wishlistItemId,
   }) async {
     try {
       await _remote.removeFromWishlist(
         consumerId: consumerId,
         listingId: listingId,
+        wishlistItemId: wishlistItemId,
       );
       return const Right(unit);
     } catch (e) {

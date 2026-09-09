@@ -14,7 +14,6 @@ enum CommissionStatus { pending, due, settled, voided }
 CommissionStatus commissionStatusForOrder(OrderStatus status) {
   switch (status) {
     case OrderStatus.cancelled:
-    case OrderStatus.refunded:
       return CommissionStatus.voided;
     case OrderStatus.delivered:
       return CommissionStatus.due;

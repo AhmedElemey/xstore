@@ -42,7 +42,7 @@ final vendorCommissionSnapshotProvider =
 typedef VendorCommissionSnapshotRef
     = AutoDisposeFutureProviderRef<OrderStatsEntity?>;
 String _$commissionFeeEgpForCategoryHash() =>
-    r'6181922e16ad90070037b84e4961f464bec7e8a7';
+    r'670ba5181afdced364d46f3cc03ba3ce96d0e466';
 
 /// Copied from Dart SDK
 class _SystemHash {

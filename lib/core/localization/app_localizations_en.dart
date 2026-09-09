@@ -475,7 +475,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingBrandOptional => 'Brand (optional)';
 
   @override
-  String get listingBrandHint => 'Start typing…';
+  String get listingBrandHint => 'Brand name';
 
   @override
   String get listingSectionStockShipping => 'Stock & Shipping';
@@ -1098,7 +1098,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersDeliveryLocationUpdated => 'Delivery location updated';
 
   @override
-  String get ordersConfirmReceipt => '✓ Confirm Receipt';
+  String get ordersConfirmReceipt => 'Confirm Receipt';
 
   @override
   String get ordersLeaveReview => 'Leave Review';
@@ -1938,13 +1938,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorViewAnalytics => 'View Analytics';
 
   @override
-  String get vendorStatPendingOrders => 'Pending Orders';
+  String get vendorStatPendingOrders => 'Pending';
 
   @override
-  String get vendorStatActiveOrders => 'Active Orders';
+  String get vendorStatActiveOrders => 'Active';
 
   @override
-  String get vendorStatTotalOrders => 'Total Orders';
+  String get vendorStatTotalOrders => 'Total';
 
   @override
   String get vendorStatRevenue => 'Revenue';

@@ -27,7 +27,10 @@ abstract interface class ProfileRemoteDataSource {
     required UserEntity sessionUser,
   });
 
-  Future<String> updateAvatar({required String userId, required String filePath});
+  Future<String> updateAvatar({
+    required String userId,
+    required String filePath,
+  });
 
   Future<void> deleteAccount({
     required String password,
@@ -80,8 +83,9 @@ Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
     if (_optTrimmed(request.facebookPage) != null)
       'facebookPage': _optTrimmed(request.facebookPage),
     if (_optTrimmed(request.detailedAddressByGoogleMaps) != null)
-      'detailedAddressByGoogleMaps':
-          _optTrimmed(request.detailedAddressByGoogleMaps),
+      'detailedAddressByGoogleMaps': _optTrimmed(
+        request.detailedAddressByGoogleMaps,
+      ),
     if (_optTrimmed(request.detailedAddressByUser) != null)
       'detailedAddressByUser': _optTrimmed(request.detailedAddressByUser),
     if (_optTrimmed(request.cityByGoogleMaps) != null)
@@ -93,8 +97,7 @@ Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
     if (request.storeCategoryId != null)
       'storeCategoryId': request.storeCategoryId,
     if (request.cityId != null) 'cityId': request.cityId,
-    if (request.governorateId != null)
-      'governorateId': request.governorateId,
+    if (request.governorateId != null) 'governorateId': request.governorateId,
     if (request.birthDate != null)
       'birthDate': _birthDateWire(request.birthDate),
   };
@@ -123,7 +126,9 @@ void _debugLogProfileFields({
     final s = sent.toString().trim();
     final g = got.toString().trim();
     if (s == g) return true;
-    if (s.length >= 10 && g.length >= 10 && s.substring(0, 10) == g.substring(0, 10)) {
+    if (s.length >= 10 &&
+        g.length >= 10 &&
+        s.substring(0, 10) == g.substring(0, 10)) {
       return true;
     }
     final sd = double.tryParse(s);
@@ -167,18 +172,14 @@ void _debugLogProfileFields({
     }
   }
 
-  if (wireFields != null &&
-      responseData != null &&
-      responseData.isNotEmpty) {
+  if (wireFields != null && responseData != null && responseData.isNotEmpty) {
     debugPrint('── field sync (sent → response raw) ──');
     for (final entry in fieldMap.entries) {
       if (!wireFields.containsKey(entry.key)) continue;
       final sent = wireFields[entry.key];
       final got = readNested(responseData, entry.value);
       final synced = valuesMatch(sent, got);
-      debugPrint(
-        '  ${synced ? "✓" : "✗"} ${entry.key}: sent=$sent → got=$got',
-      );
+      debugPrint('  ${synced ? "✓" : "✗"} ${entry.key}: sent=$sent → got=$got');
     }
   }
 
@@ -242,13 +243,19 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   final Dio _dio;
 
+  /// Catalog listing JSON for one public seller. Shared by store head + grid
+  /// so Visit Store does not GET /api/listings twice.
+  String? _publicSellerId;
+  List<Map<String, dynamic>>? _publicSellerMaps;
+
   UserEntity _mergeVendorMock(UserEntity session) {
     final base = mockVendorUser;
     return session.copyWith(
       name: session.name.isNotEmpty ? session.name : base.name,
       email: session.email,
-      phoneNumber:
-          session.phoneNumber.isNotEmpty ? session.phoneNumber : base.phoneNumber,
+      phoneNumber: session.phoneNumber.isNotEmpty
+          ? session.phoneNumber
+          : base.phoneNumber,
       avatarUrl: session.avatarUrl ?? MockImages.avatar(1),
       role: UserRole.vendor,
       isVerified: true,
@@ -273,8 +280,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     return session.copyWith(
       name: session.name.isNotEmpty ? session.name : base.name,
       email: session.email,
-      phoneNumber:
-          session.phoneNumber.isNotEmpty ? session.phoneNumber : base.phoneNumber,
+      phoneNumber: session.phoneNumber.isNotEmpty
+          ? session.phoneNumber
+          : base.phoneNumber,
       avatarUrl: session.avatarUrl ?? MockImages.avatar(2),
       // Keep the session's role: this branch also serves courier sessions
       // (mock driver login) — forcing consumer here would silently downgrade
@@ -344,26 +352,38 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
     }
     try {
-      // NOT in the confirmed backend contract — no public store-profile
-      // route exists in the xStoreEcommerce API yet. A 404 is a real miss,
-      // not an empty store: callers must surface an error instead of a
-      // blank shell built from this missing resource.
-      final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.users}/$sellerId/store',
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty store');
-      final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
+      // `/users/{id}/store` is not on the live API. Public storefronts are
+      // assembled from GET /api/listings (same catalog as home/explore),
+      // filtered by listing `userId`. Drop the per-seller cache so pull-to-
+      // refresh refetches; fetchVendorStoreListings then reuses this result.
+      _publicSellerId = null;
+      _publicSellerMaps = null;
+      final maps = await _publicListingMapsForSeller(sellerId);
+      final first = maps.isNotEmpty ? maps.first : null;
+      final storeName = first == null
+          ? null
+          : _optJsonString(first, 'storeName');
+      final userName = first == null ? null : _optJsonString(first, 'userName');
+      final avatar = first == null
+          ? null
+          : (_optJsonString(first, 'userAvatar') ??
+                _optJsonString(first, 'storeImageUrl'));
+      final name = storeName ?? userName ?? sellerId;
       return ProfileModel(
-        user: user,
-        storeViewCount: data['storeViewCount'] as int? ?? 0,
-        storeSaveCount: data['storeSaveCount'] as int? ?? 0,
-        storeActiveListings: data['storeActiveListings'] as int? ?? 0,
-        responseRatePercent: data['responseRatePercent'] as int? ?? 0,
+        user: UserModel(
+          id: sellerId,
+          name: name,
+          email: '',
+          role: UserRole.vendor,
+          storeName: storeName ?? userName,
+          storeLogoUrl: avatar,
+          avatarUrl: avatar,
+          location: first == null ? null : _optJsonString(first, 'location'),
+        ),
+        storeActiveListings: maps.length,
       );
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error');
+      throw mapDioException(e);
     }
   }
 
@@ -441,14 +461,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (storeImagePath != null && storeImagePath.isNotEmpty) {
         merged = merged.copyWith(storeLogoUrl: MockImages.avatar(99));
       }
-      final model = await MockConfig.simulate(
-        _mockUserModelFromEntity(merged),
-      );
+      final model = await MockConfig.simulate(_mockUserModelFromEntity(merged));
       return model;
     }
     try {
       final wireFields = updateProfileWireFields(request);
-      _debugLogProfileFields(tag: 'PUT update-profile (request)', wireFields: wireFields);
+      _debugLogProfileFields(
+        tag: 'PUT update-profile (request)',
+        wireFields: wireFields,
+      );
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.updateProfile,
         data: await updateProfileFormData(request),
@@ -571,8 +592,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         rows = rows
             .where(
               (e) =>
-                  e.categoryLabel.toLowerCase() ==
-                  categoryLabel.toLowerCase(),
+                  e.categoryLabel.toLowerCase() == categoryLabel.toLowerCase(),
             )
             .toList();
       }
@@ -582,24 +602,140 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return slice.map((e) => e.toEntity()).toList();
     }
     try {
-      // NOT in the confirmed backend contract — /api/listings has no
-      // seller filter, so a buyer can't fetch another vendor's listings yet.
-      // A 404 is a real miss, not "this seller has zero listings."
-      final response = await _dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.users}/$sellerId/listings',
-        queryParameters: {
-          if (categoryLabel != null) 'category': categoryLabel,
-          'page': page,
-          'pageSize': pageSize,
-        },
+      var rows = await _publicListingMapsForSeller(sellerId);
+      if (categoryLabel != null &&
+          categoryLabel.isNotEmpty &&
+          categoryLabel != 'all') {
+        final want = categoryLabel.toLowerCase();
+        rows = [
+          for (final e in rows)
+            if ((_optJsonString(e, 'category') ??
+                        _optJsonString(e, 'categoryLabel') ??
+                        _optJsonString(e, 'categoryNameEn') ??
+                        '')
+                    .toLowerCase() ==
+                want)
+              e,
+        ];
+      }
+      final start = page * pageSize;
+      if (start >= rows.length) return const [];
+      final out = <ListingEntity>[];
+      for (final e in rows.skip(start).take(pageSize)) {
+        try {
+          out.add(ListingModel.fromJson(e).toEntity());
+        } catch (_) {
+          // Skip a catalog row that does not match ListingModel rather than
+          // failing the whole storefront.
+        }
+      }
+      return out;
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _publicListingMapsForSeller(
+    String sellerId,
+  ) async {
+    if (_publicSellerId == sellerId && _publicSellerMaps != null) {
+      return _publicSellerMaps!;
+    }
+    List<Map<String, dynamic>> maps = const [];
+    try {
+      maps = _listingMapsFromResponse(
+        await _dio.get<dynamic>(
+          ApiEndpoints.apiListings,
+          queryParameters: {'page': 1, 'pageSize': 50},
+          options: ApiAuthHeaders.public(),
+        ),
+      );
+    } on DioException {
+      maps = const [];
+    }
+    var mine = _mapsForSeller(maps, sellerId);
+    if (mine.isEmpty) {
+      maps = await _homeListingMaps();
+      mine = _mapsForSeller(maps, sellerId);
+    }
+    _publicSellerId = sellerId;
+    _publicSellerMaps = mine;
+    return mine;
+  }
+
+  Future<List<Map<String, dynamic>>> _homeListingMaps() async {
+    try {
+      final response = await _dio.get<dynamic>(
+        ApiEndpoints.home,
         options: ApiAuthHeaders.public(),
       );
-      final list = response.data?['items'] as List<dynamic>? ?? [];
-      return list
-          .map((e) => ListingModel.fromJson(Map<String, dynamic>.from(e as Map)).toEntity())
-          .toList();
-    } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Network error');
+      final data = response.data;
+      if (data is! Map) return const [];
+      final map = Map<String, dynamic>.from(data);
+      final seen = <String>{};
+      final out = <Map<String, dynamic>>[];
+      for (final key in ['newArrivals', 'recommendedForYou', 'hotDeals']) {
+        for (final item in _listingMapsFromRaw(map[key])) {
+          final id = (item['id'] ?? '').toString();
+          if (id.isEmpty || !seen.add(id)) continue;
+          out.add(item);
+        }
+      }
+      return out;
+    } on DioException {
+      return const [];
     }
+  }
+
+  List<Map<String, dynamic>> _mapsForSeller(
+    List<Map<String, dynamic>> maps,
+    String sellerId,
+  ) {
+    final id = sellerId.trim();
+    return [
+      for (final e in maps)
+        if (_listingSellerId(e) == id) e,
+    ];
+  }
+
+  String _listingSellerId(Map<String, dynamic> json) =>
+      (json['userId'] ?? json['vendorId'] ?? json['sellerId'] ?? '')
+          .toString()
+          .trim();
+
+  String? _optJsonString(Map<String, dynamic> json, String key) {
+    final v =
+        json[key] ??
+        json[key.isEmpty ? key : '${key[0].toUpperCase()}${key.substring(1)}'];
+    if (v == null) return null;
+    final s = v.toString().trim();
+    return s.isEmpty ? null : s;
+  }
+
+  List<Map<String, dynamic>> _listingMapsFromResponse(
+    Response<dynamic> response,
+  ) => _listingMapsFromRaw(response.data);
+
+  List<Map<String, dynamic>> _listingMapsFromRaw(dynamic data) {
+    final raw = <Map<String, dynamic>>[];
+    if (data is List) {
+      raw.addAll(
+        data.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+      );
+    } else if (data is Map) {
+      final m = Map<String, dynamic>.from(data);
+      final nested = m['items'] ?? m['data'] ?? m['results'] ?? m['listings'];
+      if (nested is List) {
+        raw.addAll(
+          nested.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+        );
+      }
+    }
+    return [
+      for (final item in raw)
+        if (isPublicLiveListingStatus(item['status']) &&
+            (item['id'] ?? '').toString().isNotEmpty)
+          item,
+    ];
   }
 }

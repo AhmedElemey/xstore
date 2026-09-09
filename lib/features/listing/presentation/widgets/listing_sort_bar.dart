@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -33,7 +32,6 @@ class ListingSortBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -43,58 +41,53 @@ class ListingSortBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.md),
-                border: Border.all(color: scheme.outline.withValues(alpha: 0.25)),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: Row(
-                  children: [
-                    Text(
-                      context.l10n.sortBy,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const Gap(AppSpacing.md),
-                    Expanded(
-                      child: DropdownButton<SortOption>(
-                        value: sort,
-                        isExpanded: true,
-                        borderRadius: BorderRadius.circular(AppSpacing.md),
-                        icon: Icon(LucideIcons.chevronDown, color: scheme.onSurfaceVariant),
-                        items: SortOption.values
-                            .map(
-                              (o) => DropdownMenuItem(
-                                value: o,
-                                child: Text(ListingSortBar.labelFor(context, o)),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            onSortChanged(v);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
+          PopupMenuButton<SortOption>(
+            initialValue: sort,
+            tooltip: context.l10n.sortBy,
+            position: PopupMenuPosition.under,
+            padding: EdgeInsets.zero,
+            onSelected: onSortChanged,
+            itemBuilder: (context) => SortOption.values
+                .map(
+                  (o) => PopupMenuItem(
+                    value: o,
+                    child: Text(labelFor(context, o)),
+                  ),
+                )
+                .toList(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.sortBy,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: context.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  labelFor(context, sort),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 18,
+                  color: context.textPrimary,
+                ),
+              ],
             ),
           ),
-          const Gap(AppSpacing.lg),
+          const Spacer(),
           _ViewToggleIcon(
             icon: LucideIcons.list,
             selected: viewMode == ViewMode.list,
             onTap: () => onViewModeChanged(ViewMode.list),
           ),
-          const Gap(AppSpacing.sm),
+          const SizedBox(width: AppSpacing.sm),
           _ViewToggleIcon(
             icon: LucideIcons.layoutGrid,
             selected: viewMode == ViewMode.grid,
@@ -122,14 +115,15 @@ class _ViewToggleIcon extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Material(
       color: selected ? AppColors.primary.withValues(alpha: 0.12) : scheme.surface,
-      borderRadius: BorderRadius.circular(AppSpacing.md),
+      borderRadius: BorderRadius.circular(AppSpacing.sm),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.xs),
           child: Icon(
             icon,
+            size: 18,
             color: selected ? AppColors.primary : scheme.onSurfaceVariant,
           ),
         ),

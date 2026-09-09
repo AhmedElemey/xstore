@@ -56,7 +56,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _shippingCost = TextEditingController();
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
-  late final FocusNode _brandFocus = FocusNode();
 
   // `/listing/add` is a StatefulShellRoute branch — go_router keeps its
   // Page/State alive across navigations to the same path, so tapping
@@ -112,7 +111,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
 
   @override
   void dispose() {
-    _brandFocus.dispose();
     _name.dispose();
     _price.dispose();
     _compare.dispose();
@@ -296,6 +294,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       if (prev?.draftRevision != next.draftRevision) {
         _applyStateToControllers(next);
       }
+      // Brand lives on a local controller (same as name/price). Category /
+      // subcategory changes clear it in notifier state without bumping
+      // draftRevision, so copy that wipe here — otherwise Apple stays in
+      // the field after switching to Furniture.
+      if (prev?.brand != next.brand && _brand.text != next.brand) {
+        _brand.text = next.brand;
+      }
       final pl = prev?.attributes.length ?? 0;
       if (pl != next.attributes.length || prev?.categoryId != next.categoryId) {
         _syncAttributeControllers(next.attributes);
@@ -378,7 +383,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     notifier: notifier,
                     errors: err,
                     brandController: _brand,
-                    brandFocusNode: _brandFocus,
                     categoryDisplay:
                         _categoryLabel(catalogCategories, isArabic, form.categoryId),
                     subcategoryDisplay: _subcategoryLabel(
@@ -584,7 +588,6 @@ class _ListingCategoryBrandSection extends StatelessWidget {
     required this.notifier,
     required this.errors,
     required this.brandController,
-    required this.brandFocusNode,
     required this.categoryDisplay,
     required this.subcategoryDisplay,
   });
@@ -593,7 +596,6 @@ class _ListingCategoryBrandSection extends StatelessWidget {
   final ListingFormNotifier notifier;
   final Map<String, String?> errors;
   final TextEditingController brandController;
-  final FocusNode brandFocusNode;
   final String categoryDisplay;
   final String subcategoryDisplay;
 
@@ -650,84 +652,13 @@ class _ListingCategoryBrandSection extends StatelessWidget {
           onChanged: (v) => notifier.updateField('condition', v),
         ),
         const Gap(AppSpacing.lg),
-        RawAutocomplete<String>(
-          textEditingController: brandController,
-          focusNode: brandFocusNode,
-          optionsBuilder: (tv) => notifier.brandSuggestionsFor(tv.text),
-          onSelected: (s) {
-            brandController.text = s;
-            notifier.updateField('brand', s);
-          },
-          fieldViewBuilder: (context, c, fn, onFieldSubmitted) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.listingBrandOptional,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: context.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                SizedBox(height: context.scaledPx(6)),
-                TextField(
-                  controller: c,
-                  focusNode: fn,
-                  onChanged: (v) => notifier.updateField('brand', v),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: context.textPrimary,
-                      ),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.listingBrandHint,
-                    hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: context.textHint,
-                        ),
-                    filled: true,
-                    fillColor: context.surfaceVariantColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: context.scaledPx(AppTypography.rem(0.875)),
-                      vertical: context.scaledPx(AppTypography.rem(0.875)),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-          optionsViewBuilder: (context, onSelected, opts) {
-            return Align(
-              alignment: Alignment.topLeft,
-              child: Material(
-                color: context.surfaceColor,
-                surfaceTintColor: AppColors.transparent,
-                elevation: 4,
-                shadowColor: context.shadowColor,
-                borderRadius: BorderRadius.circular(12),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: opts.length,
-                    itemBuilder: (context, i) {
-                      final o = opts.elementAt(i);
-                      return ListTile(
-                        dense: true,
-                        title: Text(
-                          o,
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: context.textPrimary),
-                        ),
-                        onTap: () => onSelected(o),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
+        ListingFormField(
+          label: context.l10n.listingBrandOptional,
+          controller: brandController,
+          hint: context.l10n.listingBrandHint,
+          errorText: errors['brand'],
+          textCapitalization: TextCapitalization.words,
+          onChanged: (v) => notifier.updateField('brand', v),
         ),
       ],
     );

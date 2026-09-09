@@ -19,7 +19,15 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
       required PaymentMethod fallbackPayment,
       String? notes,
     })? onCreateOrder,
-  }) : _onCreateOrder = onCreateOrder;
+    Future<OrderModel?> Function(String orderId)? getOrderByIdResult,
+    Future<List<OrderModel>> Function({
+      required String consumerId,
+      required int page,
+      required int pageSize,
+    })? getConsumerOrdersResult,
+  })  : _onCreateOrder = onCreateOrder,
+        _getOrderById = getOrderByIdResult,
+        _getConsumerOrders = getConsumerOrdersResult;
 
   final Future<OrderModel> Function({
     required String listingId,
@@ -31,6 +39,13 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
     required PaymentMethod fallbackPayment,
     String? notes,
   })? _onCreateOrder;
+
+  final Future<OrderModel?> Function(String orderId)? _getOrderById;
+  final Future<List<OrderModel>> Function({
+    required String consumerId,
+    required int page,
+    required int pageSize,
+  })? _getConsumerOrders;
 
   @override
   Future<OrderModel> createOrder({
@@ -62,8 +77,11 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
     required String consumerId,
     required int page,
     required int pageSize,
-  }) =>
-      throw UnimplementedError();
+  }) {
+    final cb = _getConsumerOrders;
+    if (cb == null) throw UnimplementedError();
+    return cb(consumerId: consumerId, page: page, pageSize: pageSize);
+  }
 
   @override
   Future<List<OrderModel>> getVendorOrders({
@@ -82,7 +100,11 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
       throw UnimplementedError();
 
   @override
-  Future<OrderModel?> getOrderById(String orderId) => throw UnimplementedError();
+  Future<OrderModel?> getOrderById(String orderId) {
+    final cb = _getOrderById;
+    if (cb == null) throw UnimplementedError();
+    return cb(orderId);
+  }
 
   @override
   Future<OrderStatsEntity> getVendorOrderStats({required String vendorId}) =>
@@ -100,6 +122,7 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
   Future<OrderModel> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) =>
       throw UnimplementedError();
 
@@ -107,16 +130,19 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
   Future<OrderModel> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) =>
       throw UnimplementedError();
 
   @override
-  Future<OrderModel> markProcessing(String orderId) => throw UnimplementedError();
+  Future<OrderModel> markProcessing(String orderId, {String? vendorId}) =>
+      throw UnimplementedError();
 
   @override
   Future<OrderModel> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) =>
       throw UnimplementedError();
 

@@ -129,35 +129,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         duration: const Duration(milliseconds: 320),
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
-                        child: Column(
+                        child: SingleChildScrollView(
                           key: ValueKey(_page),
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              [
-                                context.l10n.onboardingTitle1,
-                                context.l10n.onboardingTitle2,
-                                context.l10n.onboardingTitle3,
-                              ][_page],
-                              style: AppTypography.titleLarge.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: context.textPrimary,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                [
+                                  context.l10n.onboardingTitle1,
+                                  context.l10n.onboardingTitle2,
+                                  context.l10n.onboardingTitle3,
+                                ][_page],
+                                style: AppTypography.titleLarge.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: context.textPrimary,
+                                ),
                               ),
-                            ),
-                            const Gap(AppSpacing.md),
-                            Text(
-                              [
-                                context.l10n.onboardingSubtitle1,
-                                context.l10n.onboardingSubtitle2,
-                                context.l10n.onboardingSubtitle3,
-                              ][_page],
-                              maxLines: 3,
-                              style: AppTypography.body15.copyWith(
-                                height: 1.45,
-                                color: context.textSecondary,
+                              const Gap(AppSpacing.md),
+                              Text(
+                                [
+                                  context.l10n.onboardingSubtitle1,
+                                  context.l10n.onboardingSubtitle2,
+                                  context.l10n.onboardingSubtitle3,
+                                ][_page],
+                                maxLines: 3,
+                                style: AppTypography.body15.copyWith(
+                                  height: 1.45,
+                                  color: context.textSecondary,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

@@ -61,8 +61,6 @@ void main() {
           CommissionStatus.due);
       expect(commissionStatusForOrder(OrderStatus.cancelled),
           CommissionStatus.voided);
-      expect(commissionStatusForOrder(OrderStatus.refunded),
-          CommissionStatus.voided);
     });
   });
 

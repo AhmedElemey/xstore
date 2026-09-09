@@ -9,6 +9,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/review_entity.dart';
@@ -259,7 +260,13 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
         );
     if (!mounted) return;
     setState(() => _isSubmitting = false);
-    if (ok) Navigator.of(context).pop();
+    if (ok) {
+      Navigator.of(context).pop();
+      return;
+    }
+    final error =
+        ref.read(productReviewsNotifierProvider(widget.listingId)).error;
+    if (error != null) AppSnackbar.error(context, error);
   }
 
   @override

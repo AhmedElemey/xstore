@@ -105,4 +105,64 @@ void main() {
 
     expect(container.read(listingFormNotifierProvider).quantity, 1);
   });
+
+  test('reset clears the form and bumps draftRevision for controller sync', () {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.listen(listingFormNotifierProvider, (_, __) {});
+
+    final notifier = container.read(listingFormNotifierProvider.notifier);
+    notifier.loadForEdit(_editingListing);
+    final revision = container.read(listingFormNotifierProvider).draftRevision;
+    expect(container.read(listingFormNotifierProvider).name, 'Wireless Mouse');
+
+    notifier.reset();
+
+    final state = container.read(listingFormNotifierProvider);
+    expect(state.name, isEmpty);
+    expect(state.priceInput, isEmpty);
+    expect(state.categoryId, isEmpty);
+    expect(state.editingListingId, isEmpty);
+    expect(state.photoPaths, isEmpty);
+    expect(state.draftRevision, revision + 1);
+  });
+
+  test('changing category clears subcategory, attributes, and brand', () {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.listen(listingFormNotifierProvider, (_, __) {});
+
+    final notifier = container.read(listingFormNotifierProvider.notifier);
+    notifier.loadForEdit(_editingListing);
+    expect(container.read(listingFormNotifierProvider).brand, 'Logitech');
+    expect(container.read(listingFormNotifierProvider).subcategoryId, '32');
+
+    notifier.updateField('categoryId', '9');
+
+    final state = container.read(listingFormNotifierProvider);
+    expect(state.categoryId, '9');
+    expect(state.subcategoryId, isEmpty);
+    expect(state.brand, isEmpty);
+    expect(state.attributes, isEmpty);
+  });
+
+  test('changing subcategory clears brand', () {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.listen(listingFormNotifierProvider, (_, __) {});
+
+    final notifier = container.read(listingFormNotifierProvider.notifier);
+    notifier.loadForEdit(_editingListing);
+    expect(container.read(listingFormNotifierProvider).brand, 'Logitech');
+
+    notifier.updateField('subcategoryId', '99');
+
+    final state = container.read(listingFormNotifierProvider);
+    expect(state.subcategoryId, '99');
+    expect(state.brand, isEmpty);
+    expect(state.categoryId, '7');
+  });
 }

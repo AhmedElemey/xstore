@@ -38,14 +38,14 @@ class CartItemCard extends StatelessWidget {
 
     return Material(
       color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.lg),
+      borderRadius: BorderRadius.circular(AppSpacing.md),
       elevation: 1,
       shadowColor: context.textPrimary.withValues(alpha: 0.06),
       child: InkWell(
         onTap: available ? onOpenProduct : null,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
+        borderRadius: BorderRadius.circular(AppSpacing.md),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -173,19 +173,10 @@ class CartItemCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              Align(
-                alignment: Alignment.centerRight,
-                child: QuantityControl(
-                  quantity: item.quantity,
-                  maxQuantity: item.maxQuantity,
-                  enabled: available,
-                  onDecrement: onDecrement,
-                  onIncrement: onIncrement,
-                  onEditQuantity: onEditQuantity,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
+              Row(
+               
+                children: [
+                     Text(
                 item.shippingAvailable
                     ? (item.shippingCost <= 0
                         ? context.l10n.cartShippingFree
@@ -199,6 +190,23 @@ class CartItemCard extends StatelessWidget {
                       : AppColors.error,
                 ),
               ),
+              const Spacer(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: QuantityControl(
+                  quantity: item.quantity,
+                  maxQuantity: item.maxQuantity,
+                  enabled: available,
+                  onDecrement: onDecrement,
+                  onIncrement: onIncrement,
+                  onEditQuantity: onEditQuantity,
+                ),
+              ),
+                ],
+              ),
+              
+              const SizedBox(height: AppSpacing.sm),
+           
               if (!available) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Text(
@@ -208,7 +216,7 @@ class CartItemCard extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: AppSpacing.md),
+              // const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
                   TextButton(

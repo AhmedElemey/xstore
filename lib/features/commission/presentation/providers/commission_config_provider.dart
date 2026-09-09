@@ -8,10 +8,11 @@ import '../../../orders/presentation/providers/orders_dependencies.dart';
 part 'commission_config_provider.g.dart';
 
 /// Fallback flat commission fee (EGP per order), used while
-/// [vendorCommissionSnapshot] is loading, failed, or the session has no
-/// vendor identity (mock mode included — mock has no real backend truth).
-/// The real value is admin-configured; see [vendorCommissionSnapshot] for
-/// where it's actually sourced.
+/// [vendorCommissionSnapshot] is loading, failed, the session has no
+/// vendor identity, or the backend echoes 0 (SystemSetting seed is 0
+/// until an admin PUTs `/api/admin/system-settings`). Mock mode included
+/// — mock has no real backend truth. A positive admin-configured value
+/// from [vendorCommissionSnapshot] wins.
 const double kStarterCommissionFeeEgp = 2.0;
 
 /// Fallback weekly vendor owed-balance thresholds (EGP) — see
@@ -53,5 +54,10 @@ double commissionFeeEgpForCategory(
   int? categoryId,
 ) {
   final snapshot = ref.watch(vendorCommissionSnapshotProvider).valueOrNull;
-  return snapshot?.commissionValueOnOrder ?? kStarterCommissionFeeEgp;
+  final fee = snapshot?.commissionValueOnOrder;
+  // `??` does not treat 0 as missing. Backend seed / unset SystemSetting
+  // is 0, which would otherwise render as "EGP 0.00" (fee not calculated)
+  // and skip accrual on the server until an admin sets a positive value.
+  if (fee != null && fee > 0) return fee;
+  return kStarterCommissionFeeEgp;
 }

@@ -4,7 +4,9 @@ import '../../../../core/error/failures.dart';
 import '../entities/wishlist_item_entity.dart';
 
 abstract interface class WishlistRepository {
-  Future<Either<Failure, List<WishlistItemEntity>>> getWishlist(String consumerId);
+  Future<Either<Failure, List<WishlistItemEntity>>> getWishlist(
+    String consumerId,
+  );
 
   Future<Either<Failure, WishlistItemEntity>> addToWishlist({
     required String consumerId,
@@ -14,6 +16,7 @@ abstract interface class WishlistRepository {
   Future<Either<Failure, Unit>> removeFromWishlist({
     required String consumerId,
     required String listingId,
+    String? wishlistItemId,
   });
 
   Future<Either<Failure, Unit>> moveListingToCart({

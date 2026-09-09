@@ -32,7 +32,9 @@ class ListingFormState with _$ListingFormState {
     @Default(<AttributeEntry>[]) List<AttributeEntry> attributes,
     @Default(false) bool isSubmitting,
     @Default(<String, String>{}) Map<String, String> errors,
-    /// Incremented when a draft is loaded from storage (for controller sync).
+    /// Bumped when a draft is loaded, the form is reset, or publish
+    /// succeeds — Add Listing listens for this to re-sync its
+    /// TextEditingControllers (the tab stays mounted in the vendor shell).
     @Default(0) int draftRevision,
     /// Remote photo URLs already on the listing being edited (empty when
     /// creating). Not resubmitted as files — see `submit()`'s comment on

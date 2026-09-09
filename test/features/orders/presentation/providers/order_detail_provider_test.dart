@@ -15,6 +15,7 @@ import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/core/mock/mock_users.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
+import 'package:xstore/features/orders/domain/entities/order_item_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
@@ -116,9 +117,33 @@ void main() {
       expect(state.order, isNull);
       expect(state.error, isNotNull);
     });
-  });
 
-  group('OrderDetailNotifier.cancelOrder (consumer)', () {
+    test('keeps the loaded order when a later fetch is not-found', () async {
+      var calls = 0;
+      final container = await _containerFor(
+        StubOrdersRepository(
+          getOrderDetailResult: ({
+            required orderId,
+            required consumerId,
+            required vendorId,
+            required isVendorSession,
+          }) {
+            calls++;
+            if (calls == 1) return Right(_order());
+            return Left(Failure.notFound('Order'));
+          },
+        ),
+      );
+      final notifier =
+          container.read(orderDetailNotifierProvider(_orderId).notifier);
+
+      await notifier.fetchOrder();
+      await notifier.fetchOrder();
+
+      final state = container.read(orderDetailNotifierProvider(_orderId));
+      expect(state.order?.id, _orderId);
+      expect(state.error, isNull);
+    });
     test('updates the order on success and invalidates the list without refetching it',
         () async {
       final container = await _containerFor(
@@ -179,9 +204,51 @@ void main() {
       expect(state.error, isNotNull);
       expect(state.isActioning, isFalse);
     });
-  });
 
-  group('OrderDetailNotifier.confirmReceipt (consumer)', () {
+    test('keeps line items when cancel 2xx returns a hollow order', () async {
+      final withItem = _order().copyWith(
+        items: const [
+          OrderItemEntity(
+            id: 'line_1',
+            listingId: '9',
+            listingName: 'Nike Air Max',
+            listingImage: 'https://cdn.example/nike.jpg',
+            category: 'Fashion',
+            condition: 'New',
+            price: 1250,
+            quantity: 1,
+            total: 1250,
+          ),
+        ],
+      );
+      final container = await _containerFor(
+        StubOrdersRepository(
+          getOrderDetailResult: ({
+            required orderId,
+            required consumerId,
+            required vendorId,
+            required isVendorSession,
+          }) =>
+              Right(withItem),
+          cancelOrderResult: (orderId, reason, isVendorSession) => Right(
+            _order().copyWith(
+              status: OrderStatus.cancelled,
+              cancelReason: reason,
+            ),
+          ),
+        ),
+      );
+      final notifier =
+          container.read(orderDetailNotifierProvider(_orderId).notifier);
+      await notifier.fetchOrder();
+
+      await notifier.cancelOrder('Changed my mind');
+
+      final state = container.read(orderDetailNotifierProvider(_orderId));
+      expect(state.order?.status, OrderStatus.cancelled);
+      expect(state.order?.items.single.listingName, 'Nike Air Max');
+      expect(state.error, isNull);
+    });
     test('delegates to markDelivered and updates the order on success', () async {
       final shipped = _order(status: OrderStatus.shipped);
       final container = await _containerFor(

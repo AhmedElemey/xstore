@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/exceptions.dart';
+import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/features/home/data/datasources/home_remote_datasource.dart';
 
@@ -65,6 +66,14 @@ void main() {
     d.interceptors.add(_RoutedInterceptor(routes));
     return d;
   }
+
+  // Every group in this file scripts Dio to exercise HomeRemoteDataSourceImpl's
+  // LIVE fetch/parse/fallback logic. Under MOCK=true every fetch* method
+  // short-circuits to the static mock_banners/mock_categories/mock_deals
+  // fixtures before Dio is ever touched, so these assertions don't hold.
+  final skipMock = MockConfig.useMock
+      ? 'Requires MOCK=false — exercises the live (non-mock) datasource path'
+      : false;
 
   group('fetchBanners', () {
     test('GETs /api/banners and parses tolerant field-name variants',
@@ -147,7 +156,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('fetchCategories', () {
     test('GETs /api/categories and reads the nameEn/name/nameAr fallback chain',
@@ -188,7 +197,7 @@ void main() {
         throwsA(isA<ServerException>()),
       );
     });
-  });
+  }, skip: skipMock);
 
   group('fetchHomeAggregate', () {
     test('parses all four sections from a populated GET /api/home', () async {
@@ -259,7 +268,7 @@ void main() {
 
       expect(await datasource.fetchHomeAggregate(), isNull);
     });
-  });
+  }, skip: skipMock);
 
   group('fetchHotDeals', () {
     test('uses the aggregate\'s hotDeals when present, without calling /api/listings',
@@ -325,5 +334,5 @@ void main() {
 
       expect(result, hasLength(2));
     });
-  });
+  }, skip: skipMock);
 }
