@@ -143,6 +143,9 @@ jobs:
             echo "API_URL=${API_BASE_URL_PROD}" >> "$GITHUB_ENV"
           fi
 
+      - name: Flutter clean
+        run: flutter clean
+
       - name: Flutter pub get
         run: flutter pub get
 
