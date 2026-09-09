@@ -234,12 +234,15 @@ function vendors(){
 }
 
 function categories(){
- const cards=CATS.map((c,i)=>`<div class="cat"><div class="ci">${c[1]}</div>
-   <div class="cmeta"><b>${c[0]}</b><small>${c[2]} subcategories · ${c[3]} live products</small></div>
-   <div class="switch ${c[4]?'':'off'}" onclick="this.classList.toggle('off');toast('${c[0]} '+(this.classList.contains('off')?'hidden':'visible'))"></div></div>`).join('');
- return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy (10 categories · 31 subcategories) — powers <b>GET /categories</b></p></div>
+ const live=Api.isConnected()&&Api.isAuthed();
+ const grid=live
+   ?`<div id="catGrid" class="cat-grid"><div class="cat-note">Loading categories…</div></div>`
+   :`<div class="cat-grid">${CATS.map((c,i)=>`<div class="cat"><div class="ci">${c[1]}</div>
+       <div class="cmeta"><b>${c[0]}</b><small>${c[2]} subcategories · ${c[3]} live products</small></div>
+       <div class="switch ${c[4]?'':'off'}" onclick="this.classList.toggle('off');toast('${c[0]} '+(this.classList.contains('off')?'hidden':'visible'))"></div></div>`).join('')}</div>`;
+ return `<div class="page-head"><div><h2>Categories</h2><p>Server-driven taxonomy — powers <b>GET /api/categories</b></p></div>
    <button class="btn btn-p" onclick="openCategoryForm()">+ Add category</button></div>
-   <div class="card"><div class="c-body"><div class="cat-grid">${cards}</div></div></div>`;
+   <div class="card"><div class="c-body">${grid}</div></div>`;
 }
 
 /* which orders can still be handed to a platform courier */
@@ -540,14 +543,108 @@ function syncOverlay(){
 function toggleSidebar(){document.querySelector('.sidebar').classList.toggle('open');syncOverlay();}
 function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');syncOverlay();}
 
+/* ---------- backend wiring (Phase 1) ---------- */
+let currentView='overview';
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* which views the backend can actually serve today */
+const BACKEND_STATUS={
+ categories:'live',
+ overview:'partial',moderation:'partial',vendors:'partial',customers:'partial',
+ analytics:'none',orders:'none',couriers:'none',packages:'none',disputes:'none',coupons:'none',content:'none',settings:'none'
+};
+/* async loaders that replace sample data with live data once connected */
+const LIVE_HOOKS={categories:loadCategoriesLive};
+
+function connectionBanner(v){
+ const live=Api.isConnected()&&Api.isAuthed();
+ const st=BACKEND_STATUS[v]||'none';
+ if(live&&st==='live')    return '<div class="cbar cbar-live">● Live data from the backend</div>';
+ if(live&&st==='partial') return '<div class="cbar cbar-warn">Partial backend — some fields or actions still use sample data</div>';
+ if(live&&st==='none')    return '<div class="cbar cbar-warn">No backend endpoint yet — this screen shows sample data</div>';
+ if(!live&&st==='live')   return '<div class="cbar cbar-info">Prototype — <a onclick="openConnect()">connect to the live API</a> to manage real data</div>';
+ return '';
+}
+
 /* ---------- router ---------- */
 function go(v){
- document.getElementById('content').innerHTML=VIEWS[v]();
+ currentView=v;
+ document.getElementById('content').innerHTML=connectionBanner(v)+VIEWS[v]();
  document.getElementById('topTitle').textContent=TITLES[v];
  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
  const s=document.getElementById('searchInput'); if(s) s.value='';
  closeSidebar();
  window.scrollTo(0,0);
+ if(Api.isConnected()&&Api.isAuthed()&&LIVE_HOOKS[v]){ try{ LIVE_HOOKS[v](); }catch(e){ console.error(e); } }
+}
+
+/* ---------- connect / admin sign-in ---------- */
+function updateConnIndicator(){
+ const b=document.getElementById('connBtn'); if(!b) return;
+ const live=Api.isConnected()&&Api.isAuthed();
+ b.classList.toggle('on',live);
+ const l=document.getElementById('connLabel'); if(l) l.textContent=live?'Live':'Prototype';
+}
+function openConnect(){
+ const base=Api.getBase(), authed=Api.isConnected()&&Api.isAuthed();
+ const body=
+  '<p class="muted" style="font-size:13px;line-height:1.6;margin-bottom:14px">Connect to the live xStore backend. The API must have <b>CORS</b> enabled for this origin and be served over <b>HTTPS</b>. Sign in with an <b>administrator</b> account.</p>'
+  +secH('API base URL')
+  +'<div class="form-row"><input id="apiBase" value="'+esc(base)+'" placeholder="https://api.xstore.eg"></div>'
+  +secH('Admin sign-in')
+  +'<div class="form-row"><input id="apiPhone" placeholder="Phone number"></div>'
+  +'<div class="form-row"><input id="apiPass" type="password" placeholder="Password"></div>'
+  +'<div id="connMsg" class="conn-msg"></div>'
+  +(authed?'<p class="muted" style="font-size:12.5px;margin-top:10px">● Currently connected.</p>':'');
+ const actions='<button class="btn btn-p" style="flex:1;justify-content:center" onclick="connectSubmit()">'+(authed?'Reconnect':'Connect & sign in')+'</button>'
+  +(base?'<button class="btn btn-no" style="flex:1;justify-content:center" onclick="doDisconnect()">Disconnect</button>':'');
+ openDrawer(authed?'Connected':'Connect to API',body,actions);
+}
+async function connectSubmit(){
+ const base=document.getElementById('apiBase').value.trim();
+ const phone=document.getElementById('apiPhone').value.trim();
+ const pass=document.getElementById('apiPass').value;
+ const msg=document.getElementById('connMsg');
+ if(!base){msg.textContent='Enter the API base URL.';return;}
+ if(!phone||!pass){msg.textContent='Enter the admin phone and password.';return;}
+ Api.setBase(base); msg.textContent='Signing in…';
+ try{
+  await Api.login(phone,pass);
+  updateConnIndicator(); closeDrawer(); toast('Connected to the live API ✓'); go(currentView);
+ }catch(e){ msg.textContent=e.message; updateConnIndicator(); }
+}
+function doDisconnect(){ Api.logout(); Api.setBase(''); updateConnIndicator(); closeDrawer(); toast('Disconnected — prototype mode'); go(currentView); }
+
+/* ---------- live categories ---------- */
+async function loadCategoriesLive(){
+ const grid=document.getElementById('catGrid'); if(!grid) return;
+ grid.innerHTML='<div class="cat-note">Loading categories…</div>';
+ try{
+  const cats=await Api.getCategories();
+  if(!Array.isArray(cats)||!cats.length){ grid.innerHTML='<div class="cat-note">No categories yet — use “+ Add category”.</div>'; return; }
+  grid.innerHTML=cats.map(liveCatCard).join('');
+ }catch(e){
+  grid.innerHTML='<div class="cat-note cat-err">Couldn’t load categories: '+esc(e.message)+' <button class="btn btn-g btn-sm" onclick="loadCategoriesLive()">Retry</button></div>';
+ }
+}
+function liveCatCard(c){
+ const name=c.nameEn||c.nameAr||'Untitled';
+ const icon=c.imageUrl?'<img src="'+esc(Api.resolveUrl(c.imageUrl))+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">':'📦';
+ const sub=(c.children&&c.children.length)?c.children.length+' subcategories':'—';
+ return '<div class="cat" data-id="'+c.id+'"><div class="ci">'+icon+'</div>'
+  +'<div class="cmeta"><b>'+esc(name)+'</b><small>'+esc(c.nameAr||'')+(c.nameAr?' · ':'')+sub+'</small></div>'
+  +'<div class="switch '+(c.isActive?'':'off')+'" title="Toggle visibility" onclick="catToggleLive('+c.id+',this)"></div>'
+  +'<button class="cat-del" title="Delete category" onclick="catDeleteLive('+c.id+',this)">✕</button></div>';
+}
+async function catToggleLive(id,el){
+ const makeActive=el.classList.contains('off');   // currently hidden -> activating
+ el.classList.toggle('off');
+ try{ await Api.setCategoryStatus(id,makeActive); toast('Category '+(makeActive?'visible':'hidden')+' ✓'); }
+ catch(e){ el.classList.toggle('off'); toast('Failed: '+e.message); }
+}
+async function catDeleteLive(id,el){
+ if(!confirm('Delete this category? This cannot be undone.')) return;
+ try{ await Api.deleteCategory(id); const card=el.closest('.cat'); if(card) card.remove(); toast('Category deleted ✓'); }
+ catch(e){ toast('Failed: '+e.message); }
 }
 document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
 
@@ -802,9 +899,18 @@ function formDrawer(title,fields,submitLabel,onSubmit,values){
  };
  openDrawer(title,body,'<button class="btn btn-g" style="flex:1;justify-content:center" onclick="closeDrawer()">Cancel</button><button class="btn btn-p" style="flex:1;justify-content:center" onclick="_submitForm()">'+submitLabel+'</button>');
 }
-function openCategoryForm(){formDrawer('Add category',
- [{label:'Category name',ph:'e.g. Groceries',required:true},{label:'Icon (emoji)',ph:'🛒'},{label:'Subcategories (comma-separated)',ph:'Fruits, Dairy, Bakery'}],
- 'Add category',v=>{const subs=v[2]?v[2].split(',').filter(x=>x.trim()).length:0;CATS.push([v[0],v[1]||'📦',subs,0,true]);toast('Category "'+v[0]+'" added ✓');closeDrawer();go('categories');});}
+function openCategoryForm(){
+ if(Api.isConnected()&&Api.isAuthed()){
+  return formDrawer('Add category',
+   [{label:'Name (English)',ph:'e.g. Groceries',required:true},{label:'Name (Arabic)',ph:'مثال: بقالة',required:true}],
+   'Add category',async v=>{
+    try{ await Api.createCategory({nameEn:v[0],nameAr:v[1]}); toast('Category "'+v[0]+'" added ✓'); closeDrawer(); go('categories'); }
+    catch(e){ toast('Failed: '+e.message); }
+   });
+ }
+ formDrawer('Add category',
+  [{label:'Category name',ph:'e.g. Groceries',required:true},{label:'Icon (emoji)',ph:'🛒'},{label:'Subcategories (comma-separated)',ph:'Fruits, Dairy, Bakery'}],
+  'Add category',v=>{const subs=v[2]?v[2].split(',').filter(x=>x.trim()).length:0;CATS.push([v[0],v[1]||'📦',subs,0,true]);toast('Category "'+v[0]+'" added ✓');closeDrawer();go('categories');});}
 function openCouponForm(){formDrawer('New coupon',
  [{label:'Code',ph:'SUMMER25',required:true},{label:'Offer description',ph:'25% off orders over EGP 500',required:true},{label:'Scope',type:'select',options:['Platform','Seasonal']}],
  'Create coupon',v=>{COUPONS.push([v[0].toUpperCase(),v[1],v[2],0,true]);toast('Coupon "'+v[0].toUpperCase()+'" created ✓');closeDrawer();go('coupons');});}
@@ -884,4 +990,5 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();close
 
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
 /* boot */
+updateConnIndicator();
 go('overview');
