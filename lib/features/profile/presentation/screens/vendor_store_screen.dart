@@ -13,7 +13,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/mock/mock_images.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -34,8 +33,7 @@ import '../../../../shared/widgets/error_state_widget.dart';
 // import '../../../store/presentation/providers/store_hours_provider.dart';
 // import '../../../store/presentation/widgets/store_hours_summary_card.dart';
 
-/// Radius of the storefront avatar; it overlaps the banner and the profile
-/// card beneath it by this many pixels on each side.
+/// Radius of the storefront avatar in the profile card header.
 const double _kAvatarRadius = 38;
 
 class VendorStoreScreen extends ConsumerStatefulWidget {
@@ -212,16 +210,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return trimmed != null && trimmed.isNotEmpty ? trimmed : null;
   }
 
-  static Widget _storeBannerFallback(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.profileHeaderGradientEnd],
-        ),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -313,7 +301,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joined = u.joinedAt;
     final joinedLine = joined != null ? DateFormat('MMM y').format(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
-    final banner = storePhoto ?? MockImages.banner(widget.sellerId.hashCode);
     final desc = u.storeDescription ?? '';
     final authUser = ref.watch(authProvider).valueOrNull;
     final isOwnStore = _isOwnStore(authUser);
@@ -337,164 +324,148 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
             slivers: [
               SliverAppBar(
                 pinned: true,
-                expandedHeight: 150,
-                iconTheme: const IconThemeData(color: AppColors.white),
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.surfaceColor,
                 surfaceTintColor: AppColors.transparent,
-                foregroundColor: AppColors.white,
+                foregroundColor: context.textPrimary,
+                title: Text(context.l10n.stepStore),
                 actions: [
                   IconButton(
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.black.withValues(alpha: 0.22),
-                    ),
                     onPressed: () => Share.share(name),
                     icon: const Icon(LucideIcons.share2, size: 20),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                 ],
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      AppCachedNetworkImage(
-                        imageUrl: banner,
-                        fit: BoxFit.cover,
-                        memCacheHeight: 450,
-                        errorWidget: (_, __, ___) =>
-                            _storeBannerFallback(context),
-                      ),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              AppColors.black.withValues(alpha: 0),
-                              AppColors.black.withValues(alpha: 0.35),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg,
-                    0,
+                    AppSpacing.md,
                     AppSpacing.lg,
                     AppSpacing.lg,
                   ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          _kAvatarRadius + AppSpacing.sm,
-                          AppSpacing.lg,
-                          AppSpacing.lg,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: context.surfaceColor,
+                      borderRadius: BorderRadius.circular(AppSpacing.xl),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.cardShadowColor,
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
                         ),
-                        decoration: BoxDecoration(
-                          color: context.surfaceColor,
-                          borderRadius: BorderRadius.circular(AppSpacing.xl),
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.cardShadowColor,
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Column(
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.titleMedium,
-                            ),
-                            const Gap(AppSpacing.xs),
-                            Text(
-                              '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
-                              '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: context.textSecondary,
+                            Container(
+                              width: _kAvatarRadius * 2,
+                              height: _kAvatarRadius * 2,
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: context.surfaceColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: context.cardShadowColor,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                backgroundColor: AppColors.primary,
+                                backgroundImage: storePhoto != null
+                                    ? AppNetworkImage.cached(storePhoto)
+                                    : null,
+                                child: storePhoto == null
+                                    ? FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(
+                                            AppSpacing.sm,
+                                          ),
+                                          child: Text(
+                                            name.isNotEmpty
+                                                ? name[0].toUpperCase()
+                                                : '?',
+                                            style: AppTypography.titleLarge
+                                                .copyWith(
+                                              color: AppColors.white,
+                                              height: 1,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : null,
                               ),
                             ),
-                            if (!isOwnStore && whatsapp.isNotEmpty) ...[
-                              const Gap(AppSpacing.lg),
-                              SizedBox(
-                                width: double.infinity,
-                                child: OutlinedButton.icon(
-                                  onPressed: () =>
-                                      _openStoreWhatsApp(u.whatsappNumber, name),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppColors.success,
-                                    side: BorderSide(
-                                      color: AppColors.success.withValues(alpha: 0.5),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: AppSpacing.md,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(AppSpacing.md),
+                            const Gap(AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.titleMedium,
+                                  ),
+                                  const Gap(AppSpacing.xs),
+                                  Text(
+                                    '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
+                                    '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: context.textSecondary,
                                     ),
                                   ),
-                                  icon: const Icon(LucideIcons.messageCircle, size: 18),
-                                  label: Text(
-                                    context.l10n.ordersWhatsapp,
-                                    style: AppTypography.labelLarge,
-                                  ),
-                                ),
+                                ],
                               ),
-                            ],
-                            const Gap(AppSpacing.lg),
-                            Divider(height: 1, color: context.dividerColor),
-                            const Gap(AppSpacing.lg),
-                            _VendorStoreStatsRow(profile: profile),
+                            ),
                           ],
                         ),
-                      ),
-                      Positioned(
-                        left: AppSpacing.lg,
-                        top: -_kAvatarRadius,
-                        child: Container(
-                          width: _kAvatarRadius * 2,
-                          height: _kAvatarRadius * 2,
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: context.surfaceColor,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: context.cardShadowColor,
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
+                        if (!isOwnStore && whatsapp.isNotEmpty) ...[
+                          const Gap(AppSpacing.lg),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () =>
+                                  _openStoreWhatsApp(u.whatsappNumber, name),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.success,
+                                side: BorderSide(
+                                  color: AppColors.success.withValues(alpha: 0.5),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.md,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(AppSpacing.md),
+                                ),
                               ),
-                            ],
+                              icon: const Icon(
+                                LucideIcons.messageCircle,
+                                size: 18,
+                              ),
+                              label: Text(
+                                context.l10n.ordersWhatsapp,
+                                style: AppTypography.labelLarge,
+                              ),
+                            ),
                           ),
-                          child: CircleAvatar(
-                            backgroundColor: AppColors.primary,
-                            backgroundImage: storePhoto != null
-                                ? AppNetworkImage.cached(storePhoto)
-                                : null,
-                            child: storePhoto == null
-                                ? Text(
-                                    name.isNotEmpty ? name[0].toUpperCase() : '?',
-                                    style: AppTypography.titleLarge.copyWith(
-                                      color: AppColors.white,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ),
-                    ],
+                        ],
+                        const Gap(AppSpacing.lg),
+                        Divider(height: 1, color: context.dividerColor),
+                        const Gap(AppSpacing.lg),
+                        _VendorStoreStatsRow(profile: profile),
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
+import 'package:xstore/features/store_categories/domain/entities/store_category_entity.dart';
 
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -17,7 +17,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
-import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../providers/profile_verification_provider.dart';
@@ -143,7 +143,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       context: context,
       builder: (ctx) => Consumer(
         builder: (ctx, ref, _) {
-          final async = ref.watch(allCatalogCategoriesProvider);
+          final async = ref.watch(allStoreCategoriesProvider);
           final selectedId = ref.watch(
             profileNotifierProvider.select((s) => s.editStoreCategoryId),
           );
@@ -167,7 +167,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         const Gap(AppSpacing.sm),
                         TextButton(
                           onPressed: () =>
-                              ref.invalidate(allCatalogCategoriesProvider),
+                              ref.invalidate(allStoreCategoriesProvider),
                           child: Text(context.l10n.retry),
                         ),
                       ],
@@ -210,8 +210,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
     if (!mounted || id == null) return;
     final categories =
-        ref.read(allCatalogCategoriesProvider).valueOrNull ?? const [];
-    final cat = _catalogCategoryById(categories, id);
+        ref.read(allStoreCategoriesProvider).valueOrNull ?? const [];
+    final cat = _storeCategoryById(categories, id);
     final label = cat?.name.resolve(context.isArabic) ?? '';
     setState(() {
       _storeCategory.text = label.isEmpty ? context.l10n.requiredField : label;
@@ -221,9 +221,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   String _storeCategoryLabel(ProfileState s) {
     final id = s.editStoreCategoryId;
-    final categories = ref.read(allCatalogCategoriesProvider).valueOrNull;
+    final categories = ref.read(allStoreCategoriesProvider).valueOrNull;
     if (id != null && categories != null) {
-      final cat = _catalogCategoryById(categories, id);
+      final cat = _storeCategoryById(categories, id);
       if (cat != null) return cat.name.resolve(context.isArabic);
     }
     if (s.editStoreCategory.isEmpty) return context.l10n.requiredField;
@@ -1077,15 +1077,12 @@ bool editProfileContactNeedsOtp({
   return true;
 }
 
-CatalogCategoryEntity? _catalogCategoryById(
-  List<CatalogCategoryEntity> all,
+StoreCategoryEntity? _storeCategoryById(
+  List<StoreCategoryEntity> all,
   int id,
 ) {
   for (final c in all) {
     if (c.id == id) return c;
-    for (final child in c.children) {
-      if (child.id == id) return child;
-    }
   }
   return null;
 }
