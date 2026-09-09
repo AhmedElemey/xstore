@@ -146,7 +146,15 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const Gap(AppSpacing.md),
                   categories.toWidget(
-                    data: (data) => CategoryChipRow(categories: data),
+                    data: (data) => CategoryChipRow(
+                      categories: data,
+                      onSelected: (c) => context.go(
+                        Uri(
+                          path: AppRoutes.explore,
+                          queryParameters: {'category': c.name},
+                        ).toString(),
+                      ),
+                    ),
                     loading: () => const SizedBox(
                       height: AppSpacing.x3l + AppSpacing.sm,
                       child: _BannerShimmer(),
