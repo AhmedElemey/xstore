@@ -18,7 +18,6 @@ import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
-import '../providers/guest_mode_provider.dart';
 import '../providers/phone_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_divider.dart';
