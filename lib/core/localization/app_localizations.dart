@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Code sent to'**
   String get codeSentTo;
 
+  /// No description provided for @phoneOtpSentToAssociatedEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to the email associated with this number'**
+  String get phoneOtpSentToAssociatedEmail;
+
   /// No description provided for @verifyYourEmail.
   ///
   /// In en, this message translates to:
@@ -230,11 +236,23 @@ abstract class AppLocalizations {
   /// **'Your phone number is not verified'**
   String get profilePhoneNotVerified;
 
+  /// No description provided for @profilePhoneMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number is not set'**
+  String get profilePhoneMissing;
+
   /// No description provided for @verifyNow.
   ///
   /// In en, this message translates to:
   /// **'Verify Now'**
   String get verifyNow;
+
+  /// No description provided for @addNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Now'**
+  String get addNow;
 
   /// No description provided for @changeNumber.
   ///

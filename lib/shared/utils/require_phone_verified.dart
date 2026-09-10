@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/validators.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/widgets/email_verification_sheet.dart';
 import '../../features/auth/presentation/widgets/phone_verification_sheet.dart';
@@ -41,7 +42,7 @@ Future<bool> requirePhoneVerified(BuildContext context, WidgetRef ref) async {
   final phone = profile?.user.phoneNumber ??
       ref.read(authProvider).valueOrNull?.phoneNumber ??
       '';
-  if (phone.isEmpty) return false;
+  if (AppValidators.isMissingPhoneNumber(phone)) return false;
 
   final verified = await verifyPhoneNow(context, ref, phone);
   if (!verified || !context.mounted) return false;

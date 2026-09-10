@@ -66,6 +66,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get codeSentTo => 'Code sent to';
 
   @override
+  String get phoneOtpSentToAssociatedEmail =>
+      'Code sent to the email associated with this number';
+
+  @override
   String get verifyYourEmail => 'Verify your email';
 
   @override
@@ -75,7 +79,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePhoneNotVerified => 'Your phone number is not verified';
 
   @override
+  String get profilePhoneMissing => 'Your phone number is not set';
+
+  @override
   String get verifyNow => 'Verify Now';
+
+  @override
+  String get addNow => 'Add Now';
 
   @override
   String get changeNumber => 'Change';

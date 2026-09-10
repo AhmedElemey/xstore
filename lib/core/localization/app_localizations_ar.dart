@@ -66,6 +66,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get codeSentTo => 'الكود اتبعت على';
 
   @override
+  String get phoneOtpSentToAssociatedEmail =>
+      'الكود اتبعت على الإيميل المرتبط بالرقم ده';
+
+  @override
   String get verifyYourEmail => 'تحقق من بريدك الإلكتروني';
 
   @override
@@ -75,7 +79,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profilePhoneNotVerified => 'رقم هاتفك غير موثّق';
 
   @override
+  String get profilePhoneMissing => 'رقم هاتفك غير موجود';
+
+  @override
   String get verifyNow => 'وثّق الآن';
+
+  @override
+  String get addNow => 'أضف الآن';
 
   @override
   String get changeNumber => 'غيّر الرقم';

@@ -298,4 +298,11 @@ abstract final class AppValidators {
   static String toLocalEgypt(String e164) {
     return e164.startsWith('+20') ? '0${e164.substring(3)}' : e164;
   }
+
+  /// True when the stored phone is unset or a backend placeholder of all
+  /// zeros (`000000000`, `00000000000`, empty / non-digits only).
+  static bool isMissingPhoneNumber(String? phone) {
+    final digits = (phone ?? '').replaceAll(RegExp(r'\D'), '');
+    return digits.isEmpty || RegExp(r'^0+$').hasMatch(digits);
+  }
 }

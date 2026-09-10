@@ -80,6 +80,24 @@ void main() {
     });
   });
 
+  group('isMissingPhoneNumber', () {
+    test('empty and whitespace', () {
+      expect(AppValidators.isMissingPhoneNumber(null), isTrue);
+      expect(AppValidators.isMissingPhoneNumber(''), isTrue);
+      expect(AppValidators.isMissingPhoneNumber('   '), isTrue);
+    });
+
+    test('all-zero backend placeholders', () {
+      expect(AppValidators.isMissingPhoneNumber('000000000'), isTrue);
+      expect(AppValidators.isMissingPhoneNumber('00000000000'), isTrue);
+    });
+
+    test('real Egypt numbers are present', () {
+      expect(AppValidators.isMissingPhoneNumber('01012345678'), isFalse);
+      expect(AppValidators.isMissingPhoneNumber('+201012345678'), isFalse);
+    });
+  });
+
   group('dateOfBirth', () {
     final today = DateTime(2026, 7, 26);
     final yesterday = DateTime(2026, 7, 25);

@@ -133,7 +133,7 @@ class _PhoneVerificationSheetState
               const SizedBox(height: AppSpacing.sm),
               Text(
                 _codeSent
-                    ? '${context.l10n.codeSentTo} ${widget.phoneNumber}'
+                    ? context.l10n.phoneOtpSentToAssociatedEmail
                     : widget.phoneNumber,
                 style: AppTypography.bodyMedium,
               ),

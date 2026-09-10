@@ -8,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -92,6 +93,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final u = profile?.user ?? user;
     final isVendor = u.hasStore;
+    final phoneMissing = AppValidators.isMissingPhoneNumber(u.phoneNumber);
     // final sellerId = u.id.isNotEmpty ? u.id : user.id;
 
     return RouteReentryRefresh(
@@ -173,21 +175,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               if (profile != null &&
                   ((!profile.isEmailVerified && u.email.isNotEmpty) ||
-                      (!profile.isPhoneVerified && u.phoneNumber.isNotEmpty)))
+                      phoneMissing ||
+                      !profile.isPhoneVerified))
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg,
                       AppSpacing.sm,
                       AppSpacing.lg,
-                      0,
+                                            AppSpacing.sm,
+
                     ),
                     child: ProfileVerificationBanner(
                       email: u.email,
+                      phoneNumber: u.phoneNumber,
                       showEmailPrompt:
                           !profile.isEmailVerified && u.email.isNotEmpty,
-                      showPhonePrompt: !profile.isPhoneVerified &&
-                          u.phoneNumber.isNotEmpty,
+                      showPhonePrompt:
+                          phoneMissing || !profile.isPhoneVerified,
                     ),
                   ),
                 ),
