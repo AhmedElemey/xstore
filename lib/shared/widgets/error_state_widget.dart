@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_strings.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 import 'xstore_button.dart';
 
 class ErrorStateWidget extends StatelessWidget {
@@ -11,12 +11,15 @@ class ErrorStateWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onRetry,
-    this.retryLabel = AppStrings.retry,
+    this.retryLabel,
   });
 
   final String message;
   final VoidCallback? onRetry;
-  final String retryLabel;
+
+  /// Falls back to the localized default when omitted, since a `const`
+  /// constructor default can't call `context.l10n`.
+  final String? retryLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class ErrorStateWidget extends StatelessWidget {
             if (onRetry != null) ...[
               const Gap(AppSpacing.lg),
               XstoreButton(
-                label: retryLabel,
+                label: retryLabel ?? context.l10n.retry,
                 onPressed: onRetry,
               ),
             ],
