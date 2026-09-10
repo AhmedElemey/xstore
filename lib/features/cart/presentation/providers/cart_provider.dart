@@ -76,6 +76,17 @@ double cartDiscountOnSubtotal(double sub, CouponEntity c) {
 
 @Riverpod(keepAlive: true)
 class Cart extends _$Cart {
+  // Bumped whenever the auth-listener below resets state on logout. This
+  // provider is keepAlive, so it outlives any single screen — an async
+  // mutator (addFromListing, placeOrder, ...) that's still in flight when
+  // logout resets state would otherwise silently resurrect the previous
+  // user's cart when its own `await` resolves and writes `state =`.
+  // Mutators capture `_epoch` before their await and skip the write if it
+  // no longer matches, same shape as the `_disposed` guard in
+  // checkout_provider.dart / explore_provider.dart (there tied to widget
+  // disposal instead of a logout reset).
+  var _epoch = 0;
+
   @override
   CartState build() {
     ref.listen<AsyncValue<UserEntity?>>(authProvider, (prev, next) {
@@ -84,6 +95,7 @@ class Cart extends _$Cart {
       if (user == null) {
         Future.microtask(() {
           CartRemoteDataSourceImpl.clearSessionCache();
+          _epoch++;
           state = const CartState();
         });
       } else if (!user.isVendor) {
@@ -136,8 +148,10 @@ class Cart extends _$Cart {
   Future<void> fetchCart() async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _epoch;
     state = state.copyWith(isLoading: true, error: null, consumerId: id);
     final result = await ref.read(getCartUseCaseProvider).call(id);
+    if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
       (e) {
@@ -159,12 +173,14 @@ class Cart extends _$Cart {
       return;
     }
     final prevIds = state.items.map((x) => x.id).toSet();
+    final epoch = _epoch;
     state = state.copyWith(isUpdating: true, error: null);
     final result = await ref.read(addToCartUseCaseProvider).call(
           consumerId: id,
           listingId: listingId,
           quantity: quantity,
         );
+    if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
@@ -217,10 +233,12 @@ class Cart extends _$Cart {
       lastRemovedIndex: skipUndo ? null : idx,
     );
     _recomputeTotals();
+    final epoch = _epoch;
     final result = await ref.read(removeFromCartUseCaseProvider).call(
           consumerId: id,
           itemId: itemId,
         );
+    if (_epoch != epoch) return;
     result.fold(
       (f) {
         state = state.copyWith(
@@ -248,11 +266,13 @@ class Cart extends _$Cart {
     final line = state.lastRemovedItem;
     final id = _consumerId;
     if (line == null || id == null) return;
+    final epoch = _epoch;
     state = state.copyWith(isUpdating: true);
     final result = await ref.read(addOrUpdateCartItemUseCaseProvider).call(
           consumerId: id,
           item: line,
         );
+    if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
@@ -280,11 +300,13 @@ class Cart extends _$Cart {
         .toList();
     state = state.copyWith(items: optimistic);
     _recomputeTotals();
+    final epoch = _epoch;
     final result = await ref.read(updateQuantityUseCaseProvider).call(
           consumerId: id,
           itemId: itemId,
           quantity: quantity,
         );
+    if (_epoch != epoch) return;
     result.fold(
       (f) {
         state = state.copyWith(
@@ -304,8 +326,10 @@ class Cart extends _$Cart {
   Future<void> clearCart() async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _epoch;
     state = state.copyWith(isUpdating: true, error: null);
     final result = await ref.read(clearCartUseCaseProvider).call(id);
+    if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
@@ -367,12 +391,14 @@ class Cart extends _$Cart {
     for (final it in state.selectedAvailableItems) {
       sub += it.price * it.quantity;
     }
+    final epoch = _epoch;
     state = state.copyWith(isCouponLoading: true, couponErrorKey: null);
     final result = await ref.read(applyCouponUseCaseProvider).call(
           consumerId: id,
           code: code,
           eligibleSubtotal: sub,
         );
+    if (_epoch != epoch) return;
     var applied = false;
     result.fold(
       (f) {
@@ -390,6 +416,7 @@ class Cart extends _$Cart {
     );
     if (applied) {
       await fetchCart();
+      if (_epoch != epoch) return;
       state = state.copyWith(isCouponLoading: false);
     }
   }
@@ -397,8 +424,10 @@ class Cart extends _$Cart {
   Future<void> removeCoupon() async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _epoch;
     state = state.copyWith(isCouponLoading: true);
     final result = await ref.read(removeCouponUseCaseProvider).call(id);
+    if (_epoch != epoch) return;
     var ok = false;
     result.fold(
       (f) => state = state.copyWith(isCouponLoading: false, error: f.toString()),
@@ -423,8 +452,10 @@ class Cart extends _$Cart {
       state = state.copyWith(error: kOfflineErrorCode);
       return null;
     }
+    final epoch = _epoch;
     state = state.copyWith(isUpdating: true, error: null);
     final result = await ref.read(placeOrderUseCaseProvider).call(params);
+    if (_epoch != epoch) return null;
     return result.fold(
       (f) {
         state = state.copyWith(isUpdating: false, error: f.toString());

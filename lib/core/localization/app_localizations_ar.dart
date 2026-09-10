@@ -63,6 +63,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyYourNumber => 'تحقق من رقمك';
 
   @override
+  String get otpEnterCodeSentTo => 'ادخل الكود المكون من 6 أرقام اللي اتبعت على';
+
+  @override
+  String get otpContactSupport => 'بتواجه مشكلة؟ تواصل مع الدعم';
+
+  @override
   String get codeSentTo => 'الكود اتبعت على';
 
   @override
@@ -150,6 +156,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get socialRoleSubtitle => 'خطوة أخيرة — اختار نوع حسابك';
 
   @override
+  String socialWelcomeGreeting(String name) {
+    return 'أهلاً بيك، $name! 👋';
+  }
+
+  @override
+  String get socialRoleLastStep => 'خطوة أخيرة — هتستخدم xStore إزاي؟';
+
+  @override
+  String get socialWelcomeFallbackName => 'يا صاحبي';
+
+  @override
   String get searchHint => 'ابحث عن منتجات...';
 
   @override
@@ -184,6 +201,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get easyReturnsBadge => '↩️ إرجاع سهل';
+
+  @override
+  String get productTrustFastShipping => 'شحن سريع';
+
+  @override
+  String get productTrustSecurePayment => 'دفع آمن';
+
+  @override
+  String get productTrustEasyReturns => 'إرجاع سهل';
 
   @override
   String get shopNow => 'تسوق دلوقتي';
@@ -1243,6 +1269,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersConfirmReceiptTitle => 'تأكيد الاستلام؟';
+
+  @override
+  String get ordersConfirmReceiptBody => 'هل تأكد إنك استلمت هذا الطلب؟';
 
   @override
   String get ordersConfirm => 'تأكيد';
@@ -2581,6 +2610,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get storeNameHint => '[AR] e.g. Ahmed\'s Electronics';
+
+  @override
+  String storeUrlPreview(String slug) {
+    return 'رابط متجرك: xstore.com/store/$slug';
+  }
 
   @override
   String get storeCategoryRequired => 'فئة المتجر *';

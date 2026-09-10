@@ -426,7 +426,7 @@ class OrderCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.ordersConfirmReceiptTitle),
-        content: Text(context.l10n.ordersConfirmReceiptTitle),
+        content: Text(context.l10n.ordersConfirmReceiptBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

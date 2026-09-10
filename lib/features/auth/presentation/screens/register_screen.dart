@@ -707,7 +707,7 @@ class _StepStore extends ConsumerWidget {
         ),
         const Gap(AppSpacing.sm),
         Text(
-          'Your store URL: xstore.com/store/${s.storeSlug}',
+          context.l10n.storeUrlPreview(s.storeSlug),
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,

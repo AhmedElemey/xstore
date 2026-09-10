@@ -67,46 +67,49 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
                     ),
                     const Gap(AppSpacing.spacing10),
                     Text(
-                      'Welcome, ${pending?.displayName ?? 'there'}! 👋',
+                      context.l10n.socialWelcomeGreeting(
+                        pending?.displayName ??
+                            context.l10n.socialWelcomeFallbackName,
+                      ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const Gap(AppSpacing.xs),
                     Text(
-                      'One last step — how will you use xStore?',
+                      context.l10n.socialRoleLastStep,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: context.textSecondary),
                     ),
                     const Gap(AppSpacing.spacing18),
                     RoleSelectorCard(
-                      title: "I'm a Buyer",
-                      subtitle: 'Discover and buy products from verified sellers',
+                      title: context.l10n.iAmBuyer,
+                      subtitle: context.l10n.buyerSubtitle,
                       icon: Icons.shopping_bag_outlined,
                       accentColor: AppColors.primary,
                       selectionBorderColor: AppColors.primary,
                       isSelected: _selectedRole == UserRole.consumer,
                       onTap: () => setState(() => _selectedRole = UserRole.consumer),
-                      features: const [
-                        'Browse thousands of products',
-                        'Secure checkout & payments',
+                      features: [
+                        context.l10n.buyerFeature1,
+                        context.l10n.buyerFeature2,
                       ],
                     ),
                     RoleSelectorCard(
-                      title: "I'm a Seller",
-                      subtitle: 'List products and start earning today',
+                      title: context.l10n.iAmSeller,
+                      subtitle: context.l10n.sellerSubtitle,
                       icon: Icons.storefront_outlined,
                       accentColor: AppColors.accent,
                       selectionBorderColor: AppColors.accent,
                       isSelected: _selectedRole == UserRole.vendor,
                       onTap: () => setState(() => _selectedRole = UserRole.vendor),
-                      features: const [
-                        'List unlimited products',
-                        'Manage orders & inventory',
+                      features: [
+                        context.l10n.sellerFeature1,
+                        context.l10n.sellerFeature2,
                       ],
                     ),
                     const Gap(AppSpacing.md),
                     XstoreButton(
-                      label: 'Continue',
+                      label: context.l10n.continueLabel,
                       isLoading: social.isAnyLoading,
                       onPressed: _selectedRole == null || social.isAnyLoading
                           ? null

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({super.key});
@@ -11,9 +12,9 @@ class QuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final items = [
-      ('🚚', 'Fast Shipping'),
-      ('🔒', 'Secure Payment'),
-      ('↩️', 'Easy Returns'),
+      ('🚚', context.l10n.productTrustFastShipping),
+      ('🔒', context.l10n.productTrustSecurePayment),
+      ('↩️', context.l10n.productTrustEasyReturns),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

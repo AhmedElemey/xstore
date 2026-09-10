@@ -63,6 +63,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyYourNumber => 'Verify your number';
 
   @override
+  String get otpEnterCodeSentTo => 'Enter the 6-digit code sent to';
+
+  @override
+  String get otpContactSupport => 'Having trouble? Contact Support';
+
+  @override
   String get codeSentTo => 'Code sent to';
 
   @override
@@ -150,6 +156,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialRoleSubtitle => 'One last step — choose your account type';
 
   @override
+  String socialWelcomeGreeting(String name) {
+    return 'Welcome, $name! 👋';
+  }
+
+  @override
+  String get socialRoleLastStep => 'One last step — how will you use xStore?';
+
+  @override
+  String get socialWelcomeFallbackName => 'there';
+
+  @override
   String get searchHint => 'Search products...';
 
   @override
@@ -184,6 +201,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get easyReturnsBadge => '↩️ Easy Returns';
+
+  @override
+  String get productTrustFastShipping => 'Fast Shipping';
+
+  @override
+  String get productTrustSecurePayment => 'Secure Payment';
+
+  @override
+  String get productTrustEasyReturns => 'Easy Returns';
 
   @override
   String get shopNow => 'Shop Now';
@@ -1241,6 +1267,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersConfirmReceiptTitle => 'Confirm receipt?';
+
+  @override
+  String get ordersConfirmReceiptBody => 'Confirm you received this order?';
 
   @override
   String get ordersConfirm => 'Confirm';
@@ -2582,6 +2611,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storeNameHint => 'e.g. Ahmed\'s Electronics';
+
+  @override
+  String storeUrlPreview(String slug) {
+    return 'Your store URL: xstore.com/store/$slug';
+  }
 
   @override
   String get storeCategoryRequired => 'Store Category *';

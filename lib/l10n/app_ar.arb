@@ -18,6 +18,8 @@
   "sendVerificationCode": "إبعت كود التحقق",
   "verifyAndContinue": "تحقق وكمل",
   "verifyYourNumber": "تحقق من رقمك",
+  "otpEnterCodeSentTo": "ادخل الكود المكون من 6 أرقام اللي اتبعت على",
+  "otpContactSupport": "بتواجه مشكلة؟ تواصل مع الدعم",
   "codeSentTo": "الكود اتبعت على",
   "verifyYourEmail": "تحقق من بريدك الإلكتروني",
   "profileEmailNotVerified": "بريدك الإلكتروني غير موثّق",
@@ -46,6 +48,9 @@
   "welcomeBack": "أهلاً بيك",
   "chooseYourRole": "هتستخدم xStore إزاي؟",
   "socialRoleSubtitle": "خطوة أخيرة — اختار نوع حسابك",
+  "socialWelcomeGreeting": "أهلاً بيك، {name}! 👋",
+  "socialRoleLastStep": "خطوة أخيرة — هتستخدم xStore إزاي؟",
+  "socialWelcomeFallbackName": "يا صاحبي",
   "searchHint": "ابحث عن منتجات...",
   "hotDeals": "🔥 أحسن العروض",
   "newArrivals": "✨ وصل حديثاً",
@@ -58,6 +63,9 @@
   "freeShippingBadge": "🚚 شحن مجاني",
   "securePayBadge": "🔒 دفع آمن",
   "easyReturnsBadge": "↩️ إرجاع سهل",
+  "productTrustFastShipping": "شحن سريع",
+  "productTrustSecurePayment": "دفع آمن",
+  "productTrustEasyReturns": "إرجاع سهل",
   "shopNow": "تسوق دلوقتي",
   "categoryQueryMens": "mens_fashion",
   "categoryQueryWomens": "womens_fashion",
@@ -432,6 +440,7 @@
   "ordersCancelReasonMistake": "طلبت بالغلط",
   "ordersCancelReasonOther": "سبب تاني",
   "ordersConfirmReceiptTitle": "تأكيد الاستلام؟",
+  "ordersConfirmReceiptBody": "هل تأكد إنك استلمت هذا الطلب؟",
   "ordersConfirm": "تأكيد",
   "ordersRejectDialogTitle": "رفض الطلب",
   "ordersRejectReasonHint": "سبب الرفض",
@@ -940,6 +949,20 @@
       }
     }
   },
+  "@socialWelcomeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@storeUrlPreview": {
+    "placeholders": {
+      "slug": {
+        "type": "String"
+      }
+    }
+  },
   "@cartSelectAllCount": {
     "placeholders": {
       "n": {
@@ -1135,6 +1158,7 @@
   "tellBuyersStore": "عرّف المشترين على متجرك",
   "storeNameRequired": "اسم المتجر *",
   "storeNameHint": "[AR] e.g. Ahmed's Electronics",
+  "storeUrlPreview": "رابط متجرك: xstore.com/store/{slug}",
   "storeCategoryRequired": "فئة المتجر *",
   "storeSellHint": "بتبيع إيه بشكل أساسي؟",
   "storeDescriptionRequired": "وصف المتجر *",
