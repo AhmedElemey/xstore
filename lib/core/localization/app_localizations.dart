@@ -3806,6 +3806,42 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get deleteListing;
 
+  /// No description provided for @myListingsSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search listings'**
+  String get myListingsSearchTitle;
+
+  /// No description provided for @myListingsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by title'**
+  String get myListingsSearchHint;
+
+  /// No description provided for @myListingsSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get myListingsSearchClear;
+
+  /// No description provided for @myListingsSearchSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get myListingsSearchSubmit;
+
+  /// No description provided for @myListingsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete listing?'**
+  String get myListingsDeleteTitle;
+
+  /// No description provided for @myListingsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'"{title}" will be removed permanently.'**
+  String myListingsDeleteBody(String title);
+
   /// No description provided for @draft.
   ///
   /// In en, this message translates to:

@@ -67,11 +67,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     await showAnimatedDialog<void>(
       context: context,
       child: AlertDialog(
-        title: Text('Search listings'),
+        title: Text(context.l10n.myListingsSearchTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Search by title'),
+          decoration: InputDecoration(hintText: context.l10n.myListingsSearchHint),
           onSubmitted: (v) {
             ref.read(myListingsNotifierProvider.notifier).setSearchQuery(v);
             Navigator.of(context).pop();
@@ -83,7 +83,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
               ref.read(myListingsNotifierProvider.notifier).setSearchQuery('');
               Navigator.of(context).pop();
             },
-            child: Text('Clear'),
+            child: Text(context.l10n.myListingsSearchClear),
           ),
           FilledButton(
             onPressed: () {
@@ -92,7 +92,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                   .setSearchQuery(controller.text);
               Navigator.of(context).pop();
             },
-            child: Text('Search'),
+            child: Text(context.l10n.myListingsSearchSubmit),
           ),
         ],
       ),
@@ -104,19 +104,19 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     final ok = await showAnimatedDialog<bool>(
       context: context,
       child: AlertDialog(
-        title: Text('Delete listing?'),
-        content: Text('“${listing.title}” will be removed permanently.'),
+        title: Text(context.l10n.myListingsDeleteTitle),
+        content: Text(context.l10n.myListingsDeleteBody(listing.title)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Delete'),
+            child: Text(context.l10n.deleteListing),
           ),
         ],
       ),
@@ -385,7 +385,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 onPressed: () => ref
                     .read(myListingsNotifierProvider.notifier)
                     .fetchListings(),
-                child: Text('Retry'),
+                child: Text(context.l10n.retry),
               ),
             ],
           ),

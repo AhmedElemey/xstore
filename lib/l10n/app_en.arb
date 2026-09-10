@@ -653,6 +653,12 @@
   "resumeListing": "Resume",
   "listingStats": "Statistics",
   "deleteListing": "Delete",
+  "myListingsSearchTitle": "Search listings",
+  "myListingsSearchHint": "Search by title",
+  "myListingsSearchClear": "Clear",
+  "myListingsSearchSubmit": "Search",
+  "myListingsDeleteTitle": "Delete listing?",
+  "myListingsDeleteBody": "“{title}” will be removed permanently.",
   "draft": "Draft",
   "active": "Active",
   "paused": "Paused",
@@ -924,6 +930,13 @@
     "placeholders": {
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "@myListingsDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
       }
     }
   },

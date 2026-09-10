@@ -1902,6 +1902,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteListing => 'حذف';
 
   @override
+  String get myListingsSearchTitle => 'البحث في الإعلانات';
+
+  @override
+  String get myListingsSearchHint => 'ابحث بالعنوان';
+
+  @override
+  String get myListingsSearchClear => 'مسح';
+
+  @override
+  String get myListingsSearchSubmit => 'بحث';
+
+  @override
+  String get myListingsDeleteTitle => 'حذف الإعلان؟';
+
+  @override
+  String myListingsDeleteBody(String title) {
+    return 'سيتم حذف "$title" نهائيًا.';
+  }
+
+  @override
   String get draft => 'مسودة';
 
   @override

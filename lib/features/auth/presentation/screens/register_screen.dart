@@ -555,7 +555,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.terms),
                       child: Text(
                         context.l10n.termsOfService,
                         style: AppTypography.bodyMedium.copyWith(
@@ -571,7 +571,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.privacy),
                       child: Text(
                         context.l10n.privacyPolicy,
                         style: AppTypography.bodyMedium.copyWith(

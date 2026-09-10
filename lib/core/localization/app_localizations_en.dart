@@ -1898,6 +1898,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteListing => 'Delete';
 
   @override
+  String get myListingsSearchTitle => 'Search listings';
+
+  @override
+  String get myListingsSearchHint => 'Search by title';
+
+  @override
+  String get myListingsSearchClear => 'Clear';
+
+  @override
+  String get myListingsSearchSubmit => 'Search';
+
+  @override
+  String get myListingsDeleteTitle => 'Delete listing?';
+
+  @override
+  String myListingsDeleteBody(String title) {
+    return '"$title" will be removed permanently.';
+  }
+
+  @override
   String get draft => 'Draft';
 
   @override

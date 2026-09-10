@@ -653,6 +653,12 @@
   "resumeListing": "استئناف",
   "listingStats": "إحصائيات",
   "deleteListing": "حذف",
+  "myListingsSearchTitle": "البحث في الإعلانات",
+  "myListingsSearchHint": "ابحث بالعنوان",
+  "myListingsSearchClear": "مسح",
+  "myListingsSearchSubmit": "بحث",
+  "myListingsDeleteTitle": "حذف الإعلان؟",
+  "myListingsDeleteBody": "سيتم حذف “{title}” نهائيًا.",
   "draft": "مسودة",
   "active": "نشط",
   "paused": "موقوف",
@@ -924,6 +930,13 @@
     "placeholders": {
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "@myListingsDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
       }
     }
   },
