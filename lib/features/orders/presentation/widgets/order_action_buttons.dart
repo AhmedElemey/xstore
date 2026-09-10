@@ -9,6 +9,8 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../product/domain/entities/review_write_params.dart';
+import '../../../product/presentation/providers/product_dependencies.dart';
 import '../../domain/entities/order_entity.dart'
     show DeliveryMethod, OrderEntity, OrderStatus, ShippingInfo;
 import '../providers/order_detail_provider.dart';
@@ -242,7 +244,7 @@ class OrderActionButtons extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: busy ? null : () => _review(context),
+                onPressed: busy ? null : () => _review(context, ref),
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
@@ -460,9 +462,9 @@ class OrderActionButtons extends ConsumerWidget {
     );
   }
 
-  void _review(BuildContext context) {
+  void _review(BuildContext context, WidgetRef ref) {
     var stars = 5;
-    final text = TextEditingController();
+    var reviewText = '';
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -473,7 +475,7 @@ class OrderActionButtons extends ConsumerWidget {
             padding: EdgeInsets.only(
               left: AppSpacing.lg,
               right: AppSpacing.lg,
-              bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.lg,
+              bottom: MediaQuery.paddingOf(ctx).bottom + AppSpacing.lg,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -494,29 +496,46 @@ class OrderActionButtons extends ConsumerWidget {
                   ),
                 ),
                 TextField(
-                  controller: text,
+                  onChanged: (v) => reviewText = v,
                   maxLines: 3,
                   decoration: InputDecoration(hintText: context.l10n.ordersReviewHint),
                 ),
-                Tooltip(
-                  message: context.l10n.placeholderScreenSubtitle,
-                  child: XstoreButton(
-                    label: context.l10n.ordersSubmitReview,
-                    onPressed: null,
-                  ),
-                ),
-                Text(
-                  context.l10n.placeholderScreenSubtitle,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: context.textSecondary,
-                  ),
+                const SizedBox(height: AppSpacing.lg),
+                XstoreButton(
+                  label: context.l10n.ordersSubmitReview,
+                  onPressed: () async {
+                    // Matches product_reviews_screen.dart's own write-review
+                    // validation: an empty comment blocks submission rather
+                    // than sending a blank one.
+                    final comment = reviewText.trim();
+                    if (comment.isEmpty) return;
+                    final listingId = order.items.isEmpty
+                        ? null
+                        : order.items.first.listingId;
+                    Navigator.pop(ctx);
+                    if (listingId == null) return;
+                    final result = await ref.read(createReviewUseCaseProvider).call(
+                          listingId: listingId,
+                          params: ReviewWriteParams(
+                            rating: stars.toDouble(),
+                            comment: comment,
+                          ),
+                        );
+                    if (!context.mounted) return;
+                    result.fold(
+                      (failure) => AppSnackbar.error(context, failure.toString()),
+                      (_) => AppSnackbar.success(
+                        context,
+                        context.l10n.ordersReviewThanks,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           );
         },
       ),
-    ).whenComplete(text.dispose);
+    );
   }
 }
