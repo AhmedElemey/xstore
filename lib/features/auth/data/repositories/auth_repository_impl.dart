@@ -488,7 +488,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> persistSessionUser(UserEntity user) async {
     try {
-      final token = await _secureStorage.read(key: _tokenKey);
+      // Same hung/corrupted native secure-storage guard as dio_provider.dart's
+      // onRequest — a stuck AndroidKeyStore read here must not hang session
+      // persistence forever; degrade to persisting without a token instead.
+      String? token;
+      try {
+        token = await _secureStorage
+            .read(key: _tokenKey)
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {
+        token = null;
+      }
       final model = UserModel(
         id: user.id,
         name: user.name,
