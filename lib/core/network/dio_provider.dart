@@ -82,12 +82,6 @@ Dio dio(DioRef ref) {
         }
         if (token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
-          if (kDebugMode) {
-            debugPrint(
-              '── request header (${options.method} ${options.path}) ──',
-            );
-            debugPrint('X-Auth-Token: ${options.headers['X-Auth-Token']}');
-          }
         }
         // CONFIRMED (live probe, 2026-08-14): listing reads 400 without
         // these. Best-known device fix, falling back to Cairo — see

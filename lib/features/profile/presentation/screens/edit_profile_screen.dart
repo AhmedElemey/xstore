@@ -1089,8 +1089,11 @@ class _VerificationStatus extends StatelessWidget {
     return TextButton(
       onPressed: onVerify,
       style: TextButton.styleFrom(
+        // No tapTargetSize override: keep the default padded (48dp)
+        // invisible hit area so the tap target stays accessible even
+        // though the visible chip is compact enough to sit as a
+        // suffixIcon inline with the field.
         minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,

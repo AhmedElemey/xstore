@@ -9,6 +9,8 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../product/domain/entities/review_write_params.dart';
+import '../../../product/presentation/providers/product_dependencies.dart';
 import '../../domain/entities/order_entity.dart'
     show DeliveryMethod, OrderEntity, OrderStatus, ShippingInfo;
 import '../providers/order_detail_provider.dart';
@@ -242,7 +244,7 @@ class OrderActionButtons extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: busy ? null : () => _review(context),
+                onPressed: busy ? null : () => _review(context, ref),
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
@@ -295,13 +297,18 @@ class OrderActionButtons extends ConsumerWidget {
   }
 
   Future<String?> _rejectDialog(BuildContext context) async {
-    final ctrl = TextEditingController();
+    // No TextEditingController: a controller disposed right after
+    // showDialog's Future resolves races the dialog's own exit transition,
+    // which still has a live TextField/EditableText referencing it —
+    // "A TextEditingController was used after being disposed." Same fix as
+    // order_card.dart's _rejectFlow.
+    var reasonText = '';
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.ordersRejectDialogTitle),
         content: TextField(
-          controller: ctrl,
+          onChanged: (v) => reasonText = v,
           decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
         ),
         actions: [
@@ -316,8 +323,7 @@ class OrderActionButtons extends ConsumerWidget {
         ],
       ),
     );
-    final reason = ctrl.text.trim();
-    ctrl.dispose();
+    final reason = reasonText.trim();
     if (ok == true) return reason.isEmpty ? '—' : reason;
     return null;
   }
@@ -328,8 +334,13 @@ class OrderActionButtons extends ConsumerWidget {
     String id,
     OrderDetailNotifier notifier,
   ) async {
-    final trackCtrl = TextEditingController();
-    final courierCtrl = TextEditingController();
+    // No TextEditingControllers: disposing them right after
+    // showModalBottomSheet's Future resolves races the sheet's own exit
+    // transition, which still has live TextFields/EditableTexts referencing
+    // them — "A TextEditingController was used after being disposed." Same
+    // fix as order_card.dart's _shipSheet.
+    var trackingNumber = '';
+    var courierName = '';
     DateTime? eta = DateTime.now().add(const Duration(days: 2));
     await showModalBottomSheet<void>(
       context: context,
@@ -350,13 +361,13 @@ class OrderActionButtons extends ConsumerWidget {
                 Text(context.l10n.ordersAddTrackingTitle,
                     style: AppTypography.titleMedium),
                 TextField(
-                  controller: trackCtrl,
+                  onChanged: (v) => trackingNumber = v,
                   decoration: InputDecoration(
                     labelText: context.l10n.ordersTrackingNumberLabel,
                   ),
                 ),
                 TextField(
-                  controller: courierCtrl,
+                  onChanged: (v) => courierName = v,
                   decoration: InputDecoration(
                     labelText: context.l10n.ordersCourierNameLabel,
                   ),
@@ -381,12 +392,12 @@ class OrderActionButtons extends ConsumerWidget {
                     Navigator.pop(ctx);
                     await notifier.markShipped(
                       ShippingInfo(
-                        trackingNumber: trackCtrl.text.trim().isEmpty
+                        trackingNumber: trackingNumber.trim().isEmpty
                             ? null
-                            : trackCtrl.text.trim(),
-                        courierName: courierCtrl.text.trim().isEmpty
+                            : trackingNumber.trim(),
+                        courierName: courierName.trim().isEmpty
                             ? null
-                            : courierCtrl.text.trim(),
+                            : courierName.trim(),
                         estimatedDelivery: eta,
                       ),
                     );
@@ -398,8 +409,6 @@ class OrderActionButtons extends ConsumerWidget {
         },
       ),
     );
-    trackCtrl.dispose();
-    courierCtrl.dispose();
     if (context.mounted) _err(context, ref, id);
   }
 
@@ -445,7 +454,7 @@ class OrderActionButtons extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.ordersConfirmReceiptTitle),
-        content: Text(context.l10n.ordersConfirmReceiptTitle),
+        content: Text(context.l10n.ordersConfirmReceiptBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -460,9 +469,9 @@ class OrderActionButtons extends ConsumerWidget {
     );
   }
 
-  void _review(BuildContext context) {
+  void _review(BuildContext context, WidgetRef ref) {
     var stars = 5;
-    final text = TextEditingController();
+    var reviewText = '';
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -473,7 +482,7 @@ class OrderActionButtons extends ConsumerWidget {
             padding: EdgeInsets.only(
               left: AppSpacing.lg,
               right: AppSpacing.lg,
-              bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.lg,
+              bottom: MediaQuery.paddingOf(ctx).bottom + AppSpacing.lg,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -494,29 +503,46 @@ class OrderActionButtons extends ConsumerWidget {
                   ),
                 ),
                 TextField(
-                  controller: text,
+                  onChanged: (v) => reviewText = v,
                   maxLines: 3,
                   decoration: InputDecoration(hintText: context.l10n.ordersReviewHint),
                 ),
-                Tooltip(
-                  message: context.l10n.placeholderScreenSubtitle,
-                  child: XstoreButton(
-                    label: context.l10n.ordersSubmitReview,
-                    onPressed: null,
-                  ),
-                ),
-                Text(
-                  context.l10n.placeholderScreenSubtitle,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: context.textSecondary,
-                  ),
+                const SizedBox(height: AppSpacing.lg),
+                XstoreButton(
+                  label: context.l10n.ordersSubmitReview,
+                  onPressed: () async {
+                    // Matches product_reviews_screen.dart's own write-review
+                    // validation: an empty comment blocks submission rather
+                    // than sending a blank one.
+                    final comment = reviewText.trim();
+                    if (comment.isEmpty) return;
+                    final listingId = order.items.isEmpty
+                        ? null
+                        : order.items.first.listingId;
+                    Navigator.pop(ctx);
+                    if (listingId == null) return;
+                    final result = await ref.read(createReviewUseCaseProvider).call(
+                          listingId: listingId,
+                          params: ReviewWriteParams(
+                            rating: stars.toDouble(),
+                            comment: comment,
+                          ),
+                        );
+                    if (!context.mounted) return;
+                    result.fold(
+                      (failure) => AppSnackbar.error(context, failure.toString()),
+                      (_) => AppSnackbar.success(
+                        context,
+                        context.l10n.ordersReviewThanks,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           );
         },
       ),
-    ).whenComplete(text.dispose);
+    );
   }
 }

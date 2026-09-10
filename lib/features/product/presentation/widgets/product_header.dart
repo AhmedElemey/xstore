@@ -15,16 +15,16 @@ class ProductHeader extends StatelessWidget {
     this.compareAtPrice,
     required this.onTapReviews,
     this.locationLine = '',
-    this.ratingLabel = '4.7',
-    this.reviewCountLabel = '1,230',
+    this.ratingLabel,
+    this.reviewCountLabel,
   });
 
   final ListingEntity listing;
   final double? compareAtPrice;
   final VoidCallback onTapReviews;
   final String locationLine;
-  final String ratingLabel;
-  final String reviewCountLabel;
+  final String? ratingLabel;
+  final String? reviewCountLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -108,14 +108,21 @@ class ProductHeader extends StatelessWidget {
                   children: [
                     Icon(
                       LucideIcons.star,
-                      color: AppColors.warning,
+                      color: ratingLabel != null
+                          ? AppColors.warning
+                          : theme.colorScheme.onSurfaceVariant,
                       size: AppSpacing.xl + AppSpacing.xs,
                     ),
                     const Gap(AppSpacing.xs),
                     Text(
-                      '$ratingLabel${context.l10n.reviewsDotSeparator}$reviewCountLabel${context.l10n.reviewsSuffix}',
+                      ratingLabel != null && reviewCountLabel != null
+                          ? '$ratingLabel${context.l10n.reviewsDotSeparator}$reviewCountLabel${context.l10n.reviewsSuffix}'
+                          : context.l10n.noReviewsYet,
                       style: AppTypography.titleSmall.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: ratingLabel != null
+                            ? null
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     Icon(

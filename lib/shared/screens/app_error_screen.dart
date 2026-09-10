@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_strings.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 import '../widgets/error_state_widget.dart';
 
 /// Full-screen fallback for navigation/route failures (wired as go_router's
@@ -8,11 +8,13 @@ import '../widgets/error_state_widget.dart';
 class AppErrorScreen extends StatelessWidget {
   const AppErrorScreen({
     super.key,
-    this.message = AppStrings.routeErrorMessage,
+    this.message,
     this.onRetry,
   });
 
-  final String message;
+  /// Falls back to the localized default when omitted, since a `const`
+  /// constructor default can't call `context.l10n`.
+  final String? message;
   final VoidCallback? onRetry;
 
   @override
@@ -20,9 +22,9 @@ class AppErrorScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: ErrorStateWidget(
-          message: message,
+          message: message ?? context.l10n.routeErrorMessage,
           onRetry: onRetry,
-          retryLabel: AppStrings.goHome,
+          retryLabel: context.l10n.goHome,
         ),
       ),
     );

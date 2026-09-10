@@ -254,12 +254,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       compareAtPrice: data.compareAtPrice,
                       locationLine: data.locationLine,
                       onTapReviews: _scrollToReviews,
-                      ratingLabel: reviewSummary != null
+                      ratingLabel: reviewSummary != null &&
+                              reviewSummary.totalCount > 0
                           ? reviewSummary.average.toStringAsFixed(1)
-                          : '4.7',
-                      reviewCountLabel: reviewSummary != null
+                          : null,
+                      reviewCountLabel: reviewSummary != null &&
+                              reviewSummary.totalCount > 0
                           ? _formatCount(reviewSummary.totalCount)
-                          : '1,230',
+                          : null,
                     ).fadeSlideIn(
                       delay: const Duration(milliseconds: 150),
                     ),

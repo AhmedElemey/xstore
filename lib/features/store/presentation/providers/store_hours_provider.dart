@@ -99,15 +99,29 @@ void resetStoreHoursData(Ref ref) {
 
 @Riverpod(keepAlive: true)
 class StoreHoursNotifier extends _$StoreHoursNotifier {
+  // Bumped every time build() runs. resetStoreHoursData() above resets this
+  // notifier via ref.invalidate(), which — per this codegen's documented
+  // behavior (see auth_provider.dart) — re-runs build() on the SAME
+  // instance rather than replacing it, so an async mutator (fetchStoreHours,
+  // toggleStoreStatus, saveStoreHours) still in flight when that happens
+  // would otherwise write the previous vendor's data back once its own
+  // await resolves. Same guard shape as cart_provider.dart's `_epoch`.
+  var _epoch = 0;
+
   @override
-  StoreHoursState build() => const StoreHoursState(original: null, current: null);
+  StoreHoursState build() {
+    _epoch++;
+    return const StoreHoursState(original: null, current: null);
+  }
 
   Future<void> fetchStoreHours() async {
     final user = ref.read(authProvider).valueOrNull;
     if (user == null || user.role != UserRole.vendor) return;
     final vendorId = user.id;
+    final epoch = _epoch;
     state = state.copyWith(isLoading: true, error: null);
     final result = await ref.read(getStoreHoursUseCaseProvider).call(vendorId);
+    if (epoch != _epoch) return;
     result.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
       (hours) => state = state.copyWith(
@@ -124,11 +138,13 @@ class StoreHoursNotifier extends _$StoreHoursNotifier {
     if (current == null) return false;
     final nextValue = !current.isStoreOpen;
     final optimistic = current.copyWith(isStoreOpen: nextValue, updatedAt: DateTime.now());
+    final epoch = _epoch;
     state = state.copyWith(current: optimistic, isTogglingStatus: true);
     final result = await ref.read(toggleStoreStatusUseCaseProvider).call(
           vendorId: current.vendorId,
           isOpen: nextValue,
         );
+    if (epoch != _epoch) return false;
     return result.fold((f) {
       state = state.copyWith(
         current: current,
@@ -227,8 +243,10 @@ class StoreHoursNotifier extends _$StoreHoursNotifier {
       state = state.copyWith(error: 'invalid');
       return false;
     }
+    final epoch = _epoch;
     state = state.copyWith(isSaving: true, error: null);
     final result = await ref.read(updateStoreHoursUseCaseProvider).call(current);
+    if (epoch != _epoch) return false;
     return result.fold((f) {
       state = state.copyWith(isSaving: false, error: f.toString());
       return false;

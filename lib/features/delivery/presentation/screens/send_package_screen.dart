@@ -6,14 +6,17 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/constants/egypt_wilayas.dart';
+import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
+import '../../../cities/presentation/providers/city_dependencies.dart';
+import '../../../governments/presentation/providers/government_dependencies.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/delivery_requests_provider.dart';
 
@@ -56,21 +59,30 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
   final _senderNameCtrl = TextEditingController();
   final _senderPhoneCtrl = TextEditingController();
   final _pickupStreetCtrl = TextEditingController();
-  final _pickupCityCtrl = TextEditingController();
   final _recipientNameCtrl = TextEditingController();
   final _recipientPhoneCtrl = TextEditingController();
   final _dropoffStreetCtrl = TextEditingController();
-  final _dropoffCityCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
 
-  String _pickupWilaya = EgyptWilayas.names.first;
-  String _dropoffWilaya = EgyptWilayas.names.first;
+  // Governorate/city picked via the same API-backed cascade used at
+  // checkout — OrderAddress only carries resolved names on the wire, so a
+  // prefilled pickup/dropoff (see below) is shown as a hint, not mapped
+  // back to ids; the sender re-picks it to submit, same tradeoff already
+  // accepted for the checkout address book.
+  int? _pickupCityId;
+  int? _pickupGovernorateId;
+  int? _dropoffCityId;
+  int? _dropoffGovernorateId;
+  String? _pickupLocationHint;
+  String? _dropoffLocationHint;
 
   // PhoneInputField reports errors via `errorText` instead of a Form
   // validator, so phone validation is applied on submit.
   String? _senderPhoneError;
   String? _recipientPhoneError;
   late final Listenable _fields;
+  String? _pickupLocationError;
+  String? _dropoffLocationError;
 
   @override
   void initState() {
@@ -88,28 +100,33 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
       _senderNameCtrl.text = pickup.fullName;
       _senderPhoneCtrl.text = AppValidators.toLocalEgypt(pickup.phone);
       _pickupStreetCtrl.text = pickup.street;
-      _pickupCityCtrl.text = pickup.city;
-      if (EgyptWilayas.names.contains(pickup.wilaya)) _pickupWilaya = pickup.wilaya;
+      if (pickup.wilaya.isNotEmpty || pickup.city.isNotEmpty) {
+        _pickupLocationHint = '${pickup.wilaya} - ${pickup.city}';
+      }
     }
     final dropoff = widget.args?.initialDropoff;
     if (dropoff != null) {
       _recipientNameCtrl.text = dropoff.fullName;
       _recipientPhoneCtrl.text = AppValidators.toLocalEgypt(dropoff.phone);
       _dropoffStreetCtrl.text = dropoff.street;
-      _dropoffCityCtrl.text = dropoff.city;
-      if (EgyptWilayas.names.contains(dropoff.wilaya)) _dropoffWilaya = dropoff.wilaya;
+      if (dropoff.wilaya.isNotEmpty || dropoff.city.isNotEmpty) {
+        _dropoffLocationHint = '${dropoff.wilaya} - ${dropoff.city}';
+      }
     }
     final note = widget.args?.initialNote;
     if (note != null) _noteCtrl.text = note;
+    // Pickup/dropoff location (_pickupCityId/_pickupGovernorateId/
+    // _dropoffCityId/_dropoffGovernorateId) isn't a TextEditingController,
+    // so it isn't part of this Listenable — LocationCascadeField's
+    // onChanged already calls setState, which rebuilds the
+    // ListenableBuilder below along with the rest of the screen.
     _fields = Listenable.merge([
       _senderNameCtrl,
       _senderPhoneCtrl,
       _pickupStreetCtrl,
-      _pickupCityCtrl,
       _recipientNameCtrl,
       _recipientPhoneCtrl,
       _dropoffStreetCtrl,
-      _dropoffCityCtrl,
       _noteCtrl,
     ]);
   }
@@ -119,11 +136,9 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     _senderNameCtrl.dispose();
     _senderPhoneCtrl.dispose();
     _pickupStreetCtrl.dispose();
-    _pickupCityCtrl.dispose();
     _recipientNameCtrl.dispose();
     _recipientPhoneCtrl.dispose();
     _dropoffStreetCtrl.dispose();
-    _dropoffCityCtrl.dispose();
     _noteCtrl.dispose();
     super.dispose();
   }
@@ -133,28 +148,53 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     final senderPhoneError = Validators.egyptPhone(l10n, _senderPhoneCtrl.text);
     final recipientPhoneError =
         Validators.egyptPhone(l10n, _recipientPhoneCtrl.text);
+    final pickupLocationError =
+        (_pickupGovernorateId == null || _pickupCityId == null)
+            ? l10n.checkoutErrorAddressCity
+            : null;
+    final dropoffLocationError =
+        (_dropoffGovernorateId == null || _dropoffCityId == null)
+            ? l10n.checkoutErrorAddressCity
+            : null;
     final formOk = _formKey.currentState?.validate() ?? false;
     setState(() {
       _senderPhoneError = senderPhoneError;
       _recipientPhoneError = recipientPhoneError;
+      _pickupLocationError = pickupLocationError;
+      _dropoffLocationError = dropoffLocationError;
     });
-    if (!formOk || senderPhoneError != null || recipientPhoneError != null) {
+    if (!formOk ||
+        senderPhoneError != null ||
+        recipientPhoneError != null ||
+        pickupLocationError != null ||
+        dropoffLocationError != null) {
       return;
     }
+
+    final isArabic = ref.read(appIsArabicProvider);
+    final governments = ref.read(allGovernmentsProvider).valueOrNull;
+    final cities = ref.read(allCitiesProvider).valueOrNull;
+    String? governorateNameOf(int? id) => governments
+        ?.where((g) => g.id == id)
+        .firstOrNull
+        ?.name
+        .resolve(isArabic);
+    String? cityNameOf(int? id) =>
+        cities?.where((c) => c.id == id).firstOrNull?.name.resolve(isArabic);
 
     final pickup = OrderAddress(
       fullName: _senderNameCtrl.text.trim(),
       phone: AppValidators.normalizeEgyptLocal(_senderPhoneCtrl.text),
       street: _pickupStreetCtrl.text.trim(),
-      city: _pickupCityCtrl.text.trim(),
-      wilaya: _pickupWilaya,
+      city: cityNameOf(_pickupCityId) ?? '',
+      wilaya: governorateNameOf(_pickupGovernorateId) ?? '',
     );
     final dropoff = OrderAddress(
       fullName: _recipientNameCtrl.text.trim(),
       phone: AppValidators.normalizeEgyptLocal(_recipientPhoneCtrl.text),
       street: _dropoffStreetCtrl.text.trim(),
-      city: _dropoffCityCtrl.text.trim(),
-      wilaya: _dropoffWilaya,
+      city: cityNameOf(_dropoffCityId) ?? '',
+      wilaya: governorateNameOf(_dropoffGovernorateId) ?? '',
     );
 
     final ok = await ref.read(deliveryRequestsProvider.notifier).createRequest(
@@ -187,13 +227,13 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     if (Validators.egyptPhone(l10n, _recipientPhoneCtrl.text) != null) {
       return false;
     }
+    if (_pickupGovernorateId == null || _pickupCityId == null) return false;
+    if (_dropoffGovernorateId == null || _dropoffCityId == null) return false;
     for (final c in [
       _senderNameCtrl,
       _pickupStreetCtrl,
-      _pickupCityCtrl,
       _recipientNameCtrl,
       _dropoffStreetCtrl,
-      _dropoffCityCtrl,
       _noteCtrl,
     ]) {
       if (c.text.trim().isEmpty) return false;
@@ -250,16 +290,18 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
                   validator: _requiredLine,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _pickupCityCtrl,
-                  decoration: _decoration(context.l10n.checkoutCity),
-                  validator: _requiredLine,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _wilayaField(
-                  context,
-                  value: _pickupWilaya,
-                  onChanged: (v) => setState(() => _pickupWilaya = v),
+                LocationCascadeField(
+                  cityId: _pickupCityId,
+                  governorateId: _pickupGovernorateId,
+                  hint: _pickupLocationHint,
+                  errorText: _pickupLocationError,
+                  onChanged: (cityId, governorateId) {
+                    setState(() {
+                      _pickupCityId = cityId;
+                      _pickupGovernorateId = governorateId;
+                      _pickupLocationError = null;
+                    });
+                  },
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 _sectionTitle(context, context.l10n.sendPackageDropoffSection),
@@ -288,16 +330,18 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
                   validator: _requiredLine,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _dropoffCityCtrl,
-                  decoration: _decoration(context.l10n.checkoutCity),
-                  validator: _requiredLine,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _wilayaField(
-                  context,
-                  value: _dropoffWilaya,
-                  onChanged: (v) => setState(() => _dropoffWilaya = v),
+                LocationCascadeField(
+                  cityId: _dropoffCityId,
+                  governorateId: _dropoffGovernorateId,
+                  hint: _dropoffLocationHint,
+                  errorText: _dropoffLocationError,
+                  onChanged: (cityId, governorateId) {
+                    setState(() {
+                      _dropoffCityId = cityId;
+                      _dropoffGovernorateId = governorateId;
+                      _dropoffLocationError = null;
+                    });
+                  },
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 _sectionTitle(context, context.l10n.sendPackageNoteLabel),
@@ -337,26 +381,6 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
         color: context.textPrimary,
         fontWeight: FontWeight.w700,
       ),
-    );
-  }
-
-  Widget _wilayaField(
-    BuildContext context, {
-    required String value,
-    required ValueChanged<String> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      initialValue: value,
-      decoration: InputDecoration(
-        labelText: context.l10n.checkoutWilaya,
-        border: const OutlineInputBorder(),
-      ),
-      items: EgyptWilayas.names
-          .map((w) => DropdownMenuItem(value: w, child: Text(w)))
-          .toList(),
-      onChanged: (v) {
-        if (v != null) onChanged(v);
-      },
     );
   }
 }

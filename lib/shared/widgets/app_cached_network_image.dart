@@ -55,12 +55,20 @@ class AppCachedNetworkImage extends StatelessWidget {
 
 /// [ImageProvider] helpers that attach the same auth headers as API calls.
 abstract final class AppNetworkImage {
-  static ImageProvider cached(String url) => CachedNetworkImageProvider(
+  /// [cacheSize] resizes the decoded image to roughly that many logical
+  /// pixels (both dimensions) before it hits memory — pass it for any small
+  /// fixed-size use (e.g. a `CircleAvatar.backgroundImage`) so a full-res
+  /// photo isn't decoded and cached at its original size.
+  static ImageProvider cached(String url, {int? cacheSize}) =>
+      CachedNetworkImageProvider(
         resolveBackendMediaUrl(url),
         headers: AppNetworkImageHeaders.httpHeaders,
         cacheManager: AppImageCacheManager.instance,
         errorListener: _ignoreImageLoadError,
+        maxWidth: cacheSize,
+        maxHeight: cacheSize,
       );
 
-  static ImageProvider network(String url) => cached(url);
+  static ImageProvider network(String url, {int? cacheSize}) =>
+      cached(url, cacheSize: cacheSize);
 }

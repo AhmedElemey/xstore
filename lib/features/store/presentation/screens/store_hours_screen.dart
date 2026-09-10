@@ -96,7 +96,7 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                                     context,
                                     message: text,
                                     action: SnackBarAction(
-                                      label: context.l10n.applyFilters,
+                                      label: context.l10n.cartApply,
                                       onPressed: () =>
                                           notifier.applyPreset(preset),
                                     ),

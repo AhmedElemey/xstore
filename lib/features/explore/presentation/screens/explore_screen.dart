@@ -13,8 +13,12 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/utils/require_login.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/explore_skeleton.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../home/presentation/providers/categories_provider.dart';
+import '../../domain/entities/search_result_entity.dart';
 import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
@@ -67,6 +71,22 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     if (f.location != null && f.location!.isNotEmpty) c++;
     if (f.shippingOnly) c++;
     return c;
+  }
+
+  Future<void> _addToCart(SearchResultEntity item) async {
+    if (!requireLogin(context, ref)) return;
+    await ref.read(cartProvider.notifier).addFromListing(
+          listingId: item.id,
+          quantity: 1,
+        );
+    if (!mounted) return;
+    final cartError = ref.read(cartProvider).error;
+    if (cartError != null) {
+      AppSnackbar.error(context, resolveAppError(context, cartError));
+      ref.read(cartProvider.notifier).clearError();
+      return;
+    }
+    AppSnackbar.success(context, context.l10n.addedToCart);
   }
 
   void _openFilters(
@@ -341,7 +361,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           child: ProductGridCard(
                             key: ValueKey<String>('explore-grid-${item.id}'),
                             item: item,
-                            onAddToCart: () {},
+                            onAddToCart: () => _addToCart(item),
                             showAddToCart: !isVendor,
                             onTap: () =>
                                 context.push('${AppRoutes.product}/${item.id}'),
@@ -365,7 +385,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             child: ProductListCard(
                               key: ValueKey<String>('explore-list-${item.id}'),
                               item: item,
-                              onAddToCart: () {},
+                              onAddToCart: () => _addToCart(item),
                               showAddToCart: !isVendor,
                               onTap: () => context.push(
                                 '${AppRoutes.product}/${item.id}',

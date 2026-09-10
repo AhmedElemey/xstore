@@ -18,6 +18,13 @@ class Notifications extends _$Notifications {
 
   final Map<String, Timer> _deleteTimers = {};
 
+  // Bumped whenever the auth-listener below resets state on logout. This
+  // provider is keepAlive, so an async mutator (fetchNotifications,
+  // loadMore, markAllRead) still in flight when logout resets state would
+  // otherwise write the previous user's notifications back once its own
+  // `await` resolves — same guard shape as cart_provider.dart's `_epoch`.
+  var _epoch = 0;
+
   @override
   NotificationsState build() {
     ref.onDispose(() {
@@ -31,7 +38,10 @@ class Notifications extends _$Notifications {
       if (next.valueOrNull != null) {
         Future.microtask(fetchNotifications);
       } else {
-        Future.microtask(() => state = const NotificationsState());
+        Future.microtask(() {
+          _epoch++;
+          state = const NotificationsState();
+        });
       }
     });
     return const NotificationsState();
@@ -161,6 +171,7 @@ class Notifications extends _$Notifications {
 
   Future<void> fetchNotifications() async {
     final role = _role;
+    final epoch = _epoch;
     state = state.copyWith(
       isLoading: true,
       error: null,
@@ -177,6 +188,7 @@ class Notifications extends _$Notifications {
           ),
       ref.read(notificationsRepositoryProvider).unreadCount(role),
     ).wait;
+    if (epoch != _epoch) return;
     listR.fold(
       (f) => state = state.copyWith(isLoading: false, error: f.toString()),
       (page) {
@@ -201,6 +213,7 @@ class Notifications extends _$Notifications {
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore) return;
     final role = _role;
+    final epoch = _epoch;
     state = state.copyWith(isLoadingMore: true);
     final nextPage = state.page + 1;
     final r = await ref.read(getNotificationsUseCaseProvider).call(
@@ -208,6 +221,7 @@ class Notifications extends _$Notifications {
           page: nextPage,
           pageSize: _pageSize,
         );
+    if (epoch != _epoch) return;
     r.fold(
       (f) => state = state.copyWith(isLoadingMore: false, error: f.toString()),
       (page) {
@@ -268,6 +282,7 @@ class Notifications extends _$Notifications {
 
   Future<void> markAllRead() async {
     final role = _role;
+    final epoch = _epoch;
     state = state.copyWith(
       markAllReadAnimating: true,
       notifications:
@@ -277,6 +292,7 @@ class Notifications extends _$Notifications {
     _applyFilterAndGroups();
     await ref.read(markAllReadUseCaseProvider).call(role);
     await Future<void>.delayed(const Duration(milliseconds: 360));
+    if (epoch != _epoch) return;
     state = state.copyWith(markAllReadAnimating: false);
   }
 

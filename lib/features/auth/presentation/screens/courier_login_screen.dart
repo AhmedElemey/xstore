@@ -179,8 +179,19 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                 AuthTextField(
                   label: context.l10n.courierModePassword,
                   controller: _password,
-                  obscureText: true,
+                  obscureText: !login.isPasswordVisible,
                   prefixIcon: const Icon(LucideIcons.lock, size: 18),
+                  suffixIcon: IconButton(
+                    onPressed: () => ref
+                        .read(loginNotifierProvider.notifier)
+                        .togglePasswordVisibility(),
+                    icon: Icon(
+                      login.isPasswordVisible
+                          ? LucideIcons.eyeOff
+                          : LucideIcons.eye,
+                      color: context.iconSecondary,
+                    ),
+                  ),
                   onChanged: (_) => setState(() => _localError = null),
                 ),
                 const Gap(AppSpacing.lg),

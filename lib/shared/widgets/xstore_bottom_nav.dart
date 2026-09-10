@@ -143,7 +143,12 @@ class XstoreBottomNav extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               NotificationIconBadge(
-                                count: role == UserRole.consumer && index == 1
+                                // Cart has no bottom-nav tab of its own (it's
+                                // opened from the cart icon in Home's app
+                                // bar) — echo the count on Home, not on a
+                                // tab (Explore) that has nothing to do with
+                                // the cart.
+                                count: role == UserRole.consumer && index == 0
                                     ? cartCount
                                     : 0,
                                 child: Transform.scale(

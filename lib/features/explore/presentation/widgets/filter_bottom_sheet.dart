@@ -10,6 +10,11 @@ import '../explore_state.dart';
 import 'price_range_slider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+// Generous ceiling for marketplace listings (electronics, appliances, etc.)
+// — the previous 500 EGP cap made the slider unusable for anything but the
+// cheapest items.
+const _kMaxPriceFilter = 50000.0;
+
 Future<void> showExploreFilterBottomSheet({
   required BuildContext context,
   required FilterState initial,
@@ -81,7 +86,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
     _conds = List.from(widget.initial.conditions);
     _range = RangeValues(
       widget.initial.minPrice ?? 0,
-      widget.initial.maxPrice ?? 500,
+      widget.initial.maxPrice ?? _kMaxPriceFilter,
     );
     _minRating = widget.initial.minRating;
     _loc = TextEditingController(text: widget.initial.location ?? '');
@@ -90,7 +95,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
       text: (widget.initial.minPrice ?? 0).toStringAsFixed(0),
     );
     _maxPrice = TextEditingController(
-      text: (widget.initial.maxPrice ?? 500).toStringAsFixed(0),
+      text: (widget.initial.maxPrice ?? _kMaxPriceFilter).toStringAsFixed(0),
     );
   }
 
@@ -107,7 +112,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
     if (_minRating != null) n++;
     if (_loc.text.trim().isNotEmpty) n++;
     if (_ship) n++;
-    if (_range.start > 0 || _range.end < 500) n++;
+    if (_range.start > 0 || _range.end < _kMaxPriceFilter) n++;
     return n;
   }
 
@@ -142,20 +147,21 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
+    final viewPadding = MediaQuery.viewPaddingOf(context);
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final size = MediaQuery.sizeOf(context);
     // Prefer the caller-captured inset; fall back if the sheet still has one.
     final topInset = widget.topInset > 0
         ? widget.topInset
-        : media.viewPadding.top;
-    final bottomInset = media.viewPadding.bottom + media.viewInsets.bottom;
-    final maxHeight =
-        media.size.height - topInset - bottomInset - AppSpacing.md;
+        : viewPadding.top;
+    final bottomInset = viewPadding.bottom + viewInsets.bottom;
+    final maxHeight = size.height - topInset - bottomInset - AppSpacing.md;
 
     return Padding(
       padding: EdgeInsets.only(top: topInset, bottom: bottomInset),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: maxHeight.clamp(200.0, media.size.height),
+          maxHeight: maxHeight.clamp(200.0, size.height),
         ),
         child: Material(
           color: context.surfaceColor,
@@ -246,7 +252,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                         const Gap(AppSpacing.lg),
                         PriceRangeSlider(
                           min: 0,
-                          max: 500,
+                          max: _kMaxPriceFilter,
                           values: _range,
                           onChanged: (v) {
                             setState(() {

@@ -63,6 +63,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyYourNumber => 'Verify your number';
 
   @override
+  String get otpEnterCodeSentTo => 'Enter the 6-digit code sent to';
+
+  @override
+  String get otpContactSupport => 'Having trouble? Contact Support';
+
+  @override
   String get codeSentTo => 'Code sent to';
 
   @override
@@ -160,6 +166,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialRoleSubtitle => 'One last step — choose your account type';
 
   @override
+  String socialWelcomeGreeting(String name) {
+    return 'Welcome, $name! 👋';
+  }
+
+  @override
+  String get socialRoleLastStep => 'One last step — how will you use xStore?';
+
+  @override
+  String get socialWelcomeFallbackName => 'there';
+
+  @override
   String get searchHint => 'Search products...';
 
   @override
@@ -194,6 +211,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get easyReturnsBadge => '↩️ Easy Returns';
+
+  @override
+  String get productTrustFastShipping => 'Fast Shipping';
+
+  @override
+  String get productTrustSecurePayment => 'Secure Payment';
+
+  @override
+  String get productTrustEasyReturns => 'Easy Returns';
 
   @override
   String get shopNow => 'Shop Now';
@@ -1253,6 +1279,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersConfirmReceiptTitle => 'Confirm receipt?';
 
   @override
+  String get ordersConfirmReceiptBody => 'Confirm you received this order?';
+
+  @override
   String get ordersConfirm => 'Confirm';
 
   @override
@@ -1544,6 +1573,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartShippingLine => 'Shipping';
 
   @override
+  String cartFreeShippingThresholdNote(String threshold) {
+    return '🚚 Items priced $threshold and up ship free';
+  }
+
+  @override
   String get cartTotalLine => 'Total';
 
   @override
@@ -1718,6 +1752,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please verify your phone number to place an order';
 
   @override
+  String get checkoutPartialOrderTitle => 'Part of your order didn\'t go through';
+
+  @override
+  String checkoutPartialOrderWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 could not be added to your order and stayed in your cart. Try placing the order again to complete it.';
+  }
+
+  @override
+  String get checkoutPartialOrderAck => 'Got it';
+
+  @override
   String get orderPlacedTitle => 'Order Placed! 🎉';
 
   @override
@@ -1886,6 +1937,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteListing => 'Delete';
 
   @override
+  String get myListingsSearchTitle => 'Search listings';
+
+  @override
+  String get myListingsSearchHint => 'Search by title';
+
+  @override
+  String get myListingsSearchClear => 'Clear';
+
+  @override
+  String get myListingsSearchSubmit => 'Search';
+
+  @override
+  String get myListingsDeleteTitle => 'Delete listing?';
+
+  @override
+  String myListingsDeleteBody(String title) {
+    return '"$title" will be removed permanently.';
+  }
+
+  @override
   String get draft => 'Draft';
 
   @override
@@ -1932,6 +2003,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorGeneric => 'Something went wrong';
+
+  @override
+  String get routeErrorMessage =>
+      'We couldn\'t load that page. Please try again.';
+
+  @override
+  String get goHome => 'Go home';
+
+  @override
+  String get serverErrorMessage =>
+      'Something went wrong on our end. Please try again in a moment.';
 
   @override
   String get emptyInbox => 'Nothing here yet';
@@ -2550,6 +2632,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storeNameHint => 'e.g. Ahmed\'s Electronics';
+
+  @override
+  String storeUrlPreview(String slug) {
+    return 'Your store URL: xstore.com/store/$slug';
+  }
 
   @override
   String get storeCategoryRequired => 'Store Category *';

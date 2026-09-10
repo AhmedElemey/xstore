@@ -9,6 +9,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../providers/auth_provider.dart';
@@ -153,7 +154,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     FadeTransition(
                       opacity: _taglineOpacity,
                       child: Text(
-                        'Buy & Sell Anything',
+                        context.l10n.tagline,
                         style: AppTypography.bodyLarge.copyWith(
                           color: AppColors.white.withValues(alpha: 0.92),
                           fontWeight: FontWeight.w500,

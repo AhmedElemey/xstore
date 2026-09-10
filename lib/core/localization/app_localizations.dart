@@ -206,6 +206,18 @@ abstract class AppLocalizations {
   /// **'Verify your number'**
   String get verifyYourNumber;
 
+  /// No description provided for @otpEnterCodeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to'**
+  String get otpEnterCodeSentTo;
+
+  /// No description provided for @otpContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Having trouble? Contact Support'**
+  String get otpContactSupport;
+
   /// No description provided for @codeSentTo.
   ///
   /// In en, this message translates to:
@@ -392,6 +404,24 @@ abstract class AppLocalizations {
   /// **'One last step — choose your account type'**
   String get socialRoleSubtitle;
 
+  /// No description provided for @socialWelcomeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, {name}! 👋'**
+  String socialWelcomeGreeting(String name);
+
+  /// No description provided for @socialRoleLastStep.
+  ///
+  /// In en, this message translates to:
+  /// **'One last step — how will you use xStore?'**
+  String get socialRoleLastStep;
+
+  /// No description provided for @socialWelcomeFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'there'**
+  String get socialWelcomeFallbackName;
+
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
@@ -463,6 +493,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'↩️ Easy Returns'**
   String get easyReturnsBadge;
+
+  /// No description provided for @productTrustFastShipping.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Shipping'**
+  String get productTrustFastShipping;
+
+  /// No description provided for @productTrustSecurePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Payment'**
+  String get productTrustSecurePayment;
+
+  /// No description provided for @productTrustEasyReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy Returns'**
+  String get productTrustEasyReturns;
 
   /// No description provided for @shopNow.
   ///
@@ -2540,6 +2588,12 @@ abstract class AppLocalizations {
   /// **'Confirm receipt?'**
   String get ordersConfirmReceiptTitle;
 
+  /// No description provided for @ordersConfirmReceiptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm you received this order?'**
+  String get ordersConfirmReceiptBody;
+
   /// No description provided for @ordersConfirm.
   ///
   /// In en, this message translates to:
@@ -3122,6 +3176,12 @@ abstract class AppLocalizations {
   /// **'Shipping'**
   String get cartShippingLine;
 
+  /// No description provided for @cartFreeShippingThresholdNote.
+  ///
+  /// In en, this message translates to:
+  /// **'🚚 Items priced {threshold} and up ship free'**
+  String cartFreeShippingThresholdNote(String threshold);
+
   /// No description provided for @cartTotalLine.
   ///
   /// In en, this message translates to:
@@ -3464,6 +3524,24 @@ abstract class AppLocalizations {
   /// **'Please verify your phone number to place an order'**
   String get checkoutErrorPhoneNotVerified;
 
+  /// No description provided for @checkoutPartialOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of your order didn't go through'**
+  String get checkoutPartialOrderTitle;
+
+  /// No description provided for @checkoutPartialOrderWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
+  String checkoutPartialOrderWarning(int count);
+
+  /// No description provided for @checkoutPartialOrderAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get checkoutPartialOrderAck;
+
   /// No description provided for @orderPlacedTitle.
   ///
   /// In en, this message translates to:
@@ -3800,6 +3878,42 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get deleteListing;
 
+  /// No description provided for @myListingsSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search listings'**
+  String get myListingsSearchTitle;
+
+  /// No description provided for @myListingsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by title'**
+  String get myListingsSearchHint;
+
+  /// No description provided for @myListingsSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get myListingsSearchClear;
+
+  /// No description provided for @myListingsSearchSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get myListingsSearchSubmit;
+
+  /// No description provided for @myListingsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete listing?'**
+  String get myListingsDeleteTitle;
+
+  /// No description provided for @myListingsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'"{title}" will be removed permanently.'**
+  String myListingsDeleteBody(String title);
+
   /// No description provided for @draft.
   ///
   /// In en, this message translates to:
@@ -3895,6 +4009,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong'**
   String get errorGeneric;
+
+  /// No description provided for @routeErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn't load that page. Please try again.'**
+  String get routeErrorMessage;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go home'**
+  String get goHome;
+
+  /// No description provided for @serverErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our end. Please try again in a moment.'**
+  String get serverErrorMessage;
 
   /// No description provided for @emptyInbox.
   ///
@@ -4957,6 +5089,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. Ahmed\'s Electronics'**
   String get storeNameHint;
+
+  /// No description provided for @storeUrlPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store URL: xstore.com/store/{slug}'**
+  String storeUrlPreview(String slug);
 
   /// No description provided for @storeCategoryRequired.
   ///

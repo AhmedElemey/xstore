@@ -89,6 +89,7 @@ class OrderCard extends ConsumerWidget {
                                 backgroundImage: order.consumerAvatar.isNotEmpty
                                     ? AppNetworkImage.network(
                                         order.consumerAvatar,
+                                        cacheSize: 120,
                                       )
                                     : null,
                                 child: order.consumerAvatar.isEmpty
@@ -426,7 +427,7 @@ class OrderCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.ordersConfirmReceiptTitle),
-        content: Text(context.l10n.ordersConfirmReceiptTitle),
+        content: Text(context.l10n.ordersConfirmReceiptBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

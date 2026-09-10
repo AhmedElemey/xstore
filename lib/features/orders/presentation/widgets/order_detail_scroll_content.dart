@@ -413,7 +413,10 @@ class _BuyerSection extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: order.consumerAvatar.isNotEmpty
-                      ? AppNetworkImage.network(order.consumerAvatar)
+                      ? AppNetworkImage.network(
+                          order.consumerAvatar,
+                          cacheSize: 96,
+                        )
                       : null,
                   child: order.consumerAvatar.isEmpty
                       ? Text(

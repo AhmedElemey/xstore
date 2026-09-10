@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/egypt_wilayas.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
+import '../../../cities/presentation/providers/city_dependencies.dart';
+import '../../../governments/presentation/providers/government_dependencies.dart';
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/location_cascade_field.dart';
 
 /// Opens the add/edit address sheet. Pass [existing] and [editIndex]
 /// together to edit a saved address in place; omit both to add a new one.
@@ -74,10 +77,14 @@ class _CheckoutAddAddressSheetState
   late final TextEditingController _nameCtrl;
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _streetCtrl;
-  late final TextEditingController _cityCtrl;
   late final TextEditingController _postalCtrl;
 
-  late String _wilaya;
+  // The governorate/city picker works in ids (backed by the same live
+  // /api/governorates + /api/cities reference data used at register and
+  // edit-profile), not free text — this keeps checkout consistent with the
+  // rest of the app instead of a second, disagreeing location system.
+  int? _cityId;
+  int? _governorateId;
   late bool _isDefault;
   late final Listenable _fields;
   var _fieldErrors = <String, String>{};
@@ -88,18 +95,22 @@ class _CheckoutAddAddressSheetState
     _nameCtrl = TextEditingController(text: widget.prefillName);
     _phoneCtrl = TextEditingController(text: widget.prefillPhone);
     _streetCtrl = TextEditingController(text: widget.existing?.street ?? '');
-    _cityCtrl = TextEditingController(text: widget.existing?.city ?? '');
     _postalCtrl = TextEditingController(
       text: widget.existing?.postalCode ?? '',
     );
+    // Location (_cityId/_governorateId) isn't a TextEditingController, so it
+    // isn't part of this Listenable — the picker's onChanged already calls
+    // setState, which rebuilds the ListenableBuilder below along with the
+    // rest of the sheet, so its selection is still reflected immediately.
     _fields = Listenable.merge([
       _nameCtrl,
       _phoneCtrl,
       _streetCtrl,
-      _cityCtrl,
       _postalCtrl,
     ]);
-    _wilaya = widget.existing?.wilaya ?? EgyptWilayas.names.first;
+    // The saved address only carries the resolved names (city/wilaya), not
+    // the ids that produced them — an editor re-picks governorate/city to
+    // change it; until then the field shows the saved names as a hint.
     // The very first saved address defaults to the delivery default so
     // selection logic never has to special-case a single-address list.
     _isDefault = widget.existing?.isDefault ?? widget.noSavedAddressesYet;
@@ -110,7 +121,6 @@ class _CheckoutAddAddressSheetState
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
     _streetCtrl.dispose();
-    _cityCtrl.dispose();
     _postalCtrl.dispose();
     super.dispose();
   }
@@ -133,22 +143,37 @@ class _CheckoutAddAddressSheetState
       (l10n) => l10n.checkoutErrorAddressStreet,
     );
     if (streetErr != null) errors['street'] = streetErr;
-    final cityErr = Validators.nonEmptyLine(
-      l10n,
-      _cityCtrl.text,
-      (l10n) => l10n.checkoutErrorAddressCity,
-    );
-    if (cityErr != null) errors['city'] = cityErr;
+    if (_governorateId == null || _cityId == null) {
+      errors['location'] = l10n.checkoutErrorAddressCity;
+    }
     if (errors.isNotEmpty) {
       setState(() => _fieldErrors = errors);
       return;
     }
+    // OrderAddress only carries resolved names on the wire (matching the
+    // existing entity shape) — resolve them from the same cached reference
+    // lists the picker sheets themselves just read from.
+    final isArabic = ref.read(appIsArabicProvider);
+    final governorateName = ref
+        .read(allGovernmentsProvider)
+        .valueOrNull
+        ?.where((g) => g.id == _governorateId)
+        .firstOrNull
+        ?.name
+        .resolve(isArabic);
+    final cityName = ref
+        .read(allCitiesProvider)
+        .valueOrNull
+        ?.where((c) => c.id == _cityId)
+        .firstOrNull
+        ?.name
+        .resolve(isArabic);
     final address = OrderAddress(
       fullName: _nameCtrl.text.trim(),
       phone: normalizedPhone,
       street: _streetCtrl.text.trim(),
-      city: _cityCtrl.text.trim(),
-      wilaya: _wilaya,
+      city: cityName ?? '',
+      wilaya: governorateName ?? '',
       postalCode: _postalCtrl.text.trim().isEmpty
           ? null
           : _postalCtrl.text.trim(),
@@ -171,12 +196,16 @@ class _CheckoutAddAddressSheetState
     if (!widget.isEditing) return true;
     final e = widget.existing!;
     final postal = _postalCtrl.text.trim();
+    // _cityId/_governorateId always start null on edit (the picker only
+    // shows the saved wilaya/city as a hint, per the comment above) — any
+    // pick counts as a change, and _save() already blocks until both are
+    // set, so this can never be a false positive.
     return _nameCtrl.text.trim() != e.fullName.trim() ||
         AppValidators.normalizeEgyptLocal(_phoneCtrl.text) !=
             AppValidators.normalizeEgyptLocal(e.phone) ||
         _streetCtrl.text.trim() != e.street.trim() ||
-        _cityCtrl.text.trim() != e.city.trim() ||
-        _wilaya != e.wilaya ||
+        _cityId != null ||
+        _governorateId != null ||
         (postal.isEmpty ? null : postal) != e.postalCode ||
         _isDefault != e.isDefault;
   }
@@ -230,28 +259,18 @@ class _CheckoutAddAddressSheetState
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: _cityCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutCity,
-                border: const OutlineInputBorder(),
-                errorText: _fieldErrors['city'],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            DropdownButtonFormField<String>(
-              initialValue: _wilaya,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutWilaya,
-                border: const OutlineInputBorder(),
-              ),
-              items: EgyptWilayas.names
-                  .map(
-                    (w) => DropdownMenuItem(value: w, child: Text(w)),
-                  )
-                  .toList(),
-              onChanged: (v) {
-                if (v != null) setState(() => _wilaya = v);
+            LocationCascadeField(
+              cityId: _cityId,
+              governorateId: _governorateId,
+              hint: widget.existing == null
+                  ? null
+                  : '${widget.existing!.wilaya} - ${widget.existing!.city}',
+              errorText: _fieldErrors['location'],
+              onChanged: (cityId, governorateId) {
+                setState(() {
+                  _cityId = cityId;
+                  _governorateId = governorateId;
+                });
               },
             ),
             const SizedBox(height: AppSpacing.sm),

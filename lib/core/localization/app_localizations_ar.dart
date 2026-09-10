@@ -63,6 +63,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyYourNumber => 'تحقق من رقمك';
 
   @override
+  String get otpEnterCodeSentTo => 'ادخل الكود المكون من 6 أرقام اللي اتبعت على';
+
+  @override
+  String get otpContactSupport => 'بتواجه مشكلة؟ تواصل مع الدعم';
+
+  @override
   String get codeSentTo => 'الكود اتبعت على';
 
   @override
@@ -160,6 +166,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get socialRoleSubtitle => 'خطوة أخيرة — اختار نوع حسابك';
 
   @override
+  String socialWelcomeGreeting(String name) {
+    return 'أهلاً بيك، $name! 👋';
+  }
+
+  @override
+  String get socialRoleLastStep => 'خطوة أخيرة — هتستخدم xStore إزاي؟';
+
+  @override
+  String get socialWelcomeFallbackName => 'يا صاحبي';
+
+  @override
   String get searchHint => 'ابحث عن منتجات...';
 
   @override
@@ -194,6 +211,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get easyReturnsBadge => '↩️ إرجاع سهل';
+
+  @override
+  String get productTrustFastShipping => 'شحن سريع';
+
+  @override
+  String get productTrustSecurePayment => 'دفع آمن';
+
+  @override
+  String get productTrustEasyReturns => 'إرجاع سهل';
 
   @override
   String get shopNow => 'تسوق دلوقتي';
@@ -1255,6 +1281,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersConfirmReceiptTitle => 'تأكيد الاستلام؟';
 
   @override
+  String get ordersConfirmReceiptBody => 'هل تأكد إنك استلمت هذا الطلب؟';
+
+  @override
   String get ordersConfirm => 'تأكيد';
 
   @override
@@ -1546,6 +1575,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartShippingLine => 'الشحن';
 
   @override
+  String cartFreeShippingThresholdNote(String threshold) {
+    return '🚚 المنتجات اللي سعرها $threshold وأكتر شحنها مجاني';
+  }
+
+  @override
   String get cartTotalLine => 'الإجمالي';
 
   @override
@@ -1720,6 +1754,25 @@ class AppLocalizationsAr extends AppLocalizations {
       'من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب';
 
   @override
+  String get checkoutPartialOrderTitle => 'جزء من طلبك ماتمش';
+
+  @override
+  String checkoutPartialOrderWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج',
+      few: '$count منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+    );
+    return '$_temp0 ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.';
+  }
+
+  @override
+  String get checkoutPartialOrderAck => 'تمام';
+
+  @override
   String get orderPlacedTitle => 'تم الطلب! 🎉';
 
   @override
@@ -1888,6 +1941,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteListing => 'حذف';
 
   @override
+  String get myListingsSearchTitle => 'البحث في الإعلانات';
+
+  @override
+  String get myListingsSearchHint => 'ابحث بالعنوان';
+
+  @override
+  String get myListingsSearchClear => 'مسح';
+
+  @override
+  String get myListingsSearchSubmit => 'بحث';
+
+  @override
+  String get myListingsDeleteTitle => 'حذف الإعلان؟';
+
+  @override
+  String myListingsDeleteBody(String title) {
+    return 'سيتم حذف "$title" نهائيًا.';
+  }
+
+  @override
   String get draft => 'مسودة';
 
   @override
@@ -1934,6 +2007,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorGeneric => 'حصل خطأ';
+
+  @override
+  String get routeErrorMessage => 'معرفناش نفتح الصفحة دي. حاول تاني.';
+
+  @override
+  String get goHome => 'ارجع للرئيسية';
+
+  @override
+  String get serverErrorMessage => 'حصلت مشكلة من عندنا. حاول تاني بعد شوية.';
 
   @override
   String get emptyInbox => 'لا يوجد شيء بعد';
@@ -2547,6 +2629,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get storeNameHint => '[AR] e.g. Ahmed\'s Electronics';
+
+  @override
+  String storeUrlPreview(String slug) {
+    return 'رابط متجرك: xstore.com/store/$slug';
+  }
 
   @override
   String get storeCategoryRequired => 'فئة المتجر *';

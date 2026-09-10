@@ -77,7 +77,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * 0.35,
+            height: MediaQuery.sizeOf(context).height * 0.35,
             width: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -124,7 +124,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                     ),
                     const Gap(AppSpacing.sm),
                     Text(
-                      'Enter the 6-digit code sent to',
+                      context.l10n.otpEnterCodeSentTo,
                       style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
                     ),
                     const Gap(AppSpacing.xs),
@@ -206,7 +206,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
                     ),
                     const Spacer(),
                     Text(
-                      'Having trouble? Contact Support',
+                      context.l10n.otpContactSupport,
                       style: AppTypography.labelSmall.copyWith(color: context.textDisabled),
                     ),
                   ],

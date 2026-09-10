@@ -18,6 +18,8 @@
   "sendVerificationCode": "Send Verification Code",
   "verifyAndContinue": "Verify & Continue",
   "verifyYourNumber": "Verify your number",
+  "otpEnterCodeSentTo": "Enter the 6-digit code sent to",
+  "otpContactSupport": "Having trouble? Contact Support",
   "codeSentTo": "Code sent to",
   "phoneOtpSentToAssociatedEmail": "Code sent to the email associated with this number",
   "verifyYourEmail": "Verify your email",
@@ -49,6 +51,9 @@
   "welcomeBack": "Welcome back",
   "chooseYourRole": "How will you use xStore?",
   "socialRoleSubtitle": "One last step — choose your account type",
+  "socialWelcomeGreeting": "Welcome, {name}! 👋",
+  "socialRoleLastStep": "One last step — how will you use xStore?",
+  "socialWelcomeFallbackName": "there",
   "searchHint": "Search products...",
   "hotDeals": "🔥 Hot Deals",
   "newArrivals": "✨ New Arrivals",
@@ -61,6 +66,9 @@
   "freeShippingBadge": "🚚 Free Shipping",
   "securePayBadge": "🔒 Secure Pay",
   "easyReturnsBadge": "↩️ Easy Returns",
+  "productTrustFastShipping": "Fast Shipping",
+  "productTrustSecurePayment": "Secure Payment",
+  "productTrustEasyReturns": "Easy Returns",
   "shopNow": "Shop Now",
   "categoryQueryMens": "mens_fashion",
   "categoryQueryWomens": "womens_fashion",
@@ -435,6 +443,7 @@
   "ordersCancelReasonMistake": "Ordered by mistake",
   "ordersCancelReasonOther": "Other",
   "ordersConfirmReceiptTitle": "Confirm receipt?",
+  "ordersConfirmReceiptBody": "Confirm you received this order?",
   "ordersConfirm": "Confirm",
   "ordersRejectDialogTitle": "Reject order",
   "ordersRejectReasonHint": "Reason for rejection",
@@ -532,6 +541,7 @@
   "cartCouponMinOrder": "Minimum order 5,000 EGP required",
   "cartOrderSummary": "Order Summary",
   "cartShippingLine": "Shipping",
+  "cartFreeShippingThresholdNote": "🚚 Items priced {threshold} and up ship free",
   "cartTotalLine": "Total",
   "cartCashOnDeliveryNote": "💳 Cash on Delivery available",
   "cartSecureCheckout": "🔒 Secure checkout guaranteed",
@@ -589,6 +599,16 @@
   "checkoutPaymentSecure": "Your payment info is encrypted",
   "checkoutErrorGeneric": "Could not place order",
   "checkoutErrorPhoneNotVerified": "Please verify your phone number to place an order",
+  "checkoutPartialOrderTitle": "Part of your order didn't go through",
+  "checkoutPartialOrderWarning": "{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.",
+  "@checkoutPartialOrderWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checkoutPartialOrderAck": "Got it",
   "orderPlacedTitle": "Order Placed! 🎉",
   "orderTrackCta": "Track My Order",
   "orderContinueShopping": "Continue Shopping",
@@ -645,6 +665,12 @@
   "resumeListing": "Resume",
   "listingStats": "Statistics",
   "deleteListing": "Delete",
+  "myListingsSearchTitle": "Search listings",
+  "myListingsSearchHint": "Search by title",
+  "myListingsSearchClear": "Clear",
+  "myListingsSearchSubmit": "Search",
+  "myListingsDeleteTitle": "Delete listing?",
+  "myListingsDeleteBody": "“{title}” will be removed permanently.",
   "draft": "Draft",
   "active": "Active",
   "paused": "Paused",
@@ -661,6 +687,9 @@
   "resubmitSuccess": "Listing resubmitted for review",
   "retry": "Retry",
   "errorGeneric": "Something went wrong",
+  "routeErrorMessage": "We couldn't load that page. Please try again.",
+  "goHome": "Go home",
+  "serverErrorMessage": "Something went wrong on our end. Please try again in a moment.",
   "emptyInbox": "Nothing here yet",
   "incomingOrders": "Incoming Orders",
   "vendorSearchHint": "Search by order ID or buyer name",
@@ -919,6 +948,27 @@
       }
     }
   },
+  "@myListingsDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@socialWelcomeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@storeUrlPreview": {
+    "placeholders": {
+      "slug": {
+        "type": "String"
+      }
+    }
+  },
   "@cartSelectAllCount": {
     "placeholders": {
       "n": {
@@ -1113,6 +1163,7 @@
   "tellBuyersStore": "Tell buyers about your store",
   "storeNameRequired": "Store Name *",
   "storeNameHint": "e.g. Ahmed's Electronics",
+  "storeUrlPreview": "Your store URL: xstore.com/store/{slug}",
   "storeCategoryRequired": "Store Category *",
   "storeSellHint": "What do you mainly sell?",
   "storeDescriptionRequired": "Store Description *",

@@ -158,24 +158,28 @@ class CheckoutReviewSection extends ConsumerWidget {
                 ),
               ),
             ),
-            Text(
-              context.l10n.checkoutTermsAnd,
-              style: AppTypography.bodySmall.copyWith(
-                color: context.textSecondary,
-                height: 1.45,
-              ),
-            ),
-            InkWell(
-              onTap: () => context.push(AppRoutes.terms),
-              child: Text(
-                context.l10n.checkoutReturnPolicy,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w700,
-                  height: 1.45,
-                ),
-              ),
-            ),
+            // TODO(phase-2): No standalone return-policy content exists
+            // (the Terms document doesn't cover returns either) — re-enable
+            // once real return-policy content ships instead of linking
+            // "Return Policy" to the unrelated Terms screen.
+            // Text(
+            //   context.l10n.checkoutTermsAnd,
+            //   style: AppTypography.bodySmall.copyWith(
+            //     color: context.textSecondary,
+            //     height: 1.45,
+            //   ),
+            // ),
+            // InkWell(
+            //   onTap: () => context.push(AppRoutes.terms),
+            //   child: Text(
+            //     context.l10n.checkoutReturnPolicy,
+            //     style: AppTypography.bodySmall.copyWith(
+            //       color: AppColors.accent,
+            //       fontWeight: FontWeight.w700,
+            //       height: 1.45,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ],

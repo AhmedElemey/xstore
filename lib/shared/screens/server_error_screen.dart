@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/constants/app_strings.dart';
 import '../../core/network/server_error_provider.dart';
 import '../../core/router/app_routes.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 import '../widgets/error_state_widget.dart';
 
 /// Full-screen fallback shown whenever any API call fails with an HTTP 5xx
@@ -19,8 +19,8 @@ class ServerErrorScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: ErrorStateWidget(
-          message: AppStrings.serverErrorMessage,
-          retryLabel: AppStrings.goHome,
+          message: context.l10n.serverErrorMessage,
+          retryLabel: context.l10n.goHome,
           onRetry: () {
             ref.read(serverErrorProvider.notifier).clear();
             context.go(AppRoutes.home);

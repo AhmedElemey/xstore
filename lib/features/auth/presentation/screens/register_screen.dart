@@ -586,7 +586,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.terms),
                       child: Text(
                         context.l10n.termsOfService,
                         style: AppTypography.bodyMedium.copyWith(
@@ -602,7 +602,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.privacy),
                       child: Text(
                         context.l10n.privacyPolicy,
                         style: AppTypography.bodyMedium.copyWith(
@@ -738,7 +738,7 @@ class _StepStore extends ConsumerWidget {
         ),
         const Gap(AppSpacing.sm),
         Text(
-          'Your store URL: xstore.com/store/${s.storeSlug}',
+          context.l10n.storeUrlPreview(s.storeSlug),
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,

@@ -71,8 +71,11 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       final user = userCredential.user;
       if (user == null) throw const SocialAuthException('Google sign-in failed');
       if (kDebugMode) {
-        // One debugPrint per field: tokens stay on single logcat lines (<4KB)
-        // so they can be copy-pasted for backend verification testing.
+        // One debugPrint per field: fields stay on single logcat lines
+        // (<4KB) for readability. Tokens are truncated — even a
+        // kDebugMode-only log shouldn't put a full, copy-pasteable bearer
+        // token on a shared device's logcat; the visible prefix is enough
+        // to confirm which sign-in produced it during dev testing.
         final firebaseIdToken = await user.getIdToken();
         debugPrint('── Google sign-in credential ──');
         debugPrint('email: ${user.email}');
@@ -80,8 +83,8 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         debugPrint('photoUrl: ${user.photoURL}');
         debugPrint('firebaseUid: ${user.uid}');
         debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
-        debugPrint('google idToken (backend verifies this): $googleIdToken');
-        debugPrint('firebase idToken: $firebaseIdToken');
+        debugPrint('google idToken: ${_truncatedForLog(googleIdToken)}');
+        debugPrint('firebase idToken: ${_truncatedForLog(firebaseIdToken)}');
       }
       return SocialAuthResult(
         provider: SocialProvider.google,
@@ -244,4 +247,14 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         return e.message ?? e.code;
     }
   }
+}
+
+/// Truncates a token to a short, unusable-as-credential prefix for
+/// kDebugMode logcat output — just enough to eyeball which sign-in produced
+/// it, never enough to paste elsewhere as a live bearer token.
+String _truncatedForLog(String? token) {
+  if (token == null || token.isEmpty) return '(none)';
+  const visible = 12;
+  if (token.length <= visible) return token;
+  return '${token.substring(0, visible)}…(${token.length} chars)';
 }
