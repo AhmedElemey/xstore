@@ -372,10 +372,14 @@ class AuthRepositoryImpl implements AuthRepository {
     // (expired token, offline, unconfigured Facebook SDK throwing).
     try {
       await _remote.logout();
-    } catch (_) {}
+    } catch (e) {
+      if (kDebugMode) debugPrint('Auth: remote logout failed: $e');
+    }
     try {
       await _social.signOutSocial();
-    } catch (_) {}
+    } catch (e) {
+      if (kDebugMode) debugPrint('Auth: social sign-out failed: $e');
+    }
     try {
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: PrefsKeys.authRefreshToken);

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
@@ -510,28 +511,56 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     }
     final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
     final createdOrders = <OrderModel>[];
-    for (final item in params.items) {
-      final created = await _orders.createOrder(
-        listingId: item.listingId,
-        quantity: item.quantity,
-        latitude: AppLocationCache.latitude,
-        longitude: AppLocationCache.longitude,
-        fallbackItem: OrderItemModel(
-          id: 'oi_${item.listingId}',
+    try {
+      for (final item in params.items) {
+        final created = await _orders.createOrder(
           listingId: item.listingId,
-          listingName: item.listingName,
-          listingImage: item.listingImage,
-          category: item.category,
-          condition: item.condition,
-          price: item.price,
           quantity: item.quantity,
-          total: item.price * item.quantity,
-        ),
-        fallbackAddress: fallbackAddress,
-        fallbackPayment: params.paymentMethod,
-        notes: params.deliveryNote,
-      );
-      createdOrders.add(created);
+          latitude: AppLocationCache.latitude,
+          longitude: AppLocationCache.longitude,
+          fallbackItem: OrderItemModel(
+            id: 'oi_${item.listingId}',
+            listingId: item.listingId,
+            listingName: item.listingName,
+            listingImage: item.listingImage,
+            category: item.category,
+            condition: item.condition,
+            price: item.price,
+            quantity: item.quantity,
+            total: item.price * item.quantity,
+          ),
+          fallbackAddress: fallbackAddress,
+          fallbackPayment: params.paymentMethod,
+          notes: params.deliveryNote,
+        );
+        createdOrders.add(created);
+      }
+    } catch (e) {
+      // No atomic multi-item checkout on the backend (see doc above), so a
+      // mid-loop failure would otherwise leave earlier cart lines as real,
+      // unintended orders while the cart still shows them as un-purchased —
+      // risking a duplicate order if the shopper retries. Best-effort cancel
+      // whatever already went through before surfacing the failure, and
+      // leave the cart untouched.
+      if (kDebugMode) debugPrint('Checkout: order creation failed: $e');
+      for (final order in createdOrders) {
+        try {
+          await _orders.cancelOrder(
+            orderId: order.id,
+            reason: 'Checkout failed on a later item — auto-cancelled',
+            isVendorSession: false,
+          );
+        } catch (cancelError) {
+          // Best-effort: without a backend transaction there's nothing more
+          // a client-side compensation can do if the cancel call itself fails.
+          if (kDebugMode) {
+            debugPrint(
+              'Checkout: compensating cancel failed for ${order.id}: $cancelError',
+            );
+          }
+        }
+      }
+      rethrow;
     }
     // Combine the per-listing orders into one view for the confirmation
     // screen: real id/status/createdAt from the first created order, full

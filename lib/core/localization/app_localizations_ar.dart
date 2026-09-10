@@ -3407,4 +3407,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'مرتبط بطلب';
+
+  @override
+  String get myListingsSearchTitle => 'بحث في الإعلانات';
+
+  @override
+  String get myListingsSearchHint => 'ابحث بالعنوان';
+
+  @override
+  String get myListingsSearchClear => 'مسح';
+
+  @override
+  String get myListingsSearchAction => 'بحث';
+
+  @override
+  String get myListingsDeleteTitle => 'حذف الإعلان؟';
+
+  @override
+  String myListingsDeleteMessage(String title) {
+    return 'سيتم حذف “$title” نهائياً.';
+  }
+
+  @override
+  String get myListingsDeleteConfirm => 'حذف';
 }

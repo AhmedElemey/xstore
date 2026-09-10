@@ -1489,5 +1489,19 @@
   "requestCustomDeliveryAction": "Request custom delivery",
   "packageRejectReasonHint": "Reason (optional)",
   "packageRequestAgainAction": "Request again",
-  "packageOrderLinkedLabel": "Linked to an order"
+  "packageOrderLinkedLabel": "Linked to an order",
+  "myListingsSearchTitle": "Search listings",
+  "myListingsSearchHint": "Search by title",
+  "myListingsSearchClear": "Clear",
+  "myListingsSearchAction": "Search",
+  "myListingsDeleteTitle": "Delete listing?",
+  "myListingsDeleteMessage": "“{title}” will be removed permanently.",
+  "@myListingsDeleteMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "myListingsDeleteConfirm": "Delete"
 }

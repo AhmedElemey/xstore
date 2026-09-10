@@ -3421,4 +3421,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'Linked to an order';
+
+  @override
+  String get myListingsSearchTitle => 'Search listings';
+
+  @override
+  String get myListingsSearchHint => 'Search by title';
+
+  @override
+  String get myListingsSearchClear => 'Clear';
+
+  @override
+  String get myListingsSearchAction => 'Search';
+
+  @override
+  String get myListingsDeleteTitle => 'Delete listing?';
+
+  @override
+  String myListingsDeleteMessage(String title) {
+    return '“$title” will be removed permanently.';
+  }
+
+  @override
+  String get myListingsDeleteConfirm => 'Delete';
 }

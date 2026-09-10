@@ -1489,5 +1489,19 @@
   "requestCustomDeliveryAction": "طلب توصيل مخصص",
   "packageRejectReasonHint": "السبب (اختياري)",
   "packageRequestAgainAction": "إعادة الطلب",
-  "packageOrderLinkedLabel": "مرتبط بطلب"
+  "packageOrderLinkedLabel": "مرتبط بطلب",
+  "myListingsSearchTitle": "بحث في الإعلانات",
+  "myListingsSearchHint": "ابحث بالعنوان",
+  "myListingsSearchClear": "مسح",
+  "myListingsSearchAction": "بحث",
+  "myListingsDeleteTitle": "حذف الإعلان؟",
+  "myListingsDeleteMessage": "سيتم حذف “{title}” نهائياً.",
+  "@myListingsDeleteMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "myListingsDeleteConfirm": "حذف"
 }
