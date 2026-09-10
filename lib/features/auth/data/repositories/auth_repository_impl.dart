@@ -44,14 +44,22 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity?>> restoreSession() async {
     try {
-      final jsonStr = await _secureStorage.read(key: _userKey);
+      // A hung native secure-storage read (stale AndroidKeyStore entry —
+      // the platform channel call never returns, never throws) must not
+      // block app startup forever. `.timeout` turns that into a normal,
+      // caught exception instead of an indefinite splash-screen hang.
+      final jsonStr = await _secureStorage
+          .read(key: _userKey)
+          .timeout(const Duration(seconds: 5));
       if (jsonStr == null || jsonStr.isEmpty) {
         return const Right(null);
       }
       final map = jsonDecode(jsonStr) as Map<String, dynamic>;
       var model = UserModel.fromJson(map);
       if (model.id.isEmpty) {
-        final token = await _secureStorage.read(key: _tokenKey);
+        final token = await _secureStorage
+            .read(key: _tokenKey)
+            .timeout(const Duration(seconds: 5));
         final id = userIdFromJwt(token);
         if (id != null) {
           model = model.copyWith(id: id);
@@ -480,7 +488,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> persistSessionUser(UserEntity user) async {
     try {
-      final token = await _secureStorage.read(key: _tokenKey);
+      // Same hung/corrupted native secure-storage guard as dio_provider.dart's
+      // onRequest — a stuck AndroidKeyStore read here must not hang session
+      // persistence forever; degrade to persisting without a token instead.
+      String? token;
+      try {
+        token = await _secureStorage
+            .read(key: _tokenKey)
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {
+        token = null;
+      }
       final model = UserModel(
         id: user.id,
         name: user.name,

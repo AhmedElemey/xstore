@@ -70,7 +70,17 @@ class TokenRefreshInterceptor extends Interceptor {
   }
 
   Future<String?> _performRefresh() async {
-    final refreshToken = await _secureStorage.read(key: PrefsKeys.authRefreshToken);
+    String? refreshToken;
+    try {
+      // Same hung-native-read guard as dio_provider.dart's onRequest — a
+      // stuck secure-storage read here must not block every retried
+      // request forever.
+      refreshToken = await _secureStorage
+          .read(key: PrefsKeys.authRefreshToken)
+          .timeout(const Duration(seconds: 5));
+    } catch (_) {
+      return null;
+    }
     if (refreshToken == null || refreshToken.isEmpty) return null;
 
     try {
