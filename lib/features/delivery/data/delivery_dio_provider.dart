@@ -28,8 +28,17 @@ Dio deliveryDio(DeliveryDioRef ref) {
   client.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token =
-            await secureStorage.read(key: PrefsKeys.deliveryAuthToken);
+        // Same hung/corrupted native secure-storage guard as
+        // dio_provider.dart's onRequest — must not block every outbound
+        // request forever on a stuck AndroidKeyStore read.
+        String? token;
+        try {
+          token = await secureStorage
+              .read(key: PrefsKeys.deliveryAuthToken)
+              .timeout(const Duration(seconds: 5));
+        } catch (_) {
+          token = null;
+        }
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -54,8 +63,14 @@ Dio deliveryDio(DeliveryDioRef ref) {
           name: user.name,
           role: user.role,
         );
-        final token =
-            await secureStorage.read(key: PrefsKeys.deliveryAuthToken);
+        String? token;
+        try {
+          token = await secureStorage
+              .read(key: PrefsKeys.deliveryAuthToken)
+              .timeout(const Duration(seconds: 5));
+        } catch (_) {
+          token = null;
+        }
         if (token == null || token.isEmpty) {
           handler.next(error);
           return;
