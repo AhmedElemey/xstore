@@ -46,6 +46,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       if (prev?.valueOrNull?.id == next.valueOrNull?.id) return;
       Future.microtask(() {
         OrdersRemoteDataSourceImpl.clearSessionCache();
+        _fetchEpoch++;
         state = const OrdersState();
       });
     });
@@ -138,6 +139,7 @@ class OrdersNotifier extends _$OrdersNotifier {
 
   Future<void> loadMore() async {
     if (!state.hasMore || state.isLoadingMore || _user == null) return;
+    final epoch = _fetchEpoch;
     state = state.copyWith(isLoadingMore: true, error: null);
     final next = state.page + 1;
     final result = _isVendor
@@ -152,6 +154,7 @@ class OrdersNotifier extends _$OrdersNotifier {
               pageSize: _pageSize,
             );
 
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (f) => state = state.copyWith(
         isLoadingMore: false,
@@ -284,11 +287,13 @@ class OrdersNotifier extends _$OrdersNotifier {
         .toList();
     state = state.copyWith(orders: updated);
     _recomputeDerived();
+    final epoch = _fetchEpoch;
     final result = await ref.read(cancelOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
           isVendorSession: _isVendor,
         );
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot);
@@ -330,9 +335,11 @@ class OrdersNotifier extends _$OrdersNotifier {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.confirmed,
         confirmedAt: DateTime.now(), deliveryMethod: method,);
+    final epoch = _fetchEpoch;
     final result = await ref
         .read(confirmOrderUseCaseProvider)
         .call(orderId: orderId, method: method, vendorId: _vendorId);
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -355,11 +362,13 @@ class OrdersNotifier extends _$OrdersNotifier {
     _optimisticStatus(orderId, OrderStatus.cancelled,
         cancelReason: reason,
         cancelledAt: DateTime.now(),);
+    final epoch = _fetchEpoch;
     final result = await ref.read(rejectOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
           vendorId: _vendorId,
         );
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -375,9 +384,11 @@ class OrdersNotifier extends _$OrdersNotifier {
   Future<void> markProcessing(String orderId) async {
     final snapshot = state.orders;
     _optimisticStatus(orderId, OrderStatus.processing);
+    final epoch = _fetchEpoch;
     final result = await ref
         .read(markProcessingUseCaseProvider)
         .call(orderId, vendorId: _vendorId);
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -413,11 +424,13 @@ class OrdersNotifier extends _$OrdersNotifier {
           .toList(),
     );
     _recomputeDerived();
+    final epoch = _fetchEpoch;
     final result = await ref.read(markShippedUseCaseProvider).call(
           orderId: orderId,
           shippingInfo: info,
           vendorId: _vendorId,
         );
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -447,8 +460,10 @@ class OrdersNotifier extends _$OrdersNotifier {
           .toList(),
     );
     _recomputeDerived();
+    final epoch = _fetchEpoch;
     final result =
         await ref.read(markDeliveredUseCaseProvider).call(orderId);
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
         state = state.copyWith(orders: snapshot, error: failure.toString());
@@ -501,10 +516,12 @@ class OrdersNotifier extends _$OrdersNotifier {
     }
     _recomputeDerived();
     if (_isVendor) {
+      final statsEpoch = _fetchEpoch;
       ref
           .read(getVendorOrderStatsUseCaseProvider)
           .call(_vendorId!)
           .then((r) => r.fold((_) => null, (s) {
+                if (statsEpoch != _fetchEpoch) return;
                 state = state.copyWith(stats: s);
               }),);
     }
