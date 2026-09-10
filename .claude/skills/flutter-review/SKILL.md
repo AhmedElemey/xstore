@@ -1462,3 +1462,18 @@ Rules for the log:
 - **Rule:** Disable the sheet's Verify (`onPressed: null`) until `normalize(current) != normalize(initial)` AND `validate(current) == null` (reuse `Validators.registerEmail` / `Validators.egyptPhone` — do not copy the regex into the widget). Rebuild only the button via `ListenableBuilder` on the field controller — do not add a second listener. Reverting to the initial value, or typing an invalid address/number, disables it again.
 - **Where it applies:** `EditProfileContactValueSheet` in `edit_profile_screen.dart` (email and phone); `test/features/profile/edit_profile_contact_otp_test.dart`.
 
+### 2026-09-10 — Checkout address Save: valid phone always; dirty only when editing
+- **What happened:** Checkout add/edit address Save was always enabled. Requiring a change from the initial value (the contact-sheet rule) would block the first saved address, which prefills the signed-in user's already-valid phone.
+- **Rule:** Dim Save until `Validators.egyptPhone` passes. Require a dirty form only when editing. New/add (including profile prefill) enables as soon as the phone is valid — do not force the user to mutate a prefilled valid number. Rebuild the button from `Listenable.merge` of the field controllers, not a second listener per field.
+- **Where it applies:** `checkout_add_address_sheet.dart`; `test/checkout_add_address_sheet_test.dart`.
+
+### 2026-09-10 — Register Info Continue stays dimmed until email and phone are valid
+- **What happened:** Register step 2 Continue was enabled with empty/invalid email and phone; `nextStep` only showed errors after the tap. The email checkmark also copied the email regex inline instead of using `Validators.registerEmail`.
+- **Rule:** Dim Continue on the Info step until `Validators.registerEmail` and `Validators.registerPhoneEgypt` both pass. Empty forms start dimmed (no dirty check — fields are blank). Reuse those validators for any email checkmark on the same step; do not duplicate the regex. Other steps keep their existing enable rules. Vendor WhatsApp is optional: empty is allowed, a partial/invalid number dims Create My Store.
+- **Where it applies:** `register_screen.dart` `_primaryEnabled` / `_StepPersonal` / `_StepStore`; `test/register_screen_live_flow_test.dart`.
+
+### 2026-09-10 — Dim primary actions until email/phone/OTP validators pass
+- **What happened:** After contact-change and register Info, the same always-enabled submit pattern was still on login, forgot-password, courier login, send-package, and the email/phone OTP sheets.
+- **Rule:** Dim the primary button until the relevant `Validators.registerEmail` / `egyptPhone` / `loginPassword` check passes (empty starts dimmed). OTP verify buttons require 6 digits, matching profile/login OTP. Prefills that are already valid (send-package sender phone) do not need a dirty check. Optional WhatsApp: empty OK, invalid dims. Password screens use `registerPassword` + `confirmPasswordMatches` (register security also requires terms; change-password also requires `loginPassword` on the current field). Create `Listenable.merge` once in `initState`, not in `build`.
+- **Where it applies:** `login_screen.dart`, `forgot_password_screen.dart`, `courier_login_screen.dart`, `send_package_screen.dart`, `email_verification_sheet.dart`, `phone_verification_sheet.dart`, `register_screen.dart` step 3, `reset_password_screen.dart`, `change_password_screen.dart`.
+

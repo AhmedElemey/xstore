@@ -32,6 +32,13 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   String? _currentError;
   String? _nextError;
   String? _confirmError;
+  late final Listenable _fields;
+
+  @override
+  void initState() {
+    super.initState();
+    _fields = Listenable.merge([_current, _next, _confirm]);
+  }
 
   @override
   void dispose() {
@@ -77,6 +84,14 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         context.pop();
       },
     );
+  }
+
+  bool get _canSubmit {
+    final l10n = context.l10n;
+    return Validators.loginPassword(l10n, _current.text) == null &&
+        Validators.registerPassword(l10n, _next.text) == null &&
+        Validators.confirmPasswordMatches(l10n, _next.text, _confirm.text) ==
+            null;
   }
 
   @override
@@ -162,10 +177,13 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 },
               ),
               const Gap(AppSpacing.x2l),
-              XstoreButton(
-                label: context.l10n.menuChangePassword,
-                isLoading: _isLoading,
-                onPressed: _isLoading ? null : _submit,
+              ListenableBuilder(
+                listenable: _fields,
+                builder: (context, _) => XstoreButton(
+                  label: context.l10n.menuChangePassword,
+                  isLoading: _isLoading,
+                  onPressed: _isLoading || !_canSubmit ? null : _submit,
+                ),
               ),
             ],
           ),

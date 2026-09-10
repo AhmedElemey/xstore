@@ -345,7 +345,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         XstoreButton(
                           label: context.l10n.login,
                           isLoading: login.isLoading,
-                          onPressed: login.isLoading
+                          onPressed: login.isLoading ||
+                                  phoneFormatError != null ||
+                                  passwordFormatError != null
                               ? null
                               : () async {
                                   if (_formKey.currentState?.validate() ??

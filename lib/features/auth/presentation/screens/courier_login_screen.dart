@@ -110,6 +110,14 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
     await _finishLogin(password: 'otp-$kCourierDemoOtp');
   }
 
+  bool get _phoneValid =>
+      Validators.egyptPhone(context.l10n, _phone.text) == null;
+
+  bool get _passwordValid =>
+      Validators.loginPassword(context.l10n, _password.text) == null;
+
+  bool get _otpComplete => _otp.text.trim().length == 6;
+
   @override
   Widget build(BuildContext context) {
     final login = ref.watch(loginNotifierProvider);
@@ -179,7 +187,9 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                 XstoreButton(
                   label: context.l10n.login,
                   isLoading: login.isLoading,
-                  onPressed: login.isLoading ? null : _submitPassword,
+                  onPressed: login.isLoading || !_phoneValid || !_passwordValid
+                      ? null
+                      : _submitPassword,
                 ),
               ] else ...[
                 if (_otpSent) ...[
@@ -198,7 +208,9 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                   XstoreButton(
                     label: context.l10n.courierVerifyAndLogin,
                     isLoading: login.isLoading,
-                    onPressed: login.isLoading ? null : _verifyOtp,
+                    onPressed: login.isLoading || !_otpComplete
+                        ? null
+                        : _verifyOtp,
                   ),
                   const Gap(AppSpacing.sm),
                   Center(
@@ -211,7 +223,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                   XstoreButton(
                     label: context.l10n.courierSendCode,
                     isLoading: false,
-                    onPressed: login.isLoading ? null : _sendOtp,
+                    onPressed: login.isLoading || !_phoneValid ? null : _sendOtp,
                   ),
               ],
               if (error != null) ...[

@@ -30,42 +30,58 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  Future<void> _pumpSection(
+    WidgetTester tester, {
+    String phoneNumber = '01012345678',
+  }) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith(
+            () => _FakeAuth(
+              UserEntity(
+                id: 'consumer_1',
+                name: 'Jane Doe',
+                email: 'buyer@test.com',
+                phoneNumber: phoneNumber,
+              ),
+            ),
+          ),
+          cartProvider.overrideWith(() => _InertCart()),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: CheckoutAddressSection()),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+  }
+
+  Future<void> _openAddSheet(WidgetTester tester) async {
+    await tester.tap(find.text('+ Add New Address'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  FilledButton _saveButton(WidgetTester tester) {
+    return tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Save Address'),
+    );
+  }
+
   testWidgets(
     'saving a new address does not use disposed controllers during sheet exit',
     (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authProvider.overrideWith(
-              () => _FakeAuth(
-                const UserEntity(
-                  id: 'consumer_1',
-                  name: 'Jane Doe',
-                  email: 'buyer@test.com',
-                  phoneNumber: '01012345678',
-                ),
-              ),
-            ),
-            cartProvider.overrideWith(() => _InertCart()),
-          ],
-          child: const MaterialApp(
-            localizationsDelegates: [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(body: CheckoutAddressSection()),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump();
-
-      await tester.tap(find.text('+ Add New Address'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await _pumpSection(tester);
+      await _openAddSheet(tester);
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Street'),
@@ -88,6 +104,71 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(tester.takeException(), isNull);
       expect(find.textContaining('Jane Doe'), findsWidgets);
+    },
+  );
+
+  testWidgets(
+    'add-address Save stays dimmed until the phone matches Egypt regex',
+    (tester) async {
+      await _pumpSection(tester, phoneNumber: '');
+      await _openAddSheet(tester);
+
+      expect(_saveButton(tester).onPressed, isNull);
+
+      await tester.enterText(find.byType(TextFormField), '010');
+      await tester.pump();
+      expect(_saveButton(tester).onPressed, isNull);
+
+      await tester.enterText(find.byType(TextFormField), '01712345678');
+      await tester.pump();
+      expect(_saveButton(tester).onPressed, isNull);
+
+      await tester.enterText(find.byType(TextFormField), '01112345678');
+      await tester.pump();
+      expect(_saveButton(tester).onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'edit-address Save stays dimmed until a field changes and phone stays valid',
+    (tester) async {
+      await _pumpSection(tester);
+      await _openAddSheet(tester);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Street'),
+        '1 Nile St',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'City'),
+        'Maadi',
+      );
+      final save = find.text('Save Address');
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(_saveButton(tester).onPressed, isNull);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Street'),
+        '2 Nile St',
+      );
+      await tester.pump();
+      expect(_saveButton(tester).onPressed, isNotNull);
+
+      await tester.enterText(find.byType(TextFormField), '010');
+      await tester.pump();
+      expect(_saveButton(tester).onPressed, isNull);
+
+      await tester.enterText(find.byType(TextFormField), '01212345678');
+      await tester.pump();
+      expect(_saveButton(tester).onPressed, isNotNull);
     },
   );
 }

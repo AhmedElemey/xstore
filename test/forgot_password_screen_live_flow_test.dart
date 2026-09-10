@@ -135,6 +135,7 @@ List<Override> _overrides(Dio dio) => [
 
 Future<void> _submitEmail(WidgetTester tester) async {
   await tester.enterText(find.byType(TextField), 'jane@test.com');
+  await tester.pump();
   await tester.tap(find.text('Send Reset Code'));
   await tester.pumpAndSettle();
 }

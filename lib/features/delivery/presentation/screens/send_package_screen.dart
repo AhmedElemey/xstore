@@ -70,6 +70,7 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
   // validator, so phone validation is applied on submit.
   String? _senderPhoneError;
   String? _recipientPhoneError;
+  late final Listenable _fields;
 
   @override
   void initState() {
@@ -100,6 +101,17 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     }
     final note = widget.args?.initialNote;
     if (note != null) _noteCtrl.text = note;
+    _fields = Listenable.merge([
+      _senderNameCtrl,
+      _senderPhoneCtrl,
+      _pickupStreetCtrl,
+      _pickupCityCtrl,
+      _recipientNameCtrl,
+      _recipientPhoneCtrl,
+      _dropoffStreetCtrl,
+      _dropoffCityCtrl,
+      _noteCtrl,
+    ]);
   }
 
   @override
@@ -166,6 +178,28 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
       (value == null || value.trim().isEmpty)
           ? context.l10n.sendPackageFieldRequired
           : null;
+
+  bool get _canSubmit {
+    final l10n = context.l10n;
+    if (Validators.egyptPhone(l10n, _senderPhoneCtrl.text) != null) {
+      return false;
+    }
+    if (Validators.egyptPhone(l10n, _recipientPhoneCtrl.text) != null) {
+      return false;
+    }
+    for (final c in [
+      _senderNameCtrl,
+      _pickupStreetCtrl,
+      _pickupCityCtrl,
+      _recipientNameCtrl,
+      _dropoffStreetCtrl,
+      _dropoffCityCtrl,
+      _noteCtrl,
+    ]) {
+      if (c.text.trim().isEmpty) return false;
+    }
+    return true;
+  }
 
   InputDecoration _decoration(String label) => InputDecoration(
         labelText: label,
@@ -279,10 +313,13 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
                   validator: _requiredLine,
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                XstoreButton(
-                  label: context.l10n.sendPackageSubmit,
-                  isLoading: isSubmitting,
-                  onPressed: isSubmitting ? null : _submit,
+                ListenableBuilder(
+                  listenable: _fields,
+                  builder: (context, _) => XstoreButton(
+                    label: context.l10n.sendPackageSubmit,
+                    isLoading: isSubmitting,
+                    onPressed: isSubmitting || !_canSubmit ? null : _submit,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
               ],

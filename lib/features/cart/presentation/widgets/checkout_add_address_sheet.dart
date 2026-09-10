@@ -79,6 +79,7 @@ class _CheckoutAddAddressSheetState
 
   late String _wilaya;
   late bool _isDefault;
+  late final Listenable _fields;
   var _fieldErrors = <String, String>{};
 
   @override
@@ -91,6 +92,13 @@ class _CheckoutAddAddressSheetState
     _postalCtrl = TextEditingController(
       text: widget.existing?.postalCode ?? '',
     );
+    _fields = Listenable.merge([
+      _nameCtrl,
+      _phoneCtrl,
+      _streetCtrl,
+      _cityCtrl,
+      _postalCtrl,
+    ]);
     _wilaya = widget.existing?.wilaya ?? EgyptWilayas.names.first;
     // The very first saved address defaults to the delivery default so
     // selection logic never has to special-case a single-address list.
@@ -155,6 +163,25 @@ class _CheckoutAddAddressSheetState
     }
     Navigator.pop(context);
   }
+
+  bool get _phoneValid =>
+      Validators.egyptPhone(context.l10n, _phoneCtrl.text) == null;
+
+  bool get _hasChanged {
+    if (!widget.isEditing) return true;
+    final e = widget.existing!;
+    final postal = _postalCtrl.text.trim();
+    return _nameCtrl.text.trim() != e.fullName.trim() ||
+        AppValidators.normalizeEgyptLocal(_phoneCtrl.text) !=
+            AppValidators.normalizeEgyptLocal(e.phone) ||
+        _streetCtrl.text.trim() != e.street.trim() ||
+        _cityCtrl.text.trim() != e.city.trim() ||
+        _wilaya != e.wilaya ||
+        (postal.isEmpty ? null : postal) != e.postalCode ||
+        _isDefault != e.isDefault;
+  }
+
+  bool get _canSave => _phoneValid && _hasChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -248,9 +275,12 @@ class _CheckoutAddAddressSheetState
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            FilledButton(
-              onPressed: _save,
-              child: Text(l10n.checkoutSaveAddress),
+            ListenableBuilder(
+              listenable: _fields,
+              builder: (context, _) => FilledButton(
+                onPressed: _canSave ? _save : null,
+                child: Text(l10n.checkoutSaveAddress),
+              ),
             ),
           ],
         ),

@@ -13,6 +13,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
@@ -108,6 +109,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } else {
       _confirmExit();
     }
+  }
+
+  bool _primaryEnabled(RegisterState s) {
+    if (s.isLoading) return false;
+    if (s.currentStep == 1 && s.selectedRole == null) return false;
+    final l10n = context.l10n;
+    if (s.currentStep == 2) {
+      if (Validators.registerEmail(l10n, s.email) != null) return false;
+      if (Validators.registerPhoneEgypt(l10n, rawInput: s.phoneNumber) !=
+          null) {
+        return false;
+      }
+    }
+    if (s.currentStep == 3) {
+      if (Validators.registerPassword(l10n, s.password) != null) return false;
+      if (Validators.confirmPasswordMatches(
+            l10n,
+            s.password,
+            s.confirmPassword,
+          ) !=
+          null) {
+        return false;
+      }
+      if (!s.agreedToTerms) return false;
+    }
+    if (s.currentStep == 4) {
+      final wa = s.whatsappNumber.trim();
+      if (wa.isNotEmpty &&
+          Validators.registerPhoneEgypt(l10n, rawInput: wa) != null) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<void> _onPrimary(RegisterState s, RegisterNotifier n) async {
@@ -232,10 +266,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ? context.l10n.createMyStore
                       : context.l10n.continueLabel,
                   isLoading: s.isLoading,
-                  onPressed: s.isLoading ||
-                          (s.currentStep == 1 && s.selectedRole == null)
-                      ? null
-                      : () => _onPrimary(s, n),
+                  onPressed: _primaryEnabled(s) ? () => _onPrimary(s, n) : null,
                 ),
               ),
             ],
@@ -406,7 +437,7 @@ class _StepPersonal extends StatelessWidget {
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: email,
           builder: (context, val, _) {
-            final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val.text.trim());
+            final ok = Validators.registerEmail(context.l10n, val.text) == null;
             return AuthTextField(
               label: context.l10n.emailAddressRequired,
               hint: context.l10n.enterEmailHint,
