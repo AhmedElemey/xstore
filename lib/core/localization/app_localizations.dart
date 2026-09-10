@@ -3104,6 +3104,12 @@ abstract class AppLocalizations {
   /// **'Shipping'**
   String get cartShippingLine;
 
+  /// No description provided for @cartFreeShippingThresholdNote.
+  ///
+  /// In en, this message translates to:
+  /// **'🚚 Items priced {threshold} and up ship free'**
+  String cartFreeShippingThresholdNote(String threshold);
+
   /// No description provided for @cartTotalLine.
   ///
   /// In en, this message translates to:
@@ -3445,6 +3451,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please verify your phone number to place an order'**
   String get checkoutErrorPhoneNotVerified;
+
+  /// No description provided for @checkoutPartialOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of your order didn't go through'**
+  String get checkoutPartialOrderTitle;
+
+  /// No description provided for @checkoutPartialOrderWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
+  String checkoutPartialOrderWarning(int count);
+
+  /// No description provided for @checkoutPartialOrderAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get checkoutPartialOrderAck;
 
   /// No description provided for @orderPlacedTitle.
   ///

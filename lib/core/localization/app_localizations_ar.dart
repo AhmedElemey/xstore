@@ -1536,6 +1536,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartShippingLine => 'الشحن';
 
   @override
+  String cartFreeShippingThresholdNote(String threshold) {
+    return '🚚 المنتجات اللي سعرها $threshold وأكتر شحنها مجاني';
+  }
+
+  @override
   String get cartTotalLine => 'الإجمالي';
 
   @override
@@ -1708,6 +1713,25 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get checkoutErrorPhoneNotVerified =>
       'من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب';
+
+  @override
+  String get checkoutPartialOrderTitle => 'جزء من طلبك ماتمش';
+
+  @override
+  String checkoutPartialOrderWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج',
+      few: '$count منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+    );
+    return '$_temp0 ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.';
+  }
+
+  @override
+  String get checkoutPartialOrderAck => 'تمام';
 
   @override
   String get orderPlacedTitle => 'تم الطلب! 🎉';

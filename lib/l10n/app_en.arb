@@ -529,6 +529,7 @@
   "cartCouponMinOrder": "Minimum order 5,000 EGP required",
   "cartOrderSummary": "Order Summary",
   "cartShippingLine": "Shipping",
+  "cartFreeShippingThresholdNote": "🚚 Items priced {threshold} and up ship free",
   "cartTotalLine": "Total",
   "cartCashOnDeliveryNote": "💳 Cash on Delivery available",
   "cartSecureCheckout": "🔒 Secure checkout guaranteed",
@@ -586,6 +587,16 @@
   "checkoutPaymentSecure": "Your payment info is encrypted",
   "checkoutErrorGeneric": "Could not place order",
   "checkoutErrorPhoneNotVerified": "Please verify your phone number to place an order",
+  "checkoutPartialOrderTitle": "Part of your order didn't go through",
+  "checkoutPartialOrderWarning": "{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.",
+  "@checkoutPartialOrderWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checkoutPartialOrderAck": "Got it",
   "orderPlacedTitle": "Order Placed! 🎉",
   "orderTrackCta": "Track My Order",
   "orderContinueShopping": "Continue Shopping",

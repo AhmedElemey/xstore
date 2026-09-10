@@ -529,6 +529,7 @@
   "cartCouponMinOrder": "الحد الأدنى للطلب 5,000 ج.م",
   "cartOrderSummary": "ملخص الطلب",
   "cartShippingLine": "الشحن",
+  "cartFreeShippingThresholdNote": "🚚 المنتجات اللي سعرها {threshold} وأكتر شحنها مجاني",
   "cartTotalLine": "الإجمالي",
   "cartCashOnDeliveryNote": "💳 الدفع عند الاستلام متاح",
   "cartSecureCheckout": "🔒 إتمام شراء آمن",
@@ -586,6 +587,16 @@
   "checkoutPaymentSecure": "بيانات الدفع مشفّرة",
   "checkoutErrorGeneric": "مقدرناش نكمل الطلب",
   "checkoutErrorPhoneNotVerified": "من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب",
+  "checkoutPartialOrderTitle": "جزء من طلبك ماتمش",
+  "checkoutPartialOrderWarning": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.",
+  "@checkoutPartialOrderWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checkoutPartialOrderAck": "تمام",
   "orderPlacedTitle": "تم الطلب! 🎉",
   "orderTrackCta": "تابع طلبي",
   "orderContinueShopping": "كمّل التسوق",

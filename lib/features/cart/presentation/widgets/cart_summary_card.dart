@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../domain/entities/cart_shipping_rules.dart';
 import '../providers/cart_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -55,6 +56,17 @@ class CartSummaryCard extends ConsumerWidget {
               context.l10n.cartShippingLine,
               context.formatCurrency(summary.shippingTotal),
             ),
+            if (summary.shippingTotal > 0) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                context.l10n.cartFreeShippingThresholdNote(
+                  context.formatCurrency(kFreeShippingPriceThresholdEgp),
+                ),
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.textSecondary,
+                ),
+              ),
+            ],
             if (code != null && summary.discount > 0) ...[
               const SizedBox(height: AppSpacing.sm),
               _row(

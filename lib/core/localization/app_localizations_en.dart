@@ -1534,6 +1534,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartShippingLine => 'Shipping';
 
   @override
+  String cartFreeShippingThresholdNote(String threshold) {
+    return '🚚 Items priced $threshold and up ship free';
+  }
+
+  @override
   String get cartTotalLine => 'Total';
 
   @override
@@ -1706,6 +1711,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checkoutErrorPhoneNotVerified =>
       'Please verify your phone number to place an order';
+
+  @override
+  String get checkoutPartialOrderTitle => 'Part of your order didn\'t go through';
+
+  @override
+  String checkoutPartialOrderWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 could not be added to your order and stayed in your cart. Try placing the order again to complete it.';
+  }
+
+  @override
+  String get checkoutPartialOrderAck => 'Got it';
 
   @override
   String get orderPlacedTitle => 'Order Placed! 🎉';
