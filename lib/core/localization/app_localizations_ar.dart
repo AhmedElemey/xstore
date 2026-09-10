@@ -1999,6 +1999,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorGeneric => 'حصل خطأ';
 
   @override
+  String get routeErrorMessage => 'معرفناش نفتح الصفحة دي. حاول تاني.';
+
+  @override
+  String get goHome => 'ارجع للرئيسية';
+
+  @override
+  String get serverErrorMessage => 'حصلت مشكلة من عندنا. حاول تاني بعد شوية.';
+
+  @override
   String get emptyInbox => 'لا يوجد شيء بعد';
 
   @override

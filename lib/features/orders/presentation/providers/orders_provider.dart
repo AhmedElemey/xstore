@@ -272,8 +272,9 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> cancelOrder(String orderId, String reason) async {
-    final snapshot = state.orders;
-    final updated = snapshot
+    final original = _orderById(orderId);
+    if (original == null) return;
+    final updated = state.orders
         .map(
           (o) => o.id == orderId
               ? o.copyWith(
@@ -296,8 +297,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot);
-        _recomputeDerived();
+        _restoreOrder(original);
         state = state.copyWith(error: failure.toString());
       },
       (o) {
@@ -332,7 +332,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> confirmOrderVendor(String orderId, DeliveryMethod method) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     _optimisticStatus(orderId, OrderStatus.confirmed,
         confirmedAt: DateTime.now(), deliveryMethod: method,);
     final epoch = _fetchEpoch;
@@ -342,8 +343,8 @@ class OrdersNotifier extends _$OrdersNotifier {
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -358,7 +359,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> rejectOrder(String orderId, String reason) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     _optimisticStatus(orderId, OrderStatus.cancelled,
         cancelReason: reason,
         cancelledAt: DateTime.now(),);
@@ -371,8 +373,8 @@ class OrdersNotifier extends _$OrdersNotifier {
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -382,7 +384,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> markProcessing(String orderId) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     _optimisticStatus(orderId, OrderStatus.processing);
     final epoch = _fetchEpoch;
     final result = await ref
@@ -391,8 +394,8 @@ class OrdersNotifier extends _$OrdersNotifier {
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -402,7 +405,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> markShipped(String orderId, ShippingInfo info) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     final now = DateTime.now();
     final tn = info.trackingNumber ?? 'XS-TRACK-$orderId';
     state = state.copyWith(
@@ -433,8 +437,8 @@ class OrdersNotifier extends _$OrdersNotifier {
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -444,7 +448,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> markDelivered(String orderId) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     final now = DateTime.now();
     state = state.copyWith(
       orders: state.orders
@@ -466,14 +471,36 @@ class OrdersNotifier extends _$OrdersNotifier {
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
         _trackOrderStatus(orderId, OrderStatus.delivered, role: 'consumer');
       },
     );
+  }
+
+  OrderEntity? _orderById(String orderId) {
+    for (final o in state.orders) {
+      if (o.id == orderId) return o;
+    }
+    return null;
+  }
+
+  /// Rolls back a single order to [original] by id, in the CURRENT
+  /// `state.orders` — not by restoring a whole-list snapshot captured
+  /// before this mutator's optimistic update. Two mutators can legitimately
+  /// run concurrently (e.g. cancel order A, then confirm order B before A's
+  /// request resolves); a whole-list snapshot restore on A's failure would
+  /// silently wipe out B's already-applied optimistic/merged change. This
+  /// only touches the one order this call owns.
+  void _restoreOrder(OrderEntity original) {
+    final idx = state.orders.indexWhere((e) => e.id == original.id);
+    if (idx < 0) return;
+    final next = [...state.orders]..[idx] = original;
+    state = state.copyWith(orders: next);
+    _recomputeDerived();
   }
 
   void _optimisticStatus(

@@ -3992,6 +3992,24 @@ abstract class AppLocalizations {
   /// **'Something went wrong'**
   String get errorGeneric;
 
+  /// No description provided for @routeErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn't load that page. Please try again.'**
+  String get routeErrorMessage;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go home'**
+  String get goHome;
+
+  /// No description provided for @serverErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our end. Please try again in a moment.'**
+  String get serverErrorMessage;
+
   /// No description provided for @emptyInbox.
   ///
   /// In en, this message translates to:

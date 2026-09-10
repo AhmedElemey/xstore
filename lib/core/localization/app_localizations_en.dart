@@ -1995,6 +1995,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneric => 'Something went wrong';
 
   @override
+  String get routeErrorMessage =>
+      'We couldn\'t load that page. Please try again.';
+
+  @override
+  String get goHome => 'Go home';
+
+  @override
+  String get serverErrorMessage =>
+      'Something went wrong on our end. Please try again in a moment.';
+
+  @override
   String get emptyInbox => 'Nothing here yet';
 
   @override

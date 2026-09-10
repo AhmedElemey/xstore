@@ -631,11 +631,6 @@ abstract final class AppStrings {
   // Shared / errors
   static const retry = 'Retry';
   static const errorGeneric = 'Something went wrong';
-  static const routeErrorMessage =
-      "We couldn't load that page. Please try again.";
-  static const goHome = 'Go home';
-  static const serverErrorMessage =
-      'Something went wrong on our end. Please try again in a moment.';
   static const emptyInbox = 'Nothing here yet';
 
   // Screen titles (alias nav where aligned)
