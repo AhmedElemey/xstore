@@ -64,7 +64,22 @@ Dio dio(DioRef ref) {
       // always the static Basic key above. Added automatically whenever a
       // token is stored; harmless to send on endpoints that don't need it.
       onRequest: (options, handler) async {
-        final token = await secureStorage.read(key: PrefsKeys.authToken);
+        // A hung/corrupted native secure-storage read (seen on some Android
+        // devices when the AndroidKeyStore entry is stale — the platform
+        // channel call never returns, never throws) must not block every
+        // outbound request forever, including public endpoints like login
+        // that don't even need this token. Time-box it and proceed
+        // unauthenticated on failure; an endpoint that actually needs the
+        // token will 401 and the normal session-restore/refresh paths take
+        // over from there.
+        String? token;
+        try {
+          token = await secureStorage
+              .read(key: PrefsKeys.authToken)
+              .timeout(const Duration(seconds: 5));
+        } catch (_) {
+          token = null;
+        }
         if (token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
           if (kDebugMode) {
