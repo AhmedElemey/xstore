@@ -147,20 +147,21 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
+    final viewPadding = MediaQuery.viewPaddingOf(context);
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final size = MediaQuery.sizeOf(context);
     // Prefer the caller-captured inset; fall back if the sheet still has one.
     final topInset = widget.topInset > 0
         ? widget.topInset
-        : media.viewPadding.top;
-    final bottomInset = media.viewPadding.bottom + media.viewInsets.bottom;
-    final maxHeight =
-        media.size.height - topInset - bottomInset - AppSpacing.md;
+        : viewPadding.top;
+    final bottomInset = viewPadding.bottom + viewInsets.bottom;
+    final maxHeight = size.height - topInset - bottomInset - AppSpacing.md;
 
     return Padding(
       padding: EdgeInsets.only(top: topInset, bottom: bottomInset),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: maxHeight.clamp(200.0, media.size.height),
+          maxHeight: maxHeight.clamp(200.0, size.height),
         ),
         child: Material(
           color: context.surfaceColor,

@@ -89,6 +89,7 @@ class OrderCard extends ConsumerWidget {
                                 backgroundImage: order.consumerAvatar.isNotEmpty
                                     ? AppNetworkImage.network(
                                         order.consumerAvatar,
+                                        cacheSize: 120,
                                       )
                                     : null,
                                 child: order.consumerAvatar.isEmpty

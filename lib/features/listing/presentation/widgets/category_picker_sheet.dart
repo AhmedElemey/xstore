@@ -133,6 +133,7 @@ class _CatalogPickerBody extends ConsumerWidget {
                   }
                   return ListView.builder(
                     itemCount: items.length,
+                    prototypeItem: const ListTile(title: Text('')),
                     itemBuilder: (_, i) {
                       final c = items[i];
                       final sel = c.id == selectedId;

@@ -404,6 +404,9 @@ class _LookupSheetBodyState<T> extends ConsumerState<_LookupSheetBody<T>> {
                                       ScrollViewKeyboardDismissBehavior
                                           .onDrag,
                                   itemCount: visible.length,
+                                  prototypeItem: const ListTile(
+                                    title: Text(''),
+                                  ),
                                   itemBuilder: (context, i) {
                                     final item = visible[i];
                                     final id = widget.idOf(item);
