@@ -31,8 +31,6 @@ abstract final class AppRoutes {
   static const orders = '/orders';
   static const vendorOrders = '/vendor-orders';
   static const vendorWallet = '/vendor-wallet';
-  /// Vendor stack route (same [OrdersScreen] as consumer tab).
-  static const incomingOrders = '/incoming-orders';
   static const orderDetail = '/order';
   static String orderPath(String orderId) => '$orderDetail/$orderId';
   static const settings = '/settings';
@@ -82,7 +80,6 @@ abstract final class AppRoutes {
 bool isVendorRestrictedRoute(String location) {
   return location.startsWith('/listing') ||
       location.startsWith(AppRoutes.vendorOrders) ||
-      location == AppRoutes.incomingOrders ||
       location == AppRoutes.storeHours ||
       location == AppRoutes.vendorWallet ||
       location == AppRoutes.earnings ||

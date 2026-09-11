@@ -12,7 +12,6 @@ import '../../../../core/mock/mock_config.dart';
 import '../../domain/entities/auth_token_pair.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
-import '../../domain/entities/register_params.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/vendor_register_params.dart';
@@ -153,23 +152,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(model.toEntity());
     } on AuthException catch (e) {
       return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, UserEntity>> register(RegisterParams params) async {
-    try {
-      final model = await _remote.register(params);
-      await _persistUser(model);
-      return Right(model.toEntity());
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
     } on UnauthorizedException catch (e) {
