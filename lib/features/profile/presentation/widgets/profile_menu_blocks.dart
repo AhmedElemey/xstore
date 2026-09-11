@@ -11,8 +11,6 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/presentation/providers/vendor_orders_provider.dart';
-// TODO(phase-2): Re-enable once store/active hours ships.
-// import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
@@ -82,10 +80,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
     final pendingVendorOrders = ref.watch(
       vendorOrdersProvider.select((s) => s.pendingCount),
     );
-    // TODO(phase-2): Store/active hours deferred to next phase.
-    // final storeOpen = ref.watch(
-    //   storeHoursNotifierProvider.select((s) => s.isStoreOpen),
-    // );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,15 +96,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     label: context.l10n.menuMyListings,
                     onTap: () => context.go(AppRoutes.listingMy),
                   ),
-                  // Store/active hours deferred to phase 2.
-                  // ProfileMenuTile(
-                  //   icon: LucideIcons.clock3,
-                  //   iconBackground: AppColors.primary,
-                  //   label: context.l10n.storeHours,
-                  //   subtitle: storeOpen ? context.l10n.storeOpenNow : context.l10n.storeClosedNow,
-                  //   subtitleColor: storeOpen ? AppColors.success : AppColors.error,
-                  //   onTap: () => context.push(AppRoutes.storeHours),
-                  // ),
                   ProfileMenuTile(
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.accent,

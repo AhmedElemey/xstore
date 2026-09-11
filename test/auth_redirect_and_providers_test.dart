@@ -167,7 +167,6 @@ void main() {
         AppRoutes.listingMy,
         AppRoutes.vendorOrders,
         '${AppRoutes.vendorOrders}/ord_1',
-        AppRoutes.incomingOrders,
         AppRoutes.storeHours,
         AppRoutes.vendorWallet,
         AppRoutes.earnings,
@@ -284,8 +283,7 @@ void main() {
         (_vendor(), AppRoutes.listingAdd),
         (_vendor(), AppRoutes.storeHours),
         (_vendor(), AppRoutes.vendorWallet),
-        (_vendor(), AppRoutes.incomingOrders),
-        // Vendors open consumer order detail via incoming orders.
+        // Vendors open consumer order detail via vendor orders.
         (_vendor(), AppRoutes.orderPath('ord_1')),
         (_consumer(), AppRoutes.cart),
         (_consumer(), AppRoutes.checkout),

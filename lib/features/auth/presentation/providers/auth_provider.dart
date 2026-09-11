@@ -19,7 +19,6 @@ import '../../domain/entities/vendor_register_params.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
-import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/register_consumer_usecase.dart';
 import '../../domain/usecases/register_vendor_usecase.dart';
 import '../../domain/usecases/change_password_usecase.dart';
@@ -73,11 +72,6 @@ SocialAuthDatasource socialAuthDatasource(SocialAuthDatasourceRef ref) {
 @riverpod
 LoginUseCase loginUseCase(LoginUseCaseRef ref) {
   return LoginUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-RegisterUseCase registerUseCase(RegisterUseCaseRef ref) {
-  return RegisterUseCase(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
