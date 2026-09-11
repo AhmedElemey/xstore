@@ -161,8 +161,8 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
     }
   }
 
-  // ---- JSON parsing (hand-written; no separate Model class layer — the
-  // typedef-only NotificationModel pattern stays). ----
+  // ---- JSON parsing (hand-written; parses directly into NotificationEntity,
+  // no separate Model class layer). ----
 
   PaginatedResult<NotificationEntity> _parsePaginatedResponse(
     dynamic data, {

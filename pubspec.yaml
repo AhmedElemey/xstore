@@ -32,7 +32,6 @@ dependencies:
 
   # Serialization
   freezed_annotation: ^2.4.1
-  json_annotation: ^4.9.0
 
   # Image Handling
   image_picker: ^1.1.2
