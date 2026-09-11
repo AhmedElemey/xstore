@@ -12,6 +12,17 @@
             "statusMessage": "Team-lead review: checking Dart change for leaks & over-engineering"
           }
         ]
+      },
+      {
+        "matcher": "mcp__github__merge_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -e '.tool_response.merged == true' >/dev/null 2>&1 && printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"A pull request merge just completed via merge_pull_request. Check the flutter-review skill Post-Merge Audit section: if the merge target was the dev branch, run the dead-code and maintainability audit now.\"}}'; exit 0",
+            "timeout": 10,
+            "statusMessage": "Checking whether a post-merge audit is due"
+          }
+        ]
       }
     ]
   }
