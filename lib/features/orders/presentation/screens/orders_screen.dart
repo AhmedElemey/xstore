@@ -18,8 +18,7 @@ class OrdersScreen extends ConsumerWidget {
       authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
     );
     return RouteReentryRefresh(
-      isTarget: (location) =>
-          location == AppRoutes.orders || location == AppRoutes.incomingOrders,
+      isTarget: (location) => location == AppRoutes.orders,
       onReentry: (ref) => ref.read(ordersNotifierProvider.notifier).fetchOrders(),
       child: role == UserRole.vendor
           ? const VendorOrdersView()
