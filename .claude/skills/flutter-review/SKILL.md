@@ -1,15 +1,49 @@
 ---
 name: flutter-review
-description: Team-lead review checklist and accumulated lessons for xStore Flutter code. Use BEFORE writing or modifying any Dart code in this repo, and AFTER completing a change to self-review it. Also use when a review finding or user correction produces a new lesson to record.
+description: Team-lead review checklist and accumulated lessons for xStore Flutter code. Use BEFORE writing or modifying any Dart code in this repo, and AFTER completing a change to self-review it. Also use when a review finding or user correction produces a new lesson to record, or after merging a pull request to dev (see "Post-Merge Audit").
 ---
 
 # xStore Flutter Review — Team Lead Skill
 
-Two jobs:
+Three jobs:
 1. **Before writing Dart code**: read the Lessons Learned log below and apply every relevant lesson.
 2. **After a review finding or user correction**: record the lesson (see "Recording a lesson").
+3. **After merging a pull request into `dev`**: run the codebase audit below (see "Post-Merge Audit").
 
 The base rules (disposal, Riverpod lifecycles, mounted checks, rebuild storms, over-engineering bans) live in the project CLAUDE.md — this skill holds what we learn on top of them.
+
+## Post-Merge Audit
+
+A `PostToolUse` hook on `mcp__github__merge_pull_request` (see `.claude/settings.json`) injects a reminder into context right after any PR merge completes. When that reminder appears (or when the user directly asks to "run the audit"/"check for dead code"), and the merge target was `dev`:
+
+1. Confirm the merge actually landed on `dev` (not `main` or another branch) before proceeding — the hook fires on every merge regardless of target, since the merge tool doesn't report the base branch.
+2. Run this review as a senior software engineer performing a code quality and maintainability review, using parallel Explore agents the same way prior runs did (roughly: orphaned files/unused deps, duplicate UI/logic, legacy code markers, redundant API calls/dead routes — four passes covers the codebase without any one agent's context overflowing):
+
+   > Act as a senior software engineer performing a code quality and maintainability review.
+   >
+   > Analyze the entire codebase and identify:
+   >
+   > 1. Dead code (unused functions, files, components, routes, APIs, variables, imports, and dependencies)
+   > 2. Duplicate logic that should be consolidated
+   > 3. Unused UI components
+   > 4. Overly complex implementations that can be simplified
+   > 5. Legacy code that is no longer needed
+   > 6. Redundant database queries or API calls
+   > 7. Files that appear abandoned or disconnected from the application
+   > 8. Opportunities to reduce technical debt
+   >
+   > For each issue:
+   >
+   > * Explain why it is unnecessary
+   > * Estimate the impact of removing it
+   > * Identify any risks before deletion
+   > * Provide a recommended cleanup plan
+   >
+   > Be aggressive but safe. Assume the goal is to simplify the codebase, improve maintainability, and remove anything that does not provide value.
+
+3. If a prior audit's findings are still in this skill file's memory (recent conversation, or a prior report), re-verify each one against the CURRENT code before repeating it — don't pad the new report with stale findings (see the 2026-09-11 "audit is a snapshot" lesson below), and don't silently skip re-checking just because a finding was reported once.
+4. **Before recommending any deletion, verify it doesn't break the build** — a symbol can have a live reference the grep pass missed (see the 2026-09-11 "hotfix" lesson below, where exactly this happened: a deleted route constant left one dangling reference that broke `dev`). If you executed deletions from a previous run of this audit, grep one more time across the whole `lib/` and `test/` trees for anything on the delete list before considering the pass done.
+5. Report the findings to the user and ask how they'd like to proceed (report only, or open a cleanup PR) — unless this specific conversation already told you to auto-apply confirmed-safe deletions, in which case do that on a fresh branch off `dev` and open a PR. This section only guarantees the audit itself runs on schedule; it doesn't authorize skipping the user's say on what happens with the results.
 
 ## Recording a lesson
 
@@ -1572,3 +1606,13 @@ Rules for the log:
 - **What happened:** The audit flagged `mockVendorProfileDisplay` (`mock_users.dart`) as a dead "legacy tuple." While deleting it, grepped its immediate neighbor `mockConsumerProfileDisplay` out of habit — same shape, same file, right below it — and found it was equally dead (zero callers) despite never being named in the audit. Removed both together.
 - **Rule:** When removing an audited dead symbol, grep its obvious siblings (same file, same naming pattern, same "pair" like consumer/vendor or en/ar) before finishing — audits built from a lead list don't always catch the symmetric twin of the thing they were looking for.
 - **Where it applies:** Any dead-code deletion pass; especially consumer/vendor-, en/ar-, or mock-paired constants and helpers.
+
+### 2026-09-11 — A deleted route constant broke the build because a same-day sibling commit added a second reference the deletion pass's grep missed
+- **What happened:** The dead-code audit deleted `AppRoutes.incomingOrders` after grepping every call site and confirming only test files referenced it. What the grep pass didn't catch: a separate same-day commit (`a7110ea`, "Refresh shell-tab screens when navigation re-enters their route") had already added a new reference to it in `OrdersScreen`'s `RouteReentryRefresh.isTarget` check, and that reference existed in the exact `dev` snapshot the deletion was verified against — the verification grep simply missed it (not a timing race; a real miss). `dev` was broken (a dangling identifier, would fail `flutter analyze`/build) from the moment PR #25 merged until a follow-up hotfix PR caught it during the NEXT audit run.
+- **Rule:** A single `grep -rn "<ClassName>\."`-style pass is not proof of zero references — rerun the exact deletion-justifying grep one more time immediately before merging (not just before opening the PR), and after any dead-code cleanup merges, the next audit pass's first job is confirming the previous pass's deletions didn't leave a dangling reference, before looking for anything new.
+- **Where it applies:** Every dead-code deletion, especially route/constant deletions referenced by string/enum comparison (`location == AppRoutes.foo`) rather than a typed import, which are easy for both grep and human review to skim past.
+
+### 2026-09-11 — Set up a PostToolUse hook + this skill's "Post-Merge Audit" section so the dead-code audit runs after every merge to dev
+- **What happened:** Asked to make the dead-code/maintainability audit run automatically after every merge to `dev`. A skill's instructions alone can't trigger on a git event — only a hook (configured in `.claude/settings.json`) can react to a tool call. Added a `PostToolUse` hook matching `mcp__github__merge_pull_request` that, when `tool_response.merged == true`, injects an `additionalContext` reminder pointing at this skill's new "Post-Merge Audit" section (which holds the actual audit prompt). The hook can't see the PR's base branch (the merge tool doesn't take one as a parameter), so it fires on every merge regardless of target — the injected reminder tells Claude to check whether the target was actually `dev` before running the audit, rather than trying to filter in the hook shell script itself.
+- **Rule:** "Run X automatically when Y happens" always needs a hook, not just a documented skill step — but keep the hook's shell command minimal (a condition check + a fixed JSON reminder) and push any judgment call (like "was this actually a merge to dev") into the reminder text for Claude to resolve, rather than trying to replicate that logic in bash/jq.
+- **Where it applies:** `.claude/settings.json`'s `PostToolUse` hooks list; any future "after X, do Y" automation request in this repo.
