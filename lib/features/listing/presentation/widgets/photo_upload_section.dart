@@ -262,7 +262,12 @@ class _PhotoTile extends StatelessWidget {
         child: SizedBox(
           width: PhotoUploadSection.tile,
           height: PhotoUploadSection.tile,
-          child: Image.file(File(path), fit: BoxFit.cover),
+          child: Image.file(
+            File(path),
+            fit: BoxFit.cover,
+            cacheWidth: (PhotoUploadSection.tile * 2).toInt(),
+            cacheHeight: (PhotoUploadSection.tile * 2).toInt(),
+          ),
         ),
       ),
       childWhenDragging: Opacity(
@@ -307,7 +312,12 @@ class _PhotoTile extends StatelessWidget {
           Semantics(
             label: '${context.l10n.listingPhotoSectionTitle} ${index + 1}',
             image: true,
-            child: Image.file(File(path), fit: BoxFit.cover),
+            child: Image.file(
+              File(path),
+              fit: BoxFit.cover,
+              cacheWidth: (PhotoUploadSection.tile * 2).toInt(),
+              cacheHeight: (PhotoUploadSection.tile * 2).toInt(),
+            ),
           ),
           if (isCover)
             Positioned(
