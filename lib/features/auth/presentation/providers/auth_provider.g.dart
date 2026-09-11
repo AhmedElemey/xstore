@@ -172,23 +172,6 @@ final verifyForgotPasswordOtpUseCaseProvider =
 
 typedef VerifyForgotPasswordOtpUseCaseRef
     = AutoDisposeProviderRef<VerifyForgotPasswordOtpUseCase>;
-String _$refreshTokenUseCaseHash() =>
-    r'c168419b5d4712e004270dc3a4c6db067941322e';
-
-/// See also [refreshTokenUseCase].
-@ProviderFor(refreshTokenUseCase)
-final refreshTokenUseCaseProvider =
-    AutoDisposeProvider<RefreshTokenUseCase>.internal(
-  refreshTokenUseCase,
-  name: r'refreshTokenUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$refreshTokenUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef RefreshTokenUseCaseRef = AutoDisposeProviderRef<RefreshTokenUseCase>;
 String _$sendEmailOtpUseCaseHash() =>
     r'372ac4cffefa408d1cf1b83399dd2de10727a422';
 

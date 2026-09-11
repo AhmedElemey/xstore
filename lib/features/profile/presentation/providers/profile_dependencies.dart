@@ -6,8 +6,6 @@ import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
-import '../../domain/usecases/get_vendor_store_profile_usecase.dart';
-import '../../domain/usecases/update_avatar_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 
 part 'profile_dependencies.g.dart';
@@ -28,20 +26,8 @@ GetProfileUseCase getProfileUseCase(GetProfileUseCaseRef ref) {
 }
 
 @riverpod
-GetVendorStoreProfileUseCase getVendorStoreProfileUseCase(
-  GetVendorStoreProfileUseCaseRef ref,
-) {
-  return GetVendorStoreProfileUseCase(ref.watch(profileRepositoryProvider));
-}
-
-@riverpod
 UpdateProfileUseCase updateProfileUseCase(UpdateProfileUseCaseRef ref) {
   return UpdateProfileUseCase(ref.watch(profileRepositoryProvider));
-}
-
-@riverpod
-UpdateAvatarUseCase updateAvatarUseCase(UpdateAvatarUseCaseRef ref) {
-  return UpdateAvatarUseCase(ref.watch(profileRepositoryProvider));
 }
 
 @riverpod

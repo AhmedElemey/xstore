@@ -35,10 +35,6 @@ class DefaultFirebaseOptions {
   static const googleWebClientId =
       '304127266125-agfonsmqpsub3tgocn3g4a0hs55tcrg0.apps.googleusercontent.com';
 
-  /// Flavor-blind accessor (kept for backward compatibility). Returns the
-  /// PROD app for the current platform. Prefer [forFlavor].
-  static FirebaseOptions get currentPlatform => _forPlatform(isDev: false);
-
   /// Flavor-aware options — picks the correct Firebase app for the running
   /// flavor so the dev build reports to the dev app, not prod.
   static FirebaseOptions forFlavor(AppFlavor flavor) =>
