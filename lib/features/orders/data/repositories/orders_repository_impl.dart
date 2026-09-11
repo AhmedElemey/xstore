@@ -155,9 +155,14 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) async {
     try {
-      final row = await _remote.confirmOrder(orderId: orderId, method: method);
+      final row = await _remote.confirmOrder(
+        orderId: orderId,
+        method: method,
+        vendorId: vendorId,
+      );
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -168,9 +173,14 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) async {
     try {
-      final row = await _remote.rejectOrder(orderId: orderId, reason: reason);
+      final row = await _remote.rejectOrder(
+        orderId: orderId,
+        reason: reason,
+        vendorId: vendorId,
+      );
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -178,9 +188,12 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<Either<Failure, OrderEntity>> markProcessing(String orderId) async {
+  Future<Either<Failure, OrderEntity>> markProcessing(
+    String orderId, {
+    String? vendorId,
+  }) async {
     try {
-      final row = await _remote.markProcessing(orderId);
+      final row = await _remote.markProcessing(orderId, vendorId: vendorId);
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
@@ -191,11 +204,13 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Either<Failure, OrderEntity>> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) async {
     try {
       final row = await _remote.markShipped(
         orderId: orderId,
         shippingInfo: shippingInfo,
+        vendorId: vendorId,
       );
       return Right(row.toEntity());
     } catch (e) {

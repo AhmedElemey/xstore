@@ -32,21 +32,23 @@ class ListingThumbnail extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: SizedBox(
-        width: w,
-        height: h,
-        child: _imageChild(context, bg),
+        width: w.isFinite ? w : null,
+        height: h.isFinite ? h : null,
+        child: _imageChild(context, bg, w, h),
       ),
     );
   }
 
-  Widget _imageChild(BuildContext context, Color placeholderBg) {
+  Widget _imageChild(
+    BuildContext context,
+    Color placeholderBg,
+    double w,
+    double h,
+  ) {
     if (imageUrl.isEmpty) {
       return ColoredBox(
         color: placeholderBg,
-        child: Icon(
-          LucideIcons.imageOff,
-          color: context.textDisabled,
-        ),
+        child: Icon(LucideIcons.imageOff, color: context.textDisabled),
       );
     }
     final isRemote =
@@ -55,8 +57,8 @@ class ListingThumbnail extends StatelessWidget {
       return AppCachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
-        memCacheWidth: ((width ?? size) * 3).round(),
-        memCacheHeight: ((height ?? size) * 3).round(),
+        memCacheWidth: _memCachePx(w),
+        memCacheHeight: _memCachePx(h),
         placeholder: (_, __) => ColoredBox(color: placeholderBg),
         errorWidget: (_, __, ___) => ColoredBox(
           color: placeholderBg,
@@ -72,5 +74,11 @@ class ListingThumbnail extends StatelessWidget {
         child: const Icon(LucideIcons.imageOff),
       ),
     );
+  }
+
+  /// CachedNetworkImage converts this to int — Infinity/NaN throws.
+  int? _memCachePx(double dim) {
+    if (!dim.isFinite || dim <= 0) return null;
+    return (dim * 3).round();
   }
 }

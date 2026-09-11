@@ -58,7 +58,6 @@ void main() {
           courierNextAction(OrderStatus.delivered), CourierOrderAction.none);
       expect(
           courierNextAction(OrderStatus.cancelled), CourierOrderAction.none);
-      expect(courierNextAction(OrderStatus.refunded), CourierOrderAction.none);
     });
   });
 

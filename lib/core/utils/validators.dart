@@ -151,6 +151,7 @@ abstract final class Validators {
     if (name.isEmpty || name.length > 100) return true;
     final price = parseMoneyInput(input.priceInput);
     if (price == null || price <= 0) return true;
+    if (_compareAtInvalid(input.compareAtPriceInput, price)) return true;
     final desc = input.description.trim();
     if (desc.isEmpty || desc.length > 1000) return true;
     if (input.categoryId.isEmpty) return true;
@@ -163,6 +164,16 @@ abstract final class Validators {
       if (sc == null || sc < 0) return true;
     }
     return false;
+  }
+
+  /// Empty is fine (optional). If set, must parse and be strictly > [price].
+  static bool _compareAtInvalid(String raw, double? price) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return false;
+    final compareAt = parseMoneyInput(trimmed);
+    if (compareAt == null || compareAt <= 0) return true;
+    if (price == null) return false;
+    return compareAt <= price;
   }
 
   /// Field keys match [ListingFormState.errors] usages in the add-listing UI.
@@ -184,6 +195,9 @@ abstract final class Validators {
     final price = parseMoneyInput(input.priceInput);
     if (price == null || price <= 0) {
       err['price'] = l10n.listingValidationPriceInvalid;
+    }
+    if (_compareAtInvalid(input.compareAtPriceInput, price)) {
+      err['compareAt'] = l10n.listingCompareAtWarning;
     }
 
     final desc = input.description.trim();
@@ -224,6 +238,7 @@ class ListingFormValidationInput {
     required this.photoPaths,
     required this.name,
     required this.priceInput,
+    this.compareAtPriceInput = '',
     required this.description,
     required this.categoryId,
     required this.subcategoryId,
@@ -238,6 +253,7 @@ class ListingFormValidationInput {
   final List<String> photoPaths;
   final String name;
   final String priceInput;
+  final String compareAtPriceInput;
   final String description;
   final String categoryId;
   final String subcategoryId;
@@ -281,5 +297,12 @@ abstract final class AppValidators {
 
   static String toLocalEgypt(String e164) {
     return e164.startsWith('+20') ? '0${e164.substring(3)}' : e164;
+  }
+
+  /// True when the stored phone is unset or a backend placeholder of all
+  /// zeros (`000000000`, `00000000000`, empty / non-digits only).
+  static bool isMissingPhoneNumber(String? phone) {
+    final digits = (phone ?? '').replaceAll(RegExp(r'\D'), '');
+    return digits.isEmpty || RegExp(r'^0+$').hasMatch(digits);
   }
 }

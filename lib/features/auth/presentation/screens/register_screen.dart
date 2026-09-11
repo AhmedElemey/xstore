@@ -13,12 +13,13 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
-import '../../../catalog_categories/domain/entities/catalog_category_entity.dart';
-import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../store_categories/domain/entities/store_category_entity.dart';
+import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -108,6 +109,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } else {
       _confirmExit();
     }
+  }
+
+  bool _primaryEnabled(RegisterState s) {
+    if (s.isLoading) return false;
+    if (s.currentStep == 1 && s.selectedRole == null) return false;
+    final l10n = context.l10n;
+    if (s.currentStep == 2) {
+      if (Validators.registerEmail(l10n, s.email) != null) return false;
+      if (Validators.registerPhoneEgypt(l10n, rawInput: s.phoneNumber) !=
+          null) {
+        return false;
+      }
+    }
+    if (s.currentStep == 3) {
+      if (Validators.registerPassword(l10n, s.password) != null) return false;
+      if (Validators.confirmPasswordMatches(
+            l10n,
+            s.password,
+            s.confirmPassword,
+          ) !=
+          null) {
+        return false;
+      }
+      if (!s.agreedToTerms) return false;
+    }
+    if (s.currentStep == 4) {
+      final wa = s.whatsappNumber.trim();
+      if (wa.isNotEmpty &&
+          Validators.registerPhoneEgypt(l10n, rawInput: wa) != null) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<void> _onPrimary(RegisterState s, RegisterNotifier n) async {
@@ -232,10 +266,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ? context.l10n.createMyStore
                       : context.l10n.continueLabel,
                   isLoading: s.isLoading,
-                  onPressed: s.isLoading ||
-                          (s.currentStep == 1 && s.selectedRole == null)
-                      ? null
-                      : () => _onPrimary(s, n),
+                  onPressed: _primaryEnabled(s) ? () => _onPrimary(s, n) : null,
                 ),
               ),
             ],
@@ -406,7 +437,7 @@ class _StepPersonal extends StatelessWidget {
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: email,
           builder: (context, val, _) {
-            final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val.text.trim());
+            final ok = Validators.registerEmail(context.l10n, val.text) == null;
             return AuthTextField(
               label: context.l10n.emailAddressRequired,
               hint: context.l10n.enterEmailHint,
@@ -555,7 +586,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.terms),
                       child: Text(
                         context.l10n.termsOfService,
                         style: AppTypography.bodyMedium.copyWith(
@@ -571,7 +602,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.privacy),
                       child: Text(
                         context.l10n.privacyPolicy,
                         style: AppTypography.bodyMedium.copyWith(
@@ -707,7 +738,7 @@ class _StepStore extends ConsumerWidget {
         ),
         const Gap(AppSpacing.sm),
         Text(
-          'Your store URL: xstore.com/store/${s.storeSlug}',
+          context.l10n.storeUrlPreview(s.storeSlug),
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
@@ -722,16 +753,16 @@ class _StepStore extends ConsumerWidget {
           ),
         ),
         const Gap(AppSpacing.sm),
-        _lookupDropdown<CatalogCategoryEntity>(
+        _lookupDropdown<StoreCategoryEntity>(
           context: context,
-          async: ref.watch(allCatalogCategoriesProvider),
+          async: ref.watch(allStoreCategoriesProvider),
           value: s.storeCategoryId,
           idOf: (e) => e.id,
           labelOf: (e) => e.name.resolve(isArabic),
           hint: context.l10n.storeSellHint,
           errorText: s.stepErrors['storeCategory'],
           onChanged: (v) => n.updateField(storeCategoryId: v),
-          onRetry: () => ref.invalidate(allCatalogCategoriesProvider),
+          onRetry: () => ref.invalidate(allStoreCategoriesProvider),
         ),
         const Gap(AppSpacing.lg),
         AuthTextField(

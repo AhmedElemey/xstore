@@ -18,11 +18,16 @@
   "sendVerificationCode": "إبعت كود التحقق",
   "verifyAndContinue": "تحقق وكمل",
   "verifyYourNumber": "تحقق من رقمك",
+  "otpEnterCodeSentTo": "ادخل الكود المكون من 6 أرقام اللي اتبعت على",
+  "otpContactSupport": "بتواجه مشكلة؟ تواصل مع الدعم",
   "codeSentTo": "الكود اتبعت على",
+  "phoneOtpSentToAssociatedEmail": "الكود اتبعت على الإيميل المرتبط بالرقم ده",
   "verifyYourEmail": "تحقق من بريدك الإلكتروني",
   "profileEmailNotVerified": "بريدك الإلكتروني غير موثّق",
   "profilePhoneNotVerified": "رقم هاتفك غير موثّق",
+  "profilePhoneMissing": "رقم هاتفك غير موجود",
   "verifyNow": "وثّق الآن",
+  "addNow": "أضف الآن",
   "changeNumber": "غيّر الرقم",
   "resendCodeIn": "إعادة الإرسال خلال",
   "resendCode": "إعادة الإرسال",
@@ -46,6 +51,9 @@
   "welcomeBack": "أهلاً بيك",
   "chooseYourRole": "هتستخدم xStore إزاي؟",
   "socialRoleSubtitle": "خطوة أخيرة — اختار نوع حسابك",
+  "socialWelcomeGreeting": "أهلاً بيك، {name}! 👋",
+  "socialRoleLastStep": "خطوة أخيرة — هتستخدم xStore إزاي؟",
+  "socialWelcomeFallbackName": "يا صاحبي",
   "searchHint": "ابحث عن منتجات...",
   "hotDeals": "🔥 أحسن العروض",
   "newArrivals": "✨ وصل حديثاً",
@@ -58,6 +66,9 @@
   "freeShippingBadge": "🚚 شحن مجاني",
   "securePayBadge": "🔒 دفع آمن",
   "easyReturnsBadge": "↩️ إرجاع سهل",
+  "productTrustFastShipping": "شحن سريع",
+  "productTrustSecurePayment": "دفع آمن",
+  "productTrustEasyReturns": "إرجاع سهل",
   "shopNow": "تسوق دلوقتي",
   "categoryQueryMens": "mens_fashion",
   "categoryQueryWomens": "womens_fashion",
@@ -154,8 +165,8 @@
   },
   "commissionWalletBlockedSubmit": "الإعلانات الجديدة متوقفة حتى تدفع رسوم المنصة المستحقة.",
   "listingCompareAtTitle": "سعر قبل الخصم (اختياري)",
-  "listingCompareAtHelper": "السعر الأصلي لعرض الخصم",
-  "listingCompareAtWarning": "سعر قبل الخصم أقل من سعر البيع.",
+  "listingCompareAtHelper": "السعر الأصلي الذي يظهر مشطوبًا عند الخصم. اتركه فارغًا إن لم يكن هناك خصم. يجب أن يكون أكبر من سعر البيع.",
+  "listingCompareAtWarning": "يجب أن يكون سعر قبل الخصم أكبر من سعر البيع.",
   "listingDescriptionLabel": "الوصف *",
   "listingDescriptionHint": "صف المنتج — الحالة، المميزات، وإيه اللي معاه...",
   "listingSectionCategoryDetails": "الفئة والتفاصيل",
@@ -384,7 +395,7 @@
   "ordersCancelOrder": "إلغاء الطلب",
   "ordersUpdateDeliveryLocation": "تحديث موقع التوصيل",
   "ordersDeliveryLocationUpdated": "تم تحديث موقع التوصيل",
-  "ordersConfirmReceipt": "✓ تأكيد الاستلام",
+  "ordersConfirmReceipt": "تأكيد الاستلام",
   "ordersLeaveReview": "اترك تقييم",
   "ordersReorder": "اطلب تاني",
   "ordersRejectOrder": "رفض",
@@ -432,6 +443,7 @@
   "ordersCancelReasonMistake": "طلبت بالغلط",
   "ordersCancelReasonOther": "سبب تاني",
   "ordersConfirmReceiptTitle": "تأكيد الاستلام؟",
+  "ordersConfirmReceiptBody": "هل تأكد إنك استلمت هذا الطلب؟",
   "ordersConfirm": "تأكيد",
   "ordersRejectDialogTitle": "رفض الطلب",
   "ordersRejectReasonHint": "سبب الرفض",
@@ -529,6 +541,7 @@
   "cartCouponMinOrder": "الحد الأدنى للطلب 5,000 ج.م",
   "cartOrderSummary": "ملخص الطلب",
   "cartShippingLine": "الشحن",
+  "cartFreeShippingThresholdNote": "🚚 المنتجات اللي سعرها {threshold} وأكتر شحنها مجاني",
   "cartTotalLine": "الإجمالي",
   "cartCashOnDeliveryNote": "💳 الدفع عند الاستلام متاح",
   "cartSecureCheckout": "🔒 إتمام شراء آمن",
@@ -586,6 +599,16 @@
   "checkoutPaymentSecure": "بيانات الدفع مشفّرة",
   "checkoutErrorGeneric": "مقدرناش نكمل الطلب",
   "checkoutErrorPhoneNotVerified": "من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب",
+  "checkoutPartialOrderTitle": "جزء من طلبك ماتمش",
+  "checkoutPartialOrderWarning": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.",
+  "@checkoutPartialOrderWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "checkoutPartialOrderAck": "تمام",
   "orderPlacedTitle": "تم الطلب! 🎉",
   "orderTrackCta": "تابع طلبي",
   "orderContinueShopping": "كمّل التسوق",
@@ -642,6 +665,12 @@
   "resumeListing": "استئناف",
   "listingStats": "إحصائيات",
   "deleteListing": "حذف",
+  "myListingsSearchTitle": "البحث في الإعلانات",
+  "myListingsSearchHint": "ابحث بالعنوان",
+  "myListingsSearchClear": "مسح",
+  "myListingsSearchSubmit": "بحث",
+  "myListingsDeleteTitle": "حذف الإعلان؟",
+  "myListingsDeleteBody": "سيتم حذف “{title}” نهائيًا.",
   "draft": "مسودة",
   "active": "نشط",
   "paused": "موقوف",
@@ -658,14 +687,17 @@
   "resubmitSuccess": "تمت إعادة إرسال الإعلان للمراجعة",
   "retry": "[AR] Retry",
   "errorGeneric": "حصل خطأ",
+  "routeErrorMessage": "معرفناش نفتح الصفحة دي. حاول تاني.",
+  "goHome": "ارجع للرئيسية",
+  "serverErrorMessage": "حصلت مشكلة من عندنا. حاول تاني بعد شوية.",
   "emptyInbox": "لا يوجد شيء بعد",
   "incomingOrders": "الطلبات الواردة",
   "vendorSearchHint": "ابحث برقم الطلب أو اسم المشتري",
   "vendorConfirmAllPending": "تأكيد كل الطلبات المعلقة",
   "vendorViewAnalytics": "عرض التحليلات",
-  "vendorStatPendingOrders": "طلبات معلقة",
-  "vendorStatActiveOrders": "طلبات نشطة",
-  "vendorStatTotalOrders": "إجمالي الطلبات",
+  "vendorStatPendingOrders": "معلقة",
+  "vendorStatActiveOrders": "نشطة",
+  "vendorStatTotalOrders": "إجمالي",
   "vendorStatRevenue": "الإيرادات",
   "vendorConfirmAllPendingTitle": "تأكيد كل الطلبات المعلقة؟",
   "vendorSortNewestFirst": "الأحدث أولاً",
@@ -916,6 +948,27 @@
       }
     }
   },
+  "@myListingsDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@socialWelcomeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@storeUrlPreview": {
+    "placeholders": {
+      "slug": {
+        "type": "String"
+      }
+    }
+  },
   "@cartSelectAllCount": {
     "placeholders": {
       "n": {
@@ -1111,6 +1164,7 @@
   "tellBuyersStore": "عرّف المشترين على متجرك",
   "storeNameRequired": "اسم المتجر *",
   "storeNameHint": "[AR] e.g. Ahmed's Electronics",
+  "storeUrlPreview": "رابط متجرك: xstore.com/store/{slug}",
   "storeCategoryRequired": "فئة المتجر *",
   "storeSellHint": "بتبيع إيه بشكل أساسي؟",
   "storeDescriptionRequired": "وصف المتجر *",
@@ -1489,19 +1543,5 @@
   "requestCustomDeliveryAction": "طلب توصيل مخصص",
   "packageRejectReasonHint": "السبب (اختياري)",
   "packageRequestAgainAction": "إعادة الطلب",
-  "packageOrderLinkedLabel": "مرتبط بطلب",
-  "myListingsSearchTitle": "بحث في الإعلانات",
-  "myListingsSearchHint": "ابحث بالعنوان",
-  "myListingsSearchClear": "مسح",
-  "myListingsSearchAction": "بحث",
-  "myListingsDeleteTitle": "حذف الإعلان؟",
-  "myListingsDeleteMessage": "سيتم حذف “{title}” نهائياً.",
-  "@myListingsDeleteMessage": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
-  "myListingsDeleteConfirm": "حذف"
+  "packageOrderLinkedLabel": "مرتبط بطلب"
 }

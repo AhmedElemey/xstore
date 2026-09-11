@@ -43,18 +43,24 @@ abstract interface class OrdersRepository {
   Future<Either<Failure, OrderEntity>> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   });
 
   Future<Either<Failure, OrderEntity>> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   });
 
-  Future<Either<Failure, OrderEntity>> markProcessing(String orderId);
+  Future<Either<Failure, OrderEntity>> markProcessing(
+    String orderId, {
+    String? vendorId,
+  });
 
   Future<Either<Failure, OrderEntity>> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   });
 
   Future<Either<Failure, OrderEntity>> markDelivered(String orderId);

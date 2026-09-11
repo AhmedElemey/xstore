@@ -10,9 +10,13 @@ import 'package:xstore/features/cart/presentation/widgets/checkout_payment_secti
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 
 class _SilentCheckout extends Checkout {
+  _SilentCheckout({this.note = ''});
+  final String note;
+
   @override
-  CheckoutState build() => const CheckoutState(
+  CheckoutState build() => CheckoutState(
         selectedPayment: PaymentMethod.cashOnDelivery,
+        deliveryNote: note,
       );
 
   @override
@@ -27,7 +31,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          checkoutProvider.overrideWith(_SilentCheckout.new),
+          checkoutProvider.overrideWith(() => _SilentCheckout()),
         ],
         child: MaterialApp(
           localizationsDelegates: const [
@@ -57,5 +61,31 @@ void main() {
       checkoutPaymentLabel(ctx, PaymentMethod.cibCard),
       l10n.ordersPaymentCib,
     );
+  });
+
+  testWidgets('payment step restores a previously entered delivery note',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkoutProvider.overrideWith(
+            () => _SilentCheckout(note: 'Ring the bell'),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: CheckoutPaymentSection()),
+        ),
+      ),
+    );
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.controller?.text, 'Ring the bell');
   });
 }

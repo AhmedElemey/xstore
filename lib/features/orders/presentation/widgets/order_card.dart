@@ -32,167 +32,195 @@ class OrderCard extends ConsumerWidget {
     final notifier = ref.read(ordersNotifierProvider.notifier);
     final first = order.items.isNotEmpty ? order.items.first : null;
     final more = order.items.length - 1;
+    final accent = orderStatusColor(order.status);
+    final radius = BorderRadius.circular(AppSpacing.lg);
 
-    return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.lg),
-      elevation: 0,
-      shadowColor: context.textPrimary.withValues(alpha: 0.06),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.orderPath(order.id)),
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
-            boxShadow: [
-              BoxShadow(
-                color: context.textPrimary.withValues(alpha: 0.06),
-                blurRadius: AppSpacing.md,
-                offset: const Offset(0, AppSpacing.xs),
-              ),
-            ],
+    // Same chrome as VendorOrderCard: soft shadow outside clip, status-tint
+    // outline, and a 4px left accent bar.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: [
+          BoxShadow(
+            color: context.cardShadowColor,
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                      style: AppTypography.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  OrderStatusBadge(status: order.status, compact: true),
-                ],
-              ),
-              Divider(height: AppSpacing.lg),
-              if (first != null) ...[
-                if (isVendor) ...[
-                  Row(
+        ],
+      ),
+      child: Material(
+        color: context.surfaceColor,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.push(AppRoutes.orderPath(order.id)),
+          child: Ink(
+            decoration: BoxDecoration(
+              border: Border.all(color: accent.withValues(alpha: 0.45)),
+              borderRadius: radius,
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: order.consumerAvatar.isNotEmpty
-                            ? AppNetworkImage.network(order.consumerAvatar)
-                            : null,
-                        child: order.consumerAvatar.isEmpty
-                            ? Text(
-                                order.consumerName.isNotEmpty
-                                    ? order.consumerName[0].toUpperCase()
-                                    : '?',
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              order.consumerName,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
                               style: AppTypography.bodyLarge.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            Text(
-                              '📞 ${order.consumerPhone}',
-                              style: AppTypography.bodySmall,
+                          ),
+                          OrderStatusBadge(status: order.status, compact: true),
+                        ],
+                      ),
+                      Divider(height: AppSpacing.lg),
+                      if (first != null) ...[
+                        if (isVendor) ...[
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage: order.consumerAvatar.isNotEmpty
+                                    ? AppNetworkImage.network(
+                                        order.consumerAvatar,
+                                        cacheSize: 120,
+                                      )
+                                    : null,
+                                child: order.consumerAvatar.isEmpty
+                                    ? Text(
+                                        order.consumerName.isNotEmpty
+                                            ? order.consumerName[0]
+                                                .toUpperCase()
+                                            : '?',
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      order.consumerName,
+                                      style: AppTypography.bodyLarge.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      '📞 ${order.consumerPhone}',
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                    Text(
+                                      '📍 ${order.deliveryAddress.city}, ${order.deliveryAddress.wilaya}',
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: AppSpacing.lg),
+                        ],
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.sm,
+                              ),
+                              child: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: first.listingImage.isNotEmpty
+                                    ? AppCachedNetworkImage(
+                                        imageUrl: first.listingImage,
+                                        fit: BoxFit.cover,
+                                        memCacheWidth: 180,
+                                        memCacheHeight: 180,
+                                      )
+                                    : Container(
+                                        color: context.textDisabled.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                      ),
+                              ),
                             ),
-                            Text(
-                              '📍 ${order.deliveryAddress.city}, ${order.deliveryAddress.wilaya}',
-                              style: AppTypography.bodySmall,
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    first.listingName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.bodyLarge.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (more > 0)
+                                    Text(
+                                      context.l10n.ordersMoreItems(more),
+                                      style: AppTypography.bodySmall,
+                                    ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${context.formatCurrency(first.total)}',
+                                    style: AppTypography.bodyLarge.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
+                      Divider(height: AppSpacing.lg),
+                      if (!isVendor)
+                        Text(
+                          '📦 ${order.vendorStoreName} · ${_shortDate(order.createdAt)}',
+                          style: AppTypography.bodySmall,
+                        )
+                      else
+                        Text(
+                          '💳 ${paymentShort(context, order)} · ${_shortDate(order.createdAt)}',
+                          style: AppTypography.bodySmall,
+                        ),
+                      if (!isVendor &&
+                          (order.status == OrderStatus.shipped ||
+                              order.status == OrderStatus.confirmed) &&
+                          order.estimatedDelivery != null) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          '${context.l10n.ordersEstimatedDelivery}: ${_eta(order.estimatedDelivery!)}',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.md),
+                      _actions(context, ref, notifier),
                     ],
                   ),
-                  Divider(height: AppSpacing.lg),
-                ],
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSpacing.sm),
-                      child: SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: first.listingImage.isNotEmpty
-                            ? AppCachedNetworkImage(
-                                imageUrl: first.listingImage,
-                                fit: BoxFit.cover,
-                                memCacheWidth: 180,
-                                memCacheHeight: 180,
-                              )
-                            : Container(
-                                color: context.textDisabled
-                                    .withValues(alpha: 0.2),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            first.listingName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (more > 0)
-                            Text(
-                              context.l10n.ordersMoreItems(more),
-                              style: AppTypography.bodySmall,
-                            ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${context.formatCurrency(first.total)}',
-                            style: AppTypography.bodyLarge.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 4,
+                  child: ColoredBox(color: accent),
                 ),
               ],
-              Divider(height: AppSpacing.lg),
-              if (!isVendor)
-                Text(
-                  '📦 ${order.vendorStoreName} · ${_shortDate(order.createdAt)}',
-                  style: AppTypography.bodySmall,
-                )
-              else
-                Text(
-                  '💳 ${paymentShort(context, order)} · ${_shortDate(order.createdAt)}',
-                  style: AppTypography.bodySmall,
-                ),
-              if (!isVendor &&
-                  (order.status == OrderStatus.shipped ||
-                      order.status == OrderStatus.confirmed) &&
-                  order.estimatedDelivery != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '${context.l10n.ordersEstimatedDelivery}: ${_eta(order.estimatedDelivery!)}',
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.md),
-              _actions(context, ref, notifier),
-            ],
+            ),
           ),
         ),
       ),
@@ -258,7 +286,6 @@ class OrderCard extends ConsumerWidget {
           );
         case OrderStatus.delivered:
         case OrderStatus.cancelled:
-        case OrderStatus.refunded:
           return SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -280,19 +307,48 @@ class OrderCard extends ConsumerWidget {
           ),
         );
       case OrderStatus.shipped:
+        final compact = ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          ),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
         return Row(
           children: [
             Expanded(
               child: OutlinedButton(
+                style: compact,
                 onPressed: () => _trackingSnack(context),
-                child: Text(context.l10n.ordersTrackOrder),
+                child: Text(
+                  context.l10n.ordersTrackOrder,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: FilledButton(
+                style: compact,
                 onPressed: () => _confirmReceipt(context, ref, notifier),
-                child: Text(context.l10n.ordersConfirmReceipt),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check, size: AppSpacing.lg),
+                    const SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        context.l10n.ordersConfirmReceipt,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -329,7 +385,6 @@ class OrderCard extends ConsumerWidget {
           ),
         );
       case OrderStatus.processing:
-      case OrderStatus.refunded:
         return SizedBox(
           width: double.infinity,
           child: OutlinedButton(
@@ -372,7 +427,7 @@ class OrderCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.ordersConfirmReceiptTitle),
-        content: Text(context.l10n.ordersConfirmReceiptTitle),
+        content: Text(context.l10n.ordersConfirmReceiptBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

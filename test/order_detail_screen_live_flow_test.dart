@@ -323,7 +323,7 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [901],
-        'status': 'confirmed',
+        'status': 'Confirmed',
       });
       expect(
         find.text('Mark as Processing'),

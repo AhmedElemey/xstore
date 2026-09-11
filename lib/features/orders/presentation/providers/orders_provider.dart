@@ -46,6 +46,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       if (prev?.valueOrNull?.id == next.valueOrNull?.id) return;
       Future.microtask(() {
         OrdersRemoteDataSourceImpl.clearSessionCache();
+        _fetchEpoch++;
         state = const OrdersState();
       });
     });
@@ -63,6 +64,7 @@ class OrdersNotifier extends _$OrdersNotifier {
   List<OrderStatus> get _consumerFilters => const [
         OrderStatus.pending,
         OrderStatus.confirmed,
+        OrderStatus.processing,
         OrderStatus.shipped,
         OrderStatus.delivered,
         OrderStatus.cancelled,
@@ -77,15 +79,20 @@ class OrdersNotifier extends _$OrdersNotifier {
         OrderStatus.cancelled,
       ];
 
+  var _fetchEpoch = 0;
+
   Future<void> fetchOrders() async {
+    final epoch = ++_fetchEpoch;
+    // Keep the current list on screen while refetching so tab revisits
+    // and pull-to-refresh do not flash an empty skeleton.
     state = state.copyWith(
       isLoading: true,
       error: null,
       page: 1,
-      orders: [],
       hasMore: true,
     );
     if (_user == null) {
+      if (epoch != _fetchEpoch) return;
       state = state.copyWith(isLoading: false);
       return;
     }
@@ -95,6 +102,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       final statsResult = await ref
           .read(getVendorOrderStatsUseCaseProvider)
           .call(_vendorId!);
+      if (epoch != _fetchEpoch) return;
       stats = statsResult.fold((_) => null, (s) => s);
     }
 
@@ -110,6 +118,7 @@ class OrdersNotifier extends _$OrdersNotifier {
               pageSize: _pageSize,
             );
 
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (f) => state = state.copyWith(
         isLoading: false,
@@ -130,6 +139,7 @@ class OrdersNotifier extends _$OrdersNotifier {
 
   Future<void> loadMore() async {
     if (!state.hasMore || state.isLoadingMore || _user == null) return;
+    final epoch = _fetchEpoch;
     state = state.copyWith(isLoadingMore: true, error: null);
     final next = state.page + 1;
     final result = _isVendor
@@ -144,6 +154,7 @@ class OrdersNotifier extends _$OrdersNotifier {
               pageSize: _pageSize,
             );
 
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (f) => state = state.copyWith(
         isLoadingMore: false,
@@ -261,8 +272,9 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> cancelOrder(String orderId, String reason) async {
-    final snapshot = state.orders;
-    final updated = snapshot
+    final original = _orderById(orderId);
+    if (original == null) return;
+    final updated = state.orders
         .map(
           (o) => o.id == orderId
               ? o.copyWith(
@@ -276,15 +288,16 @@ class OrdersNotifier extends _$OrdersNotifier {
         .toList();
     state = state.copyWith(orders: updated);
     _recomputeDerived();
+    final epoch = _fetchEpoch;
     final result = await ref.read(cancelOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
           isVendorSession: _isVendor,
         );
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot);
-        _recomputeDerived();
+        _restoreOrder(original);
         state = state.copyWith(error: failure.toString());
       },
       (o) {
@@ -319,16 +332,19 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> confirmOrderVendor(String orderId, DeliveryMethod method) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     _optimisticStatus(orderId, OrderStatus.confirmed,
         confirmedAt: DateTime.now(), deliveryMethod: method,);
+    final epoch = _fetchEpoch;
     final result = await ref
         .read(confirmOrderUseCaseProvider)
-        .call(orderId: orderId, method: method);
+        .call(orderId: orderId, method: method, vendorId: _vendorId);
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -343,18 +359,22 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> rejectOrder(String orderId, String reason) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     _optimisticStatus(orderId, OrderStatus.cancelled,
         cancelReason: reason,
         cancelledAt: DateTime.now(),);
+    final epoch = _fetchEpoch;
     final result = await ref.read(rejectOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
+          vendorId: _vendorId,
         );
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -364,14 +384,18 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> markProcessing(String orderId) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     _optimisticStatus(orderId, OrderStatus.processing);
-    final result =
-        await ref.read(markProcessingUseCaseProvider).call(orderId);
+    final epoch = _fetchEpoch;
+    final result = await ref
+        .read(markProcessingUseCaseProvider)
+        .call(orderId, vendorId: _vendorId);
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -381,7 +405,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> markShipped(String orderId, ShippingInfo info) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     final now = DateTime.now();
     final tn = info.trackingNumber ?? 'XS-TRACK-$orderId';
     state = state.copyWith(
@@ -403,14 +428,17 @@ class OrdersNotifier extends _$OrdersNotifier {
           .toList(),
     );
     _recomputeDerived();
+    final epoch = _fetchEpoch;
     final result = await ref.read(markShippedUseCaseProvider).call(
           orderId: orderId,
           shippingInfo: info,
+          vendorId: _vendorId,
         );
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
@@ -420,7 +448,8 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> markDelivered(String orderId) async {
-    final snapshot = state.orders;
+    final original = _orderById(orderId);
+    if (original == null) return;
     final now = DateTime.now();
     state = state.copyWith(
       orders: state.orders
@@ -436,18 +465,42 @@ class OrdersNotifier extends _$OrdersNotifier {
           .toList(),
     );
     _recomputeDerived();
+    final epoch = _fetchEpoch;
     final result =
         await ref.read(markDeliveredUseCaseProvider).call(orderId);
+    if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
-        state = state.copyWith(orders: snapshot, error: failure.toString());
-        _recomputeDerived();
+        _restoreOrder(original);
+        state = state.copyWith(error: failure.toString());
       },
       (o) {
         _mergeOrder(o);
         _trackOrderStatus(orderId, OrderStatus.delivered, role: 'consumer');
       },
     );
+  }
+
+  OrderEntity? _orderById(String orderId) {
+    for (final o in state.orders) {
+      if (o.id == orderId) return o;
+    }
+    return null;
+  }
+
+  /// Rolls back a single order to [original] by id, in the CURRENT
+  /// `state.orders` — not by restoring a whole-list snapshot captured
+  /// before this mutator's optimistic update. Two mutators can legitimately
+  /// run concurrently (e.g. cancel order A, then confirm order B before A's
+  /// request resolves); a whole-list snapshot restore on A's failure would
+  /// silently wipe out B's already-applied optimistic/merged change. This
+  /// only touches the one order this call owns.
+  void _restoreOrder(OrderEntity original) {
+    final idx = state.orders.indexWhere((e) => e.id == original.id);
+    if (idx < 0) return;
+    final next = [...state.orders]..[idx] = original;
+    state = state.copyWith(orders: next);
+    _recomputeDerived();
   }
 
   void _optimisticStatus(
@@ -479,19 +532,23 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   void _mergeOrder(OrderEntity o) {
+    if (o.id.isEmpty) return;
     final idx = state.orders.indexWhere((e) => e.id == o.id);
     if (idx < 0) {
       state = state.copyWith(orders: [...state.orders, o]);
     } else {
-      final next = [...state.orders]..[idx] = o;
+      final next = [...state.orders]
+        ..[idx] = state.orders[idx].takingStatusFrom(o);
       state = state.copyWith(orders: next);
     }
     _recomputeDerived();
     if (_isVendor) {
+      final statsEpoch = _fetchEpoch;
       ref
           .read(getVendorOrderStatsUseCaseProvider)
           .call(_vendorId!)
           .then((r) => r.fold((_) => null, (s) {
+                if (statsEpoch != _fetchEpoch) return;
                 state = state.copyWith(stats: s);
               }),);
     }

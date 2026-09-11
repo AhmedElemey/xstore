@@ -90,38 +90,45 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                 children: [
                   SizedBox(
                     height: kToolbarHeight,
-                    child: Row(
-                      children: [
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: searching
-                              ? TextField(
-                                  autofocus: true,
-                                  decoration: InputDecoration(
-                                    hintText: context.l10n.ordersSearchHint,
-                                    border: InputBorder.none,
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(Icons.close),
-                                      onPressed: () {
-                                        notifier.setSearching(false);
-                                        notifier.updateSearch('');
-                                      },
-                                    ),
-                                  ),
-                                  onChanged: notifier.updateSearch,
-                                )
-                              : Text(
-                                  context.l10n.ordersMyTitle,
-                                  style: Theme.of(context).textTheme.titleLarge,
+                    child: searching
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                            ),
+                            child: TextField(
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                hintText: context.l10n.ordersSearchHint,
+                                border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () {
+                                    notifier.setSearching(false);
+                                    notifier.updateSearch('');
+                                  },
                                 ),
-                        ),
-                        if (!searching)
-                          IconButton(
-                            icon: const Icon(Icons.search_rounded),
-                            onPressed: () => notifier.setSearching(true),
+                              ),
+                              onChanged: notifier.updateSearch,
+                            ),
+                          )
+                        : Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                context.l10n.ordersMyTitle,
+                                style: Theme.of(context).textTheme.titleLarge,
+                                textAlign: TextAlign.center,
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: IconButton(
+                                  icon: const Icon(Icons.search_rounded),
+                                  onPressed: () =>
+                                      notifier.setSearching(true),
+                                ),
+                              ),
+                            ],
                           ),
-                      ],
-                    ),
                   ),
                   const OrderFilterTabs(isVendor: false),
                 ],

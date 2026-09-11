@@ -30,35 +30,44 @@ class QuantityControl extends StatelessWidget {
     final atMin = quantity <= 1;
     final atMax = quantity >= maxQuantity;
     final lowStock = maxQuantity <= 3 && enabled;
+    final border = enabled ? AppColors.primary : context.textDisabled;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _QtyButton(
-              enabled: enabled,
-              icon: atMin ? LucideIcons.trash2 : LucideIcons.minus,
-              color: atMin ? AppColors.error : context.textPrimary,
-              onTap: onDecrement,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: Material(
-                color: context.backgroundColor,
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: BorderRadius.circular(AppSpacing.x3l),
+            border: Border.all(color: border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _QtySegment(
+                enabled: enabled,
+                onTap: onDecrement,
+                child: Icon(
+                  atMin ? LucideIcons.trash2 : LucideIcons.minus,
+                  size: AppSpacing.md + AppSpacing.xs,
+                  color: enabled
+                      ? (atMin ? AppColors.error : context.textPrimary)
+                      : context.textDisabled,
+                ),
+              ),
+              Material(
+                color: AppColors.transparent,
                 child: InkWell(
                   onTap: enabled ? onEditQuantity : null,
-                  borderRadius: BorderRadius.circular(AppSpacing.sm),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
+                      horizontal: AppSpacing.sm,
                       vertical: AppSpacing.xs,
                     ),
                     child: Text(
                       '$quantity',
-                      style: AppTypography.titleMedium.copyWith(
+                      style: AppTypography.labelLarge.copyWith(
                         fontWeight: FontWeight.w700,
                         color: enabled
                             ? context.textPrimary
@@ -68,14 +77,19 @@ class QuantityControl extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            _QtyButton(
-              enabled: enabled && !atMax,
-              icon: LucideIcons.plus,
-              color: AppColors.primary,
-              onTap: onIncrement,
-            ),
-          ],
+              _QtySegment(
+                enabled: enabled && !atMax,
+                onTap: onIncrement,
+                child: Icon(
+                  LucideIcons.plus,
+                  size: AppSpacing.md + AppSpacing.xs,
+                  color: enabled && !atMax
+                      ? context.textPrimary
+                      : context.textDisabled,
+                ),
+              ),
+            ],
+          ),
         ),
         if (lowStock) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -89,29 +103,21 @@ class QuantityControl extends StatelessWidget {
   }
 }
 
-class _QtyButton extends StatelessWidget {
-  const _QtyButton({
+class _QtySegment extends StatelessWidget {
+  const _QtySegment({
     required this.enabled,
-    required this.icon,
-    required this.color,
     required this.onTap,
+    required this.child,
   });
 
   final bool enabled;
-  final IconData icon;
-  final Color color;
   final VoidCallback onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: context.surfaceColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
-        side: BorderSide(
-          color: enabled ? context.textDisabled : context.textDisabled.withValues(alpha: 0.4),
-        ),
-      ),
+      color: AppColors.transparent,
       child: InkWell(
         onTap: enabled
             ? () {
@@ -119,14 +125,13 @@ class _QtyButton extends StatelessWidget {
                 onTap();
               }
             : null,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        borderRadius: BorderRadius.circular(AppSpacing.x3l),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Icon(
-            icon,
-            size: AppSpacing.md + AppSpacing.xs,
-            color: enabled ? color : context.textDisabled,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs + 2,
           ),
+          child: child,
         ),
       ),
     );

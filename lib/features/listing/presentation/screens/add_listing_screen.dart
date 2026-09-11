@@ -544,6 +544,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           hint: '0.00',
           prefixText: '${notifier.currencyCode} ',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          errorText: errors['compareAt'],
           onChanged: (v) => notifier.updateField('compareAtPriceInput', v),
         ),
         Text(
@@ -553,7 +554,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
                 height: 1.35,
               ),
         ),
-        if (showCompareWarn)
+        if (showCompareWarn && errors['compareAt'] == null)
           Padding(
             padding: EdgeInsets.only(top: context.scaledPx(6)),
             child: Text(

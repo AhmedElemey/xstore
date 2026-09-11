@@ -68,7 +68,15 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
         );
     if (_disposed) return;
     result.fold(
-      (f) => state = state.copyWith(isLoading: false, error: f.toString()),
+      (f) {
+        // Cancelled orders 404 on GET /me/{id} and drop off GET /me.
+        // Keep the snapshot already on screen instead of a not-found error.
+        if (state.order != null && f is NotFoundFailure) {
+          state = state.copyWith(isLoading: false, error: null);
+          return;
+        }
+        state = state.copyWith(isLoading: false, error: f.toString());
+      },
       (o) => state = state.copyWith(isLoading: false, order: o),
     );
   }
@@ -107,9 +115,11 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       updatedAt: now,
     );
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
-    final result = await ref
-        .read(confirmOrderUseCaseProvider)
-        .call(orderId: state.orderId, method: method);
+    final result = await ref.read(confirmOrderUseCaseProvider).call(
+          orderId: state.orderId,
+          method: method,
+          vendorId: _vendorId,
+        );
     _finalizeMutation(result, prev, deliveryMethod: method);
   }
 
@@ -126,6 +136,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     final result = await ref.read(rejectOrderUseCaseProvider).call(
           orderId: state.orderId,
           reason: reason,
+          vendorId: _vendorId,
         );
     _finalizeMutation(result, prev, reason: reason);
   }
@@ -138,8 +149,9 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       updatedAt: DateTime.now(),
     );
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
-    final result =
-        await ref.read(markProcessingUseCaseProvider).call(state.orderId);
+    final result = await ref
+        .read(markProcessingUseCaseProvider)
+        .call(state.orderId, vendorId: _vendorId);
     _finalizeMutation(result, prev);
   }
 
@@ -162,6 +174,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     final result = await ref.read(markShippedUseCaseProvider).call(
           orderId: state.orderId,
           shippingInfo: info,
+          vendorId: _vendorId,
         );
     _finalizeMutation(result, prev);
   }
@@ -199,7 +212,10 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
         error: f.toString(),
       ),
       (o) {
-        state = state.copyWith(isActioning: false, order: o);
+        state = state.copyWith(
+          isActioning: false,
+          order: prev.takingStatusFrom(o),
+        );
         ref.invalidate(ordersNotifierProvider);
         ref.read(analyticsServiceProvider).track(
           AnalyticsEvents.orderStatusChanged,

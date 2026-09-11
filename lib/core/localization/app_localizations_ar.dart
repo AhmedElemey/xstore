@@ -63,7 +63,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyYourNumber => 'تحقق من رقمك';
 
   @override
+  String get otpEnterCodeSentTo => 'ادخل الكود المكون من 6 أرقام اللي اتبعت على';
+
+  @override
+  String get otpContactSupport => 'بتواجه مشكلة؟ تواصل مع الدعم';
+
+  @override
   String get codeSentTo => 'الكود اتبعت على';
+
+  @override
+  String get phoneOtpSentToAssociatedEmail =>
+      'الكود اتبعت على الإيميل المرتبط بالرقم ده';
 
   @override
   String get verifyYourEmail => 'تحقق من بريدك الإلكتروني';
@@ -75,7 +85,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profilePhoneNotVerified => 'رقم هاتفك غير موثّق';
 
   @override
+  String get profilePhoneMissing => 'رقم هاتفك غير موجود';
+
+  @override
   String get verifyNow => 'وثّق الآن';
+
+  @override
+  String get addNow => 'أضف الآن';
 
   @override
   String get changeNumber => 'غيّر الرقم';
@@ -150,6 +166,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get socialRoleSubtitle => 'خطوة أخيرة — اختار نوع حسابك';
 
   @override
+  String socialWelcomeGreeting(String name) {
+    return 'أهلاً بيك، $name! 👋';
+  }
+
+  @override
+  String get socialRoleLastStep => 'خطوة أخيرة — هتستخدم xStore إزاي؟';
+
+  @override
+  String get socialWelcomeFallbackName => 'يا صاحبي';
+
+  @override
   String get searchHint => 'ابحث عن منتجات...';
 
   @override
@@ -184,6 +211,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get easyReturnsBadge => '↩️ إرجاع سهل';
+
+  @override
+  String get productTrustFastShipping => 'شحن سريع';
+
+  @override
+  String get productTrustSecurePayment => 'دفع آمن';
+
+  @override
+  String get productTrustEasyReturns => 'إرجاع سهل';
 
   @override
   String get shopNow => 'تسوق دلوقتي';
@@ -438,10 +474,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingCompareAtTitle => 'سعر قبل الخصم (اختياري)';
 
   @override
-  String get listingCompareAtHelper => 'السعر الأصلي لعرض الخصم';
+  String get listingCompareAtHelper =>
+      'السعر الأصلي الذي يظهر مشطوبًا عند الخصم. اتركه فارغًا إن لم يكن هناك خصم. يجب أن يكون أكبر من سعر البيع.';
 
   @override
-  String get listingCompareAtWarning => 'سعر قبل الخصم أقل من سعر البيع.';
+  String get listingCompareAtWarning =>
+      'يجب أن يكون سعر قبل الخصم أكبر من سعر البيع.';
 
   @override
   String get listingDescriptionLabel => 'الوصف *';
@@ -1099,7 +1137,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersDeliveryLocationUpdated => 'تم تحديث موقع التوصيل';
 
   @override
-  String get ordersConfirmReceipt => '✓ تأكيد الاستلام';
+  String get ordersConfirmReceipt => 'تأكيد الاستلام';
 
   @override
   String get ordersLeaveReview => 'اترك تقييم';
@@ -1241,6 +1279,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersConfirmReceiptTitle => 'تأكيد الاستلام؟';
+
+  @override
+  String get ordersConfirmReceiptBody => 'هل تأكد إنك استلمت هذا الطلب؟';
 
   @override
   String get ordersConfirm => 'تأكيد';
@@ -1534,6 +1575,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartShippingLine => 'الشحن';
 
   @override
+  String cartFreeShippingThresholdNote(String threshold) {
+    return '🚚 المنتجات اللي سعرها $threshold وأكتر شحنها مجاني';
+  }
+
+  @override
   String get cartTotalLine => 'الإجمالي';
 
   @override
@@ -1708,6 +1754,25 @@ class AppLocalizationsAr extends AppLocalizations {
       'من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب';
 
   @override
+  String get checkoutPartialOrderTitle => 'جزء من طلبك ماتمش';
+
+  @override
+  String checkoutPartialOrderWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج',
+      few: '$count منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+    );
+    return '$_temp0 ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.';
+  }
+
+  @override
+  String get checkoutPartialOrderAck => 'تمام';
+
+  @override
   String get orderPlacedTitle => 'تم الطلب! 🎉';
 
   @override
@@ -1876,6 +1941,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteListing => 'حذف';
 
   @override
+  String get myListingsSearchTitle => 'البحث في الإعلانات';
+
+  @override
+  String get myListingsSearchHint => 'ابحث بالعنوان';
+
+  @override
+  String get myListingsSearchClear => 'مسح';
+
+  @override
+  String get myListingsSearchSubmit => 'بحث';
+
+  @override
+  String get myListingsDeleteTitle => 'حذف الإعلان؟';
+
+  @override
+  String myListingsDeleteBody(String title) {
+    return 'سيتم حذف "$title" نهائيًا.';
+  }
+
+  @override
   String get draft => 'مسودة';
 
   @override
@@ -1924,6 +2009,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorGeneric => 'حصل خطأ';
 
   @override
+  String get routeErrorMessage => 'معرفناش نفتح الصفحة دي. حاول تاني.';
+
+  @override
+  String get goHome => 'ارجع للرئيسية';
+
+  @override
+  String get serverErrorMessage => 'حصلت مشكلة من عندنا. حاول تاني بعد شوية.';
+
+  @override
   String get emptyInbox => 'لا يوجد شيء بعد';
 
   @override
@@ -1939,13 +2033,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorViewAnalytics => 'عرض التحليلات';
 
   @override
-  String get vendorStatPendingOrders => 'طلبات معلقة';
+  String get vendorStatPendingOrders => 'معلقة';
 
   @override
-  String get vendorStatActiveOrders => 'طلبات نشطة';
+  String get vendorStatActiveOrders => 'نشطة';
 
   @override
-  String get vendorStatTotalOrders => 'إجمالي الطلبات';
+  String get vendorStatTotalOrders => 'إجمالي';
 
   @override
   String get vendorStatRevenue => 'الإيرادات';
@@ -2535,6 +2629,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get storeNameHint => '[AR] e.g. Ahmed\'s Electronics';
+
+  @override
+  String storeUrlPreview(String slug) {
+    return 'رابط متجرك: xstore.com/store/$slug';
+  }
 
   @override
   String get storeCategoryRequired => 'فئة المتجر *';
@@ -3407,27 +3506,4 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'مرتبط بطلب';
-
-  @override
-  String get myListingsSearchTitle => 'بحث في الإعلانات';
-
-  @override
-  String get myListingsSearchHint => 'ابحث بالعنوان';
-
-  @override
-  String get myListingsSearchClear => 'مسح';
-
-  @override
-  String get myListingsSearchAction => 'بحث';
-
-  @override
-  String get myListingsDeleteTitle => 'حذف الإعلان؟';
-
-  @override
-  String myListingsDeleteMessage(String title) {
-    return 'سيتم حذف “$title” نهائياً.';
-  }
-
-  @override
-  String get myListingsDeleteConfirm => 'حذف';
 }

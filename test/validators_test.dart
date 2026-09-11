@@ -80,6 +80,24 @@ void main() {
     });
   });
 
+  group('isMissingPhoneNumber', () {
+    test('empty and whitespace', () {
+      expect(AppValidators.isMissingPhoneNumber(null), isTrue);
+      expect(AppValidators.isMissingPhoneNumber(''), isTrue);
+      expect(AppValidators.isMissingPhoneNumber('   '), isTrue);
+    });
+
+    test('all-zero backend placeholders', () {
+      expect(AppValidators.isMissingPhoneNumber('000000000'), isTrue);
+      expect(AppValidators.isMissingPhoneNumber('00000000000'), isTrue);
+    });
+
+    test('real Egypt numbers are present', () {
+      expect(AppValidators.isMissingPhoneNumber('01012345678'), isFalse);
+      expect(AppValidators.isMissingPhoneNumber('+201012345678'), isFalse);
+    });
+  });
+
   group('dateOfBirth', () {
     final today = DateTime(2026, 7, 26);
     final yesterday = DateTime(2026, 7, 25);
@@ -198,6 +216,33 @@ void main() {
         shippingCostInput: '',
       );
       expect(Validators.listingFormHasErrors(input), isFalse);
+    });
+
+    test('compare-at must be strictly greater than price', () {
+      ListingFormValidationInput input({required String compareAt}) =>
+          ListingFormValidationInput(
+            photoPaths: const ['p'],
+            name: 'Shoes',
+            priceInput: '10',
+            compareAtPriceInput: compareAt,
+            description: 'Nice',
+            categoryId: 'c',
+            subcategoryId: 's',
+            condition: 'new',
+            quantity: 1,
+            location: 'Cairo',
+            shippingAvailable: false,
+            shippingCostInput: '',
+          );
+
+      expect(Validators.listingFormHasErrors(input(compareAt: '')), isFalse);
+      expect(Validators.listingFormHasErrors(input(compareAt: '11')), isFalse);
+      expect(Validators.listingFormHasErrors(input(compareAt: '10')), isTrue);
+      expect(Validators.listingFormHasErrors(input(compareAt: '9')), isTrue);
+      expect(
+        Validators.listingFormErrors(l10n, input(compareAt: '10'))['compareAt'],
+        l10n.listingCompareAtWarning,
+      );
     });
   });
 }

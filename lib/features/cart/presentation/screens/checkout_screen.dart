@@ -38,6 +38,10 @@ class CheckoutScreen extends ConsumerWidget {
       // guaranteed-failing request and gets the OTP sheet up sooner.
       if (!await requirePhoneVerified(context, ref)) return;
       if (!context.mounted) return;
+      // Checkout places one real order per cart line (no batch endpoint
+      // exists) — capture what was actually submitted so a partial
+      // failure can be told apart from full success below.
+      final requestedCount = cart.selectedAvailableItems.length;
       final order = await notifier.placeOrder();
       if (!context.mounted) return;
       if (order == null) {
@@ -74,6 +78,23 @@ class CheckoutScreen extends ConsumerWidget {
         return;
       }
       ref.invalidate(ordersNotifierProvider);
+      final missing = requestedCount - order.items.length;
+      if (missing > 0 && context.mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(context.l10n.checkoutPartialOrderTitle),
+            content: Text(context.l10n.checkoutPartialOrderWarning(missing)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(context.l10n.checkoutPartialOrderAck),
+              ),
+            ],
+          ),
+        );
+        if (!context.mounted) return;
+      }
       await showOrderConfirmationSheet(context, orderId: order.id);
     }
 

@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
+import 'package:xstore/features/store_categories/domain/entities/store_category_entity.dart';
 
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -17,7 +17,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
-import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../providers/profile_verification_provider.dart';
@@ -143,7 +143,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       context: context,
       builder: (ctx) => Consumer(
         builder: (ctx, ref, _) {
-          final async = ref.watch(allCatalogCategoriesProvider);
+          final async = ref.watch(allStoreCategoriesProvider);
           final selectedId = ref.watch(
             profileNotifierProvider.select((s) => s.editStoreCategoryId),
           );
@@ -167,7 +167,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         const Gap(AppSpacing.sm),
                         TextButton(
                           onPressed: () =>
-                              ref.invalidate(allCatalogCategoriesProvider),
+                              ref.invalidate(allStoreCategoriesProvider),
                           child: Text(context.l10n.retry),
                         ),
                       ],
@@ -210,8 +210,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
     if (!mounted || id == null) return;
     final categories =
-        ref.read(allCatalogCategoriesProvider).valueOrNull ?? const [];
-    final cat = _catalogCategoryById(categories, id);
+        ref.read(allStoreCategoriesProvider).valueOrNull ?? const [];
+    final cat = _storeCategoryById(categories, id);
     final label = cat?.name.resolve(context.isArabic) ?? '';
     setState(() {
       _storeCategory.text = label.isEmpty ? context.l10n.requiredField : label;
@@ -221,9 +221,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   String _storeCategoryLabel(ProfileState s) {
     final id = s.editStoreCategoryId;
-    final categories = ref.read(allCatalogCategoriesProvider).valueOrNull;
+    final categories = ref.read(allStoreCategoriesProvider).valueOrNull;
     if (id != null && categories != null) {
-      final cat = _catalogCategoryById(categories, id);
+      final cat = _storeCategoryById(categories, id);
       if (cat != null) return cat.name.resolve(context.isArabic);
     }
     if (s.editStoreCategory.isEmpty) return context.l10n.requiredField;
@@ -463,7 +463,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   bool _typedPhoneIsVerified(ProfileState s) {
     final typed = AppValidators.normalizeEgyptLocal(_phone.text);
-    if (typed.isEmpty) return false;
+    if (AppValidators.isMissingPhoneNumber(typed)) return false;
     if (_otpVerifiedPhone != null &&
         typed == AppValidators.normalizeEgyptLocal(_otpVerifiedPhone!)) {
       return true;
@@ -491,14 +491,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<String?> _promptNewEmail() {
-    return showAnimatedDialog<String>(
+    return showAnimatedBottomSheet<String>(
       context: context,
-      child: EditProfileContactValueDialog(
+      builder: (_) => EditProfileContactValueSheet(
         title: context.l10n.verifyYourEmail,
         initialText: _email.text.trim(),
         fieldBuilder: (ctx, controller) => TextField(
           controller: controller,
-          autofocus: true,
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             labelText: ctx.l10n.email,
@@ -512,11 +511,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<String?> _promptNewPhone() {
-    return showAnimatedDialog<String>(
+    return showAnimatedBottomSheet<String>(
       context: context,
-      child: EditProfileContactValueDialog(
+      builder: (_) => EditProfileContactValueSheet(
         title: context.l10n.verifyYourNumber,
-        initialText: AppValidators.normalizeEgyptLocal(_phone.text),
+        initialText: AppValidators.isMissingPhoneNumber(_phone.text)
+            ? ''
+            : AppValidators.normalizeEgyptLocal(_phone.text),
         fieldBuilder: (ctx, controller) =>
             PhoneInputField(controller: controller, onChanged: (_) {}),
         normalize: AppValidators.normalizeEgyptLocal,
@@ -573,7 +574,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       return false;
     }
     final phone = AppValidators.normalizeEgyptLocal(contact ?? _phone.text);
-    if (phone.isEmpty) return false;
+    if (AppValidators.isMissingPhoneNumber(phone)) return false;
     final formatErr = Validators.egyptPhone(context.l10n, phone);
     if (formatErr != null) {
       AppSnackbar.error(context, formatErr);
@@ -754,7 +755,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             onTap: isVendor ? null : _changePhone,
             suffix: _VerificationStatus(
               verified: _typedPhoneIsVerified(s),
-              onVerify: _phone.text.trim().isEmpty
+              onVerify: AppValidators.isMissingPhoneNumber(_phone.text)
                   ? null
                   : () {
                       _verifyPhone();
@@ -945,10 +946,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
 /// Prompt for a new email/phone. Owns its [TextEditingController] so dispose
 /// happens in [State.dispose] after the animated route is gone — disposing
-/// when [showAnimatedDialog] returns is too early (exit animation still
+/// when [showAnimatedBottomSheet] returns is too early (exit animation still
 /// holds the TextField).
-class EditProfileContactValueDialog extends StatefulWidget {
-  const EditProfileContactValueDialog({
+class EditProfileContactValueSheet extends StatefulWidget {
+  const EditProfileContactValueSheet({
     super.key,
     required this.title,
     required this.initialText,
@@ -965,12 +966,12 @@ class EditProfileContactValueDialog extends StatefulWidget {
   final String? Function(String value) validate;
 
   @override
-  State<EditProfileContactValueDialog> createState() =>
-      _EditProfileContactValueDialogState();
+  State<EditProfileContactValueSheet> createState() =>
+      _EditProfileContactValueSheetState();
 }
 
-class _EditProfileContactValueDialogState
-    extends State<EditProfileContactValueDialog> {
+class _EditProfileContactValueSheetState
+    extends State<EditProfileContactValueSheet> {
   late final TextEditingController _controller;
 
   @override
@@ -995,21 +996,65 @@ class _EditProfileContactValueDialogState
     Navigator.pop(context, value);
   }
 
+  bool get _canSubmit {
+    final value = widget.normalize(_controller.text);
+    if (value == widget.normalize(widget.initialText)) return false;
+    return widget.validate(value) == null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.title),
-      content: widget.fieldBuilder(context, _controller),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.title,
+                  style: AppTypography.titleMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Gap(AppSpacing.lg),
+                widget.fieldBuilder(context, _controller),
+                const Gap(AppSpacing.lg),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(context.l10n.cancel),
+                      ),
+                    ),
+                    const Gap(AppSpacing.md),
+                    Expanded(
+                      child: ListenableBuilder(
+                        listenable: _controller,
+                        builder: (context, _) => FilledButton(
+                          onPressed: _canSubmit ? _submit : null,
+                          child: Text(context.l10n.verify),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        TextButton(
-          onPressed: _submit,
-          child: Text(context.l10n.verify),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -1044,8 +1089,11 @@ class _VerificationStatus extends StatelessWidget {
     return TextButton(
       onPressed: onVerify,
       style: TextButton.styleFrom(
+        // No tapTargetSize override: keep the default padded (48dp)
+        // invisible hit area so the tap target stays accessible even
+        // though the visible chip is compact enough to sit as a
+        // suffixIcon inline with the field.
         minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
@@ -1077,15 +1125,12 @@ bool editProfileContactNeedsOtp({
   return true;
 }
 
-CatalogCategoryEntity? _catalogCategoryById(
-  List<CatalogCategoryEntity> all,
+StoreCategoryEntity? _storeCategoryById(
+  List<StoreCategoryEntity> all,
   int id,
 ) {
   for (final c in all) {
     if (c.id == id) return c;
-    for (final child in c.children) {
-      if (child.id == id) return child;
-    }
   }
   return null;
 }

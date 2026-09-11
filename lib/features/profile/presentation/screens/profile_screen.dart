@@ -8,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
@@ -23,6 +24,7 @@ import '../widgets/vendor_store_card.dart';
 // TODO(phase-2): Re-enable once store/active hours ships.
 // import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -91,9 +93,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final u = profile?.user ?? user;
     final isVendor = u.hasStore;
-    final sellerId = u.id.isNotEmpty ? u.id : user.id;
+    final phoneMissing = AppValidators.isMissingPhoneNumber(u.phoneNumber);
+    // final sellerId = u.id.isNotEmpty ? u.id : user.id;
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.profile,
+      onReentry: (ref) =>
+          ref.read(profileNotifierProvider.notifier).refreshProfileData(),
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       body: RefreshIndicator(
         onRefresh: _onRefresh,
@@ -168,21 +175,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               if (profile != null &&
                   ((!profile.isEmailVerified && u.email.isNotEmpty) ||
-                      (!profile.isPhoneVerified && u.phoneNumber.isNotEmpty)))
+                      phoneMissing ||
+                      !profile.isPhoneVerified))
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg,
                       AppSpacing.sm,
                       AppSpacing.lg,
-                      0,
+                                            AppSpacing.sm,
+
                     ),
                     child: ProfileVerificationBanner(
                       email: u.email,
+                      phoneNumber: u.phoneNumber,
                       showEmailPrompt:
                           !profile.isEmailVerified && u.email.isNotEmpty,
-                      showPhonePrompt: !profile.isPhoneVerified &&
-                          u.phoneNumber.isNotEmpty,
+                      showPhonePrompt:
+                          phoneMissing || !profile.isPhoneVerified,
                     ),
                   ),
                 ),
@@ -233,9 +243,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: VendorStoreCard(
                       profile: profile,
-                      onManageStore: sellerId.isEmpty
-                          ? null
-                          : () => context.push(AppRoutes.sellerPath(sellerId)),
+                      // Hidden on the card; keep the route wired for restore.
+                      // onManageStore: sellerId.isEmpty
+                      //     ? null
+                      //     : () => context.push(AppRoutes.sellerPath(sellerId)),
                     ),
                   ),
                 ),
@@ -253,6 +264,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           ],
         ),
+      ),
       ),
     );
   }

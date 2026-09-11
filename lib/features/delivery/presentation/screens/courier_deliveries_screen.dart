@@ -4,8 +4,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/courier_order_flow.dart';
 import '../../domain/delivery_request_flow.dart';
@@ -140,7 +142,13 @@ class _CourierDeliveriesScreenState
         state.error == null &&
         packagesState.error == null;
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.deliveries,
+      onReentry: (ref) {
+        ref.read(courierDeliveriesProvider.notifier).fetchOrders();
+        ref.read(courierPackagesProvider.notifier).fetchPackages();
+      },
+      child: Scaffold(
       appBar: AppBar(title: Text(context.l10n.courierDeliveriesTitle)),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -226,6 +234,7 @@ class _CourierDeliveriesScreenState
                   ),
                 ],
               ),
+      ),
       ),
     );
   }

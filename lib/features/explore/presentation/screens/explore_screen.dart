@@ -13,8 +13,12 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/utils/require_login.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/explore_skeleton.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../home/presentation/providers/categories_provider.dart';
+import '../../domain/entities/search_result_entity.dart';
 import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
@@ -69,6 +73,36 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     return c;
   }
 
+  Future<void> _addToCart(SearchResultEntity item) async {
+    if (!requireLogin(context, ref)) return;
+    await ref.read(cartProvider.notifier).addFromListing(
+          listingId: item.id,
+          quantity: 1,
+        );
+    if (!mounted) return;
+    final cartError = ref.read(cartProvider).error;
+    if (cartError != null) {
+      AppSnackbar.error(context, resolveAppError(context, cartError));
+      ref.read(cartProvider.notifier).clearError();
+      return;
+    }
+    AppSnackbar.success(context, context.l10n.addedToCart);
+  }
+
+  void _openFilters(
+    BuildContext context,
+    FilterState filters,
+    List<String> categoryOptions,
+  ) {
+    showExploreFilterBottomSheet(
+      context: context,
+      initial: filters,
+      categoryOptions: categoryOptions,
+      onApply: ref.read(exploreProvider.notifier).applyFilters,
+      onReset: ref.read(exploreProvider.notifier).resetFilters,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(
@@ -99,11 +133,28 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             .toList() ??
         const <String>[];
 
+    final filterCount = _filterCount(state.filters);
+
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         title: Text(context.l10n.navExplore),
         backgroundColor: context.backgroundColor,
+        actions: [
+          IconButton(
+            tooltip: context.l10n.filters,
+            onPressed: () => _openFilters(
+              context,
+              state.filters,
+              categoryOptions,
+            ),
+            icon: Badge(
+              isLabelVisible: filterCount > 0,
+              label: Text('$filterCount'),
+              child: const Icon(LucideIcons.slidersHorizontal),
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         color: AppColors.primary,
@@ -160,19 +211,23 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             children: [
                               const Gap(AppSpacing.md),
                               const RecentSearchesHeader(),
-                              Wrap(
-                                spacing: AppSpacing.sm,
-                                children: recent
-                                    .map(
-                                      (t) => ActionChip(
-                                        label: Text(t),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    for (var i = 0; i < recent.length; i++) ...[
+                                      if (i > 0)
+                                        const SizedBox(width: AppSpacing.sm),
+                                      ActionChip(
+                                        label: Text(recent[i]),
                                         onPressed: () {
-                                          _q.text = t;
-                                          notifier.onQueryChanged(t);
+                                          _q.text = recent[i];
+                                          notifier.onQueryChanged(recent[i]);
                                         },
                                       ),
-                                    )
-                                    .toList(),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ],
                           );
@@ -183,7 +238,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       const Gap(AppSpacing.lg),
                       ActiveFiltersRow(
                         filters: state.filters,
-                        activeFilterCount: _filterCount(state.filters),
                         onRemoveCategory: (c) {
                           final next = List<String>.from(state.filters.categories)
                             ..remove(c);
@@ -195,13 +249,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           notifier.applyFilters(state.filters.copyWith(conditions: next));
                         },
                         onClearAll: notifier.resetFilters,
-                        onOpenFilters: () => showExploreFilterBottomSheet(
-                          context: context,
-                          initial: state.filters,
-                          categoryOptions: categoryOptions,
-                          onApply: notifier.applyFilters,
-                          onReset: notifier.resetFilters,
-                        ),
                       ),
                       const Gap(AppSpacing.md),
                       Row(
@@ -314,7 +361,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           child: ProductGridCard(
                             key: ValueKey<String>('explore-grid-${item.id}'),
                             item: item,
-                            onAddToCart: () {},
+                            onAddToCart: () => _addToCart(item),
                             showAddToCart: !isVendor,
                             onTap: () =>
                                 context.push('${AppRoutes.product}/${item.id}'),
@@ -338,7 +385,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             child: ProductListCard(
                               key: ValueKey<String>('explore-list-${item.id}'),
                               item: item,
-                              onAddToCart: () {},
+                              onAddToCart: () => _addToCart(item),
                               showAddToCart: !isVendor,
                               onTap: () => context.push(
                                 '${AppRoutes.product}/${item.id}',

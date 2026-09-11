@@ -276,11 +276,14 @@ class ListingFormNotifier extends _$ListingFormNotifier {
       case 'description':
         state = state.copyWith(description: value as String, errors: e);
       case 'priceInput':
+        e.remove('price');
+        e.remove('compareAt');
         state = state.copyWith(
           priceInput: _formatPriceInput(value as String),
           errors: e,
         );
       case 'compareAtPriceInput':
+        e.remove('compareAt');
         state = state.copyWith(
           compareAtPriceInput: _formatPriceInput(value as String),
           errors: e,
@@ -363,7 +366,8 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     if (state.compareAtPriceInput.trim().isEmpty) {
       return false;
     }
-    return c < p;
+    // Backend: CompareAtPrice must be strictly greater than Price.
+    return c <= p;
   }
 
   void addAttribute() {
@@ -410,6 +414,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         photoPaths: state.photoPaths,
         name: state.name,
         priceInput: state.priceInput,
+        compareAtPriceInput: state.compareAtPriceInput,
         description: state.description,
         categoryId: state.categoryId,
         subcategoryId: state.subcategoryId,
@@ -420,6 +425,14 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         shippingCostInput: state.shippingCostInput,
         existingPhotoCount: state.existingImageUrls.length,
       );
+
+  double? get _compareAtForSubmit {
+    final compareAt = Validators.parseMoneyInput(state.compareAtPriceInput);
+    final price = Validators.parseMoneyInput(state.priceInput);
+    if (compareAt == null || compareAt <= 0 || price == null) return null;
+    if (compareAt <= price) return null;
+    return compareAt;
+  }
 
   /// Whether all required fields satisfy validation (no errors written to state).
   bool get canSubmit =>
@@ -459,7 +472,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
       final categoryId = int.tryParse(state.categoryId);
       final subcategoryId = int.tryParse(state.subcategoryId);
       final condition = _conditionFromFormValue(state.condition);
-      final compareAt = Validators.parseMoneyInput(state.compareAtPrice);
       final shippingCost = state.shippingAvailable ? (state.shippingCost ?? 0) : 0.0;
       final attributesMap = <String, String>{
         for (final a in state.attributes)
@@ -474,6 +486,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         return false;
       }
 
+      final compareAtPrice = _compareAtForSubmit;
       final isEditing = state.editingListingId.isNotEmpty;
       final result = isEditing
           ? await ref.read(updateListingUseCaseProvider).call(
@@ -486,8 +499,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
                 descriptionEn: state.description.trim(),
                 descriptionAr: state.description.trim(),
                 price: price,
-                compareAtPrice:
-                    (compareAt != null && compareAt > 0) ? compareAt : null,
+                compareAtPrice: compareAtPrice,
                 categoryId: categoryId,
                 subcategoryId: subcategoryId,
                 condition: condition,
@@ -514,8 +526,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
                 descriptionEn: state.description.trim(),
                 descriptionAr: state.description.trim(),
                 price: price,
-                compareAtPrice:
-                    (compareAt != null && compareAt > 0) ? compareAt : null,
+                compareAtPrice: compareAtPrice,
                 categoryId: categoryId,
                 subcategoryId: subcategoryId,
                 condition: condition,

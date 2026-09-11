@@ -32,56 +32,57 @@ class CartVendorGroupBlock extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Material(
-          color: AppColors.primary.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(AppSpacing.md),
-          child: InkWell(
-            onTap: () => context.push(
-              '${AppRoutes.sellerProfile}/${group.vendorId}',
-            ),
-            borderRadius: BorderRadius.circular(AppSpacing.md),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm + AppSpacing.xs,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '🏪 ${group.vendorStoreName}',
-                        style: AppTypography.titleMedium.copyWith(
-                          fontWeight: FontWeight.w700,
-                          
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        '(${group.items.length} items)',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: context.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    group.vendorRating != null
-                        ? '${context.l10n.starChar} ${group.vendorRating!.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}'
-                        : context.l10n.newSeller,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: context.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
+        // Vendor header (store name + rating / "New Seller") — keep for restore.
+        // Material(
+        //   color: AppColors.primary.withValues(alpha: 0.06),
+        //   borderRadius: BorderRadius.circular(AppSpacing.md),
+        //   child: InkWell(
+        //     onTap: () => context.push(
+        //       '${AppRoutes.sellerProfile}/${group.vendorId}',
+        //     ),
+        //     borderRadius: BorderRadius.circular(AppSpacing.md),
+        //     child: Padding(
+        //       padding: const EdgeInsets.symmetric(
+        //         horizontal: AppSpacing.md,
+        //         vertical: AppSpacing.sm + AppSpacing.xs,
+        //       ),
+        //       child: Column(
+        //         crossAxisAlignment: CrossAxisAlignment.start,
+        //         children: [
+        //           Row(
+        //             children: [
+        //               Text(
+        //                 '🏪 ${group.vendorStoreName}',
+        //                 style: AppTypography.titleMedium.copyWith(
+        //                   fontWeight: FontWeight.w700,
+        //                 ),
+        //               ),
+        //               // Item count beside store name — keep for restore.
+        //               // const SizedBox(width: AppSpacing.sm),
+        //               // Text(
+        //               //   '(${group.items.length} items)',
+        //               //   style: AppTypography.bodySmall.copyWith(
+        //               //     color: context.textSecondary,
+        //               //     fontWeight: FontWeight.w500,
+        //               //   ),
+        //               // ),
+        //             ],
+        //           ),
+        //           const SizedBox(height: AppSpacing.xs),
+        //           Text(
+        //             group.vendorRating != null
+        //                 ? '${context.l10n.starChar} ${group.vendorRating!.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}'
+        //                 : context.l10n.newSeller,
+        //             style: AppTypography.labelSmall.copyWith(
+        //               color: context.textSecondary,
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: AppSpacing.md),
         // Plain Column, not a nested shrinkWrap ListView: this feature's
         // parent scrollable already handles the whole cart's scrolling via
         // slivers, and a vendor's item count is small/bounded (never an

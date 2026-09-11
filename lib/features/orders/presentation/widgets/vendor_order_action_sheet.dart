@@ -25,8 +25,7 @@ class VendorOrderActionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     if (order.status == OrderStatus.shipped ||
         order.status == OrderStatus.delivered ||
-        order.status == OrderStatus.cancelled ||
-        order.status == OrderStatus.refunded) {
+        order.status == OrderStatus.cancelled) {
       return const SizedBox.shrink();
     }
     return SafeArea(
@@ -50,17 +49,34 @@ class VendorOrderActionSheet extends StatelessWidget {
           Expanded(
             child: OutlinedButton(
               onPressed: onReject,
-              style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
-              child: Text(context.l10n.vendorRejectOrder),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                context.l10n.vendorRejectOrder,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            flex: 2,
             child: FilledButton(
               onPressed: onConfirm,
-              style: FilledButton.styleFrom(backgroundColor: AppColors.success),
-              child: Text(context.l10n.vendorConfirmOrderShort),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.success,
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                context.l10n.vendorConfirmOrderShort,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ],
@@ -69,11 +85,13 @@ class VendorOrderActionSheet extends StatelessWidget {
     if (order.status == OrderStatus.confirmed) {
       return FilledButton(
         onPressed: onProcessing,
+        style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
         child: Text(context.l10n.vendorMarkProcessing),
       );
     }
     return FilledButton(
       onPressed: onShipped,
+      style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
       child: Text(context.l10n.vendorMarkShipped),
     );
   }

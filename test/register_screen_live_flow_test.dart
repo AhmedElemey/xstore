@@ -240,12 +240,26 @@ void main() {
       await tester.tap(find.widgetWithText(XstoreButton, 'Continue'));
       await _settle(tester);
 
-      // Step 2: personal info. The location cascade is seeded directly
-      // (see file-level comment) rather than driving its picker sheets.
+      // Step 2: personal info. Continue stays dimmed until email + phone
+      // match the register validators. The location cascade is seeded
+      // directly (see file-level comment) rather than driving its picker
+      // sheets.
+      XstoreButton continueBtn() => tester.widget<XstoreButton>(
+        find.widgetWithText(XstoreButton, 'Continue'),
+      );
+      expect(continueBtn().onPressed, isNull);
+
       var fields = find.byType(TextFormField);
       await tester.enterText(fields.at(0), 'Test User');
-      await tester.enterText(fields.at(1), 'newuser@test.com');
+      await tester.enterText(fields.at(1), 'not-an-email');
       await tester.enterText(fields.at(2), '01012345678');
+      await tester.pump();
+      expect(continueBtn().onPressed, isNull);
+
+      await tester.enterText(fields.at(1), 'newuser@test.com');
+      await tester.pump();
+      expect(continueBtn().onPressed, isNotNull);
+
       container
           .read(registerNotifierProvider.notifier)
           .updateStoreLocation(storeCityId: 1, storeGovernmentId: 1);
@@ -259,6 +273,8 @@ void main() {
       await tester.enterText(fields.at(0), 'Password123!');
       await tester.enterText(fields.at(1), 'Password123!');
       await tester.pump();
+      expect(continueBtn().onPressed, isNull);
+
       await tester.scrollUntilVisible(
         find.byType(Checkbox),
         200,
@@ -266,6 +282,7 @@ void main() {
       );
       await tester.tap(find.byType(Checkbox));
       await tester.pump();
+      expect(continueBtn().onPressed, isNotNull);
       await tester.tap(find.widgetWithText(XstoreButton, 'Continue'));
       await _settle(tester);
 

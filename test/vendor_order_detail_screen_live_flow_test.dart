@@ -106,6 +106,13 @@ Map<String, dynamic> _vendorOrderJson({
   'total': 30000,
   'createdAt': '2026-08-05T00:00:00.000Z',
   'updatedAt': '2026-08-05T00:00:00.000Z',
+  'deliveryAddress': {
+    'fullName': 'Nadia Mansouri',
+    'phone': '01022223333',
+    'street': '12 Nile St',
+    'city': 'Cairo',
+    'governorate': 'Giza',
+  },
 };
 
 Widget _harness(List<Override> overrides, String orderId) => ProviderScope(
@@ -197,16 +204,19 @@ void main() {
         find.text('Bluetooth Speaker', skipOffstage: false),
         findsOneWidget,
       );
-      // Appears twice: the buyer-info card's own consumerName, and the
-      // delivery-address card's fullName — which falls back to
-      // consumerName since the fixture has no nested address object
-      // (same CONFIRMED `_addressFromApi` fallback behavior as
-      // order_detail_screen_live_flow_test.dart).
+      expect(find.text('Buyer Info', skipOffstage: false), findsOneWidget);
+      expect(find.text('Nadia Mansouri', skipOffstage: false), findsOneWidget);
+      expect(find.text('01022223333', skipOffstage: false), findsOneWidget);
       expect(
-        find.text('Nadia Mansouri', skipOffstage: false),
-        findsWidgets,
+        find.text('Delivery Address', skipOffstage: false),
+        findsOneWidget,
       );
-      expect(find.text('Confirm Order'), findsOneWidget);
+      expect(find.text('12 Nile St', skipOffstage: false), findsOneWidget);
+      expect(find.text('Cairo, Giza', skipOffstage: false), findsOneWidget);
+      expect(find.text('View on Map', skipOffstage: false), findsNothing);
+      expect(find.text('Confirm Order'), findsNothing);
+      expect(find.text('Reject Order'), findsOneWidget);
+      expect(find.text('Confirm'), findsOneWidget);
     },
   );
 
@@ -240,8 +250,9 @@ void main() {
       ], '920');
       await _settle(tester);
 
-      expect(find.text('Confirm Order'), findsOneWidget);
-      await tester.tap(find.text('Confirm Order'));
+      expect(find.text('Confirm Order'), findsNothing);
+      expect(find.text('Confirm'), findsOneWidget);
+      await tester.tap(find.text('Confirm'));
       await _settle(tester);
 
       expect(find.text('How will this order be delivered?'), findsOneWidget);
@@ -251,14 +262,11 @@ void main() {
       expect(putRequest, isNotNull);
       expect(putRequest!.data, {
         'orderIds': [920],
-        'status': 'confirmed',
+        'status': 'Confirmed',
       });
-      // Appears twice: the inline _Urgent card's action AND the fixed
-      // bottom VendorOrderActionSheet both render the same
-      // vendorMarkProcessing string for a confirmed order.
       expect(
         find.text('Mark as Processing'),
-        findsWidgets,
+        findsOneWidget,
         reason: 'a confirmed order moves on to Mark as Processing',
       );
       expect(find.text('Confirm Order'), findsNothing);

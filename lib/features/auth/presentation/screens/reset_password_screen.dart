@@ -48,6 +48,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   bool _isLoading = false;
   String? _passwordError;
   String? _confirmError;
+  late final Listenable _fields;
+
+  @override
+  void initState() {
+    super.initState();
+    _fields = Listenable.merge([_password, _confirm]);
+  }
 
   @override
   void dispose() {
@@ -91,6 +98,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         context.go(AppRoutes.login);
       },
     );
+  }
+
+  bool get _canSubmit {
+    final l10n = context.l10n;
+    return Validators.registerPassword(l10n, _password.text) == null &&
+        Validators.confirmPasswordMatches(
+              l10n,
+              _password.text,
+              _confirm.text,
+            ) ==
+            null;
   }
 
   @override
@@ -169,10 +187,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 },
               ),
               const Gap(AppSpacing.x2l),
-              XstoreButton(
-                label: context.l10n.resetPassword,
-                isLoading: _isLoading,
-                onPressed: _isLoading ? null : _submit,
+              ListenableBuilder(
+                listenable: _fields,
+                builder: (context, _) => XstoreButton(
+                  label: context.l10n.resetPassword,
+                  isLoading: _isLoading,
+                  onPressed: _isLoading || !_canSubmit ? null : _submit,
+                ),
               ),
             ],
           ),

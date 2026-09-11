@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
 import '../../core/router/app_routes.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -87,19 +86,19 @@ class WishHeartButton extends ConsumerWidget {
     if (nowWishlisted && !wasWishlisted) {
       AppSnackbar.show(
         context,
-        message: AppStrings.wishlistSavedSnack,
+        message: context.l10n.wishlistSavedSnack,
         action: SnackBarAction(
-          label: AppStrings.wishlistView,
+          label: context.l10n.wishlistView,
           onPressed: () => context.go(AppRoutes.wishlist),
         ),
       );
     } else if (!nowWishlisted && wasWishlisted) {
       AppSnackbar.show(
         context,
-        message: AppStrings.wishlistRemovedSnack,
+        message: context.l10n.wishlistRemovedSnack,
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
-          label: AppStrings.cartUndo,
+          label: context.l10n.cartUndo,
           onPressed: () => ref.read(wishlistProvider.notifier).undoRemove(),
         ),
       );

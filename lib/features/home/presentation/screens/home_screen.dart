@@ -17,6 +17,7 @@ import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/home_skeleton.dart';
 import '../../domain/entities/deal_entity.dart';
 import '../providers/banners_provider.dart';
@@ -66,7 +67,16 @@ class HomeScreen extends ConsumerWidget {
       return const Scaffold(body: HomeSkeleton());
     }
 
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.home,
+      onReentry: (ref) {
+        ref.invalidate(bannersProvider);
+        ref.invalidate(hotDealsProvider);
+        ref.invalidate(categoriesProvider);
+        ref.invalidate(newArrivalsProvider);
+        ref.invalidate(recommendedProvider);
+      },
+      child: Scaffold(
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
@@ -136,7 +146,15 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const Gap(AppSpacing.md),
                   categories.toWidget(
-                    data: (data) => CategoryChipRow(categories: data),
+                    data: (data) => CategoryChipRow(
+                      categories: data,
+                      onSelected: (c) => context.go(
+                        Uri(
+                          path: AppRoutes.explore,
+                          queryParameters: {'category': c.name},
+                        ).toString(),
+                      ),
+                    ),
                     loading: () => const SizedBox(
                       height: AppSpacing.x3l + AppSpacing.sm,
                       child: _BannerShimmer(),
@@ -189,6 +207,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

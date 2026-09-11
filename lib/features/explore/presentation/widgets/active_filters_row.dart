@@ -14,16 +14,12 @@ class ActiveFiltersRow extends StatelessWidget {
     required this.onRemoveCategory,
     required this.onRemoveCondition,
     required this.onClearAll,
-    required this.onOpenFilters,
-    required this.activeFilterCount,
   });
 
   final FilterState filters;
   final ValueChanged<String> onRemoveCategory;
   final ValueChanged<String> onRemoveCondition;
   final VoidCallback onClearAll;
-  final VoidCallback onOpenFilters;
-  final int activeFilterCount;
 
   @override
   Widget build(BuildContext context) {
@@ -65,41 +61,33 @@ class ActiveFiltersRow extends StatelessWidget {
       ));
     }
 
-    if (chips.isEmpty && activeFilterCount == 0) {
-      return Wrap(
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        children: [
-          ActionChip(
-            label: Text(context.l10n.addFilters, style: AppTypography.labelLarge),
-            onPressed: onOpenFilters,
-          ),
-        ],
-      );
+    if (chips.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          if (chips.isNotEmpty)
-            TextButton.icon(
-              onPressed: onClearAll,
-              icon: Icon(LucideIcons.x, size: AppSpacing.lg, color: AppColors.primary),
-              label: Text(
-                context.l10n.clearAllFilters,
-                style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
+          TextButton.icon(
+            onPressed: onClearAll,
+            icon: Icon(
+              LucideIcons.x,
+              size: AppSpacing.lg,
+              color: AppColors.primary,
+            ),
+            label: Text(
+              context.l10n.clearAllFilters,
+              style: AppTypography.labelLarge.copyWith(
+                color: AppColors.primary,
               ),
             ),
+          ),
           ...chips.map(
             (w) => Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
               child: w,
             ),
-          ),
-          ActionChip(
-            label: Text(context.l10n.addFilters, style: AppTypography.labelLarge),
-            onPressed: onOpenFilters,
           ),
         ],
       ),

@@ -49,18 +49,21 @@ abstract interface class OrdersRemoteDataSource {
   Future<OrderModel> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   });
 
   Future<OrderModel> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   });
 
-  Future<OrderModel> markProcessing(String orderId);
+  Future<OrderModel> markProcessing(String orderId, {String? vendorId});
 
   Future<OrderModel> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   });
 
   Future<OrderModel> markDelivered(String orderId);
@@ -592,12 +595,15 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       return MockConfig.simulate(null);
     }
     try {
-      // CONFIRMED route: GET /orders/me/{id} (consumer-scoped). The
-      // payload shape was never live-probed — unwrap `{data|Data}` and
-      // tolerate 404 so the repository can fall back to GET /orders/me.
+      // CONFIRMED route: GET /orders/me/{id} (consumer-scoped). Live 404
+      // "Order not found" is expected for cancelled orders (they also drop
+      // off GET /orders/me) — tolerate it so the repository can fall back
+      // to the list without an ERROR log.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.orderMeById(orderId),
+        options: LegacyRouteOptions.allowNotFound(),
       );
+      if (LegacyRouteOptions.isNotFound(response)) return null;
       final map = _asOrderMap(response.data);
       if (map == null) return null;
       final parsed = _orderFromApiMap(map);
@@ -713,24 +719,35 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       // confirm/reject — there's no vendor-specific cancel route.
       return _setVendorOrderStatus(
         orderId: orderId,
-        status: 'cancelled',
+        status: OrderStatus.cancelled,
         localReason: reason,
       );
     }
     try {
-      // CONFIRMED route: POST /orders/{id}/cancel. No documented request
-      // body — the reason is applied locally for display only.
-      final response = await _dio.post<Map<String, dynamic>>(
+      // CONFIRMED route: POST /orders/{id}/cancel. A bodyless POST omits
+      // Content-Type and the live ASP.NET API returns 415; send the
+      // user-collected reason as JSON (same `reason` key as delivery
+      // cancel). Live cancel then 404s GET /orders/me/{id} and drops the
+      // row from GET /orders/me — do not refetch; keep a cancelled stub
+      // when the 2xx body is a Result envelope with no order. post<dynamic>
+      // so a non-Map body (bare success string) does not type-cast-throw.
+      final response = await _dio.post<dynamic>(
         ApiEndpoints.orderCancel(orderId),
+        data: {'reason': reason},
       );
-      final data = response.data;
-      final parsed = data != null
-          ? _orderFromApiMap(data)
-          : (await getOrderById(orderId));
-      if (parsed == null) throw const ServerException('Empty order response');
+      final map = _asOrderMap(response.data);
+      final parsed = map != null &&
+              (_optString(map, 'id') ?? _optString(map, 'orderId')) != null
+          ? _orderFromApiMap(map)
+          : _orderFromApiMap({
+              'id': orderId,
+              'status': 'cancelled',
+              'cancelReason': reason,
+            });
       return parsed.copyWith(
         status: OrderStatus.cancelled,
         cancelReason: parsed.cancelReason ?? reason,
+        cancelledAt: parsed.cancelledAt ?? DateTime.now(),
       );
     } on DioException catch (e) {
       throw mapDioException(e);
@@ -758,39 +775,54 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   /// Every vendor status transition (confirm/reject/processing/shipped/
-  /// delivered/cancel) goes through this one bulk endpoint. UNCONFIRMED
-  /// beyond `"confirmed"` (the only value shown in the collection's
-  /// example body) — the other values below are the app's existing enum
-  /// names lowercased, matching that one confirmed convention. Verify
-  /// the full enum with the backend before this ships to production.
+  /// delivered/cancel) goes through this one bulk endpoint. Wire `status`
+  /// is the C# `OrderStatus` *name* (`Confirmed`, …) — the property is a
+  /// `string`, so the int code 400s.
   Future<OrderModel> _setVendorOrderStatus({
     required String orderId,
-    required String status,
+    required OrderStatus status,
     String? localReason,
     DeliveryMethod? localDeliveryMethod,
     ShippingInfo? localShippingInfo,
+    String? vendorId,
   }) async {
     try {
       final response = await _dio.put<Map<String, dynamic>>(
         ApiEndpoints.vendorOrdersStatus,
         data: {
           'orderIds': [int.tryParse(orderId) ?? orderId],
-          'status': status,
+          'status': orderStatusToWireName(status),
         },
       );
+      // Same Result-envelope risk as cancelOrder: unwrap a possible
+      // `{data|Data: {...}}` wrap via _asOrderMap instead of assuming the
+      // order fields sit at the response's top level.
       final data = response.data;
+      final unwrapped =
+          (data != null && data['orders'] == null) ? _asOrderMap(data) : null;
       final parsedFromResponse =
-          (data != null && data['orders'] == null && data['id'] != null)
-              ? _orderFromApiMap(data)
-              : null;
-      final base = parsedFromResponse ?? await getOrderById(orderId);
+          unwrapped != null ? _orderFromApiMap(unwrapped) : null;
+      // Fallback hydration: GET /orders/me/{id} is consumer-scoped, so it's
+      // the wrong lookup for a vendor session — search the vendor's own
+      // order list instead when we know who the vendor is (mirrors
+      // OrdersRepositoryImpl.getOrderDetail's vendor branch). Callers that
+      // don't pass vendorId (courier's markShipped/markDelivered, the
+      // unreachable vendor branch of cancelOrder) keep the old fallback.
+      final base = parsedFromResponse ??
+          (vendorId != null
+              ? (await getVendorOrders(vendorId: vendorId, page: 1, pageSize: 100))
+                  .where((o) => o.id == orderId)
+                  .firstOrNull
+              : await getOrderById(orderId));
       if (base == null) throw const ServerException('Empty order response');
+      final track = localShippingInfo?.trackingNumber?.trim();
       return base.copyWith(
-        status: _statusFromWire(status) ?? base.status,
+        status: status,
         cancelReason: localReason ?? base.cancelReason,
         deliveryMethod: localDeliveryMethod ?? base.deliveryMethod,
-        trackingNumber:
-            localShippingInfo?.trackingNumber ?? base.trackingNumber,
+        trackingNumber: (track != null && track.isNotEmpty)
+            ? track
+            : base.trackingNumber,
         courierName: localShippingInfo?.courierName ?? base.courierName,
         estimatedDelivery:
             localShippingInfo?.estimatedDelivery ?? base.estimatedDelivery,
@@ -804,6 +836,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   Future<OrderModel> confirmOrder({
     required String orderId,
     required DeliveryMethod method,
+    String? vendorId,
   }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
@@ -823,8 +856,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     // "required for production" audit: this needs a backend field.
     return _setVendorOrderStatus(
       orderId: orderId,
-      status: 'confirmed',
+      status: OrderStatus.confirmed,
       localDeliveryMethod: method,
+      vendorId: vendorId,
     );
   }
 
@@ -832,6 +866,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   Future<OrderModel> rejectOrder({
     required String orderId,
     required String reason,
+    String? vendorId,
   }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
@@ -853,13 +888,14 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     // rejection-reason field is documented on this endpoint either.
     return _setVendorOrderStatus(
       orderId: orderId,
-      status: 'cancelled',
+      status: OrderStatus.cancelled,
       localReason: reason,
+      vendorId: vendorId,
     );
   }
 
   @override
-  Future<OrderModel> markProcessing(String orderId) async {
+  Future<OrderModel> markProcessing(String orderId, {String? vendorId}) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
       if (row == null) throw StateError('order');
@@ -871,13 +907,18 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    return _setVendorOrderStatus(orderId: orderId, status: 'processing');
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: OrderStatus.processing,
+      vendorId: vendorId,
+    );
   }
 
   @override
   Future<OrderModel> markShipped({
     required String orderId,
     required ShippingInfo shippingInfo,
+    String? vendorId,
   }) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
@@ -903,8 +944,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     // confirmOrder's delivery method.
     return _setVendorOrderStatus(
       orderId: orderId,
-      status: 'shipped',
+      status: OrderStatus.shipped,
       localShippingInfo: shippingInfo,
+      vendorId: vendorId,
     );
   }
 
@@ -922,7 +964,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    return _setVendorOrderStatus(orderId: orderId, status: 'delivered');
+    return _setVendorOrderStatus(
+      orderId: orderId,
+      status: OrderStatus.delivered,
+    );
   }
 
   @override
@@ -980,19 +1025,6 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
   }
 
-  static const _statusWireValues = {
-    'pending': OrderStatus.pending,
-    'confirmed': OrderStatus.confirmed,
-    'processing': OrderStatus.processing,
-    'shipped': OrderStatus.shipped,
-    'delivered': OrderStatus.delivered,
-    'cancelled': OrderStatus.cancelled,
-    'rejected': OrderStatus.cancelled,
-    'refunded': OrderStatus.refunded,
-  };
-
-  OrderStatus? _statusFromWire(String raw) =>
-      _statusWireValues[raw.toLowerCase()];
 
   /// Parses a single order object from the API. UNCONFIRMED field shape
   /// (see the doc on [ApiEndpoints.orders]) — tolerant of both a
@@ -1028,8 +1060,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       items = _itemFromFlatOrder(data, fallbackItems, listing: listing);
     }
 
-    final statusRaw = _optString(data, 'status') ?? '';
-    final status = _statusFromWire(statusRaw) ?? OrderStatus.pending;
+    final status =
+        orderStatusFromWire(_envelopeValue(data, 'status')) ??
+            OrderStatus.pending;
 
     final computedTotal = items.fold<double>(0, (a, b) => a + b.total);
 
@@ -1057,22 +1090,63 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         _optString(vendorNode ?? const {}, 'id') ??
         '';
     final vendorAvatar = _optString(data, 'vendorAvatar') ??
+        _optString(data, 'storeImageUrl') ??
+        _optString(data, 'storeLogoUrl') ??
+        _optString(listing ?? const {}, 'storeImageUrl') ??
+        _optString(listing ?? const {}, 'storeLogoUrl') ??
         _optString(data, 'userAvatar') ??
         _optString(listing ?? const {}, 'userAvatar') ??
         _optString(vendorNode ?? const {}, 'avatarUrl') ??
         _optString(vendorNode ?? const {}, 'storeImageUrl') ??
         '';
 
+    // Live vendor-order rows often omit top-level `consumerName`. Buyer
+    // may be nested (`buyer`/`consumer`/`customer`) or the order-level
+    // `user` when that id is not the vendor. Do not read listing
+    // `userName` — that is the vendor. `fullName` (not `userName`) and
+    // address name/phone are the remaining fallbacks so the card is not
+    // blank.
+    final orderUser = _asMap(_envelopeValue(data, 'user'));
+    final orderUserId = _optString(orderUser ?? const {}, 'id');
+    final orderUserName = _personName(orderUser);
+    final userIsVendor = (orderUserId != null && orderUserId == vendorId) ||
+        (orderUserName != null &&
+            (orderUserName == vendorName || orderUserName == vendorStoreName));
+    final buyerNode = _asMap(_envelopeValue(data, 'buyer')) ??
+        _asMap(_envelopeValue(data, 'consumer')) ??
+        _asMap(_envelopeValue(data, 'customer')) ??
+        (orderUser != null && !userIsVendor ? orderUser : null);
+    final deliveryAddress = _addressFromApi(data, fallbackAddress);
+
     return OrderModel(
       id: _optString(data, 'id') ?? _optString(data, 'orderId') ?? '',
       consumerId: _optString(data, 'consumerId') ??
           _optString(data, 'buyerId') ??
+          _optString(buyerNode ?? const {}, 'id') ??
           '',
-      consumerName: _optString(data, 'consumerName') ?? '',
+      consumerName: _optString(data, 'consumerName') ??
+          _optString(data, 'buyerName') ??
+          _optString(data, 'customerName') ??
+          _personName(data, allowGenericName: false) ??
+          _personName(buyerNode) ??
+          (deliveryAddress.fullName.isNotEmpty
+              ? deliveryAddress.fullName
+              : null) ??
+          '',
       consumerPhone: _optString(data, 'consumerPhone') ??
+          _optString(data, 'buyerPhone') ??
           _optString(data, 'phoneNumber') ??
+          _optString(buyerNode ?? const {}, 'phoneNumber') ??
+          _optString(buyerNode ?? const {}, 'phone') ??
+          (deliveryAddress.phone.isNotEmpty ? deliveryAddress.phone : null) ??
           '',
-      consumerAvatar: _optString(data, 'consumerAvatar') ?? '',
+      consumerAvatar: _optString(data, 'consumerAvatar') ??
+          _optString(data, 'buyerAvatar') ??
+          _optString(data, 'userImageUrl') ??
+          _optString(buyerNode ?? const {}, 'userImageUrl') ??
+          _optString(buyerNode ?? const {}, 'avatarUrl') ??
+          _optString(buyerNode ?? const {}, 'avatar') ??
+          '',
       vendorId: vendorId,
       vendorName: vendorName,
       vendorStoreName: vendorStoreName,
@@ -1082,7 +1156,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       status: status,
       paymentMethod: fallbackPayment ?? PaymentMethod.cashOnDelivery,
       isPaid: _envelopeBool(data, 'isPaid'),
-      deliveryAddress: _addressFromApi(data, fallbackAddress),
+      deliveryAddress: deliveryAddress,
       subtotal: _envelopeDouble(data, 'subtotal') ?? computedTotal,
       shippingCost: _envelopeDouble(data, 'shippingCost') ?? 0,
       discount: _envelopeDouble(data, 'discount') ?? 0,
@@ -1122,8 +1196,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         _asMap(_envelopeValue(data, 'address'));
     final src = nested ?? data;
     final fullName = _optString(src, 'fullName') ??
+        _optString(src, 'fullNameEn') ??
+        _optString(src, 'fullNameAr') ??
         _optString(src, 'name') ??
         _optString(data, 'consumerName') ??
+        _optString(data, 'fullName') ??
         fallback?.fullName ??
         '';
     final phone = _optString(src, 'phone') ??
@@ -1280,18 +1357,13 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   bool _needsListingSnap(OrderModel o) {
-    final needsVendor = o.vendorId.isEmpty &&
-        o.vendorName.isEmpty &&
-        o.vendorStoreName.isEmpty;
-    final needsItem = o.items.isEmpty ||
-        o.items.any(
-          (i) =>
-              i.listingName.isEmpty || i.listingImage.isEmpty || i.price <= 0,
-        );
-    final needsAddress = o.deliveryAddress.street.isEmpty &&
-        o.deliveryAddress.city.isEmpty &&
-        o.deliveryAddress.wilaya.isEmpty;
-    return needsVendor || needsItem || needsAddress;
+    // Sold/paused/cancelled listings 404 on public GET /api/listings/{id}.
+    // Only fetch when a line is missing the fields the card actually shows.
+    return o.items.any(
+      (i) =>
+          i.listingId.isNotEmpty &&
+          (i.listingName.isEmpty || i.listingImage.isEmpty || i.price <= 0),
+    );
   }
 
   Future<void> _ensureListingSnap(String listingId) async {
@@ -1299,16 +1371,30 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListingDetail(listingId),
+        options: LegacyRouteOptions.allowNotFound(),
       );
-      final map = _asOrderMap(response.data) ?? _asMap(response.data);
-      if (map == null) return;
-      if (_listingSnapCache.length >= _listingSnapCacheCap) {
-        _listingSnapCache.remove(_listingSnapCache.keys.first);
+      if (LegacyRouteOptions.isNotFound(response)) {
+        _rememberListingSnap(listingId, const <String, dynamic>{});
+        return;
       }
-      _listingSnapCache[listingId] = map;
-    } on DioException {
-      // Order still renders with whatever the order payload had.
+      final map = _asOrderMap(response.data) ?? _asMap(response.data);
+      if (map == null || map['isSuccess'] == false) {
+        _rememberListingSnap(listingId, const <String, dynamic>{});
+        return;
+      }
+      _rememberListingSnap(listingId, map);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        _rememberListingSnap(listingId, const <String, dynamic>{});
+      }
     }
+  }
+
+  void _rememberListingSnap(String listingId, Map<String, dynamic> map) {
+    if (_listingSnapCache.length >= _listingSnapCacheCap) {
+      _listingSnapCache.remove(_listingSnapCache.keys.first);
+    }
+    _listingSnapCache[listingId] = map;
   }
 
   OrderModel _applyListingSnap(OrderModel o) {
@@ -1320,7 +1406,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     for (var i = 0; i < o.items.length; i++) {
       final item = o.items[i];
       final snap = snaps[i];
-      if (snap == null) {
+      if (snap == null || snap.isEmpty) {
         items.add(item);
         continue;
       }
@@ -1349,7 +1435,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         ),
       );
     }
-    final firstSnap = snaps.whereType<Map<String, dynamic>>().firstOrNull;
+    final firstSnap = snaps
+        .whereType<Map<String, dynamic>>()
+        .where((m) => m.isNotEmpty)
+        .firstOrNull;
     var next = o.copyWith(items: items);
     if (firstSnap != null) {
       next = next.copyWith(
@@ -1368,7 +1457,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
                 o.vendorStoreName),
         vendorAvatar: o.vendorAvatar.isNotEmpty
             ? o.vendorAvatar
-            : (_optString(firstSnap, 'userAvatar') ?? o.vendorAvatar),
+            : (_optString(firstSnap, 'storeImageUrl') ??
+                _optString(firstSnap, 'storeLogoUrl') ??
+                _optString(firstSnap, 'userAvatar') ??
+                o.vendorAvatar),
       );
       final loc = _optString(firstSnap, 'location');
       if (loc != null &&
@@ -1401,8 +1493,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     }
     final nested = map['data'] ?? map['Data'];
     if (nested is Map) return _asOrderMap(nested);
-    if (map.isEmpty) return null;
-    return map;
+    // `{isSuccess, data: null, errorEn}` is a Result envelope, not an order.
+    return null;
   }
 
   String? _optString(Map<String, dynamic> m, String camel) {
@@ -1410,6 +1502,20 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     if (v == null) return null;
     final s = v.toString().trim();
     return s.isEmpty ? null : s;
+  }
+
+  /// Display name on a person object. Order-root `name` is skipped — it
+  /// is often the listing title, not the buyer.
+  String? _personName(
+    Map<String, dynamic>? m, {
+    bool allowGenericName = true,
+  }) {
+    if (m == null) return null;
+    return _optString(m, 'fullName') ??
+        _optString(m, 'fullNameEn') ??
+        _optString(m, 'fullNameAr') ??
+        _optString(m, 'displayName') ??
+        (allowGenericName ? _optString(m, 'name') : null);
   }
 
   /// Vendor-orders success is `Ok(result.Data)` (flat map). Also accept a

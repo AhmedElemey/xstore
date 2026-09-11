@@ -133,10 +133,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 },
               ),
               const Spacer(),
-              XstoreButton(
-                label: context.l10n.sendResetCode,
-                isLoading: _isLoading,
-                onPressed: _isLoading ? null : _sendResetLink,
+              ListenableBuilder(
+                listenable: _email,
+                builder: (context, _) => XstoreButton(
+                  label: context.l10n.sendResetCode,
+                  isLoading: _isLoading,
+                  onPressed: _isLoading || _validateEmail(_email.text) != null
+                      ? null
+                      : _sendResetLink,
+                ),
               ),
               TextButton(
                 onPressed: () => context.go(AppRoutes.login),

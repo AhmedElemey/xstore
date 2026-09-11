@@ -37,13 +37,17 @@ class Explore extends _$Explore {
   }
 
   void bootstrapFromRouteCategory(String? categoryKey) {
-    final prefix = switch (categoryKey) {
+    // The two featured-fashion banners route through fixed slugs; any other
+    // category (e.g. a tapped home category chip) arrives as its own
+    // display name and is used directly as the search query.
+    final query = switch (categoryKey) {
+      null => '',
       AppStrings.categoryQueryMens => 'men ',
       AppStrings.categoryQueryWomens => 'women ',
-      _ => '',
+      final key => key,
     };
-    if (prefix.isNotEmpty) {
-      onQueryChanged(prefix);
+    if (query.isNotEmpty) {
+      onQueryChanged(query);
     }
   }
 

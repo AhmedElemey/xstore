@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mock/mock_config.dart';
@@ -15,6 +14,7 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/domain/entities/order_item_entity.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
+import '../../domain/entities/cart_shipping_rules.dart';
 import '../../domain/entities/place_order_params.dart';
 
 abstract interface class CartRemoteDataSource {
@@ -216,7 +216,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       category: m.categoryLabel,
       condition: m.conditionLabel,
       shippingAvailable: true,
-      shippingCost: m.price >= 20000 ? 0 : 500,
+      shippingCost: m.price >= kFreeShippingPriceThresholdEgp
+          ? 0.0
+          : kFlatShippingFeeEgp,
       isAvailable: true,
       addedAt: DateTime.now(),
     );
@@ -282,7 +284,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
     final shipAvail =
         json['shippingAvailable'] != false && root['shippingAvailable'] != false;
-    final shippingCost = shipAvail ? (price >= 20000 ? 0.0 : 500.0) : 0.0;
+    final shippingCost = shipAvail
+        ? (price >= kFreeShippingPriceThresholdEgp ? 0.0 : kFlatShippingFeeEgp)
+        : 0.0;
 
     return CartItemEntity(
       id: id,
@@ -511,8 +515,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     }
     final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
     final createdOrders = <OrderModel>[];
-    try {
-      for (final item in params.items) {
+    Object? lastError;
+    for (final item in params.items) {
+      try {
         final created = await _orders.createOrder(
           listingId: item.listingId,
           quantity: item.quantity,
@@ -534,40 +539,32 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           notes: params.deliveryNote,
         );
         createdOrders.add(created);
+        // Only the line that actually got an order removes itself from
+        // the cart — a failed line stays so the customer can retry just
+        // that item instead of the whole checkout re-ordering everything
+        // (including lines that already succeeded).
+        _items.removeWhere((e) => e.id == item.id);
+      } catch (e) {
+        // One failed line must not discard orders already placed for the
+        // others — keep going so every line gets its own outcome instead
+        // of the whole checkout aborting on the first failure.
+        lastError = e;
       }
-    } catch (e) {
-      // No atomic multi-item checkout on the backend (see doc above), so a
-      // mid-loop failure would otherwise leave earlier cart lines as real,
-      // unintended orders while the cart still shows them as un-purchased —
-      // risking a duplicate order if the shopper retries. Best-effort cancel
-      // whatever already went through before surfacing the failure, and
-      // leave the cart untouched.
-      if (kDebugMode) debugPrint('Checkout: order creation failed: $e');
-      for (final order in createdOrders) {
-        try {
-          await _orders.cancelOrder(
-            orderId: order.id,
-            reason: 'Checkout failed on a later item — auto-cancelled',
-            isVendorSession: false,
-          );
-        } catch (cancelError) {
-          // Best-effort: without a backend transaction there's nothing more
-          // a client-side compensation can do if the cancel call itself fails.
-          if (kDebugMode) {
-            debugPrint(
-              'Checkout: compensating cancel failed for ${order.id}: $cancelError',
-            );
-          }
-        }
-      }
-      rethrow;
+    }
+    if (createdOrders.isEmpty) {
+      // Nothing went through: cart is untouched (every line stayed), so
+      // rethrow the real failure and let the whole checkout be retried.
+      if (lastError != null) throw lastError;
+      throw const ServerException('Cart is empty');
     }
     // Combine the per-listing orders into one view for the confirmation
     // screen: real id/status/createdAt from the first created order, full
     // item list from all of them, totals from the already-known cart
     // context (more reliable than summing unconfirmed per-order totals).
+    // When a line failed, `items` below naturally reflects only the
+    // successes — the caller compares this against what was submitted to
+    // tell the customer which line(s) didn't go through.
     final first = createdOrders.first.toEntity();
-    _items.clear();
     _coupon = null;
     _couponCodeInput = null;
     return first.copyWith(

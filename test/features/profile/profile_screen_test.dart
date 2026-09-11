@@ -38,6 +38,26 @@ class _UnverifiedProfileNotifier extends ProfileNotifier {
       );
 }
 
+class _UnverifiedMissingPhoneNotifier extends ProfileNotifier {
+  _UnverifiedMissingPhoneNotifier(this._phone);
+
+  final String _phone;
+
+  @override
+  ProfileState build() => ProfileState(
+        profile: ProfileEntity(
+          user: UserEntity(
+            id: _sessionUser.id,
+            name: _sessionUser.name,
+            email: _sessionUser.email,
+            phoneNumber: _phone,
+          ),
+          isEmailVerified: true,
+          isPhoneVerified: false,
+        ),
+      );
+}
+
 class _VerifiedProfileNotifier extends ProfileNotifier {
   @override
   ProfileState build() => ProfileState(
@@ -154,6 +174,53 @@ void main() {
 
       expect(find.text('Your email is not verified'), findsNothing);
       expect(find.text('Your phone number is not verified'), findsNothing);
+      expect(find.text('Your phone number is not set'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows add-phone banner when stored phone is empty',
+    (tester) async {
+      const user = UserEntity(
+        id: '9',
+        name: 'Test User',
+        email: 'user@test.com',
+        phoneNumber: '',
+      );
+      await tester.pumpWidget(
+        _harness(
+          authOverride: FakeAuth(user),
+          profileOverride: () => _UnverifiedMissingPhoneNotifier(''),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your phone number is not set'), findsOneWidget);
+      expect(find.text('Your phone number is not verified'), findsNothing);
+      expect(find.text('Add Now'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'shows add-phone banner when stored phone is a zero placeholder',
+    (tester) async {
+      const user = UserEntity(
+        id: '9',
+        name: 'Test User',
+        email: 'user@test.com',
+        phoneNumber: '000000000',
+      );
+      await tester.pumpWidget(
+        _harness(
+          authOverride: FakeAuth(user),
+          profileOverride: () => _UnverifiedMissingPhoneNotifier('000000000'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your phone number is not set'), findsOneWidget);
+      expect(find.text('Your phone number is not verified'), findsNothing);
+      expect(find.text('Add Now'), findsOneWidget);
     },
   );
 }

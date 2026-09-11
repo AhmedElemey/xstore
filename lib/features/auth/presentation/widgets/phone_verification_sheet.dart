@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
@@ -133,7 +134,7 @@ class _PhoneVerificationSheetState
               const SizedBox(height: AppSpacing.sm),
               Text(
                 _codeSent
-                    ? '${context.l10n.codeSentTo} ${widget.phoneNumber}'
+                    ? context.l10n.phoneOtpSentToAssociatedEmail
                     : widget.phoneNumber,
                 style: AppTypography.bodyMedium,
               ),
@@ -142,23 +143,36 @@ class _PhoneVerificationSheetState
                 controller: _otpController,
                 keyboardType: TextInputType.number,
                 autofocus: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
                 decoration: InputDecoration(
                   labelText: context.l10n.courierModeOtp,
                   border: const OutlineInputBorder(),
                   errorText: _error,
                 ),
-                onSubmitted: (_) => _verify(),
+                onSubmitted: (_) {
+                  if (_otpController.text.trim().length == 6) _verify();
+                },
               ),
               const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: _isVerifying || !_codeSent ? null : _verify,
-                child: _isVerifying
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(context.l10n.verifyAndContinue),
+              ListenableBuilder(
+                listenable: _otpController,
+                builder: (context, _) => FilledButton(
+                  onPressed: _isVerifying ||
+                          !_codeSent ||
+                          _otpController.text.trim().length != 6
+                      ? null
+                      : _verify,
+                  child: _isVerifying
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(context.l10n.verifyAndContinue),
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               TextButton(

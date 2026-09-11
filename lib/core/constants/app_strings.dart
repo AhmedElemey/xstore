@@ -320,7 +320,7 @@ abstract final class AppStrings {
   static const ordersTrackOrder = 'Track Order';
   static const ordersViewDetails = 'View Details';
   static const ordersCancelOrder = 'Cancel Order';
-  static const ordersConfirmReceipt = '✓ Confirm Receipt';
+  static const ordersConfirmReceipt = 'Confirm Receipt';
   static const ordersLeaveReview = 'Leave Review';
   static const ordersReorder = 'Reorder';
   static const ordersRejectOrder = 'Reject';
@@ -631,11 +631,6 @@ abstract final class AppStrings {
   // Shared / errors
   static const retry = 'Retry';
   static const errorGeneric = 'Something went wrong';
-  static const routeErrorMessage =
-      "We couldn't load that page. Please try again.";
-  static const goHome = 'Go home';
-  static const serverErrorMessage =
-      'Something went wrong on our end. Please try again in a moment.';
   static const emptyInbox = 'Nothing here yet';
 
   // Screen titles (alias nav where aligned)
@@ -652,9 +647,9 @@ abstract final class AppStrings {
   static const vendorSearchHint = 'Search by order ID or buyer name';
   static const vendorConfirmAllPending = 'Confirm All Pending';
   static const vendorViewAnalytics = 'View Analytics';
-  static const vendorStatPendingOrders = 'Pending Orders';
-  static const vendorStatActiveOrders = 'Active Orders';
-  static const vendorStatTotalOrders = 'Total Orders';
+  static const vendorStatPendingOrders = 'Pending';
+  static const vendorStatActiveOrders = 'Active';
+  static const vendorStatTotalOrders = 'Total';
   static const vendorStatRevenue = 'Revenue';
   static const vendorConfirmAllPendingTitle = 'Confirm all pending orders?';
   static String vendorOrdersConfirmed(int n) => '$n orders confirmed successfully';

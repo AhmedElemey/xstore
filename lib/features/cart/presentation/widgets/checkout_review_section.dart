@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
@@ -31,103 +32,154 @@ class CheckoutReviewSection extends ConsumerWidget {
         ? st.savedAddresses[idx]
         : null;
     final pay = st.selectedPayment;
+    final note = st.deliveryNote.trim();
     final vendors = items.map((e) => e.vendorId).toSet().length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          context.l10n.checkoutReviewTitle,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          context.l10n.checkoutItemsFromSellers(items.length, vendors),
-          style: AppTypography.bodySmall.copyWith(
-            color: context.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        for (final it in items)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Row(
+        Material(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(AppSpacing.lg),
+          elevation: 1,
+          shadowColor: context.textPrimary.withValues(alpha: 0.06),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppSpacing.xs),
-                  child: SizedBox(
-                    width: AppSpacing.x3l + AppSpacing.sm,
-                    height: AppSpacing.x3l + AppSpacing.sm,
-                    child: AppCachedNetworkImage(
-                      imageUrl: it.listingImage,
-                      fit: BoxFit.cover,
-                      memCacheWidth: 120,
-                      memCacheHeight: 120,
+                Text(
+                  context.l10n.checkoutReviewTitle,
+                  style: AppTypography.titleMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  context.l10n.checkoutItemsFromSellers(items.length, vendors),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                for (final it in items)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(AppSpacing.xs),
+                          child: SizedBox(
+                            width: AppSpacing.x3l + AppSpacing.sm,
+                            height: AppSpacing.x3l + AppSpacing.sm,
+                            child: AppCachedNetworkImage(
+                              imageUrl: it.listingImage,
+                              fit: BoxFit.cover,
+                              memCacheWidth: 120,
+                              memCacheHeight: 120,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            '${it.listingName} · ${context.l10n.quantity} ${it.quantity} · ${context.formatCurrency(it.price * it.quantity)}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    '${it.listingName} · ${context.l10n.quantity} ${it.quantity} · ${context.formatCurrency(it.price * it.quantity)}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                Divider(height: AppSpacing.x2l),
+                if (addr != null) ...[
+                  Text(
+                    '📍 ${addr.street}, ${addr.city}, ${addr.wilaya}',
+                    style: AppTypography.bodySmall.copyWith(height: 1.4),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                if (pay != null)
+                  Text(
+                    '💳 ${_payLabel(context, pay)}',
                     style: AppTypography.bodySmall,
                   ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  context.l10n.checkoutEstimatedDelivery,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.textSecondary,
+                  ),
                 ),
+                if (note.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    context.l10n.checkoutDeliveryNoteLabel,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    note,
+                    style: AppTypography.bodySmall.copyWith(height: 1.4),
+                  ),
+                ],
               ],
             ),
-          ),
-        Divider(height: AppSpacing.x2l),
-        if (addr != null) ...[
-          Text(
-            '📍 ${addr.street}, ${addr.city}, ${addr.wilaya}',
-            style: AppTypography.bodySmall.copyWith(height: 1.4),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        if (pay != null)
-          Text(
-            '💳 ${_payLabel(context, pay)}',
-            style: AppTypography.bodySmall,
-          ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.checkoutEstimatedDelivery,
-          style: AppTypography.bodySmall.copyWith(
-            color: context.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         const CartSummaryCard(),
         const SizedBox(height: AppSpacing.lg),
-        Text(
-          context.l10n.checkoutTermsBefore,
-          style: AppTypography.bodySmall.copyWith(
-            color: context.textSecondary,
-            height: 1.45,
-          ),
-        ),
         Wrap(
           spacing: AppSpacing.xs,
+          runSpacing: AppSpacing.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            TextButton(
-              onPressed: () => context.push(AppRoutes.terms),
-              child: Text(context.l10n.menuTerms),
-            ),
             Text(
-              context.l10n.checkoutTermsAnd,
+              context.l10n.checkoutTermsBefore,
               style: AppTypography.bodySmall.copyWith(
                 color: context.textSecondary,
+                height: 1.45,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: Text(context.l10n.checkoutReturnPolicy),
+            InkWell(
+              onTap: () => context.push(AppRoutes.terms),
+              child: Text(
+                context.l10n.menuTerms,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.accent,
+                  fontWeight: FontWeight.w700,
+                  height: 1.45,
+                ),
+              ),
             ),
+            // TODO(phase-2): No standalone return-policy content exists
+            // (the Terms document doesn't cover returns either) — re-enable
+            // once real return-policy content ships instead of linking
+            // "Return Policy" to the unrelated Terms screen.
+            // Text(
+            //   context.l10n.checkoutTermsAnd,
+            //   style: AppTypography.bodySmall.copyWith(
+            //     color: context.textSecondary,
+            //     height: 1.45,
+            //   ),
+            // ),
+            // InkWell(
+            //   onTap: () => context.push(AppRoutes.terms),
+            //   child: Text(
+            //     context.l10n.checkoutReturnPolicy,
+            //     style: AppTypography.bodySmall.copyWith(
+            //       color: AppColors.accent,
+            //       fontWeight: FontWeight.w700,
+            //       height: 1.45,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ],

@@ -223,7 +223,10 @@ void main() {
       ]);
       await _settle(tester);
 
-      expect(find.text('My Wishlist (1)'), findsOneWidget);
+      // WishlistHeaderBar's "My Wishlist (n)" title was intentionally
+      // hidden (kept in source, not shown) by the wishlist UI polish pass —
+      // the AppBar now shows a plain, count-less title instead.
+      expect(find.text('Wishlist'), findsOneWidget);
       expect(find.text('Wireless Earbuds'), findsOneWidget);
 
       await tester.tap(find.textContaining('Remove'));

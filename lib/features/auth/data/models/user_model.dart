@@ -115,7 +115,15 @@ void mergeStoreJsonIntoUser(
     'storeCategoryId',
     _optInt(store['storeCategoryId']) ?? _nestedId(store['storeCategory']),
   );
-  put('storeLogoUrl', store['storeLogoUrl']);
+  put(
+    'storeLogoUrl',
+    firstNonBlank([
+      store['storeLogoUrl'],
+      store['storeImageUrl'],
+      store['logoUrl'],
+      store['imageUrl'],
+    ]),
+  );
   put(
     'storeCategory',
     firstNonBlank([

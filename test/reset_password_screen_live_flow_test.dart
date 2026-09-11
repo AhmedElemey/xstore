@@ -152,6 +152,7 @@ void main() {
       final fields = find.byType(TextField);
       await tester.enterText(fields.at(0), 'NewPass1!');
       await tester.enterText(fields.at(1), 'NewPass1!');
+      await tester.pump();
       await tester.tap(find.widgetWithText(XstoreButton, 'Reset Password'));
       await tester.pumpAndSettle();
 

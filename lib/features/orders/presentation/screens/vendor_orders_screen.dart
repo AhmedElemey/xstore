@@ -19,6 +19,7 @@ import '../widgets/vendor_order_filter_tabs.dart';
 import '../widgets/vendor_order_sort_row.dart';
 import '../widgets/vendor_order_stats_banner.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
+import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
 
 class VendorOrdersScreen extends ConsumerStatefulWidget {
@@ -28,7 +29,8 @@ class VendorOrdersScreen extends ConsumerStatefulWidget {
 }
 
 class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
-  Future<DeliveryMethod?> _pickDeliveryMethod() => showModalBottomSheet<DeliveryMethod>(
+  Future<DeliveryMethod?> _pickDeliveryMethod() =>
+      showModalBottomSheet<DeliveryMethod>(
         context: context,
         isScrollControlled: true,
         builder: (_) => const DeliveryMethodSheet(),
@@ -91,6 +93,9 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
     final isLoading = ref.watch(
       vendorOrdersProvider.select((s) => s.isLoading),
     );
+    final hasOrders = ref.watch(
+      vendorOrdersProvider.select((s) => s.orders.isNotEmpty),
+    );
     final statusCounts = ref.watch(
       vendorOrdersProvider.select((s) {
         final orders = s.orders;
@@ -111,7 +116,10 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
         ref.read(vendorOrdersProvider.notifier).clearError();
       }
     });
-    return Scaffold(
+    return RouteReentryRefresh(
+      isTarget: (location) => location == AppRoutes.vendorOrders,
+      onReentry: (ref) => ref.read(vendorOrdersProvider.notifier).fetchOrders(),
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
         backgroundColor: context.surfaceColor,
@@ -226,7 +234,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
             cancelledCount: statusCounts.cancelled,
             onTap: ref.read(vendorOrdersProvider.notifier).applyFilter,
           ),
-           const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
           VendorOrderSortRow(
             sort: sortOption,
             count: filteredOrders.length,
@@ -235,7 +243,9 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: ref.read(vendorOrdersProvider.notifier).refreshOrders,
-              child:  filteredOrders.isEmpty
+              child: isLoading && !hasOrders
+                  ? const VendorOrdersSkeleton()
+                  : filteredOrders.isEmpty
                   ? ListView(
                       cacheExtent: 300,
                       children: [
@@ -248,21 +258,28 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         OrderEmptyState(
-                                          title: context.l10n.vendorOrdersEmptyTitle,
-                                          subtitle: context.l10n
+                                          title: context
+                                              .l10n
+                                              .vendorOrdersEmptyTitle,
+                                          subtitle: context
+                                              .l10n
                                               .vendorOrdersEmptySubtitle,
                                         ),
                                         const SizedBox(height: AppSpacing.md),
                                         OutlinedButton(
                                           onPressed: () =>
                                               context.go(AppRoutes.listingMy),
-                                          child: Text(context.l10n.menuMyListings),
+                                          child: Text(
+                                            context.l10n.menuMyListings,
+                                          ),
                                         ),
                                       ],
                                     )
                                   : OrderEmptyState(
                                       title: context.l10n.vendorNoStatusOrders,
-                                      subtitle: context.l10n.vendorNoStatusOrdersSubtitle,
+                                      subtitle: context
+                                          .l10n
+                                          .vendorNoStatusOrdersSubtitle,
                                       filterActive: true,
                                     );
                               // A fixed-fraction height can be shorter than
@@ -285,8 +302,6 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                         ),
                       ],
                     )
-                 : isLoading 
-                  ? const VendorOrdersSkeleton()
                   : ListView.separated(
                       controller: _scroll,
                       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -374,6 +389,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

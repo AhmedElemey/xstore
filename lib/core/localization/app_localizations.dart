@@ -206,11 +206,29 @@ abstract class AppLocalizations {
   /// **'Verify your number'**
   String get verifyYourNumber;
 
+  /// No description provided for @otpEnterCodeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to'**
+  String get otpEnterCodeSentTo;
+
+  /// No description provided for @otpContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Having trouble? Contact Support'**
+  String get otpContactSupport;
+
   /// No description provided for @codeSentTo.
   ///
   /// In en, this message translates to:
   /// **'Code sent to'**
   String get codeSentTo;
+
+  /// No description provided for @phoneOtpSentToAssociatedEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to the email associated with this number'**
+  String get phoneOtpSentToAssociatedEmail;
 
   /// No description provided for @verifyYourEmail.
   ///
@@ -230,11 +248,23 @@ abstract class AppLocalizations {
   /// **'Your phone number is not verified'**
   String get profilePhoneNotVerified;
 
+  /// No description provided for @profilePhoneMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number is not set'**
+  String get profilePhoneMissing;
+
   /// No description provided for @verifyNow.
   ///
   /// In en, this message translates to:
   /// **'Verify Now'**
   String get verifyNow;
+
+  /// No description provided for @addNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Now'**
+  String get addNow;
 
   /// No description provided for @changeNumber.
   ///
@@ -374,6 +404,24 @@ abstract class AppLocalizations {
   /// **'One last step — choose your account type'**
   String get socialRoleSubtitle;
 
+  /// No description provided for @socialWelcomeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, {name}! 👋'**
+  String socialWelcomeGreeting(String name);
+
+  /// No description provided for @socialRoleLastStep.
+  ///
+  /// In en, this message translates to:
+  /// **'One last step — how will you use xStore?'**
+  String get socialRoleLastStep;
+
+  /// No description provided for @socialWelcomeFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'there'**
+  String get socialWelcomeFallbackName;
+
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
@@ -445,6 +493,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'↩️ Easy Returns'**
   String get easyReturnsBadge;
+
+  /// No description provided for @productTrustFastShipping.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Shipping'**
+  String get productTrustFastShipping;
+
+  /// No description provided for @productTrustSecurePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Payment'**
+  String get productTrustSecurePayment;
+
+  /// No description provided for @productTrustEasyReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy Returns'**
+  String get productTrustEasyReturns;
 
   /// No description provided for @shopNow.
   ///
@@ -941,13 +1007,13 @@ abstract class AppLocalizations {
   /// No description provided for @listingCompareAtHelper.
   ///
   /// In en, this message translates to:
-  /// **'Original price for discount display'**
+  /// **'Original price shown as a strikethrough for discounts. Leave empty if none. Must be greater than the selling price.'**
   String get listingCompareAtHelper;
 
   /// No description provided for @listingCompareAtWarning.
   ///
   /// In en, this message translates to:
-  /// **'Compare-at price is lower than your selling price.'**
+  /// **'Compare-at price must be greater than your selling price.'**
   String get listingCompareAtWarning;
 
   /// No description provided for @listingDescriptionLabel.
@@ -2237,7 +2303,7 @@ abstract class AppLocalizations {
   /// No description provided for @ordersConfirmReceipt.
   ///
   /// In en, this message translates to:
-  /// **'✓ Confirm Receipt'**
+  /// **'Confirm Receipt'**
   String get ordersConfirmReceipt;
 
   /// No description provided for @ordersLeaveReview.
@@ -2521,6 +2587,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm receipt?'**
   String get ordersConfirmReceiptTitle;
+
+  /// No description provided for @ordersConfirmReceiptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm you received this order?'**
+  String get ordersConfirmReceiptBody;
 
   /// No description provided for @ordersConfirm.
   ///
@@ -3104,6 +3176,12 @@ abstract class AppLocalizations {
   /// **'Shipping'**
   String get cartShippingLine;
 
+  /// No description provided for @cartFreeShippingThresholdNote.
+  ///
+  /// In en, this message translates to:
+  /// **'🚚 Items priced {threshold} and up ship free'**
+  String cartFreeShippingThresholdNote(String threshold);
+
   /// No description provided for @cartTotalLine.
   ///
   /// In en, this message translates to:
@@ -3446,6 +3524,24 @@ abstract class AppLocalizations {
   /// **'Please verify your phone number to place an order'**
   String get checkoutErrorPhoneNotVerified;
 
+  /// No description provided for @checkoutPartialOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of your order didn't go through'**
+  String get checkoutPartialOrderTitle;
+
+  /// No description provided for @checkoutPartialOrderWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
+  String checkoutPartialOrderWarning(int count);
+
+  /// No description provided for @checkoutPartialOrderAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get checkoutPartialOrderAck;
+
   /// No description provided for @orderPlacedTitle.
   ///
   /// In en, this message translates to:
@@ -3782,6 +3878,42 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get deleteListing;
 
+  /// No description provided for @myListingsSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search listings'**
+  String get myListingsSearchTitle;
+
+  /// No description provided for @myListingsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by title'**
+  String get myListingsSearchHint;
+
+  /// No description provided for @myListingsSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get myListingsSearchClear;
+
+  /// No description provided for @myListingsSearchSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get myListingsSearchSubmit;
+
+  /// No description provided for @myListingsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete listing?'**
+  String get myListingsDeleteTitle;
+
+  /// No description provided for @myListingsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'"{title}" will be removed permanently.'**
+  String myListingsDeleteBody(String title);
+
   /// No description provided for @draft.
   ///
   /// In en, this message translates to:
@@ -3878,6 +4010,24 @@ abstract class AppLocalizations {
   /// **'Something went wrong'**
   String get errorGeneric;
 
+  /// No description provided for @routeErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn't load that page. Please try again.'**
+  String get routeErrorMessage;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go home'**
+  String get goHome;
+
+  /// No description provided for @serverErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our end. Please try again in a moment.'**
+  String get serverErrorMessage;
+
   /// No description provided for @emptyInbox.
   ///
   /// In en, this message translates to:
@@ -3911,19 +4061,19 @@ abstract class AppLocalizations {
   /// No description provided for @vendorStatPendingOrders.
   ///
   /// In en, this message translates to:
-  /// **'Pending Orders'**
+  /// **'Pending'**
   String get vendorStatPendingOrders;
 
   /// No description provided for @vendorStatActiveOrders.
   ///
   /// In en, this message translates to:
-  /// **'Active Orders'**
+  /// **'Active'**
   String get vendorStatActiveOrders;
 
   /// No description provided for @vendorStatTotalOrders.
   ///
   /// In en, this message translates to:
-  /// **'Total Orders'**
+  /// **'Total'**
   String get vendorStatTotalOrders;
 
   /// No description provided for @vendorStatRevenue.
@@ -4939,6 +5089,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. Ahmed\'s Electronics'**
   String get storeNameHint;
+
+  /// No description provided for @storeUrlPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store URL: xstore.com/store/{slug}'**
+  String storeUrlPreview(String slug);
 
   /// No description provided for @storeCategoryRequired.
   ///
@@ -6535,48 +6691,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Linked to an order'**
   String get packageOrderLinkedLabel;
-
-  /// No description provided for @myListingsSearchTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Search listings'**
-  String get myListingsSearchTitle;
-
-  /// No description provided for @myListingsSearchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search by title'**
-  String get myListingsSearchHint;
-
-  /// No description provided for @myListingsSearchClear.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear'**
-  String get myListingsSearchClear;
-
-  /// No description provided for @myListingsSearchAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get myListingsSearchAction;
-
-  /// No description provided for @myListingsDeleteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete listing?'**
-  String get myListingsDeleteTitle;
-
-  /// No description provided for @myListingsDeleteMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'“{title}” will be removed permanently.'**
-  String myListingsDeleteMessage(String title);
-
-  /// No description provided for @myListingsDeleteConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get myListingsDeleteConfirm;
 }
 
 class _AppLocalizationsDelegate

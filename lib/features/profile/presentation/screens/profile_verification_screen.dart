@@ -124,7 +124,9 @@ class _ProfileVerificationScreenState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '${context.l10n.codeSentTo} ${args.contactValue}',
+                isEmail
+                    ? '${context.l10n.codeSentTo} ${args.contactValue}'
+                    : context.l10n.phoneOtpSentToAssociatedEmail,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.textSecondary,
                 ),

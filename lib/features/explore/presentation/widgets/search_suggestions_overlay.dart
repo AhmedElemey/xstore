@@ -21,19 +21,21 @@ class SearchSuggestionsOverlay extends StatelessWidget {
       elevation: 6,
       color: context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.md),
-      child: ListView.separated(
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        itemCount: suggestions.length,
-        separatorBuilder: (_, __) => Divider(height: 1),
-        itemBuilder: (context, i) {
-          final s = suggestions[i];
-          return ListTile(
-            dense: true,
-            title: Text(s, style: AppTypography.bodyMedium),
-            onTap: () => onSelect(s),
-          );
-        },
+      // Already inside explore_screen.dart's outer CustomScrollView — a
+      // second, shrink-wrapped scrollable here is unnecessary nesting for a
+      // small, bounded suggestions list, and it rebuilds on every keystroke.
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < suggestions.length; i++) ...[
+            if (i > 0) const Divider(height: 1),
+            ListTile(
+              dense: true,
+              title: Text(suggestions[i], style: AppTypography.bodyMedium),
+              onTap: () => onSelect(suggestions[i]),
+            ),
+          ],
+        ],
       ),
     );
   }

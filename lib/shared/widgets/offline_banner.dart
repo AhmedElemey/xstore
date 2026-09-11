@@ -18,16 +18,18 @@ class OfflineBannerHost extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final online = ref.watch(isOnlineProvider);
 
-    // Keep both slots always. Inserting the banner with `if (!online)`
-    // shifts [Expanded] from index 0 to 1 and remounts the navigator —
-    // Overlay inherited widgets then unmount with dependents still attached
-    // (`_dependents.isEmpty`).
-    return Column(
+    // Stack, not Column+Expanded. Flex as a parent of the navigator remounts
+    // Overlay inherited widgets (`_dependents.isEmpty`) when the banner's
+    // height changes — even with a stable child index and a keyed Expanded.
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        _OfflineStrip(visible: !online),
-        Expanded(
-          key: const ValueKey<String>('app-body'),
-          child: child,
+        child,
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _OfflineStrip(visible: !online),
         ),
       ],
     );

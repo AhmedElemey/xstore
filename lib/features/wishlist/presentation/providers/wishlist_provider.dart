@@ -335,12 +335,14 @@ class Wishlist extends _$Wishlist {
   Future<void> addFromCartItem(CartItemEntity item) async {
     final id = _consumerId;
     if (id == null) return;
+    final epoch = _sessionEpoch;
     // Same confirmed POST /api/wishlist/{consumerId}/items route as
     // toggleWishlist — the backend builds the denormalized wishlist entry
     // itself, so no client-built payload is needed.
     final r = await ref
         .read(addToWishlistUseCaseProvider)
         .call(consumerId: id, listingId: item.listingId);
+    if (epoch != _sessionEpoch) return;
     await r.fold((_) async {}, (_) async => fetchWishlist());
   }
 

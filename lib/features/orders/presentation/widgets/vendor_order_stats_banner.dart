@@ -23,13 +23,14 @@ class VendorOrderStatsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).colorScheme.onPrimary;
+    final fill = Color.lerp(context.surfaceColor, AppColors.primary, 0.9)!;
+    const onFill = Colors.white;
+    final muted = Colors.white.withValues(alpha: 0.75);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-             color:  AppColors.primary,
-
+        color: fill,
         borderRadius: BorderRadius.circular(AppSpacing.xl),
       ),
       child: Column(
@@ -40,23 +41,37 @@ class VendorOrderStatsBanner extends StatelessWidget {
                 context,
                 '$pendingCount',
                 context.l10n.vendorStatPendingOrders,
-                valueColor: AppColors.warningLight,
-                labelColor: AppColors.warningLight,
+                valueColor: AppColors.warning,
+                labelColor: AppColors.warning,
               ),
-              _divider(text),
-              _item(context, '$activeCount', context.l10n.vendorStatActiveOrders),
-              _divider(text),
-              _item(context, '$totalCount', context.l10n.vendorStatTotalOrders),
-              _divider(text),
+              _divider(muted),
+              _item(
+                context,
+                '$activeCount',
+                context.l10n.vendorStatActiveOrders,
+                valueColor: onFill,
+                labelColor: muted,
+              ),
+              _divider(muted),
+              _item(
+                context,
+                '$totalCount',
+                context.l10n.vendorStatTotalOrders,
+                valueColor: onFill,
+                labelColor: muted,
+              ),
+              _divider(muted),
               _item(
                 context,
                 context.formatCurrency(totalRevenue),
                 context.l10n.vendorStatRevenue,
+                valueColor: onFill,
+                labelColor: muted,
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Divider(color: text.withValues(alpha: 0.2), height: 1),
+          Divider(color: muted.withValues(alpha: 0.35), height: 1),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -80,7 +95,8 @@ class VendorOrderStatsBanner extends StatelessWidget {
     Color? valueColor,
     Color? labelColor,
   }) {
-    final text = Theme.of(context).colorScheme.onPrimary;
+    final valueFg = valueColor ?? context.textPrimary;
+    final labelFg = labelColor ?? context.textSecondary;
     return Expanded(
       child: Column(
         children: [
@@ -88,16 +104,16 @@ class VendorOrderStatsBanner extends StatelessWidget {
             text: TextSpan(
               text: value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: valueColor ?? text,
-                    fontWeight: FontWeight.w800,
-                  ),
+                color: valueFg,
+                fontWeight: FontWeight.w800,
+              ),
               children: [
                 if (suffix != null)
                   TextSpan(
                     text: ' $suffix',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: (valueColor ?? text).withValues(alpha: 0.9),
-                        ),
+                      color: valueFg.withValues(alpha: 0.9),
+                    ),
                   ),
               ],
             ),
@@ -105,9 +121,9 @@ class VendorOrderStatsBanner extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: labelColor ?? text.withValues(alpha: 0.9),
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: labelFg),
           ),
         ],
       ),
@@ -115,10 +131,10 @@ class VendorOrderStatsBanner extends StatelessWidget {
   }
 
   Widget _divider(Color color) => Container(
-        width: 1,
-        height: AppSpacing.x3l,
-        color: color.withValues(alpha: 0.2),
-      );
+    width: 1,
+    height: AppSpacing.x3l,
+    color: color.withValues(alpha: 0.35),
+  );
 
   Widget _chip(
     BuildContext context, {
@@ -128,8 +144,8 @@ class VendorOrderStatsBanner extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        side: const BorderSide(color: Colors.white),
+        foregroundColor: Colors.white,
       ),
       child: Text(
         label,

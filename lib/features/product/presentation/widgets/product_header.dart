@@ -108,7 +108,9 @@ class ProductHeader extends StatelessWidget {
                   children: [
                     Icon(
                       LucideIcons.star,
-                      color: AppColors.warning,
+                      color: ratingLabel != null
+                          ? AppColors.warning
+                          : theme.colorScheme.onSurfaceVariant,
                       size: AppSpacing.xl + AppSpacing.xs,
                     ),
                     const Gap(AppSpacing.xs),
@@ -118,6 +120,9 @@ class ProductHeader extends StatelessWidget {
                           : context.l10n.noReviewsYet,
                       style: AppTypography.titleSmall.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: ratingLabel != null
+                            ? null
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     Icon(
