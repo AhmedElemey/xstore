@@ -1,7 +1,6 @@
 import '../../features/auth/data/models/user_model.dart';
 import '../utils/validators.dart';
 import '../../features/auth/domain/entities/consumer_register_params.dart';
-import '../../features/auth/domain/entities/register_params.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/domain/entities/vendor_register_params.dart';
 import 'mock_images.dart';
@@ -126,28 +125,6 @@ UserModel mockConsumerUserModel({
       token: 'mock-token-consumer',
     );
 
-/// Extra display fields for seller/profile UIs (legacy tuple — prefer [UserEntity]).
-final mockVendorProfileDisplay = (
-  name: mockVendorUser.name,
-  email: mockVendorUser.email,
-  avatarUrl: MockImages.avatar(1),
-  isVerified: true,
-  rating: 4.8,
-  totalSales: 142,
-  joinedAt: DateTime(2023, 3, 15),
-  location: mockVendorUser.location ?? '',
-);
-
-final mockConsumerProfileDisplay = (
-  name: mockConsumerUser.name,
-  email: mockConsumerUser.email,
-  avatarUrl: MockImages.avatar(2),
-  isVerified: false,
-  rating: null as double?,
-  totalSales: null as int?,
-  joinedAt: DateTime(2024, 1, 10),
-  location: mockConsumerUser.location ?? '',
-);
 
 /// The login UI is phone-first (identifiers reach the datasource as
 /// normalized 11-digit local numbers), so each mock role also matches its
@@ -173,48 +150,6 @@ bool mockLoginIsCourier(String emailOrPhone) {
   return e.contains('courier') ||
       e.contains('driver') ||
       _matchesMockPhone(e, mockCourierUser);
-}
-
-UserModel userModelFromRegisterParams(RegisterParams p, {String? id}) {
-  final newId = id ?? 'user_${p.email.hashCode.abs()}';
-  final joined = DateTime.now();
-  if (p.role == UserRole.vendor) {
-    final slug = (p.storeName ?? '')
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
-        .trim()
-        .replaceAll(RegExp(r'\s+'), '-');
-    final safeSlug = slug.isEmpty ? 'store' : slug;
-    return UserModel(
-      id: newId,
-      name: p.fullName,
-      email: p.email,
-      phoneNumber: '${p.countryCode}${p.phoneNumber}',
-      role: UserRole.vendor,
-      isVerified: false,
-      joinedAt: joined,
-      location: p.location,
-      storeName: p.storeName,
-      storeSlug: safeSlug,
-      storeCategory: p.storeCategory,
-      storeDescription: p.storeDescription,
-      storeCity: p.storeCity,
-      storeWilaya: p.storeWilaya,
-      whatsappNumber: p.whatsappNumber,
-      token: 'mock-token-new-vendor',
-    );
-  }
-  return UserModel(
-    id: newId,
-    name: p.fullName,
-    email: p.email,
-    phoneNumber: '${p.countryCode}${p.phoneNumber}',
-    role: UserRole.consumer,
-    isVerified: false,
-    joinedAt: joined,
-    location: p.location,
-    token: 'mock-token-new-consumer',
-  );
 }
 
 UserModel userModelFromConsumerRegisterParams(

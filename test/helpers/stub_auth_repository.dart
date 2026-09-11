@@ -3,7 +3,6 @@ import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/features/auth/domain/entities/auth_token_pair.dart';
 import 'package:xstore/features/auth/domain/entities/consumer_register_params.dart';
 import 'package:xstore/features/auth/domain/entities/login_params.dart';
-import 'package:xstore/features/auth/domain/entities/register_params.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/domain/entities/vendor_register_params.dart';
@@ -13,7 +12,6 @@ class StubAuthRepository implements AuthRepository {
   StubAuthRepository({
     this.restoreUser,
     Either<Failure, UserEntity>? loginResult,
-    Either<Failure, UserEntity>? registerResult,
     Either<Failure, UserEntity>? registerConsumerResult,
     Either<Failure, UserEntity>? registerVendorResult,
     Either<Failure, Unit>? changePasswordResult,
@@ -21,8 +19,6 @@ class StubAuthRepository implements AuthRepository {
     Either<Failure, Unit>? verifyForgotPasswordOtpResult,
     Either<Failure, AuthTokenPair>? refreshTokenResult,
   })  : _loginResult = loginResult ?? Left(Failure.server('stub login')),
-        _registerResult =
-            registerResult ?? Left(Failure.server('stub register')),
         _registerConsumerResult = registerConsumerResult ??
             Left(Failure.server('stub register consumer')),
         _registerVendorResult = registerVendorResult ??
@@ -38,7 +34,6 @@ class StubAuthRepository implements AuthRepository {
 
   final UserEntity? restoreUser;
   final Either<Failure, UserEntity> _loginResult;
-  final Either<Failure, UserEntity> _registerResult;
   final Either<Failure, UserEntity> _registerConsumerResult;
   final Either<Failure, UserEntity> _registerVendorResult;
   final Either<Failure, Unit> _changePasswordResult;
@@ -53,10 +48,6 @@ class StubAuthRepository implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> login(LoginParams params) async =>
       _loginResult;
-
-  @override
-  Future<Either<Failure, UserEntity>> register(RegisterParams params) async =>
-      _registerResult;
 
   @override
   Future<Either<Failure, UserEntity>> registerConsumer(

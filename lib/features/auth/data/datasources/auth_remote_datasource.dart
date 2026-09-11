@@ -10,14 +10,11 @@ import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/legacy_route_options.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
-import '../../domain/entities/register_params.dart';
 import '../../domain/entities/vendor_register_params.dart';
 import '../models/user_model.dart';
 
 abstract interface class AuthRemoteDataSource {
   Future<UserModel> login(LoginParams params);
-
-  Future<UserModel> register(RegisterParams params);
 
   Future<UserModel> registerConsumer(ConsumerRegisterParams params);
   Future<UserModel> registerVendor(VendorRegisterParams params);
@@ -123,43 +120,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const ServerException('Empty response');
       }
       return _tokenOnlyModel(data, email: identifier);
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
-  Future<UserModel> register(RegisterParams params) async {
-    if (MockConfig.useMock) {
-      final model = userModelFromRegisterParams(params);
-      return MockConfig.simulateScaled(model, multiplier: 2);
-    }
-
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.register,
-        data: {
-          'role': params.role.name,
-          'fullName': params.fullName,
-          'email': params.email,
-          'phoneNumber': params.phoneNumber,
-          'countryCode': params.countryCode,
-          'dateOfBirth': params.dateOfBirth?.toIso8601String(),
-          'location': params.location,
-          'password': params.password,
-          'storeName': params.storeName,
-          'storeCategory': params.storeCategory,
-          'storeDescription': params.storeDescription,
-          'storeCity': params.storeCity,
-          'storeWilaya': params.storeWilaya,
-          'whatsappNumber': params.whatsappNumber,
-        },
-      );
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty response');
-      }
-      return UserModel.fromJson(data);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
