@@ -9,7 +9,6 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import 'app.dart';
-import 'core/config/app_config.dart';
 import 'core/config/app_flavor.dart';
 import 'core/firebase/fcm_push_setup.dart';
 import 'core/firebase/fcm_token.dart';
@@ -18,7 +17,6 @@ import 'core/utils/app_location_cache.dart';
 
 /// Shared startup used by all flavor entry points.
 Future<void> bootstrap(AppFlavor flavor) async {
-  AppConfig.init(flavor);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.forFlavor(flavor),

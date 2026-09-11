@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
-import '../../core/router/app_routes.dart';
 import '../../core/utils/extensions/context_extensions.dart';
 import '../legal/xstore_legal_documents.dart';
-import '../utils/require_login.dart';
 import '../widgets/xstore_button.dart';
 import 'legal_document_screen.dart';
 
@@ -78,46 +73,6 @@ class TrustInfoAction {
   final VoidCallback onPressed;
 }
 
-// TODO(phase-2): Re-enable once saved payment methods ships.
-class PaymentMethodsInfoScreen extends StatelessWidget {
-  const PaymentMethodsInfoScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TrustInfoScreen(
-      title: context.l10n.menuPaymentMethods,
-      message: context.l10n.trustInfoPaymentMethodsBody,
-      icon: LucideIcons.creditCard,
-      actions: [
-        TrustInfoAction(
-          label: context.l10n.trustInfoActionCheckout,
-          onPressed: () => context.push(AppRoutes.checkout),
-        ),
-      ],
-    );
-  }
-}
-
-// TODO(phase-2): Re-enable once the address book ships.
-class AddressesInfoScreen extends StatelessWidget {
-  const AddressesInfoScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TrustInfoScreen(
-      title: context.l10n.menuAddresses,
-      message: context.l10n.trustInfoAddressesBody,
-      icon: LucideIcons.mapPin,
-      actions: [
-        TrustInfoAction(
-          label: context.l10n.trustInfoActionCheckout,
-          onPressed: () => context.push(AppRoutes.checkout),
-        ),
-      ],
-    );
-  }
-}
-
 class TermsInfoScreen extends StatelessWidget {
   const TermsInfoScreen({super.key});
 
@@ -144,34 +99,3 @@ class PrivacyInfoScreen extends StatelessWidget {
   }
 }
 
-/// Consumer widget: the help screen is guest-browsable, so its
-/// account-bound shortcuts go through [requireLogin].
-// TODO(phase-2): Re-enable once a real help center ships.
-class HelpCenterInfoScreen extends ConsumerWidget {
-  const HelpCenterInfoScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return TrustInfoScreen(
-      title: context.l10n.menuHelpCenter,
-      message: context.l10n.trustInfoHelpBody,
-      icon: LucideIcons.messageCircle,
-      actions: [
-        TrustInfoAction(
-          label: context.l10n.trustInfoHelpViewOrders,
-          onPressed: () {
-            if (!requireLogin(context, ref)) return;
-            context.go(AppRoutes.orders);
-          },
-        ),
-        TrustInfoAction(
-          label: context.l10n.trustInfoHelpNotifications,
-          onPressed: () {
-            if (!requireLogin(context, ref)) return;
-            context.push(AppRoutes.notificationSettings);
-          },
-        ),
-      ],
-    );
-  }
-}

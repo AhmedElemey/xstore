@@ -8,12 +8,5 @@ enum AppFlavor {
         AppFlavor.prod => 'prod',
       };
 
-  String get displayName => switch (this) {
-        AppFlavor.dev => 'xStore Dev',
-        AppFlavor.prod => 'xStore',
-      };
-
   bool get isDev => this == AppFlavor.dev;
-
-  bool get isProd => this == AppFlavor.prod;
 }
