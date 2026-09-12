@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xstore/core/analytics/analytics_service.dart';
+import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/router/app_router.dart';
 import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
@@ -55,6 +57,13 @@ void main() {
               return MaterialApp.router(
                 key: ObjectKey(router),
                 routerConfig: router,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
               );
             },
           ),
