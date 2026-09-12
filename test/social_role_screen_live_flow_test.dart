@@ -164,6 +164,12 @@ void main() {
     skip: MockConfig.useMock,
     (tester) async {
       final dio = _fakeDio({
+        // A brand-new identity — checkGoogleUser reports it doesn't exist
+        // yet, so the flow falls through to the buyer/seller picker below.
+        'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+          'exists': false,
+          'role': null,
+        },
         'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
           'token': 'access-token-123',
           'refreshToken': 'refresh-token-123',
@@ -273,6 +279,100 @@ void main() {
   );
 
   testWidgets(
+    'an existing Google identity skips the picker and lands on home directly',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        // checkGoogleUser reports this identity already has a Consumer
+        // account — the picker must never appear; login goes straight
+        // through with that role.
+        'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+          'exists': true,
+          'role': 'Consumer',
+        },
+        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
+          'token': 'access-token-456',
+          'refreshToken': 'refresh-token-456',
+        },
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(
+                const SocialAuthResult(
+                  provider: SocialProvider.google,
+                  uid: 'google-uid-returning',
+                  email: 'returning@gmail.com',
+                  displayName: 'Returning Googler',
+                  idToken: 'google-id-token-returning',
+                  isNewUser: false,
+                ),
+              ),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+        ],
+      );
+      final refresh = container.read(routerNotifierProvider);
+      final router = GoRouter(
+        initialLocation: AppRoutes.socialRoleSelect,
+        refreshListenable: refresh,
+        redirect: (context, state) => refresh.redirectFor(state.matchedLocation),
+        routes: [
+          GoRoute(
+            path: AppRoutes.socialRoleSelect,
+            builder: (_, __) => const SocialRoleScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.home,
+            builder: (_, __) => const Scaffold(body: Text('Home Screen')),
+          ),
+          GoRoute(
+            path: AppRoutes.login,
+            builder: (_, __) => const Scaffold(body: Text('Login Screen')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Deliberately not awaited — see the FakeAsync-zone note above.
+      unawaited(container.read(socialAuthProvider.notifier).signInWithGoogle());
+      await _settle(tester);
+
+      // Never shows the picker, and lands straight on home.
+      expect(find.text("I'm a Buyer"), findsNothing);
+      expect(find.text('Home Screen'), findsOneWidget);
+      expect(container.read(socialAuthProvider).needsRoleSelection, isFalse);
+
+      await container.read(analyticsServiceProvider).ready;
+      container.dispose();
+    },
+  );
+
+  testWidgets(
     'cancelling a pending Google sign-in returns to login without a session',
     (tester) async {
       final container = ProviderContainer(
@@ -294,7 +394,14 @@ void main() {
               firebaseAuth: _FakeFirebaseAuth(),
             ),
           ),
-          dioProvider.overrideWithValue(_fakeDio(const {})),
+          dioProvider.overrideWithValue(_fakeDio({
+            // A brand-new identity — checkGoogleUser reports it doesn't
+            // exist yet, so the picker shows and this test cancels out of it.
+            'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+              'exists': false,
+              'role': null,
+            },
+          })),
         ],
       );
       final refresh = container.read(routerNotifierProvider);

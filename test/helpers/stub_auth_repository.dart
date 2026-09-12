@@ -168,4 +168,10 @@ class StubAuthRepository implements AuthRepository {
     required UserRole role,
   }) async =>
       Left(Failure.socialAuth('stub'));
+
+  @override
+  Future<Either<Failure, ({bool exists, UserRole? role})>> checkGoogleUser({
+    required String idToken,
+  }) async =>
+      const Right((exists: false, role: null));
 }

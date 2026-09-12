@@ -65,9 +65,36 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   }
 
   /// Google sign-in yields only the identity token; the actual backend session
-  /// is created after the user picks a role (the endpoints are role-specific
-  /// and auto-create the account) — always route through the role screen.
+  /// is created via a role-specific login endpoint. Before forcing the role
+  /// picker, ask the backend (read-only `checkGoogleUser`) whether this
+  /// identity already has an account — if so, log straight in with that
+  /// existing role and skip the picker; only a genuinely new identity sees it.
   Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
+    final idToken = result.idToken;
+    if (idToken == null || idToken.isEmpty) {
+      state = state.copyWith(
+        isGoogleLoading: false,
+        isAppleLoading: false,
+        isFacebookLoading: false,
+        error: 'Google sign-in failed — no identity token. Please try again.',
+      );
+      return;
+    }
+
+    final checkResult =
+        await ref.read(checkGoogleUserUseCaseProvider).call(idToken: idToken);
+    if (!mounted) return;
+
+    // A failed lookup (network hiccup, etc.) falls back to today's behavior
+    // — show the picker. The role-specific login endpoint is safe to call
+    // even for an existing user (it just logs them into their real role),
+    // so this only costs an extra tap, never a wrong account.
+    final existingRole = checkResult.fold((_) => null, (r) => r.exists ? r.role : null);
+    if (existingRole != null) {
+      await _loginWithGoogleRole(result, existingRole);
+      return;
+    }
+
     state = state.copyWith(
       isGoogleLoading: false,
       isAppleLoading: false,
@@ -134,9 +161,22 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       return;
     }
 
+    await _loginWithGoogleRole(pending, role);
+  }
+
+  /// Calls the role-specific Google login endpoint (auto-creates the account
+  /// if none exists, or logs into the existing one) and adopts the resulting
+  /// session. Shared by [_handleGoogleSuccess] (identity already has an
+  /// account — skips the picker) and [completeSocialRegistration] (a new
+  /// identity, role just chosen on the picker).
+  Future<void> _loginWithGoogleRole(
+    SocialAuthResult pending,
+    UserRole role,
+  ) async {
     final idToken = pending.idToken;
     if (idToken == null || idToken.isEmpty) {
       state = state.copyWith(
+        isGoogleLoading: false,
         error: 'Google sign-in failed — no identity token. Please try again.',
         needsRoleSelection: false,
         clearPending: true,
