@@ -663,12 +663,17 @@ class ProfileNotifier extends _$ProfileNotifier {
     state = state.copyWith(emailUpdatesEnabled: enabled);
   }
 
-  // Returns true when the backend deleted the account. Session teardown is
-  // the caller's job — this notifier must not `ref.read(authProvider)`:
+  // Returns `deleted: true` when the backend deleted the account. Session
+  // teardown is the caller's job — this notifier must not `ref.read(authProvider)`:
   // that makes Profile depend on Auth, Auth.logout then reads analytics
   // (or invalidates Profile), and Riverpod circular-asserts in debug.
   // The dialog's WidgetRef calls Auth.logout(), same as the logout sheet.
-  Future<bool> deleteAccount({
+  //
+  // Failures are returned as `error` instead of writing `state.error`.
+  // ProfileScreen uses that field as a top-of-tab load-retry banner, which
+  // a user who just tapped Delete Account at the bottom of the screen
+  // would never see.
+  Future<({bool deleted, String? error})> deleteAccount({
     required String password,
     required String confirmationText,
   }) async {
@@ -676,10 +681,10 @@ class ProfileNotifier extends _$ProfileNotifier {
     final remote = await ref
         .read(deleteAccountUseCaseProvider)
         .call(password: password, confirmationText: confirmationText);
-    if (epoch != _sessionEpoch) return false;
-    return remote.fold((f) {
-      state = state.copyWith(error: f.toString());
-      return false;
-    }, (_) => true);
+    if (epoch != _sessionEpoch) return (deleted: false, error: null);
+    return remote.fold(
+      (f) => (deleted: false, error: f.toString()),
+      (_) => (deleted: true, error: null),
+    );
   }
 }
