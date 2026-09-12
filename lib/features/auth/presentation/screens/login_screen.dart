@@ -19,6 +19,7 @@ import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
+import '../providers/social_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_header.dart';
@@ -201,6 +202,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     ref.listen(loginNotifierProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error) {
         _shakeController.forward(from: 0);
+      }
+    });
+    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
+      if (next && mounted) {
+        ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
+        AppSnackbar.error(context, context.l10n.googleAccountNotFound);
+        context.go(AppRoutes.register);
       }
     });
 

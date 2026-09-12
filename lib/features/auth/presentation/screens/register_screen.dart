@@ -23,6 +23,7 @@ import '../../../store_categories/presentation/providers/store_category_dependen
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
+import '../providers/social_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
@@ -165,6 +166,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ref.listen(registerNotifierProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error && mounted) {
         AppSnackbar.error(context, next.error!);
+      }
+    });
+    // Already on the register screen — just consume the flag (a Google
+    // sign-in with no matching account can fire this from here too, via the
+    // same SocialLoginRow), no navigation needed.
+    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
+      if (next) {
+        ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
       }
     });
 
