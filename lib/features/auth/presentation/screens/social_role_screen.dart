@@ -9,6 +9,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/social_auth_provider.dart';
@@ -28,6 +29,11 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(socialAuthProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error && mounted) {
+        AppSnackbar.error(context, next.error!);
+      }
+    });
     final social = ref.watch(socialAuthProvider);
     final pending = social.pendingSocialResult;
     return Scaffold(

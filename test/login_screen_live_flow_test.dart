@@ -86,12 +86,18 @@ Dio _fakeDio(Map<String, Object? Function(RequestOptions)> routes) {
   return d;
 }
 
-/// Stands in only for the Firebase-touching half of auth — this screen's
-/// password-login flow never calls social sign-in.
+/// Stands in for the Firebase-touching half of auth. [googleResult], when
+/// set, is returned by [signInWithGoogle] (the Google-sign-in-with-no-account
+/// test); the password-login tests never call social sign-in at all, so it's
+/// left null there and throws if somehow reached.
 class _FakeSocialAuth implements SocialAuthDatasource {
+  _FakeSocialAuth({this.googleResult});
+
+  final SocialAuthResult? googleResult;
+
   @override
-  Future<SocialAuthResult> signInWithGoogle() =>
-      throw UnimplementedError('not exercised by this screen');
+  Future<SocialAuthResult> signInWithGoogle() async =>
+      googleResult ?? (throw UnimplementedError('not exercised by this screen'));
   @override
   Future<SocialAuthResult> signInWithApple() =>
       throw UnimplementedError('not exercised by this screen');
@@ -268,6 +274,57 @@ void main() {
       expect(find.text('Home Screen'), findsNothing);
       // Still on the login form.
       expect(find.widgetWithText(XstoreButton, 'Login'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Google sign-in with no matching account sends the user to Register, '
+    'not the buyer/seller picker',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        // checkGoogleUser reports no account for this identity — Google is
+        // login-only, so the app must route to full registration instead of
+        // auto-creating an account (it never collects a phone/password).
+        'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+          'exists': false,
+          'role': null,
+        },
+      });
+
+      await tester.pumpWidget(
+        _routedHarness([
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(
+                googleResult: const SocialAuthResult(
+                  provider: SocialProvider.google,
+                  uid: 'google-uid-no-account',
+                  email: 'noaccount@gmail.com',
+                  displayName: 'No Account Googler',
+                  idToken: 'google-id-token-no-account',
+                  isNewUser: true,
+                ),
+              ),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      // The social row sits below the fold of the login form's
+      // SingleChildScrollView at this test's viewport size.
+      await tester.ensureVisible(find.text('Continue with Google'));
+      await tester.pump();
+      await tester.tap(find.text('Continue with Google'));
+      await _settle(tester);
+
+      expect(find.text('Register Screen'), findsOneWidget);
+      expect(find.text('Home Screen'), findsNothing);
     },
   );
 }

@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'there'**
   String get socialWelcomeFallbackName;
 
+  /// No description provided for @googleAccountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account found for this Google account. Please register.'**
+  String get googleAccountNotFound;
+
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
@@ -3180,7 +3186,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'🚚 Items priced {threshold} and up ship free'**
-  String cartFreeShippingThresholdNote(String threshold);
+  String cartFreeShippingThresholdNote(Object threshold);
 
   /// No description provided for @cartTotalLine.
   ///
@@ -3557,7 +3563,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutPartialOrderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Part of your order didn't go through'**
+  /// **'Part of your order didn\'t go through'**
   String get checkoutPartialOrderTitle;
 
   /// No description provided for @checkoutPartialOrderWarning.
@@ -3941,7 +3947,7 @@ abstract class AppLocalizations {
   /// No description provided for @myListingsDeleteBody.
   ///
   /// In en, this message translates to:
-  /// **'"{title}" will be removed permanently.'**
+  /// **'“{title}” will be removed permanently.'**
   String myListingsDeleteBody(String title);
 
   /// No description provided for @draft.
@@ -4043,7 +4049,7 @@ abstract class AppLocalizations {
   /// No description provided for @routeErrorMessage.
   ///
   /// In en, this message translates to:
-  /// **'We couldn't load that page. Please try again.'**
+  /// **'We couldn\'t load that page. Please try again.'**
   String get routeErrorMessage;
 
   /// No description provided for @goHome.

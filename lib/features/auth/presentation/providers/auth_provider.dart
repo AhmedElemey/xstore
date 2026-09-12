@@ -35,6 +35,7 @@ import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/send_login_otp_usecase.dart';
 import '../../domain/usecases/login_with_otp_usecase.dart';
 import '../../domain/usecases/google_login_usecase.dart';
+import '../../domain/usecases/check_google_user_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../listing/presentation/providers/listing_dependencies.dart';
 import '../../../store/presentation/providers/store_hours_provider.dart';
@@ -165,6 +166,11 @@ LoginWithOtpUseCase loginWithOtpUseCase(LoginWithOtpUseCaseRef ref) {
 @riverpod
 GoogleLoginUseCase googleLoginUseCase(GoogleLoginUseCaseRef ref) {
   return GoogleLoginUseCase(ref.watch(authRepositoryProvider));
+}
+
+@riverpod
+CheckGoogleUserUseCase checkGoogleUserUseCase(CheckGoogleUserUseCaseRef ref) {
+  return CheckGoogleUserUseCase(ref.watch(authRepositoryProvider));
 }
 
 @Riverpod(keepAlive: true)

@@ -10,6 +10,7 @@ import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/legacy_route_options.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/vendor_register_params.dart';
 import '../models/user_model.dart';
 
@@ -69,6 +70,13 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel> loginWithGoogle({
     required String idToken,
     required bool asVendor,
+  });
+
+  /// Read-only lookup — does NOT create an account. Lets the caller skip the
+  /// buyer/seller picker and go straight to [loginWithGoogle] with the
+  /// returned role when the identity already has one.
+  Future<({bool exists, UserRole? role})> checkGoogleUser({
+    required String idToken,
   });
 
   /// Exchanges a Firebase ID token (verified server-side) for a backend session.
@@ -483,6 +491,48 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on DioException catch (e) {
       throw mapDioException(e);
     }
+  }
+
+  @override
+  Future<({bool exists, UserRole? role})> checkGoogleUser({
+    required String idToken,
+  }) async {
+    if (MockConfig.useMock) {
+      // Mock mode has no persistent "existing social account" concept —
+      // always route through the role picker, matching prior mock behavior.
+      return MockConfig.simulate((exists: false, role: null));
+    }
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.googleCheckUser,
+        data: {
+          'idToken': idToken,
+          'clientId': DefaultFirebaseOptions.googleWebClientId,
+        },
+        options: ApiAuthHeaders.public(),
+      );
+      final body = _unwrapObject(response.data);
+      final exists = body['exists'] as bool? ?? false;
+      return (exists: exists, role: exists ? _parseRole(body['role']) : null);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  UserRole? _parseRole(dynamic value) {
+    if (value is! String) return null;
+    final lower = value.trim().toLowerCase();
+    if (lower == UserRole.vendor.name) return UserRole.vendor;
+    if (lower == UserRole.consumer.name) return UserRole.consumer;
+    return null;
+  }
+
+  Map<String, dynamic> _unwrapObject(dynamic data) {
+    if (data is! Map) return const {};
+    final m = Map<String, dynamic>.from(data);
+    final nested = m['data'] ?? m['Data'];
+    if (nested is Map) return Map<String, dynamic>.from(nested);
+    return m;
   }
 
   @override

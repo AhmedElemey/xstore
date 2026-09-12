@@ -85,6 +85,12 @@ abstract final class ApiEndpoints {
   static const String googleConsumerLogin = '$_api/auth/google/consumer/login';
   static const String googleVendorLogin = '$_api/auth/google/vendor/login';
 
+  /// Read-only lookup — does NOT create an account, unlike the two routes
+  /// above. Body `{"idToken", "clientId"}`; response `{exists, role}`
+  /// (role is null when exists is false). Lets the app skip the buyer/seller
+  /// picker for a Google identity that already has an account.
+  static const String googleCheckUser = '$_api/auth/google/check-user';
+
   // Reference data (GET only — write ops are admin-only, not used by this app)
   static const String cities = '$_api/cities';
   // CONFIRMED (Postman collection): the folder is labeled "Governments"

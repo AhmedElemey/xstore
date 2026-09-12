@@ -378,6 +378,24 @@ final googleLoginUseCaseProvider =
 );
 
 typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
+String _$checkGoogleUserUseCaseHash() =>
+    r'0000000000000000000000000000000000000a';
+
+/// See also [checkGoogleUserUseCase].
+@ProviderFor(checkGoogleUserUseCase)
+final checkGoogleUserUseCaseProvider =
+    AutoDisposeProvider<CheckGoogleUserUseCase>.internal(
+  checkGoogleUserUseCase,
+  name: r'checkGoogleUserUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$checkGoogleUserUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef CheckGoogleUserUseCaseRef
+    = AutoDisposeProviderRef<CheckGoogleUserUseCase>;
 String _$authHash() => r'd22d2a8bab0138b678fa54a0e80edc2d6b030378';
 
 /// See also [Auth].

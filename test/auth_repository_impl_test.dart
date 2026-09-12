@@ -67,9 +67,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   Future<UserModel> login(_) => throw UnimplementedError();
 
   @override
-  Future<UserModel> register(_) => throw UnimplementedError();
-
-  @override
   Future<UserModel> fetchProfile({String? authToken}) async =>
       consumerRegisterResponse;
 
@@ -172,6 +169,12 @@ class _RecordingRemote implements AuthRemoteDataSource {
     lastGoogleAsVendor = asVendor;
     return asVendor ? mockVendorUserModel() : mockConsumerUserModel();
   }
+
+  @override
+  Future<({bool exists, UserRole? role})> checkGoogleUser({
+    required String idToken,
+  }) async =>
+      (exists: false, role: null);
 }
 
 class _FakeSocial implements SocialAuthDatasource {

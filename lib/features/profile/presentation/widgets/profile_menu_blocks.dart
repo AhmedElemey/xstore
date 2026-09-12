@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/presentation/providers/vendor_orders_provider.dart';
@@ -59,14 +60,20 @@ class ProfileMenuBlocks extends ConsumerWidget {
       context: context,
       child: DeleteAccountDialog(
         onConfirm: (password, confirmationText) async {
-          final deleted =
+          final result =
               await ref.read(profileNotifierProvider.notifier).deleteAccount(
                     password: password,
                     confirmationText: confirmationText,
                   );
-          if (deleted) {
+          if (result.deleted) {
             await ref.read(authProvider.notifier).logout();
+            return;
           }
+          if (!context.mounted || result.error == null) return;
+          AppSnackbar.error(
+            context,
+            resolveAppError(context, result.error),
+          );
         },
       ),
     );

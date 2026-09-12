@@ -5,11 +5,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_state.dart';
 import 'package:xstore/features/cart/presentation/widgets/checkout_address_section.dart';
+import 'package:xstore/features/cities/domain/entities/city_entity.dart';
+import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
+import 'package:xstore/features/governments/domain/entities/government_entity.dart';
+import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
+
+const _cairoGov = GovernmentEntity(id: 16, name: LocalizedText(en: 'Cairo', ar: 'القاهرة'));
+const _maadiCity = CityEntity(
+  id: 1,
+  name: LocalizedText(en: 'Maadi', ar: 'المعادي'),
+  governorateId: 16,
+);
 
 class _FakeAuth extends Auth {
   _FakeAuth(this._user);
@@ -48,6 +60,15 @@ void main() {
             ),
           ),
           cartProvider.overrideWith(() => _InertCart()),
+          // Without this override, LocationCascadeField's underlying
+          // providers hit the real (unmocked) dioProvider, whose
+          // secure-storage-read .timeout() guard creates a genuine 5s Timer
+          // that outlives the test's widget tree and trips the
+          // pending-timer invariant. One government/city pair is enough for
+          // the tests that actually pick a location; the phone-dimming test
+          // never opens the picker at all, so the data is unused there.
+          allGovernmentsProvider.overrideWith((ref) async => const [_cairoGov]),
+          allCitiesProvider.overrideWith((ref) async => const [_maadiCity]),
         ],
         child: const MaterialApp(
           localizationsDelegates: [
@@ -87,10 +108,12 @@ void main() {
         find.widgetWithText(TextField, 'Street'),
         '1 Nile St',
       );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'City'),
-        'Maadi',
-      );
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cairo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Maadi'));
+      await tester.pumpAndSettle();
 
       final save = find.text('Save Address');
       await tester.ensureVisible(save);
@@ -139,10 +162,12 @@ void main() {
         find.widgetWithText(TextField, 'Street'),
         '1 Nile St',
       );
-      await tester.enterText(
-        find.widgetWithText(TextField, 'City'),
-        'Maadi',
-      );
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cairo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Maadi'));
+      await tester.pumpAndSettle();
       final save = find.text('Save Address');
       await tester.ensureVisible(save);
       await tester.tap(save);

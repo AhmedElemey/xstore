@@ -27,15 +27,27 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/delivery_api_endpoints.dart';
 import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/cities/domain/entities/city_entity.dart';
+import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/delivery/data/delivery_dio_provider.dart';
 import 'package:xstore/features/delivery/presentation/screens/send_package_screen.dart';
+import 'package:xstore/features/governments/domain/entities/government_entity.dart';
+import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
+
+const _cairoGov = GovernmentEntity(id: 16, name: LocalizedText(en: 'Cairo', ar: 'القاهرة'));
+const _maadiCity = CityEntity(
+  id: 1,
+  name: LocalizedText(en: 'Maadi', ar: 'المعادي'),
+  governorateId: 16,
+);
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as edit_profile_screen_live_flow_test.dart's
@@ -154,25 +166,54 @@ void main() {
         _routedHarness([
           authProvider.overrideWith(() => FakeAuth(_consumer())),
           deliveryDioProvider.overrideWithValue(dio),
+          // Pickup/dropoff location is a LocationCascadeField picker now,
+          // not a free-text city field — its underlying providers hit the
+          // real (unmocked) dioProvider without this override, whose
+          // secure-storage-read .timeout() guard creates a genuine 5s
+          // Timer that outlives the test's widget tree.
+          allGovernmentsProvider.overrideWith((ref) async => const [_cairoGov]),
+          allCitiesProvider.overrideWith((ref) async => const [_maadiCity]),
         ]),
       );
       await _settle(tester);
 
-      // Both PhoneInputField and every other field on this form render as
-      // a TextFormField, so every field — including the two phone ones —
-      // is addressed by position in this single list: [senderName,
-      // senderPhone, pickupStreet, pickupCity, recipientName,
-      // recipientPhone, dropoffStreet, dropoffCity, note].
+      // Both PhoneInputField and every other TextFormField on this form
+      // are addressed by position: [senderName, senderPhone, pickupStreet,
+      // recipientName, recipientPhone, dropoffStreet, note]. Pickup/dropoff
+      // city+governorate are picked via the two LocationCascadeField
+      // pickers instead (same widget twice, so byKey finds two — .at(0)
+      // is pickup, .at(1) is dropoff, matching document order).
       final fields = find.byType(TextFormField);
       await tester.enterText(fields.at(0), 'Test Buyer');
       await tester.enterText(fields.at(1), '01012345678');
       await tester.enterText(fields.at(2), 'Street 1');
-      await tester.enterText(fields.at(3), 'Cairo');
-      await tester.enterText(fields.at(4), 'Test Recipient');
-      await tester.enterText(fields.at(5), '01098765432');
-      await tester.enterText(fields.at(6), 'Street 2');
-      await tester.enterText(fields.at(7), 'Giza');
-      await tester.enterText(fields.at(8), 'A small box');
+      await tester.pump();
+
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')).at(0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cairo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Maadi'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(fields.at(3), 'Test Recipient');
+      await tester.enterText(fields.at(4), '01098765432');
+      await tester.enterText(fields.at(5), 'Street 2');
+      await tester.pump();
+
+      // The dropoff cascade sits below the fold of this long form.
+      final dropoffCascade =
+          find.byKey(const ValueKey('locationCascadeField')).at(1);
+      await tester.ensureVisible(dropoffCascade);
+      await tester.pump();
+      await tester.tap(dropoffCascade);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cairo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Maadi'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(fields.at(6), 'A small box');
       await tester.pump();
 
       // The submit button sits below the fold of this long form.

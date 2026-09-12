@@ -75,6 +75,13 @@ abstract interface class AuthRepository {
     required UserRole role,
   });
 
+  /// Read-only lookup — does NOT create an account. Lets the caller skip the
+  /// buyer/seller picker and call [loginWithGoogle] directly with the
+  /// returned role when the identity already has an account.
+  Future<Either<Failure, ({bool exists, UserRole? role})>> checkGoogleUser({
+    required String idToken,
+  });
+
   Future<Either<Failure, SocialAuthResult>> signInWithApple();
   Future<Either<Failure, SocialAuthResult>> signInWithFacebook();
   Future<Either<Failure, Unit>> signOutSocial();

@@ -164,6 +164,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, ({bool exists, UserRole? role})>> checkGoogleUser({
+    required String idToken,
+  }) async {
+    try {
+      final result = await _remote.checkGoogleUser(idToken: idToken);
+      return Right(result);
+    } on AuthException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on UnauthorizedException catch (e) {
+      return Left(Failure.unauthorized(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, UserEntity>> registerConsumer(
     ConsumerRegisterParams params,
   ) async {
