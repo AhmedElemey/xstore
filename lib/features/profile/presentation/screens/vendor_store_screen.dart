@@ -29,9 +29,6 @@ import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
-// TODO(phase-2): Re-enable once store/active hours ships.
-// import '../../../store/presentation/providers/store_hours_provider.dart';
-// import '../../../store/presentation/widgets/store_hours_summary_card.dart';
 
 /// Radius of the storefront avatar in the profile card header.
 const double _kAvatarRadius = 38;
@@ -305,10 +302,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final authUser = ref.watch(authProvider).valueOrNull;
     final isOwnStore = _isOwnStore(authUser);
     final whatsapp = (u.whatsappNumber ?? '').trim();
-    // TODO(phase-2): Store/active hours deferred to next phase.
-    // final storeHoursState =
-    //     isOwnStore ? ref.watch(storeHoursNotifierProvider) : null;
-    // final isOpen = storeHoursState?.isStoreOpen ?? false;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -525,21 +518,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                     ),
                   ),
                 ),
-              // TODO(phase-2): Store/active hours deferred to next phase.
-              // if (isOwnStore && storeHoursState?.current != null)
-              //   SliverToBoxAdapter(
-              //     child: Padding(
-              //       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
-              //       child: Column(
-              //         crossAxisAlignment: CrossAxisAlignment.start,
-              //         children: [
-              //           Text(context.l10n.storeHours, style: AppTypography.titleMedium),
-              //           const Gap(AppSpacing.sm),
-              //           StoreHoursSummaryCard(schedule: storeHoursState!.current!.schedule),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 40,

@@ -1,15 +1,49 @@
 ---
 name: flutter-review
-description: Team-lead review checklist and accumulated lessons for xStore Flutter code. Use BEFORE writing or modifying any Dart code in this repo, and AFTER completing a change to self-review it. Also use when a review finding or user correction produces a new lesson to record.
+description: Team-lead review checklist and accumulated lessons for xStore Flutter code. Use BEFORE writing or modifying any Dart code in this repo, and AFTER completing a change to self-review it. Also use when a review finding or user correction produces a new lesson to record, or after merging a pull request to dev (see "Post-Merge Audit").
 ---
 
 # xStore Flutter Review — Team Lead Skill
 
-Two jobs:
+Three jobs:
 1. **Before writing Dart code**: read the Lessons Learned log below and apply every relevant lesson.
 2. **After a review finding or user correction**: record the lesson (see "Recording a lesson").
+3. **After merging a pull request into `dev`**: run the codebase audit below (see "Post-Merge Audit").
 
 The base rules (disposal, Riverpod lifecycles, mounted checks, rebuild storms, over-engineering bans) live in the project CLAUDE.md — this skill holds what we learn on top of them.
+
+## Post-Merge Audit
+
+A `PostToolUse` hook on `mcp__github__merge_pull_request` (see `.claude/settings.json`) injects a reminder into context right after any PR merge completes. When that reminder appears (or when the user directly asks to "run the audit"/"check for dead code"), and the merge target was `dev`:
+
+1. Confirm the merge actually landed on `dev` (not `main` or another branch) before proceeding — the hook fires on every merge regardless of target, since the merge tool doesn't report the base branch.
+2. Run this review as a senior software engineer performing a code quality and maintainability review, using parallel Explore agents the same way prior runs did (roughly: orphaned files/unused deps, duplicate UI/logic, legacy code markers, redundant API calls/dead routes — four passes covers the codebase without any one agent's context overflowing):
+
+   > Act as a senior software engineer performing a code quality and maintainability review.
+   >
+   > Analyze the entire codebase and identify:
+   >
+   > 1. Dead code (unused functions, files, components, routes, APIs, variables, imports, and dependencies)
+   > 2. Duplicate logic that should be consolidated
+   > 3. Unused UI components
+   > 4. Overly complex implementations that can be simplified
+   > 5. Legacy code that is no longer needed
+   > 6. Redundant database queries or API calls
+   > 7. Files that appear abandoned or disconnected from the application
+   > 8. Opportunities to reduce technical debt
+   >
+   > For each issue:
+   >
+   > * Explain why it is unnecessary
+   > * Estimate the impact of removing it
+   > * Identify any risks before deletion
+   > * Provide a recommended cleanup plan
+   >
+   > Be aggressive but safe. Assume the goal is to simplify the codebase, improve maintainability, and remove anything that does not provide value.
+
+3. If a prior audit's findings are still in this skill file's memory (recent conversation, or a prior report), re-verify each one against the CURRENT code before repeating it — don't pad the new report with stale findings (see the 2026-09-11 "audit is a snapshot" lesson below), and don't silently skip re-checking just because a finding was reported once.
+4. **Before recommending any deletion, verify it doesn't break the build** — a symbol can have a live reference the grep pass missed (see the 2026-09-11 "hotfix" lesson below, where exactly this happened: a deleted route constant left one dangling reference that broke `dev`). If you executed deletions from a previous run of this audit, grep one more time across the whole `lib/` and `test/` trees for anything on the delete list before considering the pass done.
+5. Report the findings to the user and ask how they'd like to proceed (report only, or open a cleanup PR) — unless this specific conversation already told you to auto-apply confirmed-safe deletions, in which case do that on a fresh branch off `dev` and open a PR. This section only guarantees the audit itself runs on schedule; it doesn't authorize skipping the user's say on what happens with the results.
 
 ## Recording a lesson
 
@@ -1557,3 +1591,43 @@ Rules for the log:
 - **What happened:** Google sign-in always forced the buyer/seller picker, even for a returning user, because the only backend routes (`google/{consumer|vendor}/login`) are role-specific and auto-create the account — there was no way to ask "does this identity already have an account" without already committing to a role. The backend team shipped a genuine fix: `POST /api/auth/google/check-user` (body `{idToken, clientId}`, response `{exists, role}`, read-only — never creates an account). Wired it in as `AuthRemoteDataSource.checkGoogleUser`/`AuthRepository.checkGoogleUser`/`CheckGoogleUserUseCase`, called from `SocialAuthNotifier._handleGoogleSuccess` right after Google sign-in returns the identity token, BEFORE deciding whether to show the picker: `exists:true` skips straight to the role-specific login with the returned role (extracted into a shared `_loginWithGoogleRole` used by both this path and the post-picker `completeSocialRegistration` path); `exists:false` or a failed lookup falls through to the picker exactly as before.
 - **Rule:** When a "does X already exist" check is impossible because the only mutating endpoint requires committing to the thing you're checking for first (role, category, etc.), that is a real backend-contract gap, not a client-side workaround — flag it as a dedicated read-only lookup endpoint to add, rather than guessing client-side (a locally cached role, a default-then-correct-later flow) which either only works per-device or risks silently creating the wrong kind of account. A failed lookup should degrade to the SAFE prior behavior (here: show the picker) rather than block sign-in — the mutating endpoint is idempotent/safe to call either way, so worst case is one extra tap, never a wrong account.
 - **Where it applies:** `auth_remote_datasource.dart` (`checkGoogleUser`), `auth_repository_impl.dart`, `check_google_user_usecase.dart` (new), `auth_provider.dart` (`checkGoogleUserUseCaseProvider`, hand-mirrored into `auth_provider.g.dart` — no SDK in this session to regenerate), `social_auth_provider.dart` (`_handleGoogleSuccess`, `_loginWithGoogleRole` extracted from `completeSocialRegistration`'s google branch). Any hand-rolled `implements AuthRepository`/`implements AuthRemoteDataSource` test double that does NOT extend `Fake` (grep found `StubAuthRepository` and `_RecordingRemote` — `Fake`-based doubles don't need this) must get the new interface method added in the same change or it fails to compile.
+
+### 2026-09-10 — Add an import in the same edit as its first usage, not a separate one
+- **What happened:** Added `import 'package:flutter/foundation.dart';` to `cart_remote_datasource.dart` in its own `Edit` call before the following edit added the `kDebugMode`/`debugPrint` calls that use it. The review hook inspects each edit's `new_string` in isolation, so the import-only edit correctly read as an unused import and was flagged.
+- **Rule:** When a fix needs a new import, add the import and its first real usage in the same `Edit` call (or add the import after the usage exists) rather than as a separate preceding edit — the review hook has no visibility into edits you haven't made yet.
+- **Where it applies:** Any change that introduces a new import to an existing file.
+
+### 2026-09-11 — When resolving a stale PR's merge conflict against a fast-moving base, some of the PR's own fixes may already be superseded
+- **What happened:** Between opening a QA-fixes PR and being asked to resolve its merge conflict, `dev` moved ~150 files and had independently fixed 3 of the PR's 5 issues (checkout partial-failure handling, the fake-rating fallback, My Listings localization) — in two cases (rating fallback, checkout) with a materially different and arguably better design than the PR's own fix, not just a cosmetic difference. Resolving the conflict wasn't a matter of picking a side per hunk: it required diffing each overlapping file against the merge-base on both branches to determine, per file, whether the PR's fix was still needed, fully superseded, or partially redundant, before touching any conflict markers.
+- **Rule:** When resolving a merge conflict on a PR you own, don't default to keeping "your" side just because it's familiar — diff each conflicted file (`git diff <merge-base> <other-branch> -- <file>`) to see what the other side actually did, and drop your own change wholesale where the other branch already solves the same problem (especially if its approach is more correct), rather than fighting to preserve a now-redundant or inferior fix.
+- **Where it applies:** Any "resolve this PR's conflict" request, especially after a time gap or when other sessions/contributors could plausibly have shipped an overlapping fix in the meantime.
+
+### 2026-09-11 — A dead-code audit is a snapshot; re-verify every finding against current HEAD before executing deletions from it
+- **What happened:** Asked to execute deletions from a dead-code audit report written earlier in the same session. Between the audit and the deletion request, `dev` had moved by 156 files / ~7800 lines (unrelated feature work from other sessions), including changes to some of the exact files the audit had cited line numbers for (`seller_card.dart`, `vendor_store_screen.dart`, `product_header.dart`, `my_listings_screen.dart`). Re-ran the audit's grep checks fresh against current `origin/dev` before touching anything rather than trusting the report's line numbers — all findings still held, but the line numbers had shifted and needed fresh reads.
+- **Rule:** Never execute a code-removal plan (yours or a prior report's) against a codebase state you haven't just re-read. Re-verify each "confirmed dead" claim with a fresh grep/read immediately before editing, especially after any time gap or when other work could plausibly have landed on the branch in between.
+- **Where it applies:** Any "apply this audit's fixes" / "execute this cleanup plan" request that follows an earlier analysis pass in the same or a different session.
+
+### 2026-09-11 — Deleting an audited dead symbol should prompt a check for its unaudited siblings
+- **What happened:** The audit flagged `mockVendorProfileDisplay` (`mock_users.dart`) as a dead "legacy tuple." While deleting it, grepped its immediate neighbor `mockConsumerProfileDisplay` out of habit — same shape, same file, right below it — and found it was equally dead (zero callers) despite never being named in the audit. Removed both together.
+- **Rule:** When removing an audited dead symbol, grep its obvious siblings (same file, same naming pattern, same "pair" like consumer/vendor or en/ar) before finishing — audits built from a lead list don't always catch the symmetric twin of the thing they were looking for.
+- **Where it applies:** Any dead-code deletion pass; especially consumer/vendor-, en/ar-, or mock-paired constants and helpers.
+
+### 2026-09-11 — A deleted route constant broke the build because a same-day sibling commit added a second reference the deletion pass's grep missed
+- **What happened:** The dead-code audit deleted `AppRoutes.incomingOrders` after grepping every call site and confirming only test files referenced it. What the grep pass didn't catch: a separate same-day commit (`a7110ea`, "Refresh shell-tab screens when navigation re-enters their route") had already added a new reference to it in `OrdersScreen`'s `RouteReentryRefresh.isTarget` check, and that reference existed in the exact `dev` snapshot the deletion was verified against — the verification grep simply missed it (not a timing race; a real miss). `dev` was broken (a dangling identifier, would fail `flutter analyze`/build) from the moment PR #25 merged until a follow-up hotfix PR caught it during the NEXT audit run.
+- **Rule:** A single `grep -rn "<ClassName>\."`-style pass is not proof of zero references — rerun the exact deletion-justifying grep one more time immediately before merging (not just before opening the PR), and after any dead-code cleanup merges, the next audit pass's first job is confirming the previous pass's deletions didn't leave a dangling reference, before looking for anything new.
+- **Where it applies:** Every dead-code deletion, especially route/constant deletions referenced by string/enum comparison (`location == AppRoutes.foo`) rather than a typed import, which are easy for both grep and human review to skim past.
+
+### 2026-09-11 — Set up a PostToolUse hook + this skill's "Post-Merge Audit" section so the dead-code audit runs after every merge to dev
+- **What happened:** Asked to make the dead-code/maintainability audit run automatically after every merge to `dev`. A skill's instructions alone can't trigger on a git event — only a hook (configured in `.claude/settings.json`) can react to a tool call. Added a `PostToolUse` hook matching `mcp__github__merge_pull_request` that, when `tool_response.merged == true`, injects an `additionalContext` reminder pointing at this skill's new "Post-Merge Audit" section (which holds the actual audit prompt). The hook can't see the PR's base branch (the merge tool doesn't take one as a parameter), so it fires on every merge regardless of target — the injected reminder tells Claude to check whether the target was actually `dev` before running the audit, rather than trying to filter in the hook shell script itself.
+- **Rule:** "Run X automatically when Y happens" always needs a hook, not just a documented skill step — but keep the hook's shell command minimal (a condition check + a fixed JSON reminder) and push any judgment call (like "was this actually a merge to dev") into the reminder text for Claude to resolve, rather than trying to replicate that logic in bash/jq.
+- **Where it applies:** `.claude/settings.json`'s `PostToolUse` hooks list; any future "after X, do Y" automation request in this repo.
+
+### 2026-09-11 — A "dead" screen had a dedicated test constructing it directly — grep lib/ alone isn't enough to call something orphaned
+- **What happened:** An audit pass flagged `NotificationSettingsScreen` as dead because `grep -rn "NotificationSettingsScreen" lib/` found no callers — the registered route redirects to `/profile` before ever building it. Re-verifying immediately before deleting (this session's own new rule, applied the same day it was written) turned up `test/notification_settings_screen_live_flow_test.dart`, which pumps `home: const NotificationSettingsScreen()` directly — the earlier grep was scoped to `lib/` only and missed `test/`. Deleting the screen would have broken that test. Left it in place; it's the same "built and tested, not yet wired into navigation" category as the store-hours feature, not true dead code.
+- **Rule:** Every "is this file dead" grep must cover `test/` as well as `lib/` — a screen/widget with zero production callers can still be load-bearing for a dedicated screen-level test that constructs it directly, and deleting it breaks the build even though no *feature* code referenced it.
+- **Where it applies:** Any dead-code grep pass; this repo specifically has many screen-level "live_flow" tests that construct a screen directly by class name rather than through navigation, so a `lib/`-only grep will systematically miss them.
+
+### 2026-09-11 — Four Round 3 "ask first" findings resolved by the product owner — record the answer, don't re-ask
+- **What happened:** Round 3's audit reported four items as ambiguous (zero live references, but each carrying a signal of deliberate pause rather than abandonment) and asked rather than guessing: `cart_select_all_row.dart` and `wishlist_header_bar.dart` (both explicitly commented "hidden for now" with restore instructions), and `AppRoutes.earnings`/`AppRoutes.chatThread()` (route scaffolding with zero navigation call sites, not even commented). Asked the product owner directly. Answer: **keep all four** — `cart_select_all_row.dart` and `wishlist_header_bar.dart` stay paused-but-present (not being deleted), and both vendor earnings and in-app chat are real planned features, not abandoned scaffolding.
+- **Rule:** Once a human with product context has answered one of this audit's "ask first" findings, that answer is durable — a future audit pass must not re-flag the same symbol/route as an open question. Check this log for a prior resolution before re-reporting an "ask first" item as still-open.
+- **Where it applies:** `cart_select_all_row.dart`, `wishlist_header_bar.dart`, `AppRoutes.earnings`, `AppRoutes.chatThread()` — all four are settled as "keep, planned/paused feature," not dead code, until someone says otherwise.

@@ -4,7 +4,6 @@ import '../../../../core/error/failures.dart';
 import '../entities/auth_token_pair.dart';
 import '../entities/consumer_register_params.dart';
 import '../entities/login_params.dart';
-import '../entities/register_params.dart';
 import '../entities/social_auth_result.dart';
 import '../entities/user_entity.dart';
 import '../entities/vendor_register_params.dart';
@@ -13,8 +12,6 @@ abstract interface class AuthRepository {
   Future<Either<Failure, UserEntity?>> restoreSession();
 
   Future<Either<Failure, UserEntity>> login(LoginParams params);
-
-  Future<Either<Failure, UserEntity>> register(RegisterParams params);
 
   Future<Either<Failure, UserEntity>> registerConsumer(
     ConsumerRegisterParams params,

@@ -32,10 +32,6 @@ abstract final class ApiEndpoints {
   // the real backend and are kept only until the backend adds routes.
   // ---------------------------------------------------------------------
 
-  /// Legacy generic register — UI now uses [consumerRegister] /
-  /// [vendorRegister]; only the unused RegisterUseCase path references it.
-  static const String register = '/auth/register';
-
   // TODO(backend): no social token-exchange route exists yet.
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';
@@ -46,11 +42,6 @@ abstract final class ApiEndpoints {
       '/vendors/$vendorId/store-hours';
   static String vendorStoreStatus(String vendorId) =>
       '/vendors/$vendorId/store-status';
-
-  /// Used by profile for vendor store head/stats and public store listings —
-  /// none of which exist in the confirmed contract yet. (Account delete now
-  /// has a confirmed route — see [deleteAccount] below.)
-  static const String users = '/users';
 
 
   // ---------------------------------------------------------------------

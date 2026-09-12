@@ -313,14 +313,6 @@ GoRouter goRouter(GoRouterRef ref) {
         ),
       ),
       GoRoute(
-        path: AppRoutes.incomingOrders,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const OrdersScreen(),
-        ),
-      ),
-      GoRoute(
         path: '${AppRoutes.vendorOrders}/:orderId',
         pageBuilder: (context, state) => slideUpTransition(
           context,

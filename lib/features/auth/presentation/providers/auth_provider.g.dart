@@ -82,21 +82,6 @@ final loginUseCaseProvider = AutoDisposeProvider<LoginUseCase>.internal(
 );
 
 typedef LoginUseCaseRef = AutoDisposeProviderRef<LoginUseCase>;
-String _$registerUseCaseHash() => r'40b32ebe481f7183de4ac3eaac00f8473d98eaeb';
-
-/// See also [registerUseCase].
-@ProviderFor(registerUseCase)
-final registerUseCaseProvider = AutoDisposeProvider<RegisterUseCase>.internal(
-  registerUseCase,
-  name: r'registerUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$registerUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef RegisterUseCaseRef = AutoDisposeProviderRef<RegisterUseCase>;
 String _$registerConsumerUseCaseHash() =>
     r'8b99efb166881b376018e2fb12bd99d7f7f1d075';
 
