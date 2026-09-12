@@ -24,6 +24,14 @@ mixin _$OrderAddress {
   String? get postalCode => throw _privateConstructorUsedError;
   bool get isDefault => throw _privateConstructorUsedError;
 
+  /// Set when this address was pinned on the map picker (see
+  /// `showMapAddressPicker`). Null for addresses saved before the picker
+  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// to [AppLocationCache] in that case, same as before this field
+  /// existed.
+  double? get latitude => throw _privateConstructorUsedError;
+  double? get longitude => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $OrderAddressCopyWith<OrderAddress> get copyWith =>
       throw _privateConstructorUsedError;
@@ -42,7 +50,9 @@ abstract class $OrderAddressCopyWith<$Res> {
       String city,
       String wilaya,
       String? postalCode,
-      bool isDefault});
+      bool isDefault,
+      double? latitude,
+      double? longitude});
 }
 
 /// @nodoc
@@ -65,6 +75,8 @@ class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
     Object? wilaya = null,
     Object? postalCode = freezed,
     Object? isDefault = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
   }) {
     return _then(_value.copyWith(
       fullName: null == fullName
@@ -95,6 +107,14 @@ class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
           ? _value.isDefault
           : isDefault // ignore: cast_nullable_to_non_nullable
               as bool,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -114,7 +134,9 @@ abstract class _$$OrderAddressImplCopyWith<$Res>
       String city,
       String wilaya,
       String? postalCode,
-      bool isDefault});
+      bool isDefault,
+      double? latitude,
+      double? longitude});
 }
 
 /// @nodoc
@@ -135,6 +157,8 @@ class __$$OrderAddressImplCopyWithImpl<$Res>
     Object? wilaya = null,
     Object? postalCode = freezed,
     Object? isDefault = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
   }) {
     return _then(_$OrderAddressImpl(
       fullName: null == fullName
@@ -165,6 +189,14 @@ class __$$OrderAddressImplCopyWithImpl<$Res>
           ? _value.isDefault
           : isDefault // ignore: cast_nullable_to_non_nullable
               as bool,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -179,7 +211,9 @@ class _$OrderAddressImpl implements _OrderAddress {
       required this.city,
       required this.wilaya,
       this.postalCode,
-      this.isDefault = false});
+      this.isDefault = false,
+      this.latitude,
+      this.longitude});
 
   @override
   final String fullName;
@@ -197,9 +231,19 @@ class _$OrderAddressImpl implements _OrderAddress {
   @JsonKey()
   final bool isDefault;
 
+  /// Set when this address was pinned on the map picker (see
+  /// `showMapAddressPicker`). Null for addresses saved before the picker
+  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// to [AppLocationCache] in that case, same as before this field
+  /// existed.
+  @override
+  final double? latitude;
+  @override
+  final double? longitude;
+
   @override
   String toString() {
-    return 'OrderAddress(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault)';
+    return 'OrderAddress(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault, latitude: $latitude, longitude: $longitude)';
   }
 
   @override
@@ -216,12 +260,16 @@ class _$OrderAddressImpl implements _OrderAddress {
             (identical(other.postalCode, postalCode) ||
                 other.postalCode == postalCode) &&
             (identical(other.isDefault, isDefault) ||
-                other.isDefault == isDefault));
+                other.isDefault == isDefault) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, fullName, phone, street, city,
-      wilaya, postalCode, isDefault);
+      wilaya, postalCode, isDefault, latitude, longitude);
 
   @JsonKey(ignore: true)
   @override
@@ -238,7 +286,9 @@ abstract class _OrderAddress implements OrderAddress {
       required final String city,
       required final String wilaya,
       final String? postalCode,
-      final bool isDefault}) = _$OrderAddressImpl;
+      final bool isDefault,
+      final double? latitude,
+      final double? longitude}) = _$OrderAddressImpl;
 
   @override
   String get fullName;
@@ -254,6 +304,16 @@ abstract class _OrderAddress implements OrderAddress {
   String? get postalCode;
   @override
   bool get isDefault;
+  @override
+
+  /// Set when this address was pinned on the map picker (see
+  /// `showMapAddressPicker`). Null for addresses saved before the picker
+  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// to [AppLocationCache] in that case, same as before this field
+  /// existed.
+  double? get latitude;
+  @override
+  double? get longitude;
   @override
   @JsonKey(ignore: true)
   _$$OrderAddressImplCopyWith<_$OrderAddressImpl> get copyWith =>

@@ -1669,6 +1669,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutErrorAddressCity => 'أدخل المدينة';
 
   @override
+  String get checkoutPickOnMap => 'تحديد على الخريطة';
+
+  @override
+  String get checkoutConfirmLocation => 'تأكيد الموقع';
+
+  @override
+  String get checkoutMapPinDropped =>
+      'اسحب الخريطة لنقل الدبوس إلى موقع التوصيل';
+
+  @override
+  String get checkoutMapOutsideEgypt => 'يجب أن يكون موقع التوصيل داخل مصر';
+
+  @override
+  String get checkoutLocationPinned => 'تم تحديد الموقع';
+
+  @override
   String get checkoutPaymentTitle => 'طريقة الدفع';
 
   @override

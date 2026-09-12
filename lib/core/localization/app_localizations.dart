@@ -3356,6 +3356,36 @@ abstract class AppLocalizations {
   /// **'Enter a city'**
   String get checkoutErrorAddressCity;
 
+  /// No description provided for @checkoutPickOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick on Map'**
+  String get checkoutPickOnMap;
+
+  /// No description provided for @checkoutConfirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Location'**
+  String get checkoutConfirmLocation;
+
+  /// No description provided for @checkoutMapPinDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the map to move the pin to your delivery spot'**
+  String get checkoutMapPinDropped;
+
+  /// No description provided for @checkoutMapOutsideEgypt.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery pin must be within Egypt'**
+  String get checkoutMapOutsideEgypt;
+
+  /// No description provided for @checkoutLocationPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Location pinned'**
+  String get checkoutLocationPinned;
+
   /// No description provided for @checkoutPaymentTitle.
   ///
   /// In en, this message translates to:

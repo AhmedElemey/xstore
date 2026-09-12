@@ -18,6 +18,12 @@
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
+        <!-- TODO: Replace google_maps_api_key in
+             android/app/src/main/res/values/strings.xml with a real Maps
+             SDK for Android key before release — see the comment there. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_api_key" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

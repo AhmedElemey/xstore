@@ -514,6 +514,19 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       throw const ServerException('Cart is empty');
     }
     final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
+    // A map-pinned delivery address (see showMapAddressPicker) carries its
+    // own coordinates — prefer those over the device's last-known GPS fix,
+    // since the two can legitimately differ (ordering for a different
+    // address than the one the phone is currently at). Addresses saved
+    // before the picker existed, or typed without dropping a pin, have no
+    // lat/lng and fall back to AppLocationCache exactly as before.
+    final pinnedLat = params.deliveryAddress.latitude;
+    final pinnedLng = params.deliveryAddress.longitude;
+    final hasValidPin = pinnedLat != null &&
+        pinnedLng != null &&
+        AppLocationCache.isInEgypt(pinnedLat, pinnedLng);
+    final orderLatitude = hasValidPin ? pinnedLat : AppLocationCache.latitude;
+    final orderLongitude = hasValidPin ? pinnedLng : AppLocationCache.longitude;
     final createdOrders = <OrderModel>[];
     Object? lastError;
     for (final item in params.items) {
@@ -521,8 +534,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         final created = await _orders.createOrder(
           listingId: item.listingId,
           quantity: item.quantity,
-          latitude: AppLocationCache.latitude,
-          longitude: AppLocationCache.longitude,
+          latitude: orderLatitude,
+          longitude: orderLongitude,
           fallbackItem: OrderItemModel(
             id: 'oi_${item.listingId}',
             listingId: item.listingId,

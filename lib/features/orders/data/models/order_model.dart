@@ -15,6 +15,8 @@ class OrderAddressModel with _$OrderAddressModel {
     required String wilaya,
     String? postalCode,
     @Default(false) bool isDefault,
+    double? latitude,
+    double? longitude,
   }) = _OrderAddressModel;
 }
 
@@ -66,6 +68,8 @@ extension OrderAddressModelX on OrderAddressModel {
         wilaya: wilaya,
         postalCode: postalCode,
         isDefault: isDefault,
+        latitude: latitude,
+        longitude: longitude,
       );
 
   static OrderAddressModel fromEntity(OrderAddress e) => OrderAddressModel(
@@ -76,6 +80,8 @@ extension OrderAddressModelX on OrderAddressModel {
         wilaya: e.wilaya,
         postalCode: e.postalCode,
         isDefault: e.isDefault,
+        latitude: e.latitude,
+        longitude: e.longitude,
       );
 }
 

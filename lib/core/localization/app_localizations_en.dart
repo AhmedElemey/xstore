@@ -1667,6 +1667,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutErrorAddressCity => 'Enter a city';
 
   @override
+  String get checkoutPickOnMap => 'Pick on Map';
+
+  @override
+  String get checkoutConfirmLocation => 'Confirm Location';
+
+  @override
+  String get checkoutMapPinDropped =>
+      'Drag the map to move the pin to your delivery spot';
+
+  @override
+  String get checkoutMapOutsideEgypt => 'Delivery pin must be within Egypt';
+
+  @override
+  String get checkoutLocationPinned => 'Location pinned';
+
+  @override
   String get checkoutPaymentTitle => 'Payment Method';
 
   @override

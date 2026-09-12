@@ -13,6 +13,7 @@ import '../../../governments/presentation/providers/government_dependencies.dart
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../../shared/widgets/map_address_picker.dart';
 
 /// Opens the add/edit address sheet. Pass [existing] and [editIndex]
 /// together to edit a saved address in place; omit both to add a new one.
@@ -85,6 +86,13 @@ class _CheckoutAddAddressSheetState
   // rest of the app instead of a second, disagreeing location system.
   int? _cityId;
   int? _governorateId;
+  // Set by the map picker (showMapAddressPicker) — carried on the saved
+  // OrderAddress so checkout can use the exact pinned spot instead of the
+  // device's last-known GPS fix when placing the order (see
+  // cart_remote_datasource.dart's placeOrder). Null until the user drops a
+  // pin; an edited address starts with the previously-saved pin, if any.
+  double? _pickedLat;
+  double? _pickedLng;
   late bool _isDefault;
   late final Listenable _fields;
   var _fieldErrors = <String, String>{};
@@ -98,6 +106,8 @@ class _CheckoutAddAddressSheetState
     _postalCtrl = TextEditingController(
       text: widget.existing?.postalCode ?? '',
     );
+    _pickedLat = widget.existing?.latitude;
+    _pickedLng = widget.existing?.longitude;
     // Location (_cityId/_governorateId) isn't a TextEditingController, so it
     // isn't part of this Listenable — the picker's onChanged already calls
     // setState, which rebuilds the ListenableBuilder below along with the
@@ -123,6 +133,24 @@ class _CheckoutAddAddressSheetState
     _streetCtrl.dispose();
     _postalCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickOnMap() async {
+    final result = await showMapAddressPicker(
+      context,
+      initialLatitude: _pickedLat,
+      initialLongitude: _pickedLng,
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _pickedLat = result.latitude;
+      _pickedLng = result.longitude;
+      // A dropped pin's reverse-geocoded label is a reasonable street-line
+      // starting point, but never overwrites text the user already typed.
+      if (_streetCtrl.text.trim().isEmpty && result.addressLine != null) {
+        _streetCtrl.text = result.addressLine!;
+      }
+    });
   }
 
   void _save() {
@@ -178,6 +206,8 @@ class _CheckoutAddAddressSheetState
           ? null
           : _postalCtrl.text.trim(),
       isDefault: _isDefault,
+      latitude: _pickedLat,
+      longitude: _pickedLng,
     );
     if (widget.isEditing) {
       ref
@@ -207,7 +237,9 @@ class _CheckoutAddAddressSheetState
         _cityId != null ||
         _governorateId != null ||
         (postal.isEmpty ? null : postal) != e.postalCode ||
-        _isDefault != e.isDefault;
+        _isDefault != e.isDefault ||
+        _pickedLat != e.latitude ||
+        _pickedLng != e.longitude;
   }
 
   bool get _canSave => _phoneValid && _hasChanged;
@@ -256,6 +288,18 @@ class _CheckoutAddAddressSheetState
                 labelText: l10n.checkoutStreet,
                 border: const OutlineInputBorder(),
                 errorText: _fieldErrors['street'],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            OutlinedButton.icon(
+              onPressed: _pickOnMap,
+              icon: Icon(
+                _pickedLat == null ? Icons.location_on_outlined : Icons.check,
+              ),
+              label: Text(
+                _pickedLat == null
+                    ? l10n.checkoutPickOnMap
+                    : l10n.checkoutLocationPinned,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

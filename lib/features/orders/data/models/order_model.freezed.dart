@@ -23,6 +23,8 @@ mixin _$OrderAddressModel {
   String get wilaya => throw _privateConstructorUsedError;
   String? get postalCode => throw _privateConstructorUsedError;
   bool get isDefault => throw _privateConstructorUsedError;
+  double? get latitude => throw _privateConstructorUsedError;
+  double? get longitude => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $OrderAddressModelCopyWith<OrderAddressModel> get copyWith =>
@@ -42,7 +44,9 @@ abstract class $OrderAddressModelCopyWith<$Res> {
       String city,
       String wilaya,
       String? postalCode,
-      bool isDefault});
+      bool isDefault,
+      double? latitude,
+      double? longitude});
 }
 
 /// @nodoc
@@ -65,6 +69,8 @@ class _$OrderAddressModelCopyWithImpl<$Res, $Val extends OrderAddressModel>
     Object? wilaya = null,
     Object? postalCode = freezed,
     Object? isDefault = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
   }) {
     return _then(_value.copyWith(
       fullName: null == fullName
@@ -95,6 +101,14 @@ class _$OrderAddressModelCopyWithImpl<$Res, $Val extends OrderAddressModel>
           ? _value.isDefault
           : isDefault // ignore: cast_nullable_to_non_nullable
               as bool,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -114,7 +128,9 @@ abstract class _$$OrderAddressModelImplCopyWith<$Res>
       String city,
       String wilaya,
       String? postalCode,
-      bool isDefault});
+      bool isDefault,
+      double? latitude,
+      double? longitude});
 }
 
 /// @nodoc
@@ -135,6 +151,8 @@ class __$$OrderAddressModelImplCopyWithImpl<$Res>
     Object? wilaya = null,
     Object? postalCode = freezed,
     Object? isDefault = null,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
   }) {
     return _then(_$OrderAddressModelImpl(
       fullName: null == fullName
@@ -165,6 +183,14 @@ class __$$OrderAddressModelImplCopyWithImpl<$Res>
           ? _value.isDefault
           : isDefault // ignore: cast_nullable_to_non_nullable
               as bool,
+      latitude: freezed == latitude
+          ? _value.latitude
+          : latitude // ignore: cast_nullable_to_non_nullable
+              as double?,
+      longitude: freezed == longitude
+          ? _value.longitude
+          : longitude // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -179,7 +205,9 @@ class _$OrderAddressModelImpl implements _OrderAddressModel {
       required this.city,
       required this.wilaya,
       this.postalCode,
-      this.isDefault = false});
+      this.isDefault = false,
+      this.latitude,
+      this.longitude});
 
   @override
   final String fullName;
@@ -196,10 +224,14 @@ class _$OrderAddressModelImpl implements _OrderAddressModel {
   @override
   @JsonKey()
   final bool isDefault;
+  @override
+  final double? latitude;
+  @override
+  final double? longitude;
 
   @override
   String toString() {
-    return 'OrderAddressModel(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault)';
+    return 'OrderAddressModel(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault, latitude: $latitude, longitude: $longitude)';
   }
 
   @override
@@ -216,12 +248,16 @@ class _$OrderAddressModelImpl implements _OrderAddressModel {
             (identical(other.postalCode, postalCode) ||
                 other.postalCode == postalCode) &&
             (identical(other.isDefault, isDefault) ||
-                other.isDefault == isDefault));
+                other.isDefault == isDefault) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, fullName, phone, street, city,
-      wilaya, postalCode, isDefault);
+      wilaya, postalCode, isDefault, latitude, longitude);
 
   @JsonKey(ignore: true)
   @override
@@ -239,7 +275,9 @@ abstract class _OrderAddressModel implements OrderAddressModel {
       required final String city,
       required final String wilaya,
       final String? postalCode,
-      final bool isDefault}) = _$OrderAddressModelImpl;
+      final bool isDefault,
+      final double? latitude,
+      final double? longitude}) = _$OrderAddressModelImpl;
 
   @override
   String get fullName;
@@ -255,6 +293,10 @@ abstract class _OrderAddressModel implements OrderAddressModel {
   String? get postalCode;
   @override
   bool get isDefault;
+  @override
+  double? get latitude;
+  @override
+  double? get longitude;
   @override
   @JsonKey(ignore: true)
   _$$OrderAddressModelImplCopyWith<_$OrderAddressModelImpl> get copyWith =>
