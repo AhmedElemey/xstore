@@ -12,6 +12,7 @@ import 'package:xstore/features/cart/domain/entities/place_order_params.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_dependencies.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_provider.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
+import 'package:xstore/features/orders/domain/entities/order_item_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
 import 'helpers/fake_async_auth_notifier.dart';
@@ -32,6 +33,44 @@ UserEntity _vendor() => UserEntity(
   email: 'v@test.com',
   phoneNumber: '01099999999',
   role: UserRole.vendor,
+);
+
+OrderEntity _vendorOrder(String id) => OrderEntity(
+  id: id,
+  consumerId: 'c1',
+  consumerName: 'Buyer',
+  consumerPhone: '01011111111',
+  vendorId: 'v99',
+  vendorName: 'Ven',
+  vendorStoreName: 'Ven Store',
+  items: const [
+    OrderItemEntity(
+      id: 'oi_1',
+      listingId: '501',
+      listingName: 'Test Listing',
+      listingImage: '',
+      category: 'Electronics',
+      condition: 'New',
+      price: 100,
+      quantity: 1,
+      total: 100,
+    ),
+  ],
+  status: OrderStatus.pending,
+  paymentMethod: PaymentMethod.cashOnDelivery,
+  deliveryAddress: const OrderAddress(
+    fullName: 'Buyer',
+    phone: '01011111111',
+    street: '1 Test Street',
+    city: 'Cairo',
+    wilaya: 'Cairo',
+  ),
+  subtotal: 100,
+  shippingCost: 0,
+  discount: 0,
+  total: 100,
+  createdAt: DateTime(2026, 1, 1),
+  updatedAt: DateTime(2026, 1, 1),
 );
 
 UserEntity _courier() => UserEntity(
@@ -517,6 +556,12 @@ void main() {
           authProvider.overrideWith(() => FakeAuth(_vendor())),
           ordersRepositoryProvider.overrideWith((ref) {
             return StubOrdersRepository(
+              getVendorOrdersResult:
+                  ({
+                    required String vendorId,
+                    required int page,
+                    required int pageSize,
+                  }) => Right([_vendorOrder('order_x')]),
               confirmOrderResult: (_, __) =>
                   Left(Failure.server('confirm failed')),
             );
@@ -526,6 +571,12 @@ void main() {
       addTearDown(container.dispose);
 
       await container.read(authProvider.future);
+
+      // confirmOrderVendor's optimistic-update guard needs the order
+      // already in state.orders (it snapshots the original for rollback on
+      // failure) — a bare id with no matching order is a silent no-op, not
+      // a call to the repository.
+      await container.read(ordersNotifierProvider.notifier).fetchOrders();
 
       await container
           .read(ordersNotifierProvider.notifier)
