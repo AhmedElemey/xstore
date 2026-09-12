@@ -67,9 +67,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   Future<UserModel> login(_) => throw UnimplementedError();
 
   @override
-  Future<UserModel> register(_) => throw UnimplementedError();
-
-  @override
   Future<UserModel> fetchProfile({String? authToken}) async =>
       consumerRegisterResponse;
 

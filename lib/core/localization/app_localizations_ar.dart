@@ -63,7 +63,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyYourNumber => 'تحقق من رقمك';
 
   @override
-  String get otpEnterCodeSentTo => 'ادخل الكود المكون من 6 أرقام اللي اتبعت على';
+  String get otpEnterCodeSentTo =>
+      'ادخل الكود المكون من 6 أرقام اللي اتبعت على';
 
   @override
   String get otpContactSupport => 'بتواجه مشكلة؟ تواصل مع الدعم';
@@ -1579,7 +1580,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartShippingLine => 'الشحن';
 
   @override
-  String cartFreeShippingThresholdNote(String threshold) {
+  String cartFreeShippingThresholdNote(Object threshold) {
     return '🚚 المنتجات اللي سعرها $threshold وأكتر شحنها مجاني';
   }
 
@@ -1961,7 +1962,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String myListingsDeleteBody(String title) {
-    return 'سيتم حذف "$title" نهائيًا.';
+    return 'سيتم حذف “$title” نهائيًا.';
   }
 
   @override

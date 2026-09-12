@@ -1577,7 +1577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartShippingLine => 'Shipping';
 
   @override
-  String cartFreeShippingThresholdNote(String threshold) {
+  String cartFreeShippingThresholdNote(Object threshold) {
     return '🚚 Items priced $threshold and up ship free';
   }
 
@@ -1756,7 +1756,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please verify your phone number to place an order';
 
   @override
-  String get checkoutPartialOrderTitle => 'Part of your order didn\'t go through';
+  String get checkoutPartialOrderTitle =>
+      'Part of your order didn\'t go through';
 
   @override
   String checkoutPartialOrderWarning(int count) {
@@ -1957,7 +1958,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String myListingsDeleteBody(String title) {
-    return '"$title" will be removed permanently.';
+    return '“$title” will be removed permanently.';
   }
 
   @override
