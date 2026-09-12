@@ -57,8 +57,10 @@ String? computeXStoreAuthRedirect({
   return auth.when(
     data: (user) {
       final loggedIn = user != null;
-      // Google sign-in sets this before a session exists (the role picks the
-      // backend endpoint), so route to the role screen logged-in or not.
+      // Apple/Facebook new-user sign-in sets this before a local session
+      // exists (the role picks what kind of account to create), so route to
+      // the role screen logged-in or not. Google no longer uses this path —
+      // see SocialAuthState.needsRegistration instead.
       if (needsRoleSelection && loc != AppRoutes.socialRoleSelect) {
         return AppRoutes.socialRoleSelect;
       }

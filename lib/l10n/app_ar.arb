@@ -54,6 +54,7 @@
   "socialWelcomeGreeting": "أهلاً بيك، {name}! 👋",
   "socialRoleLastStep": "خطوة أخيرة — هتستخدم xStore إزاي؟",
   "socialWelcomeFallbackName": "يا صاحبي",
+  "googleAccountNotFound": "لا يوجد حساب مرتبط بحساب جوجل ده. من فضلك سجّل حساب جديد.",
   "searchHint": "ابحث عن منتجات...",
   "hotDeals": "🔥 أحسن العروض",
   "newArrivals": "✨ وصل حديثاً",

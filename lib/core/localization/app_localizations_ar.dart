@@ -178,6 +178,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get socialWelcomeFallbackName => 'يا صاحبي';
 
   @override
+  String get googleAccountNotFound =>
+      'لا يوجد حساب مرتبط بحساب جوجل ده. من فضلك سجّل حساب جديد.';
+
+  @override
   String get searchHint => 'ابحث عن منتجات...';
 
   @override

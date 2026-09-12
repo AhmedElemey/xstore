@@ -1,25 +1,30 @@
-// Screen-level, LIVE-mode test of the real SocialRoleScreen — a user who
-// just finished a new-account Google sign-in picking Buyer/Seller, not
-// fixture data. Matches login_screen_live_flow_test.dart's established
+// Screen-level, LIVE-mode test of the real SocialRoleScreen, plus a
+// provider-level test of the Google sign-in flow that no longer reaches
+// this screen at all. Matches login_screen_live_flow_test.dart's established
 // pattern for exercising the real AuthRepositoryImpl -> AuthRemoteDataSourceImpl
 // chain (a hand-built real AuthRepositoryImpl, stubbing only the two
 // Firebase-touching constructor params).
 //
+// Google is now a login-only shortcut: `checkGoogleUser` decides everything
+// before the picker is ever considered. An identity that already has an
+// account skips straight to home (tested below, still via SocialRoleScreen's
+// real GoRouter redirect, since that identity's role-specific login still
+// runs through the normal auth flow). An identity with NO account no longer
+// auto-creates one via this screen at all — `SocialAuthState.needsRegistration`
+// is set instead, and it's the login/register screens (not this one) that
+// react to it by navigating to Register (see login_screen_live_flow_test.dart
+// for that half). SocialRoleScreen's picker + `completeSocialRegistration`'s
+// Google branch are exercised here only via the "existing identity" path;
+// Apple/Facebook still use the picker for their own new-user flow, unchanged.
+//
 // SocialRoleScreen itself never calls Google sign-in — that fires from the
 // login screen's Google button before this screen is even pushed, and the
 // resulting `pendingSocialResult`/`needsRoleSelection` state is what routes
-// here. This test reproduces that setup by driving `socialAuthProvider`'s
-// real `signInWithGoogle()` via the container right after building the
-// harness (same seeding technique as otp_screen_live_flow_test.dart),
-// backed by a `_FakeSocialAuth` that returns a scripted "new Google user"
-// result instead of a real Google popup.
-//
-// Tapping Continue then exercises `completeSocialRegistration`, which for a
-// Google result makes a REAL `POST /auth/google/consumer/login` call
-// (resolved via the scripted Dio, same as every other live-mode test this
-// session) followed by the usual token-only-response `GET get-profile`
-// round trip. `AuthRemoteDataSourceImpl.loginWithGoogle` has a MockConfig
-// branch — this test needs the usual `skip: MockConfig.useMock`.
+// here. The existing-identity test reproduces that setup by driving
+// `socialAuthProvider`'s real `signInWithGoogle()` via the container right
+// after building the harness (same seeding technique as
+// otp_screen_live_flow_test.dart), backed by a `_FakeSocialAuth` that
+// returns a scripted Google-sign-in result instead of a real Google popup.
 //
 // Unlike every other screen this session, there's no on-screen navigation
 // target to assert against directly: SocialRoleScreen never calls
@@ -58,7 +63,6 @@ import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/providers/social_auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/social_role_screen.dart';
-import 'package:xstore/shared/widgets/xstore_button.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as login_screen_live_flow_test.dart's `_RoutedInterceptor`.
@@ -159,22 +163,19 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
   });
 
-  testWidgets(
-    'a new Google sign-in picks Buyer and lands on home via the live wire call',
-    skip: MockConfig.useMock,
-    (tester) async {
+  test(
+    'a Google identity with no matching account sets needsRegistration and '
+    'never calls the auto-create login endpoint',
+    () async {
+      // Deliberately no googleConsumerLogin/googleVendorLogin route scripted
+      // — if the app still tried to auto-create an account here, the
+      // interceptor would reject the unscripted request and this test would
+      // fail with a clear signal rather than silently passing.
       final dio = _fakeDio({
-        // A brand-new identity — checkGoogleUser reports it doesn't exist
-        // yet, so the flow falls through to the buyer/seller picker below.
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': false,
           'role': null,
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
-          'token': 'access-token-123',
-          'refreshToken': 'refresh-token-123',
-        },
-        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
       });
 
       final container = ProviderContainer(
@@ -185,10 +186,10 @@ void main() {
               social: _FakeSocialAuth(
                 const SocialAuthResult(
                   provider: SocialProvider.google,
-                  uid: 'google-uid-1',
-                  email: 'newuser@gmail.com',
-                  displayName: 'New Googler',
-                  idToken: 'google-id-token-123',
+                  uid: 'google-uid-no-account',
+                  email: 'noaccount@gmail.com',
+                  displayName: 'No Account Googler',
+                  idToken: 'google-id-token-no-account',
                   isNewUser: true,
                 ),
               ),
@@ -199,82 +200,17 @@ void main() {
           dioProvider.overrideWithValue(dio),
         ],
       );
-      final refresh = container.read(routerNotifierProvider);
-      final router = GoRouter(
-        initialLocation: AppRoutes.socialRoleSelect,
-        refreshListenable: refresh,
-        redirect: (context, state) => refresh.redirectFor(state.matchedLocation),
-        routes: [
-          GoRoute(
-            path: AppRoutes.socialRoleSelect,
-            builder: (_, __) => const SocialRoleScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.home,
-            builder: (_, __) => const Scaffold(body: Text('Home Screen')),
-          ),
-          GoRoute(
-            path: AppRoutes.login,
-            builder: (_, __) => const Scaffold(body: Text('Login Screen')),
-          ),
-        ],
-      );
-      addTearDown(router.dispose);
+      addTearDown(container.dispose);
 
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-          ),
-        ),
-      );
-      await tester.pump();
+      // A plain test() (unlike testWidgets) doesn't run inside
+      // AutomatedTestWidgetsFlutterBinding's FakeAsync zone, so a direct
+      // await here is safe — no unawaited/pump dance needed.
+      await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
-      // Reproduces the login screen's Google-button tap, which is what
-      // actually populates pendingSocialResult/needsRoleSelection before
-      // this screen is ever reached. Deliberately not awaited — a direct
-      // top-level await on anything touching Dio/Futures hangs forever
-      // inside AutomatedTestWidgetsFlutterBinding's single FakeAsync zone.
-      unawaited(container.read(socialAuthProvider.notifier).signInWithGoogle());
-      await _settle(tester);
-
-      expect(find.text("I'm a Buyer"), findsOneWidget);
-      expect(find.textContaining('New Googler'), findsOneWidget);
-
-      await tester.tap(find.text("I'm a Buyer"));
-      await tester.pump();
-
-      // The bottom sheet's `ListView` is a real (Sliver-backed) scroll view —
-      // "Continue" sits below the fold at this test's viewport size and
-      // isn't even mounted until scrolled into view.
-      await tester.scrollUntilVisible(
-        find.widgetWithText(XstoreButton, 'Continue'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.widgetWithText(XstoreButton, 'Continue'));
-      await _settle(tester);
-
-      expect(find.text('Home Screen'), findsOneWidget);
-
-      // adoptSession starts AnalyticsService's periodic flush timer — await
-      // its init so the explicit dispose() below actually cancels it (a
-      // still-mid-flight _init() would create the Timer AFTER disposal,
-      // leaking it). Dispose explicitly here, not via addTearDown:
-      // testWidgets' pending-timer invariant check runs before addTearDown
-      // callbacks fire, so a container owned by the test (not a ProviderScope
-      // the framework tears down itself) must be disposed before the test
-      // body returns, or that check fails on this exact timer.
-      await container.read(analyticsServiceProvider).ready;
-      container.dispose();
+      final social = container.read(socialAuthProvider);
+      expect(social.needsRegistration, isTrue);
+      expect(social.needsRoleSelection, isFalse);
+      expect(social.pendingSocialResult, isNull);
     },
   );
 
@@ -367,98 +303,6 @@ void main() {
       expect(find.text('Home Screen'), findsOneWidget);
       expect(container.read(socialAuthProvider).needsRoleSelection, isFalse);
 
-      await container.read(analyticsServiceProvider).ready;
-      container.dispose();
-    },
-  );
-
-  testWidgets(
-    'cancelling a pending Google sign-in returns to login without a session',
-    (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          authRepositoryProvider.overrideWith(
-            (ref) => AuthRepositoryImpl(
-              remote: ref.watch(authRemoteDataSourceProvider),
-              social: _FakeSocialAuth(
-                const SocialAuthResult(
-                  provider: SocialProvider.google,
-                  uid: 'google-uid-2',
-                  email: 'anotheruser@gmail.com',
-                  displayName: 'Another Googler',
-                  idToken: 'google-id-token-456',
-                  isNewUser: true,
-                ),
-              ),
-              secureStorage: ref.watch(secureStorageProvider),
-              firebaseAuth: _FakeFirebaseAuth(),
-            ),
-          ),
-          dioProvider.overrideWithValue(_fakeDio({
-            // A brand-new identity — checkGoogleUser reports it doesn't
-            // exist yet, so the picker shows and this test cancels out of it.
-            'POST ${ApiEndpoints.googleCheckUser}': (_) => {
-              'exists': false,
-              'role': null,
-            },
-          })),
-        ],
-      );
-      final refresh = container.read(routerNotifierProvider);
-      final router = GoRouter(
-        initialLocation: AppRoutes.socialRoleSelect,
-        refreshListenable: refresh,
-        redirect: (context, state) => refresh.redirectFor(state.matchedLocation),
-        routes: [
-          GoRoute(
-            path: AppRoutes.socialRoleSelect,
-            builder: (_, __) => const SocialRoleScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.login,
-            builder: (_, __) => const Scaffold(body: Text('Login Screen')),
-          ),
-        ],
-      );
-      addTearDown(router.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-          ),
-        ),
-      );
-      await tester.pump();
-
-      // Deliberately not awaited — see the FakeAsync-zone note above.
-      unawaited(container.read(socialAuthProvider.notifier).signInWithGoogle());
-      await _settle(tester);
-
-      // "Cancel" sits below the fold of the bottom sheet's real Sliver-backed
-      // ListView at this test's viewport size — scroll it into view first.
-      await tester.scrollUntilVisible(
-        find.text('Cancel'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.text('Cancel'));
-      await _settle(tester);
-
-      expect(find.text('Login Screen'), findsOneWidget);
-      expect(container.read(authProvider).valueOrNull, isNull);
-
-      // See the note on the test above — dispose explicitly (not via
-      // addTearDown, which fires after testWidgets' pending-timer check)
-      // once AnalyticsService's init has actually created its timer.
       await container.read(analyticsServiceProvider).ready;
       container.dispose();
     },

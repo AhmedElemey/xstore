@@ -177,6 +177,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get socialWelcomeFallbackName => 'there';
 
   @override
+  String get googleAccountNotFound =>
+      'No account found for this Google account. Please register.';
+
+  @override
   String get searchHint => 'Search products...';
 
   @override
