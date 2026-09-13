@@ -29,6 +29,30 @@ import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/product/presentation/screens/product_reviews_screen.dart';
 import 'package:xstore/shared/widgets/xstore_button.dart';
 
+/// A consumer-scoped `GET /orders/me` order row. `status` is the wire
+/// enum name (`orderStatusFromWire` — "Delivered", "Pending", ...); the
+/// single item carries enough fields (title/image/price) that
+/// `_hydrateOrders`'s `_needsListingSnap` check never fires a second,
+/// unscripted `GET /api/listings/{id}` snapshot request.
+Map<String, dynamic> _orderJson({
+  String id = 'order_1',
+  required String status,
+  required String listingId,
+}) => {
+  'id': id,
+  'consumerId': 'consumer_1',
+  'status': status,
+  'items': [
+    {
+      'listingId': listingId,
+      'titleEn': 'Test Product',
+      'imageUrls': ['https://example.com/product.jpg'],
+      'price': 100,
+      'quantity': 1,
+    },
+  ],
+};
+
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as orders_screen_live_flow_test.dart's `_RoutedInterceptor`.
 class _RoutedInterceptor extends Interceptor {
@@ -268,6 +292,151 @@ void main() {
       // only exists as the still-open sheet's unsaved TextField content —
       // the underlying data was never actually persisted.
       expect(find.text('Good product'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'consumer with no delivered order for this listing cannot start a new review',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var postCalled = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiListingReviews('9001')}': (_) => {
+          'items': <Object?>[],
+          'totalCount': 0,
+        },
+        // An order exists, but it never reached Delivered — not eligible.
+        'GET ${ApiEndpoints.ordersMe}': (_) => <Object?>[
+          _orderJson(status: 'Pending', listingId: '9001'),
+        ],
+        'POST ${ApiEndpoints.apiListingReviews('9001')}': (options) {
+          postCalled = true;
+          return _reviewJson();
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.text('No reviews yet'), findsOneWidget);
+
+      await tester.tap(find.byIcon(LucideIcons.pencil));
+      await _settle(tester);
+
+      // The verified-purchase gate blocks the write sheet from ever
+      // opening, and the create request is never sent.
+      expect(find.byType(XstoreButton), findsNothing);
+      expect(postCalled, isFalse);
+      expect(
+        find.text(
+          'You can review this product once your order for it has been delivered',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'consumer with a delivered order for this listing can write a new review',
+    skip: MockConfig.useMock,
+    (tester) async {
+      RequestOptions? postRequest;
+      var reviews = <Map<String, dynamic>>[];
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiListingReviews('9001')}': (_) => {
+          'items': reviews,
+          'totalCount': reviews.length,
+        },
+        'GET ${ApiEndpoints.ordersMe}': (_) => <Object?>[
+          _orderJson(status: 'Delivered', listingId: '9001'),
+        ],
+        'POST ${ApiEndpoints.apiListingReviews('9001')}': (options) {
+          postRequest = options;
+          final created = _reviewJson(
+            id: 'review_new',
+            rating: 5,
+            comment: 'Great, arrived on time!',
+          );
+          reviews = [created];
+          return created;
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.text('No reviews yet'), findsOneWidget);
+
+      await tester.tap(find.byIcon(LucideIcons.pencil));
+      await _settle(tester);
+
+      // Eligible — the write sheet opens for a brand-new review (default
+      // rating 5, per _WriteReviewSheetState's editing==null fallback).
+      expect(find.widgetWithText(XstoreButton, 'Submit'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Great, arrived on time!');
+      await tester.tap(find.widgetWithText(XstoreButton, 'Submit'));
+      await _settle(tester);
+
+      expect(postRequest, isNotNull);
+      expect(postRequest!.data, {
+        'rating': 5.0,
+        'comment': 'Great, arrived on time!',
+      });
+      expect(find.text('Great, arrived on time!'), findsOneWidget);
+      expect(find.text('No reviews yet'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'consumer who already reviewed this listing gets routed to edit, not a second review',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var postCalled = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiListingReviews('9001')}': (_) => {
+          'items': [_reviewJson()],
+          'totalCount': 1,
+        },
+        'GET ${ApiEndpoints.ordersMe}': (_) => <Object?>[
+          _orderJson(status: 'Delivered', listingId: '9001'),
+        ],
+        'POST ${ApiEndpoints.apiListingReviews('9001')}': (options) {
+          postCalled = true;
+          return _reviewJson();
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.text('Good product'), findsOneWidget);
+
+      // Tapping the AppBar pencil (not the per-review edit menu) still
+      // finds the reviewer's own existing review and opens it for editing
+      // instead of a blank create sheet — and never fetches orders at all,
+      // since the already-reviewed check runs first.
+      await tester.tap(find.byIcon(LucideIcons.pencil));
+      await _settle(tester);
+
+      expect(find.text('Edit Review'), findsWidgets);
+      expect(find.text('Good product'), findsWidgets);
+      expect(postCalled, isFalse);
     },
   );
 }
