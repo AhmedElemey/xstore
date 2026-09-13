@@ -3734,6 +3734,12 @@ abstract class AppLocalizations {
   /// **'Sign in to write a review'**
   String get signInToWriteReview;
 
+  /// No description provided for @reviewRequiresDeliveredOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'You can review this product once your order for it has been delivered'**
+  String get reviewRequiresDeliveredOrder;
+
   /// No description provided for @deleteReviewConfirmTitle.
   ///
   /// In en, this message translates to:

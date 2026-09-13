@@ -1872,6 +1872,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signInToWriteReview => 'سجّل الدخول لكتابة تقييم';
 
   @override
+  String get reviewRequiresDeliveredOrder =>
+      'يمكنك تقييم هذا المنتج بعد استلام طلبك الخاص به';
+
+  @override
   String get deleteReviewConfirmTitle => 'حذف التقييم؟';
 
   @override

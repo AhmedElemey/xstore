@@ -11,7 +11,10 @@ import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../orders/domain/entities/order_entity.dart';
+import '../../../orders/presentation/providers/orders_provider.dart';
 import '../../domain/entities/review_entity.dart';
 import '../../domain/entities/review_write_params.dart';
 import '../providers/product_reviews_notifier.dart';
@@ -55,6 +58,30 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     if (!requireLogin(context, ref, message: context.l10n.signInToWriteReview)) {
       return;
     }
+    // Editing an existing review needs no re-check — the reviewer already
+    // cleared this gate the first time they wrote it.
+    if (editing == null) {
+      final myId = ref.read(authProvider).valueOrNull?.id;
+      ReviewEntity? myExistingReview;
+      for (final r in ref
+          .read(productReviewsNotifierProvider(widget.listingId))
+          .reviews) {
+        if (r.userId == myId) {
+          myExistingReview = r;
+          break;
+        }
+      }
+      if (myExistingReview != null) {
+        // Already reviewed this listing — edit it instead of creating a
+        // second, duplicate review.
+        editing = myExistingReview;
+      } else if (!await _canWriteNewReview()) {
+        if (!mounted) return;
+        AppSnackbar.error(context, context.l10n.reviewRequiresDeliveredOrder);
+        return;
+      }
+    }
+    if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -63,6 +90,17 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
         editing: editing,
       ),
     );
+  }
+
+  /// Verified-purchase gate: only a consumer with a delivered order for
+  /// this listing may write a NEW review (editing an existing one skips
+  /// this — see caller).
+  Future<bool> _canWriteNewReview() async {
+    final user = ref.read(authProvider).valueOrNull;
+    if (user == null || user.role != UserRole.consumer) return false;
+    await ref.read(ordersNotifierProvider.notifier).fetchOrders();
+    final orders = ref.read(ordersNotifierProvider).orders;
+    return hasDeliveredOrderForListing(orders, widget.listingId);
   }
 
   Future<void> _confirmDelete(String reviewId) async {

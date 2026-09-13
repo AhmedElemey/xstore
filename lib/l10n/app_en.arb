@@ -641,6 +641,7 @@
   "reviewCommentHint": "Share your thoughts about this product",
   "submitReview": "Submit",
   "signInToWriteReview": "Sign in to write a review",
+  "reviewRequiresDeliveredOrder": "You can review this product once your order for it has been delivered",
   "deleteReviewConfirmTitle": "Delete review?",
   "deleteReviewConfirmMessage": "This can't be undone.",
   "noReviewsYet": "No reviews yet",

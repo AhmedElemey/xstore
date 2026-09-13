@@ -641,6 +641,7 @@
   "reviewCommentHint": "شاركنا رأيك في هذا المنتج",
   "submitReview": "إرسال",
   "signInToWriteReview": "سجّل الدخول لكتابة تقييم",
+  "reviewRequiresDeliveredOrder": "يمكنك تقييم هذا المنتج بعد استلام طلبك الخاص به",
   "deleteReviewConfirmTitle": "حذف التقييم؟",
   "deleteReviewConfirmMessage": "لا يمكن التراجع عن هذا الإجراء.",
   "noReviewsYet": "لا توجد تقييمات بعد",

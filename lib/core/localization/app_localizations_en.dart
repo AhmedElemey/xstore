@@ -1868,6 +1868,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInToWriteReview => 'Sign in to write a review';
 
   @override
+  String get reviewRequiresDeliveredOrder =>
+      'You can review this product once your order for it has been delivered';
+
+  @override
   String get deleteReviewConfirmTitle => 'Delete review?';
 
   @override
