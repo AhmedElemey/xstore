@@ -42,7 +42,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  Future<void> _pumpSection(
+  Future<void> pumpSection(
     WidgetTester tester, {
     String phoneNumber = '01012345678',
   }) async {
@@ -86,13 +86,13 @@ void main() {
     await tester.pump();
   }
 
-  Future<void> _openAddSheet(WidgetTester tester) async {
+  Future<void> openAddSheet(WidgetTester tester) async {
     await tester.tap(find.text('+ Add New Address'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  FilledButton _saveButton(WidgetTester tester) {
+  FilledButton saveButton(WidgetTester tester) {
     return tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Save Address'),
     );
@@ -101,8 +101,8 @@ void main() {
   testWidgets(
     'saving a new address does not use disposed controllers during sheet exit',
     (tester) async {
-      await _pumpSection(tester);
-      await _openAddSheet(tester);
+      await pumpSection(tester);
+      await openAddSheet(tester);
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Street'),
@@ -133,30 +133,30 @@ void main() {
   testWidgets(
     'add-address Save stays dimmed until the phone matches Egypt regex',
     (tester) async {
-      await _pumpSection(tester, phoneNumber: '');
-      await _openAddSheet(tester);
+      await pumpSection(tester, phoneNumber: '');
+      await openAddSheet(tester);
 
-      expect(_saveButton(tester).onPressed, isNull);
+      expect(saveButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextFormField), '010');
       await tester.pump();
-      expect(_saveButton(tester).onPressed, isNull);
+      expect(saveButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextFormField), '01712345678');
       await tester.pump();
-      expect(_saveButton(tester).onPressed, isNull);
+      expect(saveButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextFormField), '01112345678');
       await tester.pump();
-      expect(_saveButton(tester).onPressed, isNotNull);
+      expect(saveButton(tester).onPressed, isNotNull);
     },
   );
 
   testWidgets(
     'edit-address Save stays dimmed until a field changes and phone stays valid',
     (tester) async {
-      await _pumpSection(tester);
-      await _openAddSheet(tester);
+      await pumpSection(tester);
+      await openAddSheet(tester);
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Street'),
@@ -178,22 +178,22 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(_saveButton(tester).onPressed, isNull);
+      expect(saveButton(tester).onPressed, isNull);
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Street'),
         '2 Nile St',
       );
       await tester.pump();
-      expect(_saveButton(tester).onPressed, isNotNull);
+      expect(saveButton(tester).onPressed, isNotNull);
 
       await tester.enterText(find.byType(TextFormField), '010');
       await tester.pump();
-      expect(_saveButton(tester).onPressed, isNull);
+      expect(saveButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextFormField), '01212345678');
       await tester.pump();
-      expect(_saveButton(tester).onPressed, isNotNull);
+      expect(saveButton(tester).onPressed, isNotNull);
     },
   );
 }

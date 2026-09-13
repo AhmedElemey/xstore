@@ -72,7 +72,7 @@ void main() {
 
   final l10n = AppLocalizationsEn();
 
-  Future<void> _openContactSheet(
+  Future<void> openContactSheet(
     WidgetTester tester, {
     required String title,
     required String initialText,
@@ -118,7 +118,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  FilledButton _verifyButton(WidgetTester tester) {
+  FilledButton verifyButton(WidgetTester tester) {
     return tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Verify'),
     );
@@ -127,7 +127,7 @@ void main() {
   testWidgets(
     'email Verify stays dimmed until the address changes and matches the regex',
     (tester) async {
-      await _openContactSheet(
+      await openContactSheet(
         tester,
         title: 'Email',
         initialText: 'old@x.com',
@@ -135,26 +135,26 @@ void main() {
         validate: (value) => Validators.registerEmail(l10n, value),
       );
 
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextField), 'not-an-email');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextField), 'new@x.com');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNotNull);
+      expect(verifyButton(tester).onPressed, isNotNull);
 
       await tester.enterText(find.byType(TextField), ' old@x.com ');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
     },
   );
 
   testWidgets(
     'phone Verify stays dimmed until the number changes and matches Egypt regex',
     (tester) async {
-      await _openContactSheet(
+      await openContactSheet(
         tester,
         title: 'Phone',
         initialText: '01012345678',
@@ -162,23 +162,23 @@ void main() {
         validate: (value) => Validators.egyptPhone(l10n, value),
       );
 
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextField), '010');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextField), '01712345678');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
 
       await tester.enterText(find.byType(TextField), '01112345678');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNotNull);
+      expect(verifyButton(tester).onPressed, isNotNull);
 
       await tester.enterText(find.byType(TextField), '01012345678');
       await tester.pump();
-      expect(_verifyButton(tester).onPressed, isNull);
+      expect(verifyButton(tester).onPressed, isNull);
     },
   );
 
