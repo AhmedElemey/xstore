@@ -137,6 +137,16 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
     return ok;
   }
 
+  Future<bool> markDelivered() async {
+    final ok =
+        await ref.read(vendorOrdersProvider.notifier).markDelivered(orderId);
+    if (!mounted) return ok;
+    if (ok) {
+      await fetchOrder();
+    }
+    return ok;
+  }
+
   void clearError() {
     state = state.copyWith(error: null);
   }

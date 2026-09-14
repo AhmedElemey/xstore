@@ -9,7 +9,7 @@ class ChangePasswordUseCase {
   final AuthRepository _repository;
 
   Future<Either<Failure, Unit>> call({
-    required String currentPassword,
+    String? currentPassword,
     required String newPassword,
     required String confirmNewPassword,
   }) {

@@ -1160,6 +1160,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersMarkShipped => 'Mark as Shipped';
 
   @override
+  String get ordersMarkDelivered => 'Mark as Delivered';
+
+  @override
   String get ordersViewTracking => 'View Tracking';
 
   @override
@@ -1872,6 +1875,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can review this product once your order for it has been delivered';
 
   @override
+  String get alreadyReviewedTitle => 'Already reviewed';
+
+  @override
+  String get alreadyReviewedMessage => 'You already reviewed this product.';
+
+  @override
   String get deleteReviewConfirmTitle => 'Delete review?';
 
   @override
@@ -2104,6 +2113,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorMarkShipped => 'Mark as Shipped';
 
   @override
+  String get vendorMarkDelivered => 'Mark as Delivered';
+
+  @override
   String get vendorOrdersEmptyTitle => 'No orders yet';
 
   @override
@@ -2182,6 +2194,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorOrderShippedSnack => 'Order marked as shipped!';
+
+  @override
+  String get vendorOrderDeliveredSnack => 'Order marked as delivered';
 
   @override
   String get vendorStatusPending => 'Awaiting your confirmation';

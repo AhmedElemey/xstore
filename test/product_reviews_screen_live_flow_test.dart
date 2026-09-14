@@ -132,7 +132,7 @@ Map<String, dynamic> _reviewJson({
 }) => {
   'id': id,
   'userId': userId,
-  'userName': 'Test Buyer',
+  'userName': 'buyer@test.com',
   'rating': rating,
   'comment': comment,
   'createdAt': '2026-08-01T00:00:00.000Z',
@@ -205,6 +205,8 @@ void main() {
 
       expect(find.text('Reviews'), findsOneWidget);
       expect(find.text('Good product'), findsOneWidget);
+      expect(find.text('Test Buyer'), findsOneWidget);
+      expect(find.text('buyer@test.com'), findsNothing);
 
       // Only the review's own author sees the edit/delete menu.
       await tester.tap(find.byType(PopupMenuButton<String>));
@@ -395,11 +397,12 @@ void main() {
       });
       expect(find.text('Great, arrived on time!'), findsOneWidget);
       expect(find.text('No reviews yet'), findsNothing);
+      expect(find.text('Thanks for your review!'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'consumer who already reviewed this listing gets routed to edit, not a second review',
+    'consumer who already reviewed this listing sees an already-reviewed sheet',
     skip: MockConfig.useMock,
     (tester) async {
       var postCalled = false;
@@ -427,16 +430,19 @@ void main() {
 
       expect(find.text('Good product'), findsOneWidget);
 
-      // Tapping the AppBar pencil (not the per-review edit menu) still
-      // finds the reviewer's own existing review and opens it for editing
-      // instead of a blank create sheet — and never fetches orders at all,
-      // since the already-reviewed check runs first.
       await tester.tap(find.byIcon(LucideIcons.pencil));
       await _settle(tester);
 
-      expect(find.text('Edit Review'), findsWidgets);
-      expect(find.text('Good product'), findsWidgets);
+      expect(find.text('Already reviewed'), findsOneWidget);
+      expect(find.text('You already reviewed this product.'), findsOneWidget);
+      expect(find.widgetWithText(XstoreButton, 'Submit'), findsNothing);
       expect(postCalled, isFalse);
+
+      await tester.tap(find.text('Edit Review'));
+      await _settle(tester);
+
+      expect(find.widgetWithText(XstoreButton, 'Submit'), findsOneWidget);
+      expect(find.text('Good product'), findsWidgets);
     },
   );
 }

@@ -1163,6 +1163,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersMarkShipped => 'تم الشحن';
 
   @override
+  String get ordersMarkDelivered => 'تم التسليم';
+
+  @override
   String get ordersViewTracking => 'عرض التتبع';
 
   @override
@@ -1876,6 +1879,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'يمكنك تقييم هذا المنتج بعد استلام طلبك الخاص به';
 
   @override
+  String get alreadyReviewedTitle => 'تم التقييم من قبل';
+
+  @override
+  String get alreadyReviewedMessage => 'لقد قيّمت هذا المنتج بالفعل.';
+
+  @override
   String get deleteReviewConfirmTitle => 'حذف التقييم؟';
 
   @override
@@ -2106,6 +2115,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorMarkShipped => 'وضع تم الشحن';
 
   @override
+  String get vendorMarkDelivered => 'وضع تم التسليم';
+
+  @override
   String get vendorOrdersEmptyTitle => 'لا توجد طلبات بعد';
 
   @override
@@ -2184,6 +2196,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorOrderShippedSnack => 'تم وضع الطلب كمشحون!';
+
+  @override
+  String get vendorOrderDeliveredSnack => 'تم وضع الطلب كمُسلَّم';
 
   @override
   String get vendorStatusPending => 'في انتظار تأكيدك';

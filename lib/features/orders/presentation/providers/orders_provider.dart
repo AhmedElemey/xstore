@@ -467,7 +467,10 @@ class OrdersNotifier extends _$OrdersNotifier {
     _recomputeDerived();
     final epoch = _fetchEpoch;
     final result =
-        await ref.read(markDeliveredUseCaseProvider).call(orderId);
+        await ref.read(markDeliveredUseCaseProvider).call(
+              orderId,
+              vendorId: _isVendor ? _vendorId : null,
+            );
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
@@ -476,7 +479,11 @@ class OrdersNotifier extends _$OrdersNotifier {
       },
       (o) {
         _mergeOrder(o);
-        _trackOrderStatus(orderId, OrderStatus.delivered, role: 'consumer');
+        _trackOrderStatus(
+          orderId,
+          OrderStatus.delivered,
+          role: _isVendor ? 'vendor' : 'consumer',
+        );
       },
     );
   }

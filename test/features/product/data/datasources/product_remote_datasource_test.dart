@@ -86,6 +86,20 @@ void main() {
       expect(result.seller?.name, 'Sara');
     });
 
+    test('reads listing rating + reviewCount as reviewSummary', () async {
+      dio = buildDio((_) => {
+        ..._minimalListing(),
+        'rating': 4.5,
+        'reviewCount': 2,
+      });
+      datasource = ProductRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchProductDetail('listing_1');
+
+      expect(result.reviewSummary?.average, 4.5);
+      expect(result.reviewSummary?.totalCount, 2);
+    });
+
     test('reads a nested seller object when present, ignoring the flat fallback',
         () async {
       dio = buildDio((_) => {
@@ -198,11 +212,55 @@ void main() {
       );
 
       expect(captured!.path, ApiEndpoints.apiListingReviews('listing_1'));
-      expect(captured!.queryParameters, {'page': 2, 'pageSize': 10});
+      expect(captured!.queryParameters, {'page': 3, 'pageSize': 10});
       expect(result.items.single.id, 'r1');
+      expect(result.items.single.userName, 'Jane');
       expect(result.totalCount, 25);
       expect(result.page, 2);
       expect(result.pageSize, 10);
+    });
+
+    test('translates 0-based page 0 to wire page 1', () async {
+      RequestOptions? captured;
+      dio = buildDio((options) {
+        captured = options;
+        return {'items': <dynamic>[], 'totalCount': 0};
+      });
+      datasource = ProductRemoteDataSourceImpl(dio);
+
+      await datasource.fetchProductReviews(
+        listingId: 'listing_1',
+        page: 0,
+        pageSize: 3,
+      );
+
+      expect(captured!.queryParameters, {'page': 1, 'pageSize': 3});
+    });
+
+    test('prefers fullNameEn over Identity userName when userName is an email',
+        () async {
+      dio = buildDio((_) => {
+        'items': [
+          {
+            'id': 'r1',
+            'userId': 'u1',
+            'userName': 'neciy@example.com',
+            'fullNameEn': 'Neci',
+            'rating': 5,
+            'comment': 'Good',
+          },
+        ],
+        'totalCount': 1,
+      });
+      datasource = ProductRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchProductReviews(
+        listingId: 'listing_1',
+        page: 0,
+        pageSize: 3,
+      );
+
+      expect(result.items.single.userName, 'Neci');
     });
 
     test('falls back to a bare list with totalCount = items.length when there is no envelope',

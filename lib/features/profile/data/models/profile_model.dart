@@ -16,6 +16,7 @@ class ProfileModel {
     this.isPhoneVerificationRequired = false,
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
+    this.hasPassword = true,
   });
 
   final UserModel user;
@@ -30,6 +31,7 @@ class ProfileModel {
   final bool isPhoneVerificationRequired;
   final bool isEmailVerified;
   final bool isPhoneVerified;
+  final bool hasPassword;
 
   ProfileEntity toEntity() => ProfileEntity(
         user: user.toEntity(),
@@ -44,5 +46,6 @@ class ProfileModel {
         isPhoneVerificationRequired: isPhoneVerificationRequired,
         isEmailVerified: isEmailVerified,
         isPhoneVerified: isPhoneVerified,
+        hasPassword: hasPassword,
       );
 }

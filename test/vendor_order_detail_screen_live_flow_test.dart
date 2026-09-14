@@ -272,4 +272,48 @@ void main() {
       expect(find.text('Confirm Order'), findsNothing);
     },
   );
+
+  testWidgets(
+    'vendor marks a shipped order delivered from the detail screen',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var status = 'shipped';
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(status: status)],
+          'totalCount': 1,
+          'pendingCount': 0,
+          'confirmedCount': 0,
+          'totalRevenue': status == 'delivered' ? 30000 : 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          status = 'delivered';
+          return _vendorOrderJson(status: status);
+        },
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], '920');
+      await _settle(tester);
+
+      expect(find.text('Mark as Delivered'), findsOneWidget);
+      await tester.tap(find.text('Mark as Delivered'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [920],
+        'status': 'Delivered',
+      });
+      expect(
+        find.text('Mark as Delivered'),
+        findsNothing,
+        reason: 'a delivered order no longer offers Mark as Delivered',
+      );
+    },
+  );
 }

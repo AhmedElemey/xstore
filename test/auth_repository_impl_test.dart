@@ -84,7 +84,7 @@ class _RecordingRemote implements AuthRemoteDataSource {
 
   @override
   Future<void> changePassword({
-    required String currentPassword,
+    String? currentPassword,
     required String newPassword,
     required String confirmNewPassword,
   }) async {
@@ -362,6 +362,17 @@ void main() {
 
       expect(result.isRight(), isTrue);
       expect(remote.lastChangePasswordCurrent, 'old-pass');
+    });
+
+    test('changePassword omits current password when the account has none',
+        () async {
+      final result = await repository.changePassword(
+        newPassword: 'new-pass',
+        confirmNewPassword: 'new-pass',
+      );
+
+      expect(result.isRight(), isTrue);
+      expect(remote.lastChangePasswordCurrent, isNull);
     });
 
     test(

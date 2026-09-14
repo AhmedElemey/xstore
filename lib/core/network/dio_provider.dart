@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -83,6 +85,7 @@ Dio dio(DioRef ref) {
         if (token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
         }
+        _debugLogAuthToken(token);
         // CONFIRMED (live probe, 2026-08-14): listing reads 400 without
         // these. Best-known device fix, falling back to Cairo — see
         // AppLocationCache.
@@ -137,4 +140,27 @@ Dio dio(DioRef ref) {
 
   ref.onDispose(client.close);
   return client;
+}
+
+/// Last distinct session token printed in debug. Replaced on change; not a
+/// growing collection.
+String? _lastLoggedAuthToken;
+
+/// One-shot (per distinct token) debug dump so a live 401/403 can be
+/// replayed without un-redacting `LoggingInterceptor` on every request.
+void _debugLogAuthToken(String? token) {
+  if (!kDebugMode) return;
+  final value = (token == null || token.isEmpty) ? '(none)' : token;
+  if (_lastLoggedAuthToken == value) return;
+  _lastLoggedAuthToken = value;
+  debugPrint('X-Auth-Token: $value');
+  if (token == null || token.isEmpty) return;
+  final parts = token.split('.');
+  if (parts.length < 2) return;
+  try {
+    final payload = utf8.decode(
+      base64Url.decode(base64Url.normalize(parts[1])),
+    );
+    debugPrint('X-Auth-Token payload: $payload');
+  } catch (_) {}
 }

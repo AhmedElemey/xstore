@@ -140,6 +140,31 @@ void main() {
       expect(mapped.message, storeLocationRequiredErrorCode);
     });
 
+    test('403 vendor wallet pause surfaces errorEn, not unauthorized', () {
+      const pauseMessage =
+          'Your wallet has exceeded the pause threshold. Your order status updates are paused.';
+      final err = DioException(
+        requestOptions: RequestOptions(path: '/api/vendor/orders/status'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/vendor/orders/status'),
+          statusCode: 403,
+          data: {
+            'isSuccess': false,
+            'data': null,
+            'errorEn': pauseMessage,
+            'errorAr': 'تم إيقاف تحديثات حالة الطلب',
+            'statusCode': 403,
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      final mapped = mapDioException(err);
+
+      expect(mapped, isA<ServerException>());
+      expect(mapped.message, pauseMessage);
+    });
+
     test(
       '400 email-before-phone OTP maps to the stable emailRequiredBeforePhone code',
       () {

@@ -13,6 +13,7 @@ class VendorOrderActionSheet extends StatelessWidget {
     required this.onReject,
     required this.onProcessing,
     required this.onShipped,
+    required this.onDelivered,
   });
 
   final OrderEntity order;
@@ -20,11 +21,11 @@ class VendorOrderActionSheet extends StatelessWidget {
   final VoidCallback onReject;
   final VoidCallback onProcessing;
   final VoidCallback onShipped;
+  final VoidCallback onDelivered;
 
   @override
   Widget build(BuildContext context) {
-    if (order.status == OrderStatus.shipped ||
-        order.status == OrderStatus.delivered ||
+    if (order.status == OrderStatus.delivered ||
         order.status == OrderStatus.cancelled) {
       return const SizedBox.shrink();
     }
@@ -87,6 +88,13 @@ class VendorOrderActionSheet extends StatelessWidget {
         onPressed: onProcessing,
         style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
         child: Text(context.l10n.vendorMarkProcessing),
+      );
+    }
+    if (order.status == OrderStatus.shipped) {
+      return FilledButton(
+        onPressed: onDelivered,
+        style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+        child: Text(context.l10n.vendorMarkDelivered),
       );
     }
     return FilledButton(

@@ -222,4 +222,59 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'consumer sees a written review on the product page from listing rating/reviewCount + GET /reviews',
+    skip: MockConfig.useMock,
+    (tester) async {
+      RequestOptions? reviewsRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiListingDetail('1')}': (_) => {
+          ..._listingJson(id: '1'),
+          'rating': 5.0,
+          'reviewCount': 1,
+        },
+        'GET ${ApiEndpoints.apiListingSimilar('1')}': (_) => <dynamic>[],
+        'GET ${ApiEndpoints.apiListingReviews('1')}': (options) {
+          reviewsRequest = options;
+          return {
+            'items': [
+              {
+                'id': 10,
+                'listingId': 1,
+                'userId': 'consumer_1',
+                'userName': 'buyer@test.com',
+                'rating': 5,
+                'comment': 'Great earbuds, battery lasts.',
+                'helpfulCount': 0,
+                'createdAt': '2026-09-13T18:00:00.000Z',
+              },
+            ],
+            'totalCount': 1,
+            'page': 1,
+            'pageSize': 3,
+          };
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ], '1'),
+      );
+      await _settle(tester);
+
+      expect(reviewsRequest, isNotNull);
+      expect(reviewsRequest!.queryParameters['page'], 1);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -1200));
+      await _settle(tester);
+
+      expect(find.text('Customer Reviews'), findsOneWidget);
+      expect(find.text('Great earbuds, battery lasts.'), findsOneWidget);
+      expect(find.text('Test Buyer'), findsOneWidget);
+      expect(find.text('buyer@test.com'), findsNothing);
+    },
+  );
 }

@@ -212,6 +212,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         context.go(AppRoutes.register);
       }
     });
+    ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
+      if (next != null && next != prev && mounted) {
+        AppSnackbar.error(context, next);
+      }
+    });
 
     final l10n = context.l10n;
     final phoneFormatError = Validators.egyptPhone(l10n, login.phone.trim());

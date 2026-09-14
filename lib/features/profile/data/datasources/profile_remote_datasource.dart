@@ -438,6 +438,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         isPhoneVerificationRequired: wire.isPhoneVerificationRequired,
         isEmailVerified: wire.isEmailVerified,
         isPhoneVerified: wire.isPhoneVerified,
+        hasPassword: wire.hasPassword,
       );
     } on FormatException {
       throw const ServerException('Empty profile');

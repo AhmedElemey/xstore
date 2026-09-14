@@ -30,8 +30,12 @@ import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/change_password_screen.dart';
+import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
+import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
+import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
 import 'package:xstore/shared/widgets/xstore_button.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
@@ -93,6 +97,21 @@ class _FakeSocialAuth implements SocialAuthDatasource {
 class _FakeFirebaseAuth implements FirebaseAuth {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _NoPasswordProfile extends ProfileNotifier {
+  @override
+  ProfileState build() => const ProfileState(
+        profile: ProfileEntity(
+          user: UserEntity(
+            id: '1',
+            name: 'Social User',
+            email: 'social@test.com',
+            phoneNumber: '01000000000',
+          ),
+          hasPassword: false,
+        ),
+      );
 }
 
 Widget _harness(List<Override> overrides) {
@@ -182,7 +201,9 @@ void main() {
       await tester.tap(find.text('Open Change Password'));
       await _settle(tester);
 
+      expect(find.text('Current Password *'), findsOneWidget);
       final fields = find.byType(TextFormField);
+      expect(fields, findsNWidgets(3));
       await tester.enterText(fields.at(0), 'OldPassword1!');
       await tester.enterText(fields.at(1), 'NewPassword2!');
       await tester.enterText(fields.at(2), 'NewPassword2!');
@@ -244,6 +265,53 @@ void main() {
       expect(find.text('Your password was changed.'), findsNothing);
       // Still on the change-password form.
       expect(find.widgetWithText(XstoreButton, 'Change Password'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'an account without a password only submits new + confirm',
+    (tester) async {
+      RequestOptions? postedRequest;
+      final dio = _fakeDio({
+        'POST ${ApiEndpoints.changePassword}': (options) {
+          postedRequest = options;
+          return <String, dynamic>{};
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+          profileNotifierProvider.overrideWith(() => _NoPasswordProfile()),
+        ]),
+      );
+      await tester.tap(find.text('Open Change Password'));
+      await _settle(tester);
+
+      expect(find.text('Current Password *'), findsNothing);
+      final fields = find.byType(TextFormField);
+      expect(fields, findsNWidgets(2));
+      await tester.enterText(fields.at(0), 'NewPassword2!');
+      await tester.enterText(fields.at(1), 'NewPassword2!');
+      await tester.pump();
+
+      await tester.tap(find.widgetWithText(XstoreButton, 'Change Password'));
+      await _settle(tester);
+
+      expect(postedRequest?.data, {
+        'newPassword': 'NewPassword2!',
+        'confirmNewPassword': 'NewPassword2!',
+      });
+      expect(find.text('Your password was changed.'), findsOneWidget);
+      expect(find.text('Open Change Password'), findsOneWidget);
     },
   );
 }

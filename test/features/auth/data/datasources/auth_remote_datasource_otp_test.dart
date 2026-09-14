@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/exceptions.dart';
+import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/app_error_messages.dart';
 import 'package:xstore/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 
 /// Resolves (or rejects) every request with a scripted value instead of
 /// hitting the network — same approach as the wishlist datasource tests.
@@ -336,6 +338,60 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('checkGoogleUser', () {
+    test(
+      'parses exists + roleName from a nested envelope',
+      skip: MockConfig.useMock,
+      () async {
+        datasource = datasourceFor({
+          'isSuccess': true,
+          'data': {
+            'exists': true,
+            'roleName': 'Consumer',
+          },
+        });
+
+        final result = await datasource.checkGoogleUser(idToken: 'tok');
+        expect(result.exists, isTrue);
+        expect(result.role, UserRole.consumer);
+      },
+    );
+
+    test(
+      'parses a 1-based numeric role and Exists PascalCase',
+      skip: MockConfig.useMock,
+      () async {
+        datasource = datasourceFor({'Exists': true, 'Role': 2});
+
+        final result = await datasource.checkGoogleUser(idToken: 'tok');
+        expect(result.exists, isTrue);
+        expect(result.role, UserRole.vendor);
+      },
+    );
+  });
+
+  group('loginWithGoogle', () {
+    test(
+      'reads token from a nested data envelope',
+      skip: MockConfig.useMock,
+      () async {
+      datasource = datasourceFor({
+        'isSuccess': true,
+        'data': {
+          'token': 'wrapped-access',
+          'refreshToken': 'wrapped-refresh',
+        },
+      });
+
+      final model = await datasource.loginWithGoogle(
+        idToken: 'tok',
+        asVendor: false,
+      );
+      expect(model.token, 'wrapped-access');
+      expect(model.refreshToken, 'wrapped-refresh');
     });
   });
 }

@@ -28,6 +28,10 @@ AppException mapDioException(DioException e) {
           if (lower.contains('store location')) {
             return const ServerException(storeLocationRequiredErrorCode);
           }
+          if (lower.contains('pause threshold') ||
+              lower.contains('order status updates are paused')) {
+            return ServerException(serverMessage);
+          }
           // Live probe 2026-08-29: the same endpoint now 403s with
           // "Account must be verified to create listings." when email/
           // phone aren't verified — not a session/auth failure.

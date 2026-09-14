@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +22,19 @@ void main() {
   tearDown(() {
     debugPrint = originalDebugPrint;
   });
+
+  List<String> capturePrint(void Function() body) {
+    final printed = <String>[];
+    runZoned(
+      body,
+      zoneSpecification: ZoneSpecification(
+        print: (self, parent, zone, line) {
+          printed.add(line);
+        },
+      ),
+    );
+    return printed;
+  }
 
   test('onRequest redacts Authorization header and sensitive body fields', () {
     final options = RequestOptions(
@@ -56,7 +71,7 @@ void main() {
       data: {
         'id': 'user-1',
         'token': 'super-secret-session-token',
-        'idToken': 'firebase-secret',
+        'refreshToken': 'do-not-log-me',
       },
     );
 
@@ -64,7 +79,7 @@ void main() {
 
     final output = logs.join('\n');
     expect(output, isNot(contains('super-secret-session-token')));
-    expect(output, isNot(contains('firebase-secret')));
+    expect(output, isNot(contains('do-not-log-me')));
     expect(output, contains('user-1'));
     expect(output, contains('***REDACTED***'));
   });
@@ -88,6 +103,56 @@ void main() {
     expect(output, contains('storeDescription'));
     expect(output, contains('Test desc'));
     expect(output, contains('<file:a.jpg>'));
+  });
+
+  test('onRequest logs Google idToken and clientId on separate print lines', () {
+    const idToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.payload.sig';
+    final options = RequestOptions(
+      path: '/api/auth/google/check-user',
+      method: 'POST',
+      data: {
+        'idToken': idToken,
+        'clientId': 'web-client.apps.googleusercontent.com',
+      },
+    );
+
+    final printed = capturePrint(() {
+      interceptor.onRequest(options, RequestInterceptorHandler());
+    });
+
+    expect(printed, contains('idToken:'));
+    expect(printed, contains(idToken));
+    expect(printed, contains('clientId:'));
+    expect(printed, contains('web-client.apps.googleusercontent.com'));
+    final requestDump = logs.first;
+    expect(requestDump, isNot(contains(idToken)));
+    expect(requestDump, contains('***REDACTED***'));
+  });
+
+  test('onRequest splits a long Google idToken across 800-char print lines', () {
+    final idToken = 'A' * 800 + 'B' * 800;
+    final options = RequestOptions(
+      path: '/api/auth/google/check-user',
+      method: 'POST',
+      data: {'idToken': idToken, 'clientId': 'web-client'},
+    );
+
+    final printed = capturePrint(() {
+      interceptor.onRequest(options, RequestInterceptorHandler());
+    });
+
+    expect(printed, contains('idToken:'));
+    expect(printed, contains('A' * 800));
+    expect(printed, contains('B' * 800));
+    expect(printed.join(), contains(idToken));
+    expect(printed, contains('clientId:'));
+    expect(printed, contains('web-client'));
+  });
+
+  test('printFullToken emits 800-char slices via print', () {
+    final token = 'A' * 800 + 'B' * 50;
+    final printed = capturePrint(() => printFullToken(token));
+    expect(printed, ['A' * 800, 'B' * 50]);
   });
 
   test('onError redacts sensitive fields in the error response body', () {

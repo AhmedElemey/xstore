@@ -223,7 +223,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Unit>> changePassword({
-    required String currentPassword,
+    String? currentPassword,
     required String newPassword,
     required String confirmNewPassword,
   }) async {

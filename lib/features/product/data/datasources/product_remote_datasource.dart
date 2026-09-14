@@ -123,9 +123,11 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       // ASSUMPTION: envelope is {"items": [...], "totalCount": N} matching
       // cities/governments precedent. Falls back to a bare list with
       // items.length as totalCount if no envelope is present.
+      // Callers pass 0-based `page`; live GET is 1-based and 400s on page=0
+      // (`Page` must be > 0). Mock paging above stays 0-based.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListingReviews(listingId),
-        queryParameters: {'page': page, 'pageSize': pageSize},
+        queryParameters: {'page': page + 1, 'pageSize': pageSize},
         options: ApiAuthHeaders.public(),
       );
       final data = response.data;
@@ -405,8 +407,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final specs = _parseStringMap(json['specifications'] ?? json['specs']);
 
     final reviewSummary = _parseReviewSummary(
-      json['reviewSummary'] ?? json['review_summary'],
-    );
+          json['reviewSummary'] ?? json['review_summary'],
+        ) ??
+        _parseListingReviewSummary(json);
 
     final reviewsRaw = json['reviews'];
     final reviews = reviewsRaw is List
@@ -506,10 +509,22 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     );
   }
 
+  /// Live listing detail is flat `rating` + `reviewCount`, not a nested
+  /// `reviewSummary` object. Without this the product page hides reviews
+  /// even when GET /reviews returned rows.
+  ReviewSummaryEntity? _parseListingReviewSummary(Map<String, dynamic> json) {
+    final total = _int(json['reviewCount'], fallback: 0);
+    if (total <= 0) return null;
+    return ReviewSummaryEntity(
+      average: _num(json['rating']),
+      totalCount: total,
+    );
+  }
+
   ProductReviewEntity _parseProductReview(Map<String, dynamic> m) {
     return ProductReviewEntity(
       id: (m['id'] ?? '').toString(),
-      userName: (m['userName'] ?? m['author'] ?? m['name'] ?? '').toString(),
+      userName: _reviewAuthorName(m),
       userAvatarUrl:
           (m['userAvatarUrl'] ?? m['avatarUrl'] ?? m['avatar'])?.toString(),
       date: DateTime.tryParse((m['date'] ?? m['createdAt'] ?? '').toString()) ??
@@ -524,8 +539,12 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ReviewEntity(
       id: (m['id'] ?? '').toString(),
       userId: (m['userId'] ?? m['user_id'] ?? 'user').toString(),
-      userName: (m['userName'] ?? m['author'] ?? '').toString(),
-      userAvatar: (m['userAvatar'] ?? m['avatarUrl'] ?? m['avatar'])?.toString(),
+      userName: _reviewAuthorName(m),
+      userAvatar: (m['userAvatar'] ??
+              m['storeLogoUrl'] ??
+              m['avatarUrl'] ??
+              m['avatar'])
+          ?.toString(),
       rating: _num(m['rating'] ?? m['stars']),
       comment: (m['comment'] ?? m['text'] ?? '').toString(),
       helpfulCount: _int(m['helpfulCount'] ?? m['helpful'], fallback: 0),
@@ -533,6 +552,19 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           DateTime.tryParse((m['createdAt'] ?? m['date'] ?? '').toString()) ??
               DateTime.now(),
     );
+  }
+
+  /// Display name, never the login email. Live `userName` is Identity
+  /// username (= email at register); `fullName` / `fullNameEn` is the
+  /// profile name when the backend starts sending it.
+  String _reviewAuthorName(Map<String, dynamic> m) {
+    for (final key in ['fullName', 'fullNameEn', 'fullNameAr', 'name', 'author']) {
+      final v = m[key]?.toString().trim() ?? '';
+      if (v.isNotEmpty && !v.contains('@')) return v;
+    }
+    final userName = (m['userName'] ?? '').toString().trim();
+    if (userName.isNotEmpty && !userName.contains('@')) return userName;
+    return userName;
   }
 
   ProductDetailEntity _similarProduct(Map<String, dynamic> m) {

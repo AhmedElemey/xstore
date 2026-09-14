@@ -2348,6 +2348,12 @@ abstract class AppLocalizations {
   /// **'Mark as Shipped'**
   String get ordersMarkShipped;
 
+  /// No description provided for @ordersMarkDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Delivered'**
+  String get ordersMarkDelivered;
+
   /// No description provided for @ordersViewTracking.
   ///
   /// In en, this message translates to:
@@ -3740,6 +3746,18 @@ abstract class AppLocalizations {
   /// **'You can review this product once your order for it has been delivered'**
   String get reviewRequiresDeliveredOrder;
 
+  /// No description provided for @alreadyReviewedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already reviewed'**
+  String get alreadyReviewedTitle;
+
+  /// No description provided for @alreadyReviewedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You already reviewed this product.'**
+  String get alreadyReviewedMessage;
+
   /// No description provided for @deleteReviewConfirmTitle.
   ///
   /// In en, this message translates to:
@@ -4196,6 +4214,12 @@ abstract class AppLocalizations {
   /// **'Mark as Shipped'**
   String get vendorMarkShipped;
 
+  /// No description provided for @vendorMarkDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Delivered'**
+  String get vendorMarkDelivered;
+
   /// No description provided for @vendorOrdersEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -4351,6 +4375,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order marked as shipped!'**
   String get vendorOrderShippedSnack;
+
+  /// No description provided for @vendorOrderDeliveredSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Order marked as delivered'**
+  String get vendorOrderDeliveredSnack;
 
   /// No description provided for @vendorStatusPending.
   ///

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -7,9 +8,11 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/product_review_entity.dart';
+import '../../domain/entities/review_entity.dart';
 
-class ReviewsSummary extends StatefulWidget {
+class ReviewsSummary extends ConsumerStatefulWidget {
   const ReviewsSummary({
     super.key,
     required this.summary,
@@ -22,10 +25,10 @@ class ReviewsSummary extends StatefulWidget {
   final VoidCallback onSeeAll;
 
   @override
-  State<ReviewsSummary> createState() => _ReviewsSummaryState();
+  ConsumerState<ReviewsSummary> createState() => _ReviewsSummaryState();
 }
 
-class _ReviewsSummaryState extends State<ReviewsSummary> {
+class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
   final List<bool> _expanded = [];
 
   @override
@@ -55,6 +58,8 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
     final maxBar = counts.isEmpty
         ? 1
         : counts.reduce((a, b) => a > b ? a : b).clamp(1, 999999);
+    final viewer = ref.watch(authProvider).valueOrNull;
+    final viewerName = viewer?.displayName(context.isArabic);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -135,6 +140,11 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
           for (var i = 0; i < widget.reviews.length && i < 3; i++)
             _ReviewTile(
               review: widget.reviews[i],
+              authorName: reviewAuthorLabel(
+                wireName: widget.reviews[i].userName,
+                viewerEmail: viewer?.email,
+                viewerDisplayName: viewerName,
+              ),
               expanded: i < _expanded.length ? _expanded[i] : false,
               onToggle: () => setState(() {
                 if (i < _expanded.length) _expanded[i] = !_expanded[i];
@@ -157,11 +167,13 @@ class _ReviewsSummaryState extends State<ReviewsSummary> {
 class _ReviewTile extends StatelessWidget {
   const _ReviewTile({
     required this.review,
+    required this.authorName,
     required this.expanded,
     required this.onToggle,
   });
 
   final ProductReviewEntity review;
+  final String authorName;
   final bool expanded;
   final VoidCallback onToggle;
 
@@ -184,8 +196,8 @@ class _ReviewTile extends StatelessWidget {
                 child: review.userAvatarUrl == null ||
                         review.userAvatarUrl!.isEmpty
                     ? Text(
-                        review.userName.isNotEmpty
-                            ? review.userName[0].toUpperCase()
+                        authorName.isNotEmpty
+                            ? authorName[0].toUpperCase()
                             : '?',
                       )
                     : null,
@@ -196,7 +208,7 @@ class _ReviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.userName,
+                      authorName,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

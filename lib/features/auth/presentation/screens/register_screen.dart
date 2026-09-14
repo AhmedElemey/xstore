@@ -176,6 +176,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
       }
     });
+    ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
+      if (next != null && next != prev && mounted) {
+        AppSnackbar.error(context, next);
+      }
+    });
 
     final labels = s.totalSteps == 4
         ? [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity, context.l10n.stepStore]

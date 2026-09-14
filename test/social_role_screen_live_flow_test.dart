@@ -5,16 +5,17 @@
 // chain (a hand-built real AuthRepositoryImpl, stubbing only the two
 // Firebase-touching constructor params).
 //
-// Google is now a login-only shortcut: `checkGoogleUser` decides everything
+// Google is now a login-only shortcut: `checkGoogleUser` plus Firebase
+// `isNewUser` decide whether to log in or send the user to register,
 // before the picker is ever considered. An identity that already has an
-// account skips straight to home (tested below, still via SocialRoleScreen's
-// real GoRouter redirect, since that identity's role-specific login still
-// runs through the normal auth flow). An identity with NO account no longer
-// auto-creates one via this screen at all — `SocialAuthState.needsRegistration`
-// is set instead, and it's the login/register screens (not this one) that
-// react to it by navigating to Register (see login_screen_live_flow_test.dart
-// for that half). SocialRoleScreen's picker + `completeSocialRegistration`'s
-// Google branch are exercised here only via the "existing identity" path;
+// account (lookup hit, or `isNewUser: false` after a lookup miss) skips
+// straight to home. A brand-new identity (`isNewUser: true` and no
+// backend match) no longer auto-creates via this screen —
+// `SocialAuthState.needsRegistration` is set instead, and it's the
+// login/register screens (not this one) that react to it by navigating
+// to Register (see login_screen_live_flow_test.dart for that half).
+// SocialRoleScreen's picker + `completeSocialRegistration`'s Google
+// branch are exercised here only via the "existing identity" path;
 // Apple/Facebook still use the picker for their own new-user flow, unchanged.
 //
 // SocialRoleScreen itself never calls Google sign-in — that fires from the
@@ -211,6 +212,147 @@ void main() {
       expect(social.needsRegistration, isTrue);
       expect(social.needsRoleSelection, isFalse);
       expect(social.pendingSocialResult, isNull);
+    },
+  );
+
+  test(
+    'a returning Firebase Google identity logs in as consumer when '
+    'check-user reports no Google-linked account',
+    skip: MockConfig.useMock,
+    () async {
+      var consumerLoginCalls = 0;
+      final dio = _fakeDio({
+        'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+          'exists': false,
+          'role': null,
+        },
+        'POST ${ApiEndpoints.googleConsumerLogin}': (_) {
+          consumerLoginCalls++;
+          return {
+            'token': 'access-token-email-account',
+            'refreshToken': 'refresh-token-email-account',
+          };
+        },
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(
+                const SocialAuthResult(
+                  provider: SocialProvider.google,
+                  uid: 'google-uid-email-account',
+                  email: 'rehab.mhmd2@gmail.com',
+                  displayName: 'Existing Email User',
+                  idToken: 'google-id-token-email-account',
+                  isNewUser: false,
+                ),
+              ),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(socialAuthProvider.notifier).signInWithGoogle();
+
+      final social = container.read(socialAuthProvider);
+      expect(social.needsRegistration, isFalse);
+      expect(social.needsRoleSelection, isFalse);
+      expect(social.error, isNull);
+      expect(consumerLoginCalls, 1);
+
+      await container.read(analyticsServiceProvider).ready;
+    },
+  );
+
+  test(
+    'a returning Google identity retries vendor login when consumer returns '
+    'a different-role conflict',
+    skip: MockConfig.useMock,
+    () async {
+      var vendorLoginCalls = 0;
+      final dio = _fakeDio({
+        'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+          'exists': false,
+          'role': null,
+        },
+        'POST ${ApiEndpoints.googleConsumerLogin}': (options) => DioException(
+          requestOptions: options,
+          type: DioExceptionType.badResponse,
+          response: Response(
+            requestOptions: options,
+            statusCode: 400,
+            data: {
+              'isSuccess': false,
+              'errorEn':
+                  'This email is already registered under a different role.',
+            },
+          ),
+        ),
+        'POST ${ApiEndpoints.googleVendorLogin}': (_) {
+          vendorLoginCalls++;
+          return {
+            'isSuccess': true,
+            'data': {
+              'token': 'access-token-vendor',
+              'refreshToken': 'refresh-token-vendor',
+            },
+          };
+        },
+        'GET ${ApiEndpoints.getProfile}': (_) => {
+          'user': {
+            'id': 'vendor_1',
+            'fullName': 'Test Seller',
+            'email': 'seller@test.com',
+            'phoneNumber': '01012345678',
+            'roleName': 'Vendor',
+          },
+          'isEmailVerificationRequired': false,
+          'isPhoneVerificationRequired': false,
+          'isEmailVerified': false,
+          'isPhoneVerified': false,
+        },
+      });
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(
+                const SocialAuthResult(
+                  provider: SocialProvider.google,
+                  uid: 'google-uid-vendor-email',
+                  email: 'seller@gmail.com',
+                  displayName: 'Existing Vendor',
+                  idToken: 'google-id-token-vendor-email',
+                  isNewUser: false,
+                ),
+              ),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(socialAuthProvider.notifier).signInWithGoogle();
+
+      final social = container.read(socialAuthProvider);
+      expect(social.needsRegistration, isFalse);
+      expect(social.error, isNull);
+      expect(vendorLoginCalls, 1);
+
+      await container.read(analyticsServiceProvider).ready;
     },
   );
 

@@ -66,7 +66,7 @@ abstract interface class OrdersRemoteDataSource {
     String? vendorId,
   });
 
-  Future<OrderModel> markDelivered(String orderId);
+  Future<OrderModel> markDelivered(String orderId, {String? vendorId});
 
   /// Updates the delivery coordinates on an already-placed order. CONFIRMED
   /// (Postman collection) route + request body — response shape was never
@@ -777,7 +777,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   /// Every vendor status transition (confirm/reject/processing/shipped/
   /// delivered/cancel) goes through this one bulk endpoint. Wire `status`
   /// is the C# `OrderStatus` *name* (`Confirmed`, …) — the property is a
-  /// `string`, so the int code 400s.
+  /// `string`, so the int code 400s. Delivered is vendor-only
+  /// (`[Authorize(Roles=VENDOR)]`) and only from Shipped.
   Future<OrderModel> _setVendorOrderStatus({
     required String orderId,
     required OrderStatus status,
@@ -951,7 +952,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
   }
 
   @override
-  Future<OrderModel> markDelivered(String orderId) async {
+  Future<OrderModel> markDelivered(String orderId, {String? vendorId}) async {
     if (MockConfig.useMock) {
       final row = await getOrderById(orderId);
       if (row == null) throw StateError('order');
@@ -967,6 +968,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     return _setVendorOrderStatus(
       orderId: orderId,
       status: OrderStatus.delivered,
+      vendorId: vendorId,
     );
   }
 
