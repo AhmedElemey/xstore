@@ -201,4 +201,14 @@ abstract final class ApiEndpoints {
   // hammering a route that doesn't exist yet).
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
+
+  // ---------------------------------------------------------------------
+  // Vendor reports — PROPOSED, not yet built on the backend (2026-09-15).
+  // Full contract spec is documented on
+  // VendorReportsRemoteDataSourceImpl in
+  // lib/features/reports/data/datasources/vendor_reports_remote_datasource.dart.
+  // Until the backend ships this route, a live submission 404s and the
+  // failure is surfaced to the user — that is expected, not a bug.
+  // ---------------------------------------------------------------------
+  static const String vendorReports = '$_api/reports/vendor';
 }

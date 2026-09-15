@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -13,11 +14,13 @@ import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../reports/presentation/providers/vendor_reports_dependencies.dart';
 import '../../domain/entities/order_entity.dart';
 import 'order_item_tile.dart';
 import 'order_price_breakdown.dart';
 import 'order_status_badge.dart';
 import 'order_timeline.dart';
+import 'report_vendor_sheet.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
@@ -287,13 +290,47 @@ class _AddressCard extends StatelessWidget {
   }
 }
 
-class _SellerSection extends StatelessWidget {
+class _SellerSection extends ConsumerWidget {
   const _SellerSection({required this.order});
 
   final OrderEntity order;
 
+  Future<void> _reportVendor(BuildContext context, WidgetRef ref) async {
+    final vendorName = order.vendorStoreName.isNotEmpty
+        ? order.vendorStoreName
+        : order.vendorName;
+    // Read the use case once, synchronously, before opening the sheet —
+    // it's a plain object with no further tie to `ref`, so the async
+    // onSubmit callback below never touches this widget's `ref` after an
+    // await (see the 2026-08-03 "never pass WidgetRef into a fire-and-
+    // forget callback" lesson).
+    final submitReport = ref.read(submitVendorReportUseCaseProvider);
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => ReportVendorSheet(
+        vendorName: vendorName,
+        onSubmit: (reason, comment) async {
+          final submitted = await submitReport(
+            vendorId: order.vendorId,
+            orderId: order.id,
+            reason: reason,
+            comment: comment,
+          );
+          return submitted.isRight();
+        },
+      ),
+    );
+    if (!context.mounted || result != true) return;
+    AppSnackbar.success(context, context.l10n.reportVendorSuccess);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vendorName = order.vendorStoreName.isNotEmpty
+        ? order.vendorStoreName
+        : order.vendorName;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: _WhiteCard(
@@ -304,21 +341,14 @@ class _SellerSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                _ShopAvatar(
-                  imageUrl: order.vendorAvatar,
-                  name: order.vendorStoreName.isNotEmpty
-                      ? order.vendorStoreName
-                      : order.vendorName,
-                ),
+                _ShopAvatar(imageUrl: order.vendorAvatar, name: vendorName),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.vendorStoreName.isNotEmpty
-                            ? order.vendorStoreName
-                            : order.vendorName,
+                        vendorName,
                         style: AppTypography.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -342,6 +372,21 @@ class _SellerSection extends StatelessWidget {
                   : () => context.push(
                       '${AppRoutes.sellerProfile}/${order.vendorId}',
                     ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: order.vendorId.trim().isEmpty
+                    ? null
+                    : () => _reportVendor(context, ref),
+                icon: const Icon(LucideIcons.flag, size: 16),
+                label: Text(context.l10n.reportVendor),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  side: const BorderSide(color: AppColors.error),
+                ),
+              ),
             ),
           ],
         ),

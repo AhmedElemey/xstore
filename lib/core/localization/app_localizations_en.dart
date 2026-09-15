@@ -1926,6 +1926,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visitStore => 'Visit Store';
 
   @override
+  String get reportVendor => 'Report Vendor';
+
+  @override
+  String reportVendorTitle(String name) {
+    return 'Report $name';
+  }
+
+  @override
+  String get reportVendorSubtitle =>
+      'Let us know if something went wrong with this order. Our team will review your report.';
+
+  @override
+  String get reportVendorReasonFraud => 'Fraud or scam';
+
+  @override
+  String get reportVendorReasonPoorQuality => 'Poor product quality';
+
+  @override
+  String get reportVendorReasonNotAsDescribed => 'Item not as described';
+
+  @override
+  String get reportVendorReasonNoResponse => 'No response from seller';
+
+  @override
+  String get reportVendorReasonHarassment => 'Harassment or abuse';
+
+  @override
+  String get reportVendorReasonOther => 'Other';
+
+  @override
+  String get reportVendorCommentHintOptional => 'Add details (optional)';
+
+  @override
+  String get reportVendorCommentHintRequired => 'Please describe the issue';
+
+  @override
+  String get reportVendorSubmit => 'Submit Report';
+
+  @override
+  String get reportVendorSuccess =>
+      'Report submitted. Our team will review it.';
+
+  @override
   String get verifiedSeller => '✅ Verified Seller';
 
   @override
