@@ -48,8 +48,10 @@ abstract final class AppRoutes {
   // TODO(phase-2): Payment methods deferred — route currently redirects
   // to profile (see app_router.dart).
   static const paymentMethods = '/payment-methods';
-  // TODO(phase-2): Address book deferred — route currently redirects
-  // to profile (see app_router.dart).
+  /// Saved delivery addresses ("My Addresses" in Profile). Local-only for
+  /// now — no backend address book exists yet, see AddressBook's own doc
+  /// comment (lib/features/addresses/presentation/providers/
+  /// address_book_provider.dart).
   static const addresses = '/addresses';
   // TODO(phase-2): Help center deferred — route currently redirects
   // to profile (see app_router.dart).

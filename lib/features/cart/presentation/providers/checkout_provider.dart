@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../../core/network/connectivity_provider.dart';
-import '../../../../shared/providers/shared_providers.dart';
+import '../../../addresses/presentation/providers/address_book_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/place_order_params.dart';
@@ -18,13 +17,9 @@ part 'checkout_provider.g.dart';
 @riverpod
 class Checkout extends _$Checkout {
   // Set when this autoDispose notifier is torn down (screen popped) so an
-  // in-flight placeOrder (or the async address load below) doesn't write
+  // in-flight placeOrder (or the async address seed below) doesn't write
   // state to a disposed notifier — that throws an unhandled StateError.
   var _disposed = false;
-
-  static const _addressesKeyPrefix = 'checkout_addresses_v1_';
-
-  String? get _consumerId => ref.read(authProvider).valueOrNull?.id;
 
   @override
   CheckoutState build() {
@@ -39,54 +34,25 @@ class Checkout extends _$Checkout {
         AnalyticsProps.vendorCount: cart.vendorGroups.length,
       },
     );
-    // No backend address book exists yet (order placement only ever takes
-    // GPS coordinates — see createOrder), so saved addresses are the one
-    // piece of checkout state kept locally, per account, instead of being
-    // seeded with sample data and thrown away on screen exit.
-    unawaited(_loadAddresses());
+    // Saved addresses live in `addressBookProvider` now — shared with the
+    // Profile "My Addresses" screen so an edit made from either place is
+    // visible from the other. Checkout keeps its own copy in
+    // CheckoutState only for the per-order selection (which saved address
+    // this specific order ships to); seeding it below preselects the
+    // account's main address, same as before this provider existed.
+    unawaited(_seedFromAddressBook());
     return const CheckoutState(selectedPayment: PaymentMethod.cashOnDelivery);
   }
 
-  Future<void> _loadAddresses() async {
-    try {
-      // authProvider is an AsyncNotifier — reading it synchronously here
-      // (as `_consumerId` does elsewhere in this class, safely, since
-      // those calls only ever happen after checkout is already showing)
-      // would race its still-loading initial state and silently skip the
-      // load. Await the resolved value instead; in real usage checkout is
-      // unreachable until auth has already resolved, so this returns
-      // immediately there.
-      final consumerId = (await ref.read(authProvider.future))?.id;
-      if (_disposed || consumerId == null || consumerId.isEmpty) return;
-      final prefs = await ref.read(sharedPreferencesProvider.future);
-      if (_disposed) return;
-      final raw = prefs.getString('$_addressesKeyPrefix$consumerId');
-      if (raw == null || raw.isEmpty) return;
-      final decoded = jsonDecode(raw) as List<dynamic>;
-      final addresses = decoded
-          .whereType<Map<String, dynamic>>()
-          .map(_addressFromJson)
-          .toList();
-      if (_disposed || addresses.isEmpty) return;
-      final defaultIndex = addresses.indexWhere((a) => a.isDefault);
-      state = state.copyWith(
-        savedAddresses: addresses,
-        selectedAddressIndex: defaultIndex >= 0 ? defaultIndex : 0,
-      );
-    } catch (_) {
-      // Corrupt or unreadable local data — fall back to the honest empty
-      // state (the address section already prompts to add one) rather
-      // than blocking checkout.
-    }
-  }
-
-  Future<void> _persist() async {
-    final consumerId = _consumerId;
-    if (consumerId == null || consumerId.isEmpty) return;
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setString(
-      '$_addressesKeyPrefix$consumerId',
-      jsonEncode(state.savedAddresses.map(_addressToJson).toList()),
+  Future<void> _seedFromAddressBook() async {
+    await ref.read(addressBookProvider.notifier).ensureLoaded();
+    if (_disposed) return;
+    final addresses = ref.read(addressBookProvider);
+    if (_disposed || addresses.isEmpty) return;
+    final mainIndex = ref.read(addressBookProvider.notifier).mainIndex;
+    state = state.copyWith(
+      savedAddresses: addresses,
+      selectedAddressIndex: mainIndex >= 0 ? mainIndex : 0,
     );
   }
 
@@ -96,32 +62,25 @@ class Checkout extends _$Checkout {
   }
 
   void addAddress(OrderAddress a) {
-    var list = [...state.savedAddresses];
-    if (a.isDefault) {
-      list = list.map((e) => e.copyWith(isDefault: false)).toList();
-    }
-    list.add(a);
+    final added = ref.read(addressBookProvider.notifier).addAddress(a);
+    if (!added) return;
+    final list = ref.read(addressBookProvider);
     state = state.copyWith(
       savedAddresses: list,
       selectedAddressIndex: list.length - 1,
     );
-    unawaited(_persist());
   }
 
   void updateAddress(int index, OrderAddress a) {
     if (index < 0 || index >= state.savedAddresses.length) return;
-    var list = [...state.savedAddresses];
-    if (a.isDefault) {
-      list = list.map((e) => e.copyWith(isDefault: false)).toList();
-    }
-    list[index] = a;
-    state = state.copyWith(savedAddresses: list);
-    unawaited(_persist());
+    ref.read(addressBookProvider.notifier).updateAddress(index, a);
+    state = state.copyWith(savedAddresses: ref.read(addressBookProvider));
   }
 
   void removeAddress(int index) {
     if (index < 0 || index >= state.savedAddresses.length) return;
-    final list = [...state.savedAddresses]..removeAt(index);
+    ref.read(addressBookProvider.notifier).removeAddress(index);
+    final list = ref.read(addressBookProvider);
     final sel = state.selectedAddressIndex;
     int? nextSelected;
     if (list.isEmpty || sel == null) {
@@ -134,7 +93,6 @@ class Checkout extends _$Checkout {
       nextSelected = sel;
     }
     state = state.copyWith(savedAddresses: list, selectedAddressIndex: nextSelected);
-    unawaited(_persist());
   }
 
   void updateDeliveryNote(String v) {
@@ -236,30 +194,3 @@ class Checkout extends _$Checkout {
     return order;
   }
 }
-
-/// No `OrderAddress` JSON codec exists (the entity is a plain `@freezed`
-/// class, not `@JsonSerializable`) — mapped by hand, matching the manual
-/// entity<->wire mapping already used throughout the data layer.
-Map<String, dynamic> _addressToJson(OrderAddress a) => {
-  'fullName': a.fullName,
-  'phone': a.phone,
-  'street': a.street,
-  'city': a.city,
-  'wilaya': a.wilaya,
-  'postalCode': a.postalCode,
-  'isDefault': a.isDefault,
-  'latitude': a.latitude,
-  'longitude': a.longitude,
-};
-
-OrderAddress _addressFromJson(Map<String, dynamic> json) => OrderAddress(
-  fullName: (json['fullName'] ?? '').toString(),
-  phone: (json['phone'] ?? '').toString(),
-  street: (json['street'] ?? '').toString(),
-  city: (json['city'] ?? '').toString(),
-  wilaya: (json['wilaya'] ?? '').toString(),
-  postalCode: json['postalCode'] as String?,
-  isDefault: json['isDefault'] == true,
-  latitude: (json['latitude'] as num?)?.toDouble(),
-  longitude: (json['longitude'] as num?)?.toDouble(),
-);

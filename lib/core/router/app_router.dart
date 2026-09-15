@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/addresses/presentation/screens/addresses_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_otp_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -430,15 +431,19 @@ GoRouter goRouter(GoRouterRef ref) {
         path: '/chat/:threadId',
         redirect: (_, __) => AppRoutes.notifications,
       ),
-      // TODO(phase-2): Payment methods & address book deferred to next phase.
-      // Routes redirect to profile so deep links don't land on placeholders.
+      // TODO(phase-2): Payment methods deferred to next phase.
+      // Route redirects to profile so deep links don't land on a placeholder.
       GoRoute(
         path: AppRoutes.paymentMethods,
         redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.addresses,
-        redirect: (_, __) => AppRoutes.profile,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const AddressesScreen(),
+        ),
       ),
       // TODO(phase-2): Store/active hours screen deferred to next phase.
       // Route redirects to profile in the meantime instead of dead-ending.

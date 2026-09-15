@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
-Future<void> showCheckoutRemoveAddressSheet(
-  BuildContext context,
-  WidgetRef ref,
-  int index,
-) async {
+/// Confirm-delete sheet shared by checkout's address step and the Profile
+/// "My Addresses" screen. [onConfirm] performs the actual removal — the
+/// caller owns which list (checkout's per-session copy or the shared
+/// address book) the index refers to.
+Future<void> showRemoveAddressSheet(
+  BuildContext context, {
+  required VoidCallback onConfirm,
+}) async {
   await showModalBottomSheet<void>(
     context: context,
     backgroundColor: context.surfaceColor,
@@ -56,7 +57,7 @@ Future<void> showCheckoutRemoveAddressSheet(
                   ),
                   onPressed: () {
                     Navigator.pop(ctx);
-                    ref.read(checkoutProvider.notifier).removeAddress(index);
+                    onConfirm();
                   },
                   child: Text(context.l10n.checkoutRemoveAddress),
                 ),

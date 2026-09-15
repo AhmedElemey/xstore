@@ -3350,6 +3350,30 @@ abstract class AppLocalizations {
   /// **'Saved on this device only, until an account-wide address book ships.'**
   String get checkoutAddressesDeviceOnly;
 
+  /// No description provided for @addressesEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t saved any addresses yet.'**
+  String get addressesEmptyState;
+
+  /// No description provided for @addressesMainBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get addressesMainBadge;
+
+  /// No description provided for @addressesSetAsMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Main'**
+  String get addressesSetAsMain;
+
+  /// No description provided for @addressesMaxReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the 5-address limit'**
+  String get addressesMaxReached;
+
   /// No description provided for @checkoutErrorAddressName.
   ///
   /// In en, this message translates to:

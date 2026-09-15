@@ -1665,6 +1665,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Saved on this device only, until an account-wide address book ships.';
 
   @override
+  String get addressesEmptyState => 'You haven\'t saved any addresses yet.';
+
+  @override
+  String get addressesMainBadge => 'Main';
+
+  @override
+  String get addressesSetAsMain => 'Set as Main';
+
+  @override
+  String get addressesMaxReached => 'You\'ve reached the 5-address limit';
+
+  @override
   String get checkoutErrorAddressName => 'Enter the recipient\'s name';
 
   @override

@@ -263,7 +263,7 @@ String _truncatedForLog(String? token) {
 
 void _printFullToken(String token) {
   final pattern = RegExp('.{1,800}');
-  pattern.allMatches(token).forEach((match) => print(match.group(0)));
+  pattern.allMatches(token).forEach((match) => print(match.group(0))); // ignore: avoid_print
 }
 
 void _debugLogGoogleIdTokenPayload(String token) {
@@ -273,6 +273,6 @@ void _debugLogGoogleIdTokenPayload(String token) {
     final payload = utf8.decode(
       base64Url.decode(base64Url.normalize(parts[1])),
     );
-    print('google idToken payload: $payload');
+    print('google idToken payload: $payload'); // ignore: avoid_print
   } catch (_) {}
 }

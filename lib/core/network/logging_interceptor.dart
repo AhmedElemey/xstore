@@ -49,13 +49,13 @@ class LoggingInterceptor extends Interceptor {
     // `print` + 800-char chunks: debugPrint is cut at ~1024 chars (`<…>`).
     final idToken = _mapString(options.data, const ['idToken', 'IdToken']);
     if (idToken != null) {
-      print('idToken:');
+      print('idToken:'); // ignore: avoid_print
       printFullToken(idToken);
     }
     final clientId = _mapString(options.data, const ['clientId', 'ClientId']);
     if (clientId != null) {
-      print('clientId:');
-      print(clientId);
+      print('clientId:'); // ignore: avoid_print
+      print(clientId); // ignore: avoid_print
     }
     handler.next(options);
   }
@@ -154,5 +154,5 @@ String? _mapString(dynamic data, List<String> keys) {
 /// and 800-char slices stay under the ~1024 cutoff if a sink still wraps.
 void printFullToken(String token) {
   final pattern = RegExp('.{1,800}');
-  pattern.allMatches(token).forEach((match) => print(match.group(0)));
+  pattern.allMatches(token).forEach((match) => print(match.group(0))); // ignore: avoid_print
 }
