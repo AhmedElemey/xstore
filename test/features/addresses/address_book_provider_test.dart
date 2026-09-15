@@ -39,12 +39,17 @@ class _FakeAuth extends Auth {
   Future<UserEntity?> build() async => _user;
 }
 
-ProviderContainer _buildContainer(String consumerId) {
+/// Mirrors checkout_address_persistence_test.dart's `_buildContainer`:
+/// awaiting auth's own resolution before returning means every test starts
+/// from a container whose AddressBook has already had its initial
+/// loading→data auth transition settle, instead of racing it.
+Future<ProviderContainer> _buildContainer(String consumerId) async {
   final container = ProviderContainer(
     overrides: [authProvider.overrideWith(() => _FakeAuth(_user(consumerId)))],
   );
   addTearDown(container.dispose);
   container.listen(addressBookProvider, (_, __) {});
+  await container.read(authProvider.future);
   return container;
 }
 
@@ -55,13 +60,13 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('starts empty for a fresh consumer', () {
-    final container = _buildContainer('consumer_1');
+  test('starts empty for a fresh consumer', () async {
+    final container = await _buildContainer('consumer_1');
     expect(container.read(addressBookProvider), isEmpty);
   });
 
-  test('the first address added becomes main even if not requested', () {
-    final container = _buildContainer('consumer_1');
+  test('the first address added becomes main even if not requested', () async {
+    final container = await _buildContainer('consumer_1');
     container.read(addressBookProvider.notifier).addAddress(_address());
 
     final list = container.read(addressBookProvider);
@@ -69,8 +74,8 @@ void main() {
     expect(list.single.isDefault, isTrue);
   });
 
-  test('marking a new address main clears the previous one', () {
-    final container = _buildContainer('consumer_1');
+  test('marking a new address main clears the previous one', () async {
+    final container = await _buildContainer('consumer_1');
     final notifier = container.read(addressBookProvider.notifier);
     notifier.addAddress(_address(fullName: 'Home', isDefault: true));
     notifier.addAddress(_address(fullName: 'Work', isDefault: true));
@@ -80,8 +85,8 @@ void main() {
     expect(list.firstWhere((a) => a.isDefault).fullName, 'Work');
   });
 
-  test('setMainAddress moves the main flag without adding or removing entries', () {
-    final container = _buildContainer('consumer_1');
+  test('setMainAddress moves the main flag without adding or removing entries', () async {
+    final container = await _buildContainer('consumer_1');
     final notifier = container.read(addressBookProvider.notifier);
     notifier.addAddress(_address(fullName: 'Home'));
     notifier.addAddress(_address(fullName: 'Work'));
@@ -94,8 +99,8 @@ void main() {
     expect(list[1].isDefault, isTrue);
   });
 
-  test('removing the main address promotes another one instead of leaving none', () {
-    final container = _buildContainer('consumer_1');
+  test('removing the main address promotes another one instead of leaving none', () async {
+    final container = await _buildContainer('consumer_1');
     final notifier = container.read(addressBookProvider.notifier);
     notifier.addAddress(_address(fullName: 'Home', isDefault: true));
     notifier.addAddress(_address(fullName: 'Work'));
@@ -108,8 +113,8 @@ void main() {
     expect(list.single.isDefault, isTrue);
   });
 
-  test('removing the only address leaves the book honestly empty', () {
-    final container = _buildContainer('consumer_1');
+  test('removing the only address leaves the book honestly empty', () async {
+    final container = await _buildContainer('consumer_1');
     final notifier = container.read(addressBookProvider.notifier);
     notifier.addAddress(_address());
 
@@ -118,8 +123,8 @@ void main() {
     expect(container.read(addressBookProvider), isEmpty);
   });
 
-  test('addAddress refuses a 6th address and leaves the book at 5', () {
-    final container = _buildContainer('consumer_1');
+  test('addAddress refuses a 6th address and leaves the book at 5', () async {
+    final container = await _buildContainer('consumer_1');
     final notifier = container.read(addressBookProvider.notifier);
     for (var i = 0; i < AddressBook.maxAddresses; i++) {
       final added = notifier.addAddress(_address(fullName: 'Addr $i'));
@@ -138,12 +143,12 @@ void main() {
   });
 
   test('addAddress persists locally and a fresh notifier loads it back', () async {
-    final container = _buildContainer('consumer_1');
+    final container = await _buildContainer('consumer_1');
     container.read(addressBookProvider.notifier).addAddress(_address());
     // Let the fire-and-forget SharedPreferences write complete.
     await Future<void>.delayed(Duration.zero);
 
-    final reopened = _buildContainer('consumer_1');
+    final reopened = await _buildContainer('consumer_1');
     await Future<void>.delayed(Duration.zero);
 
     expect(reopened.read(addressBookProvider), hasLength(1));
@@ -151,11 +156,11 @@ void main() {
   });
 
   test("one consumer's addresses are never shown to another", () async {
-    final first = _buildContainer('consumer_1');
+    final first = await _buildContainer('consumer_1');
     first.read(addressBookProvider.notifier).addAddress(_address());
     await Future<void>.delayed(Duration.zero);
 
-    final second = _buildContainer('consumer_2');
+    final second = await _buildContainer('consumer_2');
     await Future<void>.delayed(Duration.zero);
 
     expect(second.read(addressBookProvider), isEmpty);
