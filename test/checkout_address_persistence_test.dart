@@ -100,11 +100,7 @@ void main() {
     // A fresh notifier instance (e.g. reopening checkout) must load the
     // same address back from local storage instead of starting empty.
     final reopened = await _buildContainer('consumer_1');
-    // A real (non-zero) delay: seeding now goes through
-    // addressBookProvider (Checkout awaits AddressBook.ensureLoaded(),
-    // one more hop than the old in-notifier load had), so a single
-    // zero-duration timer can fire before every hop resolves.
-    await Future<void>.delayed(const Duration(milliseconds: 5));
+    await Future<void>.delayed(Duration.zero);
 
     expect(reopened.read(checkoutProvider).savedAddresses, hasLength(1));
     expect(

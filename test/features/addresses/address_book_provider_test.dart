@@ -144,11 +144,7 @@ void main() {
     await Future<void>.delayed(Duration.zero);
 
     final reopened = _buildContainer('consumer_1');
-    // A real (non-zero) delay, not another Duration.zero: build()'s load
-    // chain goes through one more await than a bare `unawaited(_load())`
-    // would (ensureLoaded() is awaited from the caller), so a single
-    // zero-duration timer can fire before every hop resolves.
-    await Future<void>.delayed(const Duration(milliseconds: 5));
+    await Future<void>.delayed(Duration.zero);
 
     expect(reopened.read(addressBookProvider), hasLength(1));
     expect(reopened.read(addressBookProvider).single.fullName, 'Jane Doe');
@@ -160,7 +156,7 @@ void main() {
     await Future<void>.delayed(Duration.zero);
 
     final second = _buildContainer('consumer_2');
-    await Future<void>.delayed(const Duration(milliseconds: 5));
+    await Future<void>.delayed(Duration.zero);
 
     expect(second.read(addressBookProvider), isEmpty);
   });

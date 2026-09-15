@@ -41,7 +41,15 @@ class AddressBook extends _$AddressBook {
     ref.onDispose(() => _sessionEpoch++);
     ref.listen(authProvider, (prev, next) {
       if (next.isLoading) return;
-      final prevId = prev?.valueOrNull?.id;
+      // `prev` is whatever authProvider's state happened to be at the
+      // moment this listener was registered — almost always AsyncLoading,
+      // since build() runs before auth's own async restore resolves. That
+      // first loading→data resolution is not a user switch; comparing
+      // prev/next ids unconditionally treated it as one (prev's id reads
+      // as null while loading), wiping and restarting the load on every
+      // single cold build. Only react once prev has itself resolved.
+      if (prev == null || prev.isLoading) return;
+      final prevId = prev.valueOrNull?.id;
       final nextId = next.valueOrNull?.id;
       if (prevId == nextId) return;
       _sessionEpoch++;
