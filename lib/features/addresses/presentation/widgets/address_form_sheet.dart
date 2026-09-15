@@ -10,24 +10,28 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../cities/presentation/providers/city_dependencies.dart';
 import '../../../governments/presentation/providers/government_dependencies.dart';
-import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../../shared/widgets/map_address_picker.dart';
 
-/// Opens the add/edit address sheet. Pass [existing] and [editIndex]
-/// together to edit a saved address in place; omit both to add a new one.
-Future<void> showCheckoutAddAddressSheet(
+/// Opens the add/edit address sheet, shared by checkout's address step and
+/// the Profile "My Addresses" screen — the two only places a saved address
+/// is created or edited. Pass [existing] and [editIndex] together to edit
+/// an address in place; omit both to add a new one. [onSave] is called
+/// with the built [OrderAddress] once validation passes; the caller owns
+/// where that address is written (checkout's per-checkout-session copy or
+/// the shared address book) so this widget stays agnostic of which.
+Future<void> showAddressFormSheet(
   BuildContext context,
   WidgetRef ref, {
   OrderAddress? existing,
   int? editIndex,
+  required bool noSavedAddressesYet,
+  required void Function(OrderAddress address) onSave,
 }) async {
   final isEditing = existing != null && editIndex != null;
-  final noSavedAddressesYet = ref.read(checkoutProvider).savedAddresses.isEmpty;
   // First address ever added: prefill from the signed-in user's real name
-  // and phone instead of leaving the recipient fields blank — there is no
-  // hardcoded stand-in left to fall back to.
+  // and phone instead of leaving the recipient fields blank.
   final me = !isEditing && noSavedAddressesYet
       ? ref.read(authProvider).valueOrNull
       : null;
@@ -41,23 +45,25 @@ Future<void> showCheckoutAddAddressSheet(
         top: Radius.circular(AppSpacing.lg),
       ),
     ),
-    builder: (ctx) => _CheckoutAddAddressSheet(
+    builder: (ctx) => _AddressFormSheet(
       existing: existing,
       editIndex: editIndex,
       prefillName: existing?.fullName ?? me?.name ?? '',
       prefillPhone: existing?.phone ?? me?.phoneNumber ?? '',
       noSavedAddressesYet: noSavedAddressesYet,
+      onSave: onSave,
     ),
   );
 }
 
-class _CheckoutAddAddressSheet extends ConsumerStatefulWidget {
-  const _CheckoutAddAddressSheet({
+class _AddressFormSheet extends ConsumerStatefulWidget {
+  const _AddressFormSheet({
     required this.existing,
     required this.editIndex,
     required this.prefillName,
     required this.prefillPhone,
     required this.noSavedAddressesYet,
+    required this.onSave,
   });
 
   final OrderAddress? existing;
@@ -65,16 +71,15 @@ class _CheckoutAddAddressSheet extends ConsumerStatefulWidget {
   final String prefillName;
   final String prefillPhone;
   final bool noSavedAddressesYet;
+  final void Function(OrderAddress address) onSave;
 
   bool get isEditing => existing != null && editIndex != null;
 
   @override
-  ConsumerState<_CheckoutAddAddressSheet> createState() =>
-      _CheckoutAddAddressSheetState();
+  ConsumerState<_AddressFormSheet> createState() => _AddressFormSheetState();
 }
 
-class _CheckoutAddAddressSheetState
-    extends ConsumerState<_CheckoutAddAddressSheet> {
+class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _streetCtrl;
@@ -82,15 +87,13 @@ class _CheckoutAddAddressSheetState
 
   // The governorate/city picker works in ids (backed by the same live
   // /api/governorates + /api/cities reference data used at register and
-  // edit-profile), not free text — this keeps checkout consistent with the
+  // edit-profile), not free text — this keeps the form consistent with the
   // rest of the app instead of a second, disagreeing location system.
   int? _cityId;
   int? _governorateId;
   // Set by the map picker (showMapAddressPicker) — carried on the saved
   // OrderAddress so checkout can use the exact pinned spot instead of the
-  // device's last-known GPS fix when placing the order (see
-  // cart_remote_datasource.dart's placeOrder). Null until the user drops a
-  // pin; an edited address starts with the previously-saved pin, if any.
+  // device's last-known GPS fix when placing the order.
   double? _pickedLat;
   double? _pickedLng;
   late bool _isDefault;
@@ -121,8 +124,8 @@ class _CheckoutAddAddressSheetState
     // The saved address only carries the resolved names (city/wilaya), not
     // the ids that produced them — an editor re-picks governorate/city to
     // change it; until then the field shows the saved names as a hint.
-    // The very first saved address defaults to the delivery default so
-    // selection logic never has to special-case a single-address list.
+    // The very first saved address defaults to main so selection logic
+    // never has to special-case a single-address list.
     _isDefault = widget.existing?.isDefault ?? widget.noSavedAddressesYet;
   }
 
@@ -209,13 +212,7 @@ class _CheckoutAddAddressSheetState
       latitude: _pickedLat,
       longitude: _pickedLng,
     );
-    if (widget.isEditing) {
-      ref
-          .read(checkoutProvider.notifier)
-          .updateAddress(widget.editIndex!, address);
-    } else {
-      ref.read(checkoutProvider.notifier).addAddress(address);
-    }
+    widget.onSave(address);
     Navigator.pop(context);
   }
 

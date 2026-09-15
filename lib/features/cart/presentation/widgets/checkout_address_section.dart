@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../addresses/presentation/providers/address_book_provider.dart';
+import '../../../addresses/presentation/widgets/address_form_sheet.dart';
+import '../../../addresses/presentation/widgets/remove_address_sheet.dart';
 import '../providers/checkout_provider.dart';
-import 'checkout_add_address_sheet.dart';
-import 'checkout_remove_address_sheet.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutAddressSection extends ConsumerWidget {
@@ -68,11 +69,42 @@ class CheckoutAddressSection extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '🏠 ${st.savedAddresses[i].fullName}',
-                                style: AppTypography.titleMedium.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      '🏠 ${st.savedAddresses[i].fullName}',
+                                      style: AppTypography.titleMedium
+                                          .copyWith(fontWeight: FontWeight.w700),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (st.savedAddresses[i].isDefault) ...[
+                                    const SizedBox(width: AppSpacing.sm),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.sm,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppSpacing.x4l,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        context.l10n.addressesMainBadge,
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                               Text(
                                 '${st.savedAddresses[i].phone}\n${st.savedAddresses[i].street}\n${st.savedAddresses[i].city}, ${st.savedAddresses[i].wilaya} ${st.savedAddresses[i].postalCode ?? ''}',
@@ -87,19 +119,20 @@ class CheckoutAddressSection extends ConsumerWidget {
                         Column(
                           children: [
                             TextButton(
-                              onPressed: () => showCheckoutAddAddressSheet(
+                              onPressed: () => showAddressFormSheet(
                                 context,
                                 ref,
                                 existing: st.savedAddresses[i],
                                 editIndex: i,
+                                noSavedAddressesYet: st.savedAddresses.isEmpty,
+                                onSave: (a) => notifier.updateAddress(i, a),
                               ),
                               child: Text(context.l10n.checkoutEdit),
                             ),
                             TextButton(
-                              onPressed: () => showCheckoutRemoveAddressSheet(
+                              onPressed: () => showRemoveAddressSheet(
                                 context,
-                                ref,
-                                i,
+                                onConfirm: () => notifier.removeAddress(i),
                               ),
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.error,
@@ -115,11 +148,24 @@ class CheckoutAddressSection extends ConsumerWidget {
               ),
             ),
         const SizedBox(height: AppSpacing.sm),
-        OutlinedButton.icon(
-          onPressed: () => showCheckoutAddAddressSheet(context, ref),
-          icon: const Icon(Icons.add),
-          label: Text(context.l10n.checkoutAddAddress),
-        ),
+        if (st.savedAddresses.length < AddressBook.maxAddresses)
+          OutlinedButton.icon(
+            onPressed: () => showAddressFormSheet(
+              context,
+              ref,
+              noSavedAddressesYet: st.savedAddresses.isEmpty,
+              onSave: notifier.addAddress,
+            ),
+            icon: const Icon(Icons.add),
+            label: Text(context.l10n.checkoutAddAddress),
+          )
+        else
+          Text(
+            context.l10n.addressesMaxReached,
+            style: AppTypography.bodySmall.copyWith(
+              color: context.textSecondary,
+            ),
+          ),
       ],
     );
   }

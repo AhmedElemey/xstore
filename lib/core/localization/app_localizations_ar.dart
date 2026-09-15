@@ -1668,6 +1668,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'محفوظ على هذا الجهاز فقط، حتى يتم إطلاق دفتر عناوين مرتبط بحسابك.';
 
   @override
+  String get addressesEmptyState => 'لم تقم بحفظ أي عناوين حتى الآن.';
+
+  @override
+  String get addressesMainBadge => 'الرئيسي';
+
+  @override
+  String get addressesSetAsMain => 'تعيين كرئيسي';
+
+  @override
+  String get addressesMaxReached => 'لقد وصلت إلى الحد الأقصى (5 عناوين)';
+
+  @override
   String get checkoutErrorAddressName => 'أدخل اسم المستلم';
 
   @override
