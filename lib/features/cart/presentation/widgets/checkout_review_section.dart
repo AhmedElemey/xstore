@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/router/app_routes.dart';
+import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/cart_provider.dart';
@@ -148,7 +147,7 @@ class CheckoutReviewSection extends ConsumerWidget {
               ),
             ),
             InkWell(
-              onTap: () => context.push(AppRoutes.terms),
+              onTap: () => launchLegalUrl(xstoreTermsUrl),
               child: Text(
                 context.l10n.menuTerms,
                 style: AppTypography.bodySmall.copyWith(

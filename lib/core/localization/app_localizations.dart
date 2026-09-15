@@ -3848,6 +3848,84 @@ abstract class AppLocalizations {
   /// **'Visit Store'**
   String get visitStore;
 
+  /// No description provided for @reportVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Vendor'**
+  String get reportVendor;
+
+  /// No description provided for @reportVendorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report {name}'**
+  String reportVendorTitle(String name);
+
+  /// No description provided for @reportVendorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let us know if something went wrong with this order. Our team will review your report.'**
+  String get reportVendorSubtitle;
+
+  /// No description provided for @reportVendorReasonFraud.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraud or scam'**
+  String get reportVendorReasonFraud;
+
+  /// No description provided for @reportVendorReasonPoorQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor product quality'**
+  String get reportVendorReasonPoorQuality;
+
+  /// No description provided for @reportVendorReasonNotAsDescribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Item not as described'**
+  String get reportVendorReasonNotAsDescribed;
+
+  /// No description provided for @reportVendorReasonNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'No response from seller'**
+  String get reportVendorReasonNoResponse;
+
+  /// No description provided for @reportVendorReasonHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment or abuse'**
+  String get reportVendorReasonHarassment;
+
+  /// No description provided for @reportVendorReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reportVendorReasonOther;
+
+  /// No description provided for @reportVendorCommentHintOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Add details (optional)'**
+  String get reportVendorCommentHintOptional;
+
+  /// No description provided for @reportVendorCommentHintRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the issue'**
+  String get reportVendorCommentHintRequired;
+
+  /// No description provided for @reportVendorSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
+  String get reportVendorSubmit;
+
+  /// No description provided for @reportVendorSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted. Our team will review it.'**
+  String get reportVendorSuccess;
+
   /// No description provided for @verifiedSeller.
   ///
   /// In en, this message translates to:

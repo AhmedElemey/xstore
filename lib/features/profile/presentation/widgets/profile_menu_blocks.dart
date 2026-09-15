@@ -12,6 +12,7 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/presentation/providers/vendor_orders_provider.dart';
+import '../../../../shared/utils/legal_links.dart';
 import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
@@ -243,13 +244,13 @@ class ProfileMenuBlocks extends ConsumerWidget {
               icon: LucideIcons.fileText,
               iconBackground: context.textSecondary,
               label: context.l10n.menuTerms,
-              onTap: () => context.push(AppRoutes.terms),
+              onTap: () => launchLegalUrl(xstoreTermsUrl),
             ),
             ProfileMenuTile(
               icon: LucideIcons.shield,
               iconBackground: AppColors.success,
               label: context.l10n.menuPrivacy,
-              onTap: () => context.push(AppRoutes.privacy),
+              onTap: () => launchLegalUrl(xstorePrivacyUrl),
             ),
             ProfileMenuTile(
               icon: LucideIcons.star,

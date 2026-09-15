@@ -660,6 +660,19 @@
   "expressCheckoutSoon": "Express checkout — coming soon",
   "buyNow": "Buy now",
   "visitStore": "Visit Store",
+  "reportVendor": "Report Vendor",
+  "reportVendorTitle": "Report {name}",
+  "reportVendorSubtitle": "Let us know if something went wrong with this order. Our team will review your report.",
+  "reportVendorReasonFraud": "Fraud or scam",
+  "reportVendorReasonPoorQuality": "Poor product quality",
+  "reportVendorReasonNotAsDescribed": "Item not as described",
+  "reportVendorReasonNoResponse": "No response from seller",
+  "reportVendorReasonHarassment": "Harassment or abuse",
+  "reportVendorReasonOther": "Other",
+  "reportVendorCommentHintOptional": "Add details (optional)",
+  "reportVendorCommentHintRequired": "Please describe the issue",
+  "reportVendorSubmit": "Submit Report",
+  "reportVendorSuccess": "Report submitted. Our team will review it.",
   "verifiedSeller": "✅ Verified Seller",
   "sellerRatingMid": " Seller · ",
   "sellerSalesSuffix": " sales",
@@ -860,6 +873,13 @@
     "placeholders": {
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "@reportVendorTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

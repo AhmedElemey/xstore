@@ -1930,6 +1930,48 @@ class AppLocalizationsAr extends AppLocalizations {
   String get visitStore => 'زيارة المتجر';
 
   @override
+  String get reportVendor => 'الإبلاغ عن البائع';
+
+  @override
+  String reportVendorTitle(String name) {
+    return 'الإبلاغ عن $name';
+  }
+
+  @override
+  String get reportVendorSubtitle =>
+      'أخبرنا إذا حدث خطأ ما في هذا الطلب. سيقوم فريقنا بمراجعة بلاغك.';
+
+  @override
+  String get reportVendorReasonFraud => 'احتيال أو نصب';
+
+  @override
+  String get reportVendorReasonPoorQuality => 'جودة المنتج سيئة';
+
+  @override
+  String get reportVendorReasonNotAsDescribed => 'المنتج غير مطابق للوصف';
+
+  @override
+  String get reportVendorReasonNoResponse => 'لا يوجد رد من البائع';
+
+  @override
+  String get reportVendorReasonHarassment => 'مضايقة أو إساءة';
+
+  @override
+  String get reportVendorReasonOther => 'أخرى';
+
+  @override
+  String get reportVendorCommentHintOptional => 'أضف التفاصيل (اختياري)';
+
+  @override
+  String get reportVendorCommentHintRequired => 'يرجى وصف المشكلة';
+
+  @override
+  String get reportVendorSubmit => 'إرسال البلاغ';
+
+  @override
+  String get reportVendorSuccess => 'تم إرسال البلاغ. سيقوم فريقنا بمراجعته.';
+
+  @override
   String get verifiedSeller => '✅ بائع موثّق';
 
   @override
