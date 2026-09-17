@@ -2657,19 +2657,19 @@ abstract class AppLocalizations {
   /// No description provided for @ordersPaymentCib.
   ///
   /// In en, this message translates to:
-  /// **'CIB Card'**
+  /// **'Card payment'**
   String get ordersPaymentCib;
 
   /// No description provided for @ordersPaymentDahabi.
   ///
   /// In en, this message translates to:
-  /// **'Dahabi Card'**
+  /// **'Prepaid card'**
   String get ordersPaymentDahabi;
 
   /// No description provided for @ordersPaymentBaridimob.
   ///
   /// In en, this message translates to:
-  /// **'BaridiMob'**
+  /// **'Mobile wallet'**
   String get ordersPaymentBaridimob;
 
   /// No description provided for @ordersTimelinePlaced.
