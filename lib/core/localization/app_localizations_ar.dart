@@ -1316,13 +1316,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersPaymentCashOnDelivery => 'الدفع عند الاستلام';
 
   @override
-  String get ordersPaymentCib => 'كارت CIB';
+  String get ordersPaymentCib => 'دفع بالبطاقة';
 
   @override
-  String get ordersPaymentDahabi => 'كارت ذهبي';
+  String get ordersPaymentDahabi => 'بطاقة مدفوعة مسبقاً';
 
   @override
-  String get ordersPaymentBaridimob => 'بريدي موب';
+  String get ordersPaymentBaridimob => 'محفظة موبايل';
 
   @override
   String get ordersTimelinePlaced => 'تم تقديم الطلب';

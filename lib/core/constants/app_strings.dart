@@ -358,7 +358,7 @@ abstract final class AppStrings {
   static const ordersTrackingCopied = 'Copied to clipboard';
   static const ordersTrackOnCourier = 'Track on Courier Website';
   static const ordersCourierWebsiteSoon = 'Courier tracking — coming soon';
-  static const ordersCurrentLocationMock = 'In transit — Algiers hub';
+  static const ordersCurrentLocationMock = 'In transit — Cairo hub';
   static const ordersExpectedPrefix = '📅 Expected by';
   static const ordersAddTrackingTitle = 'Add Tracking Info';
   static const ordersTrackingNumberLabel = 'Tracking Number (optional)';

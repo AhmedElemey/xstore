@@ -1313,13 +1313,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersPaymentCashOnDelivery => 'Cash on Delivery';
 
   @override
-  String get ordersPaymentCib => 'CIB Card';
+  String get ordersPaymentCib => 'Card payment';
 
   @override
-  String get ordersPaymentDahabi => 'Dahabi Card';
+  String get ordersPaymentDahabi => 'Prepaid card';
 
   @override
-  String get ordersPaymentBaridimob => 'BaridiMob';
+  String get ordersPaymentBaridimob => 'Mobile wallet';
 
   @override
   String get ordersTimelinePlaced => 'Order Placed';
