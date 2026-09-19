@@ -26,13 +26,16 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              serverClientId: DefaultFirebaseOptions.googleWebClientId,
-            );
+        _injectedGoogleSignIn = googleSignIn != null,
+        _googleSignIn = googleSignIn ?? _createGoogleSignIn();
 
   final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
+  final bool _injectedGoogleSignIn;
+  GoogleSignIn _googleSignIn;
+
+  static GoogleSignIn _createGoogleSignIn() => GoogleSignIn(
+        serverClientId: DefaultFirebaseOptions.googleWebClientId,
+      );
 
   @override
   Future<SocialAuthResult> signInWithGoogle() async {
@@ -51,6 +54,7 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       );
     }
     try {
+      await _resetGoogleSignIn();
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw const SocialAuthCancelledException('Google sign-in cancelled');
@@ -217,6 +221,25 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       _googleSignIn.signOut(),
       FacebookAuth.instance.logOut(),
     ]);
+  }
+
+  /// Drops the cached Google account (and leftover Firebase session) so the
+  /// next [GoogleSignIn.signIn] always shows the picker and mints a fresh
+  /// ID token. A leftover session silently reuses the last account.
+  Future<void> _resetGoogleSignIn() async {
+    try {
+      await _googleSignIn.disconnect();
+    } catch (_) {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+    }
+    try {
+      await _firebaseAuth.signOut();
+    } catch (_) {}
+    if (!_injectedGoogleSignIn) {
+      _googleSignIn = _createGoogleSignIn();
+    }
   }
 
   String _generateNonce([int length = 32]) {
