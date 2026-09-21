@@ -1529,10 +1529,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartStartShopping => 'ابدأ التسوق';
 
   @override
-  String get cartOrWishlist => 'أو شوف المفضلة';
-
-  @override
-  String get cartWishlistArrow => '← المفضلة';
+  String get cartOrWishlist => 'أو شوف المفضلة ←';
 
   @override
   String get cartRemove => '🗑 إزالة';

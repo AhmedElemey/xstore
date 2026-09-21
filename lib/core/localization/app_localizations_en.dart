@@ -1526,10 +1526,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartStartShopping => 'Start Shopping';
 
   @override
-  String get cartOrWishlist => 'Or check your Wishlist';
-
-  @override
-  String get cartWishlistArrow => 'Wishlist →';
+  String get cartOrWishlist => 'Or check your Wishlist →';
 
   @override
   String get cartRemove => '🗑 Remove';

@@ -1796,3 +1796,13 @@ Rules for the log:
 - **What happened:** User reported Edit Profile's Instagram/Facebook fields had no placeholder — they only had a `prefixIcon` and a `prefixText` (`@` / `fb.com/`), no `labelText`/`hintText` at all. `instagramLabel`/`facebookLabel` already existed in `app_en.arb`/`app_ar.arb` with exactly the right copy ("Instagram handle" / "Facebook page") but grepping every `.dart` file under `lib/` found zero call sites — the keys were generated into `AppLocalizations` and `AppStrings` but never actually used anywhere.
 - **Rule:** Before adding a new l10n key for a field that looks like it should already have a label, grep the `.arb` files for a plausible existing key name (`<fieldName>Label`, `<fieldName>Hint`) — this repo has accumulated orphaned keys from earlier work that never got wired to their obvious call site. Wiring an existing key is a one-line fix; check before writing new copy.
 - **Where it applies:** `edit_profile_screen.dart` (Instagram/Facebook fields now use `labelText: context.l10n.instagramLabel`/`facebookLabel`). Worth a broader sweep of `app_en.arb` for other defined-but-unused keys next time this file is touched.
+
+### 2026-09-21 — Don't concatenate two l10n keys that already contain the same noun
+- **What happened:** Empty-cart's last line interpolated `cartOrWishlist` ("Or check your Wishlist" / "أو شوف المفضلة") with `cartWishlistArrow` ("Wishlist →" / "← المفضلة"), so "wishlist"/"المفضلة" rendered twice.
+- **Rule:** Never join two l10n getters into one on-screen sentence unless each is a verified fragment. If both already include the destination noun, bake the full phrase (including any arrow) into a single key instead of concatenating.
+- **Where it applies:** `cart_empty_state.dart` and any `'${l10n.a} ${l10n.b}'` label.
+
+### 2026-09-21 — Disabled nested InkWell (`onTap: null`) loses to the parent card tap
+- **What happened:** Cart quantity `+` sets `InkWell.onTap: null` at max stock, so the tap fell through `CartItemCard`'s outer `InkWell` and opened the product instead of doing nothing.
+- **Rule:** A nested `InkWell`/`IconButton` inside a tappable card must keep a non-null `onTap` when visually disabled (`if (!enabled) return;`) so it still wins the gesture arena. `onTap: null` does not absorb the hit — the ancestor card does.
+- **Where it applies:** `quantity_control.dart` (and any stepper/chip/icon nested under a card `InkWell`).
