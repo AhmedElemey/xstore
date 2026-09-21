@@ -405,7 +405,7 @@ class __$$WishlistItemEntityImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$WishlistItemEntityImpl implements _WishlistItemEntity {
+class _$WishlistItemEntityImpl extends _WishlistItemEntity {
   const _$WishlistItemEntityImpl(
       {required this.id,
       required this.listingId,
@@ -432,7 +432,8 @@ class _$WishlistItemEntityImpl implements _WishlistItemEntity {
       this.shippingCost = 0.0,
       required this.addedAt,
       required this.lastPriceCheckAt})
-      : _listingImages = listingImages;
+      : _listingImages = listingImages,
+        super._();
 
   @override
   final String id;
@@ -596,7 +597,7 @@ class _$WishlistItemEntityImpl implements _WishlistItemEntity {
           this, _$identity);
 }
 
-abstract class _WishlistItemEntity implements WishlistItemEntity {
+abstract class _WishlistItemEntity extends WishlistItemEntity {
   const factory _WishlistItemEntity(
       {required final String id,
       required final String listingId,
@@ -623,6 +624,7 @@ abstract class _WishlistItemEntity implements WishlistItemEntity {
       final double shippingCost,
       required final DateTime addedAt,
       required final DateTime lastPriceCheckAt}) = _$WishlistItemEntityImpl;
+  const _WishlistItemEntity._() : super._();
 
   @override
   String get id;

@@ -17,7 +17,7 @@ extension WishlistStateX on WishlistState {
   int get itemCount => items.length;
 
   int get priceDropCount =>
-      items.where((e) => (e.priceDropPercent ?? 0) > 0).length;
+      items.where((e) => e.effectiveDropPercent > 0).length;
 
   int get availableCount => items.where((e) => e.isAvailable).length;
 }
@@ -65,7 +65,7 @@ class Wishlist extends _$Wishlist {
         list = list.where((e) => e.isAvailable).toList();
         break;
       case WishlistFilter.priceDropped:
-        list = list.where((e) => (e.priceDropPercent ?? 0) > 0).toList();
+        list = list.where((e) => e.effectiveDropPercent > 0).toList();
         break;
       case WishlistFilter.inCart:
         list = list.where((e) => e.isInCart).toList();
@@ -82,11 +82,9 @@ class Wishlist extends _$Wishlist {
         list.sort((a, b) => b.price.compareTo(a.price));
         break;
       case WishlistSortOption.priceDrop:
-        list.sort((a, b) {
-          final da = a.priceDropPercent ?? 0;
-          final db = b.priceDropPercent ?? 0;
-          return db.compareTo(da);
-        });
+        list.sort(
+          (a, b) => b.effectiveDropPercent.compareTo(a.effectiveDropPercent),
+        );
         break;
       case WishlistSortOption.biggestDiscount:
         list.sort((a, b) {
