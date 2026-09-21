@@ -286,7 +286,7 @@ void main() {
       expect(result.vendorName, 'Sara');
       expect(result.vendorRating, 4.9);
       expect(result.quantity, 2);
-      // Free shipping above the 20,000 threshold.
+      // No listing shippingCost / shippingAvailable → no invented fee.
       expect(result.shippingCost, 0.0);
     });
 
@@ -300,8 +300,45 @@ void main() {
       expect(result.vendorId, 'vendor_unknown');
       expect(result.vendorName, '—');
       expect(result.vendorRating, isNull);
-      // Below the 20,000 free-shipping threshold.
-      expect(result.shippingCost, 500.0);
+      // No listing shippingCost / shippingAvailable → no invented 500 fee.
+      expect(result.shippingCost, 0.0);
+    });
+
+    test('uses the listing shippingCost when shipping is available', () async {
+      dio = buildDio(
+        (_) => {
+          'id': 'listing_1',
+          'title': 'Updated Product',
+          'price': 100,
+          'shippingAvailable': true,
+          'shippingCost': 35,
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+
+      final result = await datasource.buildLineFromListing('listing_1', 1);
+
+      expect(result.shippingAvailable, isTrue);
+      expect(result.shippingCost, 35);
+    });
+
+    test('pickup-only listing does not charge the listing shippingCost',
+        () async {
+      dio = buildDio(
+        (_) => {
+          'id': 'listing_1',
+          'title': 'Pickup item',
+          'price': 100,
+          'shippingAvailable': false,
+          'shippingCost': 500,
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+
+      final result = await datasource.buildLineFromListing('listing_1', 1);
+
+      expect(result.shippingAvailable, isFalse);
+      expect(result.shippingCost, 0);
     });
 
     test('throws ServerException on an empty response body', () async {

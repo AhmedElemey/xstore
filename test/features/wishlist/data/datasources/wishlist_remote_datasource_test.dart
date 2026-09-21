@@ -379,7 +379,6 @@ void main() {
         expect(result.vendorName, 'Sara');
         expect(result.vendorStoreName, 'Sara');
         expect(result.rating, 4.8);
-        // Free shipping above the 20,000 threshold.
         expect(result.shippingCost, 0.0);
         expect(result.id, startsWith('wish_'));
       },
@@ -402,8 +401,7 @@ void main() {
 
       expect(result.listingId, 'listing_5');
       expect(result.listingName, 'Desk Lamp');
-      // Below the 20,000 free-shipping threshold.
-      expect(result.shippingCost, 500.0);
+      expect(result.shippingCost, 0.0);
     });
 
     test('reads vendor/seller details from a nested seller object', () async {

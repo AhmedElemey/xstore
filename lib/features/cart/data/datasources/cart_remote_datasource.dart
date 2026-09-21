@@ -216,9 +216,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       category: m.categoryLabel,
       condition: m.conditionLabel,
       shippingAvailable: true,
-      shippingCost: m.price >= kFreeShippingPriceThresholdEgp
-          ? 0.0
-          : kFlatShippingFeeEgp,
+      shippingCost: cartLineShippingCost(
+        shippingAvailable: true,
+        listingShippingCost: m.shippingCost,
+      ),
       isAvailable: true,
       addedAt: DateTime.now(),
     );
@@ -283,10 +284,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final stock = _intFromJson(root['stockQuantity'] ?? root['stock'] ?? root['quantity'], 10).clamp(1, 999);
 
     final shipAvail =
-        json['shippingAvailable'] != false && root['shippingAvailable'] != false;
-    final shippingCost = shipAvail
-        ? (price >= kFreeShippingPriceThresholdEgp ? 0.0 : kFlatShippingFeeEgp)
-        : 0.0;
+        (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
+    final shippingCost = cartLineShippingCost(
+      shippingAvailable: shipAvail,
+      listingShippingCost: _num(root['shippingCost'] ?? json['shippingCost']),
+    );
 
     return CartItemEntity(
       id: id,
@@ -608,5 +610,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     }
   }
 
-  double _num(Object? value) => (value as num?)?.toDouble() ?? 0;
+  double _num(Object? value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
 }

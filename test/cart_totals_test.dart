@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
+import 'package:xstore/features/cart/domain/entities/cart_shipping_rules.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_state.dart';
 
@@ -82,6 +83,21 @@ void main() {
     expect(withCoupon.shippingTotal, 8);
     expect(withCoupon.discount, 25);
     expect(withCoupon.total, 233);
+  });
+
+  test('cartLineShippingCost uses the listing fee, not a platform flat fee', () {
+    expect(
+      cartLineShippingCost(shippingAvailable: true, listingShippingCost: 35),
+      35,
+    );
+    expect(
+      cartLineShippingCost(shippingAvailable: true, listingShippingCost: 0),
+      0,
+    );
+    expect(
+      cartLineShippingCost(shippingAvailable: false, listingShippingCost: 500),
+      0,
+    );
   });
 
   test('fixed discount cannot exceed subtotal', () {
