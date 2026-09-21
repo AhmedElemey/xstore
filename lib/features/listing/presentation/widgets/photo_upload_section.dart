@@ -48,7 +48,13 @@ class PhotoUploadSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.listingPhotoSectionTitle,
+          // The shared listingPhotoSectionTitle key is also used as an
+          // accessibility label on product/explore screens (see
+          // product_image_gallery.dart, product_list_card.dart,
+          // product_grid_card.dart) where an asterisk wouldn't make sense —
+          // the required-field marker is appended here, not baked into the
+          // ARB string, so it only shows on this form's section header.
+          '${context.l10n.listingPhotoSectionTitle} *',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
