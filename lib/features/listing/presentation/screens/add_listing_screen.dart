@@ -316,6 +316,20 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         backgroundColor: context.backgroundColor,
         surfaceTintColor: AppColors.transparent,
         centerTitle: true,
+        // "Add Listing" is a bottom-nav tab root — no back button, same as
+        // Home/Explore/etc. Editing only ever gets here via context.go from
+        // My Listings (a tab switch, not a push), which leaves no back
+        // stack to pop, so this is the only way back without the bottom
+        // nav. _syncEditingListing already resets the form when the
+        // widget's editingListing later goes back to null (a fresh "Add"),
+        // so this doesn't need to reset anything itself.
+        leading: isEditing
+            ? IconButton(
+                icon: Icon(context.arrowBackIcon),
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                onPressed: () => context.go(AppRoutes.listingMy),
+              )
+            : null,
         title: Text(isEditing ? context.l10n.editListingMenu : context.l10n.addListing),
         actions: [
           // Drafts are a create-flow concept only — editing an existing

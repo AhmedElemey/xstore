@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -28,6 +29,60 @@ const _draftKey = 'xstore_listing_form_draft';
 const _maxPhotos = 5;
 const _currencyCode = 'EGP';
 
+/// The editable fields captured at loadForEdit() time, compared against the
+/// live form state to tell whether the vendor actually changed anything.
+/// Deliberately excludes editingListingId/editingStatus (identity, not
+/// edited content) and volatile fields (errors/isSubmitting/draftRevision).
+typedef _EditSnapshot = ({
+  List<String> photoPaths,
+  String name,
+  String priceInput,
+  String compareAtPriceInput,
+  String description,
+  String categoryId,
+  String subcategoryId,
+  String condition,
+  String brand,
+  int quantity,
+  String location,
+  String shippingCostInput,
+  bool shippingAvailable,
+  List<AttributeEntry> attributes,
+});
+
+_EditSnapshot _snapshotOf(ListingFormState s) => (
+  photoPaths: List<String>.from(s.photoPaths),
+  name: s.name,
+  priceInput: s.priceInput,
+  compareAtPriceInput: s.compareAtPriceInput,
+  description: s.description,
+  categoryId: s.categoryId,
+  subcategoryId: s.subcategoryId,
+  condition: s.condition,
+  brand: s.brand,
+  quantity: s.quantity,
+  location: s.location,
+  shippingCostInput: s.shippingCostInput,
+  shippingAvailable: s.shippingAvailable,
+  attributes: List<AttributeEntry>.from(s.attributes),
+);
+
+bool _snapshotsEqual(_EditSnapshot a, _EditSnapshot b) =>
+    a.name == b.name &&
+    a.priceInput == b.priceInput &&
+    a.compareAtPriceInput == b.compareAtPriceInput &&
+    a.description == b.description &&
+    a.categoryId == b.categoryId &&
+    a.subcategoryId == b.subcategoryId &&
+    a.condition == b.condition &&
+    a.brand == b.brand &&
+    a.quantity == b.quantity &&
+    a.location == b.location &&
+    a.shippingCostInput == b.shippingCostInput &&
+    a.shippingAvailable == b.shippingAvailable &&
+    listEquals(a.photoPaths, b.photoPaths) &&
+    listEquals(a.attributes, b.attributes);
+
 @riverpod
 class ListingFormNotifier extends _$ListingFormNotifier {
   final ImagePicker _picker = ImagePicker();
@@ -45,6 +100,14 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   // in loadForEdit, deferred past initState so it never writes `state`
   // synchronously during a widget build phase (Riverpod forbids that).
   ListingEntity? _pendingEditEntity;
+
+  // Snapshot of the edited fields as loaded by loadForEdit(), so canSubmit
+  // can tell "nothing changed" apart from "form is valid" — clicking
+  // Update on an untouched form still round-trips the whole listing to the
+  // backend, which resets it to pending review regardless of what status
+  // this client sends back (see ListingFormState.editingStatus's doc).
+  // Null when creating a new listing, where there's no "unchanged" concept.
+  _EditSnapshot? _editSnapshot;
 
   String get currencyCode => _currencyCode;
 
@@ -101,6 +164,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
       editingStatus: listing.status,
       draftRevision: state.draftRevision + 1,
     );
+    _editSnapshot = _snapshotOf(next);
     state = next;
   }
 
@@ -436,7 +500,18 @@ class ListingFormNotifier extends _$ListingFormNotifier {
 
   /// Whether all required fields satisfy validation (no errors written to state).
   bool get canSubmit =>
-      !state.isSubmitting && !Validators.listingFormHasErrors(_validationInput);
+      !state.isSubmitting &&
+      !Validators.listingFormHasErrors(_validationInput) &&
+      (state.editingListingId.isEmpty || hasEditChanges);
+
+  /// True when editing and the vendor has actually changed something since
+  /// loadForEdit() populated the form. Always true outside the edit flow
+  /// (create has no "unchanged" concept) or before a snapshot exists.
+  bool get hasEditChanges {
+    final snapshot = _editSnapshot;
+    if (snapshot == null) return true;
+    return !_snapshotsEqual(snapshot, _snapshotOf(state));
+  }
 
   bool validate(AppLocalizations l10n) {
     final err = Validators.listingFormErrors(l10n, _validationInput);
@@ -615,6 +690,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
 
   void reset() {
     if (_disposed) return;
+    _editSnapshot = null;
     // Bump draftRevision so AddListingScreen's listen re-applies empty
     // text to its controllers. A bare `const ListingFormState()` keeps
     // revision 0, which looks like "no change" when the user typed into
