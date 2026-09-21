@@ -19,19 +19,20 @@ class PhotoUploadSection extends StatelessWidget {
     required this.errorText,
     required this.onOpenPicker,
     required this.onRemove,
+    required this.onRemoveExisting,
     required this.onReorder,
     this.existingUrls = const [],
   });
 
   final List<String> paths;
 
-  /// Remote photos already on the listing being edited. Shown read-only —
-  /// there is no confirmed per-image delete endpoint, so these are not
-  /// removable here; adding new local [paths] fills the remaining slots.
+  /// Remote photos already on the listing being edited. Removable via
+  /// [onRemoveExisting]; remaining URLs are what update sends as keepers.
   final List<String> existingUrls;
   final String? errorText;
   final VoidCallback onOpenPicker;
   final void Function(int index) onRemove;
+  final void Function(int index) onRemoveExisting;
   final void Function(int fromIndex, int toIndex) onReorder;
 
   static const double tile = 100;
@@ -73,6 +74,7 @@ class PhotoUploadSection extends StatelessWidget {
                     child: _ExistingPhotoTile(
                       url: existingUrls[i],
                       isCover: i == 0 && paths.isEmpty,
+                      onRemove: () => onRemoveExisting(i),
                     ),
                   ),
                 for (var i = 0; i < paths.length; i++)
@@ -185,14 +187,16 @@ class _AddPhotoTile extends StatelessWidget {
   }
 }
 
-/// Read-only tile for a photo already hosted on the listing being edited —
-/// no remove/drag affordance, since there is no confirmed per-image delete
-/// endpoint (see [PhotoUploadSection.existingUrls]).
 class _ExistingPhotoTile extends StatelessWidget {
-  const _ExistingPhotoTile({required this.url, required this.isCover});
+  const _ExistingPhotoTile({
+    required this.url,
+    required this.isCover,
+    required this.onRemove,
+  });
 
   final String url;
   final bool isCover;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -236,6 +240,7 @@ class _ExistingPhotoTile extends StatelessWidget {
                 ),
               ),
             ),
+          _RemovePhotoButton(onRemove: onRemove),
         ],
       ),
     );
@@ -348,30 +353,41 @@ class _PhotoTile extends StatelessWidget {
                 ),
               ),
             ),
-          Positioned(
-            top: AppSpacing.xs,
-            right: AppSpacing.xs,
-            child: Tooltip(
-              message: MaterialLocalizations.of(context).deleteButtonTooltip,
-              child: Material(
-                color: AppColors.error,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onRemove,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xs),
-                    child: Icon(
-                      LucideIcons.x,
-                      color: context.surfaceColor,
-                      size: AppSpacing.lg,
-                    ),
-                  ),
-                ),
+          _RemovePhotoButton(onRemove: onRemove),
+        ],
+      ),
+    );
+  }
+}
+
+class _RemovePhotoButton extends StatelessWidget {
+  const _RemovePhotoButton({required this.onRemove});
+
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: AppSpacing.xs,
+      right: AppSpacing.xs,
+      child: Tooltip(
+        message: MaterialLocalizations.of(context).deleteButtonTooltip,
+        child: Material(
+          color: AppColors.error,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onRemove,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              child: Icon(
+                LucideIcons.x,
+                color: context.surfaceColor,
+                size: AppSpacing.lg,
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

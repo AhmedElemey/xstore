@@ -48,6 +48,7 @@ abstract interface class ListingRepository {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   });
 
   Future<Either<Failure, Unit>> deleteListing(String id);

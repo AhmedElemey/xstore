@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class MoveAllToCartBar extends ConsumerWidget {
@@ -84,7 +85,7 @@ class MoveAllToCartBar extends ConsumerWidget {
                       onPressed: () {
                         Share.share(
                           context.l10n.wishlistShareText(
-                            'https://xstore.app/wishlist',
+                            xstoreDownloadUrl(isArabic: context.isArabic),
                           ),
                         );
                       },

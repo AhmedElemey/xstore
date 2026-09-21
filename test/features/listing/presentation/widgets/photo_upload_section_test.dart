@@ -27,6 +27,7 @@ void main() {
             errorText: null,
             onOpenPicker: () {},
             onRemove: (_) {},
+            onRemoveExisting: (_) {},
             onReorder: (_, __) {},
             existingUrls: const ['https://example.test/photo.jpg'],
           ),
