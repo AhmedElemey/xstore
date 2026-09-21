@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -41,20 +43,39 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   final _q = TextEditingController();
   final _focus = FocusNode();
 
+  // The Explore tab's widget/state is kept alive across navigations by the
+  // bottom nav's StatefulShellRoute (see app_router.dart's `_shellTab`
+  // comment) — its `initState` only ever fires once. Without tracking the
+  // last-seen `category` query param ourselves and re-checking it in
+  // `didChangeDependencies` (which DOES re-run on every route change, since
+  // `GoRouterState.of` depends on an InheritedWidget), tapping a second
+  // "shop by category" chip on Home after the Explore tab was already built
+  // would silently do nothing — the new query param would never be read.
+  var _bootstrapped = false;
+  String? _lastRouteCategory;
+
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final cat = GoRouterState.of(context).uri.queryParameters['category'];
-      final n = ref.read(exploreProvider.notifier);
-      if (cat != null) {
-        n.bootstrapFromRouteCategory(cat);
-      } else {
-        await n.search('');
-      }
-      _q.text = ref.read(exploreProvider).query;
+      _syncWithRouteCategory();
     });
+  }
+
+  void _syncWithRouteCategory() {
+    final cat = GoRouterState.of(context).uri.queryParameters['category'];
+    final firstLoad = !_bootstrapped;
+    if (!firstLoad && cat == _lastRouteCategory) return;
+    _bootstrapped = true;
+    _lastRouteCategory = cat;
+    final n = ref.read(exploreProvider.notifier);
+    if (cat != null) {
+      n.bootstrapFromRouteCategory(cat);
+    } else if (firstLoad) {
+      unawaited(n.search(''));
+    }
+    _q.text = ref.read(exploreProvider).query;
   }
 
   @override
