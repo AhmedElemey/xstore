@@ -211,6 +211,10 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
       isDefault: _isDefault,
       latitude: _pickedLat,
       longitude: _pickedLng,
+      // Guaranteed non-null here: the errors check above blocks save until
+      // both are picked.
+      cityId: _cityId,
+      governorateId: _governorateId,
     );
     widget.onSave(address);
     Navigator.pop(context);

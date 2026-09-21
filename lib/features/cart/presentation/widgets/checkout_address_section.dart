@@ -9,6 +9,7 @@ import '../../../addresses/presentation/widgets/address_form_sheet.dart';
 import '../../../addresses/presentation/widgets/remove_address_sheet.dart';
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/address_location_display.dart';
 
 class CheckoutAddressSection extends ConsumerWidget {
   const CheckoutAddressSection({super.key});
@@ -107,7 +108,7 @@ class CheckoutAddressSection extends ConsumerWidget {
                                 ],
                               ),
                               Text(
-                                '${st.savedAddresses[i].phone}\n${st.savedAddresses[i].street}\n${st.savedAddresses[i].city}, ${st.savedAddresses[i].wilaya} ${st.savedAddresses[i].postalCode ?? ''}',
+                                '${st.savedAddresses[i].phone}\n${st.savedAddresses[i].street}\n${resolveAddressLocation(ref, st.savedAddresses[i]).city}, ${resolveAddressLocation(ref, st.savedAddresses[i]).wilaya} ${st.savedAddresses[i].postalCode ?? ''}',
                                 style: AppTypography.bodySmall.copyWith(
                                   color: context.textSecondary,
                                   height: 1.4,

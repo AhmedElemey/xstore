@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../orders/domain/entities/order_entity.dart';
@@ -33,6 +34,7 @@ class CheckoutReviewSection extends ConsumerWidget {
     final pay = st.selectedPayment;
     final note = st.deliveryNote.trim();
     final vendors = items.map((e) => e.vendorId).toSet().length;
+    final addrLocation = addr == null ? null : resolveAddressLocation(ref, addr);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,9 +95,9 @@ class CheckoutReviewSection extends ConsumerWidget {
                     ),
                   ),
                 Divider(height: AppSpacing.x2l),
-                if (addr != null) ...[
+                if (addr != null && addrLocation != null) ...[
                   Text(
-                    '📍 ${addr.street}, ${addr.city}, ${addr.wilaya}',
+                    '📍 ${addr.street}, ${addrLocation.city}, ${addrLocation.wilaya}',
                     style: AppTypography.bodySmall.copyWith(height: 1.4),
                   ),
                   const SizedBox(height: AppSpacing.sm),

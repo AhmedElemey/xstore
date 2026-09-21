@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/address_location_display.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/address_book_provider.dart';
 import '../widgets/address_form_sheet.dart';
@@ -97,7 +98,7 @@ class AddressesScreen extends ConsumerWidget {
   }
 }
 
-class _AddressCard extends StatelessWidget {
+class _AddressCard extends ConsumerWidget {
   const _AddressCard({
     required this.address,
     required this.onEdit,
@@ -111,7 +112,8 @@ class _AddressCard extends StatelessWidget {
   final VoidCallback? onSetMain;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final location = resolveAddressLocation(ref, address);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -161,7 +163,7 @@ class _AddressCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             '${address.phone}\n${address.street}\n'
-            '${address.city}, ${address.wilaya} '
+            '${location.city}, ${location.wilaya} '
             '${address.postalCode ?? ''}',
             style: AppTypography.bodySmall.copyWith(
               color: context.textSecondary,
