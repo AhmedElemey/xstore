@@ -3083,14 +3083,8 @@ abstract class AppLocalizations {
   /// No description provided for @cartOrWishlist.
   ///
   /// In en, this message translates to:
-  /// **'Or check your Wishlist'**
+  /// **'Or check your Wishlist →'**
   String get cartOrWishlist;
-
-  /// No description provided for @cartWishlistArrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Wishlist →'**
-  String get cartWishlistArrow;
 
   /// No description provided for @cartRemove.
   ///
