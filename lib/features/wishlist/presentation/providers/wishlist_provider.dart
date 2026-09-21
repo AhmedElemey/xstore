@@ -72,30 +72,11 @@ class Wishlist extends _$Wishlist {
         break;
     }
     switch (state.sortOption) {
-      case WishlistSortOption.recentlyAdded:
-        list.sort((a, b) => b.addedAt.compareTo(a.addedAt));
-        break;
       case WishlistSortOption.priceLowToHigh:
         list.sort((a, b) => a.price.compareTo(b.price));
         break;
       case WishlistSortOption.priceHighToLow:
         list.sort((a, b) => b.price.compareTo(a.price));
-        break;
-      case WishlistSortOption.priceDrop:
-        list.sort(
-          (a, b) => b.effectiveDropPercent.compareTo(a.effectiveDropPercent),
-        );
-        break;
-      case WishlistSortOption.biggestDiscount:
-        list.sort((a, b) {
-          double disc(WishlistItemEntity e) {
-            final c = e.compareAtPrice;
-            if (c == null || c <= e.price) return 0;
-            return (c - e.price) / c;
-          }
-
-          return disc(b).compareTo(disc(a));
-        });
         break;
       case WishlistSortOption.nameAZ:
         list.sort(

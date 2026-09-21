@@ -8,9 +8,7 @@
 // these consumers, falling back to computing the percentage from
 // `previousPrice` vs `price` when the backend doesn't send
 // `priceDropPercent` — without touching `compareAtPrice`, which is a
-// vendor-set markdown unrelated to "the price dropped since you saved it"
-// (see `WishlistSortOption.biggestDiscount`, which is deliberately the
-// separate, compareAtPrice-only concept).
+// vendor-set markdown unrelated to "the price dropped since you saved it".
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

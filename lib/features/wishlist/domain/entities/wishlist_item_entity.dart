@@ -36,8 +36,7 @@ class WishlistItemEntity with _$WishlistItemEntity {
 
   /// The percentage the price has dropped SINCE this item was wishlisted —
   /// distinct from [compareAtPrice], a vendor-set markdown unrelated to
-  /// when the item was saved (that's what `WishlistSortOption.biggestDiscount`
-  /// sorts by instead).
+  /// when the item was saved.
   ///
   /// Prefers the backend's own [priceDropPercent] when it sends one, but
   /// [previousPrice] alone already proves a drop happened (it's the price
