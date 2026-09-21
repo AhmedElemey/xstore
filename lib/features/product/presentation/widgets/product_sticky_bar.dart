@@ -72,20 +72,16 @@ class ProductStickyBar extends StatelessWidget {
                               color: context.surfaceColor,
                             ),
                           )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(LucideIcons.shoppingCart, size: 20),
-                              const Gap(AppSpacing.sm),
-                              Flexible(
-                                child: Text(
-                                  context.l10n.addToCart,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.shoppingCart, size: 20),
+                                const Gap(AppSpacing.sm),
+                                Text(context.l10n.addToCart, maxLines: 1),
+                              ],
+                            ),
                           ),
                   ),
                 ),
@@ -98,20 +94,16 @@ class ProductStickyBar extends StatelessWidget {
                     backgroundColor: AppColors.accent,
                     foregroundColor: context.surfaceColor,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(LucideIcons.zap, size: 20),
-                      const Gap(AppSpacing.sm),
-                      Flexible(
-                        child: Text(
-                          context.l10n.buyNow,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(LucideIcons.zap, size: 20),
+                        const Gap(AppSpacing.sm),
+                        Text(context.l10n.buyNow, maxLines: 1),
+                      ],
+                    ),
                   ),
                 ),
               ),
