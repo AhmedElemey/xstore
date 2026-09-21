@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
@@ -45,6 +46,7 @@ void main() {
   Future<void> pumpSection(
     WidgetTester tester, {
     String phoneNumber = '01012345678',
+    bool isArabic = false,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -69,6 +71,7 @@ void main() {
           // never opens the picker at all, so the data is unused there.
           allGovernmentsProvider.overrideWith((ref) async => const [_cairoGov]),
           allCitiesProvider.overrideWith((ref) async => const [_maadiCity]),
+          appIsArabicProvider.overrideWithValue(isArabic),
         ],
         child: const MaterialApp(
           localizationsDelegates: [
@@ -194,6 +197,44 @@ void main() {
       await tester.enterText(find.byType(TextFormField), '01212345678');
       await tester.pump();
       expect(saveButton(tester).onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'reopening the edit sheet after a language switch shows the location '
+    'hint in the new language, not the one it was saved in',
+    (tester) async {
+      await pumpSection(tester);
+      await openAddSheet(tester);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Street'),
+        '1 Nile St',
+      );
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cairo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Maadi'));
+      await tester.pumpAndSettle();
+      final save = find.text('Save Address');
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Simulate switching the app language: a fresh widget tree (so the
+      // location provider overrides are read again) but the same
+      // SharedPreferences-backed address book, exactly like reopening the
+      // app after toggling language in settings.
+      await pumpSection(tester, isArabic: true);
+
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('القاهرة - المعادي'), findsOneWidget);
+      expect(find.text('Cairo - Maadi'), findsNothing);
     },
   );
 }
