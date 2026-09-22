@@ -29,7 +29,7 @@ void main() {
 
     test('rejects an unrecognized path', () {
       expect(
-        routeFromDeepLinkUri(Uri.parse('https://xstore.com/category/shoes')),
+        routeFromDeepLinkUri(Uri.parse('https://xstore.com/coupon/shoes')),
         isNull,
       );
     });
