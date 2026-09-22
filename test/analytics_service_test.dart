@@ -76,6 +76,8 @@ void main() {
     required Auth auth,
     UserEntity? sessionUser,
     Map<String, String> secureValues = const {},
+    Dio? amplitudeClient,
+    String? amplitudeApiKey,
   }) {
     FlutterSecureStorage.setMockInitialValues(secureValues);
     late AnalyticsService created;
@@ -87,6 +89,8 @@ void main() {
             ref,
             client: dio,
             readAuthToken: () async => secureValues[PrefsKeys.authToken],
+            amplitudeClient: amplitudeClient,
+            amplitudeApiKey: amplitudeApiKey,
           );
           return created;
         }),
@@ -230,4 +234,115 @@ void main() {
       expect(auth.pingAnalytics, returnsNormally);
     },
   );
+
+  group('Amplitude forwarding', () {
+    late _RecordingAdapter amplitudeAdapter;
+    late Dio amplitudeDio;
+
+    setUp(() {
+      amplitudeAdapter = _RecordingAdapter(statusCode: 200);
+      amplitudeDio = Dio()..httpClientAdapter = amplitudeAdapter;
+    });
+
+    test('does nothing when no AMPLITUDE_API_KEY is configured', () async {
+      buildContainer(auth: FakeAuth(null), amplitudeClient: amplitudeDio);
+      service.track('view_item');
+      await service.ready;
+      await service.flushNow();
+
+      expect(amplitudeAdapter.posts, isEmpty);
+    });
+
+    test('forwards guest events with no signed-in user required', () async {
+      buildContainer(
+        auth: FakeAuth(null),
+        amplitudeClient: amplitudeDio,
+        amplitudeApiKey: 'test-amplitude-key',
+      );
+      service.track('view_item', properties: {'item_id': 'p1'});
+      await service.ready;
+      await service.flushNow();
+
+      expect(amplitudeAdapter.posts, hasLength(1));
+      final body = Map<String, dynamic>.from(
+        amplitudeAdapter.posts.single.data as Map,
+      );
+      expect(body['api_key'], 'test-amplitude-key');
+      final events = (body['events'] as List).cast<Map>();
+      expect(events, hasLength(1));
+      expect(events.single['event_type'], 'view_item');
+      expect(events.single['user_id'], isNull);
+      expect(events.single['device_id'], isNotEmpty);
+      expect(
+        events.single['event_properties'],
+        containsPair('item_id', 'p1'),
+      );
+    });
+
+    test('includes user_id and role once signed in, and never sends the '
+        'xStore license/auth headers', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        amplitudeClient: amplitudeDio,
+        amplitudeApiKey: 'test-amplitude-key',
+      );
+      service.track('purchase');
+      await service.ready;
+      await service.flushNow();
+
+      expect(amplitudeAdapter.posts, hasLength(1));
+      final request = amplitudeAdapter.posts.single;
+      expect(request.headers['Authorization'], isNull);
+      expect(request.headers['X-Auth-Token'], isNull);
+      final body = Map<String, dynamic>.from(request.data as Map);
+      final events = (body['events'] as List).cast<Map>();
+      expect(events.single['user_id'], 'u1');
+      expect(events.single['user_properties'], {'role': 'consumer'});
+    });
+
+    test('maps purchase value_egp onto Amplitude revenue fields', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        amplitudeClient: amplitudeDio,
+        amplitudeApiKey: 'test-amplitude-key',
+      );
+      service.track(
+        AnalyticsEvents.purchase,
+        properties: {AnalyticsProps.valueEgp: 499.5, AnalyticsProps.orderId: 'o1'},
+      );
+      await service.ready;
+      await service.flushNow();
+
+      final body = Map<String, dynamic>.from(
+        amplitudeAdapter.posts.single.data as Map,
+      );
+      final events = (body['events'] as List).cast<Map>();
+      expect(events.single['revenue'], 499.5);
+      expect(events.single['revenue_type'], 'purchase');
+    });
+
+    test('a failed Amplitude POST does not drop the batch and does not '
+        'affect the xStore collector queue', () async {
+      final failingAdapter = _RecordingAdapter(statusCode: 500);
+      amplitudeDio.httpClientAdapter = failingAdapter;
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        amplitudeClient: amplitudeDio,
+        amplitudeApiKey: 'test-amplitude-key',
+      );
+      service.track('view_item');
+      await service.ready;
+      await service.flushNow();
+
+      expect(failingAdapter.posts, hasLength(1));
+      expect(service.amplitudeQueuedEventNames, ['view_item']);
+      expect(adapter.posts, hasLength(1)); // xStore collector still sent.
+    });
+  });
 }

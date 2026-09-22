@@ -8,6 +8,11 @@ live, this feeds the Analytics tab stubbed in
 [`../admin-dashboard/BACKEND_HANDOFF.md`](../admin-dashboard/BACKEND_HANDOFF.md) instead of
 hardcoded demo data.
 
+> **Amplitude:** the same client-side event stream is also forwarded directly to Amplitude's HTTP
+> API, independent of this backend collector — see
+> [`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) for the wiring and a gap analysis
+> of events still missing for a complete user journey.
+
 ## Why a custom endpoint instead of Firebase Analytics only
 
 `03_funnel_metrics.md` originally scoped Phase A as Firebase Analytics client-side events with
