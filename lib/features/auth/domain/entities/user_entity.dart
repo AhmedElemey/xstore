@@ -58,6 +58,14 @@ class UserEntity with _$UserEntity {
     int? storeCityId,
     int? storeGovernmentId,
     int? storeId,
+    // Verification flags from get-profile — carried through so a freshly
+    // logged-in user's data can seed ProfileEntity without a second
+    // get-profile round-trip (see ProfileNotifier._refreshProfileDataImpl).
+    @Default(false) bool isEmailVerificationRequired,
+    @Default(false) bool isPhoneVerificationRequired,
+    @Default(false) bool isEmailVerified,
+    @Default(false) bool isPhoneVerified,
+    @Default(true) bool hasPassword,
   }) = _UserEntity;
 
   /// True when get-profile returned a non-null `store` object.
