@@ -40,5 +40,44 @@ void main() {
         isNull,
       );
     });
+
+    test('resolves a seller link', () {
+      expect(
+        routeFromDeepLinkUri(Uri.parse('https://xstore.com/seller/vendor-9')),
+        AppRoutes.sellerPath('vendor-9'),
+      );
+    });
+
+    test('resolves an order link', () {
+      expect(
+        routeFromDeepLinkUri(Uri.parse('https://xstore.com/order/ord-42')),
+        AppRoutes.orderPath('ord-42'),
+      );
+    });
+
+    test('resolves a category link', () {
+      expect(
+        routeFromDeepLinkUri(
+          Uri.parse('https://xstore.com/category/Home%20%26%20Kitchen'),
+        ),
+        '${AppRoutes.explore}?category=Home%20%26%20Kitchen',
+      );
+    });
+
+    test('rejects a link with no id segment', () {
+      expect(
+        routeFromDeepLinkUri(Uri.parse('https://xstore.com/seller/')),
+        isNull,
+      );
+    });
+
+    test('rejects a link with extra path segments', () {
+      expect(
+        routeFromDeepLinkUri(
+          Uri.parse('https://xstore.com/product/abc-123/reviews'),
+        ),
+        isNull,
+      );
+    });
   });
 }
