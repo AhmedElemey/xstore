@@ -26,6 +26,14 @@ class MapPickResult {
   final String? addressLine;
 }
 
+/// Camera creation / tile-load jitter is not a user pick. ~33m; a real
+/// drag is larger, a plugin settle is typically far smaller.
+bool mapCameraMovedFromStart(LatLng from, LatLng to) {
+  const delta = 0.0003;
+  return (from.latitude - to.latitude).abs() > delta ||
+      (from.longitude - to.longitude).abs() > delta;
+}
+
 /// Full-screen "drop a pin" address picker. The pin stays fixed at the
 /// screen center — the map moves under it, the standard pattern for precise
 /// pin placement — and camera-idle triggers a best-effort reverse geocode.
@@ -65,6 +73,7 @@ class _MapAddressPickerScreen extends StatefulWidget {
 }
 
 class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
+  late LatLng _start;
   late LatLng _picked;
   GoogleMapController? _mapController;
   String? _addressLine;
@@ -72,23 +81,24 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
   bool _locating = false;
   Timer? _debounce;
 
-  // True once the vendor has actually chosen a spot (moved the map or
-  // tapped "use my location") — false on a fresh pick, even though
-  // [_picked] itself is never null (it starts at the device's last-known
-  // fix, or the Cairo fallback, purely so the map has somewhere to center
-  // on). Gates the pin overlay and Confirm so a location nobody actually
-  // chose can't be saved as the delivery address just because the map
-  // opened centered near it.
+  // True once the vendor has actually chosen a spot (dragged the map a
+  // meaningful distance, or tapped "use my location") — false on a fresh
+  // pick, even though [_picked] itself is never null (it starts at the
+  // device's last-known fix, or the Cairo fallback, purely so the map has
+  // somewhere to center on). The plugin fires onCameraMove/onCameraIdle
+  // when that starting camera is created; those are not a pick. Gates the
+  // pin overlay, reverse-geocode, and Confirm.
   late bool _hasPicked;
 
   @override
   void initState() {
     super.initState();
     _hasPicked = widget.initialLatitude != null && widget.initialLongitude != null;
-    _picked = LatLng(
+    _start = LatLng(
       widget.initialLatitude ?? AppLocationCache.latitude,
       widget.initialLongitude ?? AppLocationCache.longitude,
     );
+    _picked = _start;
     if (_hasPicked) {
       unawaited(_resolveAddress(_picked));
     }
@@ -103,16 +113,14 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
 
   void _onCameraMove(CameraPosition position) {
     _picked = position.target;
-    // Rebuild right away only on the transition to reveal the pin/enable
-    // Confirm as soon as dragging starts, instead of waiting up to 400ms
-    // for onCameraIdle's debounce — every other move this frequently
-    // updates _picked without a setState, same as before this change.
-    if (!_hasPicked) {
-      setState(() => _hasPicked = true);
+    if (_hasPicked || !mapCameraMovedFromStart(_start, position.target)) {
+      return;
     }
+    setState(() => _hasPicked = true);
   }
 
   void _onCameraIdle() {
+    if (!_hasPicked) return;
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () {
       if (mounted) unawaited(_resolveAddress(_picked));

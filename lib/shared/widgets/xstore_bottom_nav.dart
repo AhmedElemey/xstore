@@ -12,6 +12,7 @@ import '../../core/utils/extensions/context_extensions.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
+import '../../features/wishlist/presentation/providers/wishlist_provider.dart';
 import '../utils/require_login.dart';
 import 'notification_icon_badge.dart';
 
@@ -46,6 +47,8 @@ class XstoreBottomNav extends ConsumerWidget {
     final cartCount = role == UserRole.consumer
         ? ref.watch(cartProvider.select((s) => s.itemCount))
         : 0;
+    final hasWishlistItems = role == UserRole.consumer &&
+        ref.watch(wishlistProvider.select((s) => s.itemCount > 0));
 
     // Tab sets mirror the shell branches per role in app_router.dart —
     // keep both lists in sync when adding a tab. Vendors have no Home/Explore
@@ -122,6 +125,11 @@ class XstoreBottomNav extends ConsumerWidget {
                     : context.textSecondary;
                 final activeColor =
                     accentMid ? AppColors.accent : context.primaryColor;
+                // Same filled+red heart as product cards when the list
+                // isn't empty. Color stays error even on the selected tab
+                // so "you have saved items" isn't lost in the primary tint.
+                final wishlistFilled =
+                    role == UserRole.consumer && index == 2 && hasWishlistItems;
 
                 return Expanded(
                   child: AnimatedTap(
@@ -154,8 +162,12 @@ class XstoreBottomNav extends ConsumerWidget {
                                 child: Transform.scale(
                                   scale: 1.0 + (t * 0.12),
                                   child: Icon(
-                                    icons[index],
-                                    color: blended,
+                                    wishlistFilled
+                                        ? Icons.favorite_rounded
+                                        : icons[index],
+                                    color: wishlistFilled
+                                        ? AppColors.error
+                                        : blended,
                                     size: 22,
                                   ),
                                 ),

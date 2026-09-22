@@ -43,6 +43,10 @@ class Wishlist extends _$Wishlist {
   WishlistState build() {
     ref.onDispose(() => _sessionEpoch++);
     // Cart sync: ref.listen(cartProvider) lives on [WishlistScreen] per app spec.
+    // fireImmediately: this keepAlive notifier is often first read *after*
+    // auth already has a user (home hearts, profile count). A plain listen
+    // only sees later transitions, so the list stayed empty until
+    // pull-to-refresh.
     ref.listen(authProvider, (prev, next) {
       if (next.isLoading) return;
       final u = next.valueOrNull;
@@ -52,7 +56,7 @@ class Wishlist extends _$Wishlist {
         _sessionEpoch++;
         Future.microtask(() => state = const WishlistState());
       }
-    });
+    }, fireImmediately: true);
     return const WishlistState();
   }
 
