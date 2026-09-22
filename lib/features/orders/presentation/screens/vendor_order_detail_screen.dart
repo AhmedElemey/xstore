@@ -132,6 +132,7 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
           onReject: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => RejectOrderSheet(onConfirm: notifier.rejectOrder)),
           onProcessing: notifier.markProcessing,
           onShipped: () => showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => ShippingInfoSheet(onConfirm: notifier.markShipped)),
+          onDelivered: notifier.markDelivered,
         ),
       ),
     );

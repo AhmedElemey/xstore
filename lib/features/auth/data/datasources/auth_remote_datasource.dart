@@ -27,7 +27,7 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel> fetchProfile({String? authToken});
 
   Future<void> changePassword({
-    required String currentPassword,
+    String? currentPassword,
     required String newPassword,
     required String confirmNewPassword,
   });
@@ -230,16 +230,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// replaces this with the real profile; [email] is a best-effort display
   /// placeholder in case that follow-up call fails.
   UserModel _tokenOnlyModel(Map<String, dynamic> data, {required String email}) {
-    final token = data['token'] as String?;
-    if (token == null || token.isEmpty) {
-      throw const ServerException('Missing token in response');
+    final unwrapped = _unwrapObject(data);
+    final body = _tokenFrom(unwrapped) != null ? unwrapped : data;
+    final token = _tokenFrom(body);
+    if (token == null) {
+      final errorEn = _nonEmptyString(data['errorEn']) ??
+          _nonEmptyString(unwrapped['errorEn']);
+      throw ServerException(errorEn ?? 'Missing token in response');
     }
     return UserModel(
       id: '',
       email: email,
       token: token,
-      refreshToken: data['refreshToken'] as String?,
+      refreshToken: _nonEmptyString(body['refreshToken']) ??
+          _nonEmptyString(body['RefreshToken']),
     );
+  }
+
+  String? _tokenFrom(Map<String, dynamic> body) =>
+      _nonEmptyString(body['token']) ??
+      _nonEmptyString(body['Token']) ??
+      _nonEmptyString(body['accessToken']);
+
+  String? _nonEmptyString(dynamic value) {
+    if (value is! String) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   @override
@@ -264,7 +280,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> changePassword({
-    required String currentPassword,
+    String? currentPassword,
     required String newPassword,
     required String confirmNewPassword,
   }) async {
@@ -272,7 +288,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await _dio.post<void>(
         ApiEndpoints.changePassword,
         data: {
-          'currentPassword': currentPassword,
+          if (currentPassword != null && currentPassword.isNotEmpty)
+            'currentPassword': currentPassword,
           'newPassword': newPassword,
           'confirmNewPassword': confirmNewPassword,
         },
@@ -512,18 +529,58 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         options: ApiAuthHeaders.public(),
       );
       final body = _unwrapObject(response.data);
-      final exists = body['exists'] as bool? ?? false;
-      return (exists: exists, role: exists ? _parseRole(body['role']) : null);
+      final exists = _parseExists(body['exists'] ?? body['Exists']);
+      final role = _parseRole(
+        body['role'] ??
+            body['Role'] ??
+            body['roleName'] ??
+            body['RoleName'],
+      );
+      return (exists: exists, role: role);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
   }
 
+  bool _parseExists(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      switch (value.trim().toLowerCase()) {
+        case 'true':
+        case 'yes':
+        case '1':
+          return true;
+        default:
+          return false;
+      }
+    }
+    return false;
+  }
+
   UserRole? _parseRole(dynamic value) {
+    if (value is num) {
+      // 1-based C# UserRole until the declaration is confirmed: 0 unset.
+      switch (value.toInt()) {
+        case 1:
+          return UserRole.consumer;
+        case 2:
+          return UserRole.vendor;
+        case 3:
+          return UserRole.courier;
+        default:
+          return null;
+      }
+    }
     if (value is! String) return null;
     final lower = value.trim().toLowerCase();
     if (lower == UserRole.vendor.name) return UserRole.vendor;
-    if (lower == UserRole.consumer.name) return UserRole.consumer;
+    if (lower == UserRole.consumer.name || lower == 'buyer') {
+      return UserRole.consumer;
+    }
+    if (lower == UserRole.courier.name || lower == 'delivery') {
+      return UserRole.courier;
+    }
     return null;
   }
 

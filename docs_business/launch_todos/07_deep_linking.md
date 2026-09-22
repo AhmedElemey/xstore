@@ -10,7 +10,11 @@
 
 A link like `https://xstore.com/product/<id>` shared in WhatsApp, SMS, or a social ad should open the xStore app straight to that product — installed or not (falls back to a web page if not installed). This is table stakes for word-of-mouth and paid-acquisition conversion in a COD marketplace where WhatsApp sharing is already the dominant channel (see doc 05).
 
-**Phase 1 scope:** product detail links only (`/product/:id`). Seller/store pages, order-status links, and category links are natural Phase 2 additions — the mobile-side plumbing (below) already supports adding more path patterns without further native changes.
+**Phase 1 scope (shipped):** product detail links (`/product/:id`).
+
+**Phase 2 scope (shipped):** seller/store pages (`/seller/:id`), order-status links (`/order/:id`), and category links (`/category/:name`) — added without any native manifest changes, confirming the Phase 1 note below. Order links are account-bound: an unauthenticated tap stages the route and opens it right after login/OTP, the same mechanism push notifications already use (`navigateToPushRoute`), rather than dropping the user on a login screen with no memory of what they tapped.
+
+The mobile-side plumbing supports adding further path patterns (e.g. a future cart/coupon link) without further native changes — see §2.
 
 **Placeholder domain:** all mobile-side config below uses `xstore.com` as a placeholder. Swap it for the real production domain in three places once decided:
 - `lib/core/deeplink/deep_link_route.dart` (`supportedDeepLinkHosts`)
@@ -25,10 +29,10 @@ A link like `https://xstore.com/product/<id>` shared in WhatsApp, SMS, or a soci
 |------------|--------|
 | Incoming link → in-app route (cold start + while running) | Done — `app_links` package, `lib/core/deeplink/deep_link_handling_provider.dart` |
 | URI → go_router path resolver | Done — `lib/core/deeplink/deep_link_route.dart` (`routeFromDeepLinkUri`), unit-tested |
-| Android App Links intent-filter (`autoVerify`) | Done, placeholder host |
+| Android App Links intent-filter (`autoVerify`) | Done, placeholder host, whole-domain (no per-path scoping needed on Android) |
 | iOS Associated Domains entitlement | Done, placeholder host |
-| Unified with push-notification routing | Both flows resolve to the same `AppRoutes` path strings and are watched from the same place (`app.dart`), but product links navigate immediately since `/product/:id` is guest-accessible — they do **not** go through the push flow's login-staging (`navigateToPushRoute`/`pendingPushRouteProvider`), which exists because push payloads are only ever sent to logged-in users. |
-| Web fallback page at `https://xstore.com/product/<id>` for users without the app | **Not mobile's job** — needs a real web page (backend/marketing), see §4 |
+| Unified with push-notification routing | Both flows resolve to the same `AppRoutes` path strings and are watched from the same place (`app.dart`). Guest-accessible links (product, seller, category) navigate immediately. The account-bound link (order) goes through the same login-staging push already uses (`navigateToPushRoute`/`pendingPushRouteProvider`) — tap while logged out, land on the order right after login instead of losing the destination. |
+| Web fallback page at `https://xstore.com/<product\|seller\|order\|category>/...` for users without the app | **Not mobile's job** — needs real web pages (backend/marketing), see §4 |
 
 A link that doesn't match a known pattern (wrong host, unrecognized path) is silently ignored — it neither crashes nor navigates anywhere, so unrelated `https://xstore.com/...` links from a future web app don't accidentally hijack in-app navigation.
 
@@ -67,7 +71,7 @@ Host at: `https://xstore.com/.well-known/apple-app-site-association` (no `.json`
     "details": [
       {
         "appID": "<APPLE_TEAM_ID>.com.xstore.app",
-        "paths": ["/product/*"]
+        "paths": ["/product/*", "/seller/*", "/order/*", "/category/*"]
       }
     ]
   }
@@ -75,7 +79,7 @@ Host at: `https://xstore.com/.well-known/apple-app-site-association` (no `.json`
 ```
 
 - `<APPLE_TEAM_ID>`: the 10-character Apple Developer Team ID (App Store Connect → Membership), not currently in this repo.
-- `paths` is scoped to `/product/*` for Phase 1 — widen it (or add entries) as more link types ship, keeping it in sync with what `deep_link_route.dart` actually resolves.
+- `paths` must be kept in sync with every pattern `routeFromDeepLinkUri` resolves in `lib/core/deeplink/deep_link_route.dart` — currently `product`, `seller`, `order`, `category`. Add a path here whenever a new pattern ships mobile-side, or iOS will silently fall back to the browser for it even though Android (whole-domain `autoVerify`) already works.
 
 ### 3.3 Web fallback
 
@@ -87,14 +91,23 @@ Whoever owns `xstore.com` (marketing site / storefront web app, not this repo) s
 
 Universal/App Links can't be meaningfully tested in the simulator/emulator for the OS-level "does tapping a real link in Messages/WhatsApp open the app" behavior — needs physical devices with the **prod flavor** installed (App Links verification is tied to the signed APK's cert; dev builds won't verify against `assetlinks.json`).
 
+**Testing before the domain verification files exist (§3):** the resolver logic (which path opens what) can be exercised right now without any of that:
+- Android, any build: `scripts/test_deep_links_android.sh` fires all four patterns (product/seller/order/category) at a connected device/emulator via `adb shell am start` — pass `--product <id>` etc. for real backend ids, `-p com.xstore.app` for a prod build. Run it with `--help` for the full option list. Under the hood it's the same explicit `am start` call, which bypasses App Links verification entirely — it's not simulating a real tap.
+- iOS, **debug build run from Xcode**: `Runner.entitlements` (debug only — never `RunnerRelease.entitlements`) has `?mode=developer` appended to both `applinks:` entries, which makes Apple skip the hosted apple-app-site-association check for that build. On Simulator, `scripts/test_deep_links_ios.sh` fires all four patterns via `xcrun simctl openurl` (run with `--help` for options). On a real device there's no CLI equivalent — Apple doesn't expose one, precisely to keep verification from being trivially bypassed — so type/tap the link in Notes or Messages by hand; the script prints ready-to-paste links for this case too when no simulator is booted.
+
+Neither of these substitutes for the real pre-production checklist below — they only prove the in-app routing works, not that a stranger's tap on a shared link will.
+
 - [ ] Domain verification files are live and return 200 with correct content-type (`curl -I https://xstore.com/.well-known/assetlinks.json` / `.../apple-app-site-association`)
 - [ ] Android: `adb shell pm get-app-links com.xstore.app` shows the domain as `verified`
 - [ ] Android, prod build installed: tap a `https://xstore.com/product/<id>` link in Chrome/Messages/WhatsApp → app opens directly to product detail (no chooser dialog — a chooser means verification failed)
 - [ ] iOS, prod build installed (TestFlight or ad hoc): tap the same link in Messages/Notes → app opens directly to product detail (long-press should show "Open in xStore" in the preview)
 - [ ] Cold start (app fully killed) via a tapped link → lands on product detail after launch, not home
 - [ ] App already running (foreground) → tapping a link navigates immediately, no restart
-- [ ] Guest (not logged in, no account) tapping a product link → product detail opens directly, no login prompt (guest-accessible route)
+- [ ] Guest (not logged in, no account) tapping a product/seller/category link → target opens directly, no login prompt (guest-accessible routes)
 - [ ] Logged-in vendor/courier tapping a product link → product detail opens (product route isn't role-restricted)
+- [ ] Guest tapping an order link (`https://xstore.com/order/<id>`) → sent to login, then lands on that order right after login/OTP (not home) — this is the account-bound path, distinct from the guest-accessible ones above
+- [ ] Logged-in user tapping an order link → order detail opens directly, no login prompt
+- [ ] Tapping a category link (`https://xstore.com/category/<name>`) → Explore opens pre-filtered to that category
 - [ ] Unknown/garbage path (`https://xstore.com/nonsense`) → does not crash the app, does not navigate anywhere unexpected
 - [ ] Uninstalled: tapping the link opens the web fallback (once §3.3 exists) instead of a dead 404
 - [ ] `flutter test test/core/deeplink/deep_link_route_test.dart` green in CI

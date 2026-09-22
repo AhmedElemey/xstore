@@ -11,10 +11,14 @@ import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../orders/domain/entities/order_entity.dart';
+import '../../../orders/presentation/providers/orders_provider.dart';
 import '../../domain/entities/review_entity.dart';
 import '../../domain/entities/review_write_params.dart';
 import '../providers/product_reviews_notifier.dart';
+import '../widgets/already_reviewed_sheet.dart';
 
 /// Full reviews list for a listing — paginated, with write/edit/delete.
 class ProductReviewsScreen extends ConsumerStatefulWidget {
@@ -55,7 +59,39 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     if (!requireLogin(context, ref, message: context.l10n.signInToWriteReview)) {
       return;
     }
-    await showModalBottomSheet<void>(
+    // Editing an existing review needs no re-check — the reviewer already
+    // cleared this gate the first time they wrote it.
+    if (editing == null) {
+      final viewer = ref.read(authProvider).valueOrNull;
+      ReviewEntity? myExistingReview;
+      for (final r in ref
+          .read(productReviewsNotifierProvider(widget.listingId))
+          .reviews) {
+        if (isOwnReview(r, userId: viewer?.id, email: viewer?.email)) {
+          myExistingReview = r;
+          break;
+        }
+      }
+      if (myExistingReview != null) {
+        await showAlreadyReviewedSheet(
+          context,
+          onEdit: () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _openWriteReviewSheet(editing: myExistingReview);
+            });
+          },
+        );
+        return;
+      }
+      if (!await _canWriteNewReview()) {
+        if (!mounted) return;
+        AppSnackbar.error(context, context.l10n.reviewRequiresDeliveredOrder);
+        return;
+      }
+    }
+    if (!mounted) return;
+    final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _WriteReviewSheet(
@@ -63,6 +99,23 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
         editing: editing,
       ),
     );
+    if (!mounted) return;
+    if (result == 'added') {
+      AppSnackbar.success(context, context.l10n.ordersReviewThanks);
+    } else if (result == 'already') {
+      await showAlreadyReviewedSheet(context);
+    }
+  }
+
+  /// Verified-purchase gate: only a consumer with a delivered order for
+  /// this listing may write a NEW review (editing an existing one skips
+  /// this — see caller).
+  Future<bool> _canWriteNewReview() async {
+    final user = ref.read(authProvider).valueOrNull;
+    if (user == null || user.role != UserRole.consumer) return false;
+    await ref.read(ordersNotifierProvider.notifier).fetchOrders();
+    final orders = ref.read(ordersNotifierProvider).orders;
+    return hasDeliveredOrderForListing(orders, widget.listingId);
   }
 
   Future<void> _confirmDelete(String reviewId) async {
@@ -96,7 +149,9 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(productReviewsNotifierProvider(widget.listingId));
-    final myId = ref.watch(authProvider).valueOrNull?.id;
+    final viewer = ref.watch(authProvider).valueOrNull;
+    final myId = viewer?.id;
+    final viewerName = viewer?.displayName(context.isArabic);
 
     return Scaffold(
       appBar: AppBar(
@@ -126,6 +181,13 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
                     final review = state.reviews[index];
                     return _ReviewCard(
                       review: review,
+                      authorName: reviewAuthorLabel(
+                        wireName: review.userName,
+                        reviewUserId: review.userId,
+                        viewerId: viewer?.id,
+                        viewerEmail: viewer?.email,
+                        viewerDisplayName: viewerName,
+                      ),
                       isMine: review.userId == myId,
                       onEdit: () => _openWriteReviewSheet(editing: review),
                       onDelete: () => _confirmDelete(review.id),
@@ -139,12 +201,14 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
 class _ReviewCard extends StatelessWidget {
   const _ReviewCard({
     required this.review,
+    required this.authorName,
     required this.isMine,
     required this.onEdit,
     required this.onDelete,
   });
 
   final ReviewEntity review;
+  final String authorName;
   final bool isMine;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -167,8 +231,8 @@ class _ReviewCard extends StatelessWidget {
                         : null,
                 child: review.userAvatar == null || review.userAvatar!.isEmpty
                     ? Text(
-                        review.userName.isNotEmpty
-                            ? review.userName[0].toUpperCase()
+                        authorName.isNotEmpty
+                            ? authorName[0].toUpperCase()
                             : '?',
                       )
                     : null,
@@ -179,7 +243,7 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.userName,
+                      authorName,
                       style: theme.textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
@@ -245,6 +309,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
 
   @override
   void dispose() {
+    _comment.clear();
     _comment.dispose();
     super.dispose();
   }
@@ -261,11 +326,18 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
     if (!mounted) return;
     setState(() => _isSubmitting = false);
     if (ok) {
-      Navigator.of(context).pop();
+      _comment.clear();
+      _rating = widget.editing?.rating ?? 5;
+      Navigator.of(context).pop(widget.editing == null ? 'added' : 'updated');
       return;
     }
     final error =
         ref.read(productReviewsNotifierProvider(widget.listingId)).error;
+    if (error != null && error.toLowerCase().contains('already')) {
+      _comment.clear();
+      Navigator.of(context).pop('already');
+      return;
+    }
     if (error != null) AppSnackbar.error(context, error);
   }
 

@@ -14,6 +14,7 @@ import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
@@ -174,6 +175,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
       if (next) {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
+      }
+    });
+    ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
+      if (next != null && next != prev && mounted) {
+        AppSnackbar.error(context, next);
       }
     });
 
@@ -595,7 +601,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () => context.push(AppRoutes.terms),
+                      onTap: () => launchLegalUrl(xstoreTermsUrl),
                       child: Text(
                         context.l10n.termsOfService,
                         style: AppTypography.bodyMedium.copyWith(
@@ -611,7 +617,7 @@ class _StepSecurity extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () => context.push(AppRoutes.privacy),
+                      onTap: () => launchLegalUrl(xstorePrivacyUrl),
                       child: Text(
                         context.l10n.privacyPolicy,
                         style: AppTypography.bodyMedium.copyWith(

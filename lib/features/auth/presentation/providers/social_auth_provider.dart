@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
@@ -76,9 +77,16 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   /// ask the backend (read-only `checkGoogleUser`) whether this identity
   /// already has an account. If it does, log straight in with that existing
   /// role via the role-specific endpoint (which also auto-creates, but is
-  /// never asked to here). If it doesn't, send the user to the normal
-  /// register flow instead — Google never collects a phone number or
-  /// password, which the rest of the app treats as required account fields.
+  /// never asked to here).
+  ///
+  /// `check-user` looks up a Google-linked identity, not an email/password
+  /// account that happens to share this Gmail. Firebase `isNewUser: false`
+  /// means this Google identity has signed in before, so when the lookup
+  /// misses we still log in as consumer rather than sending them to
+  /// register. A brand-new Google identity (`isNewUser: true` and no
+  /// backend match) goes to the normal register flow — Google never
+  /// collects a phone number or password, which the rest of the app
+  /// treats as required account fields.
   Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
     final idToken = result.idToken;
     if (idToken == null || idToken.isEmpty) {
@@ -95,45 +103,92 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         await ref.read(checkGoogleUserUseCaseProvider).call(idToken: idToken);
     if (!mounted) return;
 
-    // A failed lookup (network hiccup, etc.) falls back to the safe default
-    // — send to register. Registering with a real phone/password when an
-    // account already exists just fails there with an actionable error,
-    // never silently creates a duplicate or wrong-role account.
-    final existingRole = checkResult.fold((_) => null, (r) => r.exists ? r.role : null);
-    if (existingRole == null) {
-      state = state.copyWith(
-        isGoogleLoading: false,
-        isAppleLoading: false,
-        isFacebookLoading: false,
-        clearError: true,
-        needsRegistration: true,
+    var exists = false;
+    UserRole? existingRole;
+    checkResult.fold((_) {}, (r) {
+      exists = r.exists;
+      existingRole = r.role;
+    });
+    if (kDebugMode) {
+      debugPrint(
+        'google check-user parsed: exists=$exists role=$existingRole '
+        'isNewUser=${result.isNewUser}',
       );
+    }
+
+    if (existingRole != null) {
+      await _loginWithGoogleRole(idToken, existingRole!);
       return;
     }
 
+    // Lookup miss, unparseable role, or a failed check-user call: a
+    // returning Firebase identity still belongs to an existing account
+    // (often email/password with the same Gmail). Log in rather than
+    // sending them to register.
+    if (exists || !result.isNewUser) {
+      await _loginWithGoogleRole(idToken, UserRole.consumer);
+      return;
+    }
+
+    state = state.copyWith(
+      isGoogleLoading: false,
+      isAppleLoading: false,
+      isFacebookLoading: false,
+      clearError: true,
+      needsRegistration: true,
+    );
+  }
+
+  Future<void> _loginWithGoogleRole(String idToken, UserRole preferred) async {
     state = state.copyWith(isGoogleLoading: true, clearError: true);
-    final loginResult = await ref
+    final first = await ref
         .read(googleLoginUseCaseProvider)
-        .call(idToken: idToken, role: existingRole);
+        .call(idToken: idToken, role: preferred);
     if (!mounted) return;
-    loginResult.fold(
+    final firstUser = first.fold((_) => null, (user) => user);
+    if (firstUser != null) {
+      _adoptGoogleSession(firstUser);
+      return;
+    }
+    final firstFailure = first.fold((failure) => failure, (_) => null)!;
+    final other = preferred == UserRole.vendor
+        ? UserRole.consumer
+        : UserRole.vendor;
+    if (!_isDifferentRoleConflict(firstFailure)) {
+      state = state.copyWith(
+        isGoogleLoading: false,
+        error: firstFailure.toString(),
+      );
+      return;
+    }
+    final second = await ref
+        .read(googleLoginUseCaseProvider)
+        .call(idToken: idToken, role: other);
+    if (!mounted) return;
+    second.fold(
       (failure) {
         state = state.copyWith(isGoogleLoading: false, error: failure.toString());
       },
-      (user) {
-        state = state.copyWith(isGoogleLoading: false, clearError: true);
-        // Session already persisted by the repository; adopt it synchronously
-        // so the router moves off login to home.
-        ref.read(authProvider.notifier).adoptSession(user);
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.loginSuccess,
-          properties: {
-            AnalyticsProps.method: 'google',
-            AnalyticsProps.role: user.role.name,
-          },
-        );
+      _adoptGoogleSession,
+    );
+  }
+
+  void _adoptGoogleSession(UserEntity user) {
+    state = state.copyWith(isGoogleLoading: false, clearError: true);
+    // Session already persisted by the repository; adopt it synchronously
+    // so the router moves off login to home.
+    ref.read(authProvider.notifier).adoptSession(user);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.loginSuccess,
+      properties: {
+        AnalyticsProps.method: 'google',
+        AnalyticsProps.role: user.role.name,
       },
     );
+  }
+
+  bool _isDifferentRoleConflict(Object failure) {
+    return failure.toString().toLowerCase().contains('different role');
   }
 
   /// Consumes [SocialAuthState.needsRegistration] once the caller has

@@ -2348,6 +2348,12 @@ abstract class AppLocalizations {
   /// **'Mark as Shipped'**
   String get ordersMarkShipped;
 
+  /// No description provided for @ordersMarkDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Delivered'**
+  String get ordersMarkDelivered;
+
   /// No description provided for @ordersViewTracking.
   ///
   /// In en, this message translates to:
@@ -3344,6 +3350,30 @@ abstract class AppLocalizations {
   /// **'Saved on this device only, until an account-wide address book ships.'**
   String get checkoutAddressesDeviceOnly;
 
+  /// No description provided for @addressesEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t saved any addresses yet.'**
+  String get addressesEmptyState;
+
+  /// No description provided for @addressesMainBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get addressesMainBadge;
+
+  /// No description provided for @addressesSetAsMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as Main'**
+  String get addressesSetAsMain;
+
+  /// No description provided for @addressesMaxReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the 5-address limit'**
+  String get addressesMaxReached;
+
   /// No description provided for @checkoutErrorAddressName.
   ///
   /// In en, this message translates to:
@@ -3734,6 +3764,24 @@ abstract class AppLocalizations {
   /// **'Sign in to write a review'**
   String get signInToWriteReview;
 
+  /// No description provided for @reviewRequiresDeliveredOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'You can review this product once your order for it has been delivered'**
+  String get reviewRequiresDeliveredOrder;
+
+  /// No description provided for @alreadyReviewedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already reviewed'**
+  String get alreadyReviewedTitle;
+
+  /// No description provided for @alreadyReviewedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You already reviewed this product.'**
+  String get alreadyReviewedMessage;
+
   /// No description provided for @deleteReviewConfirmTitle.
   ///
   /// In en, this message translates to:
@@ -3799,6 +3847,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Visit Store'**
   String get visitStore;
+
+  /// No description provided for @reportVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Vendor'**
+  String get reportVendor;
+
+  /// No description provided for @reportVendorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report {name}'**
+  String reportVendorTitle(String name);
+
+  /// No description provided for @reportVendorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let us know if something went wrong with this order. Our team will review your report.'**
+  String get reportVendorSubtitle;
+
+  /// No description provided for @reportVendorReasonFraud.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraud or scam'**
+  String get reportVendorReasonFraud;
+
+  /// No description provided for @reportVendorReasonPoorQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor product quality'**
+  String get reportVendorReasonPoorQuality;
+
+  /// No description provided for @reportVendorReasonNotAsDescribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Item not as described'**
+  String get reportVendorReasonNotAsDescribed;
+
+  /// No description provided for @reportVendorReasonNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'No response from seller'**
+  String get reportVendorReasonNoResponse;
+
+  /// No description provided for @reportVendorReasonHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment or abuse'**
+  String get reportVendorReasonHarassment;
+
+  /// No description provided for @reportVendorReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reportVendorReasonOther;
+
+  /// No description provided for @reportVendorCommentHintOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Add details (optional)'**
+  String get reportVendorCommentHintOptional;
+
+  /// No description provided for @reportVendorCommentHintRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the issue'**
+  String get reportVendorCommentHintRequired;
+
+  /// No description provided for @reportVendorSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
+  String get reportVendorSubmit;
+
+  /// No description provided for @reportVendorSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted. Our team will review it.'**
+  String get reportVendorSuccess;
 
   /// No description provided for @verifiedSeller.
   ///
@@ -4190,6 +4316,12 @@ abstract class AppLocalizations {
   /// **'Mark as Shipped'**
   String get vendorMarkShipped;
 
+  /// No description provided for @vendorMarkDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Delivered'**
+  String get vendorMarkDelivered;
+
   /// No description provided for @vendorOrdersEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -4345,6 +4477,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order marked as shipped!'**
   String get vendorOrderShippedSnack;
+
+  /// No description provided for @vendorOrderDeliveredSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Order marked as delivered'**
+  String get vendorOrderDeliveredSnack;
 
   /// No description provided for @vendorStatusPending.
   ///

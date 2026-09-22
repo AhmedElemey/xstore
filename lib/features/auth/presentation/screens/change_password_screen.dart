@@ -10,6 +10,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
 
@@ -48,9 +49,15 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     super.dispose();
   }
 
+  bool get _hasPassword =>
+      ref.read(profileNotifierProvider).profile?.hasPassword ?? true;
+
   Future<void> _submit() async {
     final l10n = context.l10n;
-    final currentError = Validators.loginPassword(l10n, _current.text);
+    final hasPassword = _hasPassword;
+    final currentError = hasPassword
+        ? Validators.loginPassword(l10n, _current.text)
+        : null;
     final nextError = Validators.registerPassword(l10n, _next.text);
     final confirmError = Validators.confirmPasswordMatches(
       l10n,
@@ -68,7 +75,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
     setState(() => _isLoading = true);
     final result = await ref.read(changePasswordUseCaseProvider).call(
-          currentPassword: _current.text,
+          currentPassword: hasPassword ? _current.text : null,
           newPassword: _next.text,
           confirmNewPassword: _confirm.text,
         );
@@ -86,9 +93,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     );
   }
 
-  bool get _canSubmit {
+  bool _canSubmit(bool hasPassword) {
     final l10n = context.l10n;
-    return Validators.loginPassword(l10n, _current.text) == null &&
+    final currentOk = !hasPassword ||
+        Validators.loginPassword(l10n, _current.text) == null;
+    return currentOk &&
         Validators.registerPassword(l10n, _next.text) == null &&
         Validators.confirmPasswordMatches(l10n, _next.text, _confirm.text) ==
             null;
@@ -96,6 +105,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final hasPassword = ref.watch(
+      profileNotifierProvider.select((s) => s.profile?.hasPassword ?? true),
+    );
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
@@ -115,27 +127,29 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 ),
               ),
               const Gap(AppSpacing.x2l),
-              AuthTextField(
-                label: context.l10n.currentPasswordRequired,
-                controller: _current,
-                obscureText: !_currentVisible,
-                prefixIcon: const Icon(LucideIcons.lock),
-                suffixIcon: IconButton(
-                  onPressed: () =>
-                      setState(() => _currentVisible = !_currentVisible),
-                  icon: Icon(
-                    _currentVisible ? LucideIcons.eyeOff : LucideIcons.eye,
-                    color: context.iconSecondary,
+              if (hasPassword) ...[
+                AuthTextField(
+                  label: context.l10n.currentPasswordRequired,
+                  controller: _current,
+                  obscureText: !_currentVisible,
+                  prefixIcon: const Icon(LucideIcons.lock),
+                  suffixIcon: IconButton(
+                    onPressed: () =>
+                        setState(() => _currentVisible = !_currentVisible),
+                    icon: Icon(
+                      _currentVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                      color: context.iconSecondary,
+                    ),
                   ),
+                  errorText: _currentError,
+                  onChanged: (_) {
+                    if (_currentError != null) {
+                      setState(() => _currentError = null);
+                    }
+                  },
                 ),
-                errorText: _currentError,
-                onChanged: (_) {
-                  if (_currentError != null) {
-                    setState(() => _currentError = null);
-                  }
-                },
-              ),
-              const Gap(AppSpacing.lg),
+                const Gap(AppSpacing.lg),
+              ],
               AuthTextField(
                 label: context.l10n.newPasswordRequired,
                 controller: _next,
@@ -182,7 +196,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 builder: (context, _) => XstoreButton(
                   label: context.l10n.menuChangePassword,
                   isLoading: _isLoading,
-                  onPressed: _isLoading || !_canSubmit ? null : _submit,
+                  onPressed:
+                      _isLoading || !_canSubmit(hasPassword) ? null : _submit,
                 ),
               ),
             ],

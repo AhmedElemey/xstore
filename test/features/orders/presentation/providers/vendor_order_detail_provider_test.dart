@@ -61,6 +61,7 @@ Future<ProviderContainer> _syncedContainer({
   Either<Failure, OrderEntity> Function(String orderId)? markProcessing,
   Either<Failure, OrderEntity> Function(String orderId, ShippingInfo info)?
   markShipped,
+  Either<Failure, OrderEntity> Function(String orderId)? markDelivered,
 }) async {
   var backendOrder = _order();
   void adopt(Either<Failure, OrderEntity> result) =>
@@ -95,6 +96,13 @@ Future<ProviderContainer> _syncedContainer({
         ? null
         : (orderId, info) {
             final result = markShipped(orderId, info);
+            adopt(result);
+            return result;
+          },
+    markDeliveredResult: markDelivered == null
+        ? null
+        : (orderId) {
+            final result = markDelivered(orderId);
             adopt(result);
             return result;
           },
@@ -252,7 +260,7 @@ void main() {
     );
 
     test(
-      'markProcessing then markShipped keep the detail order in sync step by step',
+      'markProcessing then markShipped then markDelivered keep the detail order in sync step by step',
       () async {
         final container = await _syncedContainer(
           markProcessing: (orderId) =>
@@ -262,6 +270,7 @@ void main() {
               status: OrderStatus.shipped,
             ).copyWith(trackingNumber: info.trackingNumber),
           ),
+          markDelivered: (orderId) => Right(_order(status: OrderStatus.delivered)),
         );
         final detailNotifier = container.read(
           vendorOrderDetailProvider(_orderId).notifier,
@@ -285,6 +294,17 @@ void main() {
         final listOrder = container.read(vendorOrdersProvider).orders.single;
         expect(listOrder.status, OrderStatus.shipped);
         expect(listOrder.trackingNumber, 'XS-9');
+
+        final deliveredOk = await detailNotifier.markDelivered();
+        expect(deliveredOk, isTrue);
+        expect(
+          container.read(vendorOrderDetailProvider(_orderId)).order?.status,
+          OrderStatus.delivered,
+        );
+        expect(
+          container.read(vendorOrdersProvider).orders.single.status,
+          OrderStatus.delivered,
+        );
       },
     );
   });

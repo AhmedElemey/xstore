@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/review_write_params.dart';
 import 'product_dependencies.dart';
+import 'product_detail_notifier.dart';
 import 'product_reviews_state.dart';
 
 part 'product_reviews_notifier.g.dart';
@@ -90,6 +91,7 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
       },
       (_) {
         state = state.copyWith(isSubmitting: false);
+        ref.invalidate(productDetailProvider(listingId));
         unawaited(refresh());
         return true;
       },
@@ -103,9 +105,12 @@ class ProductReviewsNotifier extends _$ProductReviewsNotifier {
     if (_disposed) return;
     result.fold(
       (failure) => state = state.copyWith(error: failure.toString()),
-      (_) => state = state.copyWith(
-        reviews: state.reviews.where((r) => r.id != reviewId).toList(),
-      ),
+      (_) {
+        ref.invalidate(productDetailProvider(listingId));
+        state = state.copyWith(
+          reviews: state.reviews.where((r) => r.id != reviewId).toList(),
+        );
+      },
     );
   }
 }

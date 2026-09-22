@@ -215,3 +215,13 @@ extension OrderEntityX on OrderEntity {
     );
   }
 }
+
+/// True when [orders] contains a delivered order carrying [listingId] as a
+/// line item — the "verified purchase" gate for writing a product review.
+bool hasDeliveredOrderForListing(List<OrderEntity> orders, String listingId) {
+  return orders.any(
+    (order) =>
+        order.status == OrderStatus.delivered &&
+        order.items.any((item) => item.listingId == listingId),
+  );
+}

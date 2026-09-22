@@ -9,7 +9,10 @@ class MarkDeliveredUseCase {
 
   final OrdersRepository _repository;
 
-  Future<Either<Failure, OrderEntity>> call(String orderId) {
-    return _repository.markDelivered(orderId);
+  Future<Either<Failure, OrderEntity>> call(
+    String orderId, {
+    String? vendorId,
+  }) {
+    return _repository.markDelivered(orderId, vendorId: vendorId);
   }
 }

@@ -19,5 +19,7 @@ class ProfileEntity with _$ProfileEntity {
     @Default(false) bool isPhoneVerificationRequired,
     @Default(false) bool isEmailVerified,
     @Default(false) bool isPhoneVerified,
+    /// Social-only accounts send `hasPassword: "No"` and skip current-password.
+    @Default(true) bool hasPassword,
   }) = _ProfileEntity;
 }

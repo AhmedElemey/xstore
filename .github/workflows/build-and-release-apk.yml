@@ -15,8 +15,8 @@
 #                 (e.g. you@gmail.com)
 # MAIL_PASSWORD   Gmail App Password (16-char token) — NOT your Gmail password
 # MAIL_TO         Primary recipient email address for build notifications
-#                 (mohamedmax728@gmail.com and Mohammedelbakly8@gmail.com are
-#                 also notified on every release — see Send email notification)
+#                 (additional hardcoded recipients are also notified on every
+#                 release — see Send email notification)
 #
 # GITHUB_TOKEN is provided automatically by GitHub Actions and is sufficient
 # for creating releases in this repository. No Personal Access Token required.
@@ -211,6 +211,7 @@ jobs:
             "Mohammedelbakly8@gmail.com"
             "rehab.mhmd2@gmail.com"
             "amlmhmd253@gmail.com"
+            "Salahwork1996@gmail.com"
           )
           TO_HEADER=$(IFS=, ; echo "${RECIPIENTS[*]}")
           MAIL_RCPT_ARGS=()

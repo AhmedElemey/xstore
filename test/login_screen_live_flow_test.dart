@@ -327,4 +327,54 @@ void main() {
       expect(find.text('Home Screen'), findsNothing);
     },
   );
+
+  testWidgets(
+    'Google sign-in for a returning Firebase identity does not send the '
+    'user to Register when check-user reports no Google-linked account',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'POST ${ApiEndpoints.googleCheckUser}': (_) => {
+          'exists': false,
+          'role': null,
+        },
+        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
+          'token': 'access-token-email-account',
+          'refreshToken': 'refresh-token-email-account',
+        },
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      await tester.pumpWidget(
+        _routedHarness([
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(
+                googleResult: const SocialAuthResult(
+                  provider: SocialProvider.google,
+                  uid: 'google-uid-email-account',
+                  email: 'rehab.mhmd2@gmail.com',
+                  displayName: 'Existing Email User',
+                  idToken: 'google-id-token-email-account',
+                  isNewUser: false,
+                ),
+              ),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      await tester.ensureVisible(find.text('Continue with Google'));
+      await tester.pump();
+      await tester.tap(find.text('Continue with Google'));
+      await _settle(tester);
+
+      expect(find.text('Register Screen'), findsNothing);
+    },
+  );
 }

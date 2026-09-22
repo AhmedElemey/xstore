@@ -1163,6 +1163,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersMarkShipped => 'تم الشحن';
 
   @override
+  String get ordersMarkDelivered => 'تم التسليم';
+
+  @override
   String get ordersViewTracking => 'عرض التتبع';
 
   @override
@@ -1665,6 +1668,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'محفوظ على هذا الجهاز فقط، حتى يتم إطلاق دفتر عناوين مرتبط بحسابك.';
 
   @override
+  String get addressesEmptyState => 'لم تقم بحفظ أي عناوين حتى الآن.';
+
+  @override
+  String get addressesMainBadge => 'الرئيسي';
+
+  @override
+  String get addressesSetAsMain => 'تعيين كرئيسي';
+
+  @override
+  String get addressesMaxReached => 'لقد وصلت إلى الحد الأقصى (5 عناوين)';
+
+  @override
   String get checkoutErrorAddressName => 'أدخل اسم المستلم';
 
   @override
@@ -1872,6 +1887,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signInToWriteReview => 'سجّل الدخول لكتابة تقييم';
 
   @override
+  String get reviewRequiresDeliveredOrder =>
+      'يمكنك تقييم هذا المنتج بعد استلام طلبك الخاص به';
+
+  @override
+  String get alreadyReviewedTitle => 'تم التقييم من قبل';
+
+  @override
+  String get alreadyReviewedMessage => 'لقد قيّمت هذا المنتج بالفعل.';
+
+  @override
   String get deleteReviewConfirmTitle => 'حذف التقييم؟';
 
   @override
@@ -1903,6 +1928,48 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get visitStore => 'زيارة المتجر';
+
+  @override
+  String get reportVendor => 'الإبلاغ عن البائع';
+
+  @override
+  String reportVendorTitle(String name) {
+    return 'الإبلاغ عن $name';
+  }
+
+  @override
+  String get reportVendorSubtitle =>
+      'أخبرنا إذا حدث خطأ ما في هذا الطلب. سيقوم فريقنا بمراجعة بلاغك.';
+
+  @override
+  String get reportVendorReasonFraud => 'احتيال أو نصب';
+
+  @override
+  String get reportVendorReasonPoorQuality => 'جودة المنتج سيئة';
+
+  @override
+  String get reportVendorReasonNotAsDescribed => 'المنتج غير مطابق للوصف';
+
+  @override
+  String get reportVendorReasonNoResponse => 'لا يوجد رد من البائع';
+
+  @override
+  String get reportVendorReasonHarassment => 'مضايقة أو إساءة';
+
+  @override
+  String get reportVendorReasonOther => 'أخرى';
+
+  @override
+  String get reportVendorCommentHintOptional => 'أضف التفاصيل (اختياري)';
+
+  @override
+  String get reportVendorCommentHintRequired => 'يرجى وصف المشكلة';
+
+  @override
+  String get reportVendorSubmit => 'إرسال البلاغ';
+
+  @override
+  String get reportVendorSuccess => 'تم إرسال البلاغ. سيقوم فريقنا بمراجعته.';
 
   @override
   String get verifiedSeller => '✅ بائع موثّق';
@@ -2102,6 +2169,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorMarkShipped => 'وضع تم الشحن';
 
   @override
+  String get vendorMarkDelivered => 'وضع تم التسليم';
+
+  @override
   String get vendorOrdersEmptyTitle => 'لا توجد طلبات بعد';
 
   @override
@@ -2180,6 +2250,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorOrderShippedSnack => 'تم وضع الطلب كمشحون!';
+
+  @override
+  String get vendorOrderDeliveredSnack => 'تم وضع الطلب كمُسلَّم';
 
   @override
   String get vendorStatusPending => 'في انتظار تأكيدك';

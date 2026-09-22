@@ -155,9 +155,10 @@ abstract final class ApiEndpoints {
   // backend model is ONE listing per order (POST body is
   // {listingId, quantity, latitude, longitude}) — there is no multi-item
   // cart/checkout endpoint anywhere on this backend. Vendor status changes
-  // are a single bulk endpoint ({orderIds:[...], status: "..."}), not the
-  // separate confirm/reject/processing/shipped/delivered routes the app
-  // used to assume — none of those exist. Live-probed response shapes:
+  // are a single bulk endpoint ({orderIds:[...], status: "..."}), including
+  // Delivered (strict pending→…→shipped→delivered). There is no buyer
+  // POST /orders/{id}/delivered on this host (404). Live-probed
+  // response shapes:
   // GET /orders/me -> bare array (confirmed empty-array response).
   // GET /vendor/orders -> {orders:[...], totalCount, pendingCount,
   // confirmedCount, totalRevenue, warnThresholdEgp, pauseThresholdEgp,
@@ -200,4 +201,14 @@ abstract final class ApiEndpoints {
   // hammering a route that doesn't exist yet).
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
+
+  // ---------------------------------------------------------------------
+  // Vendor reports — PROPOSED, not yet built on the backend (2026-09-15).
+  // Full contract spec is documented on
+  // VendorReportsRemoteDataSourceImpl in
+  // lib/features/reports/data/datasources/vendor_reports_remote_datasource.dart.
+  // Until the backend ships this route, a live submission 404s and the
+  // failure is surfaced to the user — that is expected, not a bug.
+  // ---------------------------------------------------------------------
+  static const String vendorReports = '$_api/reports/vendor';
 }

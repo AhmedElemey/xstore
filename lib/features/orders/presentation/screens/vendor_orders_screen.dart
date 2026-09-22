@@ -382,6 +382,17 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                                 },
                               ),
                             ),
+                            onDelivered: () async {
+                              final ok = await ref
+                                  .read(vendorOrdersProvider.notifier)
+                                  .markDelivered(order.id);
+                              if (!context.mounted) return;
+                              if (ok) {
+                                context.showSnack(
+                                  context.l10n.vendorOrderDeliveredSnack,
+                                );
+                              }
+                            },
                           ),
                         );
                       },

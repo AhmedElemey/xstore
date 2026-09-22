@@ -190,7 +190,10 @@ class StubOrdersRepository implements OrdersRepository {
       Future.value(_markShipped(orderId, shippingInfo));
 
   @override
-  Future<Either<Failure, OrderEntity>> markDelivered(String orderId) async =>
+  Future<Either<Failure, OrderEntity>> markDelivered(
+    String orderId, {
+    String? vendorId,
+  }) async =>
       Future.value(_markDelivered(orderId));
 
   @override

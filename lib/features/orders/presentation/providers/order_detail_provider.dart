@@ -179,6 +179,23 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     _finalizeMutation(result, prev);
   }
 
+  Future<void> markDeliveredVendor() async {
+    final prev = state.order;
+    if (prev == null) return;
+    final now = DateTime.now();
+    final optimistic = prev.copyWith(
+      status: OrderStatus.delivered,
+      deliveredAt: now,
+      updatedAt: now,
+    );
+    state = state.copyWith(isActioning: true, order: optimistic, error: null);
+    final result = await ref.read(markDeliveredUseCaseProvider).call(
+          state.orderId,
+          vendorId: _vendorId,
+        );
+    _finalizeMutation(result, prev);
+  }
+
   Future<void> confirmReceipt() async {
     final prev = state.order;
     if (prev == null) return;
@@ -189,8 +206,10 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       updatedAt: now,
     );
     state = state.copyWith(isActioning: true, order: optimistic, error: null);
-    final result =
-        await ref.read(markDeliveredUseCaseProvider).call(state.orderId);
+    final result = await ref.read(markDeliveredUseCaseProvider).call(
+          state.orderId,
+          vendorId: _isVendor ? _vendorId : null,
+        );
     _finalizeMutation(result, prev, role: 'consumer');
   }
 

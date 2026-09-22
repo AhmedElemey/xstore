@@ -198,7 +198,10 @@ class _SharedOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<Either<Failure, OrderEntity>> markDelivered(String orderId) async {
+  Future<Either<Failure, OrderEntity>> markDelivered(
+    String orderId, {
+    String? vendorId,
+  }) async {
     final now = DateTime.now();
     final next = _requireById(
       orderId,

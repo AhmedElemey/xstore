@@ -9,6 +9,8 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../product/domain/entities/review_write_params.dart';
 import '../../../product/presentation/providers/product_dependencies.dart';
+import '../../../product/presentation/providers/product_detail_notifier.dart';
+import '../../../product/presentation/widgets/already_reviewed_sheet.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'delivery_method_sheet.dart';
@@ -279,9 +281,9 @@ class OrderCard extends ConsumerWidget {
         case OrderStatus.shipped:
           return SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () => _trackingSnack(context),
-              child: Text(context.l10n.ordersViewTracking),
+            child: FilledButton(
+              onPressed: () => notifier.markDelivered(order.id),
+              child: Text(context.l10n.ordersMarkDelivered),
             ),
           );
         case OrderStatus.delivered:
@@ -307,51 +309,12 @@ class OrderCard extends ConsumerWidget {
           ),
         );
       case OrderStatus.shipped:
-        final compact = ButtonStyle(
-          visualDensity: VisualDensity.compact,
-          padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        return SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => _trackingSnack(context),
+            child: Text(context.l10n.ordersTrackOrder),
           ),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        );
-        return Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                style: compact,
-                onPressed: () => _trackingSnack(context),
-                child: Text(
-                  context.l10n.ordersTrackOrder,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: FilledButton(
-                style: compact,
-                onPressed: () => _confirmReceipt(context, ref, notifier),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.check, size: AppSpacing.lg),
-                    const SizedBox(width: AppSpacing.xs),
-                    Flexible(
-                      child: Text(
-                        context.l10n.ordersConfirmReceipt,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         );
       case OrderStatus.delivered:
         return Row(
@@ -416,35 +379,6 @@ class OrderCard extends ConsumerWidget {
     await notifier.cancelOrder(order.id, reason);
     if (!context.mounted) return;
     _errSnack(context, ref);
-  }
-
-  Future<void> _confirmReceipt(
-    BuildContext context,
-    WidgetRef ref,
-    OrdersNotifier notifier,
-  ) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.ordersConfirmReceiptTitle),
-        content: Text(context.l10n.ordersConfirmReceiptBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.l10n.ordersConfirm),
-          ),
-        ],
-      ),
-    );
-    if (ok == true && context.mounted) {
-      await notifier.confirmReceipt(order.id);
-      if (!context.mounted) return;
-      _errSnack(context, ref);
-    }
   }
 
   Future<void> _rejectFlow(
@@ -589,15 +523,31 @@ class OrderCard extends ConsumerWidget {
   }
 
   Future<void> _reviewSheet(BuildContext context, WidgetRef ref) async {
+    final listingId =
+        order.items.isEmpty ? null : order.items.first.listingId;
+    if (listingId == null || listingId.isEmpty) return;
+    final existing = await findMyListingReview(ref, listingId);
+    if (!context.mounted) return;
+    if (existing != null) {
+      await showAlreadyReviewedSheet(
+        context,
+        onEdit: () {
+          if (!context.mounted) return;
+          context.push('${AppRoutes.product}/$listingId/reviews');
+        },
+      );
+      return;
+    }
+
     var stars = 5;
     var reviewText = '';
-    await showModalBottomSheet<void>(
+    final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setS) {
+          builder: (sheetContext, setS) {
             return Padding(
               padding: EdgeInsets.only(
                 left: AppSpacing.lg,
@@ -608,7 +558,7 @@ class OrderCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(context.l10n.ordersReviewSheetTitle,
+                  Text(sheetContext.l10n.ordersReviewSheetTitle,
                       style: AppTypography.titleMedium),
                   const SizedBox(height: AppSpacing.md),
                   Row(
@@ -629,23 +579,15 @@ class OrderCard extends ConsumerWidget {
                     onChanged: (v) => reviewText = v,
                     maxLines: 4,
                     decoration: InputDecoration(
-                      hintText: context.l10n.ordersReviewHint,
+                      hintText: sheetContext.l10n.ordersReviewHint,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   FilledButton(
                     onPressed: () async {
-                      // Matches product_reviews_screen.dart's own write-review
-                      // validation: an empty comment blocks submission rather
-                      // than sending a blank one.
                       final comment = reviewText.trim();
                       if (comment.isEmpty) return;
-                      final listingId = order.items.isEmpty
-                          ? null
-                          : order.items.first.listingId;
-                      Navigator.pop(ctx);
-                      if (listingId == null) return;
-                      final result =
+                      final posted =
                           await ref.read(createReviewUseCaseProvider).call(
                         listingId: listingId,
                         params: ReviewWriteParams(
@@ -653,17 +595,27 @@ class OrderCard extends ConsumerWidget {
                           comment: comment,
                         ),
                       );
-                      if (!context.mounted) return;
-                      result.fold(
-                        (failure) =>
-                            AppSnackbar.error(context, failure.toString()),
-                        (_) => AppSnackbar.success(
-                          context,
-                          context.l10n.ordersReviewThanks,
-                        ),
+                      if (!sheetContext.mounted) return;
+                      posted.fold(
+                        (failure) {
+                          if (isAlreadyReviewedFailure(failure)) {
+                            Navigator.pop(ctx, 'already');
+                            return;
+                          }
+                          AppSnackbar.error(
+                            sheetContext,
+                            failure.toString(),
+                          );
+                        },
+                        (_) {
+                          stars = 5;
+                          reviewText = '';
+                          Navigator.pop(ctx, 'added');
+                          ref.invalidate(productDetailProvider(listingId));
+                        },
                       );
                     },
-                    child: Text(context.l10n.ordersSubmitReview),
+                    child: Text(sheetContext.l10n.ordersSubmitReview),
                   ),
                 ],
               ),
@@ -672,6 +624,12 @@ class OrderCard extends ConsumerWidget {
         );
       },
     );
+    if (!context.mounted) return;
+    if (result == 'added') {
+      AppSnackbar.success(context, context.l10n.ordersReviewThanks);
+    } else if (result == 'already') {
+      await showAlreadyReviewedSheet(context);
+    }
   }
 
   Future<String?> _cancelReasonDialog(BuildContext context) async {

@@ -219,9 +219,12 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<Either<Failure, OrderEntity>> markDelivered(String orderId) async {
+  Future<Either<Failure, OrderEntity>> markDelivered(
+    String orderId, {
+    String? vendorId,
+  }) async {
     try {
-      final row = await _remote.markDelivered(orderId);
+      final row = await _remote.markDelivered(orderId, vendorId: vendorId);
       return Right(row.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));

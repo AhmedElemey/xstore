@@ -149,6 +149,7 @@ void main() {
       expect(wire.userJson['email'], 'probe@test.local');
       expect(wire.isEmailVerificationRequired, isTrue);
       expect(wire.hasStore, isFalse);
+      expect(wire.hasPassword, isTrue);
     });
 
     test('reads isEmailVerified/isPhoneVerified as top-level flags, not nested under user', () {
@@ -200,6 +201,45 @@ void main() {
       });
       expect(wire.isEmailVerified, isTrue);
       expect(wire.isPhoneVerified, isTrue);
+    });
+
+    test('reads hasPassword Yes/No (and bool) as a top-level flag', () {
+      expect(
+        parseProfileResponse({
+          'user': {'id': 1, 'email': 'a@test.local'},
+          'store': null,
+          'hasPassword': 'Yes',
+        }).hasPassword,
+        isTrue,
+      );
+      expect(
+        parseProfileResponse({
+          'user': {'id': 1, 'email': 'a@test.local'},
+          'store': null,
+          'hasPassword': 'No',
+        }).hasPassword,
+        isFalse,
+      );
+      expect(
+        parseProfileResponse({
+          'user': {'id': 1, 'email': 'a@test.local'},
+          'store': null,
+          'hasPassword': false,
+        }).hasPassword,
+        isFalse,
+      );
+    });
+
+    test('falls back to nested user hasPassword when the top-level key is absent', () {
+      final wire = parseProfileResponse({
+        'user': {
+          'id': 1,
+          'email': 'a@test.local',
+          'hasPassword': 'No',
+        },
+        'store': null,
+      });
+      expect(wire.hasPassword, isFalse);
     });
 
     test('merges nested store object onto user fields', () {

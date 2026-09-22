@@ -352,6 +352,53 @@ void main() {
   );
 
   testWidgets(
+    'vendor marks a shipped order delivered via PUT /vendor/orders/status',
+    skip: MockConfig.useMock,
+    (tester) async {
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (_) => {
+          'orders': [_vendorOrderJson(id: '904', status: 'shipped')],
+          'totalCount': 1,
+          'pendingCount': 0,
+          'confirmedCount': 1,
+          'totalRevenue': 0,
+        },
+        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
+          putRequest = options;
+          return _vendorOrderJson(id: '904', status: 'delivered');
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      expect(find.text('Incoming Orders'), findsOneWidget);
+      expect(find.text('Mark as Delivered'), findsOneWidget);
+
+      await tester.tap(find.text('Mark as Delivered'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.data, {
+        'orderIds': [904],
+        'status': 'Delivered',
+      });
+      expect(
+        find.text('Mark as Delivered'),
+        findsNothing,
+        reason: 'a delivered order no longer offers Mark as Delivered',
+      );
+      expect(find.text('View Details'), findsOneWidget);
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
     'vendor taps Mark as Processing on OrdersScreen and the live status wire call updates the card',
     skip: MockConfig.useMock,
     (tester) async {
@@ -588,9 +635,9 @@ void main() {
         reason: 'a shipped order no longer offers Mark as Shipped',
       );
       expect(
-        find.text('View Tracking'),
+        find.text('Mark as Delivered'),
         findsOneWidget,
-        reason: 'a shipped order moves on to View Tracking',
+        reason: 'a shipped order moves on to Mark as Delivered',
       );
 
       await _awaitAnalyticsReady(container);
@@ -695,6 +742,10 @@ void main() {
         'GET ${ApiEndpoints.ordersMe}': (_) => [
           _consumerOrderJson(id: '506', status: 'delivered', listingId: '9003'),
         ],
+        'GET ${ApiEndpoints.apiListingReviews('9003')}': (_) => {
+          'items': <dynamic>[],
+          'totalCount': 0,
+        },
         // _reviewSheet posts through the same product-review endpoint the
         // product detail screen uses (ProductRemoteDataSourceImpl.createReview),
         // keyed off the order's (single) listing.
@@ -751,6 +802,10 @@ void main() {
         'GET ${ApiEndpoints.ordersMe}': (_) => [
           _consumerOrderJson(id: '507', status: 'delivered', listingId: '9004'),
         ],
+        'GET ${ApiEndpoints.apiListingReviews('9004')}': (_) => {
+          'items': <dynamic>[],
+          'totalCount': 0,
+        },
         'POST ${ApiEndpoints.apiListingReviews('9004')}': (options) =>
             _serverErrorResponse(
               options,
@@ -800,6 +855,10 @@ void main() {
         'GET ${ApiEndpoints.ordersMe}': (_) => [
           _consumerOrderJson(id: '508', status: 'delivered'),
         ],
+        'GET ${ApiEndpoints.apiListingReviews('9001')}': (_) => {
+          'items': <dynamic>[],
+          'totalCount': 0,
+        },
       });
 
       final container = await _pumpReady(tester, [

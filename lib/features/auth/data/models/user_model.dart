@@ -13,6 +13,7 @@ class ProfileResponseWire {
     this.isPhoneVerificationRequired = false,
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
+    this.hasPassword = true,
     this.hasStore = false,
   });
 
@@ -21,7 +22,28 @@ class ProfileResponseWire {
   final bool isPhoneVerificationRequired;
   final bool isEmailVerified;
   final bool isPhoneVerified;
+  final bool hasPassword;
   final bool hasStore;
+}
+
+/// Parses a backend Yes/No flag (`"Yes"`/`"No"`, bool, or 0/1).
+bool _yesNoFlag(dynamic value, {required bool fallback}) {
+  if (value == null) return fallback;
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    switch (value.trim().toLowerCase()) {
+      case 'yes':
+      case 'true':
+      case '1':
+        return true;
+      case 'no':
+      case 'false':
+      case '0':
+        return false;
+    }
+  }
+  return fallback;
 }
 
 int? _optInt(dynamic value) {
@@ -147,8 +169,8 @@ void mergeStoreJsonIntoUser(
 ///
 /// CONFIRMED live API: `{ "user": { ... }, "store": { ... } | null,
 /// "isEmailVerificationRequired", "isPhoneVerificationRequired",
-/// "isEmailVerified", "isPhoneVerified" }` — all four flags are top-level,
-/// not nested inside `user`.
+/// "isEmailVerified", "isPhoneVerified", "hasPassword" }` — flags are
+/// top-level, not nested inside `user`. `hasPassword` is a Yes/No flag.
 /// Login/register return `{ "token", "refreshToken" }` only — no user object;
 /// do not use this helper on those responses.
 ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
@@ -191,6 +213,10 @@ ProfileResponseWire parseProfileResponse(Map<String, dynamic> data) {
         userJson['isPhoneVerified'] as bool? ??
         userJson['isPhoneNumberVerified'] as bool? ??
         false,
+    hasPassword: _yesNoFlag(
+      data['hasPassword'] ?? userJson['hasPassword'],
+      fallback: true,
+    ),
     hasStore: hasStore,
   );
 }

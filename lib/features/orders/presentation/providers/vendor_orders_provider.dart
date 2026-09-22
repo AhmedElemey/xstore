@@ -322,6 +322,39 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     });
   }
 
+  Future<bool> markDelivered(String orderId) async {
+    final snapshot = state.orders;
+    final now = DateTime.now();
+    state = state.copyWith(
+      orders: state.orders
+          .map(
+            (o) => o.id == orderId
+                ? o.copyWith(
+                    status: OrderStatus.delivered,
+                    deliveredAt: now,
+                    updatedAt: now,
+                  )
+                : o,
+          )
+          .toList(),
+    );
+    _recompute();
+    final result = await ref.read(markDeliveredUseCaseProvider).call(
+          orderId,
+          vendorId: _vendorId,
+        );
+    if (!mounted) return result.isRight();
+    return result.fold((failure) {
+      state = state.copyWith(orders: snapshot, error: failure.toString());
+      _recompute();
+      return false;
+    }, (order) {
+      _mergeOrder(order);
+      _trackOrderStatus(orderId, OrderStatus.delivered);
+      return true;
+    });
+  }
+
   int statusCount(OrderStatus status) =>
       state.orders.where((o) => o.status == status).length;
 

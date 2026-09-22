@@ -85,7 +85,8 @@ class ProductDetail extends _$ProductDetail {
       );
     }).toList();
 
-    final revList = reviewsResult.fold((_) => <ReviewEntity>[], (p) => p.items);
+    final revPage = reviewsResult.fold((_) => null, (p) => p);
+    final revList = revPage?.items ?? const <ReviewEntity>[];
     final uiReviews = revList
         .map(
           (r) => ProductReviewEntity(
@@ -103,6 +104,7 @@ class ProductDetail extends _$ProductDetail {
     return entity.copyWith(
       similarProducts: deals,
       reviews: uiReviews,
+      reviewSummary: _summaryFor(entity.reviewSummary, revList, revPage?.totalCount),
     );
   }
 
@@ -123,6 +125,32 @@ class ProductDetail extends _$ProductDetail {
       },
     );
     return _fromEntity(merged);
+  }
+
+  ReviewSummaryEntity? _summaryFor(
+    ReviewSummaryEntity? fromListing,
+    List<ReviewEntity> reviews,
+    int? totalCount,
+  ) {
+    if (reviews.isEmpty) return fromListing;
+    final counts = List<int>.filled(5, 0);
+    var sum = 0.0;
+    for (final r in reviews) {
+      sum += r.rating;
+      final star = r.rating.round().clamp(1, 5);
+      counts[5 - star]++;
+    }
+    final listingCounts = fromListing?.starCounts ?? const <int>[];
+    final hasDistribution = listingCounts.any((c) => c > 0);
+    return ReviewSummaryEntity(
+      average: fromListing != null && fromListing.totalCount > 0
+          ? fromListing.average
+          : sum / reviews.length,
+      totalCount: fromListing != null && fromListing.totalCount > 0
+          ? fromListing.totalCount
+          : (totalCount ?? reviews.length),
+      starCounts: hasDistribution ? listingCounts : counts,
+    );
   }
 
   Future<void> fetchProduct(String id) async {

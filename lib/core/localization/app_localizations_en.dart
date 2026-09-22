@@ -1160,6 +1160,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersMarkShipped => 'Mark as Shipped';
 
   @override
+  String get ordersMarkDelivered => 'Mark as Delivered';
+
+  @override
   String get ordersViewTracking => 'View Tracking';
 
   @override
@@ -1662,6 +1665,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Saved on this device only, until an account-wide address book ships.';
 
   @override
+  String get addressesEmptyState => 'You haven\'t saved any addresses yet.';
+
+  @override
+  String get addressesMainBadge => 'Main';
+
+  @override
+  String get addressesSetAsMain => 'Set as Main';
+
+  @override
+  String get addressesMaxReached => 'You\'ve reached the 5-address limit';
+
+  @override
   String get checkoutErrorAddressName => 'Enter the recipient\'s name';
 
   @override
@@ -1868,6 +1883,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInToWriteReview => 'Sign in to write a review';
 
   @override
+  String get reviewRequiresDeliveredOrder =>
+      'You can review this product once your order for it has been delivered';
+
+  @override
+  String get alreadyReviewedTitle => 'Already reviewed';
+
+  @override
+  String get alreadyReviewedMessage => 'You already reviewed this product.';
+
+  @override
   String get deleteReviewConfirmTitle => 'Delete review?';
 
   @override
@@ -1899,6 +1924,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get visitStore => 'Visit Store';
+
+  @override
+  String get reportVendor => 'Report Vendor';
+
+  @override
+  String reportVendorTitle(String name) {
+    return 'Report $name';
+  }
+
+  @override
+  String get reportVendorSubtitle =>
+      'Let us know if something went wrong with this order. Our team will review your report.';
+
+  @override
+  String get reportVendorReasonFraud => 'Fraud or scam';
+
+  @override
+  String get reportVendorReasonPoorQuality => 'Poor product quality';
+
+  @override
+  String get reportVendorReasonNotAsDescribed => 'Item not as described';
+
+  @override
+  String get reportVendorReasonNoResponse => 'No response from seller';
+
+  @override
+  String get reportVendorReasonHarassment => 'Harassment or abuse';
+
+  @override
+  String get reportVendorReasonOther => 'Other';
+
+  @override
+  String get reportVendorCommentHintOptional => 'Add details (optional)';
+
+  @override
+  String get reportVendorCommentHintRequired => 'Please describe the issue';
+
+  @override
+  String get reportVendorSubmit => 'Submit Report';
+
+  @override
+  String get reportVendorSuccess =>
+      'Report submitted. Our team will review it.';
 
   @override
   String get verifiedSeller => '✅ Verified Seller';
@@ -2100,6 +2168,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorMarkShipped => 'Mark as Shipped';
 
   @override
+  String get vendorMarkDelivered => 'Mark as Delivered';
+
+  @override
   String get vendorOrdersEmptyTitle => 'No orders yet';
 
   @override
@@ -2178,6 +2249,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorOrderShippedSnack => 'Order marked as shipped!';
+
+  @override
+  String get vendorOrderDeliveredSnack => 'Order marked as delivered';
 
   @override
   String get vendorStatusPending => 'Awaiting your confirmation';

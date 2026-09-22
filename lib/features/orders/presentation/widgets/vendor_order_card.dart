@@ -18,6 +18,7 @@ class VendorOrderCard extends StatelessWidget {
     required this.onReject,
     required this.onProcessing,
     required this.onShipped,
+    required this.onDelivered,
   });
 
   final OrderEntity order;
@@ -25,6 +26,7 @@ class VendorOrderCard extends StatelessWidget {
   final VoidCallback onReject;
   final VoidCallback onProcessing;
   final VoidCallback onShipped;
+  final VoidCallback onDelivered;
 
   @override
   Widget build(BuildContext context) {
@@ -266,6 +268,21 @@ class VendorOrderCard extends StatelessWidget {
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: Text(context.l10n.vendorMarkShipped),
+        ),
+      );
+    }
+    if (order.status == OrderStatus.shipped) {
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          onPressed: onDelivered,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.accent,
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(context.l10n.vendorMarkDelivered),
         ),
       );
     }

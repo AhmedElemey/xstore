@@ -12,6 +12,7 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/presentation/providers/vendor_orders_provider.dart';
+import '../../../../shared/utils/legal_links.dart';
 import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
@@ -156,6 +157,17 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     label: context.l10n.menuWishlist,
                     onTap: () => context.go(AppRoutes.wishlist),
                   ),
+                  // Saved delivery addresses only matter for the buying
+                  // flow — vendors and couriers can't place orders in this
+                  // app (no cart/checkout access for either role), so this
+                  // stays out of their profile menu rather than linking to
+                  // a screen they can never put to use.
+                  ProfileMenuTile(
+                    icon: LucideIcons.mapPin,
+                    iconBackground: AppColors.error,
+                    label: context.l10n.menuAddresses,
+                    onTap: () => context.push(AppRoutes.addresses),
+                  ),
                 ],
         ),
         const SizedBox(height: AppSpacing.x2l),
@@ -182,19 +194,14 @@ class ProfileMenuBlocks extends ConsumerWidget {
             //   label: context.l10n.menuNotificationsSettings,
             //   onTap: () => context.push(AppRoutes.notificationSettings),
             // ),
-            // Payment methods and address book deferred to phase 2
-            // (checkout still collects a one-off address for COD).
+            // Payment methods deferred to phase 2 (checkout still collects
+            // a one-off address for COD; only the payment method itself —
+            // cards/wallets — is unbuilt).
             // ProfileMenuTile(
             //   icon: LucideIcons.creditCard,
             //   iconBackground: AppColors.success,
             //   label: context.l10n.menuPaymentMethods,
             //   onTap: () => context.push(AppRoutes.paymentMethods),
-            // ),
-            // ProfileMenuTile(
-            //   icon: LucideIcons.mapPin,
-            //   iconBackground: AppColors.error,
-            //   label: context.l10n.menuAddresses,
-            //   onTap: () => context.push(AppRoutes.addresses),
             // ),
           ],
         ),
@@ -237,13 +244,13 @@ class ProfileMenuBlocks extends ConsumerWidget {
               icon: LucideIcons.fileText,
               iconBackground: context.textSecondary,
               label: context.l10n.menuTerms,
-              onTap: () => context.push(AppRoutes.terms),
+              onTap: () => launchLegalUrl(xstoreTermsUrl),
             ),
             ProfileMenuTile(
               icon: LucideIcons.shield,
               iconBackground: AppColors.success,
               label: context.l10n.menuPrivacy,
-              onTap: () => context.push(AppRoutes.privacy),
+              onTap: () => launchLegalUrl(xstorePrivacyUrl),
             ),
             ProfileMenuTile(
               icon: LucideIcons.star,

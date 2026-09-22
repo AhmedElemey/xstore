@@ -28,6 +28,7 @@ mixin _$ProfileEntity {
   bool get isPhoneVerificationRequired => throw _privateConstructorUsedError;
   bool get isEmailVerified => throw _privateConstructorUsedError;
   bool get isPhoneVerified => throw _privateConstructorUsedError;
+  bool get hasPassword => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProfileEntityCopyWith<ProfileEntity> get copyWith =>
@@ -52,7 +53,8 @@ abstract class $ProfileEntityCopyWith<$Res> {
       bool isEmailVerificationRequired,
       bool isPhoneVerificationRequired,
       bool isEmailVerified,
-      bool isPhoneVerified});
+      bool isPhoneVerified,
+      bool hasPassword});
 
   $UserEntityCopyWith<$Res> get user;
 }
@@ -82,6 +84,7 @@ class _$ProfileEntityCopyWithImpl<$Res, $Val extends ProfileEntity>
     Object? isPhoneVerificationRequired = null,
     Object? isEmailVerified = null,
     Object? isPhoneVerified = null,
+    Object? hasPassword = null,
   }) {
     return _then(_value.copyWith(
       user: null == user
@@ -132,6 +135,10 @@ class _$ProfileEntityCopyWithImpl<$Res, $Val extends ProfileEntity>
           ? _value.isPhoneVerified
           : isPhoneVerified // ignore: cast_nullable_to_non_nullable
               as bool,
+      hasPassword: null == hasPassword
+          ? _value.hasPassword
+          : hasPassword // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -164,7 +171,8 @@ abstract class _$$ProfileEntityImplCopyWith<$Res>
       bool isEmailVerificationRequired,
       bool isPhoneVerificationRequired,
       bool isEmailVerified,
-      bool isPhoneVerified});
+      bool isPhoneVerified,
+      bool hasPassword});
 
   @override
   $UserEntityCopyWith<$Res> get user;
@@ -193,6 +201,7 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
     Object? isPhoneVerificationRequired = null,
     Object? isEmailVerified = null,
     Object? isPhoneVerified = null,
+    Object? hasPassword = null,
   }) {
     return _then(_$ProfileEntityImpl(
       user: null == user
@@ -243,6 +252,10 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
           ? _value.isPhoneVerified
           : isPhoneVerified // ignore: cast_nullable_to_non_nullable
               as bool,
+      hasPassword: null == hasPassword
+          ? _value.hasPassword
+          : hasPassword // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -262,7 +275,8 @@ class _$ProfileEntityImpl implements _ProfileEntity {
       this.isEmailVerificationRequired = false,
       this.isPhoneVerificationRequired = false,
       this.isEmailVerified = false,
-      this.isPhoneVerified = false});
+      this.isPhoneVerified = false,
+      this.hasPassword = true});
 
   @override
   final UserEntity user;
@@ -299,10 +313,13 @@ class _$ProfileEntityImpl implements _ProfileEntity {
   @override
   @JsonKey()
   final bool isPhoneVerified;
+  @override
+  @JsonKey()
+  final bool hasPassword;
 
   @override
   String toString() {
-    return 'ProfileEntity(user: $user, ordersCount: $ordersCount, wishlistCount: $wishlistCount, savedAmountDzd: $savedAmountDzd, storeViewCount: $storeViewCount, storeSaveCount: $storeSaveCount, storeActiveListings: $storeActiveListings, responseRatePercent: $responseRatePercent, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired, isEmailVerified: $isEmailVerified, isPhoneVerified: $isPhoneVerified)';
+    return 'ProfileEntity(user: $user, ordersCount: $ordersCount, wishlistCount: $wishlistCount, savedAmountDzd: $savedAmountDzd, storeViewCount: $storeViewCount, storeSaveCount: $storeSaveCount, storeActiveListings: $storeActiveListings, responseRatePercent: $responseRatePercent, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired, isEmailVerified: $isEmailVerified, isPhoneVerified: $isPhoneVerified, hasPassword: $hasPassword)';
   }
 
   @override
@@ -336,7 +353,9 @@ class _$ProfileEntityImpl implements _ProfileEntity {
             (identical(other.isEmailVerified, isEmailVerified) ||
                 other.isEmailVerified == isEmailVerified) &&
             (identical(other.isPhoneVerified, isPhoneVerified) ||
-                other.isPhoneVerified == isPhoneVerified));
+                other.isPhoneVerified == isPhoneVerified) &&
+            (identical(other.hasPassword, hasPassword) ||
+                other.hasPassword == hasPassword));
   }
 
   @override
@@ -353,7 +372,8 @@ class _$ProfileEntityImpl implements _ProfileEntity {
       isEmailVerificationRequired,
       isPhoneVerificationRequired,
       isEmailVerified,
-      isPhoneVerified);
+      isPhoneVerified,
+      hasPassword);
 
   @JsonKey(ignore: true)
   @override
@@ -375,7 +395,8 @@ abstract class _ProfileEntity implements ProfileEntity {
       final bool isEmailVerificationRequired,
       final bool isPhoneVerificationRequired,
       final bool isEmailVerified,
-      final bool isPhoneVerified}) = _$ProfileEntityImpl;
+      final bool isPhoneVerified,
+      final bool hasPassword}) = _$ProfileEntityImpl;
 
   @override
   UserEntity get user;
@@ -401,6 +422,8 @@ abstract class _ProfileEntity implements ProfileEntity {
   bool get isEmailVerified;
   @override
   bool get isPhoneVerified;
+  @override
+  bool get hasPassword;
   @override
   @JsonKey(ignore: true)
   _$$ProfileEntityImplCopyWith<_$ProfileEntityImpl> get copyWith =>

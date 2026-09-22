@@ -147,7 +147,8 @@ class StubOrdersRemoteDataSource implements OrdersRemoteDataSource {
       throw UnimplementedError();
 
   @override
-  Future<OrderModel> markDelivered(String orderId) => throw UnimplementedError();
+  Future<OrderModel> markDelivered(String orderId, {String? vendorId}) =>
+      throw UnimplementedError();
 
   @override
   Future<void> updateDeliveryCoordinates({

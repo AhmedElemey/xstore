@@ -290,6 +290,34 @@ void main() {
       expect(order.status, OrderStatus.confirmed, reason: 'must roll back to confirmed');
       expect(order.trackingNumber, isNull);
     });
+
+    test('markDelivered advances shipped -> delivered and counts it in totalRevenue',
+        () async {
+      final shipped = _order(id: 'order_1', status: OrderStatus.shipped);
+      final delivered = shipped.copyWith(status: OrderStatus.delivered);
+      final container = await _containerWith(
+        StubOrdersRepository(
+          getVendorOrdersResult: ({
+            required vendorId,
+            required page,
+            required pageSize,
+          }) =>
+              Right([shipped]),
+          markDeliveredResult: (orderId) => Right(delivered),
+        ),
+      );
+      final notifier = container.read(vendorOrdersProvider.notifier);
+      await notifier.fetchOrders();
+      expect(container.read(vendorOrdersProvider).totalRevenue, 0);
+
+      final ok = await notifier.markDelivered('order_1');
+      expect(ok, isTrue);
+      expect(
+        container.read(vendorOrdersProvider).orders.single.status,
+        OrderStatus.delivered,
+      );
+      expect(container.read(vendorOrdersProvider).totalRevenue, 500);
+    });
   });
 
   group('VendorOrdersNotifier filtering after a status change', () {
@@ -400,15 +428,8 @@ void main() {
       );
     });
 
-    test('totalRevenue only ever reflects delivered orders already in the fetched page',
+    test('totalRevenue only counts delivered orders; confirm does not add to it',
         () async {
-      // VendorOrdersNotifier has no self-service "mark delivered" action —
-      // markDeliveredUseCase is only reachable from the consumer/courier
-      // notifiers (orders_provider.dart / courier_deliveries_provider.dart).
-      // So a vendor's confirm/reject/ship actions can never themselves move
-      // totalRevenue; it only reflects whatever the last fetch already
-      // contained as delivered. Locks in that reality rather than one this
-      // notifier can't actually produce.
       final delivered = _order(id: 'order_1', status: OrderStatus.delivered);
       final pending = _order(id: 'order_2');
       final container = await _containerWith(

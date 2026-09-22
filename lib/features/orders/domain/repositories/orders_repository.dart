@@ -63,7 +63,10 @@ abstract interface class OrdersRepository {
     String? vendorId,
   });
 
-  Future<Either<Failure, OrderEntity>> markDelivered(String orderId);
+  Future<Either<Failure, OrderEntity>> markDelivered(
+    String orderId, {
+    String? vendorId,
+  });
 
   /// Updates the delivery pin on an already-placed order (e.g. the consumer
   /// re-detects their GPS location before the order ships).

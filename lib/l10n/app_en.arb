@@ -403,6 +403,7 @@
   "ordersConfirmOrderCta": "✓ Confirm Order",
   "ordersMarkProcessing": "Mark as Processing",
   "ordersMarkShipped": "Mark as Shipped",
+  "ordersMarkDelivered": "Mark as Delivered",
   "ordersViewTracking": "View Tracking",
   "ordersShopAgain": "🛒 Shop Again",
   "ordersEmptyFilteredTitle": "No matching orders",
@@ -569,6 +570,10 @@
   "checkoutRemoveAddressTitle": "Remove address?",
   "checkoutRemoveAddressBody": "This address will be removed from your saved list.",
   "checkoutAddressesDeviceOnly": "Saved on this device only, until an account-wide address book ships.",
+  "addressesEmptyState": "You haven't saved any addresses yet.",
+  "addressesMainBadge": "Main",
+  "addressesSetAsMain": "Set as Main",
+  "addressesMaxReached": "You've reached the 5-address limit",
   "checkoutErrorAddressName": "Enter the recipient's name",
   "checkoutErrorAddressStreet": "Enter a street address",
   "checkoutErrorAddressCity": "Enter a city",
@@ -641,6 +646,9 @@
   "reviewCommentHint": "Share your thoughts about this product",
   "submitReview": "Submit",
   "signInToWriteReview": "Sign in to write a review",
+  "reviewRequiresDeliveredOrder": "You can review this product once your order for it has been delivered",
+  "alreadyReviewedTitle": "Already reviewed",
+  "alreadyReviewedMessage": "You already reviewed this product.",
   "deleteReviewConfirmTitle": "Delete review?",
   "deleteReviewConfirmMessage": "This can't be undone.",
   "noReviewsYet": "No reviews yet",
@@ -652,6 +660,19 @@
   "expressCheckoutSoon": "Express checkout — coming soon",
   "buyNow": "Buy now",
   "visitStore": "Visit Store",
+  "reportVendor": "Report Vendor",
+  "reportVendorTitle": "Report {name}",
+  "reportVendorSubtitle": "Let us know if something went wrong with this order. Our team will review your report.",
+  "reportVendorReasonFraud": "Fraud or scam",
+  "reportVendorReasonPoorQuality": "Poor product quality",
+  "reportVendorReasonNotAsDescribed": "Item not as described",
+  "reportVendorReasonNoResponse": "No response from seller",
+  "reportVendorReasonHarassment": "Harassment or abuse",
+  "reportVendorReasonOther": "Other",
+  "reportVendorCommentHintOptional": "Add details (optional)",
+  "reportVendorCommentHintRequired": "Please describe the issue",
+  "reportVendorSubmit": "Submit Report",
+  "reportVendorSuccess": "Report submitted. Our team will review it.",
   "verifiedSeller": "✅ Verified Seller",
   "sellerRatingMid": " Seller · ",
   "sellerSalesSuffix": " sales",
@@ -717,6 +738,7 @@
   "vendorConfirmOrderShort": "Confirm",
   "vendorMarkProcessing": "Mark as Processing",
   "vendorMarkShipped": "Mark as Shipped",
+  "vendorMarkDelivered": "Mark as Delivered",
   "vendorOrdersEmptyTitle": "No orders yet",
   "vendorNoStatusOrders": "No orders for this status",
   "vendorNoStatusOrdersSubtitle": "Try another filter or show all orders",
@@ -743,6 +765,7 @@
   "vendorOrderConfirmedSnack": "Order confirmed",
   "vendorOrderProcessingSnack": "Order marked as processing",
   "vendorOrderShippedSnack": "Order marked as shipped!",
+  "vendorOrderDeliveredSnack": "Order marked as delivered",
   "vendorStatusPending": "Awaiting your confirmation",
   "vendorStatusConfirmed": "You confirmed this order",
   "vendorStatusProcessing": "Preparing for shipment",
@@ -850,6 +873,13 @@
     "placeholders": {
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "@reportVendorTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

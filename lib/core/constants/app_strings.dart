@@ -327,6 +327,7 @@ abstract final class AppStrings {
   static const ordersConfirmOrderCta = '✓ Confirm Order';
   static const ordersMarkProcessing = 'Mark as Processing';
   static const ordersMarkShipped = 'Mark as Shipped';
+  static const ordersMarkDelivered = 'Mark as Delivered';
   static const ordersViewTracking = 'View Tracking';
   static const ordersShopAgain = '🛒 Shop Again';
   static const ordersEmptyFilteredTitle = 'No matching orders';
@@ -664,6 +665,7 @@ abstract final class AppStrings {
   static const vendorConfirmOrderShort = 'Confirm';
   static const vendorMarkProcessing = 'Mark as Processing';
   static const vendorMarkShipped = 'Mark as Shipped';
+  static const vendorMarkDelivered = 'Mark as Delivered';
   static const vendorOrdersEmptyTitle = 'No orders yet';
   static const vendorOrdersEmptySubtitle =
       'When buyers place orders on your listings, they will appear here';
@@ -695,6 +697,7 @@ abstract final class AppStrings {
   static const vendorOrderConfirmedSnack = 'Order confirmed';
   static const vendorOrderProcessingSnack = 'Order marked as processing';
   static const vendorOrderShippedSnack = 'Order marked as shipped!';
+  static const vendorOrderDeliveredSnack = 'Order marked as delivered';
   static const vendorStatusPending = 'Awaiting your confirmation';
   static const vendorStatusConfirmed = 'You confirmed this order';
   static const vendorStatusProcessing = 'Preparing for shipment';

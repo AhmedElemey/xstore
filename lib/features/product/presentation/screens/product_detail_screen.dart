@@ -324,7 +324,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                   ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  if (reviewSummary != null && data.reviews.isNotEmpty)
+                  if (reviewSummary != null &&
+                      (data.reviews.isNotEmpty || reviewSummary.totalCount > 0))
                     SliverToBoxAdapter(
                       child: KeyedSubtree(
                         key: _reviewsKey,

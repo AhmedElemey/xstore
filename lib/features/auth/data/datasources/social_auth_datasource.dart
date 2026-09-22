@@ -26,13 +26,16 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              serverClientId: DefaultFirebaseOptions.googleWebClientId,
-            );
+        _injectedGoogleSignIn = googleSignIn != null,
+        _googleSignIn = googleSignIn ?? _createGoogleSignIn();
 
   final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
+  final bool _injectedGoogleSignIn;
+  GoogleSignIn _googleSignIn;
+
+  static GoogleSignIn _createGoogleSignIn() => GoogleSignIn(
+        serverClientId: DefaultFirebaseOptions.googleWebClientId,
+      );
 
   @override
   Future<SocialAuthResult> signInWithGoogle() async {
@@ -51,6 +54,7 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       );
     }
     try {
+      await _resetGoogleSignIn();
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw const SocialAuthCancelledException('Google sign-in cancelled');
@@ -71,11 +75,9 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       final user = userCredential.user;
       if (user == null) throw const SocialAuthException('Google sign-in failed');
       if (kDebugMode) {
-        // One debugPrint per field: fields stay on single logcat lines
-        // (<4KB) for readability. Tokens are truncated — even a
-        // kDebugMode-only log shouldn't put a full, copy-pasteable bearer
-        // token on a shared device's logcat; the visible prefix is enough
-        // to confirm which sign-in produced it during dev testing.
+        // `print` + 800-char chunks: debugPrint is cut at ~1024 chars (`<…>`).
+        // Google idToken is full; Firebase stays truncated. Payload dump
+        // is aud/email/sub without jwt.io.
         final firebaseIdToken = await user.getIdToken();
         debugPrint('── Google sign-in credential ──');
         debugPrint('email: ${user.email}');
@@ -83,7 +85,11 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         debugPrint('photoUrl: ${user.photoURL}');
         debugPrint('firebaseUid: ${user.uid}');
         debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
-        debugPrint('google idToken: ${_truncatedForLog(googleIdToken)}');
+        print('clientId:');
+        print(DefaultFirebaseOptions.googleWebClientId);
+        print('google idToken:');
+        _printFullToken(googleIdToken);
+        _debugLogGoogleIdTokenPayload(googleIdToken);
         debugPrint('firebase idToken: ${_truncatedForLog(firebaseIdToken)}');
       }
       return SocialAuthResult(
@@ -217,6 +223,25 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
     ]);
   }
 
+  /// Drops the cached Google account (and leftover Firebase session) so the
+  /// next [GoogleSignIn.signIn] always shows the picker and mints a fresh
+  /// ID token. A leftover session silently reuses the last account.
+  Future<void> _resetGoogleSignIn() async {
+    try {
+      await _googleSignIn.disconnect();
+    } catch (_) {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+    }
+    try {
+      await _firebaseAuth.signOut();
+    } catch (_) {}
+    if (!_injectedGoogleSignIn) {
+      _googleSignIn = _createGoogleSignIn();
+    }
+  }
+
   String _generateNonce([int length = 32]) {
     const charset =
         '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
@@ -257,4 +282,20 @@ String _truncatedForLog(String? token) {
   const visible = 12;
   if (token.length <= visible) return token;
   return '${token.substring(0, visible)}…(${token.length} chars)';
+}
+
+void _printFullToken(String token) {
+  final pattern = RegExp('.{1,800}');
+  pattern.allMatches(token).forEach((match) => print(match.group(0))); // ignore: avoid_print
+}
+
+void _debugLogGoogleIdTokenPayload(String token) {
+  final parts = token.split('.');
+  if (parts.length < 2) return;
+  try {
+    final payload = utf8.decode(
+      base64Url.decode(base64Url.normalize(parts[1])),
+    );
+    print('google idToken payload: $payload'); // ignore: avoid_print
+  } catch (_) {}
 }
