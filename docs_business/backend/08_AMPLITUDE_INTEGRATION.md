@@ -1,9 +1,8 @@
 # xStore — Amplitude Integration & User-Journey Event Review
 
-**Status:** client-side implemented and shipping. **Dev builds are live** — `task build:dev` (and
-`flutter run --dart-define=AMPLITUDE_API_KEY=...`) report to the `xStore - Dev` Amplitude project.
-**Prod is still inert** (no key wired) until a separate production Amplitude project is created —
-see §2.
+**Status:** client-side implemented and shipping. **Both dev and prod are live** — `task build:dev`
+reports to the `xStore - Dev` Amplitude project, `task build:prod` and the release GitHub Actions
+workflow report to `xStore - Prod`. See §2 for the exact wiring.
 **Companion:** [`03_ANALYTICS_EVENTS_HANDOFF.md`](./03_ANALYTICS_EVENTS_HANDOFF.md) is the existing
 wire contract to xStore's own backend collector; this doc covers the parallel Amplitude pipeline
 and reviews the current event catalog for gaps in the mapped user journey.
@@ -48,16 +47,19 @@ Nothing is sent to Amplitude until a real project API key is supplied at build t
 flutter run --dart-define=AMPLITUDE_API_KEY=<your Amplitude project API key>
 ```
 
-**Dev is wired.** `Taskfile.yml`'s `build:dev` task now passes
-`--dart-define=AMPLITUDE_API_KEY="{{.AMPLITUDE_API_KEY_DEV}}"`, defaulting to the `xStore - Dev`
-Amplitude project's key (override at call time with `AMPLITUDE_API_KEY_DEV=... task build:dev`,
-same pattern as `API_BASE_URL_DEV`). `flutter run` for local dev still needs the
-`--dart-define=AMPLITUDE_API_KEY=...` flag manually unless run through `task build:dev`.
+**Both dev and prod are wired**, each to their own Amplitude project so real user data and
+dev-testing noise never land in the same funnel:
 
-**Prod is not wired yet** — `build:prod` and `.github/workflows/build-and-release-apk.yml` have no
-`AMPLITUDE_API_KEY_PROD`/`--dart-define=AMPLITUDE_API_KEY` at all. Add it the same way once a
-separate `xStore - Prod` Amplitude project exists with its own key — dev and prod should never
-share one project, or real user data and dev-testing noise mix in the same funnel.
+- `Taskfile.yml`'s `build:dev` / `build:prod` tasks pass
+  `--dart-define=AMPLITUDE_API_KEY="{{.AMPLITUDE_API_KEY_DEV}}"` /
+  `"{{.AMPLITUDE_API_KEY_PROD}}"` respectively — override at call time with
+  `AMPLITUDE_API_KEY_DEV=...`/`AMPLITUDE_API_KEY_PROD=... task build:...`, same pattern as
+  `API_BASE_URL_DEV`/`API_BASE_URL_PROD`.
+- `.github/workflows/build-and-release-apk.yml` resolves the same two keys per `BUILD_FLAVOR` (the
+  "Resolve API base URL for flavor" step also resolves `AMPLITUDE_KEY`) and passes
+  `--dart-define=AMPLITUDE_API_KEY="$AMPLITUDE_KEY"` to the release build.
+- A plain `flutter run` for local dev still needs the `--dart-define=AMPLITUDE_API_KEY=...` flag
+  manually, unless run through `task build:dev`.
 
 ## 3. Current event catalog (already forwarded to both destinations)
 
