@@ -6,15 +6,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../analytics/analytics_service.dart';
 import '../analytics/event_names.dart';
+import '../firebase/fcm_push_navigation.dart';
 import '../router/app_router.dart';
+import '../router/app_routes.dart';
 import 'deep_link_route.dart';
 
 /// Watched once from [XstoreApp] alongside `fcmPushHandlingProvider` — both
 /// resolve an external trigger (a tapped link, a tapped push) to a
 /// go_router path and are the single place each kind of trigger is wired.
-/// Product links are guest-accessible (see `isGuestAccessibleRoute`), so
-/// unlike push taps they navigate immediately rather than staging behind
-/// login via `navigateToPushRoute`/`pendingPushRouteProvider`.
+/// Guest-accessible links (product, seller, category — see
+/// `isGuestAccessibleRoute`) navigate immediately; account-bound links
+/// (order) are staged behind login via the same
+/// `navigateToPushRoute`/`pendingPushRouteProvider` mechanism push taps use.
 ///
 /// Kept alive (not autoDispose): the incoming-link stream must keep
 /// listening for the app's whole lifetime.
@@ -30,7 +33,11 @@ final deepLinkHandlingProvider = Provider<void>((ref) {
         AnalyticsEvents.deepLinkOpened,
         properties: {AnalyticsProps.screenName: route},
       );
-      ref.read(goRouterProvider).go(route);
+      if (isGuestAccessibleRoute(Uri.parse(route).path)) {
+        ref.read(goRouterProvider).go(route);
+      } else {
+        unawaited(navigateToPushRoute(ref, route));
+      }
     },
     onError: (Object error) {
       if (kDebugMode) debugPrint('Deep link stream error: $error');
