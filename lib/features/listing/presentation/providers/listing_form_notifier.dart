@@ -512,10 +512,26 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   }
 
   /// Whether all required fields satisfy validation (no errors written to state).
+  /// Drafts skip the dirty-check: submitting a valid draft *is* the
+  /// change (draft → pending), even if no field was edited.
   bool get canSubmit =>
       !state.isSubmitting &&
       !Validators.listingFormHasErrors(_validationInput) &&
-      (state.editingListingId.isEmpty || hasEditChanges);
+      (state.editingListingId.isEmpty ||
+          hasEditChanges ||
+          state.editingStatus == ListingStatus.draft);
+
+  /// Status sent on the edit PUT. Drafts publish as pending (admin
+  /// approve is what sets Active — live catalog rows have `reviewedAt`).
+  /// Every other edit resends the current status so pause/rejected are
+  /// not silently rewritten.
+  ListingStatus get statusForUpdate {
+    final current = state.editingStatus;
+    if (current == null || current == ListingStatus.draft) {
+      return ListingStatus.pending;
+    }
+    return current;
+  }
 
   /// True when editing and the vendor has actually changed something since
   /// loadForEdit() populated the form. Always true outside the edit flow
@@ -602,7 +618,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
                 // untouched; edit always sends the form's remaining set.
                 imagePaths: state.photoPaths,
                 keepImageUrls: state.existingImageUrls,
-                status: state.editingStatus ?? ListingStatus.active,
+                status: statusForUpdate,
               )
           : await ref.read(createListingUseCaseProvider).call(
                 // ASSUMPTION: single-language form input for now — same

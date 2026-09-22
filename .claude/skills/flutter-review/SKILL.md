@@ -1859,3 +1859,23 @@ Rules for the log:
 - **What happened:** Edit listing gained a no-op submit gate (`_editSnapshot` vs live state) while hosted photos were still being made removable. The snapshot compared `photoPaths` (new files) and skipped `existingImageUrls`, so deleting an old image left Update disabled.
 - **Rule:** When gating submit on "has anything changed", list every user-editable field in the snapshot — including collections that were added after the dirty-check (hosted URLs, not just local paths). A field the UI can mutate that the snapshot ignores is a silent no-op.
 - **Where it applies:** `listing_form_notifier.dart` `_EditSnapshot` / `_snapshotOf` / `_snapshotsEqual`.
+
+### 2026-09-21 — Updating a draft listing is a publish, not a status-preserving edit
+- **What happened:** Tapping Update on a draft resent `editingStatus` (draft) on the PUT, so the listing stayed draft. Sending Active also failed to persist: live catalog rows are Active only after admin `PUT /api/admin/listings/{id}/approve` (`reviewedAt` set). C# `ListingStatus` default 0 is Draft, so create/update that omit `status` never enter the admin PENDING queue.
+- **Rule:** Preserve status on edit for live/paused/pending/rejected listings. A draft's form submit (and a new create) must send Pending (`status=1`) and must be allowed even when no field changed. Vendors cannot self-set Active.
+- **Where it applies:** `listing_form_notifier.dart` `canSubmit` / `statusForUpdate` / `submit`, `listing_remote_datasource.dart` `createListing`, `add_listing_screen.dart` publish label/success copy.
+
+### 2026-09-22 — Don't guess a status route that isn't in the contract
+- **What happened:** Resume was pointed at guessed status routes. Live: `/activate` 404s (no route); `/deactivate` 400s `"Only active listings can be deactivated."`; `/resubmit` 400s `"Only cancelled listings can be re-submitted."`. Generic `PUT /api/listings` is the only write that 200s on a paused listing, and it does not persist Active.
+- **Rule:** Do not reuse a status-only route that the server has already scoped (pause-only, cancelled-only). Pause = `/deactivate`. Delete = `/cancel`. Resubmit = cancelled listings only. Resume has no dedicated API — call the generic update with `status: active` and `keepImageUrls` so the request does not 400 or wipe photos. Unpause persist is a backend gap (`PUT /listings/{id}/activate` or Status on Update).
+- **Where it applies:** `my_listings_notifier.dart` `pauseListing` / `resumeListing`, `api_endpoints.dart`.
+
+### 2026-09-22 — Analytics ingest requires EventName and non-null identity, not the handoff's `name`
+- **What happened:** Live `POST /api/analytics/events` returned 400 `"One or more events are missing required fields"` once per event in the batch. The client sent the handoff shape (`name`, nullable `userId`/`screenName`, numeric `properties`). The collector binds C# `EventName` and rejects JSON nulls / untyped property maps.
+- **Rule:** Wire each event with `eventName` (and keep `name`), `timestamp` (and keep `occurredAt`), a non-empty `screenName`, session `userId`/`userRole` stamped at flush so guest-queued rows don't go out null, and `properties` as a string dictionary. Extra keys are ignored; missing `EventName` or a failed properties bind is a 400 on the whole batch.
+- **Where it applies:** `analytics_event.dart` `toJson`, `analytics_service.dart` `_runFlush`.
+
+### 2026-09-22 — KeepAlive inbox must fetch on current auth and on screen open
+- **What happened:** Notifications only loaded on the *next* `authProvider` change (`ref.listen` without `fireImmediately`) and the screen never fetched in `initState`. The keepAlive list stayed empty/stale until pull-to-refresh. Data-only FCM also never shown in the tray — the background handler only `debugPrint`ed, and iOS local notifications were skipped.
+- **Rule:** A keepAlive list whose first `watch` is after session restore must `fireImmediately` on auth (or fetch in `build` when a user is already present) and fetch again when its screen opens. Do not clear rows at the start of a refresh. Present data-only FCM with a local notification; skip that when iOS will already banner a `notification` payload.
+- **Where it applies:** `notifications_provider.dart`, `notifications_screen.dart`, `fcm_push_handling_provider.dart`, `fcm_background_handler.dart`, `fcm_local_notifications.dart`.

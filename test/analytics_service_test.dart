@@ -143,8 +143,34 @@ void main() {
     final events = (body['events'] as List).cast<Map>();
     expect(events, hasLength(2));
     expect(events.map((e) => e['name']), ['view_item', 'add_to_cart']);
+    expect(events.map((e) => e['eventName']), ['view_item', 'add_to_cart']);
     expect(events.first['eventId'], isNotEmpty);
+    expect(events.first['timestamp'], isNotEmpty);
+    expect(events.first['userId'], 'u1');
+    expect(events.first['screenName'], isNotEmpty);
     expect(events.first['properties'], {'item_id': 'p1'});
+  });
+
+  test('flush stamps session identity onto events queued as a guest', () async {
+    buildContainer(
+      auth: FakeAuth(null),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    service.track('view_item', properties: {'item_id': 'p1', 'price_egp': 10});
+    await service.ready;
+    await service.flushNow();
+    expect(adapter.posts, isEmpty);
+
+    service.bindSession(_user());
+    await service.flushNow();
+
+    final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
+    final events = (body['events'] as List).cast<Map>();
+    expect(events, hasLength(1));
+    expect(events.first['userId'], 'u1');
+    expect(events.first['userRole'], 'consumer');
+    expect(events.first['eventName'], 'view_item');
+    expect(events.first['properties'], {'item_id': 'p1', 'price_egp': '10'});
   });
 
   test('flushes the queued events once the user logs in', () async {

@@ -11,8 +11,6 @@
 // `flutter test --dart-define=MOCK=true`, with no `skip:` needed.
 //
 // Run with: flutter test test/notifications_screen_live_flow_test.dart
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -26,7 +24,6 @@ import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
-import 'package:xstore/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:xstore/features/notifications/presentation/screens/notifications_screen.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
@@ -114,12 +111,9 @@ Widget _harness(List<Override> overrides) => ProviderScope(
   ),
 );
 
-/// Pumps the screen, then explicitly (re-)fetches once `authProvider` has
-/// actually resolved. `NotificationsNotifier` only fetches reactively via
-/// `ref.listen(authProvider, ...)` registered in `build()` — that listener
-/// fires on the NEXT transition, not the value already present at
-/// registration time, so a fresh `_FakeAuth` override needs an explicit
-/// re-trigger, matching orders_screen_live_flow_test.dart's `_pumpReady`.
+/// Pumps the screen and waits for auth + the inbox fetch that
+/// [NotificationsScreen] now kicks off on first frame (keepAlive listen
+/// with `fireImmediately` plus the post-frame fetch).
 Future<ProviderContainer> _pumpReady(
   WidgetTester tester,
   List<Override> overrides,
@@ -131,11 +125,6 @@ Future<ProviderContainer> _pumpReady(
     listen: false,
   );
   await container.read(authProvider.future);
-  // Deliberately not awaited — see the FakeAsync-zone note in
-  // orders_screen_live_flow_test.dart's `_pumpReady`.
-  unawaited(
-    container.read(notificationsProvider.notifier).fetchNotifications(),
-  );
   return container;
 }
 

@@ -94,6 +94,7 @@ void main() {
       expect(fields['shippingCost'], '5.99');
       expect(fields['location'], 'Cairo');
       expect(fields['condition'], '1');
+      expect(fields['status'], '1');
       expect(fields['Attributes[0].Key'], 'Color');
       expect(fields['Attributes[0].Value'], 'Red');
 

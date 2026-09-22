@@ -43,8 +43,10 @@ class ListingFormState with _$ListingFormState {
     /// Non-empty when this form is editing an existing listing rather than
     /// creating a new one; drives `submit()`'s create-vs-update branch.
     @Default('') String editingListingId,
-    /// The listing's current status when editing, resent unchanged on
-    /// update (editing never silently changes status).
+    /// The listing's current status when editing. Resent unchanged on
+    /// update except for drafts, which publish as [ListingStatus.pending]
+    /// — Update on a draft is the submit-for-review action, not a
+    /// status-preserving edit. Active is set by admin approve.
     ListingStatus? editingStatus,
   }) = _ListingFormState;
 }

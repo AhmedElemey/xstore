@@ -222,7 +222,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
-    final isEditing = ref.read(listingFormNotifierProvider).editingListingId.isNotEmpty;
+    final formBeforeSubmit = ref.read(listingFormNotifierProvider);
+    final isEditing = formBeforeSubmit.editingListingId.isNotEmpty;
+    final isPublishingDraft =
+        formBeforeSubmit.editingStatus == ListingStatus.draft;
     final retryLabel = context.l10n.retry;
     final ok = await notifier.submit(context.l10n);
     if (!mounted) {
@@ -231,7 +234,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (ok) {
       AppSnackbar.success(
         context,
-        isEditing
+        isEditing && !isPublishingDraft
             ? context.l10n.listingUpdatedSuccess
             : context.l10n.listingPublishedSuccess,
       );
@@ -429,7 +432,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                 AppSpacing.lg,
               ),
               child: _PublishBar(
-                publishLabel: isEditing
+                publishLabel: isEditing &&
+                        form.editingStatus != ListingStatus.draft
                     ? context.l10n.updateListing
                     : context.l10n.publishListing,
                 enabled: canSubmit && !form.isSubmitting,
