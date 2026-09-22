@@ -56,6 +56,12 @@ String? _optTrimmed(String? value) {
   return trimmed.isEmpty ? null : trimmed;
 }
 
+/// Multipart cannot send JSON null; `''` is the clear signal. A missing
+/// image URL plus no new file means "remove", not "leave unchanged".
+bool _clearsProfileImage({required String? url, required String? path}) {
+  return _optTrimmed(url) == null && _optTrimmed(path) == null;
+}
+
 String? _birthDateWire(DateTime? date) {
   if (date == null) return null;
   final y = date.year.toString().padLeft(4, '0');
@@ -70,8 +76,20 @@ Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {
   return {
     if (_optTrimmed(request.fullNameEn) != null)
       'fullName': _optTrimmed(request.fullNameEn),
-    'userImageUrl': request.userImageUrl,
-    'storeImageUrl': request.storeImageUrl,
+    // Empty string, not JSON null: a missing multipart key means "keep the
+    // current image"; get-profile reads `store.storeLogoUrl` / `user.avatarUrl`.
+    'userImageUrl': request.userImageUrl ?? '',
+    'storeImageUrl': request.storeImageUrl ?? '',
+    if (_clearsProfileImage(
+      url: request.userImageUrl,
+      path: request.userImagePath,
+    ))
+      'avatarUrl': '',
+    if (_clearsProfileImage(
+      url: request.storeImageUrl,
+      path: request.storeImagePath,
+    ))
+      'storeLogoUrl': '',
     if (_optTrimmed(request.storeName) != null)
       'storeName': _optTrimmed(request.storeName),
     if (_optTrimmed(request.storeDescription) != null)
@@ -208,6 +226,28 @@ Future<FormData> updateProfileFormData(UpdateProfileRequest request) async {
     );
   }
   return FormData.fromMap(map);
+}
+
+UserModel _applyClearedProfileImages(
+  UserModel parsed,
+  UpdateProfileRequest request,
+) {
+  var next = parsed;
+  if (_clearsProfileImage(
+        url: request.userImageUrl,
+        path: request.userImagePath,
+      ) &&
+      next.avatarUrl != null) {
+    next = next.copyWith(avatarUrl: null);
+  }
+  if (_clearsProfileImage(
+        url: request.storeImageUrl,
+        path: request.storeImagePath,
+      ) &&
+      next.storeLogoUrl != null) {
+    next = next.copyWith(storeLogoUrl: null);
+  }
+  return next;
 }
 
 UserEntity _entityFromUpdateRequest(
@@ -463,7 +503,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         merged = merged.copyWith(storeLogoUrl: MockImages.avatar(99));
       }
       final model = await MockConfig.simulate(_mockUserModelFromEntity(merged));
-      return model;
+      return _applyClearedProfileImages(model, request);
     }
     try {
       final wireFields = updateProfileWireFields(request);
@@ -478,9 +518,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
-      final parsed = userModelFromProfileResponse(
-        data,
-        fallbackUserId: sessionUser.id,
+      final parsed = _applyClearedProfileImages(
+        userModelFromProfileResponse(
+          data,
+          fallbackUserId: sessionUser.id,
+        ),
+        request,
       );
       _debugLogProfileFields(
         tag: 'PUT update-profile (response ${response.statusCode})',

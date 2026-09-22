@@ -13,6 +13,7 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../domain/entities/update_profile_request.dart';
 import 'profile_dependencies.dart';
 import 'profile_state.dart';
 import '../../../../shared/providers/shared_providers.dart';
@@ -636,6 +637,40 @@ class ProfileNotifier extends _$ProfileNotifier {
       editStoreLogoFile: null,
     );
     await refreshProfileData(force: true);
+    if (epoch != _sessionEpoch) return;
+    await _persistClearedImagesAfterRefresh(request);
+  }
+
+  /// GET after save can echo the previous logo/avatar even when the PUT
+  /// asked to clear them. Keep the removal the user just confirmed so
+  /// re-entering edit / store does not restore the old URL from that GET.
+  Future<void> _persistClearedImagesAfterRefresh(
+    UpdateProfileRequest request,
+  ) async {
+    final epoch = _sessionEpoch;
+    final profile = state.profile;
+    if (profile == null) return;
+    var user = profile.user;
+    var changed = false;
+    final userPath = request.userImagePath?.trim();
+    final storePath = request.storeImagePath?.trim();
+    if ((request.userImageUrl == null || request.userImageUrl!.trim().isEmpty) &&
+        (userPath == null || userPath.isEmpty) &&
+        user.avatarUrl != null) {
+      user = user.copyWith(avatarUrl: null);
+      changed = true;
+    }
+    if ((request.storeImageUrl == null ||
+            request.storeImageUrl!.trim().isEmpty) &&
+        (storePath == null || storePath.isEmpty) &&
+        user.storeLogoUrl != null) {
+      user = user.copyWith(storeLogoUrl: null);
+      changed = true;
+    }
+    if (!changed) return;
+    if (epoch != _sessionEpoch) return;
+    state = state.copyWith(profile: profile.copyWith(user: user));
+    await ref.read(authRepositoryProvider).persistSessionUser(user);
   }
 
   Future<void> toggleDarkMode(bool enabled) async {

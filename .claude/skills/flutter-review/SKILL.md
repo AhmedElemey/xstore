@@ -73,7 +73,7 @@ Rules for the log:
 
 ### 2026-07-23 — UserImage and StoreImage are separate on update-profile
 - **What happened:** Profile avatar picker was wired to `StoreImage`/`storeImageUrl`, conflating the user's profile photo with the vendor store logo.
-- **Rule:** `UpdateProfileRequest` carries both pairs: `userImageUrl`/`userImagePath` → `UserImage`/`userImageUrl` (profile avatar picker, removal clears user only) and `storeImageUrl`/`storeImagePath` → `StoreImage`/`storeImageUrl` (store logo). Always send both URL keys on the wire; attach each file under its own multipart field name.
+- **Rule:** `UpdateProfileRequest` carries both pairs: `userImageUrl`/`userImagePath` → `UserImage`/`userImageUrl` (profile avatar picker, removal clears user only) and `storeImageUrl`/`storeImagePath` → `StoreImage`/`storeImageUrl` (store logo). Always send both URL keys on the wire as strings (`''` to clear — JSON null is dropped or ignored on multipart); on clear also send the GET field names (`storeLogoUrl`, `avatarUrl`). Attach each file under its own multipart field name.
 - **Where it applies:** `update_profile_request.dart`, `profile_state.dart` `toUpdateProfileRequest()`, `profile_remote_datasource.dart` `updateProfileFormData`.
 
 - **What happened:** Save still routed through `UserEntity.toEditedUser()` and a separate avatar-upload call instead of the confirmed `UpdateProfileRequest` DTO with inline `StoreImage` multipart.
@@ -81,7 +81,7 @@ Rules for the log:
 - **Where it applies:** `update_profile_request.dart`, `profile_state.dart`, `profile_provider.dart` `saveProfile`, `profile_remote_datasource.dart`.
 
 - **What happened:** Edit-profile save still sent legacy keys (`avatarUrl`, `latitude`, `email`, `bio`) instead of the confirmed `UpdateProfileRequest` shape (`storeImageUrl`, `lat`/`lng`, `detailedAddressByGoogleMaps`, `cityId`, date-only `birthDate`).
-- **Rule:** Build update-profile bodies from the C# `UpdateProfileRequest` contract — omit commented-out email/phone; map entity location fields to `detailedAddressByGoogleMaps`/`detailedAddressByUser`/`cityByGoogleMaps`/`governmentByGoogleMaps`; wire IDs as `cityId`/`governorateId` (C# `GovernorateId`, not `governmentId`); send `storeImageUrl` (always, null to clear); format `birthDate` as `YYYY-MM-DD`. Populate `editLocation` on GPS detect for the Google address field.
+- **Rule:** Build update-profile bodies from the C# `UpdateProfileRequest` contract — omit commented-out email/phone; map entity location fields to `detailedAddressByGoogleMaps`/`detailedAddressByUser`/`cityByGoogleMaps`/`governmentByGoogleMaps`; wire IDs as `cityId`/`governorateId` (C# `GovernorateId`, not `governmentId`); send `storeImageUrl` (always, `''` to clear) and on removal also `storeLogoUrl` (the get-profile store field); format `birthDate` as `YYYY-MM-DD`. Populate `editLocation` on GPS detect for the Google address field.
 - **Where it applies:** `profile_state.dart` `toUpdateProfileRequest()`, `update_profile_request.dart`, `profile_remote_datasource.dart` `updateProfileWireFields`/`updateProfileFormData`, `profile_provider.dart` `saveProfile`.
 
 - **What happened:** Live `POST /api/auth/google/consumer/login` returned 401 `"Invalid Google identity token."` even though Google sign-in succeeded — `GoogleSignIn()` had no `serverClientId`, so the ID token's audience was the Android/iOS OAuth client, not the Web client the backend verifies.
@@ -241,7 +241,7 @@ Rules for the log:
 
 ### 2026-07-11 — Profile update-profile wire keys are asymmetric
 - **What happened:** Edit Profile save used a partial PUT body and skipped `avatarUrl` when null, so avatar removal never reached the server; GET used `birthDate`/`whatsAppNumber`/`instagramPage` while read parsing only looked for `dateOfBirth`/`whatsappNumber`/`instagramHandle`.
-- **Rule:** Derive update-profile PUT keys from CONFIRMED get-profile / `UserModel.fromJson` field names; keep documented write-only aliases (`whatsAppNumber`, `instagramPage`); always send `avatarUrl` (null to clear); add `optString` fallbacks in `fromJson` when read/write keys differ.
+- **Rule:** Derive update-profile PUT keys from CONFIRMED get-profile / `UserModel.fromJson` field names; keep documented write-only aliases (`whatsAppNumber`, `instagramPage`); always send image URL keys (`''` to clear — JSON null never reaches multipart); add `optString` fallbacks in `fromJson` when read/write keys differ.
 - **Where it applies:** `profile_remote_datasource.dart`, `user_model.dart`, `profile_state.dart` `toEditedUser()`.
 
 ### 2026-07-11 — Bilingual store name: parse vs display
@@ -1884,4 +1884,9 @@ Rules for the log:
 - **What happened:** Notifications only loaded on the *next* `authProvider` change (`ref.listen` without `fireImmediately`) and the screen never fetched in `initState`. The keepAlive list stayed empty/stale until pull-to-refresh. Data-only FCM also never shown in the tray — the background handler only `debugPrint`ed, and iOS local notifications were skipped.
 - **Rule:** A keepAlive list whose first `watch` is after session restore must `fireImmediately` on auth (or fetch in `build` when a user is already present) and fetch again when its screen opens. Do not clear rows at the start of a refresh. Present data-only FCM with a local notification; skip that when iOS will already banner a `notification` payload.
 - **Where it applies:** `notifications_provider.dart`, `notifications_screen.dart`, `fcm_push_handling_provider.dart`, `fcm_background_handler.dart`, `fcm_local_notifications.dart`.
+
+### 2026-09-22 — Clearing a store/profile image must send empty URL keys and survive the post-save GET
+- **What happened:** Remove store photo + Save returned 200 and the picker looked empty, but re-entering edit still showed the logo. The PUT sent `storeImageUrl: null` (multipart has no JSON null), get-profile reads `store.storeLogoUrl`, and `refreshProfileData(force: true)` after save rehydrated the previous URL.
+- **Rule:** On image removal, put `''` on the write key (`storeImageUrl` / `userImageUrl`) and the GET field (`storeLogoUrl` / `avatarUrl`); do not attach a file part. After parsing PUT and after the post-save GET, if this save cleared an image (no file, empty URL), force that URL null on the session/profile — a 200 that still echoes the old URL is not a persisted clear. Parse blank logo strings as null (`optString`).
+- **Where it applies:** `updateProfileWireFields` / `updateProfileFormData`, `UserModel.fromJson`, `profile_provider.dart` `saveProfile`.
 
