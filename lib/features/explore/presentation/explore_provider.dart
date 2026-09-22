@@ -191,6 +191,15 @@ class Explore extends _$Explore {
 
   void applyFilters(FilterState f) {
     state = state.copyWith(filters: f);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.filterApplied,
+      properties: {
+        AnalyticsProps.categoryCount: f.categories.length,
+        AnalyticsProps.conditionCount: f.conditions.length,
+        AnalyticsProps.hasPriceRange: f.minPrice != null || f.maxPrice != null,
+        AnalyticsProps.shippingOnly: f.shippingOnly,
+      },
+    );
     unawaited(search(state.query));
   }
 

@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/firebase/fcm_local_notifications.dart';
 import '../../../../core/firebase/fcm_message_route.dart';
 import '../../../../core/firebase/fcm_push_navigation.dart';
@@ -65,6 +67,10 @@ Future<void> _handleInitialMessage(Ref ref) async {
 void _handlePendingLocalNotificationLaunch(Ref ref) {
   final route = consumePendingLocalNotificationLaunchRoute();
   if (route == null) return;
+  ref.read(analyticsServiceProvider).track(
+    AnalyticsEvents.pushNotificationOpened,
+    properties: {AnalyticsProps.screenName: route},
+  );
   unawaited(
     navigateToPushRoute(ref, route, deferUntilAuthenticated: true),
   );
@@ -77,6 +83,13 @@ void _openFromMessage(
 }) {
   final route = routeFromRemoteMessage(message);
   if (route == null) return;
+  ref.read(analyticsServiceProvider).track(
+    AnalyticsEvents.pushNotificationOpened,
+    properties: {
+      AnalyticsProps.messageId: message.messageId ?? '',
+      AnalyticsProps.screenName: route,
+    },
+  );
   unawaited(
     navigateToPushRoute(
       ref,
@@ -90,6 +103,14 @@ Future<void> _onForegroundMessage(Ref ref, RemoteMessage message) async {
   if (kDebugMode) {
     debugPrint('FCM foreground message: ${message.messageId}');
   }
+
+  // Only the foreground path is instrumented — a background/terminated
+  // receipt runs in fcm_background_handler.dart's separate isolate, which
+  // has no Riverpod container to read analyticsServiceProvider from.
+  ref.read(analyticsServiceProvider).track(
+    AnalyticsEvents.pushNotificationReceived,
+    properties: {AnalyticsProps.messageId: message.messageId ?? ''},
+  );
 
   if (ref.read(authProvider).valueOrNull != null) {
     ref.read(notificationsProvider.notifier).fetchNotifications();

@@ -117,11 +117,22 @@ vs logged-in split — see `03_funnel_metrics.md` §4 for the exact rates to exp
 | `cart_viewed` | Cart tab opened | (none) |
 | `order_placement_failed` | `placeOrder()` fails for any reason | `reason` (`offline`\|`noItems`\|`noAddress`\|`noConsumer`\|a mapped backend error code\|`failed`), `cart_value_egp`, `item_count` |
 | `review_submitted` | A new (not edited) product review is created | `item_id`, `rating` |
+| `onboarding_completed` / `onboarding_skipped` | Last onboarding slide "Get Started" vs. the Skip button | (none) |
+| `guest_mode_started` | "Continue as Guest" tapped on the login screen (not the returning-guest re-entry on cold start) | (none) |
+| `deep_link_opened` | A Universal/App Link resolves to an in-app route | `screen_name` (the resolved route) |
+| `filter_applied` | Explore filter sheet "Apply" tapped | `category_count`, `condition_count`, `has_price_range`, `shipping_only` |
+| `checkout_address_selected` | A different saved address is picked during checkout | (none) |
+| `checkout_address_added` | A new address is saved during checkout | (none) |
+| `push_notification_received` | An FCM message arrives in the foreground | `message_id` |
+| `push_notification_opened` | A push notification (foreground tap, cold-launch tap, or Android local-notification tap) is opened | `message_id` (foreground/cold-launch only), `screen_name` |
+| `vendor_report_submitted` | Consumer successfully reports a vendor from order detail | `seller_id`, `order_id` |
+| `vendor_onboarding_step` | Vendor register wizard advances a step | `step` (the step number just reached) |
 
-The last 7 rows above (`app_open` through `review_submitted`) are the P0 additions from the
-Amplitude user-journey gap analysis — see
+The rows above from `app_open` through `vendor_onboarding_step` are the full set of P0+P1
+additions from the Amplitude user-journey gap analysis — see
 [`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) §4 for the full list, including
-the P1/P2 events still not implemented.
+the still-unimplemented P2 events (`product_impression`, `wishlist_viewed`,
+`vendor_store_hours_updated`, `commission_wallet_viewed`).
 
 ## Open question for whoever implements this
 

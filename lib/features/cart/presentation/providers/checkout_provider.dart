@@ -60,6 +60,9 @@ class Checkout extends _$Checkout {
   void selectAddress(int index) {
     if (index < 0 || index >= state.savedAddresses.length) return;
     state = state.copyWith(selectedAddressIndex: index);
+    ref
+        .read(analyticsServiceProvider)
+        .track(AnalyticsEvents.checkoutAddressSelected);
   }
 
   void addAddress(OrderAddress a) {
@@ -70,6 +73,9 @@ class Checkout extends _$Checkout {
       savedAddresses: list,
       selectedAddressIndex: list.length - 1,
     );
+    ref
+        .read(analyticsServiceProvider)
+        .track(AnalyticsEvents.checkoutAddressAdded);
   }
 
   void updateAddress(int index, OrderAddress a) {

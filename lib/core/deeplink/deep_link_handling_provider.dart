@@ -4,6 +4,8 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../analytics/analytics_service.dart';
+import '../analytics/event_names.dart';
 import '../router/app_router.dart';
 import 'deep_link_route.dart';
 
@@ -24,6 +26,10 @@ final deepLinkHandlingProvider = Provider<void>((ref) {
     (uri) {
       final route = routeFromDeepLinkUri(uri);
       if (route == null) return;
+      ref.read(analyticsServiceProvider).track(
+        AnalyticsEvents.deepLinkOpened,
+        properties: {AnalyticsProps.screenName: route},
+      );
       ref.read(goRouterProvider).go(route);
     },
     onError: (Object error) {
