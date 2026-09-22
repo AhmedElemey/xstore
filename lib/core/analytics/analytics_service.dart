@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../shared/providers/shared_providers.dart';
+import '../config/app_config.dart';
 import '../constants/prefs_keys.dart';
 import '../network/api_auth_headers.dart';
 import '../network/api_endpoints.dart';
@@ -29,9 +30,11 @@ part 'analytics_service.g.dart';
 /// Batches user-journey events locally and POSTs them to
 /// `POST /api/analytics/events` — see
 /// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`. The same events
-/// are independently forwarded to Amplitude's HTTP API (`/2/httpapi`) when
-/// `--dart-define=AMPLITUDE_API_KEY=...` is supplied — see
-/// `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
+/// are independently forwarded to Amplitude's HTTP API (`/2/httpapi`). The
+/// API key comes from `--dart-define=AMPLITUDE_API_KEY=...` when set,
+/// otherwise the flavor default on [AppConfig] (dev → xStore-Dev, prod →
+/// xStore-Prod) so a plain `flutter run --flavor` / VS Code launch still
+/// reports. See `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
 ///
 /// Deliberately uses its own [Dio] client rather than the shared `dio`
 /// provider: the shared client's error interceptor flips the whole app to
@@ -67,7 +70,7 @@ class AnalyticsService {
     String? amplitudeApiKey,
     Future<String?> Function()? readAuthToken,
   })  : _readAuthToken = readAuthToken,
-        _amplitudeApiKey = amplitudeApiKey ?? _amplitudeApiKeyFromEnv {
+        _amplitudeApiKey = _resolveAmplitudeApiKey(amplitudeApiKey) {
     _client = client ??
         Dio(
           BaseOptions(
@@ -88,8 +91,12 @@ class AnalyticsService {
           BaseOptions(
             connectTimeout: const Duration(seconds: 10),
             receiveTimeout: const Duration(seconds: 10),
+            contentType: Headers.jsonContentType,
           ),
         );
+    if (kDebugMode && amplitudeClient == null) {
+      _amplitudeHttpClient.interceptors.add(LoggingInterceptor());
+    }
     _initFuture = _init();
   }
 
@@ -97,10 +104,17 @@ class AnalyticsService {
   static const int _batchSize = 20;
   static const Duration _flushInterval = Duration(seconds: 20);
 
-  static const String _amplitudeApiKeyFromEnv =
-      String.fromEnvironment('AMPLITUDE_API_KEY');
   static const String _amplitudeEndpoint =
       'https://api2.amplitude.com/2/httpapi';
+
+  /// Constructor [amplitudeApiKey] wins (tests). Else dart-define. Else
+  /// the flavor default so local `flutter run` is not silently off.
+  static String _resolveAmplitudeApiKey(String? override) {
+    if (override != null) return override;
+    const fromEnv = String.fromEnvironment('AMPLITUDE_API_KEY');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    return AppConfig.maybeFlavor?.amplitudeApiKey ?? '';
+  }
 
   final Ref _ref;
   final Future<String?> Function()? _readAuthToken;
@@ -178,6 +192,13 @@ class AnalyticsService {
     });
 
     _ready = true;
+    if (kDebugMode) {
+      debugPrint(
+        _amplitudeEnabled
+            ? 'Amplitude: forwarding events to $_amplitudeEndpoint'
+            : 'Amplitude: disabled (no API key)',
+      );
+    }
     for (final p in _pending) {
       _enqueue(p.$1, p.$2);
     }

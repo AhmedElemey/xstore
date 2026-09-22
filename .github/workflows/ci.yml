@@ -29,13 +29,11 @@
 #
 # NOTE ON iOS FLAVORS
 # -----------------------------------------------------------------------------
-# Android defines dev/prod product flavors, but the iOS project has only the
-# default "Runner" scheme (no dev/prod Xcode schemes). Passing --flavor to an
-# iOS build would therefore FAIL. The dev/prod split on iOS is handled purely at
-# the Dart level via the entry point (main_dev.dart / main_prod.dart calling
-# bootstrap(AppFlavor.*)), so the iOS job selects the target with -t and does NOT
-# pass --flavor. If native iOS flavors are needed later, add matching Xcode
-# schemes + build configurations first.
+# iOS now has shared Xcode schemes `dev` / `prod` (plus Debug-*/Release-*/Profile-*
+# build configurations) so local `flutter run --flavor` and VS Code launch.json
+# work. This CI iOS job still uses `-t lib/main_prod.dart` without `--flavor` so
+# it keeps using the default Runner scheme; Dart env still comes from the entry
+# point (main_dev.dart / main_prod.dart calling bootstrap(AppFlavor.*)).
 #
 # Signed release builds live in the separate `build-and-release-apk.yml`
 # workflow (Android). A signed iOS IPA requires an Apple Developer account and
@@ -164,6 +162,7 @@ jobs:
 #              --export-options-plist=ios/ExportOptions.plist
 #   3. Uploads to TestFlight via `xcrun altool` / `fastlane pilot` /
 #      apple-actions/upload-testflight-build.
-# Native iOS dev/prod flavors (Xcode schemes) should be added before then if you
-# want separate bundle IDs per environment.
+# Native iOS `dev`/`prod` schemes already exist; both currently share
+# PRODUCT_BUNDLE_IDENTIFIER com.xstore.app (Firebase plist is registered for that
+# id). Separate bundle IDs per environment would need a matching iOS Firebase app.
 # =============================================================================

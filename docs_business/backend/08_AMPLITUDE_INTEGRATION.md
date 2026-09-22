@@ -41,25 +41,32 @@ directly to Amplitude's HTTP API (`POST https://api2.amplitude.com/2/httpapi`):
 
 ## 2. Enabling it
 
-Nothing is sent to Amplitude until a real project API key is supplied at build time:
+Amplitude is **on by default** once `AppConfig.init` has run (every real app launch via
+`main_dev.dart` / `main_prod.dart` / `main.dart`). The key is resolved in this order:
+
+1. Constructor override (tests).
+2. `--dart-define=AMPLITUDE_API_KEY=...` when non-empty.
+3. Flavor default on `AppFlavor.amplitudeApiKey` — `dev` → xStore-Dev, `prod` → xStore-Prod.
+   These are the same keys `Taskfile.yml` already ships; they are project write keys, not
+   treated as secrets.
+
+A plain `flutter run --flavor dev -t lib/main_dev.dart` (or VS Code **xstore (dev)**) therefore
+forwards events without any extra flag. Override a key at build time the same way as
+`API_BASE_URL`:
 
 ```
-flutter run --dart-define=AMPLITUDE_API_KEY=<your Amplitude project API key>
+flutter run --flavor dev -t lib/main_dev.dart --dart-define=AMPLITUDE_API_KEY=<other key>
 ```
 
-**Both dev and prod are wired**, each to their own Amplitude project so real user data and
-dev-testing noise never land in the same funnel:
+Release / CI still pass the dart-define explicitly:
 
 - `Taskfile.yml`'s `build:dev` / `build:prod` tasks pass
   `--dart-define=AMPLITUDE_API_KEY="{{.AMPLITUDE_API_KEY_DEV}}"` /
-  `"{{.AMPLITUDE_API_KEY_PROD}}"` respectively — override at call time with
-  `AMPLITUDE_API_KEY_DEV=...`/`AMPLITUDE_API_KEY_PROD=... task build:...`, same pattern as
-  `API_BASE_URL_DEV`/`API_BASE_URL_PROD`.
-- `.github/workflows/build-and-release-apk.yml` resolves the same two keys per `BUILD_FLAVOR` (the
-  "Resolve API base URL for flavor" step also resolves `AMPLITUDE_KEY`) and passes
-  `--dart-define=AMPLITUDE_API_KEY="$AMPLITUDE_KEY"` to the release build.
-- A plain `flutter run` for local dev still needs the `--dart-define=AMPLITUDE_API_KEY=...` flag
-  manually, unless run through `task build:dev`.
+  `"{{.AMPLITUDE_API_KEY_PROD}}"` — override at call time with
+  `AMPLITUDE_API_KEY_DEV=...`/`AMPLITUDE_API_KEY_PROD=... task build:...`.
+- `.github/workflows/build-and-release-apk.yml` resolves the same two keys per `BUILD_FLAVOR`
+  and passes `--dart-define=AMPLITUDE_API_KEY="$AMPLITUDE_KEY"`. If that secret is empty, the
+  flavor default still applies.
 
 ## 3. Current event catalog (already forwarded to both destinations)
 
