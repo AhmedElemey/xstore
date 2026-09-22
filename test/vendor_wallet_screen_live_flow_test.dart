@@ -156,9 +156,9 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Your platform fees are up to date.'), findsOneWidget);
-      expect(find.text('EGP 4,500'), findsOneWidget);
+      expect(find.text('4,500 LE'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
-      expect(find.text('EGP 5'), findsOneWidget);
+      expect(find.text('5 LE'), findsOneWidget);
     },
   );
 
