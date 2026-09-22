@@ -37,8 +37,8 @@ class ListingFormState with _$ListingFormState {
     /// TextEditingControllers (the tab stays mounted in the vendor shell).
     @Default(0) int draftRevision,
     /// Remote photo URLs already on the listing being edited (empty when
-    /// creating). Not resubmitted as files — see `submit()`'s comment on
-    /// how an empty [photoPaths] preserves them on update.
+    /// creating). Removable in the photo strip; remaining URLs are sent on
+    /// update as keepers (`imageUrls[i]`).
     @Default(<String>[]) List<String> existingImageUrls,
     /// Non-empty when this form is editing an existing listing rather than
     /// creating a new one; drives `submit()`'s create-vs-update branch.

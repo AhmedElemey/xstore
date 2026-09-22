@@ -35,6 +35,7 @@ const _currencyCode = 'EGP';
 /// edited content) and volatile fields (errors/isSubmitting/draftRevision).
 typedef _EditSnapshot = ({
   List<String> photoPaths,
+  List<String> existingImageUrls,
   String name,
   String priceInput,
   String compareAtPriceInput,
@@ -52,6 +53,7 @@ typedef _EditSnapshot = ({
 
 _EditSnapshot _snapshotOf(ListingFormState s) => (
   photoPaths: List<String>.from(s.photoPaths),
+  existingImageUrls: List<String>.from(s.existingImageUrls),
   name: s.name,
   priceInput: s.priceInput,
   compareAtPriceInput: s.compareAtPriceInput,
@@ -81,6 +83,7 @@ bool _snapshotsEqual(_EditSnapshot a, _EditSnapshot b) =>
     a.shippingCostInput == b.shippingCostInput &&
     a.shippingAvailable == b.shippingAvailable &&
     listEquals(a.photoPaths, b.photoPaths) &&
+    listEquals(a.existingImageUrls, b.existingImageUrls) &&
     listEquals(a.attributes, b.attributes);
 
 @riverpod
@@ -248,10 +251,13 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     await prefs.setString(_draftKey, jsonEncode(snapshot));
   }
 
+  int get _remainingPhotoSlots =>
+      _maxPhotos - state.photoPaths.length - state.existingImageUrls.length;
+
   void addPhotoPath(String path) => addPhotoPaths([path]);
 
   void addPhotoPaths(Iterable<String> paths) {
-    final remaining = _maxPhotos - state.photoPaths.length;
+    final remaining = _remainingPhotoSlots;
     if (remaining <= 0) return;
     final extra = paths.take(remaining).toList();
     if (extra.isEmpty) return;
@@ -265,8 +271,15 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   void addPhoto(File file) => addPhotoPath(file.path);
 
   void removePhoto(int index) {
+    if (index < 0 || index >= state.photoPaths.length) return;
     final next = List<String>.from(state.photoPaths)..removeAt(index);
     state = state.copyWith(photoPaths: next);
+  }
+
+  void removeExistingPhoto(int index) {
+    if (index < 0 || index >= state.existingImageUrls.length) return;
+    final next = List<String>.from(state.existingImageUrls)..removeAt(index);
+    state = state.copyWith(existingImageUrls: next);
   }
 
   void reorderPhotos(int oldIndex, int newIndex) {
@@ -308,7 +321,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
   }
 
   Future<void> pickFromGallery() async {
-    final remaining = _maxPhotos - state.photoPaths.length;
+    final remaining = _remainingPhotoSlots;
     if (remaining <= 0) return;
 
     // pickMultiImage(limit:) throws ArgumentError when limit < 2, so a
@@ -584,12 +597,11 @@ class ListingFormNotifier extends _$ListingFormNotifier {
                 shippingCost: shippingCost,
                 location: state.location.trim(),
                 attributes: attributesMap,
-                // New local photos only. Empty preserves the listing's
-                // existing hosted images — same convention already relied
-                // on by resumeListing (see my_listings_notifier.dart);
-                // whether the backend appends or replaces when non-empty
-                // is unconfirmed, same caveat as that call site.
+                // Remaining hosted URLs + any newly picked local files.
+                // Status-only resume omits keepImageUrls so images stay
+                // untouched; edit always sends the form's remaining set.
                 imagePaths: state.photoPaths,
+                keepImageUrls: state.existingImageUrls,
                 status: state.editingStatus ?? ListingStatus.active,
               )
           : await ref.read(createListingUseCaseProvider).call(

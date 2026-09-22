@@ -513,6 +513,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           errorText: errors['photos'],
           onOpenPicker: openPhotoPicker,
           onRemove: notifier.removePhoto,
+          onRemoveExisting: notifier.removeExistingPhoto,
           onReorder: notifier.reorderPhotos,
         ),
         const Gap(AppSpacing.x3l),

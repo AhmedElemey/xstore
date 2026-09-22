@@ -392,6 +392,7 @@ class _StubListingRepo implements ListingRepository {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   }) => throw UnimplementedError();
 
   @override
