@@ -4,6 +4,8 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -36,10 +38,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     [AppColors.successLight, AppColors.success],
   ];
 
-  Future<void> _finish() async {
+  Future<void> _finish({required bool skipped}) async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.setBool(PrefsKeys.onboardingComplete, true);
     if (!mounted) return;
+    ref.read(analyticsServiceProvider).track(
+      skipped
+          ? AnalyticsEvents.onboardingSkipped
+          : AnalyticsEvents.onboardingCompleted,
+    );
     context.go(AppRoutes.login);
   }
 
@@ -93,7 +100,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: _finish,
+                        onPressed: () => _finish(skipped: true),
                         child: Text(
                           context.l10n.skip,
                           style: TextStyle(
@@ -174,7 +181,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             curve: Curves.easeOutCubic,
                           );
                         } else {
-                          _finish();
+                          _finish(skipped: false);
                         }
                       },
                     ),

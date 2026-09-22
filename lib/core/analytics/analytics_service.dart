@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:math' show min;
 
 import 'package:dio/dio.dart';
@@ -18,6 +19,7 @@ import '../network/api_endpoints.dart';
 import '../network/connectivity_provider.dart';
 import '../network/legacy_route_options.dart';
 import '../network/logging_interceptor.dart';
+import '../router/app_routes.dart';
 import 'analytics_event.dart';
 import 'analytics_ids.dart';
 import 'event_names.dart';
@@ -26,7 +28,10 @@ part 'analytics_service.g.dart';
 
 /// Batches user-journey events locally and POSTs them to
 /// `POST /api/analytics/events` — see
-/// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`.
+/// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`. The same events
+/// are independently forwarded to Amplitude's HTTP API (`/2/httpapi`) when
+/// `--dart-define=AMPLITUDE_API_KEY=...` is supplied — see
+/// `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
 ///
 /// Deliberately uses its own [Dio] client rather than the shared `dio`
 /// provider: the shared client's error interceptor flips the whole app to
@@ -36,20 +41,33 @@ part 'analytics_service.g.dart';
 /// client must not share [TokenRefreshInterceptor]: a 401 from telemetry
 /// must back off, not log the user out.
 ///
-/// The collector is session-gated: [_flush] POSTs only while a signed-in
-/// user (non-empty id + `X-Auth-Token`) is present. Guest events stay in
-/// the local queue until login. Session identity is pushed in via
+/// The xStore collector is session-gated: [_flush] POSTs only while a
+/// signed-in user (non-empty id + `X-Auth-Token`) is present. Guest events
+/// stay in the local queue until login. Session identity is pushed in via
 /// [bindSession] from the auth notifier — this provider must not
 /// `read`/`listen` to `authProvider`, or Auth's own
 /// `ref.read(analyticsServiceProvider)` becomes a Riverpod circular
 /// dependency in debug. This dedicated Dio does not inherit
 /// `dio_provider`'s token interceptor, so the token is attached per POST.
+///
+/// The Amplitude forwarder is intentionally NOT session-gated the same
+/// way — it sends every tracked event (guest and signed-in alike) so the
+/// full browse→purchase journey is visible in Amplitude, using
+/// [_deviceId] as Amplitude's anonymous identity and [_userId] once
+/// signed in. It uses its own separate [Dio] client with no default
+/// headers, so xStore's Basic license key / auth token is never sent to a
+/// third party. Both forwarders share the app's connectivity gate
+/// ([isOnlineProvider]) but fail independently — an Amplitude outage must
+/// never affect the xStore collector or vice versa.
 class AnalyticsService {
   AnalyticsService(
     this._ref, {
     Dio? client,
+    Dio? amplitudeClient,
+    String? amplitudeApiKey,
     Future<String?> Function()? readAuthToken,
-  }) : _readAuthToken = readAuthToken {
+  })  : _readAuthToken = readAuthToken,
+        _amplitudeApiKey = amplitudeApiKey ?? _amplitudeApiKeyFromEnv {
     _client = client ??
         Dio(
           BaseOptions(
@@ -65,6 +83,13 @@ class AnalyticsService {
     if (kDebugMode && client == null) {
       _client.interceptors.add(LoggingInterceptor());
     }
+    _amplitudeHttpClient = amplitudeClient ??
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
     _initFuture = _init();
   }
 
@@ -72,22 +97,36 @@ class AnalyticsService {
   static const int _batchSize = 20;
   static const Duration _flushInterval = Duration(seconds: 20);
 
+  static const String _amplitudeApiKeyFromEnv =
+      String.fromEnvironment('AMPLITUDE_API_KEY');
+  static const String _amplitudeEndpoint =
+      'https://api2.amplitude.com/2/httpapi';
+
   final Ref _ref;
   final Future<String?> Function()? _readAuthToken;
+  final String _amplitudeApiKey;
   late final Dio _client;
+  late final Dio _amplitudeHttpClient;
   late final Future<void> _initFuture;
   late final String _sessionId;
+  late final int _sessionStartMs;
   String _deviceId = '';
   String? _userId;
   String? _userRole;
   String? _currentScreenName;
 
+  bool get _amplitudeEnabled => _amplitudeApiKey.isNotEmpty;
+
   final List<AnalyticsEvent> _queue = [];
+  final List<AnalyticsEvent> _amplitudeQueue = [];
   final List<(String, Map<String, Object?>)> _pending = [];
   bool _ready = false;
   Future<void>? _inFlightFlush;
   int _consecutiveFailures = 0;
   DateTime? _backoffUntil;
+  Future<void>? _amplitudeInFlightFlush;
+  int _amplitudeConsecutiveFailures = 0;
+  DateTime? _amplitudeBackoffUntil;
 
   Timer? _flushTimer;
   VoidCallback? _detachRouterListener;
@@ -97,11 +136,15 @@ class AnalyticsService {
   Future<void> get ready => _initFuture;
 
   @visibleForTesting
-  Future<void> flushNow() => _flush();
+  Future<void> flushNow() => Future.wait([_flush(), _flushAmplitude()]);
 
   @visibleForTesting
   List<String> get queuedEventNames =>
       [for (final event in _queue) event.name];
+
+  @visibleForTesting
+  List<String> get amplitudeQueuedEventNames =>
+      [for (final event in _amplitudeQueue) event.name];
 
   bool get _isSignedIn => _userId != null && _userId!.isNotEmpty;
 
@@ -121,13 +164,17 @@ class AnalyticsService {
 
   Future<void> _init() async {
     _sessionId = generateEventId();
+    _sessionStartMs = DateTime.now().millisecondsSinceEpoch;
     final prefs = await _ref.read(sharedPreferencesProvider.future);
     _deviceId = prefs.getString(PrefsKeys.analyticsDeviceId) ?? generateEventId();
     await prefs.setString(PrefsKeys.analyticsDeviceId, _deviceId);
     _loadPersistedQueue(prefs);
 
     _ref.listen<bool>(isOnlineProvider, (prev, next) {
-      if (next && prev == false) unawaited(_flush());
+      if (next && prev == false) {
+        unawaited(_flush());
+        unawaited(_flushAmplitude());
+      }
     });
 
     _ready = true;
@@ -135,9 +182,19 @@ class AnalyticsService {
       _enqueue(p.$1, p.$2);
     }
     _pending.clear();
+    // Fires exactly once per process start — this service is a keepAlive
+    // provider created once for the app's lifetime, so _init() runs once.
+    // Does not cover foreground-resume from background (no
+    // WidgetsBindingObserver wired for that yet); cold start covers the
+    // large majority of "app opened" sessions.
+    track(AnalyticsEvents.appOpen);
 
-    _flushTimer = Timer.periodic(_flushInterval, (_) => unawaited(_flush()));
+    _flushTimer = Timer.periodic(_flushInterval, (_) {
+      unawaited(_flush());
+      unawaited(_flushAmplitude());
+    });
     unawaited(_flush());
+    unawaited(_flushAmplitude());
   }
 
   void _loadPersistedQueue(SharedPreferences prefs) {
@@ -194,6 +251,16 @@ class AnalyticsService {
     if (_queue.length >= _batchSize) {
       unawaited(_flush());
     }
+
+    if (_amplitudeEnabled) {
+      _amplitudeQueue.add(event);
+      if (_amplitudeQueue.length > _maxQueueSize) {
+        _amplitudeQueue.removeAt(0);
+      }
+      if (_amplitudeQueue.length >= _batchSize) {
+        unawaited(_flushAmplitude());
+      }
+    }
   }
 
   /// Wires automatic `screen_view` tracking off go_router's route-change
@@ -209,14 +276,30 @@ class AnalyticsService {
       final uri = provider.value.uri.toString();
       if (uri == last) return;
       last = uri;
-      _currentScreenName = uri;
-      track(AnalyticsEvents.screenView, properties: {AnalyticsProps.screenName: uri});
+      _onRouteChanged(uri);
     }
 
     provider.addListener(onChange);
     _detachRouterListener = () => provider.removeListener(onChange);
     onChange();
   }
+
+  void _onRouteChanged(String uri) {
+    _currentScreenName = uri;
+    track(AnalyticsEvents.screenView, properties: {AnalyticsProps.screenName: uri});
+    // A couple of funnel-critical routes also get a named event alongside
+    // the generic screen_view, so a funnel chart doesn't need a
+    // screen_name filter step — mirrors how begin_checkout/purchase are
+    // already named events rather than relying on screen_view alone.
+    if (uri == AppRoutes.cart) {
+      track(AnalyticsEvents.cartViewed);
+    }
+  }
+
+  /// Exercises the exact route-change logic [attachRouter] wires to
+  /// go_router, without needing a real [GoRouter] instance in tests.
+  @visibleForTesting
+  void debugRouteChanged(String uri) => _onRouteChanged(uri);
 
   int _backoffSeconds() => min(300, 10 * (1 << _consecutiveFailures.clamp(0, 5)));
 
@@ -282,10 +365,105 @@ class AnalyticsService {
     }
   }
 
+  int _amplitudeBackoffSeconds() =>
+      min(300, 10 * (1 << _amplitudeConsecutiveFailures.clamp(0, 5)));
+
+  void _registerAmplitudeFailure() {
+    _amplitudeConsecutiveFailures++;
+    _amplitudeBackoffUntil =
+        DateTime.now().add(Duration(seconds: _amplitudeBackoffSeconds()));
+  }
+
+  String get _amplitudePlatform {
+    try {
+      return Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other');
+    } catch (_) {
+      return 'Other';
+    }
+  }
+
+  /// Amplitude's revenue dashboards read the top-level `revenue` field, not
+  /// an `event_properties` entry — only `purchase` carries a numeric
+  /// `value_egp`, so this is the one event that populates it.
+  num? _revenueOf(AnalyticsEvent event) {
+    if (event.name != AnalyticsEvents.purchase) return null;
+    final value = event.properties[AnalyticsProps.valueEgp];
+    if (value is num) return value;
+    if (value is String) return num.tryParse(value);
+    return null;
+  }
+
+  Map<String, Object?> _amplitudeEventJson(AnalyticsEvent event) {
+    final userId = event.userId;
+    final screenName = event.screenName;
+    final revenue = _revenueOf(event);
+    return {
+      if (userId != null && userId.isNotEmpty) 'user_id': userId,
+      'device_id': event.deviceId,
+      'event_type': event.name,
+      'time': event.occurredAt.millisecondsSinceEpoch,
+      'insert_id': event.eventId, // dedupe key — safe to retry a batch
+      'session_id': _sessionStartMs,
+      'platform': _amplitudePlatform,
+      if (revenue != null) 'revenue': revenue,
+      if (revenue != null) 'revenue_type': 'purchase',
+      'event_properties': {
+        if (screenName != null) 'screen_name': screenName,
+        ...event.properties,
+      },
+      if (event.userRole != null) 'user_properties': {'role': event.userRole},
+    };
+  }
+
+  Future<void> _flushAmplitude() async {
+    if (!_amplitudeEnabled) return;
+    final inFlight = _amplitudeInFlightFlush;
+    if (inFlight != null) return inFlight;
+    final done = _runAmplitudeFlush();
+    _amplitudeInFlightFlush = done;
+    try {
+      await done;
+    } finally {
+      if (identical(_amplitudeInFlightFlush, done)) _amplitudeInFlightFlush = null;
+    }
+  }
+
+  /// Not session-gated like [_runFlush] — forwards guest and signed-in
+  /// events alike so Amplitude sees the full user journey.
+  Future<void> _runAmplitudeFlush() async {
+    if (_amplitudeQueue.isEmpty || !_ready) return;
+    final until = _amplitudeBackoffUntil;
+    if (until != null && DateTime.now().isBefore(until)) return;
+    if (!_ref.read(isOnlineProvider)) return;
+
+    try {
+      final batch = _amplitudeQueue.take(_batchSize).toList();
+      final body = <String, dynamic>{
+        'api_key': _amplitudeApiKey,
+        'events': [for (final event in batch) _amplitudeEventJson(event)],
+      };
+      final response = await _amplitudeHttpClient.post<dynamic>(
+        _amplitudeEndpoint,
+        data: body,
+      );
+      final status = response.statusCode ?? 0;
+      if (status < 200 || status >= 300) {
+        _registerAmplitudeFailure();
+        return;
+      }
+      _amplitudeQueue.removeRange(0, batch.length);
+      _amplitudeConsecutiveFailures = 0;
+      _amplitudeBackoffUntil = null;
+    } catch (_) {
+      _registerAmplitudeFailure();
+    }
+  }
+
   void dispose() {
     _flushTimer?.cancel();
     _detachRouterListener?.call();
     _client.close();
+    _amplitudeHttpClient.close();
   }
 }
 

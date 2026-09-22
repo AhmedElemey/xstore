@@ -605,7 +605,16 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
     state = state.copyWith(stepErrors: {}, error: null);
     if (state.currentStep < state.totalSteps) {
-      state = state.copyWith(currentStep: state.currentStep + 1);
+      final reachedStep = state.currentStep + 1;
+      state = state.copyWith(currentStep: reachedStep);
+      // Vendor-only: the wizard shares this method with the consumer flow,
+      // which has no separate onboarding funnel to instrument.
+      if (state.selectedRole == UserRole.vendor) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.vendorOnboardingStep,
+          properties: {AnalyticsProps.step: reachedStep},
+        );
+      }
     }
     return true;
   }
