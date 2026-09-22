@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../shared/providers/shared_providers.dart';
+import '../config/app_config.dart';
 import '../constants/prefs_keys.dart';
 import '../network/api_auth_headers.dart';
 import '../network/api_endpoints.dart';
@@ -34,8 +35,11 @@ part 'analytics_service.g.dart';
 /// `POST /api/analytics/events` — see
 /// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`. The same events
 /// are independently forwarded to Amplitude via the official
-/// `amplitude_flutter` SDK when `--dart-define=AMPLITUDE_API_KEY=...` is
-/// supplied — see `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
+/// `amplitude_flutter` SDK. The API key comes from
+/// `--dart-define=AMPLITUDE_API_KEY=...` when set, otherwise the flavor
+/// default on [AppConfig] (dev → xStore-Dev, prod → xStore-Prod) so a
+/// plain `flutter run --flavor` / VS Code launch still reports. See
+/// `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
 ///
 /// Deliberately uses its own [Dio] client rather than the shared `dio`
 /// provider: the shared client's error interceptor flips the whole app to
@@ -94,7 +98,7 @@ class AnalyticsService {
     if (kDebugMode && client == null) {
       _client.interceptors.add(LoggingInterceptor());
     }
-    final apiKey = amplitudeApiKey ?? _amplitudeApiKeyFromEnv;
+    final apiKey = _resolveAmplitudeApiKey(amplitudeApiKey);
     _amplitude = amplitudeClient ??
         (apiKey.isEmpty
             ? null
@@ -111,8 +115,14 @@ class AnalyticsService {
   static const int _batchSize = 20;
   static const Duration _flushInterval = Duration(seconds: 20);
 
-  static const String _amplitudeApiKeyFromEnv =
-      String.fromEnvironment('AMPLITUDE_API_KEY');
+  /// Constructor [amplitudeApiKey] wins (tests). Else dart-define. Else
+  /// the flavor default so local `flutter run` is not silently off.
+  static String _resolveAmplitudeApiKey(String? override) {
+    if (override != null) return override;
+    const fromEnv = String.fromEnvironment('AMPLITUDE_API_KEY');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    return AppConfig.maybeFlavor?.amplitudeApiKey ?? '';
+  }
 
   final Ref _ref;
   final Future<String?> Function()? _readAuthToken;
@@ -184,6 +194,13 @@ class AnalyticsService {
     });
 
     _ready = true;
+    if (kDebugMode) {
+      debugPrint(
+        _amplitude != null
+            ? 'Amplitude: forwarding events'
+            : 'Amplitude: disabled (no API key)',
+      );
+    }
     for (final p in _pending) {
       _enqueue(p.$1, p.$2);
     }
