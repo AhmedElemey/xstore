@@ -46,6 +46,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/analytics/analytics_service.dart';
+import 'package:xstore/core/analytics/event_names.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
@@ -371,6 +372,10 @@ void main() {
       expect(order, isNull);
       expect(container.read(checkoutProvider).error, 'noItems');
       expect(adapter.requests, isEmpty);
+      expect(
+        container.read(analyticsServiceProvider).queuedEventNames,
+        contains(AnalyticsEvents.orderPlacementFailed),
+      );
     },
   );
 
@@ -393,6 +398,10 @@ void main() {
       expect(order, isNull);
       expect(container.read(checkoutProvider).error, 'noAddress');
       expect(adapter.requests, isEmpty);
+      expect(
+        container.read(analyticsServiceProvider).queuedEventNames,
+        contains(AnalyticsEvents.orderPlacementFailed),
+      );
     },
   );
 

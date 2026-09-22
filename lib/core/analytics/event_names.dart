@@ -6,18 +6,39 @@ abstract final class AnalyticsEvents {
   // North-star funnel (view -> cart -> checkout -> purchase).
   static const String viewItem = 'view_item';
   static const String addToCart = 'add_to_cart';
+  static const String removeFromCart = 'remove_from_cart';
+  static const String cartViewed = 'cart_viewed';
   static const String beginCheckout = 'begin_checkout';
+  static const String orderPlacementFailed = 'order_placement_failed';
   static const String purchase = 'purchase';
 
   // Auth / retention.
+  static const String appOpen = 'app_open';
   static const String loginSuccess = 'login_success';
   static const String registerSuccess = 'register_success';
   static const String logout = 'logout';
   static const String loginPromptShown = 'login_prompt_shown';
+  static const String onboardingCompleted = 'onboarding_completed';
+  static const String onboardingSkipped = 'onboarding_skipped';
+  static const String guestModeStarted = 'guest_mode_started';
+  static const String deepLinkOpened = 'deep_link_opened';
 
   // Discovery.
   static const String screenView = 'screen_view';
   static const String searchPerformed = 'search_performed';
+  static const String searchNoResults = 'search_no_results';
+  static const String categoryViewed = 'category_viewed';
+  static const String filterApplied = 'filter_applied';
+
+  // Checkout detail.
+  static const String checkoutAddressSelected = 'checkout_address_selected';
+  static const String checkoutAddressAdded = 'checkout_address_added';
+
+  // Post-purchase engagement.
+  static const String reviewSubmitted = 'review_submitted';
+  static const String pushNotificationReceived = 'push_notification_received';
+  static const String pushNotificationOpened = 'push_notification_opened';
+  static const String vendorReportSubmitted = 'vendor_report_submitted';
 
   // Secondary engagement.
   static const String wishlistAdd = 'wishlist_add';
@@ -35,6 +56,7 @@ abstract final class AnalyticsEvents {
   static const String listingResubmitted = 'listing_resubmitted';
   static const String listingDeleted = 'listing_deleted';
   static const String orderStatusChanged = 'order_status_changed';
+  static const String vendorOnboardingStep = 'vendor_onboarding_step';
 }
 
 abstract final class AnalyticsProps {
@@ -59,4 +81,11 @@ abstract final class AnalyticsProps {
   static const String screenName = 'screen_name';
   static const String status = 'status';
   static const String reason = 'reason';
+  static const String rating = 'rating';
+  static const String step = 'step';
+  static const String categoryCount = 'category_count';
+  static const String conditionCount = 'condition_count';
+  static const String hasPriceRange = 'has_price_range';
+  static const String shippingOnly = 'shipping_only';
+  static const String messageId = 'message_id';
 }

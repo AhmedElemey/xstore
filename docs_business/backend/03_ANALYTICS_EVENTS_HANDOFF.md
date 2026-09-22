@@ -8,6 +8,11 @@ live, this feeds the Analytics tab stubbed in
 [`../admin-dashboard/BACKEND_HANDOFF.md`](../admin-dashboard/BACKEND_HANDOFF.md) instead of
 hardcoded demo data.
 
+> **Amplitude:** the same client-side event stream is also forwarded directly to Amplitude's HTTP
+> API, independent of this backend collector — see
+> [`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) for the wiring and a gap analysis
+> of events still missing for a complete user journey.
+
 ## Why a custom endpoint instead of Firebase Analytics only
 
 `03_funnel_metrics.md` originally scoped Phase A as Firebase Analytics client-side events with
@@ -105,6 +110,29 @@ vs logged-in split — see `03_funnel_metrics.md` §4 for the exact rates to exp
 | `listing_resubmitted` | Vendor resubmits a rejected listing | `item_id`, `price_egp` |
 | `listing_deleted` | Vendor deletes/cancels a listing | `item_id` |
 | `order_status_changed` | Any order lifecycle transition (either role) | `order_id`, `status` (`confirmed`\|`processing`\|`shipped`\|`delivered`\|`cancelled`), `role` (`vendor`\|`consumer`), `method` (delivery method, confirm only), `reason` (reject/cancel only) |
+| `app_open` | App cold start (once per process launch) | (none) |
+| `category_viewed` | A home category chip is tapped into Explore | `category` |
+| `search_no_results` | Explore search returns zero results for a non-empty query | `query` |
+| `remove_from_cart` | Cart item removed | `item_id`, `quantity`, `cart_value_egp` |
+| `cart_viewed` | Cart tab opened | (none) |
+| `order_placement_failed` | `placeOrder()` fails for any reason | `reason` (`offline`\|`noItems`\|`noAddress`\|`noConsumer`\|a mapped backend error code\|`failed`), `cart_value_egp`, `item_count` |
+| `review_submitted` | A new (not edited) product review is created | `item_id`, `rating` |
+| `onboarding_completed` / `onboarding_skipped` | Last onboarding slide "Get Started" vs. the Skip button | (none) |
+| `guest_mode_started` | "Continue as Guest" tapped on the login screen (not the returning-guest re-entry on cold start) | (none) |
+| `deep_link_opened` | A Universal/App Link resolves to an in-app route | `screen_name` (the resolved route) |
+| `filter_applied` | Explore filter sheet "Apply" tapped | `category_count`, `condition_count`, `has_price_range`, `shipping_only` |
+| `checkout_address_selected` | A different saved address is picked during checkout | (none) |
+| `checkout_address_added` | A new address is saved during checkout | (none) |
+| `push_notification_received` | An FCM message arrives in the foreground | `message_id` |
+| `push_notification_opened` | A push notification (foreground tap, cold-launch tap, or Android local-notification tap) is opened | `message_id` (foreground/cold-launch only), `screen_name` |
+| `vendor_report_submitted` | Consumer successfully reports a vendor from order detail | `seller_id`, `order_id` |
+| `vendor_onboarding_step` | Vendor register wizard advances a step | `step` (the step number just reached) |
+
+The rows above from `app_open` through `vendor_onboarding_step` are the full set of P0+P1
+additions from the Amplitude user-journey gap analysis — see
+[`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) §4 for the full list, including
+the still-unimplemented P2 events (`product_impression`, `wishlist_viewed`,
+`vendor_store_hours_updated`, `commission_wallet_viewed`).
 
 ## Open question for whoever implements this
 

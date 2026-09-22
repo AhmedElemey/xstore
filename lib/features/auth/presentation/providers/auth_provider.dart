@@ -249,7 +249,12 @@ class Auth extends _$Auth {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
     syncFcmDeviceTokenWithBackend(ref, user: user);
-    prefetchProfileData(ref, user: user);
+    // Every adoptSession caller (password login, register, phone OTP,
+    // Google) reaches here via a repository method that already called
+    // _resolveFullUser — user is fresh off a live get-profile. Unlike
+    // setUser, whose two callers (Apple/Facebook local-only sessions) never
+    // touched the backend, so must NOT claim freshness here.
+    prefetchProfileData(ref, user: user, alreadyFresh: true);
     syncDeliveryBackendSession(ref, user: user);
     _bindAnalyticsSession(user);
   }
@@ -605,7 +610,16 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
     state = state.copyWith(stepErrors: {}, error: null);
     if (state.currentStep < state.totalSteps) {
-      state = state.copyWith(currentStep: state.currentStep + 1);
+      final reachedStep = state.currentStep + 1;
+      state = state.copyWith(currentStep: reachedStep);
+      // Vendor-only: the wizard shares this method with the consumer flow,
+      // which has no separate onboarding funnel to instrument.
+      if (state.selectedRole == UserRole.vendor) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.vendorOnboardingStep,
+          properties: {AnalyticsProps.step: reachedStep},
+        );
+      }
     }
     return true;
   }

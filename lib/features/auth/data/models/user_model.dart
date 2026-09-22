@@ -237,7 +237,16 @@ UserModel userModelFromProfileResponse(
       userJson['id'] = resolvedId;
     }
   }
-  return UserModel.fromJson(userJson);
+  // wire's verification flags are top-level siblings of `user`/`store` in
+  // the response, not part of userJson — UserModel.fromJson never sees them
+  // on its own, so merge them in explicitly.
+  return UserModel.fromJson(userJson).copyWith(
+    isEmailVerificationRequired: wire.isEmailVerificationRequired,
+    isPhoneVerificationRequired: wire.isPhoneVerificationRequired,
+    isEmailVerified: wire.isEmailVerified,
+    isPhoneVerified: wire.isPhoneVerified,
+    hasPassword: wire.hasPassword,
+  );
 }
 
 /// Extracts the merged user map from a profile response wrapper.
@@ -286,6 +295,11 @@ class UserModel with _$UserModel {
     int? storeCityId,
     int? storeGovernmentId,
     int? storeId,
+    @Default(false) bool isEmailVerificationRequired,
+    @Default(false) bool isPhoneVerificationRequired,
+    @Default(false) bool isEmailVerified,
+    @Default(false) bool isPhoneVerified,
+    @Default(true) bool hasPassword,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -411,6 +425,13 @@ class UserModel with _$UserModel {
           _nestedId(json['government']) ??
           _nestedId(json['governorate']),
       storeId: (json['storeId'] as num?)?.toInt(),
+      isEmailVerificationRequired:
+          json['isEmailVerificationRequired'] as bool? ?? false,
+      isPhoneVerificationRequired:
+          json['isPhoneVerificationRequired'] as bool? ?? false,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
+      isPhoneVerified: json['isPhoneVerified'] as bool? ?? false,
+      hasPassword: json['hasPassword'] as bool? ?? true,
     );
   }
 }
@@ -452,6 +473,11 @@ extension UserModelX on UserModel {
         storeCityId: storeCityId,
         storeGovernmentId: storeGovernmentId,
         storeId: storeId,
+        isEmailVerificationRequired: isEmailVerificationRequired,
+        isPhoneVerificationRequired: isPhoneVerificationRequired,
+        isEmailVerified: isEmailVerified,
+        isPhoneVerified: isPhoneVerified,
+        hasPassword: hasPassword,
       );
 
   Map<String, dynamic> toJson() => {
@@ -494,5 +520,10 @@ extension UserModelX on UserModel {
         if (storeCityId != null) 'storeCityId': storeCityId,
         if (storeGovernmentId != null) 'storeGovernmentId': storeGovernmentId,
         if (storeId != null) 'storeId': storeId,
+        'isEmailVerificationRequired': isEmailVerificationRequired,
+        'isPhoneVerificationRequired': isPhoneVerificationRequired,
+        'isEmailVerified': isEmailVerified,
+        'isPhoneVerified': isPhoneVerified,
+        'hasPassword': hasPassword,
       };
 }

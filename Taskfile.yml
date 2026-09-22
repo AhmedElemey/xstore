@@ -17,6 +17,10 @@
 # Pass MOCK=true manually if you ever need a mock-data build.
 #
 # Release APK builds require android/key.properties and a release keystore locally.
+#
+# AMPLITUDE_API_KEY_DEV / AMPLITUDE_API_KEY_PROD are the xStore-Dev / xStore-Prod Amplitude
+# project ingestion keys — like a Firebase/Maps API key, meant to ship inside the client,
+# not treated as a secret (see docs_business/backend/08_AMPLITUDE_INTEGRATION.md).
 # =============================================================================
 
 version: 3
@@ -26,6 +30,10 @@ vars:
     sh: echo ${API_BASE_URL_DEV:-https://xstoreegy002-001-site1.etempurl.com}
   API_BASE_URL_PROD:
     sh: echo ${API_BASE_URL_PROD:-https://xstoreegy002-001-site1.etempurl.com}
+  AMPLITUDE_API_KEY_DEV:
+    sh: echo ${AMPLITUDE_API_KEY_DEV:-997771c9a79e1c8d7448c4c8359c3025}
+  AMPLITUDE_API_KEY_PROD:
+    sh: echo ${AMPLITUDE_API_KEY_PROD:-cc112c1d0642a9a8e7fb28a3f8566f12}
 
 tasks:
   version:bump:
@@ -43,18 +51,51 @@ tasks:
   build:dev:
     desc: Build release APK for the dev flavor (com.xstore.app.dev)
     cmds:
-      - flutter build apk --release --flavor dev -t lib/main_dev.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_DEV}}" --dart-define=MOCK=false
+      - flutter build apk --release --flavor dev -t lib/main_dev.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_DEV}}" --dart-define=AMPLITUDE_API_KEY="{{.AMPLITUDE_API_KEY_DEV}}" --dart-define=MOCK=false
+      - task: _apk-summary
+        vars:
+          FLAVOR: dev
 
   build:prod:
     desc: Build release APK for the prod flavor (com.xstore.app)
     cmds:
-      - flutter build apk --release --flavor prod -t lib/main_prod.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_PROD}}" --dart-define=MOCK=false
+      - flutter build apk --release --flavor prod -t lib/main_prod.dart --dart-define=API_BASE_URL="{{.API_BASE_URL_PROD}}" --dart-define=AMPLITUDE_API_KEY="{{.AMPLITUDE_API_KEY_PROD}}" --dart-define=MOCK=false
+      - task: _apk-summary
+        vars:
+          FLAVOR: prod
 
   build:all:
     desc: Build release APKs for dev and prod in sequence
     cmds:
       - task: build:dev
       - task: build:prod
+
+  _apk-summary:
+    internal: true
+    desc: Copy the just-built APK to a flavor+version-stamped filename and print a summary
+    vars:
+      APP_ID:
+        sh: '[ "{{.FLAVOR}}" = "dev" ] && echo com.xstore.app.dev || echo com.xstore.app'
+      FULL_VERSION:
+        sh: grep '^version:' pubspec.yaml | awk '{print $2}'
+    cmds:
+      - |
+        SRC="build/app/outputs/flutter-apk/app-{{.FLAVOR}}-release.apk"
+        DEST="build/app/outputs/flutter-apk/xstore-{{.FLAVOR}}-v{{.FULL_VERSION}}.apk"
+        if [ ! -f "$SRC" ]; then
+          echo "Expected APK not found at $SRC" >&2
+          exit 1
+        fi
+        cp "$SRC" "$DEST"
+        echo ""
+        echo "================================================"
+        echo " xStore APK build summary"
+        echo "================================================"
+        echo " Flavor:   {{.FLAVOR}}"
+        echo " App ID:   {{.APP_ID}}"
+        echo " Version:  {{.FULL_VERSION}}"
+        echo " APK path: $DEST"
+        echo "================================================"
 
   signing:report:
     desc: Print debug + release SHA-1/SHA-256 (add release fingerprints to Firebase)
