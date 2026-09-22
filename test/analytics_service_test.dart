@@ -1,7 +1,10 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:amplitude_flutter/amplitude.dart';
+import 'package:amplitude_flutter/autocapture/autocapture.dart';
+import 'package:amplitude_flutter/configuration.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +18,29 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
+
+/// Stands in for the real `amplitude_flutter` platform channel — records
+/// every `invokeMethod` call instead of dispatching to native code, so
+/// tests can assert on exactly what the SDK was asked to send without a
+/// real Android/iOS/web plugin registered.
+class _RecordingMethodChannel extends MethodChannel {
+  _RecordingMethodChannel() : super('amplitude_flutter');
+
+  final calls = <MethodCall>[];
+
+  @override
+  Future<T?> invokeMethod<T>(String method, [dynamic arguments]) async {
+    calls.add(MethodCall(method, arguments));
+    if (method == 'init') return true as T?;
+    return null;
+  }
+}
+
+Amplitude _fakeAmplitude(_RecordingMethodChannel channel, {String apiKey = 'test-amplitude-key'}) =>
+    Amplitude(
+      Configuration(apiKey: apiKey, autocapture: const AutocaptureDisabled()),
+      channel,
+    );
 
 class _RecordingAdapter implements HttpClientAdapter {
   _RecordingAdapter({this.statusCode = 202});
@@ -77,8 +103,7 @@ void main() {
     required Auth auth,
     UserEntity? sessionUser,
     Map<String, String> secureValues = const {},
-    Dio? amplitudeClient,
-    String? amplitudeApiKey,
+    Amplitude? amplitudeClient,
   }) {
     FlutterSecureStorage.setMockInitialValues(secureValues);
     late AnalyticsService created;
@@ -91,7 +116,6 @@ void main() {
             client: dio,
             readAuthToken: () async => secureValues[PrefsKeys.authToken],
             amplitudeClient: amplitudeClient,
-            amplitudeApiKey: amplitudeApiKey,
           );
           return created;
         }),
@@ -300,69 +324,54 @@ void main() {
   );
 
   group('Amplitude forwarding', () {
-    late _RecordingAdapter amplitudeAdapter;
-    late Dio amplitudeDio;
+    late _RecordingMethodChannel channel;
 
     setUp(() {
-      amplitudeAdapter = _RecordingAdapter(statusCode: 200);
-      amplitudeDio = Dio()..httpClientAdapter = amplitudeAdapter;
+      channel = _RecordingMethodChannel();
     });
 
-    test('does nothing when no AMPLITUDE_API_KEY is configured', () async {
-      buildContainer(auth: FakeAuth(null), amplitudeClient: amplitudeDio);
+    List<Map> trackCalls() => channel.calls
+        .where((c) => c.method == 'track')
+        .map((c) => (c.arguments as Map)['event'] as Map)
+        .toList();
+
+    test('does not construct an Amplitude client when no AMPLITUDE_API_KEY '
+        'is configured — the disabled path never touches a platform '
+        'channel, mocked or not', () async {
+      buildContainer(auth: FakeAuth(null));
       service.track('view_item');
       await service.ready;
-      await service.flushNow();
-
-      expect(amplitudeAdapter.posts, isEmpty);
+      await expectLater(service.flushNow(), completes);
     });
 
     test('forwards guest events with no signed-in user required', () async {
-      buildContainer(
-        auth: FakeAuth(null),
-        amplitudeClient: amplitudeDio,
-        amplitudeApiKey: 'test-amplitude-key',
-      );
+      buildContainer(auth: FakeAuth(null), amplitudeClient: _fakeAmplitude(channel));
       service.track('view_item', properties: {'item_id': 'p1'});
       await service.ready;
       await service.flushNow();
 
-      expect(amplitudeAdapter.posts, hasLength(1));
-      final body = Map<String, dynamic>.from(
-        amplitudeAdapter.posts.single.data as Map,
-      );
-      expect(body['api_key'], 'test-amplitude-key');
-      final events = (body['events'] as List).cast<Map>();
       // app_open is forwarded too (it's not session-gated) — pick out the
       // event this test is actually about.
       final viewItem =
-          events.firstWhere((e) => e['event_type'] == 'view_item');
+          trackCalls().firstWhere((e) => e['event_type'] == 'view_item');
       expect(viewItem['user_id'], isNull);
       expect(viewItem['device_id'], isNotEmpty);
       expect(viewItem['event_properties'], containsPair('item_id', 'p1'));
     });
 
-    test('includes user_id and role once signed in, and never sends the '
-        'xStore license/auth headers', () async {
+    test('includes user_id and role once signed in', () async {
       buildContainer(
         auth: FakeAuth(_user()),
         sessionUser: _user(),
         secureValues: {PrefsKeys.authToken: 'sess-token'},
-        amplitudeClient: amplitudeDio,
-        amplitudeApiKey: 'test-amplitude-key',
+        amplitudeClient: _fakeAmplitude(channel),
       );
       service.track('purchase');
       await service.ready;
       await service.flushNow();
 
-      expect(amplitudeAdapter.posts, hasLength(1));
-      final request = amplitudeAdapter.posts.single;
-      expect(request.headers['Authorization'], isNull);
-      expect(request.headers['X-Auth-Token'], isNull);
-      final body = Map<String, dynamic>.from(request.data as Map);
-      final events = (body['events'] as List).cast<Map>();
       final purchaseEvent =
-          events.firstWhere((e) => e['event_type'] == 'purchase');
+          trackCalls().firstWhere((e) => e['event_type'] == 'purchase');
       expect(purchaseEvent['user_id'], 'u1');
       expect(purchaseEvent['user_properties'], {'role': 'consumer'});
     });
@@ -372,8 +381,7 @@ void main() {
         auth: FakeAuth(_user()),
         sessionUser: _user(),
         secureValues: {PrefsKeys.authToken: 'sess-token'},
-        amplitudeClient: amplitudeDio,
-        amplitudeApiKey: 'test-amplitude-key',
+        amplitudeClient: _fakeAmplitude(channel),
       );
       service.track(
         AnalyticsEvents.purchase,
@@ -382,36 +390,26 @@ void main() {
       await service.ready;
       await service.flushNow();
 
-      final body = Map<String, dynamic>.from(
-        amplitudeAdapter.posts.single.data as Map,
-      );
-      final events = (body['events'] as List).cast<Map>();
       final purchaseEvent =
-          events.firstWhere((e) => e['event_type'] == 'purchase');
+          trackCalls().firstWhere((e) => e['event_type'] == 'purchase');
       expect(purchaseEvent['revenue'], 499.5);
       expect(purchaseEvent['revenue_type'], 'purchase');
     });
 
-    test('a failed Amplitude POST does not drop the batch and does not '
-        'affect the xStore collector queue', () async {
-      final failingAdapter = _RecordingAdapter(statusCode: 500);
-      amplitudeDio.httpClientAdapter = failingAdapter;
+    test('an Amplitude track() call never affects the xStore collector '
+        'queue, and vice versa', () async {
       buildContainer(
         auth: FakeAuth(_user()),
         sessionUser: _user(),
         secureValues: {PrefsKeys.authToken: 'sess-token'},
-        amplitudeClient: amplitudeDio,
-        amplitudeApiKey: 'test-amplitude-key',
+        amplitudeClient: _fakeAmplitude(channel),
       );
       service.track('view_item');
       await service.ready;
       await service.flushNow();
 
-      expect(failingAdapter.posts, hasLength(1));
-      // The failed batch (view_item + the app_open queued on init) stays
-      // queued in full for retry.
       expect(
-        service.amplitudeQueuedEventNames,
+        trackCalls().map((e) => e['event_type']),
         containsAll(['view_item', AnalyticsEvents.appOpen]),
       );
       expect(adapter.posts, hasLength(1)); // xStore collector still sent.
