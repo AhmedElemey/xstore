@@ -92,7 +92,7 @@ void main() {
       // here, so this exercises the kStarterCommissionFeeEgp fallback (2
       // EGP): vendor earns 1000 - 2 = 998.
       expect(find.textContaining('998'), findsOneWidget);
-      expect(find.textContaining('EGP 2'), findsWidgets);
+      expect(find.textContaining('2 LE'), findsWidgets);
       expect(find.textContaining('Due on delivery'), findsOneWidget);
     });
 

@@ -166,7 +166,7 @@ void main() {
 
       // Renders both in the header summary and the collected-order tile's
       // own amount — a legitimate duplicate, not a bug.
-      expect(find.text('EGP 300'), findsWidgets);
+      expect(find.text('300 LE'), findsWidgets);
       expect(find.text('Collected orders'), findsOneWidget);
       expect(find.text('701'), findsOneWidget);
     },
@@ -188,7 +188,7 @@ void main() {
       );
       await _settle(tester);
 
-      expect(find.text('EGP 0'), findsOneWidget);
+      expect(find.text('0 LE'), findsOneWidget);
       expect(
         find.text(
           "You're not holding any cash. Delivered COD orders will appear here.",
