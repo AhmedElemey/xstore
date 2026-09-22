@@ -408,7 +408,9 @@ class OrdersNotifier extends _$OrdersNotifier {
     final original = _orderById(orderId);
     if (original == null) return;
     final now = DateTime.now();
-    final tn = info.trackingNumber ?? 'XS-TRACK-$orderId';
+    final tn = info.trackingNumber?.trim().isNotEmpty == true
+        ? info.trackingNumber
+        : 'XS-TRACK-$orderId';
     state = state.copyWith(
       orders: state.orders
           .map(

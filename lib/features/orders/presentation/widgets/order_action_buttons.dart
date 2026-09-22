@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
@@ -350,7 +351,9 @@ class OrderActionButtons extends ConsumerWidget {
                 ),
                 ListTile(
                   title: Text(context.l10n.ordersEstimatedDeliveryLabel),
-                  subtitle: Text(eta != null ? '${eta!.toLocal()}' : '—'),
+                  subtitle: Text(
+                    eta != null ? DateFormat('MMM d, yyyy').format(eta!) : '—',
+                  ),
                   onTap: () async {
                     final d = await showDatePicker(
                       context: context,

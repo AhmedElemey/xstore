@@ -249,7 +249,12 @@ class Auth extends _$Auth {
     ref.read(guestModeProvider.notifier).disable();
     state = AsyncData(user);
     syncFcmDeviceTokenWithBackend(ref, user: user);
-    prefetchProfileData(ref, user: user);
+    // Every adoptSession caller (password login, register, phone OTP,
+    // Google) reaches here via a repository method that already called
+    // _resolveFullUser — user is fresh off a live get-profile. Unlike
+    // setUser, whose two callers (Apple/Facebook local-only sessions) never
+    // touched the backend, so must NOT claim freshness here.
+    prefetchProfileData(ref, user: user, alreadyFresh: true);
     syncDeliveryBackendSession(ref, user: user);
     _bindAnalyticsSession(user);
   }

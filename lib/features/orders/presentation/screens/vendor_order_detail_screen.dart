@@ -17,6 +17,7 @@ import '../providers/vendor_order_detail_provider.dart';
 import '../widgets/delivery_method_sheet.dart';
 import '../widgets/order_item_tile.dart';
 import '../widgets/order_price_breakdown.dart';
+import '../widgets/order_status_badge.dart';
 import '../widgets/order_timeline.dart';
 import '../widgets/reject_order_sheet.dart';
 import '../widgets/shipping_info_sheet.dart';
@@ -362,7 +363,7 @@ class _StatusHeader extends StatelessWidget {
   final OrderEntity order;
   @override
   Widget build(BuildContext context) {
-    final c = switch (order.status) { OrderStatus.pending => AppColors.warning, OrderStatus.confirmed => AppColors.primary, OrderStatus.processing => AppColors.orderStatusProcessing, OrderStatus.shipped => AppColors.orderStatusShipped, OrderStatus.delivered => AppColors.success, _ => AppColors.error };
+    final c = orderStatusColor(order.status);
     final text = switch (order.status) {
       OrderStatus.pending => context.l10n.vendorStatusPending,
       OrderStatus.confirmed => context.l10n.vendorStatusConfirmed,
