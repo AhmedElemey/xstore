@@ -26,6 +26,29 @@
             "flutterMode": "release",
             "program": "lib/main_dev.dart",
             "args": ["--flavor", "dev"]
+        },
+        {
+            "name": "xstore (prod)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "prod"]
+        },
+        {
+            "name": "xstore (prod, profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "prod"]
+        },
+        {
+            "name": "xstore (prod, release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "lib/main_prod.dart",
+            "args": ["--flavor", "prod"]
         }
     ]
 }
