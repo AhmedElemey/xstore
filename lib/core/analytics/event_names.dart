@@ -6,10 +6,14 @@ abstract final class AnalyticsEvents {
   // North-star funnel (view -> cart -> checkout -> purchase).
   static const String viewItem = 'view_item';
   static const String addToCart = 'add_to_cart';
+  static const String removeFromCart = 'remove_from_cart';
+  static const String cartViewed = 'cart_viewed';
   static const String beginCheckout = 'begin_checkout';
+  static const String orderPlacementFailed = 'order_placement_failed';
   static const String purchase = 'purchase';
 
   // Auth / retention.
+  static const String appOpen = 'app_open';
   static const String loginSuccess = 'login_success';
   static const String registerSuccess = 'register_success';
   static const String logout = 'logout';
@@ -18,6 +22,11 @@ abstract final class AnalyticsEvents {
   // Discovery.
   static const String screenView = 'screen_view';
   static const String searchPerformed = 'search_performed';
+  static const String searchNoResults = 'search_no_results';
+  static const String categoryViewed = 'category_viewed';
+
+  // Post-purchase engagement.
+  static const String reviewSubmitted = 'review_submitted';
 
   // Secondary engagement.
   static const String wishlistAdd = 'wishlist_add';
@@ -59,4 +68,5 @@ abstract final class AnalyticsProps {
   static const String screenName = 'screen_name';
   static const String status = 'status';
   static const String reason = 'reason';
+  static const String rating = 'rating';
 }

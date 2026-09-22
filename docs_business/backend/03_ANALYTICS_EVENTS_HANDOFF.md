@@ -110,6 +110,18 @@ vs logged-in split — see `03_funnel_metrics.md` §4 for the exact rates to exp
 | `listing_resubmitted` | Vendor resubmits a rejected listing | `item_id`, `price_egp` |
 | `listing_deleted` | Vendor deletes/cancels a listing | `item_id` |
 | `order_status_changed` | Any order lifecycle transition (either role) | `order_id`, `status` (`confirmed`\|`processing`\|`shipped`\|`delivered`\|`cancelled`), `role` (`vendor`\|`consumer`), `method` (delivery method, confirm only), `reason` (reject/cancel only) |
+| `app_open` | App cold start (once per process launch) | (none) |
+| `category_viewed` | A home category chip is tapped into Explore | `category` |
+| `search_no_results` | Explore search returns zero results for a non-empty query | `query` |
+| `remove_from_cart` | Cart item removed | `item_id`, `quantity`, `cart_value_egp` |
+| `cart_viewed` | Cart tab opened | (none) |
+| `order_placement_failed` | `placeOrder()` fails for any reason | `reason` (`offline`\|`noItems`\|`noAddress`\|`noConsumer`\|a mapped backend error code\|`failed`), `cart_value_egp`, `item_count` |
+| `review_submitted` | A new (not edited) product review is created | `item_id`, `rating` |
+
+The last 7 rows above (`app_open` through `review_submitted`) are the P0 additions from the
+Amplitude user-journey gap analysis — see
+[`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) §4 for the full list, including
+the P1/P2 events still not implemented.
 
 ## Open question for whoever implements this
 

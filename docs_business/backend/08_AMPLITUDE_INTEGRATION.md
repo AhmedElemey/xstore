@@ -54,30 +54,32 @@ key would silently no-op (harmless, but pointless to add before the key exists).
 
 ## 3. Current event catalog (already forwarded to both destinations)
 
-No changes here — see the full table in
+See the full table in
 [`03_ANALYTICS_EVENTS_HANDOFF.md`](./03_ANALYTICS_EVENTS_HANDOFF.md#event-catalog-names-are-frozen--see-event_namesdart-do-not-rename-without-updating-both-sides).
-Summary of what's already live: `view_item`, `add_to_cart`, `begin_checkout`,
+Summary of what's live: `view_item`, `add_to_cart`, `begin_checkout`,
 `checkout_payment_method_selected`, `purchase`, `login_success`, `register_success`, `logout`,
 `login_prompt_shown`, `screen_view` (auto-tracked on every go_router navigation), `search_performed`,
 `wishlist_add`/`wishlist_remove`, `listing_published`/`listing_status_changed`/
-`listing_resubmitted`/`listing_deleted`, `order_status_changed`.
+`listing_resubmitted`/`listing_deleted`, `order_status_changed`, plus the **P0 gap-closing events
+below** (`app_open`, `category_viewed`, `search_no_results`, `remove_from_cart`, `cart_viewed`,
+`order_placement_failed`, `review_submitted`) — all shipped as of this change.
 
 That is a solid **north-star funnel** (view → cart → checkout → purchase) and a **vendor-side
-funnel** (listing live → order fulfilled), plus screen-level navigation via `screen_view`. It is
-not, on its own, a full user-journey map — see the gap analysis below.
+funnel** (listing live → order fulfilled), plus screen-level navigation via `screen_view`, and now
+closes the two biggest blind spots identified below (cart abandonment, checkout failure). It is
+still not a complete user-journey map — the P1/P2 rows below remain unimplemented.
 
 ## 4. Gap analysis — events to add for a complete user journey
 
 Reviewed against the actual screens/flows in `lib/features/*` (not aspirational — every
 suggestion below maps to a real, already-built screen or provider). Grouped by journey stage,
-ranked by how directly each maps to a business decision. None of these are implemented yet in
-this change — implementing the ones marked **P0** should be the very next analytics task, since
-they're the highest-leverage gaps in the current funnel view.
+ranked by how directly each maps to a business decision. **The P0 rows are implemented** (see
+`event_names.dart` and their call sites); P1/P2 are still proposals for a future pass.
 
 ### Acquisition & onboarding
 | Suggested event | Fired when | Why it matters | Priority |
 |---|---|---|---|
-| `app_open` | Cold start / app resumed from background (splash bootstrap) | Baseline DAU/MAU and session-start marker — Amplitude computes retention/session length from a clear session-start signal; today's `screen_view` on splash is a proxy, not a deliberate one | P0 |
+| `app_open` ✅ implemented | Fires once per app process start, from `AnalyticsService._init()` — a keepAlive provider created once for the app's lifetime. Does not (yet) cover foreground-resume from background; that would need a `WidgetsBindingObserver`, deliberately deferred as a separate, smaller follow-up | Baseline DAU/MAU and session-start marker | P0 |
 | `onboarding_completed` / `onboarding_skipped` | Last onboarding slide "Get Started" vs. skip tap (`onboarding_screen.dart`) | First-run conversion — do new installs even make it past onboarding | P1 |
 | `guest_mode_started` | Guest-browse enabled (`guestModeProvider.enable()`) | Guest vs. registered split is already a KPI in `03_funnel_metrics.md` §4 but has no explicit "chose to browse as guest" marker | P1 |
 | `deep_link_opened` | `deep_link_handling_provider.dart` resolves a Universal/App Link | Attribution for shared product links / marketing campaigns (already flagged as a Phase B item in `03_funnel_metrics.md`) | P1 |
@@ -85,8 +87,8 @@ they're the highest-leverage gaps in the current funnel view.
 ### Discovery & engagement
 | Suggested event | Fired when | Why it matters | Priority |
 |---|---|---|---|
-| `category_viewed` | Explore category filter chip tapped, or Home category tile tapped | `search_performed` already exists for keyword search; category browse is the other half of discovery and is currently invisible | P0 |
-| `search_no_results` | Explore search returns 0 results | Direct, actionable signal of catalog/inventory gaps by governorate/category — cheap to add since `search_performed` already carries `result_count` | P0 |
+| `category_viewed` ✅ implemented | `ExploreNotifier.bootstrapFromRouteCategory` — fires when a Home category chip navigates into Explore | `search_performed` already exists for keyword search; category browse is the other half of discovery | P0 |
+| `search_no_results` ✅ implemented | `ExploreNotifier.search()` — a non-empty query returns 0 results, alongside the existing `search_performed` | Direct, actionable signal of catalog/inventory gaps by governorate/category | P0 |
 | `product_impression` (batched) | A product card scrolls into view on Home/Explore | Needed for a true view→cart conversion rate at the impression level, not just `view_item` (detail-page opens). **Caution:** must be batched/sampled, not per-scroll-frame, to avoid event-volume blowup — flag as a follow-up design task, not a quick add | P2 |
 | `filter_applied` | Explore filter sheet "Apply" tapped | Which filters buyers actually use — informs catalog/category taxonomy priorities | P1 |
 | `wishlist_viewed` | Wishlist tab opened | Engagement/retention signal already partially inferred from `screen_view`, but an explicit event is easier to build a funnel step on | P2 |
@@ -94,10 +96,10 @@ they're the highest-leverage gaps in the current funnel view.
 ### Transaction funnel (fills real gaps in the existing funnel)
 | Suggested event | Fired when | Why it matters | Priority |
 |---|---|---|---|
-| `remove_from_cart` | Cart item removed/quantity reduced to 0 | The funnel currently only sees additions — cart abandonment analysis needs the removal half too | P0 |
-| `cart_viewed` | Cart tab opened with ≥1 item | Distinguishes "added to cart, never opened cart" from "opened cart, didn't check out" — narrows down exactly where the view→cart→checkout drop-off in `03_funnel_metrics.md` actually happens | P0 |
+| `remove_from_cart` ✅ implemented | `Cart.removeItem()` success | The funnel currently only sees additions — cart abandonment analysis needs the removal half too | P0 |
+| `cart_viewed` ✅ implemented | `AnalyticsService`'s router listener — fires a dedicated event alongside `screen_view` whenever the route is `/cart` | Distinguishes "added to cart, never opened cart" from "opened cart, didn't check out" | P0 |
 | `checkout_address_selected` / `checkout_address_added` | Address chosen or a new one saved during checkout | Address friction is a known COD-market drop-off point; currently invisible | P1 |
-| `order_placement_failed` | `placeOrder()` fails (any reason: phone unverified, listing unavailable, network) | Every failure mode already has a mapped error code (`dio_error_mapper.dart`) — tag the failure reason as an event property; today a failed order is silent to analytics even though the user clearly intended to buy | P0 |
+| `order_placement_failed` ✅ implemented | `Checkout.placeOrder()` — every failure branch (offline, empty cart, no address, no consumer id, or the backend rejecting the order) tracks with a `reason` property | Every failure mode already has a mapped error code (`dio_error_mapper.dart`) — today's checkout failures are no longer silent to analytics | P0 |
 | `coupon_applied` / `coupon_failed` | N/A today — no live coupon mechanic exists (see the flutter-review skill's 2026-08-29 lesson: no cart-wide coupon backend) | Skip until the feature is real — listed here only so it isn't "discovered missing" later | — |
 
 ### Post-purchase & retention
@@ -105,7 +107,7 @@ they're the highest-leverage gaps in the current funnel view.
 |---|---|---|---|
 | `order_cancelled` | Consumer or vendor cancels (distinct from the existing generic `order_status_changed`) | `order_status_changed` already carries `status: cancelled`, so this can be derived from existing data in Amplitude (a saved cohort/chart on `order_status_changed` where `status = cancelled`) rather than a new event — **no code change needed**, just an Amplitude-side chart | — |
 | `order_delivered` | Same reasoning — already derivable from `order_status_changed` where `status = delivered` | — | — |
-| `review_submitted` | `createReviewUseCaseProvider`/`updateReviewUseCaseProvider` succeeds | Post-purchase engagement + a proxy for satisfaction; currently untracked entirely | P0 |
+| `review_submitted` ✅ implemented | `ProductReviewsNotifier.submitReview()` (create only, not edit), plus the two duplicate order-card/order-detail review sheets (`order_card.dart`, `order_action_buttons.dart`) that bypass that notifier and call the use case directly | Post-purchase engagement + a proxy for satisfaction | P0 |
 | `push_notification_received` / `push_notification_opened` | FCM `onMessage` fires / user taps a push (`fcm_push_navigation.dart`) | Push is a real re-engagement channel (order updates, flash sales) with zero visibility today into open rates | P1 |
 | `vendor_report_submitted` | `SubmitVendorReportUseCase` succeeds (new Report Vendor feature) | Trust & safety signal — report volume by vendor is exactly the kind of thing a marketplace ops team needs a dashboard for | P1 |
 
@@ -126,10 +128,14 @@ they're the highest-leverage gaps in the current funnel view.
 
 ## 5. Suggested next step
 
-Implement the **P0** rows above first (`app_open`, `category_viewed`, `search_no_results`,
-`remove_from_cart`, `cart_viewed`, `order_placement_failed`, `review_submitted`) — each is a small,
-additive change to an existing provider (same shape as every event already in `event_names.dart`),
-and together they close the two biggest blind spots in the current funnel: cart abandonment
-(nothing today distinguishes "added then removed" from "added then bought") and checkout failure
-(a failed order is currently silent). None of them require a backend change — they flow through
-the exact same `AnalyticsService.track()` call already wired everywhere else.
+All 7 **P0** rows above are implemented (`app_open`, `category_viewed`, `search_no_results`,
+`remove_from_cart`, `cart_viewed`, `order_placement_failed`, `review_submitted`) — together they
+closed the two biggest blind spots the original gap analysis found: cart abandonment (nothing
+used to distinguish "added then removed" from "added then bought") and checkout failure (a failed
+order used to be silent). None of them required a backend change — they flow through the exact
+same `AnalyticsService.track()` call already wired everywhere else.
+
+The next highest-value pass is the **P1** row: `onboarding_completed`/`onboarding_skipped`,
+`guest_mode_started`, `deep_link_opened`, `filter_applied`, `checkout_address_selected`/
+`checkout_address_added`, `push_notification_received`/`push_notification_opened`,
+`vendor_report_submitted`, `vendor_onboarding_step`.

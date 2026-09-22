@@ -47,6 +47,12 @@ class Explore extends _$Explore {
       final key => key,
     };
     if (query.isNotEmpty) {
+      if (categoryKey != null) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.categoryViewed,
+          properties: {AnalyticsProps.category: categoryKey},
+        );
+      }
       onQueryChanged(query);
     }
   }
@@ -141,6 +147,12 @@ class Explore extends _$Explore {
               AnalyticsProps.resultCount: sorted.length,
             },
           );
+          if (sorted.isEmpty) {
+            ref.read(analyticsServiceProvider).track(
+              AnalyticsEvents.searchNoResults,
+              properties: {AnalyticsProps.query: trimmed},
+            );
+          }
         }
       },
     );

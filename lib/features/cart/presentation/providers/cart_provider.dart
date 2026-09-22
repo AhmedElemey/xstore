@@ -258,6 +258,14 @@ class Cart extends _$Cart {
           lastRemovedIndex: skipUndo ? null : idx,
         );
         _setFromEntity(e);
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.removeFromCart,
+          properties: {
+            AnalyticsProps.itemId: prev.listingId,
+            AnalyticsProps.quantity: prev.quantity,
+            AnalyticsProps.cartValueEgp: state.total,
+          },
+        );
       },
     );
   }

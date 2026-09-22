@@ -19,6 +19,7 @@ import '../network/api_endpoints.dart';
 import '../network/connectivity_provider.dart';
 import '../network/legacy_route_options.dart';
 import '../network/logging_interceptor.dart';
+import '../router/app_routes.dart';
 import 'analytics_event.dart';
 import 'analytics_ids.dart';
 import 'event_names.dart';
@@ -181,6 +182,12 @@ class AnalyticsService {
       _enqueue(p.$1, p.$2);
     }
     _pending.clear();
+    // Fires exactly once per process start — this service is a keepAlive
+    // provider created once for the app's lifetime, so _init() runs once.
+    // Does not cover foreground-resume from background (no
+    // WidgetsBindingObserver wired for that yet); cold start covers the
+    // large majority of "app opened" sessions.
+    track(AnalyticsEvents.appOpen);
 
     _flushTimer = Timer.periodic(_flushInterval, (_) {
       unawaited(_flush());
@@ -269,14 +276,30 @@ class AnalyticsService {
       final uri = provider.value.uri.toString();
       if (uri == last) return;
       last = uri;
-      _currentScreenName = uri;
-      track(AnalyticsEvents.screenView, properties: {AnalyticsProps.screenName: uri});
+      _onRouteChanged(uri);
     }
 
     provider.addListener(onChange);
     _detachRouterListener = () => provider.removeListener(onChange);
     onChange();
   }
+
+  void _onRouteChanged(String uri) {
+    _currentScreenName = uri;
+    track(AnalyticsEvents.screenView, properties: {AnalyticsProps.screenName: uri});
+    // A couple of funnel-critical routes also get a named event alongside
+    // the generic screen_view, so a funnel chart doesn't need a
+    // screen_name filter step — mirrors how begin_checkout/purchase are
+    // already named events rather than relying on screen_view alone.
+    if (uri == AppRoutes.cart) {
+      track(AnalyticsEvents.cartViewed);
+    }
+  }
+
+  /// Exercises the exact route-change logic [attachRouter] wires to
+  /// go_router, without needing a real [GoRouter] instance in tests.
+  @visibleForTesting
+  void debugRouteChanged(String uri) => _onRouteChanged(uri);
 
   int _backoffSeconds() => min(300, 10 * (1 << _consecutiveFailures.clamp(0, 5)));
 

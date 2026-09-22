@@ -10,6 +10,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/place_order_params.dart';
 import 'cart_provider.dart';
+import 'cart_state.dart';
 import 'checkout_state.dart';
 
 part 'checkout_provider.g.dart';
@@ -139,21 +140,35 @@ class Checkout extends _$Checkout {
     state = state.copyWith(currentStep: state.currentStep - 1, error: null);
   }
 
+  void _trackPlacementFailed(String reason, CartState cart) {
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.orderPlacementFailed,
+      properties: {
+        AnalyticsProps.reason: reason,
+        AnalyticsProps.cartValueEgp: cart.total,
+        AnalyticsProps.itemCount: cart.selectedAvailableItems.length,
+      },
+    );
+  }
+
   Future<OrderEntity?> placeOrder() async {
+    final cart = ref.read(cartProvider);
     if (!ref.read(isOnlineProvider)) {
       state = state.copyWith(error: 'offline');
+      _trackPlacementFailed('offline', cart);
       return null;
     }
-    final cart = ref.read(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
     final selected = cart.selectedAvailableItems.toList();
     if (selected.isEmpty) {
       state = state.copyWith(error: 'noItems');
+      _trackPlacementFailed('noItems', cart);
       return null;
     }
     final idx = state.selectedAddressIndex;
     if (idx == null || idx < 0 || idx >= state.savedAddresses.length) {
       state = state.copyWith(error: 'noAddress');
+      _trackPlacementFailed('noAddress', cart);
       return null;
     }
     state = state.copyWith(isPlacingOrder: true, error: null);
@@ -163,6 +178,7 @@ class Checkout extends _$Checkout {
         : ref.read(authProvider).valueOrNull?.id ?? '';
     if (consumerId.isEmpty) {
       state = state.copyWith(isPlacingOrder: false, error: 'noConsumer');
+      _trackPlacementFailed('noConsumer', cart);
       return null;
     }
     final params = PlaceOrderParams(
@@ -186,11 +202,15 @@ class Checkout extends _$Checkout {
     // or a stable code like phoneNotVerifiedErrorCode) in its own state —
     // read it through rather than collapsing every failure to 'failed'.
     final cartError = ref.read(cartProvider).error;
+    final failureReason = order == null ? (cartError ?? 'failed') : null;
     state = state.copyWith(
       isPlacingOrder: false,
       placedOrderId: order?.id,
-      error: order == null ? (cartError ?? 'failed') : null,
+      error: failureReason,
     );
+    if (failureReason != null) {
+      _trackPlacementFailed(failureReason, cart);
+    }
     return order;
   }
 }

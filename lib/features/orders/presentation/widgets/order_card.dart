@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -608,6 +610,13 @@ class OrderCard extends ConsumerWidget {
                           );
                         },
                         (_) {
+                          ref.read(analyticsServiceProvider).track(
+                            AnalyticsEvents.reviewSubmitted,
+                            properties: {
+                              AnalyticsProps.itemId: listingId,
+                              AnalyticsProps.rating: stars.toDouble(),
+                            },
+                          );
                           stars = 5;
                           reviewText = '';
                           Navigator.pop(ctx, 'added');

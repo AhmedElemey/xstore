@@ -10,6 +10,7 @@ import 'package:xstore/core/analytics/analytics_service.dart';
 import 'package:xstore/core/analytics/event_names.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
+import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 
@@ -145,10 +146,15 @@ void main() {
     final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
     expect(body.keys, ['events']);
     final events = (body['events'] as List).cast<Map>();
-    expect(events, hasLength(2));
-    expect(events.map((e) => e['name']), ['view_item', 'add_to_cart']);
-    expect(events.first['eventId'], isNotEmpty);
-    expect(events.first['properties'], {'item_id': 'p1'});
+    // app_open is also queued on init (see the dedicated test below) and
+    // rides in the same batch — filter it out, it's not what this test is
+    // about.
+    final tracked =
+        events.where((e) => e['name'] != AnalyticsEvents.appOpen).toList();
+    expect(tracked, hasLength(2));
+    expect(tracked.map((e) => e['name']), ['view_item', 'add_to_cart']);
+    expect(tracked.first['eventId'], isNotEmpty);
+    expect(tracked.first['properties'], {'item_id': 'p1'});
   });
 
   test('flushes the queued events once the user logs in', () async {
@@ -171,7 +177,9 @@ void main() {
   test('does not queue logout for the initial guest session', () async {
     buildContainer(auth: FakeAuth(null));
     await service.ready;
-    expect(service.queuedEventNames, isEmpty);
+    // app_open is queued on every init (see the dedicated test below) —
+    // this test is only about logout not being queued unprompted.
+    expect(service.queuedEventNames, isNot(contains(AnalyticsEvents.logout)));
   });
 
   test('queues logout when the session goes from signed-in to signed-out',
@@ -182,6 +190,10 @@ void main() {
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     await service.ready;
+    // Deterministically drain the app_open event queued on init (signed in
+    // from the start, so it's eligible to flush) before asserting on the
+    // queue below.
+    await service.flushNow();
     expect(service.queuedEventNames, isEmpty);
 
     // Auth.logout tracks then bindSession(null); the event must stay queued.
@@ -215,10 +227,62 @@ void main() {
       secureValues: {PrefsKeys.authToken: 'sess-token'},
     );
     await service.ready;
+    // Deterministically drain the app_open event queued on init (signed in
+    // from the start, so it's eligible to flush) before asserting below
+    // that signing out stops any further POSTs.
+    await service.flushNow();
+    adapter.posts.clear();
     service.bindSession(null);
     service.track('view_item');
     await service.flushNow();
     expect(adapter.posts, isEmpty);
+  });
+
+  test('tracks app_open exactly once, on init, before any user is known',
+      () async {
+    buildContainer(auth: FakeAuth(null));
+    await service.ready;
+
+    expect(service.queuedEventNames, [AnalyticsEvents.appOpen]);
+  });
+
+  group('route-driven events', () {
+    test('screen_view fires for every route change', () async {
+      buildContainer(auth: FakeAuth(null));
+      await service.ready;
+
+      service.debugRouteChanged('/home');
+
+      expect(service.queuedEventNames, contains(AnalyticsEvents.screenView));
+    });
+
+    test('cart_viewed fires alongside screen_view when the route is /cart',
+        () async {
+      buildContainer(auth: FakeAuth(null));
+      await service.ready;
+
+      service.debugRouteChanged(AppRoutes.cart);
+
+      expect(
+        service.queuedEventNames,
+        containsAllInOrder(
+          [AnalyticsEvents.screenView, AnalyticsEvents.cartViewed],
+        ),
+      );
+    });
+
+    test('cart_viewed does not fire for other routes', () async {
+      buildContainer(auth: FakeAuth(null));
+      await service.ready;
+
+      service.debugRouteChanged('/home');
+      service.debugRouteChanged('/explore');
+
+      expect(
+        service.queuedEventNames,
+        isNot(contains(AnalyticsEvents.cartViewed)),
+      );
+    });
   });
 
   test(
@@ -269,14 +333,13 @@ void main() {
       );
       expect(body['api_key'], 'test-amplitude-key');
       final events = (body['events'] as List).cast<Map>();
-      expect(events, hasLength(1));
-      expect(events.single['event_type'], 'view_item');
-      expect(events.single['user_id'], isNull);
-      expect(events.single['device_id'], isNotEmpty);
-      expect(
-        events.single['event_properties'],
-        containsPair('item_id', 'p1'),
-      );
+      // app_open is forwarded too (it's not session-gated) — pick out the
+      // event this test is actually about.
+      final viewItem =
+          events.firstWhere((e) => e['event_type'] == 'view_item');
+      expect(viewItem['user_id'], isNull);
+      expect(viewItem['device_id'], isNotEmpty);
+      expect(viewItem['event_properties'], containsPair('item_id', 'p1'));
     });
 
     test('includes user_id and role once signed in, and never sends the '
@@ -298,8 +361,10 @@ void main() {
       expect(request.headers['X-Auth-Token'], isNull);
       final body = Map<String, dynamic>.from(request.data as Map);
       final events = (body['events'] as List).cast<Map>();
-      expect(events.single['user_id'], 'u1');
-      expect(events.single['user_properties'], {'role': 'consumer'});
+      final purchaseEvent =
+          events.firstWhere((e) => e['event_type'] == 'purchase');
+      expect(purchaseEvent['user_id'], 'u1');
+      expect(purchaseEvent['user_properties'], {'role': 'consumer'});
     });
 
     test('maps purchase value_egp onto Amplitude revenue fields', () async {
@@ -321,8 +386,10 @@ void main() {
         amplitudeAdapter.posts.single.data as Map,
       );
       final events = (body['events'] as List).cast<Map>();
-      expect(events.single['revenue'], 499.5);
-      expect(events.single['revenue_type'], 'purchase');
+      final purchaseEvent =
+          events.firstWhere((e) => e['event_type'] == 'purchase');
+      expect(purchaseEvent['revenue'], 499.5);
+      expect(purchaseEvent['revenue_type'], 'purchase');
     });
 
     test('a failed Amplitude POST does not drop the batch and does not '
@@ -341,7 +408,12 @@ void main() {
       await service.flushNow();
 
       expect(failingAdapter.posts, hasLength(1));
-      expect(service.amplitudeQueuedEventNames, ['view_item']);
+      // The failed batch (view_item + the app_open queued on init) stays
+      // queued in full for retry.
+      expect(
+        service.amplitudeQueuedEventNames,
+        containsAll(['view_item', AnalyticsEvents.appOpen]),
+      );
       expect(adapter.posts, hasLength(1)); // xStore collector still sent.
     });
   });
