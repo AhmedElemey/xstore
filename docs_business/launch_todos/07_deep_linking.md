@@ -91,6 +91,12 @@ Whoever owns `xstore.com` (marketing site / storefront web app, not this repo) s
 
 Universal/App Links can't be meaningfully tested in the simulator/emulator for the OS-level "does tapping a real link in Messages/WhatsApp open the app" behavior — needs physical devices with the **prod flavor** installed (App Links verification is tied to the signed APK's cert; dev builds won't verify against `assetlinks.json`).
 
+**Testing before the domain verification files exist (§3):** the resolver logic (which path opens what) can be exercised right now without any of that:
+- Android, any build: `adb shell am start -a android.intent.action.VIEW -d "https://xstore.com/product/<id>" com.xstore.app.dev` (swap the package for `com.xstore.app` on a prod build, and the path for `/seller/<id>`, `/order/<id>`, `/category/<name>`) — an explicit `am start` bypasses App Links verification entirely, it's not simulating a real tap.
+- iOS, **debug build run from Xcode on a real device**: `Runner.entitlements` (debug only — never `RunnerRelease.entitlements`) has `?mode=developer` appended to both `applinks:` entries, which makes Apple skip the hosted apple-app-site-association check for that build. Type/tap a real `https://xstore.com/...` link in Notes or Messages on that device and it opens the app.
+
+Neither of these substitutes for the real pre-production checklist below — they only prove the in-app routing works, not that a stranger's tap on a shared link will.
+
 - [ ] Domain verification files are live and return 200 with correct content-type (`curl -I https://xstore.com/.well-known/assetlinks.json` / `.../apple-app-site-association`)
 - [ ] Android: `adb shell pm get-app-links com.xstore.app` shows the domain as `verified`
 - [ ] Android, prod build installed: tap a `https://xstore.com/product/<id>` link in Chrome/Messages/WhatsApp → app opens directly to product detail (no chooser dialog — a chooser means verification failed)
