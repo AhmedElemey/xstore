@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math' show min;
 
+import 'package:amplitude_flutter/amplitude.dart';
+import 'package:amplitude_flutter/autocapture/autocapture.dart';
+import 'package:amplitude_flutter/configuration.dart';
+import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,11 +34,12 @@ part 'analytics_service.g.dart';
 /// Batches user-journey events locally and POSTs them to
 /// `POST /api/analytics/events` — see
 /// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md`. The same events
-/// are independently forwarded to Amplitude's HTTP API (`/2/httpapi`). The
-/// API key comes from `--dart-define=AMPLITUDE_API_KEY=...` when set,
-/// otherwise the flavor default on [AppConfig] (dev → xStore-Dev, prod →
-/// xStore-Prod) so a plain `flutter run --flavor` / VS Code launch still
-/// reports. See `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
+/// are independently forwarded to Amplitude via the official
+/// `amplitude_flutter` SDK. The API key comes from
+/// `--dart-define=AMPLITUDE_API_KEY=...` when set, otherwise the flavor
+/// default on [AppConfig] (dev → xStore-Dev, prod → xStore-Prod) so a
+/// plain `flutter run --flavor` / VS Code launch still reports. See
+/// `docs_business/backend/08_AMPLITUDE_INTEGRATION.md`.
 ///
 /// Deliberately uses its own [Dio] client rather than the shared `dio`
 /// provider: the shared client's error interceptor flips the whole app to
@@ -57,20 +62,27 @@ part 'analytics_service.g.dart';
 /// way — it sends every tracked event (guest and signed-in alike) so the
 /// full browse→purchase journey is visible in Amplitude, using
 /// [_deviceId] as Amplitude's anonymous identity and [_userId] once
-/// signed in. It uses its own separate [Dio] client with no default
-/// headers, so xStore's Basic license key / auth token is never sent to a
-/// third party. Both forwarders share the app's connectivity gate
-/// ([isOnlineProvider]) but fail independently — an Amplitude outage must
-/// never affect the xStore collector or vice versa.
+/// signed in (both passed per-event, since [AnalyticsEvent] already
+/// snapshots them at enqueue time — no separate `setUserId`/`setDeviceId`
+/// call is needed). Autocapture is disabled entirely
+/// ([AutocaptureDisabled]) so every Amplitude event comes from an explicit
+/// `track()` call here, never an SDK-generated session/lifecycle event —
+/// this keeps the event catalog in
+/// `docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md` authoritative.
+/// The SDK owns its own local queue, batching, and retry (see
+/// `Configuration.flushQueueSize`/`flushIntervalMillis`/`flushMaxRetries`),
+/// so this class does no queueing of its own for Amplitude — only [_queue]
+/// (the xStore collector's queue) is ours to manage. Amplitude fails
+/// independently of the xStore collector: an Amplitude outage never
+/// affects [_flush] or vice versa.
 class AnalyticsService {
   AnalyticsService(
     this._ref, {
     Dio? client,
-    Dio? amplitudeClient,
+    Amplitude? amplitudeClient,
     String? amplitudeApiKey,
     Future<String?> Function()? readAuthToken,
-  })  : _readAuthToken = readAuthToken,
-        _amplitudeApiKey = _resolveAmplitudeApiKey(amplitudeApiKey) {
+  }) : _readAuthToken = readAuthToken {
     _client = client ??
         Dio(
           BaseOptions(
@@ -86,26 +98,22 @@ class AnalyticsService {
     if (kDebugMode && client == null) {
       _client.interceptors.add(LoggingInterceptor());
     }
-    _amplitudeHttpClient = amplitudeClient ??
-        Dio(
-          BaseOptions(
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 10),
-            contentType: Headers.jsonContentType,
-          ),
-        );
-    if (kDebugMode && amplitudeClient == null) {
-      _amplitudeHttpClient.interceptors.add(LoggingInterceptor());
-    }
+    final apiKey = _resolveAmplitudeApiKey(amplitudeApiKey);
+    _amplitude = amplitudeClient ??
+        (apiKey.isEmpty
+            ? null
+            : Amplitude(
+                Configuration(
+                  apiKey: apiKey,
+                  autocapture: const AutocaptureDisabled(),
+                ),
+              ));
     _initFuture = _init();
   }
 
   static const int _maxQueueSize = 500;
   static const int _batchSize = 20;
   static const Duration _flushInterval = Duration(seconds: 20);
-
-  static const String _amplitudeEndpoint =
-      'https://api2.amplitude.com/2/httpapi';
 
   /// Constructor [amplitudeApiKey] wins (tests). Else dart-define. Else
   /// the flavor default so local `flutter run` is not silently off.
@@ -118,9 +126,8 @@ class AnalyticsService {
 
   final Ref _ref;
   final Future<String?> Function()? _readAuthToken;
-  final String _amplitudeApiKey;
   late final Dio _client;
-  late final Dio _amplitudeHttpClient;
+  late final Amplitude? _amplitude;
   late final Future<void> _initFuture;
   late final String _sessionId;
   late final int _sessionStartMs;
@@ -129,18 +136,12 @@ class AnalyticsService {
   String? _userRole;
   String? _currentScreenName;
 
-  bool get _amplitudeEnabled => _amplitudeApiKey.isNotEmpty;
-
   final List<AnalyticsEvent> _queue = [];
-  final List<AnalyticsEvent> _amplitudeQueue = [];
   final List<(String, Map<String, Object?>)> _pending = [];
   bool _ready = false;
   Future<void>? _inFlightFlush;
   int _consecutiveFailures = 0;
   DateTime? _backoffUntil;
-  Future<void>? _amplitudeInFlightFlush;
-  int _amplitudeConsecutiveFailures = 0;
-  DateTime? _amplitudeBackoffUntil;
 
   Timer? _flushTimer;
   VoidCallback? _detachRouterListener;
@@ -150,15 +151,12 @@ class AnalyticsService {
   Future<void> get ready => _initFuture;
 
   @visibleForTesting
-  Future<void> flushNow() => Future.wait([_flush(), _flushAmplitude()]);
+  Future<void> flushNow() =>
+      Future.wait([_flush(), _amplitude?.flush() ?? Future<void>.value()]);
 
   @visibleForTesting
   List<String> get queuedEventNames =>
       [for (final event in _queue) event.name];
-
-  @visibleForTesting
-  List<String> get amplitudeQueuedEventNames =>
-      [for (final event in _amplitudeQueue) event.name];
 
   bool get _isSignedIn => _userId != null && _userId!.isNotEmpty;
 
@@ -183,19 +181,23 @@ class AnalyticsService {
     _deviceId = prefs.getString(PrefsKeys.analyticsDeviceId) ?? generateEventId();
     await prefs.setString(PrefsKeys.analyticsDeviceId, _deviceId);
     _loadPersistedQueue(prefs);
+    // The SDK dispatches 'init' over its platform channel here — awaited so
+    // no track() call races construction (matches the SDK's own documented
+    // `await amplitude.isBuilt;` usage).
+    await _amplitude?.isBuilt;
 
     _ref.listen<bool>(isOnlineProvider, (prev, next) {
       if (next && prev == false) {
         unawaited(_flush());
-        unawaited(_flushAmplitude());
+        unawaited(_amplitude?.flush());
       }
     });
 
     _ready = true;
     if (kDebugMode) {
       debugPrint(
-        _amplitudeEnabled
-            ? 'Amplitude: forwarding events to $_amplitudeEndpoint'
+        _amplitude != null
+            ? 'Amplitude: forwarding events'
             : 'Amplitude: disabled (no API key)',
       );
     }
@@ -212,10 +214,10 @@ class AnalyticsService {
 
     _flushTimer = Timer.periodic(_flushInterval, (_) {
       unawaited(_flush());
-      unawaited(_flushAmplitude());
+      unawaited(_amplitude?.flush());
     });
     unawaited(_flush());
-    unawaited(_flushAmplitude());
+    unawaited(_amplitude?.flush());
   }
 
   void _loadPersistedQueue(SharedPreferences prefs) {
@@ -273,14 +275,12 @@ class AnalyticsService {
       unawaited(_flush());
     }
 
-    if (_amplitudeEnabled) {
-      _amplitudeQueue.add(event);
-      if (_amplitudeQueue.length > _maxQueueSize) {
-        _amplitudeQueue.removeAt(0);
-      }
-      if (_amplitudeQueue.length >= _batchSize) {
-        unawaited(_flushAmplitude());
-      }
+    // Not queued on our side — the SDK owns its own local queue/batching/
+    // retry (Configuration.flushQueueSize/flushIntervalMillis/
+    // flushMaxRetries), so a single track() call here is the whole job.
+    final amplitude = _amplitude;
+    if (amplitude != null) {
+      unawaited(amplitude.track(_amplitudeBaseEvent(event)));
     }
   }
 
@@ -393,15 +393,6 @@ class AnalyticsService {
     }
   }
 
-  int _amplitudeBackoffSeconds() =>
-      min(300, 10 * (1 << _amplitudeConsecutiveFailures.clamp(0, 5)));
-
-  void _registerAmplitudeFailure() {
-    _amplitudeConsecutiveFailures++;
-    _amplitudeBackoffUntil =
-        DateTime.now().add(Duration(seconds: _amplitudeBackoffSeconds()));
-  }
-
   String get _amplitudePlatform {
     try {
       return Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other');
@@ -421,77 +412,38 @@ class AnalyticsService {
     return null;
   }
 
-  Map<String, Object?> _amplitudeEventJson(AnalyticsEvent event) {
-    final userId = event.userId;
+  /// Builds the SDK event for [event]. [BaseEvent] takes `userId`/`deviceId`/
+  /// `sessionId`/`insertId`/`revenue`/`revenueType`/`userProperties` directly
+  /// as constructor fields — no separate `Identify`/`Revenue` call needed,
+  /// mirroring exactly what the old hand-built JSON payload sent.
+  BaseEvent _amplitudeBaseEvent(AnalyticsEvent event) {
     final screenName = event.screenName;
     final revenue = _revenueOf(event);
-    return {
-      if (userId != null && userId.isNotEmpty) 'user_id': userId,
-      'device_id': event.deviceId,
-      'event_type': event.name,
-      'time': event.occurredAt.millisecondsSinceEpoch,
-      'insert_id': event.eventId, // dedupe key — safe to retry a batch
-      'session_id': _sessionStartMs,
-      'platform': _amplitudePlatform,
-      if (revenue != null) 'revenue': revenue,
-      if (revenue != null) 'revenue_type': 'purchase',
-      'event_properties': {
+    return BaseEvent(
+      event.name,
+      userId: event.userId,
+      deviceId: event.deviceId,
+      timestamp: event.occurredAt.millisecondsSinceEpoch,
+      insertId: event.eventId, // dedupe key — safe for the SDK to retry
+      sessionId: _sessionStartMs,
+      platform: _amplitudePlatform,
+      revenue: revenue?.toDouble(),
+      revenueType: revenue != null ? 'purchase' : null,
+      eventProperties: {
         if (screenName != null) 'screen_name': screenName,
         ...event.properties,
       },
-      if (event.userRole != null) 'user_properties': {'role': event.userRole},
-    };
-  }
-
-  Future<void> _flushAmplitude() async {
-    if (!_amplitudeEnabled) return;
-    final inFlight = _amplitudeInFlightFlush;
-    if (inFlight != null) return inFlight;
-    final done = _runAmplitudeFlush();
-    _amplitudeInFlightFlush = done;
-    try {
-      await done;
-    } finally {
-      if (identical(_amplitudeInFlightFlush, done)) _amplitudeInFlightFlush = null;
-    }
-  }
-
-  /// Not session-gated like [_runFlush] — forwards guest and signed-in
-  /// events alike so Amplitude sees the full user journey.
-  Future<void> _runAmplitudeFlush() async {
-    if (_amplitudeQueue.isEmpty || !_ready) return;
-    final until = _amplitudeBackoffUntil;
-    if (until != null && DateTime.now().isBefore(until)) return;
-    if (!_ref.read(isOnlineProvider)) return;
-
-    try {
-      final batch = _amplitudeQueue.take(_batchSize).toList();
-      final body = <String, dynamic>{
-        'api_key': _amplitudeApiKey,
-        'events': [for (final event in batch) _amplitudeEventJson(event)],
-      };
-      final response = await _amplitudeHttpClient.post<dynamic>(
-        _amplitudeEndpoint,
-        data: body,
-      );
-      final status = response.statusCode ?? 0;
-      if (status < 200 || status >= 300) {
-        _registerAmplitudeFailure();
-        return;
-      }
-      _amplitudeQueue.removeRange(0, batch.length);
-      _amplitudeConsecutiveFailures = 0;
-      _amplitudeBackoffUntil = null;
-    } catch (_) {
-      _registerAmplitudeFailure();
-    }
+      userProperties: event.userRole != null ? {'role': event.userRole} : null,
+    );
   }
 
   void dispose() {
     _flushTimer?.cancel();
     _detachRouterListener?.call();
     _client.close();
-    _amplitudeHttpClient.close();
+    // Amplitude has no dispose()/close() — it's a thin MethodChannel proxy
+    // with no Dart-side resources; the native SDK flushes on app close
+    // itself (see Amplitude.track's doc comment).
   }
 }
 

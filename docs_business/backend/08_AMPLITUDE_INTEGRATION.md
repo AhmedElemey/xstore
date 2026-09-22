@@ -11,8 +11,14 @@ and reviews the current event catalog for gaps in the mapped user journey.
 
 `lib/core/analytics/analytics_service.dart` already batches every `track()` call and POSTs it to
 xStore's own `/api/analytics/events` collector (session-gated: signed-in users only). This change
-adds a **second, independent forwarder** in the same service that POSTs the identical event stream
-directly to Amplitude's HTTP API (`POST https://api2.amplitude.com/2/httpapi`):
+adds a **second, independent forwarder** in the same service that hands the identical event stream
+to Amplitude via the official [`amplitude_flutter`](https://pub.dev/packages/amplitude_flutter) SDK.
+
+> **Note:** this was originally built as a hand-rolled `Dio` client POSTing directly to Amplitude's
+> HTTP API (`/2/httpapi`), specifically to avoid a native plugin dependency. It was switched to the
+> official SDK on request. The plain-HTTP version is still the right call for a project that wants
+> zero native dependency risk — see the flutter-review skill's 2026-09-22 lesson log for the
+> tradeoffs either way.
 
 - **Same event catalog, same names/properties** — nothing in `event_names.dart` changed. Every
   event already fired anywhere in the app (see §3) reaches both destinations with the same
@@ -25,19 +31,18 @@ directly to Amplitude's HTTP API (`POST https://api2.amplitude.com/2/httpapi`):
   xStore collector) as Amplitude's identity until a `user_id` is known. This is a deliberate
   product decision: a marketplace funnel is dominated by guest browsing before signup, and a
   journey tool that only sees post-login activity would misrepresent drop-off.
-- **Independent failure domain.** A separate `Dio` client with **no default headers** — xStore's
-  Basic license key and per-user `X-Auth-Token` are never sent to Amplitude. A separate in-memory
-  queue and exponential backoff (10s → 300s, same shape as the xStore collector) mean an Amplitude
-  outage cannot block or slow down the xStore collector, and vice versa.
-- **No new persistence.** Unlike the xStore collector's SharedPreferences-backed queue (built to
-  survive app kill because that's the only pipeline before this change), the Amplitude queue is
-  in-memory only — a small, deliberate simplification: losing a handful of unsent events on a
-  force-kill is an acceptable trade for not maintaining a second persisted-queue schema. If this
-  needs revisiting (e.g. once Amplitude is the primary funnel dashboard), promote it the same way
-  the xStore queue already works.
+- **Independent failure domain.** Every `track()` call to the SDK is a single `amplitude.track(...)`
+  — the SDK owns its own local queue, batching, and retry
+  (`Configuration.flushQueueSize`/`flushIntervalMillis`/`flushMaxRetries`), so this class does no
+  queueing of its own for Amplitude. `Configuration.autocapture` is set to `AutocaptureDisabled()`
+  so the SDK never generates its own session/lifecycle/screen-view events — every Amplitude event
+  traces back to an explicit `track()` call here, keeping the event catalog authoritative. An
+  Amplitude outage cannot block or slow down the xStore collector, and vice versa — they don't
+  share a client or a queue.
 - **Revenue mapping.** The `purchase` event's `value_egp` property is additionally mapped onto
-  Amplitude's top-level `revenue`/`revenue_type` fields so Amplitude's built-in revenue/LTV charts
-  work without a custom computed metric.
+  Amplitude's top-level `revenue`/`revenue_type` fields (passed directly on the same `BaseEvent`,
+  no separate `Revenue`/`revenue()` call) so Amplitude's built-in revenue/LTV charts work without a
+  custom computed metric.
 
 ## 2. Enabling it
 
