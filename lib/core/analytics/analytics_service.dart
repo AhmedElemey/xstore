@@ -258,7 +258,14 @@ class AnalyticsService {
       // Backend ingest DTO is `{ "events": [ ... ] }`, not a bare array
       // and not a single event object (Postman: POST Ingest Events).
       final body = <String, dynamic>{
-        'events': [for (final event in batch) event.toJson()],
+        'events': [
+          for (final event in batch)
+            event.toJson(
+              fallbackUserId: _userId,
+              fallbackUserRole: _userRole,
+              fallbackScreenName: _currentScreenName,
+            ),
+        ],
       };
       final response = await _client.post<dynamic>(
         ApiEndpoints.analyticsEvents,

@@ -225,6 +225,11 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           location: location,
           attributes: attributes,
           imagePaths: imagePaths,
+          // C# `ListingStatus` defaults to 0 = Draft when this field is
+          // omitted, so Publish created rows that never entered the admin
+          // PENDING queue. Live Active listings have `reviewedAt` set by
+          // `PUT /api/admin/listings/{id}/approve` — vendors submit Pending.
+          status: ListingStatus.pending,
         ),
         options: ApiAuthHeaders.authenticated(),
       );

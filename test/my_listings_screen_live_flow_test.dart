@@ -30,7 +30,9 @@ import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/my_listings_screen.dart';
+import 'package:xstore/features/listing/presentation/widgets/status_badge.dart';
 import 'package:xstore/shared/widgets/offline_banner.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
@@ -182,6 +184,47 @@ void main() {
       await _settle(tester);
 
       expect(putRequest, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'vendor resumes a paused listing via the live update wire call',
+    (tester) async {
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) =>
+            [_listingJson(status: 3)],
+        'PUT ${ApiEndpoints.apiListings}': (options) {
+          putRequest = options;
+          return _listingJson(status: 3);
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.paused,
+      );
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      expect(find.text('Resume'), findsOneWidget);
+      await tester.tap(find.text('Resume'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.path, '/api/listings');
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.active,
+      );
     },
   );
 

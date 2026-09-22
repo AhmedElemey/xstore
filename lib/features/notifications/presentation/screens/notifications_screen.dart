@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,9 +28,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     super.initState();
     _scroll.addListener(_onScroll);
     // Filter tabs hidden while backend only returns role=ALL — keep inbox on All.
+    // Fetch on every open: notificationsProvider is keepAlive, so a previous
+    // session's list would otherwise sit stale until the user pulled to refresh.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(notificationsProvider.notifier).applyFilter(NotificationFilter.all);
+      final notifier = ref.read(notificationsProvider.notifier);
+      notifier.applyFilter(NotificationFilter.all);
+      unawaited(notifier.fetchNotifications());
     });
   }
 
