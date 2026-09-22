@@ -207,6 +207,22 @@ jobs:
           gh release create "$TAG" "$APK_PATH" "${ARGS[@]}"
           echo "RELEASE_URL=${RELEASE_HOST}/${RELEASE_REPO}/releases/tag/${TAG}" >> "$GITHUB_ENV"
 
+      - name: Write build summary
+        run: |
+          APP_ID=$( [ "$BUILD_FLAVOR" = "dev" ] && echo "com.xstore.app.dev" || echo "com.xstore.app" )
+          {
+            echo "### xStore \`${BUILD_FLAVOR}\` build"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Flavor | \`${BUILD_FLAVOR}\` |"
+            echo "| App ID | \`${APP_ID}\` |"
+            echo "| Version | ${FULL_VERSION} |"
+            echo "| Build number | ${BUILD_RUN_NUMBER} |"
+            echo "| APK | \`${APK_PATH}\` |"
+            echo "| Release | ${RELEASE_URL} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Send email notification
         run: |
           if [ -z "$MAIL_USERNAME" ] || [ -z "$MAIL_PASSWORD" ] || [ -z "$MAIL_TO" ]; then
