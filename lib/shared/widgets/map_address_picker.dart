@@ -29,8 +29,14 @@ class MapPickResult {
 /// Full-screen "drop a pin" address picker. The pin stays fixed at the
 /// screen center — the map moves under it, the standard pattern for precise
 /// pin placement — and camera-idle triggers a best-effort reverse geocode.
-/// Confirm is disabled outside Egypt, matching the backend's own
-/// "Coordinates must be within Egypt bounds" rule (see
+/// No pin is shown and Confirm stays disabled until the vendor actually
+/// moves the map or taps "use my location" — the map still centers
+/// somewhere reasonable (the last-known fix, or Cairo) so there's a
+/// starting point to look at, but that starting point was never chosen by
+/// anyone and must not be confirmable as-is (unless [initialLatitude]/
+/// [initialLongitude] are given, e.g. re-opening an already-picked spot to
+/// adjust it). Confirm is also disabled outside Egypt, matching the
+/// backend's own "Coordinates must be within Egypt bounds" rule (see
 /// [AppLocationCache.isInEgypt]).
 Future<MapPickResult?> showMapAddressPicker(
   BuildContext context, {
@@ -66,14 +72,26 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
   bool _locating = false;
   Timer? _debounce;
 
+  // True once the vendor has actually chosen a spot (moved the map or
+  // tapped "use my location") — false on a fresh pick, even though
+  // [_picked] itself is never null (it starts at the device's last-known
+  // fix, or the Cairo fallback, purely so the map has somewhere to center
+  // on). Gates the pin overlay and Confirm so a location nobody actually
+  // chose can't be saved as the delivery address just because the map
+  // opened centered near it.
+  late bool _hasPicked;
+
   @override
   void initState() {
     super.initState();
+    _hasPicked = widget.initialLatitude != null && widget.initialLongitude != null;
     _picked = LatLng(
       widget.initialLatitude ?? AppLocationCache.latitude,
       widget.initialLongitude ?? AppLocationCache.longitude,
     );
-    unawaited(_resolveAddress(_picked));
+    if (_hasPicked) {
+      unawaited(_resolveAddress(_picked));
+    }
   }
 
   @override
@@ -85,6 +103,13 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
 
   void _onCameraMove(CameraPosition position) {
     _picked = position.target;
+    // Rebuild right away only on the transition to reveal the pin/enable
+    // Confirm as soon as dragging starts, instead of waiting up to 400ms
+    // for onCameraIdle's debounce — every other move this frequently
+    // updates _picked without a setState, same as before this change.
+    if (!_hasPicked) {
+      setState(() => _hasPicked = true);
+    }
   }
 
   void _onCameraIdle() {
@@ -126,7 +151,10 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
       final result = await LocationService().getCurrentLocation();
       if (!mounted) return;
       final target = LatLng(result.latitude, result.longitude);
-      setState(() => _picked = target);
+      setState(() {
+        _picked = target;
+        _hasPicked = true;
+      });
       await _mapController?.animateCamera(CameraUpdate.newLatLng(target));
       await _resolveAddress(target);
     } catch (_) {
@@ -154,18 +182,19 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
           ),
-          const IgnorePointer(
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 36),
-                child: Icon(
-                  Icons.location_pin,
-                  size: 44,
-                  color: AppColors.error,
+          if (_hasPicked)
+            const IgnorePointer(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 36),
+                  child: Icon(
+                    Icons.location_pin,
+                    size: 44,
+                    color: AppColors.error,
+                  ),
                 ),
               ),
             ),
-          ),
           Positioned(
             right: AppSpacing.lg,
             bottom: 172,
@@ -234,7 +263,7 @@ class _MapAddressPickerScreenState extends State<_MapAddressPickerScreen> {
                     ],
                     const SizedBox(height: AppSpacing.sm),
                     FilledButton(
-                      onPressed: _inEgypt
+                      onPressed: _hasPicked && _inEgypt
                           ? () => Navigator.of(context).pop(
                               MapPickResult(
                                 latitude: _picked.latitude,
