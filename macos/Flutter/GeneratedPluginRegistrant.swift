@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import amplitude_flutter
 import app_links
 import connectivity_plus
 import facebook_auth_desktop
@@ -27,6 +28,7 @@ import sqflite_darwin
 import url_launcher_macos
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  AmplitudeFlutterPlugin.register(with: registry.registrar(forPlugin: "AmplitudeFlutterPlugin"))
   AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
   FacebookAuthDesktopPlugin.register(with: registry.registrar(forPlugin: "FacebookAuthDesktopPlugin"))
