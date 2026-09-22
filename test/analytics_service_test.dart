@@ -146,15 +146,42 @@ void main() {
     final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
     expect(body.keys, ['events']);
     final events = (body['events'] as List).cast<Map>();
-    // app_open is also queued on init (see the dedicated test below) and
-    // rides in the same batch — filter it out, it's not what this test is
-    // about.
+    // app_open is also queued on init and rides in the same batch — filter
+    // it out, it's not what this test is about.
     final tracked =
         events.where((e) => e['name'] != AnalyticsEvents.appOpen).toList();
     expect(tracked, hasLength(2));
     expect(tracked.map((e) => e['name']), ['view_item', 'add_to_cart']);
+    expect(tracked.map((e) => e['eventName']), ['view_item', 'add_to_cart']);
     expect(tracked.first['eventId'], isNotEmpty);
+    expect(tracked.first['timestamp'], isNotEmpty);
+    expect(tracked.first['userId'], 'u1');
+    expect(tracked.first['screenName'], isNotEmpty);
     expect(tracked.first['properties'], {'item_id': 'p1'});
+  });
+
+  test('flush stamps session identity onto events queued as a guest', () async {
+    buildContainer(
+      auth: FakeAuth(null),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    service.track('view_item', properties: {'item_id': 'p1', 'price_egp': 10});
+    await service.ready;
+    await service.flushNow();
+    expect(adapter.posts, isEmpty);
+
+    service.bindSession(_user());
+    await service.flushNow();
+
+    final body = Map<String, dynamic>.from(adapter.posts.single.data as Map);
+    final events = (body['events'] as List).cast<Map>();
+    // app_open is queued on init as a guest and flushes in the same batch
+    // once the session is bound.
+    final viewItem = events.firstWhere((e) => e['name'] == 'view_item');
+    expect(viewItem['userId'], 'u1');
+    expect(viewItem['userRole'], 'consumer');
+    expect(viewItem['eventName'], 'view_item');
+    expect(viewItem['properties'], {'item_id': 'p1', 'price_egp': '10'});
   });
 
   test('flushes the queued events once the user logs in', () async {

@@ -5,10 +5,11 @@
 // ExploreRemoteDataSourceImpl chain, only the Dio HTTP transport is
 // scripted.
 //
-// Unlike a plain `MaterialApp(home: ...)`, `ExploreScreen`'s `initState`
-// reads `GoRouterState.of(context)` unconditionally (to seed a category
-// filter from a `?category=` query param) — with no `GoRouter` ancestor
-// that throws immediately, so every test here uses a routed harness.
+// Unlike a plain `MaterialApp(home: ...)`, `ExploreScreen`'s
+// `didChangeDependencies` reads `GoRouterState.of(context)` unconditionally
+// (to seed a category filter from a `?category=` query param) — with no
+// `GoRouter` ancestor that throws immediately, so every test here uses a
+// routed harness.
 //
 // Run with: flutter test test/explore_screen_live_flow_test.dart
 import 'package:dio/dio.dart';

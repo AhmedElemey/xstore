@@ -368,7 +368,7 @@ class UserModel with _$UserModel {
           '',
       email: json['email'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: optString('avatarUrl'),
       role: parseRole(),
       // isVerified lives on the user object. isEmailVerified/isPhoneVerified
       // are top-level profile-wrapper flags — parsed in parseProfileResponse,
@@ -387,7 +387,7 @@ class UserModel with _$UserModel {
       storeDescription: optString('storeDescription') ??
           optString('storeDescriptionEn') ??
           optString('storeDescriptionAr'),
-      storeLogoUrl: json['storeLogoUrl'] as String?,
+      storeLogoUrl: optString('storeLogoUrl', altKey: 'storeImageUrl'),
       storeCity: optString('storeCity') ?? _nestedPlaceName(json['city']),
       storeWilaya: optString('storeWilaya') ??
           _nestedPlaceName(json['government']) ??

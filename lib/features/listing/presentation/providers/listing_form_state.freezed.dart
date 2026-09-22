@@ -177,16 +177,18 @@ mixin _$ListingFormState {
   int get draftRevision => throw _privateConstructorUsedError;
 
   /// Remote photo URLs already on the listing being edited (empty when
-  /// creating). Not resubmitted as files — see `submit()`'s comment on
-  /// how an empty [photoPaths] preserves them on update.
+  /// creating). Removable in the photo strip; remaining URLs are sent on
+  /// update as keepers (`imageUrls[i]`).
   List<String> get existingImageUrls => throw _privateConstructorUsedError;
 
   /// Non-empty when this form is editing an existing listing rather than
   /// creating a new one; drives `submit()`'s create-vs-update branch.
   String get editingListingId => throw _privateConstructorUsedError;
 
-  /// The listing's current status when editing, resent unchanged on
-  /// update (editing never silently changes status).
+  /// The listing's current status when editing. Resent unchanged on
+  /// update except for drafts, which publish as [ListingStatus.active]
+  /// — Update on a draft is the publish action, not a status-preserving
+  /// edit.
   ListingStatus? get editingStatus => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -596,13 +598,13 @@ class _$ListingFormStateImpl implements _ListingFormState {
   final int draftRevision;
 
   /// Remote photo URLs already on the listing being edited (empty when
-  /// creating). Not resubmitted as files — see `submit()`'s comment on
-  /// how an empty [photoPaths] preserves them on update.
+  /// creating). Removable in the photo strip; remaining URLs are sent on
+  /// update as keepers (`imageUrls[i]`).
   final List<String> _existingImageUrls;
 
   /// Remote photo URLs already on the listing being edited (empty when
-  /// creating). Not resubmitted as files — see `submit()`'s comment on
-  /// how an empty [photoPaths] preserves them on update.
+  /// creating). Removable in the photo strip; remaining URLs are sent on
+  /// update as keepers (`imageUrls[i]`).
   @override
   @JsonKey()
   List<String> get existingImageUrls {
@@ -618,8 +620,10 @@ class _$ListingFormStateImpl implements _ListingFormState {
   @JsonKey()
   final String editingListingId;
 
-  /// The listing's current status when editing, resent unchanged on
-  /// update (editing never silently changes status).
+  /// The listing's current status when editing. Resent unchanged on
+  /// update except for drafts, which publish as [ListingStatus.active]
+  /// — Update on a draft is the publish action, not a status-preserving
+  /// edit.
   @override
   final ListingStatus? editingStatus;
 
@@ -771,8 +775,8 @@ abstract class _ListingFormState implements ListingFormState {
   @override
 
   /// Remote photo URLs already on the listing being edited (empty when
-  /// creating). Not resubmitted as files — see `submit()`'s comment on
-  /// how an empty [photoPaths] preserves them on update.
+  /// creating). Removable in the photo strip; remaining URLs are sent on
+  /// update as keepers (`imageUrls[i]`).
   List<String> get existingImageUrls;
   @override
 
@@ -781,8 +785,10 @@ abstract class _ListingFormState implements ListingFormState {
   String get editingListingId;
   @override
 
-  /// The listing's current status when editing, resent unchanged on
-  /// update (editing never silently changes status).
+  /// The listing's current status when editing. Resent unchanged on
+  /// update except for drafts, which publish as [ListingStatus.active]
+  /// — Update on a draft is the publish action, not a status-preserving
+  /// edit.
   ListingStatus? get editingStatus;
   @override
   @JsonKey(ignore: true)

@@ -37,18 +37,56 @@ class AnalyticsEvent {
     }
   }
 
-  Map<String, Object?> toJson() => {
-        'eventId': eventId,
-        'name': name,
-        'occurredAt': occurredAt.toIso8601String(),
-        'sessionId': sessionId,
-        'deviceId': deviceId,
-        'userId': userId,
-        'userRole': userRole,
-        'screenName': screenName,
-        'platform': _platform,
-        'properties': properties,
+  Map<String, Object?> toJson({
+    String? fallbackUserId,
+    String? fallbackUserRole,
+    String? fallbackScreenName,
+  }) {
+    final uid = _nonEmpty(userId) ?? _nonEmpty(fallbackUserId);
+    final role = _nonEmpty(userRole) ?? _nonEmpty(fallbackUserRole);
+    final screen = _nonEmpty(screenName) ??
+        _nonEmpty(fallbackScreenName) ??
+        '/';
+    return {
+      'eventId': eventId,
+      'name': name,
+      // Live ingest DTO binds `EventName` (camelCase `eventName`), not
+      // `name`. Sending both keeps the original handoff key and satisfies
+      // the collector's [Required] EventName.
+      'eventName': name,
+      'occurredAt': occurredAt.toIso8601String(),
+      'timestamp': occurredAt.toIso8601String(),
+      'sessionId': sessionId,
+      'deviceId': deviceId,
+      if (uid != null) 'userId': uid,
+      if (role != null) 'userRole': role,
+      'screenName': screen,
+      'platform': _platform,
+      'properties': _wireProperties(properties),
+    };
+  }
+
+  static String? _nonEmpty(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return value;
+  }
+
+  /// Collector binds properties as a string dictionary; nums/bools in the
+  /// JSON object fail that bind, leave Properties null, and trip
+  /// "missing required fields" on every event in the batch.
+  static Map<String, String> _wireProperties(Map<String, Object?> properties) {
+    final out = <String, String>{};
+    properties.forEach((key, value) {
+      if (value == null) return;
+      out[key] = switch (value) {
+        String s => s,
+        bool b => b ? 'true' : 'false',
+        num n => n.toString(),
+        _ => value.toString(),
       };
+    });
+    return out;
+  }
 
   static AnalyticsEvent? fromJson(Map<String, dynamic> json) {
     try {

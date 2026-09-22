@@ -61,64 +61,39 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }
 
   Future<void> _openSearch() async {
-    final controller = TextEditingController(
-      text: ref.read(myListingsNotifierProvider).searchQuery,
-    );
     await showAnimatedDialog<void>(
       context: context,
-      child: AlertDialog(
-        title: Text(context.l10n.myListingsSearchTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: context.l10n.myListingsSearchHint),
-          onSubmitted: (v) {
-            ref.read(myListingsNotifierProvider.notifier).setSearchQuery(v);
-            Navigator.of(context).pop();
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              ref.read(myListingsNotifierProvider.notifier).setSearchQuery('');
-              Navigator.of(context).pop();
-            },
-            child: Text(context.l10n.myListingsSearchClear),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref
-                  .read(myListingsNotifierProvider.notifier)
-                  .setSearchQuery(controller.text);
-              Navigator.of(context).pop();
-            },
-            child: Text(context.l10n.myListingsSearchSubmit),
-          ),
-        ],
+      child: _ListingSearchDialog(
+        initialQuery: ref.read(myListingsNotifierProvider).searchQuery,
+        onClear: () =>
+            ref.read(myListingsNotifierProvider.notifier).setSearchQuery(''),
+        onSubmit: (q) =>
+            ref.read(myListingsNotifierProvider.notifier).setSearchQuery(q),
       ),
     );
-    controller.dispose();
   }
 
   Future<void> _confirmDelete(ListingEntity listing) async {
     final ok = await showAnimatedDialog<bool>(
       context: context,
-      child: AlertDialog(
-        title: Text(context.l10n.myListingsDeleteTitle),
-        content: Text(context.l10n.myListingsDeleteBody(listing.title)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+      child: Builder(
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.l10n.myListingsDeleteTitle),
+          content: Text(context.l10n.myListingsDeleteBody(listing.title)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(context.l10n.cancel),
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.l10n.deleteListing),
-          ),
-        ],
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(dialogContext).colorScheme.error,
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(context.l10n.deleteListing),
+            ),
+          ],
+        ),
       ),
     );
     if (ok == true && mounted) {
@@ -168,41 +143,46 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     );
   }
 
-  void _showOptions(ListingEntity listing) {
-    showAnimatedBottomSheet<void>(
+  Future<void> _showOptions(ListingEntity listing) async {
+    final action = await showAnimatedBottomSheet<ListingOptionsAction>(
       context: context,
       isScrollControlled: true,
       builder: (ctx) => Material(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
-        child: ListingOptionsSheet(
-          listing: listing,
-          onEdit: () => _openEdit(listing),
-          onPause: () => ref
-              .read(myListingsNotifierProvider.notifier)
-              .pauseListing(listing.id),
-          onResume: () => ref
-              .read(myListingsNotifierProvider.notifier)
-              .resumeListing(listing.id),
-          onViewStats: () {
-            showAnimatedBottomSheet<void>(
-              context: context,
-              builder: (_) => Material(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: ListingStatsSheet(listing: listing),
-              ),
-            );
-          },
-          onDelete: () => _confirmDelete(listing),
-          onResubmit: () => _openResubmitSheet(listing),
-        ),
+        child: ListingOptionsSheet(listing: listing),
       ),
     );
+    if (!mounted || action == null) return;
+    switch (action) {
+      case ListingOptionsAction.edit:
+        await _openEdit(listing);
+      case ListingOptionsAction.pause:
+        await ref
+            .read(myListingsNotifierProvider.notifier)
+            .pauseListing(listing.id);
+      case ListingOptionsAction.resume:
+        await ref
+            .read(myListingsNotifierProvider.notifier)
+            .resumeListing(listing.id);
+      case ListingOptionsAction.stats:
+        await showAnimatedBottomSheet<void>(
+          context: context,
+          builder: (_) => Material(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(16),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ListingStatsSheet(listing: listing),
+          ),
+        );
+      case ListingOptionsAction.delete:
+        await _confirmDelete(listing);
+      case ListingOptionsAction.resubmit:
+        await _openResubmitSheet(listing);
+    }
   }
 
   @override
@@ -471,6 +451,66 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Owns search text as a plain field so we never dispose a
+/// [TextEditingController] while [showAnimatedDialog]'s exit animation
+/// still holds the [TextField] (that race asserts `_dependents.isEmpty`
+/// on [OfflineBannerHost]'s Stack).
+class _ListingSearchDialog extends StatefulWidget {
+  const _ListingSearchDialog({
+    required this.initialQuery,
+    required this.onClear,
+    required this.onSubmit,
+  });
+
+  final String initialQuery;
+  final VoidCallback onClear;
+  final ValueChanged<String> onSubmit;
+
+  @override
+  State<_ListingSearchDialog> createState() => _ListingSearchDialogState();
+}
+
+class _ListingSearchDialogState extends State<_ListingSearchDialog> {
+  late String _query = widget.initialQuery;
+
+  void _pop() => Navigator.of(context).pop();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.myListingsSearchTitle),
+      content: TextFormField(
+        initialValue: widget.initialQuery,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: context.l10n.myListingsSearchHint,
+        ),
+        onChanged: (v) => _query = v,
+        onFieldSubmitted: (_) {
+          widget.onSubmit(_query);
+          _pop();
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            widget.onClear();
+            _pop();
+          },
+          child: Text(context.l10n.myListingsSearchClear),
+        ),
+        FilledButton(
+          onPressed: () {
+            widget.onSubmit(_query);
+            _pop();
+          },
+          child: Text(context.l10n.myListingsSearchSubmit),
+        ),
+      ],
     );
   }
 }

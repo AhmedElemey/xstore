@@ -102,6 +102,15 @@ class OrderAddress with _$OrderAddress {
     /// existed.
     double? latitude,
     double? longitude,
+    /// The ids [city]/[wilaya] were resolved from at save time (via the same
+    /// live `/api/governorates` + `/api/cities` reference lists the picker
+    /// itself reads) — kept so the displayed names can be re-resolved in
+    /// whichever locale is active later, instead of the display staying
+    /// frozen in the language that was active when the address was saved.
+    /// Null for addresses saved before this field existed; display falls
+    /// back to the plain [city]/[wilaya] strings in that case.
+    int? cityId,
+    int? governorateId,
   }) = _OrderAddress;
 }
 

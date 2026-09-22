@@ -32,6 +32,16 @@ mixin _$OrderAddress {
   double? get latitude => throw _privateConstructorUsedError;
   double? get longitude => throw _privateConstructorUsedError;
 
+  /// The ids [city]/[wilaya] were resolved from at save time (via the same
+  /// live `/api/governorates` + `/api/cities` reference lists the picker
+  /// itself reads) — kept so the displayed names can be re-resolved in
+  /// whichever locale is active later, instead of the display staying
+  /// frozen in the language that was active when the address was saved.
+  /// Null for addresses saved before this field existed; display falls
+  /// back to the plain [city]/[wilaya] strings in that case.
+  int? get cityId => throw _privateConstructorUsedError;
+  int? get governorateId => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $OrderAddressCopyWith<OrderAddress> get copyWith =>
       throw _privateConstructorUsedError;
@@ -52,7 +62,9 @@ abstract class $OrderAddressCopyWith<$Res> {
       String? postalCode,
       bool isDefault,
       double? latitude,
-      double? longitude});
+      double? longitude,
+      int? cityId,
+      int? governorateId});
 }
 
 /// @nodoc
@@ -77,6 +89,8 @@ class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
     Object? isDefault = null,
     Object? latitude = freezed,
     Object? longitude = freezed,
+    Object? cityId = freezed,
+    Object? governorateId = freezed,
   }) {
     return _then(_value.copyWith(
       fullName: null == fullName
@@ -115,6 +129,14 @@ class _$OrderAddressCopyWithImpl<$Res, $Val extends OrderAddress>
           ? _value.longitude
           : longitude // ignore: cast_nullable_to_non_nullable
               as double?,
+      cityId: freezed == cityId
+          ? _value.cityId
+          : cityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -136,7 +158,9 @@ abstract class _$$OrderAddressImplCopyWith<$Res>
       String? postalCode,
       bool isDefault,
       double? latitude,
-      double? longitude});
+      double? longitude,
+      int? cityId,
+      int? governorateId});
 }
 
 /// @nodoc
@@ -159,6 +183,8 @@ class __$$OrderAddressImplCopyWithImpl<$Res>
     Object? isDefault = null,
     Object? latitude = freezed,
     Object? longitude = freezed,
+    Object? cityId = freezed,
+    Object? governorateId = freezed,
   }) {
     return _then(_$OrderAddressImpl(
       fullName: null == fullName
@@ -197,6 +223,14 @@ class __$$OrderAddressImplCopyWithImpl<$Res>
           ? _value.longitude
           : longitude // ignore: cast_nullable_to_non_nullable
               as double?,
+      cityId: freezed == cityId
+          ? _value.cityId
+          : cityId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      governorateId: freezed == governorateId
+          ? _value.governorateId
+          : governorateId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -213,7 +247,9 @@ class _$OrderAddressImpl implements _OrderAddress {
       this.postalCode,
       this.isDefault = false,
       this.latitude,
-      this.longitude});
+      this.longitude,
+      this.cityId,
+      this.governorateId});
 
   @override
   final String fullName;
@@ -240,10 +276,14 @@ class _$OrderAddressImpl implements _OrderAddress {
   final double? latitude;
   @override
   final double? longitude;
+  @override
+  final int? cityId;
+  @override
+  final int? governorateId;
 
   @override
   String toString() {
-    return 'OrderAddress(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault, latitude: $latitude, longitude: $longitude)';
+    return 'OrderAddress(fullName: $fullName, phone: $phone, street: $street, city: $city, wilaya: $wilaya, postalCode: $postalCode, isDefault: $isDefault, latitude: $latitude, longitude: $longitude, cityId: $cityId, governorateId: $governorateId)';
   }
 
   @override
@@ -264,12 +304,26 @@ class _$OrderAddressImpl implements _OrderAddress {
             (identical(other.latitude, latitude) ||
                 other.latitude == latitude) &&
             (identical(other.longitude, longitude) ||
-                other.longitude == longitude));
+                other.longitude == longitude) &&
+            (identical(other.cityId, cityId) || other.cityId == cityId) &&
+            (identical(other.governorateId, governorateId) ||
+                other.governorateId == governorateId));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, fullName, phone, street, city,
-      wilaya, postalCode, isDefault, latitude, longitude);
+  int get hashCode => Object.hash(
+      runtimeType,
+      fullName,
+      phone,
+      street,
+      city,
+      wilaya,
+      postalCode,
+      isDefault,
+      latitude,
+      longitude,
+      cityId,
+      governorateId);
 
   @JsonKey(ignore: true)
   @override
@@ -288,7 +342,9 @@ abstract class _OrderAddress implements OrderAddress {
       final String? postalCode,
       final bool isDefault,
       final double? latitude,
-      final double? longitude}) = _$OrderAddressImpl;
+      final double? longitude,
+      final int? cityId,
+      final int? governorateId}) = _$OrderAddressImpl;
 
   @override
   String get fullName;
@@ -314,6 +370,10 @@ abstract class _OrderAddress implements OrderAddress {
   double? get latitude;
   @override
   double? get longitude;
+  @override
+  int? get cityId;
+  @override
+  int? get governorateId;
   @override
   @JsonKey(ignore: true)
   _$$OrderAddressImplCopyWith<_$OrderAddressImpl> get copyWith =>

@@ -287,6 +287,15 @@ abstract final class AppValidators {
     return '+20$cleaned';
   }
 
+  /// Digits shown after a `+20` prefix: 10-digit `1XXXXXXXXX` (no trunk 0).
+  static String egyptNationalSignificantNumber(String value) {
+    final local = normalizeEgyptLocal(value);
+    if (local.isEmpty) return '';
+    var national = local.startsWith('0') ? local.substring(1) : local;
+    if (national.length > 10) national = national.substring(0, 10);
+    return national;
+  }
+
   static String formatEgyptPhone(String e164) {
     final local = toLocalEgypt(e164);
     if (local.length == 11) {

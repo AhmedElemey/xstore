@@ -486,8 +486,7 @@ abstract final class AppStrings {
   static const cartEmptySubtitle =
       "Looks like you haven't added anything to your cart yet";
   static const cartStartShopping = 'Start Shopping';
-  static const cartOrWishlist = 'Or check your Wishlist';
-  static const cartWishlistArrow = 'Wishlist →';
+  static const cartOrWishlist = 'Or check your Wishlist →';
   static const cartRemove = '🗑 Remove';
   static const cartSaveForLater = '♡ Save for Later';
   static const cartUnavailableBadge = 'Unavailable';

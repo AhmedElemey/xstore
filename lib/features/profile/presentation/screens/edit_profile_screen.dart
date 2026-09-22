@@ -879,6 +879,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           TextField(
             controller: _instagram,
             decoration: InputDecoration(
+              labelText: context.l10n.instagramLabel,
               prefixIcon: const Icon(LucideIcons.instagram),
               prefixText: '@',
               border: const OutlineInputBorder(),
@@ -891,6 +892,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           TextField(
             controller: _facebook,
             decoration: InputDecoration(
+              labelText: context.l10n.facebookLabel,
               prefixIcon: const Icon(LucideIcons.facebook),
               prefixText: 'fb.com/',
               border: const OutlineInputBorder(),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -48,11 +49,31 @@ void fcmPushHandling(FcmPushHandlingRef ref) {
   unawaited(_handleInitialMessage(ref));
   _handlePendingLocalNotificationLaunch(ref);
 
+  // Tray push is not guaranteed (data-only FCM, iOS simulator, denied
+  // permission). Refresh the inbox/badge when the app is foregrounded again.
+  final observer = _InboxResumeObserver(() {
+    if (ref.read(authProvider).valueOrNull == null) return;
+    unawaited(ref.read(notificationsProvider.notifier).fetchNotifications());
+  });
+  WidgetsBinding.instance.addObserver(observer);
+
   ref.onDispose(() {
+    WidgetsBinding.instance.removeObserver(observer);
     for (final sub in subscriptions) {
       unawaited(sub.cancel());
     }
   });
+}
+
+class _InboxResumeObserver extends WidgetsBindingObserver {
+  _InboxResumeObserver(this._onResume);
+
+  final VoidCallback _onResume;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _onResume();
+  }
 }
 
 Future<void> _handleInitialMessage(Ref ref) async {
@@ -113,21 +134,27 @@ Future<void> _onForegroundMessage(Ref ref, RemoteMessage message) async {
   );
 
   if (ref.read(authProvider).valueOrNull != null) {
-    ref.read(notificationsProvider.notifier).fetchNotifications();
+    unawaited(ref.read(notificationsProvider.notifier).fetchNotifications());
   }
 
-  if (Platform.isAndroid) {
-    final notification = message.notification;
-    final route =
-        routeFromRemoteMessage(message) ?? AppRoutes.notifications;
-    final title = notification?.title ??
-        message.data['title']?.toString() ??
-        'xStore';
-    final body = notification?.body ?? message.data['body']?.toString() ?? '';
-    await showAndroidForegroundFcmNotification(
-      title: title,
-      body: body,
-      payloadRoute: route,
-    );
-  }
+  final notification = message.notification;
+  // iOS already banners a `notification` payload via presentation options.
+  // Android never shows FCM in the foreground; data-only payloads show
+  // nothing on either platform unless we raise a local notification.
+  final osWillPresent = !Platform.isAndroid && notification != null;
+  if (osWillPresent) return;
+
+  final route = routeFromRemoteMessage(message) ?? AppRoutes.notifications;
+  final title = notification?.title ??
+      message.data['title']?.toString() ??
+      'xStore';
+  final body = notification?.body ??
+      message.data['body']?.toString() ??
+      message.data['message']?.toString() ??
+      '';
+  await showFcmLocalNotification(
+    title: title,
+    body: body,
+    payloadRoute: route,
+  );
 }

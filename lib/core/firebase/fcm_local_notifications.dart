@@ -11,6 +11,8 @@ final FlutterLocalNotificationsPlugin _localNotifications =
 
 void Function(String route)? _onNotificationTap;
 
+var _initialized = false;
+
 /// Route staged when the app is cold-launched by tapping a local
 /// notification — `onDidReceiveNotificationResponse` is never invoked for
 /// that launch, so [initFcmLocalNotifications] captures it separately via
@@ -30,10 +32,20 @@ String? consumePendingLocalNotificationLaunchRoute() {
 }
 
 Future<void> initFcmLocalNotifications() async {
-  if (!Platform.isAndroid) return;
+  if (kIsWeb) return;
+  if (_initialized) return;
 
   const androidInit = AndroidInitializationSettings('@drawable/ic_stat_notify');
-  const initSettings = InitializationSettings(android: androidInit);
+  const iosInit = DarwinInitializationSettings(
+    // Permission is requested via FirebaseMessaging.requestPermission.
+    requestAlertPermission: false,
+    requestBadgePermission: false,
+    requestSoundPermission: false,
+  );
+  const initSettings = InitializationSettings(
+    android: androidInit,
+    iOS: iosInit,
+  );
 
   await _localNotifications.initialize(
     initSettings,
@@ -54,33 +66,49 @@ Future<void> initFcmLocalNotifications() async {
     }
   }
 
-  const channel = AndroidNotificationChannel(
-    fcmDefaultAndroidChannelId,
-    'Order & account updates',
-    description: 'Order status, messages, and important xStore alerts',
-    importance: Importance.high,
-  );
+  if (Platform.isAndroid) {
+    const channel = AndroidNotificationChannel(
+      fcmDefaultAndroidChannelId,
+      'Order & account updates',
+      description: 'Order status, messages, and important xStore alerts',
+      importance: Importance.high,
+    );
 
-  await _localNotifications
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+
+  _initialized = true;
 }
 
-Future<void> showAndroidForegroundFcmNotification({
+/// Shows a tray notification for FCM the OS will not present itself
+/// (Android foreground, or data-only payloads on any platform).
+Future<void> showFcmLocalNotification({
   required String title,
   required String body,
   required String payloadRoute,
 }) async {
-  if (!Platform.isAndroid) return;
+  if (kIsWeb) return;
   if (title.isEmpty && body.isEmpty) return;
+  if (!_initialized) {
+    await initFcmLocalNotifications();
+  }
 
-  const details = AndroidNotificationDetails(
-    fcmDefaultAndroidChannelId,
-    'Order & account updates',
-    channelDescription: 'Order status, messages, and important xStore alerts',
-    importance: Importance.high,
-    priority: Priority.high,
+  const details = NotificationDetails(
+    android: AndroidNotificationDetails(
+      fcmDefaultAndroidChannelId,
+      'Order & account updates',
+      channelDescription: 'Order status, messages, and important xStore alerts',
+      importance: Importance.high,
+      priority: Priority.high,
+    ),
+    iOS: DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    ),
   );
 
   try {
@@ -88,7 +116,7 @@ Future<void> showAndroidForegroundFcmNotification({
       DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
       title.isEmpty ? 'xStore' : title,
       body,
-      const NotificationDetails(android: details),
+      details,
       payload: payloadRoute,
     );
   } catch (e) {

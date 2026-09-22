@@ -5,14 +5,12 @@
 // chain (and, for "add to cart", the real CartRepositoryImpl it delegates
 // to), only the Dio HTTP transport is scripted.
 //
-// Unlike OrdersScreen's ConsumerOrdersView/VendorOrdersView, nothing here
-// fetches from an initState postFrameCallback at all — WishlistNotifier
-// only ever calls fetchWishlist() reactively (via `ref.listen(authProvider,
-// ...)`, which fires once auth settles) or from pull-to-refresh / after a
-// cart mutation. The `ref.listen` path should fire on its own once
-// `_FakeAuth`'s async build() resolves, but the explicit re-fetch below
-// mirrors orders_screen_live_flow_test.dart's `_pumpReady` defensively —
-// harmless to call twice against a scripted Dio.
+// Unlike OrdersScreen's ConsumerOrdersView/VendorOrdersView, WishlistScreen
+// itself has no initState fetch — WishlistConsumerBody posts one on first
+// mount, and WishlistNotifier also fetches via `ref.listen(authProvider,
+// fireImmediately: true)` so a first watch after session restore still
+// loads. `_pumpReady` still re-fetches defensively (harmless against
+// scripted Dio).
 //
 // Lives under test/ (not integration_test/) so it runs in plain
 // `flutter test` like the rest of CI — no device/emulator needed.

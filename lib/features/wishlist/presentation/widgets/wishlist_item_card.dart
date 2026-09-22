@@ -62,7 +62,7 @@ class WishlistItemCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final img = item.listingImages.isNotEmpty ? item.listingImages.first : null;
-    final drop = item.priceDropPercent ?? 0;
+    final drop = item.effectiveDropPercent;
     final strike = item.compareAtPrice != null && item.compareAtPrice! > item.price
         ? item.compareAtPrice
         : (item.previousPrice != null && item.previousPrice! > item.price
@@ -480,7 +480,7 @@ class WishlistItemCard extends ConsumerWidget {
 
 Color _wishlistAccent(WishlistItemEntity item) {
   if (!item.isAvailable) return AppColors.error;
-  if ((item.priceDropPercent ?? 0) > 0) return AppColors.success;
+  if (item.effectiveDropPercent > 0) return AppColors.success;
   if (item.isInCart) return AppColors.success;
   return AppColors.primary;
 }

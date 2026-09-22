@@ -108,6 +108,7 @@ class ListingRepositoryImpl implements ListingRepository {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   }) async {
     try {
       final model = await _remote.updateListing(
@@ -129,6 +130,7 @@ class ListingRepositoryImpl implements ListingRepository {
         attributes: attributes,
         imagePaths: imagePaths,
         status: status,
+        keepImageUrls: keepImageUrls,
       );
       return Right(model.toEntity());
     } on NetworkException catch (e) {

@@ -193,6 +193,8 @@ Map<String, dynamic> _addressToJson(OrderAddress a) => {
   'isDefault': a.isDefault,
   'latitude': a.latitude,
   'longitude': a.longitude,
+  'cityId': a.cityId,
+  'governorateId': a.governorateId,
 };
 
 OrderAddress _addressFromJson(Map<String, dynamic> json) => OrderAddress(
@@ -205,4 +207,6 @@ OrderAddress _addressFromJson(Map<String, dynamic> json) => OrderAddress(
   isDefault: json['isDefault'] == true,
   latitude: (json['latitude'] as num?)?.toDouble(),
   longitude: (json['longitude'] as num?)?.toDouble(),
+  cityId: (json['cityId'] as num?)?.toInt(),
+  governorateId: (json['governorateId'] as num?)?.toInt(),
 );

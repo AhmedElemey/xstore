@@ -136,12 +136,13 @@ abstract final class ApiEndpoints {
   static String apiListingDetail(String id) => '$apiListings/$id';
   static String apiListingSimilar(String id, {int count = 6}) =>
       '$apiListings/$id/similar?count=$count';
+  // CONFIRMED live 400: `"Only cancelled listings can be re-submitted."`
+  // — not paused, not rejected.
   static String apiListingResubmit(String id) => '$apiListings/$id/resubmit';
-  // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
-  // Used for pause — sidesteps the multipart image-wipe risk that the
-  // generic PUT /api/listings update carries (see ListingRemoteDataSource
-  // `_listingFormData`). No equivalent "activate"/"resume" route exists
-  // in the collection, so resume still goes through the generic update.
+  // CONFIRMED (Postman + live 400): bodyless pause PUT. Rejects unless
+  // the listing is already Active (`"Only active listings can be
+  // deactivated."`). `/activate` is not a route (empty 404). Do not use
+  // /deactivate or /resubmit to resume a paused listing.
   static String apiListingDeactivate(String id) => '$apiListings/$id/deactivate';
   // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
   // Used for "Delete listing" — the collection has no DELETE endpoint for

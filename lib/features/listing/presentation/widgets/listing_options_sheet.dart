@@ -7,26 +7,19 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Result popped by [ListingOptionsSheet]. Callers must wait for the
+/// sheet to finish closing before pushing another overlay — popping and
+/// pushing in the same tap callback locks the navigator (`!_debugLocked`).
+enum ListingOptionsAction { edit, pause, resume, stats, delete, resubmit }
+
 /// Bottom sheet: listing actions (edit, pause/resume, stats, delete).
 class ListingOptionsSheet extends StatelessWidget {
   const ListingOptionsSheet({
     super.key,
     required this.listing,
-    required this.onEdit,
-    required this.onPause,
-    required this.onResume,
-    required this.onViewStats,
-    required this.onDelete,
-    required this.onResubmit,
   });
 
   final ListingEntity listing;
-  final VoidCallback onEdit;
-  final VoidCallback onPause;
-  final VoidCallback onResume;
-  final VoidCallback onViewStats;
-  final VoidCallback onDelete;
-  final VoidCallback onResubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -62,44 +55,32 @@ class ListingOptionsSheet extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onResubmit();
-                },
+                onTap: () =>
+                    Navigator.of(context).pop(ListingOptionsAction.resubmit),
               ),
             ListTile(
               leading: const Icon(LucideIcons.pencil),
               title: Text(context.l10n.editListingMenu),
-              onTap: () {
-                Navigator.of(context).pop();
-                onEdit();
-              },
+              onTap: () => Navigator.of(context).pop(ListingOptionsAction.edit),
             ),
             if (showPause)
               ListTile(
                 leading: const Icon(LucideIcons.pauseCircle),
                 title: Text(context.l10n.pauseListing),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onPause();
-                },
+                onTap: () =>
+                    Navigator.of(context).pop(ListingOptionsAction.pause),
               ),
             if (showResume)
               ListTile(
                 leading: const Icon(LucideIcons.playCircle),
                 title: Text(context.l10n.resumeListing),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onResume();
-                },
+                onTap: () =>
+                    Navigator.of(context).pop(ListingOptionsAction.resume),
               ),
             ListTile(
               leading: const Icon(LucideIcons.barChart2),
               title: Text(context.l10n.viewStatsMenu),
-              onTap: () {
-                Navigator.of(context).pop();
-                onViewStats();
-              },
+              onTap: () => Navigator.of(context).pop(ListingOptionsAction.stats),
             ),
             ListTile(
               leading: Icon(LucideIcons.trash2, color: Theme.of(context).colorScheme.error),
@@ -107,10 +88,8 @@ class ListingOptionsSheet extends StatelessWidget {
                 context.l10n.deleteListing,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              onTap: () {
-                Navigator.of(context).pop();
-                onDelete();
-              },
+              onTap: () =>
+                  Navigator.of(context).pop(ListingOptionsAction.delete),
             ),
             const Gap(AppSpacing.md),
           ],

@@ -59,6 +59,7 @@ abstract interface class ListingRemoteDataSource {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   });
 
   Future<void> deleteListing(String id);
@@ -130,6 +131,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required List<String> imagePaths,
     String? id,
     ListingStatus? status,
+    List<String>? keepImageUrls,
   }) async {
     final fields = <String, dynamic>{
       if (id != null) 'id': id,
@@ -157,9 +159,18 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       fields['Attributes[$i].Value'] = entry.value;
       i++;
     }
+    if (keepImageUrls != null) {
+      for (var u = 0; u < keepImageUrls.length && u < _maxImagesPerListing; u++) {
+        fields['imageUrls[$u]'] = keepImageUrls[u];
+      }
+    }
 
     final formData = FormData.fromMap(fields);
-    for (final path in imagePaths.take(_maxImagesPerListing)) {
+    final keptCount = keepImageUrls == null
+        ? 0
+        : keepImageUrls.take(_maxImagesPerListing).length;
+    final newSlots = _maxImagesPerListing - keptCount;
+    for (final path in imagePaths.take(newSlots)) {
       // photoPaths can be restored from a saved draft across app
       // sessions; the OS may evict image_picker's cache in the meantime.
       // Skip a stale path rather than let MultipartFile.fromFile throw
@@ -214,6 +225,11 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           location: location,
           attributes: attributes,
           imagePaths: imagePaths,
+          // C# `ListingStatus` defaults to 0 = Draft when this field is
+          // omitted, so Publish created rows that never entered the admin
+          // PENDING queue. Live Active listings have `reviewedAt` set by
+          // `PUT /api/admin/listings/{id}/approve` — vendors submit Pending.
+          status: ListingStatus.pending,
         ),
         options: ApiAuthHeaders.authenticated(),
       );
@@ -326,6 +342,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
     required Map<String, String> attributes,
     required List<String> imagePaths,
     required ListingStatus status,
+    List<String>? keepImageUrls,
   }) async {
     try {
       // Spec: id is sent in the BODY, PUT to the collection root — not
@@ -351,6 +368,7 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           attributes: attributes,
           imagePaths: imagePaths,
           status: status,
+          keepImageUrls: keepImageUrls,
         ),
         options: ApiAuthHeaders.authenticated(),
       );
@@ -384,9 +402,9 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
           shippingCost: shippingCost,
           location: location,
           attributes: attributes,
-          // imagePaths are local file paths (usually empty here — this
-          // fallback only fires for status mutations); keep the cached
-          // model's existing hosted imageUrls untouched via copyWith.
+          // Status-only resume omits keepImageUrls (null) so hosted
+          // images stay as cached. Edit passes the remaining set.
+          imageUrls: keepImageUrls ?? _localMine[idx].imageUrls,
         );
         _localMine[idx] = updated;
         return updated;

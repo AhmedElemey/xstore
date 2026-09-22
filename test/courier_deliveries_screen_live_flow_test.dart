@@ -211,7 +211,7 @@ void main() {
       // the same amount also renders on that order's own history card, so
       // this legitimately matches twice (see the cash summary header AND
       // the card's own collected-amount line).
-      expect(find.text('EGP 300'), findsWidgets);
+      expect(find.text('300 LE'), findsWidgets);
     },
   );
 

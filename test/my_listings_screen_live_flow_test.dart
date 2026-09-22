@@ -30,7 +30,10 @@ import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/my_listings_screen.dart';
+import 'package:xstore/features/listing/presentation/widgets/status_badge.dart';
+import 'package:xstore/shared/widgets/offline_banner.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as orders_screen_live_flow_test.dart's `_RoutedInterceptor`.
@@ -94,17 +97,21 @@ Map<String, dynamic> _listingJson({
 
 Widget _harness(List<Override> overrides) => ProviderScope(
   overrides: overrides,
-  child: const MaterialApp(
-    localizationsDelegates: [
+  child: MaterialApp(
+    localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
-    // MyListingsScreen renders its own Scaffold, so no extra Material
-    // wrapper is needed here.
-    home: MyListingsScreen(),
+    // Same chrome as production `XstoreApp` — listing search used to
+    // dispose a TextEditingController during the dialog's exit animation,
+    // which asserted `_dependents.isEmpty` on this Stack.
+    builder: (context, child) => OfflineBannerHost(
+      child: child ?? const SizedBox.shrink(),
+    ),
+    home: const MyListingsScreen(),
   ),
 );
 
@@ -177,6 +184,119 @@ void main() {
       await _settle(tester);
 
       expect(putRequest, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'vendor resumes a paused listing via the live update wire call',
+    (tester) async {
+      RequestOptions? putRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) =>
+            [_listingJson(status: 3)],
+        'PUT ${ApiEndpoints.apiListings}': (options) {
+          putRequest = options;
+          return _listingJson(status: 3);
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.paused,
+      );
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      expect(find.text('Resume'), findsOneWidget);
+      await tester.tap(find.text('Resume'));
+      await _settle(tester);
+
+      expect(putRequest, isNotNull);
+      expect(putRequest!.path, '/api/listings');
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.active,
+      );
+    },
+  );
+
+  testWidgets(
+    'vendor deletes a draft listing via the live cancel wire call',
+    (tester) async {
+      RequestOptions? cancelRequest;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) =>
+            [_listingJson(title: 'Draft lamp', status: 0)],
+        'PUT ${ApiEndpoints.apiListingCancel('9001')}': (options) {
+          cancelRequest = options;
+          return <String, dynamic>{};
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.text('Draft lamp'), findsOneWidget);
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+
+      await tester.tap(find.text('Delete'));
+      await _settle(tester);
+
+      expect(find.textContaining('will be removed permanently'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await _settle(tester);
+
+      expect(cancelRequest, isNotNull);
+      expect(find.text('Draft lamp'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'searching listings does not assert during the dialog exit animation',
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) => [
+          _listingJson(id: '1', title: 'Red lamp'),
+          _listingJson(id: '2', title: 'Blue vase'),
+        ],
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(LucideIcons.search));
+      await _settle(tester);
+
+      await tester.enterText(find.byType(TextFormField), 'lamp');
+      await tester.tap(find.widgetWithText(FilledButton, 'Search'));
+      // The future completes at Navigator.pop; one more frame is the
+      // exit animation that used to hit a disposed TextEditingController.
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await _settle(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Red lamp'), findsOneWidget);
+      expect(find.text('Blue vase'), findsNothing);
     },
   );
 }

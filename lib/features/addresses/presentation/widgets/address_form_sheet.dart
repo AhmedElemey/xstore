@@ -11,6 +11,7 @@ import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../cities/presentation/providers/city_dependencies.dart';
 import '../../../governments/presentation/providers/government_dependencies.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../../shared/widgets/map_address_picker.dart';
 
@@ -211,6 +212,10 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
       isDefault: _isDefault,
       latitude: _pickedLat,
       longitude: _pickedLng,
+      // Guaranteed non-null here: the errors check above blocks save until
+      // both are picked.
+      cityId: _cityId,
+      governorateId: _governorateId,
     );
     widget.onSave(address);
     Navigator.pop(context);
@@ -244,6 +249,16 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // Resolved in the CURRENT locale (not the frozen wilaya/city strings)
+    // so the hint doesn't show stale English inside an otherwise-Arabic
+    // sheet (or vice versa) when editing an address saved in another
+    // language.
+    final existingLocationHint = widget.existing == null
+        ? null
+        : () {
+            final location = resolveAddressLocation(ref, widget.existing!);
+            return '${location.wilaya} - ${location.city}';
+          }();
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -303,9 +318,7 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
             LocationCascadeField(
               cityId: _cityId,
               governorateId: _governorateId,
-              hint: widget.existing == null
-                  ? null
-                  : '${widget.existing!.wilaya} - ${widget.existing!.city}',
+              hint: existingLocationHint,
               errorText: _fieldErrors['location'],
               onChanged: (cityId, governorateId) {
                 setState(() {

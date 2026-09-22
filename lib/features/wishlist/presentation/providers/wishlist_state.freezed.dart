@@ -273,7 +273,7 @@ class _$WishlistStateImpl implements _WishlistState {
       final List<WishlistItemEntity> filteredItems = const [],
       final Set<String> wishlistedListingIds = const <String>{},
       this.selectedFilter = WishlistFilter.all,
-      this.sortOption = WishlistSortOption.recentlyAdded,
+      this.sortOption = WishlistSortOption.priceLowToHigh,
       this.viewMode = WishlistViewMode.list,
       final Set<String> selectedItemIds = const <String>{},
       this.isSelectionMode = false,

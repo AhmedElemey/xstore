@@ -97,11 +97,21 @@ extension LocalizationContext on BuildContext {
       isArabic ? LucideIcons.arrowRight : LucideIcons.arrowLeft;
 
   String formatCurrency(double amount) {
-    return NumberFormat.currency(
-      locale: isArabic ? 'ar_EG' : 'en_EG',
-      symbol: isArabic ? 'ج.م ' : 'EGP ',
-      decimalDigits: 0,
-    ).format(amount);
+    // Arabic already reads as "٢٬٠٠٠ ج.م " — the currency symbol trails the
+    // number under the 'ar_EG' pattern. English used to show "EGP 2,000"
+    // (symbol first); switched to the same trailing convention, using "LE"
+    // instead of "EGP", since NumberFormat.currency has no locale-agnostic
+    // way to force a leading symbol to a suffix — only the ready-made
+    // 'ar_EG' currency pattern already suffixes it.
+    if (isArabic) {
+      return NumberFormat.currency(
+        locale: 'ar_EG',
+        symbol: 'ج.م ',
+        decimalDigits: 0,
+      ).format(amount);
+    }
+    final number = NumberFormat.decimalPattern('en_EG').format(amount.round());
+    return '$number LE';
   }
 
   String formatDate(DateTime date) {

@@ -33,6 +33,9 @@ class Notifications extends _$Notifications {
       }
       _deleteTimers.clear();
     });
+    // fireImmediately: this keepAlive notifier is often first read *after*
+    // auth already has a user (home bell). A plain listen only sees later
+    // transitions, so the inbox stayed empty until pull-to-refresh.
     ref.listen(authProvider, (prev, next) {
       if (next.isLoading) return;
       if (next.valueOrNull != null) {
@@ -43,7 +46,7 @@ class Notifications extends _$Notifications {
           state = const NotificationsState();
         });
       }
-    });
+    }, fireImmediately: true);
     return const NotificationsState();
   }
 
@@ -170,14 +173,14 @@ class Notifications extends _$Notifications {
   }
 
   Future<void> fetchNotifications() async {
+    if (ref.read(authProvider).valueOrNull == null) return;
     final role = _role;
     final epoch = _epoch;
+    // Keep the current list while re-fetching so opening the screen (or a
+    // foreground push) doesn't flash the skeleton over rows we already have.
     state = state.copyWith(
-      isLoading: true,
+      isLoading: state.notifications.isEmpty,
       error: null,
-      page: 0,
-      notifications: [],
-      hasMore: true,
     );
     // Independent requests — fetch in parallel instead of serially.
     final (listR, countR) = await (
@@ -190,7 +193,10 @@ class Notifications extends _$Notifications {
     ).wait;
     if (epoch != _epoch) return;
     listR.fold(
-      (f) => state = state.copyWith(isLoading: false, error: f.toString()),
+      (f) => state = state.copyWith(
+        isLoading: false,
+        error: state.notifications.isEmpty ? f.toString() : null,
+      ),
       (page) {
         countR.fold(
           (fc) =>

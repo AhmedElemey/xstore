@@ -64,7 +64,7 @@ void main() {
   });
 
   group('updateProfileWireFields', () {
-    test('sends userImageUrl null when avatar removal is requested', () {
+    test('sends empty userImageUrl when avatar removal is requested', () {
       const user = UserEntity(
         id: '1',
         name: 'Vendor',
@@ -81,13 +81,40 @@ void main() {
       final body = updateProfileWireFields(state.toUpdateProfileRequest());
 
       expect(body.containsKey('userImageUrl'), isTrue);
-      expect(body['userImageUrl'], isNull);
+      expect(body['userImageUrl'], '');
+      expect(body['avatarUrl'], '');
       expect(body['storeImageUrl'], 'https://cdn.example/store.jpg');
+      expect(body.containsKey('storeLogoUrl'), isFalse);
       expect(body.containsKey('email'), isFalse);
       expect(body.containsKey('phoneNumber'), isFalse);
     });
 
-    test('sends storeImageUrl null when store logo removal is requested', () {
+    test('sends empty storeImageUrl and storeLogoUrl when store logo is removed',
+        () {
+      const user = UserEntity(
+        id: '1',
+        name: 'Vendor',
+        email: 'v@test.com',
+        phoneNumber: '010',
+        avatarUrl: 'https://cdn.example/avatar.jpg',
+        storeLogoUrl: 'https://cdn.example/store.jpg',
+        storeId: 1,
+      );
+      final state = ProfileState(
+        profile: ProfileEntity(user: user),
+        storeLogoRemoved: true,
+      );
+
+      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+
+      expect(body['storeImageUrl'], '');
+      expect(body['storeLogoUrl'], '');
+      expect(body['userImageUrl'], 'https://cdn.example/avatar.jpg');
+      expect(body.containsKey('avatarUrl'), isFalse);
+    });
+
+    test('FormData keeps empty storeImageUrl/storeLogoUrl on logo removal',
+        () async {
       const user = UserEntity(
         id: '1',
         name: 'Vendor',
@@ -101,10 +128,12 @@ void main() {
         storeLogoRemoved: true,
       );
 
-      final body = updateProfileWireFields(state.toUpdateProfileRequest());
+      final form = await updateProfileFormData(state.toUpdateProfileRequest());
+      final fields = Map<String, String>.fromEntries(form.fields);
 
-      expect(body.containsKey('storeImageUrl'), isTrue);
-      expect(body['storeImageUrl'], isNull);
+      expect(fields['storeImageUrl'], '');
+      expect(fields['storeLogoUrl'], '');
+      expect(form.files.any((e) => e.key == 'storeImage'), isFalse);
     });
 
     test('maps edit state to UpdateProfileRequest wire keys', () {
@@ -237,6 +266,44 @@ void main() {
         expect(u.longitude, 31.2357);
         expect(u.storeName, 'Tech Hub');
         expect(u.storeDescription, 'Electronics seller');
+      },
+      skip: MockConfig.useMock ? false : 'Requires --dart-define=MOCK=true',
+    );
+
+    test(
+      'removed store logo stays absent after updateProfile then getProfile',
+      () async {
+        final ds = ProfileRemoteDataSourceImpl(Dio());
+        final repo = ProfileRepositoryImpl(ds);
+
+        const session = UserEntity(
+          id: 'vendor_1',
+          name: 'Ahmed Vendor',
+          email: 'vendor@test.com',
+          phoneNumber: '01012345678',
+          role: UserRole.vendor,
+          storeLogoUrl: 'https://cdn.example/store.jpg',
+          storeId: 1,
+        );
+
+        final request = UpdateProfileRequest(
+          fullNameEn: 'Ahmed Vendor',
+          storeName: 'Tech Hub',
+          storeImageUrl: null,
+        );
+
+        final saveResult =
+            await repo.updateProfile(request, sessionUser: session);
+        expect(saveResult.isRight(), isTrue);
+        final saved = saveResult.getOrElse((_) => session);
+        expect(saved.storeLogoUrl, isNull);
+
+        final fetchResult = await repo.getProfile(saved);
+        expect(fetchResult.isRight(), isTrue);
+        final profile = fetchResult.getOrElse(
+          (_) => throw StateError('expected profile'),
+        );
+        expect(profile.user.storeLogoUrl, isNull);
       },
       skip: MockConfig.useMock ? false : 'Requires --dart-define=MOCK=true',
     );
