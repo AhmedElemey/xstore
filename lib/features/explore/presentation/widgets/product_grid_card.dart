@@ -112,7 +112,10 @@ class ProductGridCard extends StatelessWidget {
                             color: AppColors.primary,
                           ),
                         ),
-                        if (item.compareAtPrice != null) ...[
+                        // Only a real markdown: compare-at must be above
+                        // the price (same rule as the listing form).
+                        if (item.compareAtPrice != null &&
+                            item.compareAtPrice! > item.price) ...[
                           const Gap(AppSpacing.sm),
                           Text(
                             context.formatCurrency(item.compareAtPrice!),
