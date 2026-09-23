@@ -43,8 +43,6 @@ abstract final class AnalyticsEvents {
   // Secondary engagement.
   static const String wishlistAdd = 'wishlist_add';
   static const String wishlistRemove = 'wishlist_remove';
-  static const String checkoutPaymentMethodSelected =
-      'checkout_payment_method_selected';
   static const String whatsappSellerTap = 'whatsapp_seller_tap';
 
   // Vendor funnel (listing live -> order fulfilled) — the other half of
@@ -79,6 +77,7 @@ abstract final class AnalyticsProps {
   static const String query = 'query';
   static const String resultCount = 'result_count';
   static const String screenName = 'screen_name';
+  static const String referrer = 'referrer';
   static const String status = 'status';
   static const String reason = 'reason';
   static const String rating = 'rating';

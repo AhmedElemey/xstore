@@ -194,12 +194,10 @@ abstract final class ApiEndpoints {
   static const String home = '$_api/home';
 
   // ---------------------------------------------------------------------
-  // Analytics — PROPOSED, not yet built on the backend. Contract spec for
-  // the backend team: docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md.
-  // The client batches events locally and POSTs here; until the backend
-  // ships the route it 404s and events stay queued (see
-  // AnalyticsService._flush, which backs off on repeated 404s instead of
-  // hammering a route that doesn't exist yet).
+  // Analytics collector (live, 202 {accepted}). Contract:
+  // docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md. The client
+  // batches events locally and POSTs here while signed in; a 404 or error
+  // keeps them queued and backs off (AnalyticsService._runFlush).
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
 

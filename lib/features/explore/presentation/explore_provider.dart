@@ -140,17 +140,22 @@ class Explore extends _$Explore {
         );
         final trimmed = q.trim();
         if (trimmed.isNotEmpty) {
+          // People paste phone numbers / emails into search — keep the
+          // product words, never the contact details.
+          final query = trimmed
+              .replaceAll(RegExp(r'\S+@\S+'), '[email]')
+              .replaceAll(RegExp(r'\d{7,}'), '[number]');
           ref.read(analyticsServiceProvider).track(
             AnalyticsEvents.searchPerformed,
             properties: {
-              AnalyticsProps.query: trimmed,
+              AnalyticsProps.query: query,
               AnalyticsProps.resultCount: sorted.length,
             },
           );
           if (sorted.isEmpty) {
             ref.read(analyticsServiceProvider).track(
               AnalyticsEvents.searchNoResults,
-              properties: {AnalyticsProps.query: trimmed},
+              properties: {AnalyticsProps.query: query},
             );
           }
         }

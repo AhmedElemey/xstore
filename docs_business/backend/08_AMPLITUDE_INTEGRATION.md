@@ -44,6 +44,11 @@ to Amplitude via the official [`amplitude_flutter`](https://pub.dev/packages/amp
   no separate `Revenue`/`revenue()` call) so Amplitude's built-in revenue/LTV charts work without a
   custom computed metric.
 
+- **Short user ids.** Backend user ids are short integers (`"42"`), and Amplitude rejects any
+  `user_id` under 5 characters by default (`400 "Invalid id length for user_id or device_id"`), so
+  every signed-in event was dropped while guest events went through. The SDK is configured with
+  `minIdLength: 1` (`AnalyticsService.amplitudeConfiguration`); do not remove it.
+
 ## 2. Enabling it
 
 Amplitude is **on by default** once `AppConfig.init` has run (every real app launch via
@@ -77,8 +82,7 @@ Release / CI still pass the dart-define explicitly:
 
 See the full table in
 [`03_ANALYTICS_EVENTS_HANDOFF.md`](./03_ANALYTICS_EVENTS_HANDOFF.md#event-catalog-names-are-frozen--see-event_namesdart-do-not-rename-without-updating-both-sides).
-Summary of what's live: `view_item`, `add_to_cart`, `begin_checkout`,
-`checkout_payment_method_selected`, `purchase`, `login_success`, `register_success`, `logout`,
+Summary of what's live: `view_item`, `add_to_cart`, `begin_checkout`, `purchase`, `login_success`, `register_success`, `logout`,
 `login_prompt_shown`, `screen_view` (auto-tracked on every go_router navigation), `search_performed`,
 `wishlist_add`/`wishlist_remove`, `listing_published`/`listing_status_changed`/
 `listing_resubmitted`/`listing_deleted`, `order_status_changed`, plus **all P0 and P1 gap-closing

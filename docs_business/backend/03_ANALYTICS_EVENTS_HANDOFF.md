@@ -1,6 +1,7 @@
 # xStore — Analytics Events Backend Handoff
 
-**Status:** client-side implemented and shipping (mobile app), backend endpoint **not yet built**.
+**Status:** client-side implemented and shipping (mobile app); backend endpoint live (returns
+`202 {"accepted": n}`).
 **Companion:** business rationale and the approved event schema/funnel are in
 [`../launch_todos/03_funnel_metrics.md`](../launch_todos/03_funnel_metrics.md) — this doc is
 the wire contract for the backend team to implement against. Once the collector endpoint is
@@ -8,8 +9,8 @@ live, this feeds the Analytics tab stubbed in
 [`../admin-dashboard/BACKEND_HANDOFF.md`](../admin-dashboard/BACKEND_HANDOFF.md) instead of
 hardcoded demo data.
 
-> **Amplitude:** the same client-side event stream is also forwarded directly to Amplitude's HTTP
-> API, independent of this backend collector — see
+> **Amplitude:** the same client-side event stream is also sent to Amplitude through the
+> `amplitude_flutter` SDK, independent of this backend collector — see
 > [`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) for the wiring and a gap analysis
 > of events still missing for a complete user journey.
 
@@ -26,11 +27,16 @@ option to also enable Firebase Analytics later.
 
 `lib/core/analytics/analytics_service.dart` batches events locally (SharedPreferences-backed
 queue, cap 500, drop-oldest) and flushes batches of up to 20 every ~20s, on connectivity
-regained, or immediately once 20 events queue up. Until this endpoint exists, POSTs get a 404
-(tolerated — same pattern as every other undeployed route in this app, see
-`lib/core/network/legacy_route_options.dart`) and the client backs off exponentially (10s → 300s
-cap) instead of hammering the route. No app-side changes needed when the backend ships this —
-the queue just starts draining.
+regained, or immediately once 20 events queue up. On a 404 or error it backs off exponentially
+(10s → 300s cap) instead of hammering the route.
+
+- **Signed-in only on the wire.** The client POSTs only while a user is signed in. Guest events
+  stay queued on the device and are sent after that device's next login, stamped with that
+  session's `userId`/`userRole` (joins the pre-login journey to the account). A guest who never
+  signs in never reaches this collector — Amplitude still gets their events.
+- **Logout:** the app sends the queue (including `logout`) *before* the remote logout revokes the
+  token, bounded to ~3s. Queued events stamped with a different `userId` than the next signed-in
+  user are dropped rather than sent under the wrong token.
 
 ## Endpoint
 
@@ -38,10 +44,8 @@ the queue just starts draining.
 POST /api/analytics/events
 ```
 
-**Auth:** same as every other route in this app — static Basic license key in the
-`Authorization` header (`ApiAuthHeaders.basicLicenseKey`), **not** a per-user JWT. Events fire
-for guests too, so there is no user-scoped auth gate on this route; identity travels inside the
-payload (`userId`, nullable).
+**Auth:** static Basic license key in `Authorization` (`ApiAuthHeaders.basicLicenseKey`) **plus**
+the session's `X-Auth-Token`.
 
 **Request body:**
 
@@ -96,26 +100,25 @@ vs logged-in split — see `03_funnel_metrics.md` §4 for the exact rates to exp
 | `view_item` | Product detail screen loads | `item_id`, `category`, `seller_id`, `price_egp`, `guest` |
 | `add_to_cart` | Add-to-cart succeeds | `item_id`, `quantity`, `cart_value_egp` |
 | `begin_checkout` | Checkout screen mounts | `cart_value_egp`, `item_count`, `vendor_count` |
-| `checkout_payment_method_selected` | Payment method picked in checkout | `method` |
-| `purchase` | Order placed (COD) | `order_id`, `value_egp`, `currency`, `payment_type`, `item_count` |
+| `purchase` | Order placed (COD) | `order_id`, `value_egp`, `currency`, `payment_type` (`cod`), `item_count` |
 | `login_success` | Login/OTP/Google/Apple/Facebook succeeds | `method` (`password`\|`otp`\|`google`\|`apple`\|`facebook`), `role` |
 | `register_success` | New account created | `method`, `role` |
 | `logout` | User signs out | `role` |
 | `login_prompt_shown` | Guest hits an account-gated action | (none — `screenName` gives context) |
-| `screen_view` | Every go_router navigation | `screen_name` |
-| `search_performed` | Explore search returns results (non-empty query) | `query`, `result_count` |
+| `screen_view` | Every go_router navigation | `screen_name`, `referrer` (previous route; absent on the first screen) |
+| `search_performed` | Explore search returns results (non-empty query) | `query` (7+ digit runs → `[number]`, emails → `[email]`), `result_count` |
 | `wishlist_add` / `wishlist_remove` | Wishlist toggle | `item_id` |
 | `listing_published` | Vendor's new listing is created | `item_id`, `category`, `price_egp` |
 | `listing_status_changed` | Vendor pauses/resumes a listing | `item_id`, `status` (`paused`\|`active`) |
 | `listing_resubmitted` | Vendor resubmits a rejected listing | `item_id`, `price_egp` |
 | `listing_deleted` | Vendor deletes/cancels a listing | `item_id` |
-| `order_status_changed` | Any order lifecycle transition (either role) | `order_id`, `status` (`confirmed`\|`processing`\|`shipped`\|`delivered`\|`cancelled`), `role` (`vendor`\|`consumer`), `method` (delivery method, confirm only), `reason` (reject/cancel only) |
+| `order_status_changed` | Any order lifecycle transition (either role) | `order_id`, `status` (`confirmed`\|`processing`\|`shipped`\|`delivered`\|`cancelled`), `role` (`vendor`\|`consumer`), `method` (delivery method, confirm only). No cancel/reject reason — it is free text; join the order record by `order_id`. |
 | `app_open` | App cold start (once per process launch) | (none) |
 | `category_viewed` | A home category chip is tapped into Explore | `category` |
-| `search_no_results` | Explore search returns zero results for a non-empty query | `query` |
+| `search_no_results` | Explore search returns zero results for a non-empty query | `query` (redacted like `search_performed`) |
 | `remove_from_cart` | Cart item removed | `item_id`, `quantity`, `cart_value_egp` |
 | `cart_viewed` | Cart tab opened | (none) |
-| `order_placement_failed` | `placeOrder()` fails for any reason | `reason` (`offline`\|`noItems`\|`noAddress`\|`noConsumer`\|a mapped backend error code\|`failed`), `cart_value_egp`, `item_count` |
+| `order_placement_failed` | `placeOrder()` fails for any reason | `reason` (`offline`\|`noItems`\|`noAddress`\|`noConsumer`\|`__offline__`\|`phoneNotVerified`\|`rateLimitExceeded`\|`failed`\|`server_error` — never the server's message text), `cart_value_egp`, `item_count` |
 | `review_submitted` | A new (not edited) product review is created | `item_id`, `rating` |
 | `onboarding_completed` / `onboarding_skipped` | Last onboarding slide "Get Started" vs. the Skip button | (none) |
 | `guest_mode_started` | "Continue as Guest" tapped on the login screen (not the returning-guest re-entry on cold start) | (none) |
@@ -127,6 +130,10 @@ vs logged-in split — see `03_funnel_metrics.md` §4 for the exact rates to exp
 | `push_notification_opened` | A push notification (foreground tap, cold-launch tap, or Android local-notification tap) is opened | `message_id` (foreground/cold-launch only), `screen_name` |
 | `vendor_report_submitted` | Consumer successfully reports a vendor from order detail | `seller_id`, `order_id` |
 | `vendor_onboarding_step` | Vendor register wizard advances a step | `step` (the step number just reached) |
+
+`view_item` fires once per product screen open (not again when the page reloads after a
+review). There is no `checkout_payment_method_selected`: checkout is COD-only with no payment
+picker; add it when one exists.
 
 The rows above from `app_open` through `vendor_onboarding_step` are the full set of P0+P1
 additions from the Amplitude user-journey gap analysis — see

@@ -253,6 +253,64 @@ void main() {
     expect(service.queuedEventNames, [AnalyticsEvents.logout]);
   });
 
+  test('flushBeforeSignOut sends logout while the session token is valid',
+      () async {
+    buildContainer(
+      auth: FakeAuth(_user()),
+      sessionUser: _user(),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    await service.ready;
+    await service.flushNow(); // drain app_open queued on init
+    adapter.posts.clear();
+
+    service.track(AnalyticsEvents.logout);
+    await service.flushBeforeSignOut();
+    service.bindSession(null);
+
+    expect(adapter.posts, hasLength(1));
+    final events = ((adapter.posts.single.data as Map)['events'] as List)
+        .cast<Map>();
+    expect(events.map((e) => e['name']), [AnalyticsEvents.logout]);
+    expect(service.queuedEventNames, isEmpty);
+  });
+
+  test('never sends a previous account\'s events under the next session',
+      () async {
+    buildContainer(
+      auth: FakeAuth(null),
+      secureValues: {PrefsKeys.authToken: 'sess-token'},
+    );
+    await service.ready;
+
+    // u1's logout could not be sent (e.g. offline) before signing out.
+    service.bindSession(_user());
+    await service.flushNow(); // settle the flush login kicks off
+    adapter.posts.clear();
+    service.track(AnalyticsEvents.logout);
+    service.bindSession(null);
+    service.track('view_item'); // guest browsing — stitched to next login
+
+    const other = UserEntity(
+      id: 'u2',
+      name: 'Other',
+      email: 'other@test.com',
+      phoneNumber: '01022222222',
+    );
+    service.bindSession(other);
+    await service.flushNow();
+
+    final sent = [
+      for (final post in adapter.posts)
+        ...((post.data as Map)['events'] as List).cast<Map>(),
+    ];
+    // app_open (queued as a guest on init) may ride along — not the point.
+    final tracked =
+        sent.where((e) => e['name'] != AnalyticsEvents.appOpen).toList();
+    expect(tracked.map((e) => e['name']), ['view_item']);
+    expect(tracked.single['userId'], 'u2');
+  });
+
   test('HTTP 200 drops the sent batch so the next flush does not resend it',
       () async {
     adapter = _RecordingAdapter(statusCode: 200);
@@ -305,6 +363,28 @@ void main() {
       service.debugRouteChanged('/home');
 
       expect(service.queuedEventNames, contains(AnalyticsEvents.screenView));
+    });
+
+    test('screen_view carries the previous route as referrer', () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+      );
+      await service.ready;
+
+      service.debugRouteChanged('/product/p1', referrer: '/home');
+      await service.flushNow();
+
+      final sent = [
+        for (final post in adapter.posts)
+          ...((post.data as Map)['events'] as List).cast<Map>(),
+      ];
+      final view = sent.lastWhere((e) => e['name'] == AnalyticsEvents.screenView);
+      expect(view['properties'], {
+        AnalyticsProps.screenName: '/product/p1',
+        AnalyticsProps.referrer: '/home',
+      });
     });
 
     test('cart_viewed fires alongside screen_view when the route is /cart',
@@ -361,6 +441,13 @@ void main() {
         .where((c) => c.method == 'track')
         .map((c) => (c.arguments as Map)['event'] as Map)
         .toList();
+
+    test('accepts short numeric user ids (Amplitude defaults to min 5)', () {
+      final config = AnalyticsService.amplitudeConfiguration('key');
+
+      expect(config.minIdLength, 1);
+      expect(config.toMap()['minIdLength'], 1);
+    });
 
     test('does not construct an Amplitude client when no AMPLITUDE_API_KEY '
         'is configured — the disabled path never touches a platform '
