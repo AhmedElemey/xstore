@@ -76,14 +76,14 @@ is empty or `null`, and no user-typed text shows up (search queries have phones/
 | 9 | Explore → apply filters | `filter_applied` | `category_count`, `condition_count`, `has_price_range`, `shipping_only` (`"true"`/`"false"`) |
 | 10 | Open a product | `view_item` | `item_id`, `category`, `seller_id`, `price_egp`, `guest` — **once** per open |
 | 11 | Heart / un-heart it | `wishlist_add` / `wishlist_remove` | `item_id` |
-| 12 | Product → WhatsApp seller; seller store → WhatsApp | `whatsapp_seller_tap` | `source`, `item_id` (product), `seller_id` |
+| 12 | Product → WhatsApp seller; seller store → WhatsApp | `whatsapp_seller_tap` | `source` (`product`/`store`), `item_id` (product), `seller_id` |
 
 ### C. Auth (as the guest from A)
 | # | Action | Event | Parameters to check |
 |---|---|---|---|
 | 13 | Register a new account | `register_success` | `method`, `role`; user property `user_id` set |
 | 14 | Log out | `logout` | `role`; `user_id` cleared |
-| 15 | Log in with phone, then Google / Apple | `login_success` | `method` (`phone`/`google`/`apple`), `role`; `user_id` + `role` user properties |
+| 15 | Log in with phone, then Google / Apple | `login_success` | `method` (`otp`, `password`, `google`, `apple`, …), `role`; `user_id` + `role` user properties |
 
 ### D. Cart & checkout (signed in as a buyer)
 | # | Action | Event | Parameters to check |
