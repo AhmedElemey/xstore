@@ -5,7 +5,6 @@ abstract final class Formatters {
     return '$symbol${amount.toStringAsFixed(2)}';
   }
 
-
   /// Compact posted date for listings (local timezone when set).
   static String shortDate(DateTime date) {
     final local = date.toLocal();
