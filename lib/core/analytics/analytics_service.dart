@@ -8,6 +8,8 @@ import 'package:amplitude_flutter/autocapture/autocapture.dart';
 import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -75,14 +77,24 @@ part 'analytics_service.g.dart';
 /// (the xStore collector's queue) is ours to manage. Amplitude fails
 /// independently of the xStore collector: an Amplitude outage never
 /// affects [_flush] or vice versa.
+///
+/// Google Analytics (GA4 via `firebase_analytics`) is a third sink fed from
+/// the same [_enqueue] choke point, so all three receive the identical event
+/// catalog. Like Amplitude it is not session-gated and keeps its own queue;
+/// identity is set on every [bindSession] via [_bindUser] (GA has no
+/// per-event user id). Every call is fire-and-forget with errors swallowed:
+/// an unhandled async error here would reach Crashlytics as a fatal. See
+/// `docs_business/backend/09_GOOGLE_ANALYTICS_INTEGRATION.md`.
 class AnalyticsService {
   AnalyticsService(
     this._ref, {
     Dio? client,
     Amplitude? amplitudeClient,
     String? amplitudeApiKey,
+    FirebaseAnalytics? firebaseAnalytics,
     Future<String?> Function()? readAuthToken,
-  }) : _readAuthToken = readAuthToken {
+  })  : _readAuthToken = readAuthToken,
+        _firebaseAnalytics = firebaseAnalytics ?? _defaultFirebaseAnalytics() {
     _client = client ??
         Dio(
           BaseOptions(
@@ -127,10 +139,21 @@ class AnalyticsService {
     return AppConfig.maybeFlavor?.amplitudeApiKey ?? '';
   }
 
+  /// Null when Firebase was never initialized (unit tests, or a bootstrap
+  /// that failed before `Firebase.initializeApp`) — GA is then just off.
+  static FirebaseAnalytics? _defaultFirebaseAnalytics() {
+    try {
+      return Firebase.apps.isEmpty ? null : FirebaseAnalytics.instance;
+    } catch (_) {
+      return null;
+    }
+  }
+
   final Ref _ref;
   final Future<String?> Function()? _readAuthToken;
   late final Dio _client;
   late final Amplitude? _amplitude;
+  final FirebaseAnalytics? _firebaseAnalytics;
   late final Future<void> _initFuture;
   late final String _sessionId;
   late final int _sessionStartMs;
@@ -166,6 +189,12 @@ class AnalyticsService {
   void _bindUser(UserEntity? user) {
     _userId = user?.id;
     _userRole = user?.role.name;
+    // Unconditional: GA persists the user id natively across launches, so a
+    // cold start that restores no session must still clear it.
+    _toFirebase((ga) async {
+      await ga.setUserId(id: _userId);
+      await ga.setUserProperty(name: AnalyticsProps.role, value: _userRole);
+    });
   }
 
   /// Pushed from the auth notifier on restore / login / logout. Must not be
@@ -285,6 +314,61 @@ class AnalyticsService {
     if (amplitude != null) {
       unawaited(amplitude.track(_amplitudeBaseEvent(event)));
     }
+    _toFirebase((ga) => _logToFirebase(ga, event));
+  }
+
+  /// Runs [call] against GA when it is configured, fire-and-forget. Errors
+  /// (sync or async) are swallowed — GA must never fail a `track()` caller
+  /// or surface as an uncaught zone error.
+  void _toFirebase(Future<void> Function(FirebaseAnalytics ga) call) {
+    final ga = _firebaseAnalytics;
+    if (ga == null) return;
+    unawaited(
+      Future.sync(() => call(ga)).catchError((Object e) {
+        if (kDebugMode) debugPrint('Google Analytics: $e');
+      }),
+    );
+  }
+
+  /// GA4 limits: string values up to 100 chars, only String/num values
+  /// (no bool/null), and `screen_view` is reserved — it must go through
+  /// [FirebaseAnalytics.logScreenView]. Every catalog name is already a
+  /// valid GA4 name (snake_case, under 40 chars, no reserved prefix).
+  /// `purchase` gets GA's `value` + `transaction_id` (`currency` is already
+  /// sent as `EGP`) so it lands in GA revenue reports, mirroring Amplitude's
+  /// `revenue`.
+  Future<void> _logToFirebase(FirebaseAnalytics ga, AnalyticsEvent event) {
+    final parameters = <String, Object>{};
+    void put(String key, Object? value) {
+      switch (value) {
+        case null:
+          return;
+        case num n:
+          parameters[key] = n;
+        case bool b:
+          parameters[key] = b ? 'true' : 'false';
+        default:
+          final text = value.toString();
+          parameters[key] = text.length > 100 ? text.substring(0, 100) : text;
+      }
+    }
+
+    put(AnalyticsProps.screenName, event.screenName);
+    event.properties.forEach(put);
+    final revenue = _revenueOf(event);
+    if (revenue != null) {
+      put('value', revenue);
+      put('transaction_id', event.properties[AnalyticsProps.orderId]);
+    }
+
+    if (event.name == AnalyticsEvents.screenView) {
+      final screenName = parameters.remove(AnalyticsProps.screenName);
+      return ga.logScreenView(
+        screenName: screenName as String?,
+        parameters: parameters,
+      );
+    }
+    return ga.logEvent(name: event.name, parameters: parameters);
   }
 
   /// Wires automatic `screen_view` tracking off go_router's route-change
