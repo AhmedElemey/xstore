@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../addresses/presentation/providers/address_book_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -215,7 +216,18 @@ class Checkout extends _$Checkout {
       error: failureReason,
     );
     if (failureReason != null) {
-      _trackPlacementFailed(failureReason, cart);
+      // Cart's error is the server's free-text message for most failures —
+      // only stable codes go to analytics.
+      const stableCodes = {
+        'failed',
+        kOfflineErrorCode,
+        phoneNotVerifiedErrorCode,
+        rateLimitErrorCode,
+      };
+      _trackPlacementFailed(
+        stableCodes.contains(failureReason) ? failureReason : 'server_error',
+        cart,
+      );
     }
     return order;
   }

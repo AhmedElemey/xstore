@@ -77,8 +77,7 @@ Release / CI still pass the dart-define explicitly:
 
 See the full table in
 [`03_ANALYTICS_EVENTS_HANDOFF.md`](./03_ANALYTICS_EVENTS_HANDOFF.md#event-catalog-names-are-frozen--see-event_namesdart-do-not-rename-without-updating-both-sides).
-Summary of what's live: `view_item`, `add_to_cart`, `begin_checkout`,
-`checkout_payment_method_selected`, `purchase`, `login_success`, `register_success`, `logout`,
+Summary of what's live: `view_item`, `add_to_cart`, `begin_checkout`, `purchase`, `login_success`, `register_success`, `logout`,
 `login_prompt_shown`, `screen_view` (auto-tracked on every go_router navigation), `search_performed`,
 `wishlist_add`/`wishlist_remove`, `listing_published`/`listing_status_changed`/
 `listing_resubmitted`/`listing_deleted`, `order_status_changed`, plus **all P0 and P1 gap-closing

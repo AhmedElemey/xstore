@@ -212,17 +212,19 @@ class Auth extends _$Auth {
 
   Future<void> logout() async {
     final user = state.valueOrNull;
+    final analytics = ref.read(analyticsServiceProvider);
+    analytics.track(
+      AnalyticsEvents.logout,
+      properties: {if (user != null) AnalyticsProps.role: user.role.name},
+    );
+    // Before the remote logout below invalidates the session token.
+    await analytics.flushBeforeSignOut();
     unregisterFcmDeviceTokenOnLogout(ref);
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
     resetListingLocalCache(ref);
     resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
-    final analytics = ref.read(analyticsServiceProvider);
-    analytics.track(
-      AnalyticsEvents.logout,
-      properties: {if (user != null) AnalyticsProps.role: user.role.name},
-    );
     analytics.bindSession(null);
     ref.invalidateSelf();
   }

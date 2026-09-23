@@ -484,7 +484,11 @@ class Cart extends _$Cart {
             AnalyticsProps.orderId: order.id,
             AnalyticsProps.valueEgp: params.total,
             AnalyticsProps.currency: 'EGP',
-            AnalyticsProps.paymentType: params.paymentMethod.name,
+            // Spec value is `cod`, not the enum name `cashOnDelivery`.
+            AnalyticsProps.paymentType:
+                params.paymentMethod == PaymentMethod.cashOnDelivery
+                    ? 'cod'
+                    : params.paymentMethod.name,
             AnalyticsProps.itemCount: params.items.length,
           },
         );

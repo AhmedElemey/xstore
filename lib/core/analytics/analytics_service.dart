@@ -289,6 +289,10 @@ class AnalyticsService {
   /// definitions in `app_router.dart` to name each page. Idempotent: safe
   /// to call again when the router is rebuilt (role switch recreates
   /// [GoRouter] in `app_router.dart`).
+  ///
+  /// `referrer` (the previous route) is how a product view is attributed to
+  /// home / explore / wishlist / store without instrumenting every product
+  /// link with a `select_item` event.
   void attachRouter(GoRouter router) {
     _detachRouterListener?.call();
     final provider = router.routeInformationProvider;
@@ -296,8 +300,9 @@ class AnalyticsService {
     void onChange() {
       final uri = provider.value.uri.toString();
       if (uri == last) return;
+      final referrer = last;
       last = uri;
-      _onRouteChanged(uri);
+      _onRouteChanged(uri, referrer: referrer);
     }
 
     provider.addListener(onChange);
@@ -305,9 +310,12 @@ class AnalyticsService {
     onChange();
   }
 
-  void _onRouteChanged(String uri) {
+  void _onRouteChanged(String uri, {String? referrer}) {
     _currentScreenName = uri;
-    track(AnalyticsEvents.screenView, properties: {AnalyticsProps.screenName: uri});
+    track(AnalyticsEvents.screenView, properties: {
+      AnalyticsProps.screenName: uri,
+      if (referrer != null) AnalyticsProps.referrer: referrer,
+    });
     // A couple of funnel-critical routes also get a named event alongside
     // the generic screen_view, so a funnel chart doesn't need a
     // screen_name filter step — mirrors how begin_checkout/purchase are
@@ -320,7 +328,28 @@ class AnalyticsService {
   /// Exercises the exact route-change logic [attachRouter] wires to
   /// go_router, without needing a real [GoRouter] instance in tests.
   @visibleForTesting
-  void debugRouteChanged(String uri) => _onRouteChanged(uri);
+  void debugRouteChanged(String uri, {String? referrer}) =>
+      _onRouteChanged(uri, referrer: referrer);
+
+  /// Sends the xStore collector queue while the session token is still
+  /// valid — called from `Auth.logout` before the remote logout revokes it,
+  /// so `logout` (and anything else pending) is not stranded until the next
+  /// login. Amplitude needs no token, so its SDK queue is left to itself.
+  /// Bounded so a slow network never holds up signing out.
+  Future<void> flushBeforeSignOut() async {
+    Future<void> drain() async {
+      // A flush already in flight may have started before `logout` was
+      // queued; let it finish so the loop below starts a fresh one.
+      await _inFlightFlush;
+      while (_queue.isNotEmpty) {
+        final before = _queue.length;
+        await _flush();
+        if (_queue.length >= before) return; // offline, backoff or failed
+      }
+    }
+
+    await drain().timeout(const Duration(seconds: 3), onTimeout: () {});
+  }
 
   int _backoffSeconds() => min(300, 10 * (1 << _consecutiveFailures.clamp(0, 5)));
 
@@ -358,6 +387,12 @@ class AnalyticsService {
       final token = await _sessionToken();
       if (!_isSignedIn || token == null || token.isEmpty) return;
 
+      // Events stamped for a different account (left over from a previous
+      // login on this device) would be attributed to this session's token —
+      // drop them. Guest events (null userId) stay: the session identity is
+      // stamped onto them below, stitching the pre-login journey.
+      _queue.removeWhere((e) => e.userId != null && e.userId != _userId);
+      if (_queue.isEmpty) return;
       final batch = _queue.take(_batchSize).toList();
       // Backend ingest DTO is `{ "events": [ ... ] }`, not a bare array
       // and not a single event object (Postman: POST Ingest Events).
