@@ -44,6 +44,11 @@ to Amplitude via the official [`amplitude_flutter`](https://pub.dev/packages/amp
   no separate `Revenue`/`revenue()` call) so Amplitude's built-in revenue/LTV charts work without a
   custom computed metric.
 
+- **Short user ids.** Backend user ids are short integers (`"42"`), and Amplitude rejects any
+  `user_id` under 5 characters by default (`400 "Invalid id length for user_id or device_id"`), so
+  every signed-in event was dropped while guest events went through. The SDK is configured with
+  `minIdLength: 1` (`AnalyticsService.amplitudeConfiguration`); do not remove it.
+
 ## 2. Enabling it
 
 Amplitude is **on by default** once `AppConfig.init` has run (every real app launch via

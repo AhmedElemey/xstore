@@ -100,16 +100,19 @@ class AnalyticsService {
     }
     final apiKey = _resolveAmplitudeApiKey(amplitudeApiKey);
     _amplitude = amplitudeClient ??
-        (apiKey.isEmpty
-            ? null
-            : Amplitude(
-                Configuration(
-                  apiKey: apiKey,
-                  autocapture: const AutocaptureDisabled(),
-                ),
-              ));
+        (apiKey.isEmpty ? null : Amplitude(amplitudeConfiguration(apiKey)));
     _initFuture = _init();
   }
+
+  /// `minIdLength: 1` — backend user ids are short integers ("42"), and
+  /// Amplitude rejects any user_id under 5 characters by default (400
+  /// "Invalid id length"), which silently dropped every signed-in event.
+  @visibleForTesting
+  static Configuration amplitudeConfiguration(String apiKey) => Configuration(
+        apiKey: apiKey,
+        autocapture: const AutocaptureDisabled(),
+        minIdLength: 1,
+      );
 
   static const int _maxQueueSize = 500;
   static const int _batchSize = 20;

@@ -442,6 +442,13 @@ void main() {
         .map((c) => (c.arguments as Map)['event'] as Map)
         .toList();
 
+    test('accepts short numeric user ids (Amplitude defaults to min 5)', () {
+      final config = AnalyticsService.amplitudeConfiguration('key');
+
+      expect(config.minIdLength, 1);
+      expect(config.toMap()['minIdLength'], 1);
+    });
+
     test('does not construct an Amplitude client when no AMPLITUDE_API_KEY '
         'is configured — the disabled path never touches a platform '
         'channel, mocked or not', () async {
