@@ -358,6 +358,38 @@ void main() {
   );
 
   test(
+    'a second placeOrder while the first is in flight places nothing',
+    skip: MockConfig.useMock ? 'Requires MOCK=false (default) — see the happy-path test above' : false,
+    () async {
+      final release = Completer<void>();
+      final adapter = _ScriptedAdapter((options) async {
+        await release.future;
+        return _jsonBody({'id': 9001, 'status': 'pending'}, 201);
+      });
+      final container = await _buildContainer(
+        _overrides(
+          dio: _fakeDio(adapter),
+          cartItems: [_seedItem()],
+          checkout: () => _SeededAddressCheckout(),
+        ),
+      );
+      final notifier = container.read(checkoutProvider.notifier);
+
+      final first = notifier.placeOrder();
+      final second = await notifier.placeOrder();
+      release.complete();
+      final order = await first;
+
+      expect(second, isNull);
+      expect(order?.id, '9001');
+      expect(
+        adapter.requests.where((r) => r.path == ApiEndpoints.orders).length,
+        1,
+      );
+    },
+  );
+
+  test(
     'validation failure: empty cart is rejected before any network call',
     () async {
       final adapter = _ScriptedAdapter(

@@ -7,6 +7,7 @@ import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
 import 'package:xstore/features/cart/domain/entities/place_order_params.dart';
 import 'package:xstore/features/orders/data/models/order_model.dart';
+import 'package:xstore/features/orders/data/models/order_item_model.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 
 import '../../../../helpers/stub_orders_remote_datasource.dart';
@@ -96,6 +97,55 @@ Map<String, dynamic> _fullCartJson() => {
   'total': 85500,
   'itemCount': 1,
 };
+
+PlaceOrderParams _params(
+  List<CartItemEntity> items, {
+  double? latitude,
+  double? longitude,
+}) =>
+    PlaceOrderParams(
+      consumerId: 'consumer_1',
+      items: items,
+      deliveryAddress: OrderAddress(
+        fullName: 'Jane',
+        phone: '0100',
+        street: 'St',
+        city: 'Cairo',
+        wilaya: 'Cairo',
+        latitude: latitude,
+        longitude: longitude,
+      ),
+      paymentMethod: PaymentMethod.cashOnDelivery,
+      subtotal: 0,
+      shippingTotal: 0,
+      discount: 0,
+      total: 0,
+    );
+
+OrderModel _createdOrder(
+  String listingId,
+  OrderItemModel item,
+  OrderAddressModel address,
+) =>
+    OrderModel(
+      id: 'order_$listingId',
+      consumerId: 'consumer_1',
+      consumerName: 'Jane',
+      consumerPhone: '0100',
+      vendorId: 'vendor_1',
+      vendorName: 'Ahmed',
+      vendorStoreName: 'Ahmed Store',
+      items: [item],
+      status: OrderStatus.pending,
+      paymentMethod: PaymentMethod.cashOnDelivery,
+      deliveryAddress: address,
+      subtotal: item.total,
+      shippingCost: 0,
+      discount: 0,
+      total: item.total,
+      createdAt: DateTime(2026, 8, 1),
+      updatedAt: DateTime(2026, 8, 1),
+    );
 
 void main() {
   late Dio dio;
@@ -457,6 +507,82 @@ void main() {
       expect(result.items.map((e) => e.listingId), ['listing_1', 'listing_2']);
       expect(result.subtotal, 190000);
       expect(result.notes, 'Ring the bell');
+    });
+
+    test(
+        'a failed line keeps the placed orders and stays in the cart; retry '
+        'places only that line', () async {
+      final calls = <String>[];
+      var failListing2 = true;
+      final orders = StubOrdersRemoteDataSource(
+        onCreateOrder: ({
+          required listingId,
+          required quantity,
+          required latitude,
+          required longitude,
+          required fallbackItem,
+          required fallbackAddress,
+          required fallbackPayment,
+          notes,
+        }) async {
+          calls.add(listingId);
+          if (listingId == 'listing_2' && failListing2) {
+            throw const ServerException('out of stock');
+          }
+          return _createdOrder(listingId, fallbackItem, fallbackAddress);
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, orders);
+      final line1 = _cartItem(id: 'cart_item_1', listingId: 'listing_1');
+      final line2 = _cartItem(id: 'cart_item_2', listingId: 'listing_2');
+      for (final item in [line1, line2]) {
+        await datasource.addOrUpdateItem(consumerId: 'consumer_1', item: item);
+      }
+
+      final result = await datasource.placeOrder(_params([line1, line2]));
+
+      expect(result.items.map((e) => e.listingId), ['listing_1']);
+      expect(
+        (await datasource.getCart('consumer_1')).items.map((e) => e.id),
+        ['cart_item_2'],
+      );
+
+      failListing2 = false;
+      calls.clear();
+      await datasource.placeOrder(_params([line2]));
+      expect(calls, ['listing_2'], reason: 'listing_1 must not be re-ordered');
+    });
+
+    test('uses a map-pinned address\'s coordinates over the device location',
+        () async {
+      final coords = <(double, double)>[];
+      final orders = StubOrdersRemoteDataSource(
+        onCreateOrder: ({
+          required listingId,
+          required quantity,
+          required latitude,
+          required longitude,
+          required fallbackItem,
+          required fallbackAddress,
+          required fallbackPayment,
+          notes,
+        }) async {
+          coords.add((latitude, longitude));
+          return _createdOrder(listingId, fallbackItem, fallbackAddress);
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, orders);
+
+      // Alexandria pin; the device (unit test) falls back to Cairo.
+      await datasource.placeOrder(
+        _params([_cartItem()], latitude: 31.2001, longitude: 29.9187),
+      );
+      // A pin outside Egypt is ignored.
+      await datasource.placeOrder(
+        _params([_cartItem()], latitude: 48.85, longitude: 2.35),
+      );
+
+      expect(coords, [(31.2001, 29.9187), (30.0444, 31.2357)]);
     });
 
     test('clears the in-memory cart after a successful live placeOrder',
