@@ -70,6 +70,35 @@ void main() {
       expect(snapshot, _stats);
     });
 
+    test('does not refetch when a non-identity user field changes', () async {
+      var fetches = 0;
+      final container = _containerFor(
+        mockVendorUser,
+        repo: StubOrdersRepository(
+          getVendorStatsResult: ({required vendorId}) {
+            fetches++;
+            return const Right(_stats);
+          },
+        ),
+      );
+      await container.read(vendorCommissionSnapshotProvider.future);
+      expect(fetches, 1);
+
+      // e.g. a profile save: same vendor, new name.
+      container.read(authProvider.notifier).state =
+          AsyncData(mockVendorUser.copyWith(name: 'Renamed Store Owner'));
+      await container.pump();
+      await container.read(vendorCommissionSnapshotProvider.future);
+      expect(fetches, 1);
+
+      // A different vendor is a new identity and must refetch.
+      container.read(authProvider.notifier).state =
+          AsyncData(mockVendorUser.copyWith(id: 'vendor_other'));
+      await container.pump();
+      await container.read(vendorCommissionSnapshotProvider.future);
+      expect(fetches, 2);
+    });
+
     test('is null when the stats fetch fails', () async {
       final container = _containerFor(
         mockVendorUser,

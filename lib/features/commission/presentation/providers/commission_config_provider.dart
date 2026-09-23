@@ -41,10 +41,17 @@ const double kCommissionPauseThresholdEgp = 200.0;
 Future<OrderStatsEntity?> vendorCommissionSnapshot(
   VendorCommissionSnapshotRef ref,
 ) async {
-  final user = ref.watch(authProvider).valueOrNull;
-  if (user == null || user.role != UserRole.vendor) return null;
+  // Only the vendor id matters: watching the whole user refetched on every
+  // profile save.
+  final vendorId = ref.watch(
+    authProvider.select((auth) {
+      final user = auth.valueOrNull;
+      return user?.role == UserRole.vendor ? user!.id : null;
+    }),
+  );
+  if (vendorId == null) return null;
 
-  final result = await ref.watch(getVendorOrderStatsUseCaseProvider)(user.id);
+  final result = await ref.watch(getVendorOrderStatsUseCaseProvider)(vendorId);
   return result.fold((_) => null, (stats) => stats);
 }
 
