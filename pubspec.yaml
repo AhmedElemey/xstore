@@ -69,6 +69,7 @@ dependencies:
   flutter_image_compress: ^2.5.1
   google_maps_flutter: ^2.14.2
   amplitude_flutter: ^4.7.2
+  firebase_analytics: ^11.6.0
 
 dev_dependencies:
   flutter_test:

@@ -65,6 +65,9 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- screen_view comes only from AnalyticsService's go_router listener. -->
+	<key>FirebaseAutomaticScreenReportingEnabled</key>
+	<false/>
 	<!-- TODO: Facebook App ID + Client Token from Meta developer console — also update
 	     CFBundleURLSchemes `fb…` above and android/.../strings.xml + AndroidManifest.xml. -->
 	<key>FacebookAppID</key>

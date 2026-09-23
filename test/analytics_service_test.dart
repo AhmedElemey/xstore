@@ -4,6 +4,7 @@ import 'package:amplitude_flutter/amplitude.dart';
 import 'package:amplitude_flutter/autocapture/autocapture.dart';
 import 'package:amplitude_flutter/configuration.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -41,6 +42,58 @@ Amplitude _fakeAmplitude(_RecordingMethodChannel channel, {String apiKey = 'test
       Configuration(apiKey: apiKey, autocapture: const AutocaptureDisabled()),
       channel,
     );
+
+/// Records what the service asked GA4 to log. [FirebaseAnalytics] has only
+/// a private constructor, so the fake implements it; anything unused here
+/// falls through to [noSuchMethod].
+class _RecordingFirebaseAnalytics implements FirebaseAnalytics {
+  _RecordingFirebaseAnalytics({this.throwOnLog = false});
+
+  final bool throwOnLog;
+  final events = <(String, Map<String, Object>?)>[];
+  final userIds = <String?>[];
+  final userProperties = <String, String?>{};
+
+  @override
+  Future<void> logEvent({
+    required String name,
+    Map<String, Object>? parameters,
+    AnalyticsCallOptions? callOptions,
+  }) async {
+    if (throwOnLog) throw StateError('GA unavailable');
+    events.add((name, parameters));
+  }
+
+  @override
+  Future<void> logScreenView({
+    String? screenClass,
+    String? screenName,
+    Map<String, Object>? parameters,
+    AnalyticsCallOptions? callOptions,
+  }) =>
+      logEvent(
+        name: 'screen_view',
+        parameters: {
+          if (screenName != null) 'screen_name': screenName,
+          ...?parameters,
+        },
+      );
+
+  @override
+  Future<void> setUserId({String? id, AnalyticsCallOptions? callOptions}) async =>
+      userIds.add(id);
+
+  @override
+  Future<void> setUserProperty({
+    required String name,
+    required String? value,
+    AnalyticsCallOptions? callOptions,
+  }) async =>
+      userProperties[name] = value;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class _RecordingAdapter implements HttpClientAdapter {
   _RecordingAdapter({this.statusCode = 202});
@@ -104,6 +157,7 @@ void main() {
     UserEntity? sessionUser,
     Map<String, String> secureValues = const {},
     Amplitude? amplitudeClient,
+    FirebaseAnalytics? firebaseAnalytics,
   }) {
     FlutterSecureStorage.setMockInitialValues(secureValues);
     late AnalyticsService created;
@@ -116,6 +170,7 @@ void main() {
             client: dio,
             readAuthToken: () async => secureValues[PrefsKeys.authToken],
             amplitudeClient: amplitudeClient,
+            firebaseAnalytics: firebaseAnalytics,
           );
           return created;
         }),
@@ -527,6 +582,99 @@ void main() {
         containsAll(['view_item', AnalyticsEvents.appOpen]),
       );
       expect(adapter.posts, hasLength(1)); // xStore collector still sent.
+    });
+  });
+
+  group('Google Analytics forwarding', () {
+    late _RecordingFirebaseAnalytics ga;
+
+    setUp(() {
+      ga = _RecordingFirebaseAnalytics();
+    });
+
+    Map<String, Object>? paramsOf(String name) =>
+        ga.events.firstWhere((e) => e.$1 == name).$2;
+
+    test('forwards guest events under the catalog name with GA-safe params',
+        () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      service.track(
+        AnalyticsEvents.filterApplied,
+        properties: {
+          AnalyticsProps.shippingOnly: true,
+          AnalyticsProps.categoryCount: 2,
+          AnalyticsProps.reason: null,
+          AnalyticsProps.query: 'x' * 150,
+        },
+      );
+      await service.ready;
+
+      expect(ga.events.map((e) => e.$1), contains(AnalyticsEvents.appOpen));
+      final params = paramsOf(AnalyticsEvents.filterApplied)!;
+      expect(params[AnalyticsProps.shippingOnly], 'true');
+      expect(params[AnalyticsProps.categoryCount], 2);
+      expect(params.containsKey(AnalyticsProps.reason), isFalse);
+      expect((params[AnalyticsProps.query]! as String).length, 100);
+      // The collector still holds the guest event; GA does not gate on login.
+      expect(service.queuedEventNames, contains(AnalyticsEvents.filterApplied));
+    });
+
+    test('route changes log screen_view with screen_name and referrer',
+        () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      await service.ready;
+      service.debugRouteChanged(AppRoutes.cart, referrer: '/home');
+
+      final params = paramsOf(AnalyticsEvents.screenView)!;
+      expect(params[AnalyticsProps.screenName], AppRoutes.cart);
+      expect(params[AnalyticsProps.referrer], '/home');
+      expect(ga.events.map((e) => e.$1), contains(AnalyticsEvents.cartViewed));
+    });
+
+    test('purchase carries GA revenue fields', () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      service.track(
+        AnalyticsEvents.purchase,
+        properties: {
+          AnalyticsProps.orderId: 'o1',
+          AnalyticsProps.valueEgp: 499.5,
+          AnalyticsProps.currency: 'EGP',
+        },
+      );
+      await service.ready;
+
+      final params = paramsOf(AnalyticsEvents.purchase)!;
+      expect(params['value'], 499.5);
+      expect(params['currency'], 'EGP');
+      expect(params['transaction_id'], 'o1');
+    });
+
+    test('bindSession sets and clears the GA user id and role', () async {
+      buildContainer(auth: FakeAuth(null), firebaseAnalytics: ga);
+      service.bindSession(_user());
+      await service.ready;
+      expect(ga.userIds.last, 'u1');
+      expect(ga.userProperties['role'], 'consumer');
+
+      service.bindSession(null);
+      await service.ready;
+      expect(ga.userIds.last, isNull);
+      expect(ga.userProperties['role'], isNull);
+    });
+
+    test('a failing GA call never breaks track() or the xStore collector',
+        () async {
+      buildContainer(
+        auth: FakeAuth(_user()),
+        sessionUser: _user(),
+        secureValues: {PrefsKeys.authToken: 'sess-token'},
+        firebaseAnalytics: _RecordingFirebaseAnalytics(throwOnLog: true),
+      );
+      service.track('view_item');
+      await service.ready;
+      await service.flushNow();
+
+      expect(adapter.posts, hasLength(1));
     });
   });
 }
