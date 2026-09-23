@@ -1925,6 +1925,16 @@ Rules for the log:
 - **Rule:** Keep the SDK (`Amplitude?`, no second Dio, no `dispose` on it). Key order stays constructor override, then non-empty dart-define, then `AppFlavor.amplitudeApiKey`. Do not bring the HTTP client back when rebasing key-default work onto the SDK.
 - **Where it applies:** `analytics_service.dart` `_resolveAmplitudeApiKey`, `app_flavor.dart` `amplitudeApiKey`.
 
+### 2026-09-23 — Dead-code cleanup must leave phase-2 and other planned code in place
+- **What happened:** A cleanup pass started deleting commented-out UI that the files themselves mark as deferred (courier login, notification settings, payment methods, custom delivery, return policy, manage-store) because nothing calls it today.
+- **Rule:** Do not delete code whose comments or route notes say it is for a later phase, "hidden for now", or "keep for restore" — including the commented call site that is the restore point. Unused means abandoned, not scheduled. Settled keeps stay too: `cart_select_all_row.dart`, `wishlist_header_bar.dart`, `AppRoutes.earnings`, `AppRoutes.chatThread`.
+- **Where it applies:** Any dead-code deletion pass. Grep for `phase-2`, `deferred`, `coming soon`, `hidden for now`, and `keep for restore` before removing a symbol, comment block, or l10n key those blocks reference.
+
+### 2026-09-23 — Deleting members can leave stray blank lines
+- **What happened:** Removing `dzdWhole`/`dzdSavedDisplay` from `Formatters` left two blank lines between the surviving members, which review caught.
+- **Rule:** After deleting a member or block, re-read the seam and collapse leftover blank lines by hand. Don't run `dart format` over the whole file to clean up: most files on `dev` aren't format-clean yet, so it would mix unrelated reformatting into the diff.
+- **Where it applies:** Any deletion or dead-code pass.
+
 ### 2026-09-23 — Analytics side effects: once per screen in build(), drain before logout, check this log before trusting comments
 - **What happened:** An analytics audit trusted a stale `api_endpoints.dart` comment ("PROPOSED, not yet built") and the handoff doc ("guests are sent") although this log already recorded the endpoint returning `202` and the signed-in-only gate as a deliberate decision. The fixes also surfaced: `view_item` fired inside `ProductDetail.build()`, so every `ref.invalidate` (review posted, order actions) counted another view in both the collector and Amplitude; `logout` was queued *after* the remote logout revoked the token, so it sat on the device until the next login and was then sent under that account's token; a drain loop over `_flush()` stopped early because `_flush()` coalesces with an in-flight flush started before the new event was queued.
 - **Rule:** Before reporting how a subsystem works, grep this log for it — comments and handoff docs go stale, the log records decisions. Tracking in a notifier's `build()` needs an instance flag (`_viewTracked`); riverpod 2.6 reuses the notifier across invalidate rebuilds (`_notifierNotifier.result ??=`). Send anything tied to a session token before the call that revokes it, bounded by a timeout, and never send one account's queued events under another account's token. A loop relying on a coalesced async call making progress must first `await` the call already in flight.

@@ -542,7 +542,6 @@
   "cartCouponMinOrder": "الحد الأدنى للطلب 5,000 ج.م",
   "cartOrderSummary": "ملخص الطلب",
   "cartShippingLine": "الشحن",
-  "cartFreeShippingThresholdNote": "🚚 المنتجات اللي سعرها {threshold} وأكتر شحنها مجاني",
   "cartTotalLine": "الإجمالي",
   "cartCashOnDeliveryNote": "💳 الدفع عند الاستلام متاح",
   "cartSecureCheckout": "🔒 إتمام شراء آمن",

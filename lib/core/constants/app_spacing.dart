@@ -8,7 +8,6 @@ abstract final class AppSpacing {
   static const spacing6 = 6.0;
   static const spacing10 = 10.0;
   static const spacing18 = 18.0;
-  static const spacing22 = 22.0;
   static const spacing28 = 28.0;
 
   /// [InputDecoration] content insets at text-scale 1.0 (`0.875rem` / `0.75rem`).

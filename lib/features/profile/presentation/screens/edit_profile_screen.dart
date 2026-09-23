@@ -774,15 +774,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             onTap: _pickDob,
           ),
-          // const Gap(AppSpacing.md),
-          // TextField(
-          //   controller: _location,
-          //   decoration: InputDecoration(
-          //     prefixIcon: const Icon(LucideIcons.mapPin),
-          //     border: const OutlineInputBorder(),
-          //   ),
-          //   onChanged: (v) => ref.read(profileNotifierProvider.notifier).updateField('location', v),
-          // ),
           const Gap(AppSpacing.md),
           // Single user location (governorate + city) for all roles; vendors
           // reuse this same pair as the store location.
