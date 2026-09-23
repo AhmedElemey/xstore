@@ -3,23 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/analytics/analytics_service.dart';
-import '../../../../core/analytics/event_names.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../product/domain/entities/review_write_params.dart';
-import '../../../product/presentation/providers/product_dependencies.dart';
-import '../../../product/presentation/providers/product_detail_notifier.dart';
-import '../../../product/presentation/widgets/already_reviewed_sheet.dart';
 import '../../domain/entities/order_entity.dart'
     show DeliveryMethod, OrderEntity, OrderStatus, ShippingInfo;
 import '../providers/order_detail_provider.dart';
 import 'delivery_method_sheet.dart';
+import 'order_review_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 
@@ -178,7 +172,7 @@ class OrderActionButtons extends ConsumerWidget {
               onPressed: busy
                   ? null
                   : () async {
-                      final r = await _cancelReason(context);
+                      final r = await showCancelReasonDialog(context);
                       if (r != null && context.mounted) {
                         await notifier.cancelOrder(r);
                         if (!context.mounted) return;
@@ -221,7 +215,9 @@ class OrderActionButtons extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: busy ? null : () => _review(context, ref),
+                onPressed: busy
+                    ? null
+                    : () => showOrderReviewFlow(context, ref, order),
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
@@ -389,151 +385,5 @@ class OrderActionButtons extends ConsumerWidget {
       ),
     );
     if (context.mounted) _err(context, ref, id);
-  }
-
-  Future<String?> _cancelReason(BuildContext context) async {
-    var selected = context.l10n.ordersCancelReasonChangedMind;
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setS) {
-          return AlertDialog(
-            title: Text(context.l10n.ordersCancelDialogTitle),
-            content: DropdownButton<String>(
-              isExpanded: true,
-              value: selected,
-              items: [
-                context.l10n.ordersCancelReasonChangedMind,
-                context.l10n.ordersCancelReasonBetterPrice,
-                context.l10n.ordersCancelReasonMistake,
-                context.l10n.ordersCancelReasonOther,
-              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-              onChanged: (v) {
-                if (v != null) setS(() => selected = v);
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, selected),
-                child: Text(context.l10n.ordersConfirm),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Future<void> _review(BuildContext context, WidgetRef ref) async {
-    final listingId =
-        order.items.isEmpty ? null : order.items.first.listingId;
-    if (listingId == null || listingId.isEmpty) return;
-    final existing = await findMyListingReview(ref, listingId);
-    if (!context.mounted) return;
-    if (existing != null) {
-      await showAlreadyReviewedSheet(
-        context,
-        onEdit: () {
-          if (!context.mounted) return;
-          context.push('${AppRoutes.product}/$listingId/reviews');
-        },
-      );
-      return;
-    }
-
-    var stars = 5;
-    var reviewText = '';
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (sheetContext, setS) {
-          return Padding(
-            padding: EdgeInsets.only(
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
-              bottom: MediaQuery.paddingOf(ctx).bottom + AppSpacing.lg,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(sheetContext.l10n.ordersReviewSheetTitle,
-                    style: AppTypography.titleMedium),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    5,
-                    (i) => IconButton(
-                      onPressed: () => setS(() => stars = i + 1),
-                      icon: Icon(
-                        i < stars ? Icons.star : Icons.star_border,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                  ),
-                ),
-                TextField(
-                  onChanged: (v) => reviewText = v,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: sheetContext.l10n.ordersReviewHint,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                XstoreButton(
-                  label: sheetContext.l10n.ordersSubmitReview,
-                  onPressed: () async {
-                    final comment = reviewText.trim();
-                    if (comment.isEmpty) return;
-                    final posted =
-                        await ref.read(createReviewUseCaseProvider).call(
-                              listingId: listingId,
-                              params: ReviewWriteParams(
-                                rating: stars.toDouble(),
-                                comment: comment,
-                              ),
-                            );
-                    if (!sheetContext.mounted) return;
-                    posted.fold(
-                      (failure) {
-                        if (isAlreadyReviewedFailure(failure)) {
-                          Navigator.pop(ctx, 'already');
-                          return;
-                        }
-                        AppSnackbar.error(sheetContext, failure.toString());
-                      },
-                      (_) {
-                        ref.read(analyticsServiceProvider).track(
-                          AnalyticsEvents.reviewSubmitted,
-                          properties: {
-                            AnalyticsProps.itemId: listingId,
-                            AnalyticsProps.rating: stars.toDouble(),
-                          },
-                        );
-                        stars = 5;
-                        reviewText = '';
-                        Navigator.pop(ctx, 'added');
-                        ref.invalidate(productDetailProvider(listingId));
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-    if (!context.mounted) return;
-    if (result == 'added') {
-      AppSnackbar.success(context, context.l10n.ordersReviewThanks);
-    } else if (result == 'already') {
-      await showAlreadyReviewedSheet(context);
-    }
   }
 }
