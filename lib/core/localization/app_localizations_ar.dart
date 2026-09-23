@@ -1580,11 +1580,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartShippingLine => 'الشحن';
 
   @override
-  String cartFreeShippingThresholdNote(Object threshold) {
-    return '🚚 المنتجات اللي سعرها $threshold وأكتر شحنها مجاني';
-  }
-
-  @override
   String get cartTotalLine => 'الإجمالي';
 
   @override

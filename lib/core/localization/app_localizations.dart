@@ -3182,12 +3182,6 @@ abstract class AppLocalizations {
   /// **'Shipping'**
   String get cartShippingLine;
 
-  /// No description provided for @cartFreeShippingThresholdNote.
-  ///
-  /// In en, this message translates to:
-  /// **'🚚 Items priced {threshold} and up ship free'**
-  String cartFreeShippingThresholdNote(Object threshold);
-
   /// No description provided for @cartTotalLine.
   ///
   /// In en, this message translates to:
