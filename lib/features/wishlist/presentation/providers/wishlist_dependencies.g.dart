@@ -107,22 +107,5 @@ final moveToCartUseCaseProvider =
 );
 
 typedef MoveToCartUseCaseRef = AutoDisposeProviderRef<MoveToCartUseCase>;
-String _$clearWishlistUseCaseHash() =>
-    r'd6d7c509bede6eaeb96add64f33f254077565d8d';
-
-/// See also [clearWishlistUseCase].
-@ProviderFor(clearWishlistUseCase)
-final clearWishlistUseCaseProvider =
-    AutoDisposeProvider<ClearWishlistUseCase>.internal(
-  clearWishlistUseCase,
-  name: r'clearWishlistUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$clearWishlistUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef ClearWishlistUseCaseRef = AutoDisposeProviderRef<ClearWishlistUseCase>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

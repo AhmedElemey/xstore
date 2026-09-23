@@ -47,11 +47,6 @@ abstract final class AppColors {
   static const darkOverlay = Color(0x1A000000);
   static const darkCardShadow = Color(0x66000000);
 
-  // Compatibility aliases used across feature UIs.
-  static const background = lightBackground;
-  static const textPrimary = lightTextPrimary;
-  static const textSecondary = lightTextSecondary;
-  static const textDisabled = lightTextDisabled;
   static const white = Color(0xFFFFFFFF);
   static const black = Color(0xFF000000);
   static const transparent = Color(0x00000000);

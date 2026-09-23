@@ -48,12 +48,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneInvalidPrefix => 'Must start with 010, 011, 012, or 015';
 
   @override
-  String get phoneInvalidNumber => 'Invalid phone number';
-
-  @override
-  String get phoneTooManyRequests => 'Too many attempts. Try again later.';
-
-  @override
   String get sendVerificationCode => 'Send Verification Code';
 
   @override
@@ -106,9 +100,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpInvalidCode => 'Incorrect code. Please try again.';
 
   @override
-  String get otpSessionExpired => 'Code expired. Request a new one.';
-
-  @override
   String get verify => 'Verify';
 
   @override
@@ -139,19 +130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get genericError => 'Something went wrong. Please try again.';
 
   @override
-  String get emailTab => 'Email';
-
-  @override
-  String get phoneTab => 'Phone';
-
-  @override
   String get continueWithGoogle => 'Continue with Google';
-
-  @override
-  String get continueWithApple => 'Continue with Apple';
-
-  @override
-  String get continueWithFacebook => 'Continue with Facebook';
 
   @override
   String get socialLoginDivider => 'or continue with';
@@ -561,22 +540,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingCondGood => 'Good';
 
   @override
-  String get vendorAccount => 'Vendor Account';
-
-  @override
-  String get customerAccount => 'Customer account';
-
-  @override
   String get theme => 'Theme';
-
-  @override
-  String get themeSystem => 'System';
-
-  @override
-  String get themeLight => 'Light';
-
-  @override
-  String get themeDark => 'Dark';
 
   @override
   String get darkMode => 'Dark Mode';
@@ -618,19 +582,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuMyOrders => 'My Orders';
 
   @override
-  String get menuAnalytics => 'Analytics';
-
-  @override
   String get menuEarnings => 'Earnings';
 
   @override
   String get menuWishlist => 'Wishlist';
-
-  @override
-  String get menuRecentlyViewed => 'Recently Viewed';
-
-  @override
-  String get menuMyReviews => 'My Reviews';
 
   @override
   String get menuPersonalInfo => 'Personal Info';
@@ -645,16 +600,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuNotificationsSettings => 'Notifications';
 
   @override
-  String get menuLanguage => 'Language';
-
-  @override
   String get menuPaymentMethods => 'Payment Methods';
 
   @override
   String get menuAddresses => 'My Addresses';
-
-  @override
-  String get menuDarkMode => 'Dark Mode';
 
   @override
   String get menuPushNotifications => 'Push Notifications';
@@ -702,49 +651,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statTotalSaved => 'Total Saved';
 
   @override
-  String get currencyDzd => 'EGP';
-
-  @override
   String get storeInformation => 'Store Information';
 
   @override
-  String get fullNameLabel => 'Full Name';
-
-  @override
-  String get emailAddressLabel => 'Email Address';
-
-  @override
-  String get phoneNumberLabel => 'Phone Number';
-
-  @override
-  String get dateOfBirthLabel => 'Date of Birth';
-
-  @override
-  String get locationCityLabel => 'Location / City';
-
-  @override
-  String get bioLabel => 'Bio / About';
-
-  @override
-  String get bioHint => 'Tell buyers a bit about yourself';
-
-  @override
-  String get storeNameLabel => 'Store Name';
-
-  @override
   String get storeCategoryLabel => 'Store Category';
-
-  @override
-  String get storeDescriptionLabel => 'Store Description';
-
-  @override
-  String get storeCityLabel => 'Store City';
-
-  @override
-  String get storeWilayaLabel => 'Store Governorate';
-
-  @override
-  String get whatsappLabel => 'WhatsApp Number';
 
   @override
   String whatsappProductPrefill(String title) {
@@ -793,9 +703,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteConfirmKeyword => 'DELETE';
 
   @override
-  String get choosePhotoSource => 'Profile photo';
-
-  @override
   String get takePhoto => 'Camera';
 
   @override
@@ -806,18 +713,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileUpdatedSuccess => 'Profile updated';
-
-  @override
-  String get languageTitle => 'Language';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageFrench => 'French';
-
-  @override
-  String get languageArabic => 'Arabic';
 
   @override
   String get profileFooterLine => 'xStore v1.0.0 · Made with ❤️ in Egypt';
@@ -841,9 +736,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeUnavailableNow => 'This store isn\'t available right now';
 
   @override
-  String get followStore => 'Follow Store';
-
-  @override
   String get share => 'Share';
 
   @override
@@ -860,9 +752,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorStoreStatResponse => 'Response Rate';
-
-  @override
-  String get placeholderScreenSubtitle => 'This screen is coming soon.';
 
   @override
   String get trustInfoPaymentMethodsBody =>
@@ -935,9 +824,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get navCart => 'Cart';
-
-  @override
   String get navAddListing => 'Add Listing';
 
   @override
@@ -954,9 +840,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filters => 'Filters';
-
-  @override
-  String get addFilters => '+ Filters';
 
   @override
   String get applyFilters => 'Apply Filters';
@@ -1031,12 +914,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shippingOnly => 'Shipping available';
 
   @override
-  String get gridView => 'Grid';
-
-  @override
-  String get listView => 'List';
-
-  @override
   String get ratingStars4Plus => '⭐ 4+';
 
   @override
@@ -1082,16 +959,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersFilterCancelled => 'Cancelled';
 
   @override
-  String get ordersFilterRefunded => 'Refunded';
-
-  @override
   String get ordersSortHighestValue => 'Highest Value';
 
   @override
   String get ordersSortNeedsAction => 'Needs Action';
-
-  @override
-  String get ordersCountLabel => 'orders';
 
   @override
   String get ordersStatPendingLabel => 'Pending';
@@ -1106,22 +977,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersStatTotalLabel => 'Total';
 
   @override
-  String get ordersMoreItemsSuffix => 'more item';
-
-  @override
-  String get ordersMoreItemsSuffixPlural => 'more items';
-
-  @override
   String get ordersQtyTotalLinePrefix => 'Qty';
 
   @override
-  String get ordersFromStorePrefix => 'From';
-
-  @override
   String get ordersEstimatedDelivery => '🚚 Estimated';
-
-  @override
-  String get ordersPaymentLine => 'Payment';
 
   @override
   String get ordersTrackOrder => 'Track Order';
@@ -1137,9 +996,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersDeliveryLocationUpdated => 'Delivery location updated';
-
-  @override
-  String get ordersConfirmReceipt => 'Confirm Receipt';
 
   @override
   String get ordersLeaveReview => 'Leave Review';
@@ -1163,9 +1019,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersMarkDelivered => 'Mark as Delivered';
 
   @override
-  String get ordersViewTracking => 'View Tracking';
-
-  @override
   String get ordersShopAgain => '🛒 Shop Again';
 
   @override
@@ -1173,9 +1026,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersBrowseProducts => 'Browse Products';
-
-  @override
-  String get ordersDetailTitlePrefix => 'Order #';
 
   @override
   String get ordersShareSummary => 'Share order';
@@ -1197,9 +1047,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersDeliveryAddressTitle => 'Delivery Address';
-
-  @override
-  String get ordersItemsSectionTitle => 'Items Ordered';
 
   @override
   String get ordersTrackingSectionTitle => 'Tracking Information';
@@ -1230,9 +1077,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersViewProduct => 'View Product';
-
-  @override
-  String get ordersCopyTracking => 'Copy';
 
   @override
   String get ordersTrackingCopied => 'Copied to clipboard';
@@ -1281,12 +1125,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersCancelReasonOther => 'Other';
-
-  @override
-  String get ordersConfirmReceiptTitle => 'Confirm receipt?';
-
-  @override
-  String get ordersConfirmReceiptBody => 'Confirm you received this order?';
 
   @override
   String get ordersConfirm => 'Confirm';
@@ -1364,22 +1202,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSubtitleCancelled => 'This order was cancelled';
 
   @override
-  String get statusSubtitleRefunded => 'Refund processed';
-
-  @override
   String get ordersFiltersMoreSoon => 'More filters — coming soon';
 
   @override
   String get orderHashPrefix => 'Order #';
 
   @override
-  String get vendorNeedsAttention => 'Needs attention';
-
-  @override
   String get wishlistEmptyTitle => 'Your wishlist is empty';
-
-  @override
-  String get wishlistDiscoverProducts => 'Discover products';
 
   @override
   String get wishlistForBuyersTitle => 'Wishlist is for Buyers';
@@ -1397,19 +1226,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wishlistSort => 'Sort';
 
   @override
-  String get wishlistSortRecentlyAdded => 'Recently Added';
-
-  @override
   String get wishlistSortPriceLow => 'Price: Low to High';
 
   @override
   String get wishlistSortPriceHigh => 'Price: High to Low';
-
-  @override
-  String get wishlistSortPriceDrop => 'Price Drop';
-
-  @override
-  String get wishlistSortBiggestDiscount => 'Biggest Discount';
 
   @override
   String get wishlistSortNameAz => 'Name A–Z';
@@ -1430,9 +1250,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wishlistViewPriceDrops => 'View Price Drops';
 
   @override
-  String get wishlistPriceDropBadge => 'Price Drop';
-
-  @override
   String get wishlistOutOfStock => 'Out of Stock';
 
   @override
@@ -1448,9 +1265,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wishlistInCartCta => '✓ In Cart';
 
   @override
-  String get wishlistSwipeAddCart => 'Add to Cart';
-
-  @override
   String get wishlistMoveAllToCart => 'Move All to Cart';
 
   @override
@@ -1458,9 +1272,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wishlistViewCart => 'View Cart';
-
-  @override
-  String get wishlistRemoveSelected => 'Remove Selected';
 
   @override
   String get wishlistSavedSnack => 'Saved to Wishlist ❤️';
@@ -1473,9 +1284,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wishlistShowAllItems => 'Show All Items';
-
-  @override
-  String get wishlistReviewsWord => 'reviews';
 
   @override
   String get wishlistGridContentDesc => 'Grid view';
@@ -1533,9 +1341,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartSaveForLater => '♡ Save for Later';
-
-  @override
-  String get cartUnavailableBadge => 'Unavailable';
 
   @override
   String get cartSwipeRemove => 'Remove';
@@ -1619,16 +1424,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutFullName => 'Full Name';
 
   @override
-  String get checkoutPhone => 'Phone';
-
-  @override
   String get checkoutStreet => 'Street';
-
-  @override
-  String get checkoutCity => 'City';
-
-  @override
-  String get checkoutWilaya => 'Governorate';
 
   @override
   String get checkoutPostalCode => 'Postal Code';
@@ -1706,21 +1502,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutPayCibTitle => '💳 CIB Card';
 
   @override
-  String get checkoutPayCibSubtitle => 'Debit/Credit card payment';
-
-  @override
-  String get checkoutPayDahabiTitle => '🟡 Dahabicard';
-
-  @override
-  String get checkoutPayDahabiSubtitle => 'Egypt Post golden card';
-
-  @override
-  String get checkoutPayBaridiTitle => '🟢 BaridiMob';
-
-  @override
-  String get checkoutPayBaridiSubtitle => 'Egypt Post mobile payment';
-
-  @override
   String get checkoutCardExpiry => 'MM/YY';
 
   @override
@@ -1748,9 +1529,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutReturnPolicy => 'Return Policy';
 
   @override
-  String get checkoutPlaceOrder => '🛒 Place Order';
-
-  @override
   String get checkoutErrorNoAddress => 'Please select or add an address';
 
   @override
@@ -1767,9 +1545,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkoutErrorCvv => 'Enter a valid CVV (3–4 digits)';
-
-  @override
-  String get checkoutPaymentSecure => 'Your payment info is encrypted';
 
   @override
   String get checkoutErrorGeneric => 'Could not place order';
@@ -1964,12 +1739,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifiedSeller => '✅ Verified Seller';
 
   @override
-  String get sellerRatingMid => ' Seller · ';
-
-  @override
-  String get sellerSalesSuffix => ' sales';
-
-  @override
   String get onlyLeftPrefix => 'Only ';
 
   @override
@@ -1991,9 +1760,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingInquiries => 'Inquiries';
 
   @override
-  String get editListing => 'Edit';
-
-  @override
   String get editListingMenu => 'Edit Listing';
 
   @override
@@ -2010,9 +1776,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resumeListing => 'Resume';
-
-  @override
-  String get listingStats => 'Statistics';
 
   @override
   String get deleteListing => 'Delete';
@@ -2097,9 +1860,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something went wrong on our end. Please try again in a moment.';
 
   @override
-  String get emptyInbox => 'Nothing here yet';
-
-  @override
   String get incomingOrders => 'Incoming Orders';
 
   @override
@@ -2107,9 +1867,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorConfirmAllPending => 'Confirm All Pending';
-
-  @override
-  String get vendorViewAnalytics => 'View Analytics';
 
   @override
   String get vendorStatPendingOrders => 'Pending';
@@ -2140,9 +1897,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorSortBuyerName => 'By Buyer Name A–Z';
-
-  @override
-  String get vendorNewOrder => 'NEW ORDER';
 
   @override
   String get vendorRejectOrder => 'Reject Order';
@@ -2176,9 +1930,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorShippingInfoTitle => 'Shipping Information';
 
   @override
-  String get vendorViewOnMap => 'View on Map';
-
-  @override
   String get vendorCollectOnDelivery => 'Collect on delivery';
 
   @override
@@ -2195,12 +1946,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorOrderSettings => 'Order Settings';
-
-  @override
-  String get vendorPrintOrder => 'Print Order';
-
-  @override
-  String get vendorReportIssue => 'Report Issue';
 
   @override
   String get vendorReasonItemUnavailable => 'Item no longer available';
@@ -2225,10 +1970,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorTrackingHint => 'XS-TRACK-2024-001';
-
-  @override
-  String get vendorShippingNoteHint =>
-      'Package handed to courier, estimated 3–5 days';
 
   @override
   String get vendorOrderRejectedSnack => 'Order rejected. Buyer notified.';
@@ -2262,9 +2003,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorStatusCancelled => 'This order was cancelled';
-
-  @override
-  String get vendorStatusRefunded => 'Refunded';
 
   @override
   String get didntReceiveCode => 'Didn\'t receive the code?';
@@ -2329,11 +2067,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String wishlistAppBarTitle(int n) {
-    return 'My Wishlist ($n)';
-  }
-
-  @override
   String wishlistSelectedCount(int n) {
     return '$n selected';
   }
@@ -2346,11 +2079,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String wishlistPriceDropPercent(int p) {
     return '↓ $p% Price Drop';
-  }
-
-  @override
-  String wishlistMoveAllSummary(int n) {
-    return '$n items added to cart';
   }
 
   @override
@@ -2371,11 +2099,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String wishlistRemoveSelectedCount(int n) {
     return 'Remove Selected ($n)';
-  }
-
-  @override
-  String wishlistFilterEmptyTitle(String filterName) {
-    return 'No $filterName items';
   }
 
   @override
@@ -2429,11 +2152,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartCheckoutItems(int n) {
-    return 'Checkout ($n items)';
-  }
-
-  @override
   String checkoutItemsFromSellers(int items, int sellers) {
     return '$items items from $sellers sellers';
   }
@@ -2470,9 +2188,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterEmailHint => 'you@email.com';
-
-  @override
-  String get validEmailOrPhone => 'Valid email or 10+ digit phone';
 
   @override
   String get passwordMask => '********';
@@ -2644,20 +2359,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullNameHint => 'e.g. Ahmed Mohamed';
 
   @override
-  String get fullNameArRequired => 'Full Name (Arabic) *';
-
-  @override
   String get emailAddressRequired => 'Email Address *';
-
-  @override
-  String get emailAddressOptional =>
-      'Email Address (optional — for password recovery)';
-
-  @override
-  String get locationCityRequired => 'Location / City *';
-
-  @override
-  String get locationHintAlgiers => 'e.g. Cairo';
 
   @override
   String get secureYourAccount => 'Secure your account';
@@ -2739,16 +2441,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Describe your store and what makes it unique...';
 
   @override
-  String get storeLogoOptional => 'Store Logo (optional)';
-
-  @override
   String get storeLogoRequired => 'Store Logo *';
-
-  @override
-  String get cityRequired => 'City *';
-
-  @override
-  String get wilayaRequired => 'Governorate *';
 
   @override
   String get sellerFallbackName => 'Seller';
@@ -3124,9 +2817,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validationRegisterPhoneInvalid => 'Enter a valid phone number';
 
   @override
-  String get validationCityRequired => 'City is required';
-
-  @override
   String get validationAgeMinimum18 => 'You must be at least 18 years old';
 
   @override
@@ -3162,16 +2852,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get validationStoreCityWilayaRequired =>
       'City and governorate are required';
-
-  @override
-  String get validationFullNameArRequired => 'Arabic full name is required';
-
-  @override
-  String get validationStoreNameArRequired => 'Arabic store name is required';
-
-  @override
-  String get validationStoreDescriptionArShort =>
-      'Describe your store in Arabic';
 
   @override
   String get listingValidationPhotosRequired => 'Add at least one photo';
@@ -3340,9 +3020,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courierNavigateHint => 'Directions in Google Maps';
-
-  @override
-  String get loginAsCourierDemo => 'Sign in as delivery driver (demo)';
 
   @override
   String get loginAsCourier => 'Login as delivery';

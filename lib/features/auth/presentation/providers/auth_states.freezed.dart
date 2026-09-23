@@ -254,7 +254,6 @@ mixin _$RegisterState {
   String get fullNameAr => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String get phoneNumber => throw _privateConstructorUsedError;
-  String get countryCode => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   String get location => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
@@ -269,7 +268,6 @@ mixin _$RegisterState {
   String get storeDescription => throw _privateConstructorUsedError;
   String? get storeLogoPath => throw _privateConstructorUsedError;
   String get storeCity => throw _privateConstructorUsedError;
-  String get storeWilaya => throw _privateConstructorUsedError;
   int? get storeCategoryId => throw _privateConstructorUsedError;
   int? get storeCityId => throw _privateConstructorUsedError;
   int? get storeGovernmentId => throw _privateConstructorUsedError;
@@ -298,7 +296,6 @@ abstract class $RegisterStateCopyWith<$Res> {
       String fullNameAr,
       String email,
       String phoneNumber,
-      String countryCode,
       DateTime? dateOfBirth,
       String location,
       String password,
@@ -313,7 +310,6 @@ abstract class $RegisterStateCopyWith<$Res> {
       String storeDescription,
       String? storeLogoPath,
       String storeCity,
-      String storeWilaya,
       int? storeCategoryId,
       int? storeCityId,
       int? storeGovernmentId,
@@ -344,7 +340,6 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
     Object? fullNameAr = null,
     Object? email = null,
     Object? phoneNumber = null,
-    Object? countryCode = null,
     Object? dateOfBirth = freezed,
     Object? location = null,
     Object? password = null,
@@ -359,7 +354,6 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
     Object? storeDescription = null,
     Object? storeLogoPath = freezed,
     Object? storeCity = null,
-    Object? storeWilaya = null,
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
@@ -397,10 +391,6 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
       phoneNumber: null == phoneNumber
           ? _value.phoneNumber
           : phoneNumber // ignore: cast_nullable_to_non_nullable
-              as String,
-      countryCode: null == countryCode
-          ? _value.countryCode
-          : countryCode // ignore: cast_nullable_to_non_nullable
               as String,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
@@ -457,10 +447,6 @@ class _$RegisterStateCopyWithImpl<$Res, $Val extends RegisterState>
       storeCity: null == storeCity
           ? _value.storeCity
           : storeCity // ignore: cast_nullable_to_non_nullable
-              as String,
-      storeWilaya: null == storeWilaya
-          ? _value.storeWilaya
-          : storeWilaya // ignore: cast_nullable_to_non_nullable
               as String,
       storeCategoryId: freezed == storeCategoryId
           ? _value.storeCategoryId
@@ -514,7 +500,6 @@ abstract class _$$RegisterStateImplCopyWith<$Res>
       String fullNameAr,
       String email,
       String phoneNumber,
-      String countryCode,
       DateTime? dateOfBirth,
       String location,
       String password,
@@ -529,7 +514,6 @@ abstract class _$$RegisterStateImplCopyWith<$Res>
       String storeDescription,
       String? storeLogoPath,
       String storeCity,
-      String storeWilaya,
       int? storeCategoryId,
       int? storeCityId,
       int? storeGovernmentId,
@@ -558,7 +542,6 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
     Object? fullNameAr = null,
     Object? email = null,
     Object? phoneNumber = null,
-    Object? countryCode = null,
     Object? dateOfBirth = freezed,
     Object? location = null,
     Object? password = null,
@@ -573,7 +556,6 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
     Object? storeDescription = null,
     Object? storeLogoPath = freezed,
     Object? storeCity = null,
-    Object? storeWilaya = null,
     Object? storeCategoryId = freezed,
     Object? storeCityId = freezed,
     Object? storeGovernmentId = freezed,
@@ -611,10 +593,6 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
       phoneNumber: null == phoneNumber
           ? _value.phoneNumber
           : phoneNumber // ignore: cast_nullable_to_non_nullable
-              as String,
-      countryCode: null == countryCode
-          ? _value.countryCode
-          : countryCode // ignore: cast_nullable_to_non_nullable
               as String,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
@@ -672,10 +650,6 @@ class __$$RegisterStateImplCopyWithImpl<$Res>
           ? _value.storeCity
           : storeCity // ignore: cast_nullable_to_non_nullable
               as String,
-      storeWilaya: null == storeWilaya
-          ? _value.storeWilaya
-          : storeWilaya // ignore: cast_nullable_to_non_nullable
-              as String,
       storeCategoryId: freezed == storeCategoryId
           ? _value.storeCategoryId
           : storeCategoryId // ignore: cast_nullable_to_non_nullable
@@ -723,7 +697,6 @@ class _$RegisterStateImpl implements _RegisterState {
       this.fullNameAr = '',
       this.email = '',
       this.phoneNumber = '',
-      this.countryCode = '+20',
       this.dateOfBirth,
       this.location = '',
       this.password = '',
@@ -738,7 +711,6 @@ class _$RegisterStateImpl implements _RegisterState {
       this.storeDescription = '',
       this.storeLogoPath,
       this.storeCity = '',
-      this.storeWilaya = '',
       this.storeCategoryId,
       this.storeCityId,
       this.storeGovernmentId,
@@ -769,9 +741,6 @@ class _$RegisterStateImpl implements _RegisterState {
   @override
   @JsonKey()
   final String phoneNumber;
-  @override
-  @JsonKey()
-  final String countryCode;
   @override
   final DateTime? dateOfBirth;
   @override
@@ -813,9 +782,6 @@ class _$RegisterStateImpl implements _RegisterState {
   @JsonKey()
   final String storeCity;
   @override
-  @JsonKey()
-  final String storeWilaya;
-  @override
   final int? storeCategoryId;
   @override
   final int? storeCityId;
@@ -844,7 +810,7 @@ class _$RegisterStateImpl implements _RegisterState {
 
   @override
   String toString() {
-    return 'RegisterState(currentStep: $currentStep, totalSteps: $totalSteps, selectedRole: $selectedRole, fullName: $fullName, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, countryCode: $countryCode, dateOfBirth: $dateOfBirth, location: $location, password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, isConfirmPasswordVisible: $isConfirmPasswordVisible, passwordStrength: $passwordStrength, agreedToTerms: $agreedToTerms, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoPath: $storeLogoPath, storeCity: $storeCity, storeWilaya: $storeWilaya, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, isLoading: $isLoading, error: $error, stepErrors: $stepErrors, showVendorSuccessOverlay: $showVendorSuccessOverlay)';
+    return 'RegisterState(currentStep: $currentStep, totalSteps: $totalSteps, selectedRole: $selectedRole, fullName: $fullName, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, dateOfBirth: $dateOfBirth, location: $location, password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, isConfirmPasswordVisible: $isConfirmPasswordVisible, passwordStrength: $passwordStrength, agreedToTerms: $agreedToTerms, storeName: $storeName, storeSlug: $storeSlug, storeCategory: $storeCategory, storeDescription: $storeDescription, storeLogoPath: $storeLogoPath, storeCity: $storeCity, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, isLoading: $isLoading, error: $error, stepErrors: $stepErrors, showVendorSuccessOverlay: $showVendorSuccessOverlay)';
   }
 
   @override
@@ -865,8 +831,6 @@ class _$RegisterStateImpl implements _RegisterState {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phoneNumber, phoneNumber) ||
                 other.phoneNumber == phoneNumber) &&
-            (identical(other.countryCode, countryCode) ||
-                other.countryCode == countryCode) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth) &&
             (identical(other.location, location) ||
@@ -896,8 +860,6 @@ class _$RegisterStateImpl implements _RegisterState {
                 other.storeLogoPath == storeLogoPath) &&
             (identical(other.storeCity, storeCity) ||
                 other.storeCity == storeCity) &&
-            (identical(other.storeWilaya, storeWilaya) ||
-                other.storeWilaya == storeWilaya) &&
             (identical(other.storeCategoryId, storeCategoryId) ||
                 other.storeCategoryId == storeCategoryId) &&
             (identical(other.storeCityId, storeCityId) ||
@@ -926,7 +888,6 @@ class _$RegisterStateImpl implements _RegisterState {
         fullNameAr,
         email,
         phoneNumber,
-        countryCode,
         dateOfBirth,
         location,
         password,
@@ -941,7 +902,6 @@ class _$RegisterStateImpl implements _RegisterState {
         storeDescription,
         storeLogoPath,
         storeCity,
-        storeWilaya,
         storeCategoryId,
         storeCityId,
         storeGovernmentId,
@@ -968,7 +928,6 @@ abstract class _RegisterState implements RegisterState {
       final String fullNameAr,
       final String email,
       final String phoneNumber,
-      final String countryCode,
       final DateTime? dateOfBirth,
       final String location,
       final String password,
@@ -983,7 +942,6 @@ abstract class _RegisterState implements RegisterState {
       final String storeDescription,
       final String? storeLogoPath,
       final String storeCity,
-      final String storeWilaya,
       final int? storeCategoryId,
       final int? storeCityId,
       final int? storeGovernmentId,
@@ -1007,8 +965,6 @@ abstract class _RegisterState implements RegisterState {
   String get email;
   @override
   String get phoneNumber;
-  @override
-  String get countryCode;
   @override
   DateTime? get dateOfBirth;
   @override
@@ -1037,8 +993,6 @@ abstract class _RegisterState implements RegisterState {
   String? get storeLogoPath;
   @override
   String get storeCity;
-  @override
-  String get storeWilaya;
   @override
   int? get storeCategoryId;
   @override

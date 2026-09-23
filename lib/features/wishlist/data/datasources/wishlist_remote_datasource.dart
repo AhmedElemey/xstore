@@ -22,8 +22,6 @@ abstract interface class WishlistRemoteDataSource {
     String? wishlistItemId,
   });
 
-  Future<void> clearWishlist(String consumerId);
-
   Future<WishlistItemEntity> buildFromListingId(
     String listingId, {
     String? wishId,
@@ -111,18 +109,6 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     }
     if (anyOk) return;
     if (lastError != null) throw lastError;
-  }
-
-  @override
-  Future<void> clearWishlist(String consumerId) async {
-    try {
-      await _dio.delete<void>(
-        '${ApiEndpoints.wishlist}/$consumerId',
-        options: ApiAuthHeaders.authenticated(),
-      );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
   }
 
   @override

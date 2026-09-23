@@ -16,9 +16,6 @@ abstract final class AppAnimations {
   static const Curve smooth = Curves.easeInOutCubic;
   static const Curve spring = Curves.easeOutBack;
 
-  // ── SLIDE OFFSETS (fraction of parent)
-  static const Offset slideFromRight = Offset(0.12, 0);
-
   // ── SCALE VALUES
   static const double scalePressed = 0.96;
 

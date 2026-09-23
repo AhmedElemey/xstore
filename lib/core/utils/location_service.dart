@@ -76,9 +76,6 @@ class LocationService {
 
   static String formatCoordinate(double coord) => coord.toStringAsFixed(6);
 
-  static bool isInEgypt(double lat, double lng) =>
-      AppLocationCache.isInEgypt(lat, lng);
-
   static bool isValidLatitude(String value) {
     final d = double.tryParse(value);
     return d != null && d >= -90 && d <= 90;

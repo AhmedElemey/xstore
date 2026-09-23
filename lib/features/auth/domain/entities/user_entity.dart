@@ -84,7 +84,3 @@ class UserEntity with _$UserEntity {
         : name;
   }
 }
-
-extension UserEntityNavRoleX on UserEntity? {
-  UserRole get toUserRole => this?.role ?? UserRole.consumer;
-}

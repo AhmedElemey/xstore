@@ -1,7 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
-import '../entities/auth_token_pair.dart';
 import '../entities/consumer_register_params.dart';
 import '../entities/login_params.dart';
 import '../entities/social_auth_result.dart';
@@ -34,7 +33,6 @@ abstract interface class AuthRepository {
     required String newPassword,
     required String confirmNewPassword,
   });
-  Future<Either<Failure, AuthTokenPair>> refreshToken(String token);
 
   /// Backend-driven email OTP (`/api/auth/send-email-otp` /
   /// `verify-email`) — not wired into any screen yet. Right payload is the
@@ -84,7 +82,6 @@ abstract interface class AuthRepository {
 
   Future<Either<Failure, SocialAuthResult>> signInWithApple();
   Future<Either<Failure, SocialAuthResult>> signInWithFacebook();
-  Future<Either<Failure, Unit>> signOutSocial();
 
   Future<Either<Failure, Unit>> logout();
 

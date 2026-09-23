@@ -7,21 +7,6 @@ Map<String, double> get mockCompareAtByListingId => {
         if (r.compareAt != null) r.id: r.compareAt!,
     };
 
-/// Per-listing metadata not stored on [ListingModel] (shipping, brand, etc.).
-class MockListingMeta {
-  const MockListingMeta({
-    required this.id,
-    this.compareAt,
-    this.brand,
-    this.shippingAvailable = true,
-  });
-
-  final String id;
-  final double? compareAt;
-  final String? brand;
-  final bool shippingAvailable;
-}
-
 class _CatalogRow {
   const _CatalogRow({
     required this.id,
@@ -74,12 +59,6 @@ class _CatalogRow {
     );
   }
 
-  MockListingMeta toMeta() => MockListingMeta(
-        id: id,
-        compareAt: compareAt,
-        brand: brand,
-        shippingAvailable: shippingAvailable,
-      );
 }
 
 const List<_CatalogRow> _catalog = [
@@ -470,6 +449,3 @@ List<ListingModel>? _mockListingModelsCache;
 List<ListingModel> get mockListingModels =>
     _mockListingModelsCache ??=
         [for (final r in _catalog) r.toListingModel()];
-
-List<MockListingMeta> get mockListingMetaList =>
-    [for (final r in _catalog) r.toMeta()];

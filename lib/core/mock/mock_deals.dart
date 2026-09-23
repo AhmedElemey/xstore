@@ -32,16 +32,3 @@ List<DealModel> get mockHotDealModels {
   });
   return deals;
 }
-
-/// New arrivals: most recently posted first (for feeds that support it).
-List<DealModel> get mockNewArrivalDealModels {
-  final listings = [...mockListingModels]..sort(
-        (a, b) => (b.postedAt ?? DateTime(1970))
-            .compareTo(a.postedAt ?? DateTime(1970)),
-      );
-  return listings.map<DealModel>(_dealFromListing).toList();
-}
-
-/// Mock “recommended” slice (first 8 catalog items as deals).
-List<DealModel> get mockRecommendedDealModels =>
-    mockListingModels.take(8).map<DealModel>(_dealFromListing).toList();

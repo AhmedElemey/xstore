@@ -54,24 +54,6 @@ final getProfileUseCaseProvider =
 );
 
 typedef GetProfileUseCaseRef = AutoDisposeProviderRef<GetProfileUseCase>;
-String _$getVendorStoreProfileUseCaseHash() =>
-    r'ef94fdea79bf27df8c21cb40f8e73aa4479f1e45';
-
-/// See also [getVendorStoreProfileUseCase].
-@ProviderFor(getVendorStoreProfileUseCase)
-final getVendorStoreProfileUseCaseProvider =
-    AutoDisposeProvider<GetVendorStoreProfileUseCase>.internal(
-  getVendorStoreProfileUseCase,
-  name: r'getVendorStoreProfileUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$getVendorStoreProfileUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef GetVendorStoreProfileUseCaseRef
-    = AutoDisposeProviderRef<GetVendorStoreProfileUseCase>;
 String _$updateProfileUseCaseHash() =>
     r'7fac24abef86dc05f3b10d7d57b3286781ee416c';
 
@@ -89,23 +71,6 @@ final updateProfileUseCaseProvider =
 );
 
 typedef UpdateProfileUseCaseRef = AutoDisposeProviderRef<UpdateProfileUseCase>;
-String _$updateAvatarUseCaseHash() =>
-    r'8cda96dee6b2d40f2161cb782a812ef6969131bd';
-
-/// See also [updateAvatarUseCase].
-@ProviderFor(updateAvatarUseCase)
-final updateAvatarUseCaseProvider =
-    AutoDisposeProvider<UpdateAvatarUseCase>.internal(
-  updateAvatarUseCase,
-  name: r'updateAvatarUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$updateAvatarUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef UpdateAvatarUseCaseRef = AutoDisposeProviderRef<UpdateAvatarUseCase>;
 String _$deleteAccountUseCaseHash() =>
     r'4b46cdbd1976b37674018d121a382c84bec1e42d';
 

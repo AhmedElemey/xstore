@@ -15,7 +15,7 @@ class AttributeEntry with _$AttributeEntry {
 @freezed
 class ListingFormState with _$ListingFormState {
   const factory ListingFormState({
-    /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
+    /// Persisted image paths (max 5).
     @Default(<String>[]) List<String> photoPaths,
     @Default('') String name,
     @Default('') String priceInput,

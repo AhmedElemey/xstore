@@ -48,12 +48,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneInvalidPrefix => 'لازم يبدأ بـ 010 أو 011 أو 012 أو 015';
 
   @override
-  String get phoneInvalidNumber => 'رقم الموبايل غير صحيح';
-
-  @override
-  String get phoneTooManyRequests => 'محاولات كتير. حاول تاني بعد شوية.';
-
-  @override
   String get sendVerificationCode => 'إبعت كود التحقق';
 
   @override
@@ -107,9 +101,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otpInvalidCode => 'الكود غير صحيح. حاول تاني.';
 
   @override
-  String get otpSessionExpired => 'انتهت صلاحية الكود. اطلب كود جديد.';
-
-  @override
   String get verify => 'تحقق';
 
   @override
@@ -140,19 +131,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get genericError => 'حصلت مشكلة. حاول تاني.';
 
   @override
-  String get emailTab => 'إيميل';
-
-  @override
-  String get phoneTab => 'موبايل';
-
-  @override
   String get continueWithGoogle => 'كمل بـ Google';
-
-  @override
-  String get continueWithApple => 'كمل بـ Apple';
-
-  @override
-  String get continueWithFacebook => 'كمل بـ Facebook';
 
   @override
   String get socialLoginDivider => 'أو كمل بـ';
@@ -564,22 +543,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingCondGood => 'جيد';
 
   @override
-  String get vendorAccount => 'حساب البائع';
-
-  @override
-  String get customerAccount => 'حساب المشتري';
-
-  @override
   String get theme => 'المظهر';
-
-  @override
-  String get themeSystem => 'تلقائي';
-
-  @override
-  String get themeLight => 'فاتح';
-
-  @override
-  String get themeDark => 'داكن';
 
   @override
   String get darkMode => 'الوضع الداكن';
@@ -621,19 +585,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get menuMyOrders => 'طلباتي';
 
   @override
-  String get menuAnalytics => 'التحليلات';
-
-  @override
   String get menuEarnings => 'الأرباح';
 
   @override
   String get menuWishlist => 'المفضلة';
-
-  @override
-  String get menuRecentlyViewed => 'شوفتهم مؤخراً';
-
-  @override
-  String get menuMyReviews => 'تقييماتي';
 
   @override
   String get menuPersonalInfo => 'البيانات الشخصية';
@@ -648,16 +603,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get menuNotificationsSettings => 'الإشعارات';
 
   @override
-  String get menuLanguage => 'اللغة';
-
-  @override
   String get menuPaymentMethods => 'طرق الدفع';
 
   @override
   String get menuAddresses => 'عناويني';
-
-  @override
-  String get menuDarkMode => 'الوضع الداكن';
 
   @override
   String get menuPushNotifications => 'إشعارات الموبايل';
@@ -705,49 +654,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statTotalSaved => 'إجمالي التوفير';
 
   @override
-  String get currencyDzd => 'ج.م';
-
-  @override
   String get storeInformation => 'بيانات المتجر';
 
   @override
-  String get fullNameLabel => 'الاسم الكامل';
-
-  @override
-  String get emailAddressLabel => 'البريد الإلكتروني';
-
-  @override
-  String get phoneNumberLabel => 'رقم الموبايل';
-
-  @override
-  String get dateOfBirthLabel => 'تاريخ الميلاد';
-
-  @override
-  String get locationCityLabel => 'المدينة';
-
-  @override
-  String get bioLabel => 'نبذة عنك';
-
-  @override
-  String get bioHint => 'اكتب حاجة عن نفسك للمشترين';
-
-  @override
-  String get storeNameLabel => 'اسم المتجر';
-
-  @override
   String get storeCategoryLabel => 'فئة المتجر';
-
-  @override
-  String get storeDescriptionLabel => 'وصف المتجر';
-
-  @override
-  String get storeCityLabel => 'مدينة المتجر';
-
-  @override
-  String get storeWilayaLabel => 'محافظة المتجر';
-
-  @override
-  String get whatsappLabel => 'رقم واتساب';
 
   @override
   String whatsappProductPrefill(String title) {
@@ -796,9 +706,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteConfirmKeyword => 'DELETE';
 
   @override
-  String get choosePhotoSource => 'صورة الملف الشخصي';
-
-  @override
   String get takePhoto => 'الكاميرا';
 
   @override
@@ -809,18 +716,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileUpdatedSuccess => 'تم تحديث الملف';
-
-  @override
-  String get languageTitle => 'اللغة';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
-  String get languageFrench => 'Français';
-
-  @override
-  String get languageArabic => 'العربية';
 
   @override
   String get profileFooterLine => 'xStore v1.0.0 · صُنع بـ ❤️ في مصر';
@@ -844,9 +739,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get storeUnavailableNow => 'المتجر ده مش متاح دلوقتي';
 
   @override
-  String get followStore => 'تابع المتجر';
-
-  @override
   String get share => 'مشاركة';
 
   @override
@@ -863,9 +755,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorStoreStatResponse => 'نسبة الرد';
-
-  @override
-  String get placeholderScreenSubtitle => 'الشاشة دي جاية قريباً.';
 
   @override
   String get trustInfoPaymentMethodsBody =>
@@ -938,9 +827,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navProfile => 'حسابي';
 
   @override
-  String get navCart => 'السلة';
-
-  @override
   String get navAddListing => 'إضافة إعلان';
 
   @override
@@ -957,9 +843,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get filters => 'فلاتر';
-
-  @override
-  String get addFilters => '+ فلاتر';
 
   @override
   String get applyFilters => 'تطبيق الفلاتر';
@@ -1034,12 +917,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shippingOnly => 'متاح شحن';
 
   @override
-  String get gridView => 'شبكة';
-
-  @override
-  String get listView => 'قائمة';
-
-  @override
   String get ratingStars4Plus => '⭐ 4+';
 
   @override
@@ -1085,16 +962,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersFilterCancelled => 'ملغي';
 
   @override
-  String get ordersFilterRefunded => 'مسترد';
-
-  @override
   String get ordersSortHighestValue => 'الأعلى قيمة';
 
   @override
   String get ordersSortNeedsAction => 'يحتاج إجراء';
-
-  @override
-  String get ordersCountLabel => 'طلبات';
 
   @override
   String get ordersStatPendingLabel => 'في الانتظار';
@@ -1109,22 +980,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersStatTotalLabel => 'الإجمالي';
 
   @override
-  String get ordersMoreItemsSuffix => 'عنصر إضافي';
-
-  @override
-  String get ordersMoreItemsSuffixPlural => 'عناصر إضافية';
-
-  @override
   String get ordersQtyTotalLinePrefix => 'الكمية';
 
   @override
-  String get ordersFromStorePrefix => 'من';
-
-  @override
   String get ordersEstimatedDelivery => '🚚 متوقع';
-
-  @override
-  String get ordersPaymentLine => 'الدفع';
 
   @override
   String get ordersTrackOrder => 'تتبع الطلب';
@@ -1140,9 +999,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersDeliveryLocationUpdated => 'تم تحديث موقع التوصيل';
-
-  @override
-  String get ordersConfirmReceipt => 'تأكيد الاستلام';
 
   @override
   String get ordersLeaveReview => 'اترك تقييم';
@@ -1166,9 +1022,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersMarkDelivered => 'تم التسليم';
 
   @override
-  String get ordersViewTracking => 'عرض التتبع';
-
-  @override
   String get ordersShopAgain => '🛒 تسوق تاني';
 
   @override
@@ -1176,9 +1029,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersBrowseProducts => 'تصفح المنتجات';
-
-  @override
-  String get ordersDetailTitlePrefix => 'طلب #';
 
   @override
   String get ordersShareSummary => 'مشاركة الطلب';
@@ -1200,9 +1050,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersDeliveryAddressTitle => 'عنوان التوصيل';
-
-  @override
-  String get ordersItemsSectionTitle => 'المنتجات المطلوبة';
 
   @override
   String get ordersTrackingSectionTitle => 'معلومات التتبع';
@@ -1233,9 +1080,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersViewProduct => 'عرض المنتج';
-
-  @override
-  String get ordersCopyTracking => 'نسخ';
 
   @override
   String get ordersTrackingCopied => 'تم النسخ';
@@ -1284,12 +1128,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersCancelReasonOther => 'سبب تاني';
-
-  @override
-  String get ordersConfirmReceiptTitle => 'تأكيد الاستلام؟';
-
-  @override
-  String get ordersConfirmReceiptBody => 'هل تأكد إنك استلمت هذا الطلب؟';
 
   @override
   String get ordersConfirm => 'تأكيد';
@@ -1367,22 +1205,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statusSubtitleCancelled => 'الطلب ده اتلغى';
 
   @override
-  String get statusSubtitleRefunded => 'تمت عملية الاسترداد';
-
-  @override
   String get ordersFiltersMoreSoon => 'فلاتر أكتر — قريباً';
 
   @override
   String get orderHashPrefix => 'طلب #';
 
   @override
-  String get vendorNeedsAttention => 'يحتاج متابعة';
-
-  @override
   String get wishlistEmptyTitle => 'قائمة المفضلة فاضية';
-
-  @override
-  String get wishlistDiscoverProducts => 'اكتشف منتجات';
 
   @override
   String get wishlistForBuyersTitle => 'المفضلة للمشترين فقط';
@@ -1400,19 +1229,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wishlistSort => 'ترتيب';
 
   @override
-  String get wishlistSortRecentlyAdded => 'المضاف حديثاً';
-
-  @override
   String get wishlistSortPriceLow => 'السعر: من الأقل للأعلى';
 
   @override
   String get wishlistSortPriceHigh => 'السعر: من الأعلى للأقل';
-
-  @override
-  String get wishlistSortPriceDrop => 'انخفاض السعر';
-
-  @override
-  String get wishlistSortBiggestDiscount => 'أكبر خصم';
 
   @override
   String get wishlistSortNameAz => 'الاسم أ-ي';
@@ -1433,9 +1253,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wishlistViewPriceDrops => 'عرض انخفاضات السعر';
 
   @override
-  String get wishlistPriceDropBadge => 'انخفاض السعر';
-
-  @override
   String get wishlistOutOfStock => 'غير متاح';
 
   @override
@@ -1451,9 +1268,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wishlistInCartCta => '✓ في السلة';
 
   @override
-  String get wishlistSwipeAddCart => 'أضف للسلة';
-
-  @override
   String get wishlistMoveAllToCart => 'نقل الكل للسلة';
 
   @override
@@ -1461,9 +1275,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get wishlistViewCart => 'عرض السلة';
-
-  @override
-  String get wishlistRemoveSelected => 'حذف المحدد';
 
   @override
   String get wishlistSavedSnack => 'تم الحفظ في المفضلة ❤️';
@@ -1476,9 +1287,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get wishlistShowAllItems => 'عرض كل المنتجات';
-
-  @override
-  String get wishlistReviewsWord => 'تقييمات';
 
   @override
   String get wishlistGridContentDesc => 'عرض شبكي';
@@ -1536,9 +1344,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cartSaveForLater => '♡ حفظ لوقت لاحق';
-
-  @override
-  String get cartUnavailableBadge => 'غير متاح';
 
   @override
   String get cartSwipeRemove => 'إزالة';
@@ -1622,16 +1427,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutFullName => 'الاسم الكامل';
 
   @override
-  String get checkoutPhone => 'الموبايل';
-
-  @override
   String get checkoutStreet => 'العنوان';
-
-  @override
-  String get checkoutCity => 'المدينة';
-
-  @override
-  String get checkoutWilaya => 'المحافظة';
 
   @override
   String get checkoutPostalCode => 'الرمز البريدي';
@@ -1709,21 +1505,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutPayCibTitle => '💳 كارت CIB';
 
   @override
-  String get checkoutPayCibSubtitle => 'دفع ببطاقة ائتمان/خصم';
-
-  @override
-  String get checkoutPayDahabiTitle => '🟡 كارت ذهبي';
-
-  @override
-  String get checkoutPayDahabiSubtitle => 'بطاقة ذهبية من البريد';
-
-  @override
-  String get checkoutPayBaridiTitle => '🟢 بريدي موب';
-
-  @override
-  String get checkoutPayBaridiSubtitle => 'دفع موبايل من البريد';
-
-  @override
   String get checkoutCardExpiry => '[AR] MM/YY';
 
   @override
@@ -1751,9 +1532,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutReturnPolicy => 'سياسة الإرجاع';
 
   @override
-  String get checkoutPlaceOrder => '🛒 تأكيد الطلب';
-
-  @override
   String get checkoutErrorNoAddress => 'اختار أو أضف عنوان توصيل';
 
   @override
@@ -1770,9 +1548,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get checkoutErrorCvv => 'ادخل رمز CVV صحيح (3–4 أرقام)';
-
-  @override
-  String get checkoutPaymentSecure => 'بيانات الدفع مشفّرة';
 
   @override
   String get checkoutErrorGeneric => 'مقدرناش نكمل الطلب';
@@ -1967,12 +1742,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifiedSeller => '✅ بائع موثّق';
 
   @override
-  String get sellerRatingMid => ' بائع · ';
-
-  @override
-  String get sellerSalesSuffix => ' مبيعات';
-
-  @override
   String get onlyLeftPrefix => 'متبقي ';
 
   @override
@@ -1994,9 +1763,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingInquiries => 'استفسارات';
 
   @override
-  String get editListing => 'تعديل';
-
-  @override
   String get editListingMenu => 'تعديل الإعلان';
 
   @override
@@ -2013,9 +1779,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resumeListing => 'استئناف';
-
-  @override
-  String get listingStats => 'إحصائيات';
 
   @override
   String get deleteListing => 'حذف';
@@ -2098,9 +1861,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get serverErrorMessage => 'حصلت مشكلة من عندنا. حاول تاني بعد شوية.';
 
   @override
-  String get emptyInbox => 'لا يوجد شيء بعد';
-
-  @override
   String get incomingOrders => 'الطلبات الواردة';
 
   @override
@@ -2108,9 +1868,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorConfirmAllPending => 'تأكيد كل الطلبات المعلقة';
-
-  @override
-  String get vendorViewAnalytics => 'عرض التحليلات';
 
   @override
   String get vendorStatPendingOrders => 'معلقة';
@@ -2141,9 +1898,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorSortBuyerName => 'حسب اسم المشتري أ-ي';
-
-  @override
-  String get vendorNewOrder => 'طلب جديد';
 
   @override
   String get vendorRejectOrder => 'رفض الطلب';
@@ -2177,9 +1931,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorShippingInfoTitle => 'معلومات الشحن';
 
   @override
-  String get vendorViewOnMap => 'عرض على الخريطة';
-
-  @override
   String get vendorCollectOnDelivery => 'تحصيل عند الاستلام';
 
   @override
@@ -2196,12 +1947,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorOrderSettings => 'إعدادات الطلبات';
-
-  @override
-  String get vendorPrintOrder => 'طباعة الطلب';
-
-  @override
-  String get vendorReportIssue => 'الإبلاغ عن مشكلة';
 
   @override
   String get vendorReasonItemUnavailable => 'المنتج لم يعد متاحاً';
@@ -2226,10 +1971,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorTrackingHint => '[AR] XS-TRACK-2024-001';
-
-  @override
-  String get vendorShippingNoteHint =>
-      'تم تسليم الشحنة لشركة الشحن، المتوقع 3–5 أيام';
 
   @override
   String get vendorOrderRejectedSnack => 'تم رفض الطلب. تم إبلاغ المشتري.';
@@ -2263,9 +2004,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorStatusCancelled => 'تم إلغاء هذا الطلب';
-
-  @override
-  String get vendorStatusRefunded => 'تم الاسترداد';
 
   @override
   String get didntReceiveCode => 'موصلكش الكود؟';
@@ -2330,11 +2068,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String wishlistAppBarTitle(int n) {
-    return 'مفضلتي ($n)';
-  }
-
-  @override
   String wishlistSelectedCount(int n) {
     return '$n محدد';
   }
@@ -2347,11 +2080,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String wishlistPriceDropPercent(int p) {
     return '↓ $p% انخفاض';
-  }
-
-  @override
-  String wishlistMoveAllSummary(int n) {
-    return 'تمت إضافة $n عناصر للسلة';
   }
 
   @override
@@ -2372,11 +2100,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String wishlistRemoveSelectedCount(int n) {
     return 'حذف المحدد ($n)';
-  }
-
-  @override
-  String wishlistFilterEmptyTitle(String filterName) {
-    return 'لا توجد عناصر $filterName';
   }
 
   @override
@@ -2430,11 +2153,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String cartCheckoutItems(int n) {
-    return 'الدفع ($n عناصر)';
-  }
-
-  @override
   String checkoutItemsFromSellers(int items, int sellers) {
     return '$items عناصر من $sellers بائعين';
   }
@@ -2470,9 +2188,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enterEmailHint => '[AR] you@email.com';
-
-  @override
-  String get validEmailOrPhone => 'إيميل صحيح أو رقم 10+ أرقام';
 
   @override
   String get passwordMask => '[AR] ********';
@@ -2641,20 +2356,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullNameHint => 'مثال: أحمد محمد';
 
   @override
-  String get fullNameArRequired => 'الاسم الكامل (بالعربية) *';
-
-  @override
   String get emailAddressRequired => 'البريد الإلكتروني *';
-
-  @override
-  String get emailAddressOptional =>
-      'البريد الإلكتروني (اختياري — لاستعادة كلمة المرور)';
-
-  @override
-  String get locationCityRequired => 'المدينة *';
-
-  @override
-  String get locationHintAlgiers => 'مثال: القاهرة';
 
   @override
   String get secureYourAccount => 'أمّن حسابك';
@@ -2734,16 +2436,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get storeDescriptionHint => 'اوصف متجرك وإيه اللي يميزه...';
 
   @override
-  String get storeLogoOptional => 'لوجو المتجر (اختياري)';
-
-  @override
   String get storeLogoRequired => 'لوجو المتجر *';
-
-  @override
-  String get cityRequired => 'المدينة *';
-
-  @override
-  String get wilayaRequired => 'المحافظة *';
 
   @override
   String get sellerFallbackName => 'بائع';
@@ -3116,9 +2809,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationRegisterPhoneInvalid => 'اكتب رقم موبايل صحيح';
 
   @override
-  String get validationCityRequired => 'المحافظة/المدينة مطلوبة';
-
-  @override
   String get validationAgeMinimum18 => 'لازم يكون عندك 18 سنة على الأقل';
 
   @override
@@ -3153,15 +2843,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationStoreCityWilayaRequired => 'المدينة والمحافظة مطلوبين';
-
-  @override
-  String get validationFullNameArRequired => 'الاسم الكامل بالعربية مطلوب';
-
-  @override
-  String get validationStoreNameArRequired => 'اسم المتجر بالعربية مطلوب';
-
-  @override
-  String get validationStoreDescriptionArShort => 'صف متجرك بالعربية';
 
   @override
   String get listingValidationPhotosRequired => 'ضيف صورة واحدة على الأقل';
@@ -3329,9 +3010,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courierNavigateHint => 'الاتجاهات في خرائط جوجل';
-
-  @override
-  String get loginAsCourierDemo => 'الدخول كمندوب توصيل (تجريبي)';
 
   @override
   String get loginAsCourier => 'الدخول كمندوب توصيل';
