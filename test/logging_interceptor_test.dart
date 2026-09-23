@@ -125,8 +125,8 @@ void main() {
     expect(output, contains('<file:a.jpg>'));
   });
 
-  test('onRequest logs Google idToken and clientId on separate print lines', () {
-    const idToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.payload.sig';
+  test('onRequest never prints the Google idToken, only the clientId', () {
+    final idToken = 'eyJhbGciOiJSUzI1NiJ9.${'A' * 1600}.sig';
     final options = RequestOptions(
       path: '/api/auth/google/check-user',
       method: 'POST',
@@ -140,39 +140,10 @@ void main() {
       interceptor.onRequest(options, RequestInterceptorHandler());
     });
 
-    expect(printed, contains('idToken:'));
-    expect(printed, contains(idToken));
-    expect(printed, contains('clientId:'));
+    expect(printed.join(), isNot(contains('A' * 100)));
+    expect(logs.join(), isNot(contains('A' * 100)));
+    expect(logs.first, contains('***REDACTED***'));
     expect(printed, contains('web-client.apps.googleusercontent.com'));
-    final requestDump = logs.first;
-    expect(requestDump, isNot(contains(idToken)));
-    expect(requestDump, contains('***REDACTED***'));
-  });
-
-  test('onRequest splits a long Google idToken across 800-char print lines', () {
-    final idToken = 'A' * 800 + 'B' * 800;
-    final options = RequestOptions(
-      path: '/api/auth/google/check-user',
-      method: 'POST',
-      data: {'idToken': idToken, 'clientId': 'web-client'},
-    );
-
-    final printed = capturePrint(() {
-      interceptor.onRequest(options, RequestInterceptorHandler());
-    });
-
-    expect(printed, contains('idToken:'));
-    expect(printed, contains('A' * 800));
-    expect(printed, contains('B' * 800));
-    expect(printed.join(), contains(idToken));
-    expect(printed, contains('clientId:'));
-    expect(printed, contains('web-client'));
-  });
-
-  test('printFullToken emits 800-char slices via print', () {
-    final token = 'A' * 800 + 'B' * 50;
-    final printed = capturePrint(() => printFullToken(token));
-    expect(printed, ['A' * 800, 'B' * 50]);
   });
 
   test('onError redacts sensitive fields in the error response body', () {
