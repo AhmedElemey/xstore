@@ -105,13 +105,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (MockConfig.useMock) {
       return MockConfig.simulate(List<DealModel>.from(mockHotDealModels));
     }
-    final aggregate = await fetchHomeAggregate();
-    if (aggregate != null && aggregate.hotDeals.isNotEmpty) {
-      return aggregate.hotDeals.take(_hotDealsCount).toList();
-    }
-    // Fallback: no dedicated hot-deals data from /api/home — derive from
-    // GET /api/listings instead (any listing with compareAtPrice > price
-    // is discounted; biggest discounts first).
+    // Fallback for when GET /api/home has no hot deals: derive from
+    // GET /api/listings (any listing with compareAtPrice > price is
+    // discounted; biggest discounts first).
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListings,
@@ -148,6 +144,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final hotDeals = _unwrapObjectList(map['hotDeals'])
           .map(_dealFromListing)
           .whereType<DealModel>()
+          .take(_hotDealsCount)
           .toList();
       final newArrivals = _unwrapObjectList(map['newArrivals'])
           .map(_dealFromListing)

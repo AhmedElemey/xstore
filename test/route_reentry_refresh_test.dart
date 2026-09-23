@@ -252,14 +252,13 @@ void main() {
         dioProvider.overrideWithValue(dio),
       ]);
       await _firstVisit(tester);
-      final afterFirst = homeGets;
-      expect(afterFirst, greaterThan(0));
+      expect(homeGets, 1, reason: 'one home load, one GET /api/home');
 
       await _leaveAndReturn(tester);
 
       expect(
         homeGets,
-        greaterThan(afterFirst),
+        2,
         reason: 'IndexedStack keeps HomeScreen alive; coming back to the '
             'tab must refetch the home aggregate again',
       );

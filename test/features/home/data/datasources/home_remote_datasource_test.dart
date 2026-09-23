@@ -7,9 +7,8 @@ import 'package:xstore/features/home/data/datasources/home_remote_datasource.dar
 
 /// Resolves (or rejects) every request with a scripted value keyed by
 /// path — same scripted-Dio approach as the wishlist/cart datasource
-/// tests, extended to route by path since fetchHotDeals internally calls
-/// fetchHomeAggregate (GET /api/home) before falling back to GET
-/// /api/listings.
+/// tests, extended to route by path so a test can tell GET /api/home and
+/// GET /api/listings apart.
 class _RoutedInterceptor extends Interceptor {
   _RoutedInterceptor(this._routes);
 
@@ -271,36 +270,25 @@ void main() {
   }, skip: skipMock);
 
   group('fetchHotDeals', () {
-    test('uses the aggregate\'s hotDeals when present, without calling /api/listings',
+    test('does not call GET /api/home (the home feed already did)',
         () async {
-      var listingsCalled = false;
-      final interceptor = _RoutedInterceptor({
-        ApiEndpoints.home: (_) => {
-              'banners': <dynamic>[],
-              'hotDeals': [_activeListing(id: 'from_aggregate')],
-              'newArrivals': <dynamic>[],
-              'recommendedForYou': <dynamic>[],
-            },
-        ApiEndpoints.apiListings: (_) {
-          listingsCalled = true;
-          return <dynamic>[];
+      var homeCalled = false;
+      dio = buildDio({
+        ApiEndpoints.home: (_) {
+          homeCalled = true;
+          return <String, dynamic>{};
         },
+        ApiEndpoints.apiListings: (_) => [_activeListing(id: 'from_listings')],
       });
-      dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
-        ..interceptors.add(interceptor);
       datasource = HomeRemoteDataSourceImpl(dio);
 
       final result = await datasource.fetchHotDeals();
 
-      expect(result.single.id, 'from_aggregate');
-      expect(
-        listingsCalled,
-        isFalse,
-        reason: 'should not derive from /api/listings when the aggregate has data',
-      );
+      expect(result.single.id, 'from_listings');
+      expect(homeCalled, isFalse);
     });
 
-    test('derives from /api/listings sorted by discount when the aggregate is empty',
+    test('derives from /api/listings sorted by discount',
         () async {
       dio = buildDio({
         ApiEndpoints.home: (_) => {

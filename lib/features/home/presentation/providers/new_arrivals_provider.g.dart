@@ -6,7 +6,7 @@ part of 'new_arrivals_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$newArrivalsHash() => r'c0a885b81f11bdb16a84b654a1c3800f5aa563d0';
+String _$newArrivalsHash() => r'f5c22270a1fb2304881a9c4518d6e9b81fdb231f';
 
 /// See also [NewArrivals].
 @ProviderFor(NewArrivals)

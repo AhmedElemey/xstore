@@ -37,6 +37,23 @@ final homeRepositoryProvider = Provider<HomeRepository>.internal(
 );
 
 typedef HomeRepositoryRef = ProviderRef<HomeRepository>;
+String _$getHomeFeedUseCaseHash() =>
+    r'b40b73805d851d48ba32b25cf98fccdc8f85a2d0';
+
+/// See also [getHomeFeedUseCase].
+@ProviderFor(getHomeFeedUseCase)
+final getHomeFeedUseCaseProvider =
+    AutoDisposeProvider<GetHomeFeedUseCase>.internal(
+  getHomeFeedUseCase,
+  name: r'getHomeFeedUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getHomeFeedUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GetHomeFeedUseCaseRef = AutoDisposeProviderRef<GetHomeFeedUseCase>;
 String _$getBannersUseCaseHash() => r'7e5ff7b7357b086012e1c8cb12f388126ea39c8c';
 
 /// See also [getBannersUseCase].

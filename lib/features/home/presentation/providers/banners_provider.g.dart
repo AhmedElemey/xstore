@@ -6,7 +6,7 @@ part of 'banners_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bannersHash() => r'98eb3a097b4d27d16b50dfd9964b51abc599a002';
+String _$bannersHash() => r'bfe7d72ace9d1ba67c97d11f10e8192e3bda8e7a';
 
 /// See also [Banners].
 @ProviderFor(Banners)
