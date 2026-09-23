@@ -473,12 +473,3 @@ List<ListingModel> get mockListingModels =>
 
 List<MockListingMeta> get mockListingMetaList =>
     [for (final r in _catalog) r.toMeta()];
-
-MockListingMeta? mockMetaForListing(String id) {
-  for (final r in _catalog) {
-    if (r.id == id) {
-      return r.toMeta();
-    }
-  }
-  return null;
-}

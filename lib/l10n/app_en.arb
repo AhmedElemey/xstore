@@ -542,7 +542,6 @@
   "cartCouponMinOrder": "Minimum order 5,000 EGP required",
   "cartOrderSummary": "Order Summary",
   "cartShippingLine": "Shipping",
-  "cartFreeShippingThresholdNote": "🚚 Items priced {threshold} and up ship free",
   "cartTotalLine": "Total",
   "cartCashOnDeliveryNote": "💳 Cash on Delivery available",
   "cartSecureCheckout": "🔒 Secure checkout guaranteed",
