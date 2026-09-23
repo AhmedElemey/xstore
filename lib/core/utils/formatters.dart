@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 import '../constants/app_strings.dart';
 
 abstract final class Formatters {
@@ -7,18 +5,6 @@ abstract final class Formatters {
     return '$symbol${amount.toStringAsFixed(2)}';
   }
 
-  /// Whole EGP with grouping, e.g. `185,500 EGP`.
-  static String dzdWhole(double amount) {
-    final f = NumberFormat('#,##0', 'fr_FR');
-    return '${f.format(amount.round())} ${AppStrings.currencyDzd}';
-  }
-
-  /// Saved amount for profile stats; [minorUnits] e.g. 23000 → 230 shown.
-  static String dzdSavedDisplay(int minorUnits) {
-    if (minorUnits <= 0) return '0';
-    final whole = minorUnits ~/ 100;
-    return '$whole';
-  }
 
   /// Compact posted date for listings (local timezone when set).
   static String shortDate(DateTime date) {
