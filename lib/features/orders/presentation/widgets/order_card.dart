@@ -3,19 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/analytics/analytics_service.dart';
-import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../product/domain/entities/review_write_params.dart';
-import '../../../product/presentation/providers/product_dependencies.dart';
-import '../../../product/presentation/providers/product_detail_notifier.dart';
-import '../../../product/presentation/widgets/already_reviewed_sheet.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'delivery_method_sheet.dart';
+import 'order_review_sheet.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
@@ -323,7 +318,7 @@ class OrderCard extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _reviewSheet(context, ref),
+                onPressed: () => showOrderReviewFlow(context, ref, order),
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),
@@ -376,7 +371,7 @@ class OrderCard extends ConsumerWidget {
     WidgetRef ref,
     OrdersNotifier notifier,
   ) async {
-    final reason = await _cancelReasonDialog(context);
+    final reason = await showCancelReasonDialog(context);
     if (reason == null || !context.mounted) return;
     await notifier.cancelOrder(order.id, reason);
     if (!context.mounted) return;
@@ -521,175 +516,6 @@ class OrderCard extends ConsumerWidget {
       context,
       message:
           order.trackingNumber ?? context.l10n.ordersTrackOnCourier,
-    );
-  }
-
-  Future<void> _reviewSheet(BuildContext context, WidgetRef ref) async {
-    final listingId =
-        order.items.isEmpty ? null : order.items.first.listingId;
-    if (listingId == null || listingId.isEmpty) return;
-    final existing = await findMyListingReview(ref, listingId);
-    if (!context.mounted) return;
-    if (existing != null) {
-      await showAlreadyReviewedSheet(
-        context,
-        onEdit: () {
-          if (!context.mounted) return;
-          context.push('${AppRoutes.product}/$listingId/reviews');
-        },
-      );
-      return;
-    }
-
-    var stars = 5;
-    var reviewText = '';
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (sheetContext, setS) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: AppSpacing.lg,
-                right: AppSpacing.lg,
-                bottom: MediaQuery.paddingOf(ctx).bottom + AppSpacing.lg,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(sheetContext.l10n.ordersReviewSheetTitle,
-                      style: AppTypography.titleMedium),
-                  const SizedBox(height: AppSpacing.md),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      5,
-                      (i) => IconButton(
-                        onPressed: () => setS(() => stars = i + 1),
-                        icon: Icon(
-                          i < stars ? Icons.star : Icons.star_border,
-                          color: AppColors.warning,
-                          size: AppSpacing.x3l,
-                        ),
-                      ),
-                    ),
-                  ),
-                  TextField(
-                    onChanged: (v) => reviewText = v,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: sheetContext.l10n.ordersReviewHint,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  FilledButton(
-                    onPressed: () async {
-                      final comment = reviewText.trim();
-                      if (comment.isEmpty) return;
-                      final posted =
-                          await ref.read(createReviewUseCaseProvider).call(
-                        listingId: listingId,
-                        params: ReviewWriteParams(
-                          rating: stars.toDouble(),
-                          comment: comment,
-                        ),
-                      );
-                      if (!sheetContext.mounted) return;
-                      posted.fold(
-                        (failure) {
-                          if (isAlreadyReviewedFailure(failure)) {
-                            Navigator.pop(ctx, 'already');
-                            return;
-                          }
-                          AppSnackbar.error(
-                            sheetContext,
-                            failure.toString(),
-                          );
-                        },
-                        (_) {
-                          ref.read(analyticsServiceProvider).track(
-                            AnalyticsEvents.reviewSubmitted,
-                            properties: {
-                              AnalyticsProps.itemId: listingId,
-                              AnalyticsProps.rating: stars.toDouble(),
-                            },
-                          );
-                          stars = 5;
-                          reviewText = '';
-                          Navigator.pop(ctx, 'added');
-                          ref.invalidate(productDetailProvider(listingId));
-                        },
-                      );
-                    },
-                    child: Text(sheetContext.l10n.ordersSubmitReview),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-    if (!context.mounted) return;
-    if (result == 'added') {
-      AppSnackbar.success(context, context.l10n.ordersReviewThanks);
-    } else if (result == 'already') {
-      await showAlreadyReviewedSheet(context);
-    }
-  }
-
-  Future<String?> _cancelReasonDialog(BuildContext context) async {
-    var selected = context.l10n.ordersCancelReasonChangedMind;
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setS) {
-          return AlertDialog(
-            title: Text(context.l10n.ordersCancelDialogTitle),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  context.l10n.ordersCancelReasonLabel,
-                  style: AppTypography.labelLarge,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                DropdownButton<String>(
-                  isExpanded: true,
-                  value: selected,
-                  items: [
-                    context.l10n.ordersCancelReasonChangedMind,
-                    context.l10n.ordersCancelReasonBetterPrice,
-                    context.l10n.ordersCancelReasonMistake,
-                    context.l10n.ordersCancelReasonOther,
-                  ]
-                      .map(
-                        (e) => DropdownMenuItem(value: e, child: Text(e)),
-                      )
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setS(() => selected = v);
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, selected),
-                child: Text(context.l10n.ordersConfirm),
-              ),
-            ],
-          );
-        },
-      ),
     );
   }
 

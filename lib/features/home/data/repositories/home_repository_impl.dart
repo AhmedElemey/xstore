@@ -78,28 +78,38 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<ListingEntity>>> getNewArrivals() async {
+  Future<HomeFeed?> getHomeFeed() async {
+    final HomeAggregate? aggregate;
     try {
-      final aggregate = await _remote.fetchHomeAggregate();
-      if (aggregate != null && aggregate.newArrivals.isNotEmpty) {
-        final now = DateTime.now();
-        final list = aggregate.newArrivals
-            .asMap()
-            .entries
-            .map(
-              (e) => _listingFromDeal(
-                e.value.toEntity(),
-                now.subtract(Duration(hours: e.key)),
-              ),
-            )
-            .toList();
-        return Right(list);
-      }
+      aggregate = await _remote.fetchHomeAggregate();
     } catch (_) {
-      // Falls through to the hot-deals-derived approach below.
+      return null;
     }
-    // Fallback (no dedicated data from /api/home): reuse hot deals, same
-    // as before the aggregate endpoint existed.
+    if (aggregate == null) return null;
+    final now = DateTime.now();
+    return (
+      banners: aggregate.banners.map((m) => m.toEntity()).toList(),
+      hotDeals: aggregate.hotDeals.map((m) => m.toEntity()).toList(),
+      newArrivals: aggregate.newArrivals
+          .asMap()
+          .entries
+          .map(
+            (e) => _listingFromDeal(
+              e.value.toEntity(),
+              now.subtract(Duration(hours: e.key)),
+            ),
+          )
+          .toList(),
+      recommended: aggregate.recommendedForYou
+          .map((d) => _listingFromDeal(d.toEntity(), now))
+          .toList(),
+    );
+  }
+
+  /// Fallback for an empty `newArrivals` in [getHomeFeed]: hot deals,
+  /// re-sorted.
+  @override
+  Future<Either<Failure, List<ListingEntity>>> getNewArrivals() async {
     final dealsResult = await getHotDeals();
     return dealsResult.fold(Left.new, (deals) {
       final now = DateTime.now();
@@ -121,20 +131,9 @@ class HomeRepositoryImpl implements HomeRepository {
     });
   }
 
+  /// Fallback for an empty `recommended` in [getHomeFeed]: hot deals.
   @override
   Future<Either<Failure, List<ListingEntity>>> getRecommended() async {
-    try {
-      final aggregate = await _remote.fetchHomeAggregate();
-      if (aggregate != null && aggregate.recommendedForYou.isNotEmpty) {
-        final now = DateTime.now();
-        final list = aggregate.recommendedForYou
-            .map((d) => _listingFromDeal(d.toEntity(), now))
-            .toList();
-        return Right(list);
-      }
-    } catch (_) {
-      // Falls through to the hot-deals-derived approach below.
-    }
     final dealsResult = await getHotDeals();
     return dealsResult.fold(Left.new, (deals) {
       final list =

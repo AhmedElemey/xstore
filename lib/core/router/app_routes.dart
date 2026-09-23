@@ -93,8 +93,8 @@ bool isVendorRestrictedRoute(String location) {
 /// landing here via deep link or stale navigation is sent back to Incoming
 /// Orders.
 ///
-/// `/order/:id` is deliberately NOT here — vendors open it too, via
-/// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
+/// `/order/:id` is deliberately NOT here — `computeXStoreAuthRedirect`
+/// sends vendors to `/vendor-orders/:id` instead.
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||

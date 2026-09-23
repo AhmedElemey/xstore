@@ -140,11 +140,7 @@ class Explore extends _$Explore {
         );
         final trimmed = q.trim();
         if (trimmed.isNotEmpty) {
-          // People paste phone numbers / emails into search — keep the
-          // product words, never the contact details.
-          final query = trimmed
-              .replaceAll(RegExp(r'\S+@\S+'), '[email]')
-              .replaceAll(RegExp(r'\d{7,}'), '[number]');
+          final query = scrubSearchQueryForAnalytics(trimmed);
           ref.read(analyticsServiceProvider).track(
             AnalyticsEvents.searchPerformed,
             properties: {
@@ -279,3 +275,14 @@ class Explore extends _$Explore {
     await prefs.setStringList(PrefsKeys.exploreRecentSearches, next);
   }
 }
+
+// ASCII, Arabic-Indic and Eastern Arabic-Indic digits.
+const _digit = r'[0-9\u0660-\u0669\u06F0-\u06F9]';
+
+/// People paste phone numbers and emails into search. Keep the product
+/// words, never the contact details: emails become `[email]`, and 7+ digits
+/// (optionally `+`-prefixed, separated by single spaces or dashes, in any
+/// of the digit scripts above) become `[number]`.
+String scrubSearchQueryForAnalytics(String query) => query
+    .replaceAll(RegExp(r'\S+@\S+'), '[email]')
+    .replaceAll(RegExp('\\+?$_digit(?:[ -]?$_digit){6,}'), '[number]');

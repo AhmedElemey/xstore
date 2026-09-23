@@ -7,17 +7,11 @@ import '../../features/notifications/presentation/providers/notifications_provid
 import '../../features/notifications/presentation/providers/pending_push_route_provider.dart';
 import 'fcm_message_route.dart';
 
-Future<void> navigateToPushRoute(
-  Ref ref,
-  String route, {
-  bool deferUntilAuthenticated = false,
-}) async {
+/// Opens [route] once a session exists: waits out a cold-start session
+/// restore, and stages the route behind login when there is no user (the
+/// auth listener in `fcmPushHandling` flushes it on sign-in).
+Future<void> navigateToPushRoute(Ref ref, String route) async {
   if (!isSafeInAppRoute(route)) return;
-
-  if (deferUntilAuthenticated) {
-    ref.read(pendingPushRouteProvider.notifier).stage(route);
-    return;
-  }
 
   final auth = ref.read(authProvider);
   if (auth.isLoading) {

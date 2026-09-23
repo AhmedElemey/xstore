@@ -75,9 +75,8 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       final user = userCredential.user;
       if (user == null) throw const SocialAuthException('Google sign-in failed');
       if (kDebugMode) {
-        // `print` + 800-char chunks: debugPrint is cut at ~1024 chars (`<…>`).
-        // Google idToken is full; Firebase stays truncated. Payload dump
-        // is aud/email/sub without jwt.io.
+        // Tokens stay truncated; the `aud` claim is enough to debug a
+        // clientId mismatch without logging a usable credential.
         final firebaseIdToken = await user.getIdToken();
         debugPrint('── Google sign-in credential ──');
         debugPrint('email: ${user.email}');
@@ -85,11 +84,11 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         debugPrint('photoUrl: ${user.photoURL}');
         debugPrint('firebaseUid: ${user.uid}');
         debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
-        print('clientId:');
-        print(DefaultFirebaseOptions.googleWebClientId);
-        print('google idToken:');
-        _printFullToken(googleIdToken);
-        _debugLogGoogleIdTokenPayload(googleIdToken);
+        debugPrint('clientId: ${DefaultFirebaseOptions.googleWebClientId}');
+        debugPrint(
+          'google idToken: ${_truncatedForLog(googleIdToken)} '
+          'aud: ${_idTokenAudience(googleIdToken)}',
+        );
         debugPrint('firebase idToken: ${_truncatedForLog(firebaseIdToken)}');
       }
       return SocialAuthResult(
@@ -284,18 +283,16 @@ String _truncatedForLog(String? token) {
   return '${token.substring(0, visible)}…(${token.length} chars)';
 }
 
-void _printFullToken(String token) {
-  final pattern = RegExp('.{1,800}');
-  pattern.allMatches(token).forEach((match) => print(match.group(0))); // ignore: avoid_print
-}
-
-void _debugLogGoogleIdTokenPayload(String token) {
+/// The `aud` claim of a JWT (the OAuth client it was issued for), or null.
+Object? _idTokenAudience(String token) {
   final parts = token.split('.');
-  if (parts.length < 2) return;
+  if (parts.length < 2) return null;
   try {
-    final payload = utf8.decode(
-      base64Url.decode(base64Url.normalize(parts[1])),
+    final payload = jsonDecode(
+      utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
     );
-    print('google idToken payload: $payload'); // ignore: avoid_print
-  } catch (_) {}
+    return payload is Map ? payload['aud'] : null;
+  } catch (_) {
+    return null;
+  }
 }

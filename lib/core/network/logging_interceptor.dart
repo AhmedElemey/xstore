@@ -48,12 +48,8 @@ class LoggingInterceptor extends Interceptor {
     }
     buffer.write('└─');
     debugPrint(buffer.toString());
-    // `print` + 800-char chunks: debugPrint is cut at ~1024 chars (`<…>`).
-    final idToken = _mapString(options.data, const ['idToken', 'IdToken']);
-    if (idToken != null) {
-      print('idToken:'); // ignore: avoid_print
-      printFullToken(idToken);
-    }
+    // The Google idToken stays redacted (it is a usable credential); the
+    // clientId is enough to debug an `aud` mismatch.
     final clientId = _mapString(options.data, const ['clientId', 'ClientId']);
     if (clientId != null) {
       print('clientId:'); // ignore: avoid_print
@@ -150,11 +146,4 @@ String? _mapString(dynamic data, List<String> keys) {
     if (value is String && value.isNotEmpty) return value;
   }
   return null;
-}
-
-/// `debugPrint` is truncated in the IDE console (`<…>`). `print` is not,
-/// and 800-char slices stay under the ~1024 cutoff if a sink still wraps.
-void printFullToken(String token) {
-  final pattern = RegExp('.{1,800}');
-  pattern.allMatches(token).forEach((match) => print(match.group(0))); // ignore: avoid_print
 }

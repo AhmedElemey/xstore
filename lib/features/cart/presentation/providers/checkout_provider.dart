@@ -159,6 +159,9 @@ class Checkout extends _$Checkout {
   }
 
   Future<OrderEntity?> placeOrder() async {
+    // A second call while the first is in flight would place every line
+    // again (one POST /api/orders per line, no idempotency key).
+    if (state.isPlacingOrder) return null;
     final cart = ref.read(cartProvider);
     if (!ref.read(isOnlineProvider)) {
       state = state.copyWith(error: 'offline');

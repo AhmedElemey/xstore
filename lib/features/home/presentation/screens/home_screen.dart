@@ -22,6 +22,7 @@ import '../../../../shared/widgets/skeletons/home_skeleton.dart';
 import '../../domain/entities/deal_entity.dart';
 import '../providers/banners_provider.dart';
 import '../providers/categories_provider.dart';
+import '../providers/home_feed_provider.dart';
 import '../providers/hot_deals_provider.dart';
 import '../providers/new_arrivals_provider.dart';
 import '../providers/recommended_provider.dart';
@@ -69,22 +70,18 @@ class HomeScreen extends ConsumerWidget {
 
     return RouteReentryRefresh(
       isTarget: (location) => location == AppRoutes.home,
+      // Banners, deals, new arrivals and recommended all watch the one
+      // GET /api/home in homeFeedProvider; invalidating it refreshes them.
       onReentry: (ref) {
-        ref.invalidate(bannersProvider);
-        ref.invalidate(hotDealsProvider);
+        ref.invalidate(homeFeedProvider);
         ref.invalidate(categoriesProvider);
-        ref.invalidate(newArrivalsProvider);
-        ref.invalidate(recommendedProvider);
       },
       child: Scaffold(
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
-          ref.invalidate(bannersProvider);
-          ref.invalidate(hotDealsProvider);
+          ref.invalidate(homeFeedProvider);
           ref.invalidate(categoriesProvider);
-          ref.invalidate(newArrivalsProvider);
-          ref.invalidate(recommendedProvider);
           await Future.wait([
             ref.read(bannersProvider.future),
             ref.read(hotDealsProvider.future),

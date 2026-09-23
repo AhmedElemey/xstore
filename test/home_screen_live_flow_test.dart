@@ -108,9 +108,8 @@ Map<String, dynamic> _dealListingJson({
   'imageUrls': ['https://example.test/$id.jpg'],
 };
 
-/// GET /api/home — CONFIRMED aggregate shape feeding HotDeals, NewArrivals,
-/// and Recommended all at once (each provider calls `fetchHomeAggregate()`
-/// independently, so this single scripted route serves all three fetches).
+/// GET /api/home — CONFIRMED aggregate shape. One request feeds every
+/// section through `homeFeedProvider`.
 Map<String, dynamic> _homeAggregateJson() => {
   'banners': <dynamic>[],
   'hotDeals': [
@@ -271,6 +270,58 @@ void main() {
         findsOneWidget,
         reason: 'tapping a hot deal should push AppRoutes.product/{id}',
       );
+    },
+  );
+
+  testWidgets(
+    'one home load sends a single GET /api/home and pull-to-refresh sends one more',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var homeGets = 0;
+      var bannerGets = 0;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.banners}': (_) {
+          bannerGets++;
+          return [_bannerJson()];
+        },
+        'GET ${ApiEndpoints.catalogCategories}': (_) => [_categoryJson()],
+        'GET ${ApiEndpoints.home}': (_) {
+          homeGets++;
+          return {
+            ..._homeAggregateJson(),
+            'banners': [_bannerJson()],
+            'recommendedForYou': [
+              _dealListingJson(id: '9003', title: 'Smart Watch', price: 90000),
+            ],
+          };
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+      // Build the lower sections (New Arrivals, Recommended) too.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+      await _settle(tester);
+
+      expect(find.text('Smart Watch'), findsWidgets);
+      expect(homeGets, 1, reason: 'every section reads the same /api/home');
+      expect(bannerGets, 0, reason: '/api/banners is only a fallback');
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 4000));
+      await _settle(tester);
+      await tester.fling(
+        find.byType(CustomScrollView),
+        const Offset(0, 400),
+        1000,
+      );
+      await _settle(tester, times: 30);
+
+      expect(homeGets, 2, reason: 'pull-to-refresh refetches /api/home once');
     },
   );
 }

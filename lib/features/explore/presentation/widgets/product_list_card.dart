@@ -29,10 +29,9 @@ class ProductListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Same chrome as wishlist list cards: soft shadow outside clip,
     // primary-tint outline, and a 4px left accent bar.
-    final accent = item.compareAtPrice != null &&
-            item.compareAtPrice! > item.price
-        ? AppColors.success
-        : AppColors.primary;
+    final compareAt = item.compareAtPrice;
+    final discounted = compareAt != null && compareAt > item.price;
+    final accent = discounted ? AppColors.success : AppColors.primary;
     final radius = BorderRadius.circular(AppSpacing.lg);
 
     return DecoratedBox(
@@ -144,12 +143,10 @@ class ProductListCard extends StatelessWidget {
                                       color: AppColors.primary,
                                     ),
                                   ),
-                                  if (item.compareAtPrice != null) ...[
+                                  if (discounted) ...[
                                     const Gap(AppSpacing.sm),
                                     Text(
-                                      context.formatCurrency(
-                                        item.compareAtPrice!,
-                                      ),
+                                      context.formatCurrency(compareAt),
                                       style: AppTypography.bodySmall.copyWith(
                                         decoration: TextDecoration.lineThrough,
                                       ),

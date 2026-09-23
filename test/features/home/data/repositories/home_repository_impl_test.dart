@@ -79,40 +79,52 @@ void main() {
     });
   });
 
-  group('getNewArrivals', () {
-    test('builds listings from the aggregate\'s newArrivals when present',
-        () async {
-      var hotDealsFallbackCalled = false;
+  group('getHomeFeed', () {
+    test('maps every aggregate section to entities', () async {
       final repo = HomeRepositoryImpl(
         StubHomeRemoteDataSource(
           onFetchHomeAggregate: () async => (
-            banners: <BannerModel>[],
-            hotDeals: <DealModel>[],
+            banners: const [
+              BannerModel(id: 'b1', title: 'Sale', imageUrl: 'https://example.test/b1.jpg'),
+            ],
+            hotDeals: const [DealModel(id: 'd1', title: 'Deal', price: 90)],
             newArrivals: const [DealModel(id: 'n1', title: 'New', price: 50)],
-            recommendedForYou: <DealModel>[],
+            recommendedForYou: const [DealModel(id: 'r1', title: 'Rec', price: 60)],
           ),
-          // Should not be reached: the aggregate already has newArrivals.
-          onFetchHotDeals: () async {
-            hotDealsFallbackCalled = true;
-            return const <DealModel>[];
-          },
         ),
       );
 
-      final result = await repo.getNewArrivals();
+      final feed = await repo.getHomeFeed();
 
-      result.fold(
-        (_) => fail('expected Right'),
-        (list) => expect(list.single.id, 'n1'),
-      );
-      expect(hotDealsFallbackCalled, isFalse);
+      expect(feed!.banners.single.id, 'b1');
+      expect(feed.hotDeals.single.id, 'd1');
+      expect(feed.newArrivals.single.id, 'n1');
+      expect(feed.recommended.single.id, 'r1');
     });
 
-    test('falls back to hot-deals-derived listings when the aggregate has none',
+    test('is null when the aggregate is unavailable or throws', () async {
+      expect(
+        await HomeRepositoryImpl(
+          StubHomeRemoteDataSource(onFetchHomeAggregate: () async => null),
+        ).getHomeFeed(),
+        isNull,
+      );
+      expect(
+        await HomeRepositoryImpl(
+          StubHomeRemoteDataSource(
+            onFetchHomeAggregate: () async => throw Exception('boom'),
+          ),
+        ).getHomeFeed(),
+        isNull,
+      );
+    });
+  });
+
+  group('getNewArrivals', () {
+    test('derives listings from hot deals',
         () async {
       final repo = HomeRepositoryImpl(
         StubHomeRemoteDataSource(
-          onFetchHomeAggregate: () async => null,
           onFetchHotDeals: () async => const [
             DealModel(id: 'hd1', title: 'Deal', price: 70),
           ],
@@ -129,38 +141,10 @@ void main() {
   });
 
   group('getRecommended', () {
-    test('builds listings from the aggregate\'s recommendedForYou when present',
-        () async {
-      var hotDealsFallbackCalled = false;
-      final repo = HomeRepositoryImpl(
-        StubHomeRemoteDataSource(
-          onFetchHomeAggregate: () async => (
-            banners: <BannerModel>[],
-            hotDeals: <DealModel>[],
-            newArrivals: <DealModel>[],
-            recommendedForYou: const [DealModel(id: 'r1', title: 'Rec', price: 60)],
-          ),
-          onFetchHotDeals: () async {
-            hotDealsFallbackCalled = true;
-            return const <DealModel>[];
-          },
-        ),
-      );
-
-      final result = await repo.getRecommended();
-
-      result.fold(
-        (_) => fail('expected Right'),
-        (list) => expect(list.single.id, 'r1'),
-      );
-      expect(hotDealsFallbackCalled, isFalse);
-    });
-
-    test('falls back to hot-deals-derived listings when the aggregate has none',
+    test('derives listings from hot deals',
         () async {
       final repo = HomeRepositoryImpl(
         StubHomeRemoteDataSource(
-          onFetchHomeAggregate: () async => null,
           onFetchHotDeals: () async => const [
             DealModel(id: 'hd2', title: 'Deal', price: 40),
           ],

@@ -6,6 +6,7 @@ import '../../data/repositories/home_repository_impl.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../../domain/usecases/get_banners_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
+import '../../domain/usecases/get_home_feed_usecase.dart';
 import '../../domain/usecases/get_hot_deals_usecase.dart';
 import '../../domain/usecases/get_new_arrivals_usecase.dart';
 import '../../domain/usecases/get_recommended_usecase.dart';
@@ -22,6 +23,11 @@ HomeRemoteDataSource homeRemoteDataSource(HomeRemoteDataSourceRef ref) {
 @Riverpod(keepAlive: true)
 HomeRepository homeRepository(HomeRepositoryRef ref) {
   return HomeRepositoryImpl(ref.watch(homeRemoteDataSourceProvider));
+}
+
+@riverpod
+GetHomeFeedUseCase getHomeFeedUseCase(GetHomeFeedUseCaseRef ref) {
+  return GetHomeFeedUseCase(ref.watch(homeRepositoryProvider));
 }
 
 @riverpod

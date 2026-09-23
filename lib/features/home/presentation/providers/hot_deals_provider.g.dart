@@ -6,7 +6,7 @@ part of 'hot_deals_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$hotDealsHash() => r'08329b19223493f6ffa428f79c92ec37aac8599f';
+String _$hotDealsHash() => r'e6fff5af078d627c553572b4d797593be4021d48';
 
 /// See also [HotDeals].
 @ProviderFor(HotDeals)
