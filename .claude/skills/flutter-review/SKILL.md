@@ -1924,3 +1924,8 @@ Rules for the log:
 - **What happened:** A branch that resolved `AMPLITUDE_API_KEY` from `AppFlavor` was written against the hand-rolled Dio `/2/httpapi` client. `dev` had already switched that forwarder to `amplitude_flutter`, so the merge conflict tried to resurrect `_amplitudeHttpClient`.
 - **Rule:** Keep the SDK (`Amplitude?`, no second Dio, no `dispose` on it). Key order stays constructor override, then non-empty dart-define, then `AppFlavor.amplitudeApiKey`. Do not bring the HTTP client back when rebasing key-default work onto the SDK.
 - **Where it applies:** `analytics_service.dart` `_resolveAmplitudeApiKey`, `app_flavor.dart` `amplitudeApiKey`.
+
+### 2026-09-23 — Dead-code cleanup must leave phase-2 and other planned code in place
+- **What happened:** A cleanup pass started deleting commented-out UI that the files themselves mark as deferred (courier login, notification settings, payment methods, custom delivery, return policy, manage-store) because nothing calls it today.
+- **Rule:** Do not delete code whose comments or route notes say it is for a later phase, "hidden for now", or "keep for restore" — including the commented call site that is the restore point. Unused means abandoned, not scheduled. Settled keeps stay too: `cart_select_all_row.dart`, `wishlist_header_bar.dart`, `AppRoutes.earnings`, `AppRoutes.chatThread`.
+- **Where it applies:** Any dead-code deletion pass. Grep for `phase-2`, `deferred`, `coming soon`, `hidden for now`, and `keep for restore` before removing a symbol, comment block, or l10n key those blocks reference.
