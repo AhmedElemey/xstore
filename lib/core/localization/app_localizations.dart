@@ -176,18 +176,6 @@ abstract class AppLocalizations {
   /// **'Must start with 010, 011, 012, or 015'**
   String get phoneInvalidPrefix;
 
-  /// No description provided for @phoneInvalidNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid phone number'**
-  String get phoneInvalidNumber;
-
-  /// No description provided for @phoneTooManyRequests.
-  ///
-  /// In en, this message translates to:
-  /// **'Too many attempts. Try again later.'**
-  String get phoneTooManyRequests;
-
   /// No description provided for @sendVerificationCode.
   ///
   /// In en, this message translates to:
@@ -290,12 +278,6 @@ abstract class AppLocalizations {
   /// **'Incorrect code. Please try again.'**
   String get otpInvalidCode;
 
-  /// No description provided for @otpSessionExpired.
-  ///
-  /// In en, this message translates to:
-  /// **'Code expired. Request a new one.'**
-  String get otpSessionExpired;
-
   /// No description provided for @verify.
   ///
   /// In en, this message translates to:
@@ -350,35 +332,11 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Please try again.'**
   String get genericError;
 
-  /// No description provided for @emailTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get emailTab;
-
-  /// No description provided for @phoneTab.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get phoneTab;
-
   /// No description provided for @continueWithGoogle.
   ///
   /// In en, this message translates to:
   /// **'Continue with Google'**
   String get continueWithGoogle;
-
-  /// No description provided for @continueWithApple.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Apple'**
-  String get continueWithApple;
-
-  /// No description provided for @continueWithFacebook.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Facebook'**
-  String get continueWithFacebook;
 
   /// No description provided for @socialLoginDivider.
   ///
@@ -1172,41 +1130,11 @@ abstract class AppLocalizations {
   /// **'Good'**
   String get listingCondGood;
 
-  /// No description provided for @vendorAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Vendor Account'**
-  String get vendorAccount;
-
-  /// No description provided for @customerAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Customer account'**
-  String get customerAccount;
-
   /// No description provided for @theme.
   ///
   /// In en, this message translates to:
   /// **'Theme'**
   String get theme;
-
-  /// No description provided for @themeSystem.
-  ///
-  /// In en, this message translates to:
-  /// **'System'**
-  String get themeSystem;
-
-  /// No description provided for @themeLight.
-  ///
-  /// In en, this message translates to:
-  /// **'Light'**
-  String get themeLight;
-
-  /// No description provided for @themeDark.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark'**
-  String get themeDark;
 
   /// No description provided for @darkMode.
   ///
@@ -1286,12 +1214,6 @@ abstract class AppLocalizations {
   /// **'My Orders'**
   String get menuMyOrders;
 
-  /// No description provided for @menuAnalytics.
-  ///
-  /// In en, this message translates to:
-  /// **'Analytics'**
-  String get menuAnalytics;
-
   /// No description provided for @menuEarnings.
   ///
   /// In en, this message translates to:
@@ -1303,18 +1225,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wishlist'**
   String get menuWishlist;
-
-  /// No description provided for @menuRecentlyViewed.
-  ///
-  /// In en, this message translates to:
-  /// **'Recently Viewed'**
-  String get menuRecentlyViewed;
-
-  /// No description provided for @menuMyReviews.
-  ///
-  /// In en, this message translates to:
-  /// **'My Reviews'**
-  String get menuMyReviews;
 
   /// No description provided for @menuPersonalInfo.
   ///
@@ -1340,12 +1250,6 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get menuNotificationsSettings;
 
-  /// No description provided for @menuLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get menuLanguage;
-
   /// No description provided for @menuPaymentMethods.
   ///
   /// In en, this message translates to:
@@ -1357,12 +1261,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Addresses'**
   String get menuAddresses;
-
-  /// No description provided for @menuDarkMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark Mode'**
-  String get menuDarkMode;
 
   /// No description provided for @menuPushNotifications.
   ///
@@ -1454,95 +1352,17 @@ abstract class AppLocalizations {
   /// **'Total Saved'**
   String get statTotalSaved;
 
-  /// No description provided for @currencyDzd.
-  ///
-  /// In en, this message translates to:
-  /// **'EGP'**
-  String get currencyDzd;
-
   /// No description provided for @storeInformation.
   ///
   /// In en, this message translates to:
   /// **'Store Information'**
   String get storeInformation;
 
-  /// No description provided for @fullNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Name'**
-  String get fullNameLabel;
-
-  /// No description provided for @emailAddressLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Address'**
-  String get emailAddressLabel;
-
-  /// No description provided for @phoneNumberLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone Number'**
-  String get phoneNumberLabel;
-
-  /// No description provided for @dateOfBirthLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Date of Birth'**
-  String get dateOfBirthLabel;
-
-  /// No description provided for @locationCityLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location / City'**
-  String get locationCityLabel;
-
-  /// No description provided for @bioLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Bio / About'**
-  String get bioLabel;
-
-  /// No description provided for @bioHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Tell buyers a bit about yourself'**
-  String get bioHint;
-
-  /// No description provided for @storeNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Name'**
-  String get storeNameLabel;
-
   /// No description provided for @storeCategoryLabel.
   ///
   /// In en, this message translates to:
   /// **'Store Category'**
   String get storeCategoryLabel;
-
-  /// No description provided for @storeDescriptionLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Description'**
-  String get storeDescriptionLabel;
-
-  /// No description provided for @storeCityLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store City'**
-  String get storeCityLabel;
-
-  /// No description provided for @storeWilayaLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Governorate'**
-  String get storeWilayaLabel;
-
-  /// No description provided for @whatsappLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'WhatsApp Number'**
-  String get whatsappLabel;
 
   /// No description provided for @whatsappProductPrefill.
   ///
@@ -1628,12 +1448,6 @@ abstract class AppLocalizations {
   /// **'DELETE'**
   String get deleteConfirmKeyword;
 
-  /// No description provided for @choosePhotoSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile photo'**
-  String get choosePhotoSource;
-
   /// No description provided for @takePhoto.
   ///
   /// In en, this message translates to:
@@ -1657,30 +1471,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile updated'**
   String get profileUpdatedSuccess;
-
-  /// No description provided for @languageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get languageTitle;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
-  /// No description provided for @languageFrench.
-  ///
-  /// In en, this message translates to:
-  /// **'French'**
-  String get languageFrench;
-
-  /// No description provided for @languageArabic.
-  ///
-  /// In en, this message translates to:
-  /// **'Arabic'**
-  String get languageArabic;
 
   /// No description provided for @profileFooterLine.
   ///
@@ -1724,12 +1514,6 @@ abstract class AppLocalizations {
   /// **'This store isn\'t available right now'**
   String get storeUnavailableNow;
 
-  /// No description provided for @followStore.
-  ///
-  /// In en, this message translates to:
-  /// **'Follow Store'**
-  String get followStore;
-
   /// No description provided for @share.
   ///
   /// In en, this message translates to:
@@ -1765,12 +1549,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Response Rate'**
   String get vendorStoreStatResponse;
-
-  /// No description provided for @placeholderScreenSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This screen is coming soon.'**
-  String get placeholderScreenSubtitle;
 
   /// No description provided for @trustInfoPaymentMethodsBody.
   ///
@@ -1898,12 +1676,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// No description provided for @navCart.
-  ///
-  /// In en, this message translates to:
-  /// **'Cart'**
-  String get navCart;
-
   /// No description provided for @navAddListing.
   ///
   /// In en, this message translates to:
@@ -1939,12 +1711,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filters'**
   String get filters;
-
-  /// No description provided for @addFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'+ Filters'**
-  String get addFilters;
 
   /// No description provided for @applyFilters.
   ///
@@ -2090,18 +1856,6 @@ abstract class AppLocalizations {
   /// **'Shipping available'**
   String get shippingOnly;
 
-  /// No description provided for @gridView.
-  ///
-  /// In en, this message translates to:
-  /// **'Grid'**
-  String get gridView;
-
-  /// No description provided for @listView.
-  ///
-  /// In en, this message translates to:
-  /// **'List'**
-  String get listView;
-
   /// No description provided for @ratingStars4Plus.
   ///
   /// In en, this message translates to:
@@ -2192,12 +1946,6 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get ordersFilterCancelled;
 
-  /// No description provided for @ordersFilterRefunded.
-  ///
-  /// In en, this message translates to:
-  /// **'Refunded'**
-  String get ordersFilterRefunded;
-
   /// No description provided for @ordersSortHighestValue.
   ///
   /// In en, this message translates to:
@@ -2209,12 +1957,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Needs Action'**
   String get ordersSortNeedsAction;
-
-  /// No description provided for @ordersCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'orders'**
-  String get ordersCountLabel;
 
   /// No description provided for @ordersStatPendingLabel.
   ///
@@ -2240,41 +1982,17 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get ordersStatTotalLabel;
 
-  /// No description provided for @ordersMoreItemsSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'more item'**
-  String get ordersMoreItemsSuffix;
-
-  /// No description provided for @ordersMoreItemsSuffixPlural.
-  ///
-  /// In en, this message translates to:
-  /// **'more items'**
-  String get ordersMoreItemsSuffixPlural;
-
   /// No description provided for @ordersQtyTotalLinePrefix.
   ///
   /// In en, this message translates to:
   /// **'Qty'**
   String get ordersQtyTotalLinePrefix;
 
-  /// No description provided for @ordersFromStorePrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'From'**
-  String get ordersFromStorePrefix;
-
   /// No description provided for @ordersEstimatedDelivery.
   ///
   /// In en, this message translates to:
   /// **'🚚 Estimated'**
   String get ordersEstimatedDelivery;
-
-  /// No description provided for @ordersPaymentLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment'**
-  String get ordersPaymentLine;
 
   /// No description provided for @ordersTrackOrder.
   ///
@@ -2305,12 +2023,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery location updated'**
   String get ordersDeliveryLocationUpdated;
-
-  /// No description provided for @ordersConfirmReceipt.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Receipt'**
-  String get ordersConfirmReceipt;
 
   /// No description provided for @ordersLeaveReview.
   ///
@@ -2354,12 +2066,6 @@ abstract class AppLocalizations {
   /// **'Mark as Delivered'**
   String get ordersMarkDelivered;
 
-  /// No description provided for @ordersViewTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'View Tracking'**
-  String get ordersViewTracking;
-
   /// No description provided for @ordersShopAgain.
   ///
   /// In en, this message translates to:
@@ -2377,12 +2083,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Browse Products'**
   String get ordersBrowseProducts;
-
-  /// No description provided for @ordersDetailTitlePrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Order #'**
-  String get ordersDetailTitlePrefix;
 
   /// No description provided for @ordersShareSummary.
   ///
@@ -2425,12 +2125,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery Address'**
   String get ordersDeliveryAddressTitle;
-
-  /// No description provided for @ordersItemsSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Items Ordered'**
-  String get ordersItemsSectionTitle;
 
   /// No description provided for @ordersTrackingSectionTitle.
   ///
@@ -2491,12 +2185,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Product'**
   String get ordersViewProduct;
-
-  /// No description provided for @ordersCopyTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy'**
-  String get ordersCopyTracking;
 
   /// No description provided for @ordersTrackingCopied.
   ///
@@ -2593,18 +2281,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get ordersCancelReasonOther;
-
-  /// No description provided for @ordersConfirmReceiptTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm receipt?'**
-  String get ordersConfirmReceiptTitle;
-
-  /// No description provided for @ordersConfirmReceiptBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm you received this order?'**
-  String get ordersConfirmReceiptBody;
 
   /// No description provided for @ordersConfirm.
   ///
@@ -2756,12 +2432,6 @@ abstract class AppLocalizations {
   /// **'This order was cancelled'**
   String get statusSubtitleCancelled;
 
-  /// No description provided for @statusSubtitleRefunded.
-  ///
-  /// In en, this message translates to:
-  /// **'Refund processed'**
-  String get statusSubtitleRefunded;
-
   /// No description provided for @ordersFiltersMoreSoon.
   ///
   /// In en, this message translates to:
@@ -2774,23 +2444,11 @@ abstract class AppLocalizations {
   /// **'Order #'**
   String get orderHashPrefix;
 
-  /// No description provided for @vendorNeedsAttention.
-  ///
-  /// In en, this message translates to:
-  /// **'Needs attention'**
-  String get vendorNeedsAttention;
-
   /// No description provided for @wishlistEmptyTitle.
   ///
   /// In en, this message translates to:
   /// **'Your wishlist is empty'**
   String get wishlistEmptyTitle;
-
-  /// No description provided for @wishlistDiscoverProducts.
-  ///
-  /// In en, this message translates to:
-  /// **'Discover products'**
-  String get wishlistDiscoverProducts;
 
   /// No description provided for @wishlistForBuyersTitle.
   ///
@@ -2822,12 +2480,6 @@ abstract class AppLocalizations {
   /// **'Sort'**
   String get wishlistSort;
 
-  /// No description provided for @wishlistSortRecentlyAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Recently Added'**
-  String get wishlistSortRecentlyAdded;
-
   /// No description provided for @wishlistSortPriceLow.
   ///
   /// In en, this message translates to:
@@ -2839,18 +2491,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price: High to Low'**
   String get wishlistSortPriceHigh;
-
-  /// No description provided for @wishlistSortPriceDrop.
-  ///
-  /// In en, this message translates to:
-  /// **'Price Drop'**
-  String get wishlistSortPriceDrop;
-
-  /// No description provided for @wishlistSortBiggestDiscount.
-  ///
-  /// In en, this message translates to:
-  /// **'Biggest Discount'**
-  String get wishlistSortBiggestDiscount;
 
   /// No description provided for @wishlistSortNameAz.
   ///
@@ -2888,12 +2528,6 @@ abstract class AppLocalizations {
   /// **'View Price Drops'**
   String get wishlistViewPriceDrops;
 
-  /// No description provided for @wishlistPriceDropBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Price Drop'**
-  String get wishlistPriceDropBadge;
-
   /// No description provided for @wishlistOutOfStock.
   ///
   /// In en, this message translates to:
@@ -2924,12 +2558,6 @@ abstract class AppLocalizations {
   /// **'✓ In Cart'**
   String get wishlistInCartCta;
 
-  /// No description provided for @wishlistSwipeAddCart.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Cart'**
-  String get wishlistSwipeAddCart;
-
   /// No description provided for @wishlistMoveAllToCart.
   ///
   /// In en, this message translates to:
@@ -2947,12 +2575,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Cart'**
   String get wishlistViewCart;
-
-  /// No description provided for @wishlistRemoveSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Selected'**
-  String get wishlistRemoveSelected;
 
   /// No description provided for @wishlistSavedSnack.
   ///
@@ -2977,12 +2599,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show All Items'**
   String get wishlistShowAllItems;
-
-  /// No description provided for @wishlistReviewsWord.
-  ///
-  /// In en, this message translates to:
-  /// **'reviews'**
-  String get wishlistReviewsWord;
 
   /// No description provided for @wishlistGridContentDesc.
   ///
@@ -3097,12 +2713,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'♡ Save for Later'**
   String get cartSaveForLater;
-
-  /// No description provided for @cartUnavailableBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Unavailable'**
-  String get cartUnavailableBadge;
 
   /// No description provided for @cartSwipeRemove.
   ///
@@ -3266,29 +2876,11 @@ abstract class AppLocalizations {
   /// **'Full Name'**
   String get checkoutFullName;
 
-  /// No description provided for @checkoutPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get checkoutPhone;
-
   /// No description provided for @checkoutStreet.
   ///
   /// In en, this message translates to:
   /// **'Street'**
   String get checkoutStreet;
-
-  /// No description provided for @checkoutCity.
-  ///
-  /// In en, this message translates to:
-  /// **'City'**
-  String get checkoutCity;
-
-  /// No description provided for @checkoutWilaya.
-  ///
-  /// In en, this message translates to:
-  /// **'Governorate'**
-  String get checkoutWilaya;
 
   /// No description provided for @checkoutPostalCode.
   ///
@@ -3434,36 +3026,6 @@ abstract class AppLocalizations {
   /// **'💳 CIB Card'**
   String get checkoutPayCibTitle;
 
-  /// No description provided for @checkoutPayCibSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Debit/Credit card payment'**
-  String get checkoutPayCibSubtitle;
-
-  /// No description provided for @checkoutPayDahabiTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'🟡 Dahabicard'**
-  String get checkoutPayDahabiTitle;
-
-  /// No description provided for @checkoutPayDahabiSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Egypt Post golden card'**
-  String get checkoutPayDahabiSubtitle;
-
-  /// No description provided for @checkoutPayBaridiTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'🟢 BaridiMob'**
-  String get checkoutPayBaridiTitle;
-
-  /// No description provided for @checkoutPayBaridiSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Egypt Post mobile payment'**
-  String get checkoutPayBaridiSubtitle;
-
   /// No description provided for @checkoutCardExpiry.
   ///
   /// In en, this message translates to:
@@ -3518,12 +3080,6 @@ abstract class AppLocalizations {
   /// **'Return Policy'**
   String get checkoutReturnPolicy;
 
-  /// No description provided for @checkoutPlaceOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'🛒 Place Order'**
-  String get checkoutPlaceOrder;
-
   /// No description provided for @checkoutErrorNoAddress.
   ///
   /// In en, this message translates to:
@@ -3559,12 +3115,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid CVV (3–4 digits)'**
   String get checkoutErrorCvv;
-
-  /// No description provided for @checkoutPaymentSecure.
-  ///
-  /// In en, this message translates to:
-  /// **'Your payment info is encrypted'**
-  String get checkoutPaymentSecure;
 
   /// No description provided for @checkoutErrorGeneric.
   ///
@@ -3920,18 +3470,6 @@ abstract class AppLocalizations {
   /// **'✅ Verified Seller'**
   String get verifiedSeller;
 
-  /// No description provided for @sellerRatingMid.
-  ///
-  /// In en, this message translates to:
-  /// **' Seller · '**
-  String get sellerRatingMid;
-
-  /// No description provided for @sellerSalesSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **' sales'**
-  String get sellerSalesSuffix;
-
   /// No description provided for @onlyLeftPrefix.
   ///
   /// In en, this message translates to:
@@ -3974,12 +3512,6 @@ abstract class AppLocalizations {
   /// **'Inquiries'**
   String get listingInquiries;
 
-  /// No description provided for @editListing.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get editListing;
-
   /// No description provided for @editListingMenu.
   ///
   /// In en, this message translates to:
@@ -4015,12 +3547,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resume'**
   String get resumeListing;
-
-  /// No description provided for @listingStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Statistics'**
-  String get listingStats;
 
   /// No description provided for @deleteListing.
   ///
@@ -4178,12 +3704,6 @@ abstract class AppLocalizations {
   /// **'Something went wrong on our end. Please try again in a moment.'**
   String get serverErrorMessage;
 
-  /// No description provided for @emptyInbox.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing here yet'**
-  String get emptyInbox;
-
   /// No description provided for @incomingOrders.
   ///
   /// In en, this message translates to:
@@ -4201,12 +3721,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm All Pending'**
   String get vendorConfirmAllPending;
-
-  /// No description provided for @vendorViewAnalytics.
-  ///
-  /// In en, this message translates to:
-  /// **'View Analytics'**
-  String get vendorViewAnalytics;
 
   /// No description provided for @vendorStatPendingOrders.
   ///
@@ -4268,12 +3782,6 @@ abstract class AppLocalizations {
   /// **'By Buyer Name A–Z'**
   String get vendorSortBuyerName;
 
-  /// No description provided for @vendorNewOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'NEW ORDER'**
-  String get vendorNewOrder;
-
   /// No description provided for @vendorRejectOrder.
   ///
   /// In en, this message translates to:
@@ -4334,12 +3842,6 @@ abstract class AppLocalizations {
   /// **'Shipping Information'**
   String get vendorShippingInfoTitle;
 
-  /// No description provided for @vendorViewOnMap.
-  ///
-  /// In en, this message translates to:
-  /// **'View on Map'**
-  String get vendorViewOnMap;
-
   /// No description provided for @vendorCollectOnDelivery.
   ///
   /// In en, this message translates to:
@@ -4375,18 +3877,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order Settings'**
   String get vendorOrderSettings;
-
-  /// No description provided for @vendorPrintOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Print Order'**
-  String get vendorPrintOrder;
-
-  /// No description provided for @vendorReportIssue.
-  ///
-  /// In en, this message translates to:
-  /// **'Report Issue'**
-  String get vendorReportIssue;
 
   /// No description provided for @vendorReasonItemUnavailable.
   ///
@@ -4435,12 +3925,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'XS-TRACK-2024-001'**
   String get vendorTrackingHint;
-
-  /// No description provided for @vendorShippingNoteHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Package handed to courier, estimated 3–5 days'**
-  String get vendorShippingNoteHint;
 
   /// No description provided for @vendorOrderRejectedSnack.
   ///
@@ -4507,12 +3991,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This order was cancelled'**
   String get vendorStatusCancelled;
-
-  /// No description provided for @vendorStatusRefunded.
-  ///
-  /// In en, this message translates to:
-  /// **'Refunded'**
-  String get vendorStatusRefunded;
 
   /// No description provided for @didntReceiveCode.
   ///
@@ -4598,12 +4076,6 @@ abstract class AppLocalizations {
   /// **'Items Ordered ({n})'**
   String ordersItemsSectionCount(int n);
 
-  /// No description provided for @wishlistAppBarTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'My Wishlist ({n})'**
-  String wishlistAppBarTitle(int n);
-
   /// No description provided for @wishlistSelectedCount.
   ///
   /// In en, this message translates to:
@@ -4621,12 +4093,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'↓ {p}% Price Drop'**
   String wishlistPriceDropPercent(int p);
-
-  /// No description provided for @wishlistMoveAllSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} items added to cart'**
-  String wishlistMoveAllSummary(int n);
 
   /// No description provided for @wishlistShareText.
   ///
@@ -4651,12 +4117,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove Selected ({n})'**
   String wishlistRemoveSelectedCount(int n);
-
-  /// No description provided for @wishlistFilterEmptyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No {filterName} items'**
-  String wishlistFilterEmptyTitle(String filterName);
 
   /// No description provided for @wishlistAddedToCartCount.
   ///
@@ -4718,12 +4178,6 @@ abstract class AppLocalizations {
   /// **'Proceed to Checkout ({total})'**
   String cartProceedCheckoutTotal(String total);
 
-  /// No description provided for @cartCheckoutItems.
-  ///
-  /// In en, this message translates to:
-  /// **'Checkout ({n} items)'**
-  String cartCheckoutItems(int n);
-
   /// No description provided for @checkoutItemsFromSellers.
   ///
   /// In en, this message translates to:
@@ -4777,12 +4231,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'you@email.com'**
   String get enterEmailHint;
-
-  /// No description provided for @validEmailOrPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Valid email or 10+ digit phone'**
-  String get validEmailOrPhone;
 
   /// No description provided for @passwordMask.
   ///
@@ -5108,35 +4556,11 @@ abstract class AppLocalizations {
   /// **'e.g. Ahmed Mohamed'**
   String get fullNameHint;
 
-  /// No description provided for @fullNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Name (Arabic) *'**
-  String get fullNameArRequired;
-
   /// No description provided for @emailAddressRequired.
   ///
   /// In en, this message translates to:
   /// **'Email Address *'**
   String get emailAddressRequired;
-
-  /// No description provided for @emailAddressOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Address (optional — for password recovery)'**
-  String get emailAddressOptional;
-
-  /// No description provided for @locationCityRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Location / City *'**
-  String get locationCityRequired;
-
-  /// No description provided for @locationHintAlgiers.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Cairo'**
-  String get locationHintAlgiers;
 
   /// No description provided for @secureYourAccount.
   ///
@@ -5282,29 +4706,11 @@ abstract class AppLocalizations {
   /// **'Describe your store and what makes it unique...'**
   String get storeDescriptionHint;
 
-  /// No description provided for @storeLogoOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Logo (optional)'**
-  String get storeLogoOptional;
-
   /// No description provided for @storeLogoRequired.
   ///
   /// In en, this message translates to:
   /// **'Store Logo *'**
   String get storeLogoRequired;
-
-  /// No description provided for @cityRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'City *'**
-  String get cityRequired;
-
-  /// No description provided for @wilayaRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Governorate *'**
-  String get wilayaRequired;
 
   /// No description provided for @sellerFallbackName.
   ///
@@ -6002,12 +5408,6 @@ abstract class AppLocalizations {
   /// **'Enter a valid phone number'**
   String get validationRegisterPhoneInvalid;
 
-  /// No description provided for @validationCityRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'City is required'**
-  String get validationCityRequired;
-
   /// No description provided for @validationAgeMinimum18.
   ///
   /// In en, this message translates to:
@@ -6073,24 +5473,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'City and governorate are required'**
   String get validationStoreCityWilayaRequired;
-
-  /// No description provided for @validationFullNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Arabic full name is required'**
-  String get validationFullNameArRequired;
-
-  /// No description provided for @validationStoreNameArRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Arabic store name is required'**
-  String get validationStoreNameArRequired;
-
-  /// No description provided for @validationStoreDescriptionArShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe your store in Arabic'**
-  String get validationStoreDescriptionArShort;
 
   /// No description provided for @listingValidationPhotosRequired.
   ///
@@ -6397,12 +5779,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Directions in Google Maps'**
   String get courierNavigateHint;
-
-  /// No description provided for @loginAsCourierDemo.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in as delivery driver (demo)'**
-  String get loginAsCourierDemo;
 
   /// No description provided for @loginAsCourier.
   ///

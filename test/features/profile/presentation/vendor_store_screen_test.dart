@@ -53,12 +53,6 @@ class _MissingStoreRepo implements ProfileRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, String>> updateAvatar({
-    required String userId,
-    required String filePath,
-  }) => throw UnimplementedError();
-
-  @override
   Future<Either<Failure, Unit>> deleteAccount({
     required String password,
     required String confirmationText,
@@ -270,12 +264,6 @@ class _PublicStoreRepo implements ProfileRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, String>> updateAvatar({
-    required String userId,
-    required String filePath,
-  }) => throw UnimplementedError();
-
-  @override
   Future<Either<Failure, Unit>> deleteAccount({
     required String password,
     required String confirmationText,
@@ -321,12 +309,6 @@ class _OwnStoreRepo implements ProfileRepository {
   Future<Either<Failure, UserEntity>> updateProfile(
     UpdateProfileRequest request, {
     required UserEntity sessionUser,
-  }) => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, String>> updateAvatar({
-    required String userId,
-    required String filePath,
   }) => throw UnimplementedError();
 
   @override

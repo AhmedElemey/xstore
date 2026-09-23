@@ -1,6 +1,5 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:xstore/core/error/failures.dart';
-import 'package:xstore/features/auth/domain/entities/auth_token_pair.dart';
 import 'package:xstore/features/auth/domain/entities/consumer_register_params.dart';
 import 'package:xstore/features/auth/domain/entities/login_params.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
@@ -17,7 +16,6 @@ class StubAuthRepository implements AuthRepository {
     Either<Failure, Unit>? changePasswordResult,
     Either<Failure, String?>? forgotPasswordResult,
     Either<Failure, Unit>? verifyForgotPasswordOtpResult,
-    Either<Failure, AuthTokenPair>? refreshTokenResult,
   })  : _loginResult = loginResult ?? Left(Failure.server('stub login')),
         _registerConsumerResult = registerConsumerResult ??
             Left(Failure.server('stub register consumer')),
@@ -28,9 +26,7 @@ class StubAuthRepository implements AuthRepository {
         _forgotPasswordResult = forgotPasswordResult ??
             Left(Failure.server('stub forgot password')),
         _verifyForgotPasswordOtpResult = verifyForgotPasswordOtpResult ??
-            Left(Failure.server('stub verify forgot password otp')),
-        _refreshTokenResult = refreshTokenResult ??
-            Left(Failure.server('stub refresh token'));
+            Left(Failure.server('stub verify forgot password otp'));
 
   final UserEntity? restoreUser;
   final Either<Failure, UserEntity> _loginResult;
@@ -39,7 +35,6 @@ class StubAuthRepository implements AuthRepository {
   final Either<Failure, Unit> _changePasswordResult;
   final Either<Failure, String?> _forgotPasswordResult;
   final Either<Failure, Unit> _verifyForgotPasswordOtpResult;
-  final Either<Failure, AuthTokenPair> _refreshTokenResult;
 
   @override
   Future<Either<Failure, UserEntity?>> restoreSession() async =>
@@ -93,10 +88,6 @@ class StubAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthTokenPair>> refreshToken(String token) async =>
-      _refreshTokenResult;
-
-  @override
   Future<Either<Failure, String?>> sendEmailOtp(String email) async =>
       Left(Failure.server('stub'));
 
@@ -138,9 +129,6 @@ class StubAuthRepository implements AuthRepository {
   @override
   Future<Either<Failure, SocialAuthResult>> signInWithGoogle() async =>
       Left(Failure.socialAuth('stub'));
-
-  @override
-  Future<Either<Failure, Unit>> signOutSocial() async => const Right(unit);
 
   @override
   Future<Either<Failure, String?>> sendLoginOtp(String phoneNumber) async =>

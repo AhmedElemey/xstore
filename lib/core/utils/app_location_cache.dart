@@ -45,8 +45,7 @@ abstract final class AppLocationCache {
     return lng;
   }
 
-  /// Approximate Egypt bounding box used by the live API (and
-  /// [LocationService.isInEgypt]).
+  /// Approximate Egypt bounding box used by the live API.
   static bool isInEgypt(double lat, double lng) {
     return lat >= 22.0 && lat <= 31.7 && lng >= 25.0 && lng <= 37.0;
   }

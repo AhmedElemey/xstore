@@ -36,40 +36,4 @@ extension AnimateExtensions on Widget {
         );
   }
 
-  Widget slideFromRight({
-    Duration delay = Duration.zero,
-    Duration duration = const Duration(milliseconds: 300),
-  }) {
-    return animate(delay: delay)
-        .fadeIn(duration: duration)
-        .slideX(
-          begin: 0.1,
-          end: 0,
-          duration: duration,
-          curve: AppAnimations.enter,
-        );
-  }
-
-  Widget pulse({
-    Duration duration = const Duration(milliseconds: 800),
-  }) {
-    return animate(
-      onPlay: (c) => c.repeat(reverse: true),
-    ).scale(
-      begin: const Offset(1.0, 1.0),
-      end: const Offset(1.05, 1.05),
-      duration: duration,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  Widget shake({
-    Duration duration = const Duration(milliseconds: 500),
-  }) {
-    return animate().shake(
-      hz: 4,
-      offset: const Offset(4, 0),
-      duration: duration,
-    );
-  }
 }

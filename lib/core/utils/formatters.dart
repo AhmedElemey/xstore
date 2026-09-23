@@ -1,9 +1,6 @@
 import '../constants/app_strings.dart';
 
 abstract final class Formatters {
-  static String currency(num amount, {String symbol = r'$'}) {
-    return '$symbol${amount.toStringAsFixed(2)}';
-  }
 
   /// Compact posted date for listings (local timezone when set).
   static String shortDate(DateTime date) {

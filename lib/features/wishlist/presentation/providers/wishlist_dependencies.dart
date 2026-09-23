@@ -6,7 +6,6 @@ import '../../data/datasources/wishlist_remote_datasource.dart';
 import '../../data/repositories/wishlist_repository_impl.dart';
 import '../../domain/repositories/wishlist_repository.dart';
 import '../../domain/usecases/add_to_wishlist_usecase.dart';
-import '../../domain/usecases/clear_wishlist_usecase.dart';
 import '../../domain/usecases/get_wishlist_usecase.dart';
 import '../../domain/usecases/move_to_cart_usecase.dart';
 import '../../domain/usecases/remove_from_wishlist_usecase.dart';
@@ -48,7 +47,3 @@ MoveToCartUseCase moveToCartUseCase(MoveToCartUseCaseRef ref) {
   return MoveToCartUseCase(ref.watch(wishlistRepositoryProvider));
 }
 
-@riverpod
-ClearWishlistUseCase clearWishlistUseCase(ClearWishlistUseCaseRef ref) {
-  return ClearWishlistUseCase(ref.watch(wishlistRepositoryProvider));
-}

@@ -51,7 +51,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   VendorRegisterParams? lastVendorRegisterParams;
   String? lastChangePasswordCurrent;
   String? lastForgotPasswordEmail;
-  String? lastRefreshTokenInput;
 
   final UserModel socialResponse = mockConsumerUserModel(
     email: 'social@xstore.com',
@@ -105,14 +104,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
     required String confirmNewPassword,
   }) =>
       throw UnimplementedError();
-
-  @override
-  Future<({String token, String refreshToken})> refreshToken(
-    String token,
-  ) async {
-    lastRefreshTokenInput = token;
-    return (token: 'refreshed-token', refreshToken: 'new-refresh-token');
-  }
 
   @override
   Future<String?> sendEmailOtp(String email) => throw UnimplementedError();
@@ -387,21 +378,6 @@ void main() {
       });
     });
 
-    test('refreshToken persists the new token pair', () async {
-      final result = await repository.refreshToken('stale-token');
-
-      expect(result.isRight(), isTrue);
-      expect(remote.lastRefreshTokenInput, 'stale-token');
-      expect(await readStoredToken(), 'refreshed-token');
-      expect(
-        await storage.read(key: PrefsKeys.authRefreshToken),
-        'new-refresh-token',
-      );
-      result.fold((_) => fail('expected right'), (pair) {
-        expect(pair.token, 'refreshed-token');
-        expect(pair.refreshToken, 'new-refresh-token');
-      });
-    });
   });
 
   group('AuthRepositoryImpl mock mode default wiring', () {

@@ -24,7 +24,6 @@ import '../../domain/usecases/register_vendor_usecase.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/verify_forgot_password_otp_usecase.dart';
-import '../../domain/usecases/refresh_token_usecase.dart';
 import '../../domain/usecases/send_email_otp_usecase.dart';
 import '../../domain/usecases/verify_email_otp_usecase.dart';
 import '../../domain/usecases/send_phone_otp_backend_usecase.dart';
@@ -102,11 +101,6 @@ VerifyForgotPasswordOtpUseCase verifyForgotPasswordOtpUseCase(
   VerifyForgotPasswordOtpUseCaseRef ref,
 ) {
   return VerifyForgotPasswordOtpUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-RefreshTokenUseCase refreshTokenUseCase(RefreshTokenUseCaseRef ref) {
-  return RefreshTokenUseCase(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
@@ -418,14 +412,12 @@ class RegisterNotifier extends _$RegisterNotifier {
     String? fullNameAr,
     String? email,
     String? phoneNumber,
-    String? countryCode,
     DateTime? dateOfBirth,
     String? location,
     String? storeName,
     String? storeCategory,
     String? storeDescription,
     String? storeCity,
-    String? storeWilaya,
     int? storeCategoryId,
     int? storeCityId,
     int? storeGovernmentId,
@@ -436,7 +428,6 @@ class RegisterNotifier extends _$RegisterNotifier {
     if (fullNameAr != null) next = next.copyWith(fullNameAr: fullNameAr);
     if (email != null) next = next.copyWith(email: email);
     if (phoneNumber != null) next = next.copyWith(phoneNumber: phoneNumber);
-    if (countryCode != null) next = next.copyWith(countryCode: countryCode);
     if (dateOfBirth != null) {
       final d = Validators.calendarDate(dateOfBirth);
       if (Validators.isBirthDateAfterToday(d)) return;
@@ -459,7 +450,6 @@ class RegisterNotifier extends _$RegisterNotifier {
       next = next.copyWith(storeDescription: t);
     }
     if (storeCity != null) next = next.copyWith(storeCity: storeCity);
-    if (storeWilaya != null) next = next.copyWith(storeWilaya: storeWilaya);
     if (storeCategoryId != null) {
       next = next.copyWith(storeCategoryId: storeCategoryId);
     }

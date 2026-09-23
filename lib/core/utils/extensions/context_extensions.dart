@@ -58,16 +58,10 @@ extension BuildContextX on BuildContext {
 
   Color get dividerColor => theme.dividerColor;
 
-  Color get shadowColor =>
-      isDark ? AppColors.darkShadow : AppColors.lightShadow;
-
   Color get cardShadowColor =>
       Colors.black.withValues(alpha: isDark ? 0.28 : 0.08);
 
   Color get primaryColor => colorScheme.primary;
-
-  Color get overlayColor =>
-      isDark ? AppColors.darkOverlay : AppColors.lightOverlay;
 
   void showSnack(String message) {
     AppSnackbar.info(this, message);
@@ -78,7 +72,6 @@ extension LocalizationContext on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 
   bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';
-  bool get isEnglish => Localizations.localeOf(this).languageCode == 'en';
 
   ui.TextDirection get localizedTextDirection =>
       isArabic ? ui.TextDirection.rtl : ui.TextDirection.ltr;
@@ -88,8 +81,6 @@ extension LocalizationContext on BuildContext {
 
   IconData get chevronForward =>
       isArabic ? LucideIcons.chevronLeft : LucideIcons.chevronRight;
-  IconData get chevronBack =>
-      isArabic ? LucideIcons.chevronRight : LucideIcons.chevronLeft;
 
   IconData get arrowForwardIcon =>
       isArabic ? LucideIcons.arrowLeft : LucideIcons.arrowRight;

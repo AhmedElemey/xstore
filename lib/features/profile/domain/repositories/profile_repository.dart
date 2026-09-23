@@ -16,11 +16,6 @@ abstract interface class ProfileRepository {
     required UserEntity sessionUser,
   });
 
-  Future<Either<Failure, String>> updateAvatar({
-    required String userId,
-    required String filePath,
-  });
-
   Future<Either<Failure, Unit>> deleteAccount({
     required String password,
     required String confirmationText,

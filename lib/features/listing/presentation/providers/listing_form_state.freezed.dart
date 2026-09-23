@@ -153,7 +153,7 @@ abstract class _AttributeEntry implements AttributeEntry {
 
 /// @nodoc
 mixin _$ListingFormState {
-  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
+  /// Persisted image paths (max 5).
   List<String> get photoPaths => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get priceInput => throw _privateConstructorUsedError;
@@ -186,9 +186,9 @@ mixin _$ListingFormState {
   String get editingListingId => throw _privateConstructorUsedError;
 
   /// The listing's current status when editing. Resent unchanged on
-  /// update except for drafts, which publish as [ListingStatus.active]
-  /// — Update on a draft is the publish action, not a status-preserving
-  /// edit.
+  /// update except for drafts, which publish as [ListingStatus.pending]
+  /// — Update on a draft is the submit-for-review action, not a
+  /// status-preserving edit. Active is set by admin approve.
   ListingStatus? get editingStatus => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -521,10 +521,10 @@ class _$ListingFormStateImpl implements _ListingFormState {
         _errors = errors,
         _existingImageUrls = existingImageUrls;
 
-  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
+  /// Persisted image paths (max 5).
   final List<String> _photoPaths;
 
-  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
+  /// Persisted image paths (max 5).
   @override
   @JsonKey()
   List<String> get photoPaths {
@@ -621,9 +621,9 @@ class _$ListingFormStateImpl implements _ListingFormState {
   final String editingListingId;
 
   /// The listing's current status when editing. Resent unchanged on
-  /// update except for drafts, which publish as [ListingStatus.active]
-  /// — Update on a draft is the publish action, not a status-preserving
-  /// edit.
+  /// update except for drafts, which publish as [ListingStatus.pending]
+  /// — Update on a draft is the submit-for-review action, not a
+  /// status-preserving edit. Active is set by admin approve.
   @override
   final ListingStatus? editingStatus;
 
@@ -734,7 +734,7 @@ abstract class _ListingFormState implements ListingFormState {
 
   @override
 
-  /// Persisted image paths (max 5). Use [ListingFormStateSpec.photos] for `List<File>`.
+  /// Persisted image paths (max 5).
   List<String> get photoPaths;
   @override
   String get name;
@@ -786,9 +786,9 @@ abstract class _ListingFormState implements ListingFormState {
   @override
 
   /// The listing's current status when editing. Resent unchanged on
-  /// update except for drafts, which publish as [ListingStatus.active]
-  /// — Update on a draft is the publish action, not a status-preserving
-  /// edit.
+  /// update except for drafts, which publish as [ListingStatus.pending]
+  /// — Update on a draft is the submit-for-review action, not a
+  /// status-preserving edit. Active is set by admin approve.
   ListingStatus? get editingStatus;
   @override
   @JsonKey(ignore: true)
