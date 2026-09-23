@@ -21,7 +21,12 @@ part 'fcm_push_handling_provider.g.dart';
 /// Foreground display, tap routing, and inbox refresh for FCM.
 @Riverpod(keepAlive: true)
 void fcmPushHandling(FcmPushHandlingRef ref) {
+  // Taps on the local notifications raised for foreground/data-only pushes.
   bindFcmLocalNotificationTapHandler((route) {
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.pushNotificationOpened,
+      properties: {AnalyticsProps.screenName: route},
+    );
     unawaited(navigateToPushRoute(ref, route));
   });
 
@@ -79,7 +84,7 @@ class _InboxResumeObserver extends WidgetsBindingObserver {
 Future<void> _handleInitialMessage(Ref ref) async {
   final message = await FirebaseMessaging.instance.getInitialMessage();
   if (message == null) return;
-  _openFromMessage(ref, message, deferUntilAuthenticated: true);
+  _openFromMessage(ref, message);
 }
 
 /// Android cold-launch-by-tap: `onDidReceiveNotificationResponse` never
@@ -92,16 +97,10 @@ void _handlePendingLocalNotificationLaunch(Ref ref) {
     AnalyticsEvents.pushNotificationOpened,
     properties: {AnalyticsProps.screenName: route},
   );
-  unawaited(
-    navigateToPushRoute(ref, route, deferUntilAuthenticated: true),
-  );
+  unawaited(navigateToPushRoute(ref, route));
 }
 
-void _openFromMessage(
-  Ref ref,
-  RemoteMessage message, {
-  bool deferUntilAuthenticated = false,
-}) {
+void _openFromMessage(Ref ref, RemoteMessage message) {
   final route = routeFromRemoteMessage(message);
   if (route == null) return;
   ref.read(analyticsServiceProvider).track(
@@ -111,13 +110,7 @@ void _openFromMessage(
       AnalyticsProps.screenName: route,
     },
   );
-  unawaited(
-    navigateToPushRoute(
-      ref,
-      route,
-      deferUntilAuthenticated: deferUntilAuthenticated,
-    ),
-  );
+  unawaited(navigateToPushRoute(ref, route));
 }
 
 Future<void> _onForegroundMessage(Ref ref, RemoteMessage message) async {
