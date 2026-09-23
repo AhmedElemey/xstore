@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../analytics/analytics_service.dart';
 import '../analytics/event_names.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../firebase/fcm_push_navigation.dart';
 import '../router/app_router.dart';
 import '../router/app_routes.dart';
@@ -14,10 +16,7 @@ import 'deep_link_route.dart';
 /// Watched once from [XstoreApp] alongside `fcmPushHandlingProvider` — both
 /// resolve an external trigger (a tapped link, a tapped push) to a
 /// go_router path and are the single place each kind of trigger is wired.
-/// Guest-accessible links (product, seller, category — see
-/// `isGuestAccessibleRoute`) navigate immediately; account-bound links
-/// (order) are staged behind login via the same
-/// `navigateToPushRoute`/`pendingPushRouteProvider` mechanism push taps use.
+/// See [openDeepLinkRoute] for how each resolved route is opened.
 ///
 /// Kept alive (not autoDispose): the incoming-link stream must keep
 /// listening for the app's whole lifetime.
@@ -33,11 +32,7 @@ final deepLinkHandlingProvider = Provider<void>((ref) {
         AnalyticsEvents.deepLinkOpened,
         properties: {AnalyticsProps.screenName: route},
       );
-      if (isGuestAccessibleRoute(Uri.parse(route).path)) {
-        ref.read(goRouterProvider).go(route);
-      } else {
-        unawaited(navigateToPushRoute(ref, route));
-      }
+      unawaited(openDeepLinkRoute(ref, route));
     },
     onError: (Object error) {
       if (kDebugMode) debugPrint('Deep link stream error: $error');
@@ -46,3 +41,25 @@ final deepLinkHandlingProvider = Provider<void>((ref) {
 
   ref.onDispose(() => unawaited(subscription.cancel()));
 });
+
+/// Guest-browsable links (product, seller, category — see
+/// `isGuestAccessibleRoute`) open right away. A signed-out user who never
+/// chose guest mode (e.g. a fresh install) is put into guest mode first,
+/// so the router redirect doesn't send them to login and lose the link.
+/// Account-bound links (order) are staged behind login via the same
+/// `navigateToPushRoute`/`pendingPushRouteProvider` path push taps use.
+Future<void> openDeepLinkRoute(Ref ref, String route) async {
+  if (!isGuestAccessibleRoute(Uri.parse(route).path)) {
+    return navigateToPushRoute(ref, route);
+  }
+  // Cold start: wait for the session restore before deciding.
+  try {
+    await ref.read(authProvider.future);
+  } catch (_) {
+    // A failed restore reads as signed out below.
+  }
+  if (ref.read(authProvider).valueOrNull == null) {
+    await ref.read(guestModeProvider.notifier).enable();
+  }
+  ref.read(goRouterProvider).go(route);
+}

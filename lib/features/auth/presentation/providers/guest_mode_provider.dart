@@ -14,6 +14,10 @@ part 'guest_mode_provider.g.dart';
 /// [AppThemeMode]) and is cleared as soon as a real session is adopted.
 @Riverpod(keepAlive: true)
 class GuestMode extends _$GuestMode {
+  /// Set once enable()/disable() runs, so a slower initial prefs load never
+  /// overwrites that explicit choice with the old saved value.
+  var _explicitlySet = false;
+
   @override
   bool build() {
     _loadSaved();
@@ -24,7 +28,7 @@ class GuestMode extends _$GuestMode {
     try {
       final prefs = await ref.read(sharedPreferencesProvider.future);
       final saved = prefs.getBool(PrefsKeys.guestMode) ?? false;
-      if (state != saved) {
+      if (!_explicitlySet && state != saved) {
         state = saved;
       }
     } catch (_) {
@@ -37,6 +41,7 @@ class GuestMode extends _$GuestMode {
   Future<void> disable() => _set(false);
 
   Future<void> _set(bool value) async {
+    _explicitlySet = true;
     state = value;
     try {
       final prefs = await ref.read(sharedPreferencesProvider.future);

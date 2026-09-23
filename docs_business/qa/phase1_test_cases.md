@@ -163,8 +163,8 @@ Test with `adb shell am start -a android.intent.action.VIEW -d <url>` and iOS No
 |---|---|---|---|---|---|---|
 | DL-01 | P0 | Product link, signed in | Open `https://xstore.com/product/<id>` | Product detail; `deep_link_opened` tracked | `core/deeplink/deep_link_route_test.dart` + Manual | ✅ |
 | DL-02 | P1 | Seller / category links | `/seller/<id>`, `/category/<name>` | Store page / Explore filtered by category | `core/deeplink/deep_link_route_test.dart` | ✅ |
-| DL-03 | P1 | Product link, guest | Returning guest opens a product link | Product detail without login | Manual | ✅ |
-| DL-04 | P1 | Product link, first-time user | Fresh install (never guest, never signed in) → open a product link | Currently: login screen, the product is lost | Manual | ⚠️ product decision: open as guest, or stage the link behind login? |
+| DL-03 | P1 | Product link, guest | Returning guest opens a product link | Product detail without login | `core/deeplink/deep_link_open_route_test.dart` + Manual | ✅ |
+| DL-04 | P1 | Product link, first-time user | Fresh install (never guest, never signed in) → open a product link | App enters guest mode and opens the product (no login screen); guest mode persists; checkout/cart still ask for login | `core/deeplink/deep_link_open_route_test.dart` | 🐞 fixed (landed on login and lost the product; product decision: open as guest) |
 | DL-05 | P0 | Order link | `/order/<id>` signed out, then log in | Login first, then the order (vendor: vendor order detail) | `auth_redirect_and_providers_test.dart`, `core/firebase/fcm_push_navigation_test.dart` | ✅ |
 | DL-06 | P2 | Unknown link | `https://xstore.com/foo/bar`, other hosts | Ignored; app opens normally | `core/deeplink/deep_link_route_test.dart` | ✅ |
 
@@ -213,10 +213,10 @@ Found by walking every case against the code and the test suite. Each automated 
 | 3 | CHK-06 | P1 | `Checkout.placeOrder` had no in-flight guard; only the button's rebuild prevented a second set of orders (no idempotency key on `POST /api/orders`). | Fixed with an `isPlacingOrder` guard; `checkout_order_flow_test.dart`. |
 | 4 | NOTIF-07 / ANL-07 | P1 | Tapping the local notification raised for a foreground push did not send `push_notification_opened`, contrary to the analytics handoff. | Fixed in `fcm_push_handling_provider.dart`; Manual verification (needs FirebaseMessaging). |
 | 5 | CHK-04, CHK-05 | P0 (coverage) | Partial-failure checkout and pinned-address coordinates were correct in code but had no tests. | Tests added in `features/cart/data/datasources/cart_remote_datasource_test.dart`. |
-| 6 | DL-04 | P1 | A first-time user who opens a shared product link lands on login and the product is lost. | ⚠️ Product decision needed; not changed. |
+| 6 | DL-04 | P1 | A first-time user who opened a shared product link landed on login and lost the product. While fixing it: `GuestMode`'s initial prefs load could overwrite a concurrent `enable()` with the stale saved `false`. | Product decision: open as guest. `openDeepLinkRoute` enables guest mode for signed-out users on guest-browsable links; `GuestMode` ignores the initial load once set explicitly. `core/deeplink/deep_link_open_route_test.dart`. |
 | 7 | ANL-06 | P2 | Collector 5xx/401 back-off and the 500-event queue cap have no automated test. | ⚠️ Open; Manual for now. |
 | 8 | EXP-02 | P2 | `explore_screen_route_category_test.dart` "second category tap" fails on `dev` in the full run. | Known pre-existing failure. |
 | 9 | — | P2 | `profile_screen_test.dart` (6 tests) fail on `dev` with a pending Timer. | Known pre-existing failure. |
 | 10 | HOME-02, VND-06, VND-11, VND-12, ORD-06, EXP-05, AUTH-13 | P0–P1 | Audit findings. | Fixed earlier in PR #49. |
 
-**Manual-only gaps worth automating next:** NOTIF-02/03/07 need a fake for `FirebaseMessaging` streams and `flutter_local_notifications`; DL-01/03 need an `AppLinks` stream fake. Each is one small seam (inject the stream into the provider).
+**Manual-only gaps worth automating next:** NOTIF-02/03/07 need a fake for `FirebaseMessaging` streams and `flutter_local_notifications`; DL-01/03 still need an `AppLinks` stream fake for the stream wiring itself (the routing logic is now tested via `openDeepLinkRoute`). Each is one small seam (inject the stream into the provider).

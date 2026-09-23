@@ -1988,3 +1988,8 @@ Rules for the log:
 - **Rule:** When writing test cases with automation mapping, confirm each citation against the test names (`grep -n "test("`) or the asserted values before marking it ✅. If nothing asserts the behaviour, mark it Manual or ⚠️, or write the test. An untested P0 is a finding in its own right.
 - **Where it applies:** `docs_business/qa/phase1_test_cases.md`; any coverage report or audit claim about what the suite protects.
 
+### 2026-09-23 — Shared guest-browsable links open in guest mode for signed-out users (product decision)
+- **What happened:** A first-time user (never signed in, never chose guest) who opened `https://xstore.com/product/<id>` was redirected to login and lost the product. The product owner chose to open it as a guest. `openDeepLinkRoute` now waits for the session restore and, if signed out, calls `guestModeProvider.notifier.enable()` before `go()`. Account-bound links (order) still stage behind login. The test exposed a second bug: `GuestMode.build()` starts an async `_loadSaved()` that wrote the stale saved value over a concurrent `enable()` when the link built the provider.
+- **Rule:** An entry point that changes session mode (guest on/off) must win over the provider's own async initial load. Track an explicit-set flag, or await the load before setting. Any keepAlive notifier with a fire-and-forget `_loadSaved()` in `build()` has this race. For external links: guest-browsable → guest mode + open; account-bound → stage behind login.
+- **Where it applies:** `deep_link_handling_provider.dart` `openDeepLinkRoute`, `guest_mode_provider.dart`, and similar lazy-load providers (`AppThemeMode`, locale).
+
