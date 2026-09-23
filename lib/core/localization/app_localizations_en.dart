@@ -1577,11 +1577,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartShippingLine => 'Shipping';
 
   @override
-  String cartFreeShippingThresholdNote(Object threshold) {
-    return '🚚 Items priced $threshold and up ship free';
-  }
-
-  @override
   String get cartTotalLine => 'Total';
 
   @override
