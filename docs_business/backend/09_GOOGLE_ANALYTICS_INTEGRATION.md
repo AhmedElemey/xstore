@@ -1,7 +1,10 @@
 # xStore — Google Analytics (GA4) Integration
 
-**Status:** client-side implemented. Reports to the GA4 property linked to each flavor's Firebase
-app (dev → dev Firebase app, prod → prod Firebase app), so dev traffic never lands in prod reports.
+**Status:** client-side implemented. All apps live in one Firebase project (`xstore-22e2f`), so
+they share one GA4 property: Android dev (`com.xstore.app.dev`) and prod (`com.xstore.app`) are
+separate data streams — filter by stream/app id in reports. iOS `dev` and `prod` schemes share bundle
+id `com.xstore.app`, so iOS dev traffic is mixed into the prod iOS stream until a separate iOS dev
+app is registered.
 **Companions:** [`03_ANALYTICS_EVENTS_HANDOFF.md`](./03_ANALYTICS_EVENTS_HANDOFF.md) (xStore backend
 collector) and [`08_AMPLITUDE_INTEGRATION.md`](./08_AMPLITUDE_INTEGRATION.md) (Amplitude).
 
@@ -34,11 +37,14 @@ No call site changed.
 
 ## 3. Enabling it / console checklist
 
-1. Firebase console → Project settings → Integrations → **Google Analytics: enable** for the
-   project(s) behind the dev and prod apps (no app-side key; the existing `google-services.json` /
-   `GoogleService-Info.plist` are used).
-2. Mark `purchase` as a key event (conversion) in GA4.
-3. Register custom dimensions for the parameters you want in reports (e.g. `payment_type`,
+1. Firebase console → Project settings → Integrations → **Google Analytics: enable** for
+   `xstore-22e2f`. Then re-download `GoogleService-Info.plist` (the committed one has
+   `IS_ANALYTICS_ENABLED = false`, i.e. it predates GA being enabled) and `google-services.json`,
+   and replace the repo copies.
+2. On a Mac, run `cd ios && pod install` on this branch and commit the updated `ios/Podfile.lock`
+   (it cannot be regenerated on Linux, so it does not list `FirebaseAnalytics` yet).
+3. Mark `purchase` as a key event (conversion) in GA4.
+4. Register custom dimensions for the parameters you want in reports (e.g. `payment_type`,
    `seller_id`, `source`, `status`, `referrer`) and the `role` user property.
-4. Verify with DebugView: Android `adb shell setprop debug.firebase.analytics.app <applicationId>`,
+5. Verify with DebugView: Android `adb shell setprop debug.firebase.analytics.app <applicationId>`,
    iOS launch argument `-FIRDebugEnabled`.
