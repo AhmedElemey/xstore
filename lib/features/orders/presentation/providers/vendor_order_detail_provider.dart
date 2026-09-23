@@ -85,6 +85,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
         .read(vendorOrdersProvider.notifier)
         .confirmOrder(orderId, method);
     if (!mounted) return ok;
+    if (!ok) _takeListError();
     if (ok) {
       await fetchOrder();
     }
@@ -94,6 +95,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
   Future<bool> rejectOrder(String reason) async {
     final ok = await ref.read(vendorOrdersProvider.notifier).rejectOrder(orderId, reason);
     if (!mounted) return ok;
+    if (!ok) _takeListError();
     if (ok) {
       await fetchOrder();
     }
@@ -103,6 +105,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
   Future<bool> markProcessing() async {
     final ok = await ref.read(vendorOrdersProvider.notifier).markProcessing(orderId);
     if (!mounted) return ok;
+    if (!ok) _takeListError();
     if (ok) {
       await fetchOrder();
     }
@@ -113,6 +116,7 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
     final previous = state.order;
     final ok = await ref.read(vendorOrdersProvider.notifier).markShipped(orderId, info);
     if (!mounted) return ok;
+    if (!ok) _takeListError();
     if (ok) {
       final tn = info.trackingNumber?.trim();
       final base = state.order ?? previous;
@@ -141,10 +145,22 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
     final ok =
         await ref.read(vendorOrdersProvider.notifier).markDelivered(orderId);
     if (!mounted) return ok;
+    if (!ok) _takeListError();
     if (ok) {
       await fetchOrder();
     }
     return ok;
+  }
+
+  /// Mutations run through [vendorOrdersProvider], so a failure lands on
+  /// that provider's `error`. Move it here so this screen shows it even
+  /// when Incoming Orders isn't mounted (e.g. opened from a push). If the
+  /// list screen already showed and cleared it, there is nothing to move.
+  void _takeListError() {
+    final error = ref.read(vendorOrdersProvider).error;
+    if (error == null) return;
+    ref.read(vendorOrdersProvider.notifier).clearError();
+    state = state.copyWith(error: error);
   }
 
   void clearError() {

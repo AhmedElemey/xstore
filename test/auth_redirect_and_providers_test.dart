@@ -322,8 +322,6 @@ void main() {
         (_vendor(), AppRoutes.listingAdd),
         (_vendor(), AppRoutes.storeHours),
         (_vendor(), AppRoutes.vendorWallet),
-        // Vendors open consumer order detail via vendor orders.
-        (_vendor(), AppRoutes.orderPath('ord_1')),
         (_consumer(), AppRoutes.cart),
         (_consumer(), AppRoutes.checkout),
         (_consumer(), AppRoutes.orderPath('ord_1')),
@@ -340,6 +338,17 @@ void main() {
           reason: '${user.role} should be allowed at $loc',
         );
       }
+    });
+
+    test('vendor opening /order/:id (push, deep link) lands on vendor order detail', () {
+      expect(
+        computeXStoreAuthRedirect(
+          auth: AsyncValue.data(_vendor()),
+          needsRoleSelection: false,
+          matchedLocation: AppRoutes.orderPath('ord_1'),
+        ),
+        '${AppRoutes.vendorOrders}/ord_1',
+      );
     });
 
     test('package delivery requests are open to consumers and vendors, '

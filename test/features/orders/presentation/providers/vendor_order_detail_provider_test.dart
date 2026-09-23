@@ -193,6 +193,32 @@ void main() {
     });
   });
 
+  group('VendorOrderDetailNotifier mutation failures', () {
+    test(
+      'surface on the detail provider (the list screen may not be mounted)',
+      () async {
+        final container = await _syncedContainer(
+          confirm: (_, __) => Left(Failure.server('confirm failed')),
+        );
+
+        final ok = await container
+            .read(vendorOrderDetailProvider(_orderId).notifier)
+            .confirmOrder(DeliveryMethod.self);
+
+        expect(ok, isFalse);
+        expect(
+          container.read(vendorOrderDetailProvider(_orderId)).error,
+          contains('confirm failed'),
+        );
+        expect(
+          container.read(vendorOrdersProvider).error,
+          isNull,
+          reason: 'moved, not shown twice',
+        );
+      },
+    );
+  });
+
   group('VendorOrderDetailNotifier mutations delegate to VendorOrdersNotifier', () {
     test(
       'confirmOrder updates the detail order and keeps the list populated',

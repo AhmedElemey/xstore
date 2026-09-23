@@ -95,6 +95,13 @@ String? computeXStoreAuthRedirect({
       if (isVendorRestrictedRoute(loc) && !user.isVendor) {
         return roleHome;
       }
+      // Vendors act on orders through VendorOrderDetailScreen (the
+      // vendorOrdersProvider stack the Incoming Orders tab and profile badge
+      // read). Push and deep links still carry the shared /order/:id.
+      if (user.isVendor && loc.startsWith('${AppRoutes.orderDetail}/')) {
+        return '${AppRoutes.vendorOrders}'
+            '${loc.substring(AppRoutes.orderDetail.length)}';
+      }
       if (isConsumerRestrictedRoute(loc) &&
           user.role != UserRole.consumer) {
         return roleHome;
