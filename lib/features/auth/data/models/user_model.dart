@@ -358,6 +358,15 @@ class UserModel with _$UserModel {
       return pick(json[key]) ?? (altKey != null ? pick(json[altKey]) : null);
     }
 
+    // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`. Live
+    // get-profile sends `0001-01-01T00:00:00` (C# default(DateTime)) when no
+    // birth date was given — that is "unset", not year 1.
+    final parsedBirthDate =
+        parseDate('dateOfBirth', altKey: 'birthDate', dateOnly: true);
+    final dateOfBirth = parsedBirthDate != null && parsedBirthDate.year < 1900
+        ? null
+        : parsedBirthDate;
+
     return UserModel(
       // CONFIRMED: `id` is a JSON number on the real backend, not a string.
       id: json['id']?.toString() ?? '',
@@ -405,8 +414,7 @@ class UserModel with _$UserModel {
       town: json['town'] is String ? optString('town') : null,
       detailAddress: json['detailAddress'] as String?,
       bio: json['bio'] as String?,
-      // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`.
-      dateOfBirth: parseDate('dateOfBirth', altKey: 'birthDate', dateOnly: true),
+      dateOfBirth: dateOfBirth,
       // update-profile writes instagramPage; get-profile may return either key.
       instagramHandle: optString('instagramHandle', altKey: 'instagramPage'),
       facebookPage: json['facebookPage'] as String?,

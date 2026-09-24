@@ -68,6 +68,30 @@ tests now pass, and the full suite is green on both CI defines:
   `refresh-token`, which the #3 fix now treats as transient — its message
   never reaches the user. Downgraded to resolved.
 
+**Round 2 — remaining Flutter-side fixes (tests in
+`test/qa/round2_fixes_qa_test.dart`; the behavioural ones fail with the fixes
+stashed):**
+
+- ✅ #15 — the cart is saved on the device per user (SharedPreferences,
+  `cart_items_v1_<userId>`), restored after an app restart, and updated on
+  every add/remove/quantity/clear/checkout. Another user on the same phone
+  never sees it. A corrupted save reads as an empty cart. Sign-out mid-save
+  can't wipe the saved copy, because the snapshot is taken before the await.
+- ✅ #13 (app half) — the `0001-01-01` birth-date sentinel now reads as "not
+  set".
+- ✅ #24 — server errors follow the app language: `errorAr` in Arabic, with
+  stable-code matching still keyed on `errorEn`. The no-connection and
+  rate-limit messages use the existing translations.
+- ⏸️ #14 (app half) — **waiting on the backend contract.** The app can send
+  the delivery address, recipient phone and note as soon as `POST
+  /api/orders` defines fields for them. I did not invent field names the
+  backend hasn't agreed to. A suggested shape for the backend team:
+  `recipientName`, `recipientPhone`, `street`, `city`, `governorate`,
+  `deliveryNote`. Once they confirm the names, the app change is small
+  (`OrdersRemoteDataSourceImpl.createOrder`).
+
+With these, **every Flutter-owned finding is fixed**; the rest are backend.
+
 **Still open — backend, cannot fix from this repo:**
 #1 (critical — OTP echo), #4 (server-side DOB/min-age), #12, #13 (server should
 return `null`, not `0001-01-01`). These need the backend team.
@@ -216,7 +240,7 @@ report. Numbered on from the table above.
 | # | Severity | Area | Finding | Owner |
 |---|----------|------|---------|-------|
 | 14 | 🟠 High | Orders | Placing an order sends **only** `listingId`, `quantity`, `latitude`, `longitude` (`OrdersRemoteDataSourceImpl.createOrder`). The chosen delivery address (street, city), recipient phone and delivery note **never reach the backend**, so the vendor can't see where to deliver a COD order. | Both |
-| 15 | 🟠 High | Cart | The cart lives only in memory (`static _items` in `CartRemoteDataSourceImpl`); it is **lost whenever the app is closed**. The backend has no cart API (`/cart` → 404). | Both |
+| 15 | 🟠 High | Cart | The cart lives only in memory (`static _items` in `CartRemoteDataSourceImpl`); it is **lost whenever the app is closed**. The backend has no cart API (`/cart` → 404). ✅ **Fixed on the app side** (saved on the device per user); a backend cart API is still the long-term fix for multi-device carts. | Both |
 | 16 | 🟡 Medium | Auth / backend | Consumer register **ignores `cityId`/`governorateId`**: verified live, the new profile comes back with both `null`. | Backend |
 | 17 | 🟡 Medium | Auth / backend | Register returns an **empty `refreshToken`** (login returns one). New users can't refresh and are signed out when the 48h token expires. | Backend |
 | 18 | 🟡 Medium | Checkout | Place Order had no guard against a **double tap**. A second tap before the button re-rendered could place duplicate orders. ✅ **Fixed** (see Fix status). | Flutter |
@@ -225,6 +249,7 @@ report. Numbered on from the table above.
 | 21 | 🟢 Low | Reference data | `governorates` / `cities` ignore `page`/`pageSize` (always return all 27 / 384). | Backend |
 | 22 | 🟢 Low | Catalog data | Category `imageUrl`s are icon names glued to the host (`…/car`, `…/sparkles`) → broken images. | Backend |
 | 23 | 🟢 Low | i18n / backend | Validation errors' `errorAr` is often the untranslated English text, so Arabic users see English errors. | Backend |
+| 24 | 🟡 Medium | i18n | The app always showed the backend's `errorEn`, even in Arabic when a proper `errorAr` was sent. The "no connection" and "too many requests" messages were hard-coded English. ✅ **Fixed.** | Flutter |
 
 ---
 
