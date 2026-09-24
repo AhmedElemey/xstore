@@ -32,12 +32,17 @@ import 'package:xstore/features/explore/presentation/screens/explore_screen.dart
 
 class _RoutedInterceptor extends Interceptor {
   _RoutedInterceptor(this.onRequest_);
+  // Listing-search requests only: other providers the screen reads (the
+  // wishlist hearts fetch on first read) share this Dio and can land after
+  // the search, so `requests.last` must not count them.
   final List<Map<String, String?>> requests = [];
   final Object? Function(RequestOptions options) onRequest_;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    requests.add(options.queryParameters.map((k, v) => MapEntry(k, '$v')));
+    if (options.path == ApiEndpoints.apiListings) {
+      requests.add(options.queryParameters.map((k, v) => MapEntry(k, '$v')));
+    }
     final result = onRequest_(options);
     handler.resolve(Response(requestOptions: options, statusCode: 200, data: result));
   }
