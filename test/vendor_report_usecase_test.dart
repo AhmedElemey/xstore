@@ -1,7 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:xstore/core/error/failures.dart';
+import 'package:xstore/core/mock/mock_config.dart';
+import 'package:xstore/features/reports/data/datasources/vendor_reports_remote_datasource.dart';
 import 'package:xstore/features/reports/domain/entities/vendor_report_reason.dart';
 import 'package:xstore/features/reports/domain/repositories/vendor_reports_repository.dart';
 import 'package:xstore/features/reports/domain/usecases/submit_vendor_report_usecase.dart';
@@ -87,4 +90,35 @@ void main() {
       expect(result.isLeft(), isTrue);
     });
   });
+
+  group('VendorReportsRemoteDataSourceImpl', () {
+    test('POSTs /api/reports/vendor with the Postman body shape', () async {
+      RequestOptions? sent;
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (o, h) {
+              sent = o;
+              h.resolve(Response(requestOptions: o, statusCode: 201));
+            },
+          ),
+        );
+
+      await VendorReportsRemoteDataSourceImpl(dio).submitReport(
+        vendorId: '7',
+        orderId: '42',
+        reason: VendorReportReason.fraud,
+        comment: '  Took payment, never shipped  ',
+      );
+
+      expect(sent!.method, 'POST');
+      expect(sent!.path, '/api/reports/vendor');
+      expect(sent!.data, {
+        'vendorId': 7,
+        'orderId': 42,
+        'reason': 'Fraud',
+        'comment': 'Took payment, never shipped',
+      });
+    });
+  }, skip: MockConfig.useMock ? 'Requires MOCK=false — live wire path' : false);
 }

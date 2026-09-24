@@ -15,27 +15,17 @@ abstract interface class VendorReportsRemoteDataSource {
   });
 }
 
-/// PROPOSED, not yet built on the backend (as of 2026-09-15) — contract spec
-/// for the backend team, mirroring how `ApiEndpoints.analyticsEvents` was
-/// staged before that endpoint shipped:
+/// CONFIRMED route (Postman collection; live probe 2026-09-24 answers 401
+/// unauthenticated, not 404, so it is deployed):
 ///
 ///   POST /api/reports/vendor
-///   Auth: same X-Auth-Token / Basic license headers as every other
-///         authenticated write (attached centrally by dio_provider.dart's
-///         request interceptor — no extra header needed here).
-///   Body: {
-///     "vendorId": (id of the reported vendor),
-///     "orderId": (the order establishing the consumer-vendor relationship),
-///     "reason": "Fraud" | "PoorProductQuality" | "ItemNotAsDescribed" |
-///               "NoResponseFromSeller" | "Harassment" | "Other",
-///     "comment": (free text, required by the client when reason is Other)
-///   }
-///   Response: 201 on success — response body shape not yet defined; this
-///   client does not read anything back from it.
+///   Body: {"vendorId": 1, "orderId": 1, "reason": "Fraud", "comment": "..."}
 ///
-/// Until this route ships, a live submission fails (404) and the failure
-/// is surfaced to the user via the standard `mapDioException` path — that
-/// is expected, not a bug, until the backend implements the endpoint.
+/// Ids go as JSON numbers, matching the collection and `POST /api/orders`'
+/// `listingId`, rather than relying on the server's quoted-number leniency.
+/// The collection only shows
+/// "Fraud" (and "Harassment" on the sibling user report); the other reason
+/// names are unconfirmed until an authenticated submit is probed.
 class VendorReportsRemoteDataSourceImpl implements VendorReportsRemoteDataSource {
   VendorReportsRemoteDataSourceImpl(this._dio);
 
@@ -56,8 +46,8 @@ class VendorReportsRemoteDataSourceImpl implements VendorReportsRemoteDataSource
       await _dio.post<dynamic>(
         ApiEndpoints.vendorReports,
         data: {
-          'vendorId': vendorId,
-          'orderId': orderId,
+          'vendorId': int.tryParse(vendorId) ?? vendorId,
+          'orderId': int.tryParse(orderId) ?? orderId,
           'reason': reason.wireName,
           if (comment != null && comment.trim().isNotEmpty)
             'comment': comment.trim(),

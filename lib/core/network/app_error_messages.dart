@@ -10,6 +10,10 @@ const rateLimitErrorCode = 'rateLimitExceeded';
 /// case for a consumer who hasn't verified their phone number yet.
 const phoneNotVerifiedErrorCode = 'phoneNotVerified';
 
+/// Checkout's pre-order stock check found at least one line the listing
+/// can no longer fill (`GET /api/listings/{id}/stock`). No order was placed.
+const outOfStockErrorCode = 'outOfStock';
+
 /// CONFIRMED (live probe, 2026-08-14): `POST /api/listings` 403s with this
 /// case when the vendor's store has no saved lat/lng — register only
 /// collects city/governorate dropdowns, so every vendor hits this on their

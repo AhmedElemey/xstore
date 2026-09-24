@@ -608,6 +608,7 @@
   "checkoutPaymentSecure": "بيانات الدفع مشفّرة",
   "checkoutErrorGeneric": "مقدرناش نكمل الطلب",
   "checkoutErrorPhoneNotVerified": "من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب",
+  "checkoutErrorOutOfStock": "في منتجات الكمية المتاحة منها مابقتش كفاية. حدّثنا سلتك — راجعها واطلب تاني. لسه ماتمش أي طلب.",
   "checkoutPartialOrderTitle": "جزء من طلبك ماتمش",
   "checkoutPartialOrderWarning": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.",
   "@checkoutPartialOrderWarning": {

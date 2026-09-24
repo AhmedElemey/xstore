@@ -215,6 +215,12 @@ class Checkout extends _$Checkout {
       placedOrderId: order?.id,
       error: failureReason,
     );
+    if (failureReason == outOfStockErrorCode) {
+      // The stock check already capped/disabled the short lines in the
+      // session cart; reload it so the cart shows them before a retry.
+      await cartNotifier.fetchCart();
+      if (_disposed) return order;
+    }
     if (failureReason != null) {
       // Cart's error is the server's free-text message for most failures —
       // only stable codes go to analytics.
@@ -223,6 +229,7 @@ class Checkout extends _$Checkout {
         kOfflineErrorCode,
         phoneNotVerifiedErrorCode,
         rateLimitErrorCode,
+        outOfStockErrorCode,
       };
       _trackPlacementFailed(
         stableCodes.contains(failureReason) ? failureReason : 'server_error',
