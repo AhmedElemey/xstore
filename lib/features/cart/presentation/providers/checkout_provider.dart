@@ -159,6 +159,9 @@ class Checkout extends _$Checkout {
   }
 
   Future<OrderEntity?> placeOrder() async {
+    // A second tap can land before the disabled button re-renders; one
+    // order per cart line means a re-entry would place duplicates.
+    if (state.isPlacingOrder) return null;
     final cart = ref.read(cartProvider);
     if (!ref.read(isOnlineProvider)) {
       state = state.copyWith(error: 'offline');

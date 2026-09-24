@@ -58,6 +58,9 @@ tests now pass, and the full suite is green on both CI defines:
   folds Arabic-Indic digits; money parsing folds them too.
 - ✅ #9 — email validator rejects whitespace and empty domain labels.
 - ✅ #11 — `toE164Egypt('')` returns `''` instead of `"+20"`.
+- ✅ #18 — Place Order double tap: `Checkout.placeOrder` ignores re-entry
+  while an order is in flight, and the screen bails silently on the second
+  tap. The regression test fails without the fix and passes with it.
 - 🔁 #10 — **revised, no code change.** The app *intentionally* surfaces
   meaningful 500 `errorEn` (review/checkout failures depend on it) and already
   masks the EF-SaveChanges boilerplate, so blanket-masking all 5xx regressed 4
@@ -202,6 +205,81 @@ within Egypt bounds"` — the same rule message twice. Cosmetic.
 unset; the client parses it to `DateTime(1,1,1)`. Confirm no screen renders this
 as a real date/age. Backend should return `null`; client should treat year `1`
 as unset.
+
+---
+
+## Additional findings (from code review + live probing)
+
+These were found during this pass but left out of the first version of the
+report. Numbered on from the table above.
+
+| # | Severity | Area | Finding | Owner |
+|---|----------|------|---------|-------|
+| 14 | 🟠 High | Orders | Placing an order sends **only** `listingId`, `quantity`, `latitude`, `longitude` (`OrdersRemoteDataSourceImpl.createOrder`). The chosen delivery address (street, city), recipient phone and delivery note **never reach the backend**, so the vendor can't see where to deliver a COD order. | Both |
+| 15 | 🟠 High | Cart | The cart lives only in memory (`static _items` in `CartRemoteDataSourceImpl`); it is **lost whenever the app is closed**. The backend has no cart API (`/cart` → 404). | Both |
+| 16 | 🟡 Medium | Auth / backend | Consumer register **ignores `cityId`/`governorateId`**: verified live, the new profile comes back with both `null`. | Backend |
+| 17 | 🟡 Medium | Auth / backend | Register returns an **empty `refreshToken`** (login returns one). New users can't refresh and are signed out when the 48h token expires. | Backend |
+| 18 | 🟡 Medium | Checkout | Place Order had no guard against a **double tap**. A second tap before the button re-rendered could place duplicate orders. ✅ **Fixed** (see Fix status). | Flutter |
+| 19 | 🟢 Low | Auth / backend | `send-login-otp` reveals whether a phone has an account (404 "No account found" vs 200), which lets anyone enumerate registered numbers. `forgot-password` correctly doesn't. | Backend |
+| 20 | 🟢 Low | Auth / backend | `refresh-token` with a malformed token answers **500** with the internal `IDX12741…` text instead of 401. | Backend |
+| 21 | 🟢 Low | Reference data | `governorates` / `cities` ignore `page`/`pageSize` (always return all 27 / 384). | Backend |
+| 22 | 🟢 Low | Catalog data | Category `imageUrl`s are icon names glued to the host (`…/car`, `…/sparkles`) → broken images. | Backend |
+| 23 | 🟢 Low | i18n / backend | Validation errors' `errorAr` is often the untranslated English text, so Arabic users see English errors. | Backend |
+
+---
+
+## Re-test of the previous test suite (811 tests)
+
+**Re-run:** all pass in both CI modes (`MOCK=false`: 799 run, 12 skipped;
+`MOCK=true`: 622 run, 189 skipped). No test is skipped in *both* modes, so every
+test runs somewhere. They also pass in two random test orders (seeds 1234 and
+98765), so no test depends on another's leftover state. Every test body
+contains assertions, and no date test depends on today's date.
+
+**Mutation test:** I planted 16 realistic bugs in critical code, one at a
+time, and ran the whole previous suite against each (each bug reverted
+afterwards). **The previous suite caught 8 of 16.**
+
+| # | Planted bug | Previous suite | New `test/qa` suite |
+|---|-------------|:---:|:---:|
+| M01 | Coupon % discount not capped | ✅ | ✅ |
+| M02 | Shipping dropped from the cart total | ❌ | ✅ |
+| M03 | Cart **not cleared on logout** | ❌ | ✅ |
+| M04 | Stale cart comes back after logout | ❌ | ✅ |
+| M05 | Out-of-stock pre-check skipped | ✅ | ❌ |
+| M06 | Failed checkout line removed from cart | ❌ | ✅ |
+| M07 | Out-of-range address index accepted | ❌ | ❌ |
+| M08 | Token refresh retries forever | ❌ | ✅ |
+| M09 | HTTP 429 not mapped to rate-limit | ❌ | ✅ |
+| M10 | Vendor "rejected" status not parsed | ✅ | ❌ |
+| M11 | Guests pass `requireLogin` | ✅ | ❌ |
+| M12 | Guests can open any route | ✅ | ❌ |
+| M13 | Phone prefix accepts 013/019… | ✅ | ✅ |
+| M14 | Compare-at equal to price accepted | ✅ | ✅ |
+| M15 | Listing quantity 0 accepted | ❌ | ✅ |
+| M16 | Unknown order status read as Pending | ✅ | ❌ |
+| | **Caught** | **8 / 16** | **10 / 16** |
+
+**Together the two suites catch 15 of 16**, so keep both. M07 is a defensive
+guard the app's own code can't reach (`selectAddress`/`removeAddress` keep
+the index in range), so no test needs to cover it.
+
+**Why the previous suite missed them:**
+- **M02:** `cart_totals_test.dart` re-implements the total formula inside the
+  test file (`cartWithSelection`), so it tests its own copy, not
+  `Cart._recomputeTotals`. Breaking the real code can't fail it.
+- **M03/M04:** nothing drives a logout while the cart holds items, or while a
+  cart fetch is in flight, even though the skill log records the epoch guard
+  as a fixed bug.
+- **M06:** the partial-checkout-failure path (one line fails, another
+  succeeds) has no test.
+- **M08/M09:** the refresh tests only cover success paths; nothing pins the
+  single-retry guard or the 429 mapping.
+- **M15:** the listing-form tests never check the quantity boundary.
+
+These gaps are now closed by `test/qa/regression_gaps_qa_test.dart` (M02,
+M03, M04, M06, M08, plus checkout double-tap) and the existing new tests (M09,
+M15).
 
 ---
 
