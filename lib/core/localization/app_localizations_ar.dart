@@ -1782,6 +1782,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب';
 
   @override
+  String get checkoutErrorOutOfStock =>
+      'في منتجات الكمية المتاحة منها مابقتش كفاية. حدّثنا سلتك — راجعها واطلب تاني. لسه ماتمش أي طلب.';
+
+  @override
   String get checkoutPartialOrderTitle => 'جزء من طلبك ماتمش';
 
   @override

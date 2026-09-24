@@ -1779,6 +1779,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please verify your phone number to place an order';
 
   @override
+  String get checkoutErrorOutOfStock =>
+      'Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.';
+
+  @override
   String get checkoutPartialOrderTitle =>
       'Part of your order didn\'t go through';
 

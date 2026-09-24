@@ -6,6 +6,8 @@ import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/app_error_messages.dart';
+import '../../../../core/network/legacy_route_options.dart';
 import '../../../../core/utils/app_location_cache.dart';
 import '../../../orders/data/datasources/orders_remote_datasource.dart';
 import '../../../orders/data/models/order_item_model.dart';
@@ -281,7 +283,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final condition =
         condRaw is String ? condRaw : condRaw?.toString() ?? '';
 
-    final stock = _intFromJson(root['stockQuantity'] ?? root['stock'] ?? root['quantity'], 10).clamp(1, 999);
+    // Missing stock is 0 (unavailable) — never an invented number.
+    final stock = _intFromJson(
+      root['stockQuantity'] ?? root['stock'] ?? root['quantity'],
+      0,
+    );
 
     final shipAvail =
         (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
@@ -305,12 +311,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       price: price,
       compareAtPrice: compare,
       quantity: quantity,
-      maxQuantity: stock,
+      maxQuantity: stock.clamp(1, 999),
       category: cat,
       condition: condition,
       shippingAvailable: shipAvail,
       shippingCost: shippingCost,
-      isAvailable: root['isAvailable'] != false,
+      isAvailable: root['isAvailable'] != false && stock > 0,
       addedAt: DateTime.now(),
     );
   }
@@ -515,6 +521,17 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     if (params.items.isEmpty) {
       throw const ServerException('Cart is empty');
     }
+    // Check every line BEFORE placing any order: with one order per line,
+    // a line found short mid-loop would leave the cart half-ordered.
+    final inStock = await Future.wait(params.items.map(_hasStock));
+    final short = [
+      for (var i = 0; i < params.items.length; i++)
+        if (inStock[i] == false) params.items[i],
+    ];
+    if (short.isNotEmpty) {
+      await Future.wait(short.map(_refreshShortLine));
+      throw const ServerException(outOfStockErrorCode);
+    }
     final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
     // A map-pinned delivery address (see showMapAddressPicker) carries its
     // own coordinates — prefer those over the device's last-known GPS fix,
@@ -590,6 +607,47 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       total: params.total,
       notes: params.deliveryNote,
     );
+  }
+
+  /// `true`/`false` from `GET /api/listings/{id}/stock`; a 404 (listing
+  /// gone or inactive) is `false`. `null` when the check can't answer
+  /// (network, 5xx, unexpected body) — checkout then proceeds and the
+  /// order POST stays the backend's final gate, so a stock-endpoint outage
+  /// can't block every sale.
+  Future<bool?> _hasStock(CartItemEntity line) async {
+    try {
+      final res = await _dio.get<dynamic>(
+        ApiEndpoints.apiListingStock(line.listingId, line.quantity),
+        options: LegacyRouteOptions.allowNotFound(),
+      );
+      if (LegacyRouteOptions.isNotFound(res)) return false;
+      final body = res.data;
+      final data = body is Map ? body['data'] : body;
+      return data is bool ? data : null;
+    } on DioException {
+      return null;
+    }
+  }
+
+  /// Re-reads a short line's listing so the cart shows what's really left:
+  /// quantity drops to the remaining stock, or the line is marked
+  /// unavailable when nothing is left, the listing can't be read, or the
+  /// listing still claims enough (the stock check is the authority, and
+  /// this stops the same refused quantity from being resubmitted).
+  Future<void> _refreshShortLine(CartItemEntity line) async {
+    CartItemEntity? fresh;
+    try {
+      fresh = await buildLineFromListing(line.listingId, line.quantity);
+    } on ServerException {
+      fresh = null;
+    }
+    final idx = _items.indexWhere((e) => e.id == line.id);
+    if (idx < 0) return;
+    final cur = _items[idx];
+    final left = fresh != null && fresh.isAvailable ? fresh.maxQuantity : 0;
+    _items[idx] = left > 0 && left < cur.quantity
+        ? cur.copyWith(quantity: left, maxQuantity: left)
+        : cur.copyWith(isAvailable: false);
   }
 
   /// Used when adding from product — builds line from catalog.
