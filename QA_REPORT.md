@@ -42,6 +42,35 @@ flutter test test/qa/
 
 ---
 
+## Fix status (updated 2026-09-24)
+
+Client-side (Flutter) findings **fixed** this pass — the corresponding QA
+tests now pass, and the full suite is green on both CI defines:
+
+- ✅ #2/#8 names — `Validators.personFullName` now allows Unicode letters +
+  hyphen/apostrophe/dot (`lib/core/utils/validators.dart`).
+- ✅ #3 refresh logout — `TokenRefreshInterceptor` only clears the session on
+  an authoritative rejection (401/400 on `/refresh-token` or no refresh
+  token); transport errors / 5xx / hung reads keep the session.
+- ✅ #4 (client half) — min-age is now a calendar-age check, not `days~/365`.
+- ✅ #5 — `parseMoneyInput` rejects non-finite (`NaN`/`Infinity`).
+- ✅ #6/#7 — `normalizeEgyptLocal` handles `00…` and `+20`+trunk-0 pastes and
+  folds Arabic-Indic digits; money parsing folds them too.
+- ✅ #9 — email validator rejects whitespace and empty domain labels.
+- ✅ #11 — `toE164Egypt('')` returns `''` instead of `"+20"`.
+- 🔁 #10 — **revised, no code change.** The app *intentionally* surfaces
+  meaningful 500 `errorEn` (review/checkout failures depend on it) and already
+  masks the EF-SaveChanges boilerplate, so blanket-masking all 5xx regressed 4
+  existing tests. The one real raw-internals leak (`IDX12741`) came only from
+  `refresh-token`, which the #3 fix now treats as transient — its message
+  never reaches the user. Downgraded to resolved.
+
+**Still open — backend, cannot fix from this repo:**
+#1 (critical — OTP echo), #4 (server-side DOB/min-age), #12, #13 (server should
+return `null`, not `0001-01-01`). These need the backend team.
+
+---
+
 ## Critical
 
 ### 1. 🔴 Account takeover via echoed login OTP — `send-login-otp`

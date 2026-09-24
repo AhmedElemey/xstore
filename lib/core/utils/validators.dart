@@ -2,8 +2,16 @@ import '../localization/app_localizations.dart';
 
 /// Shared form validation helpers. Return localized user-facing strings via [AppLocalizations].
 abstract final class Validators {
-  static final RegExp _emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-  static final RegExp _fullNameLetters = RegExp(r'^[a-zA-Z\s]+$');
+  // Reject whitespace inside the address and empty domain labels
+  // (`a@b..com`); the backend enforces the same, so validate inline.
+  static final RegExp _emailRegex =
+      RegExp(r'^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$');
+  // Egypt-first app: names are letters in ANY script (Arabic included), plus
+  // spaces and the joiners real names use (hyphen, apostrophe, dot). ASCII
+  // `[a-zA-Z]` wrongly rejected Arabic names the backend accepts.
+  static final RegExp _fullNameAllowed =
+      RegExp(r"^[\p{L} .'\-]+$", unicode: true);
+  static final RegExp _fullNameHasLetter = RegExp(r'\p{L}', unicode: true);
   static final RegExp _egyptMobileLocal = RegExp(r'^01[0125]\d{8}$');
   static final RegExp _hasUppercase = RegExp(r'[A-Z]');
   static final RegExp _hasLowercase = RegExp(r'[a-z]');
@@ -46,7 +54,9 @@ abstract final class Validators {
 
   static String? personFullName(AppLocalizations l10n, String raw) {
     final t = raw.trim();
-    if (t.length < 3 || !_fullNameLetters.hasMatch(t)) {
+    if (t.length < 3 ||
+        !_fullNameAllowed.hasMatch(t) ||
+        !_fullNameHasLetter.hasMatch(t)) {
       return l10n.validationFullNameInvalid;
     }
     return null;
@@ -133,15 +143,30 @@ abstract final class Validators {
       return l10n.validationBirthDateBeforeToday;
     }
     if (enforceMinimumAge) {
-      final age =
-          todayCalendarDate(now).difference(calendarDate(date)).inDays ~/ 365;
+      // Calendar age, not `days ~/ 365` — the latter (leap years + rounding)
+      // counted a 17-year-old whose 18th birthday is tomorrow as 18.
+      final today = todayCalendarDate(now);
+      final dob = calendarDate(date);
+      var age = today.year - dob.year;
+      if (today.month < dob.month ||
+          (today.month == dob.month && today.day < dob.day)) {
+        age--;
+      }
       if (age < 18) return l10n.validationAgeMinimum18;
     }
     return null;
   }
 
-  static double? parseMoneyInput(String raw) =>
-      double.tryParse(raw.replaceAll(RegExp(r','), ''));
+  static double? parseMoneyInput(String raw) {
+    // Fold Arabic-Indic digits (Arabic keyboard) and drop thousands commas.
+    final cleaned =
+        AppValidators.foldDigits(raw).replaceAll(RegExp(r','), '');
+    final value = double.tryParse(cleaned);
+    // `double.tryParse('NaN'|'Infinity')` succeeds — reject non-finite so a
+    // NaN price can't pass listing validation (NaN <= 0 is false).
+    if (value == null || !value.isFinite) return null;
+    return value;
+  }
 
   static bool listingFormHasErrors(ListingFormValidationInput input) {
     if (input.photoPaths.isEmpty && input.existingPhotoCount == 0) {
@@ -270,9 +295,34 @@ class ListingFormValidationInput {
 
 /// Egypt phone normalization and E.164 helpers (non-UI).
 abstract final class AppValidators {
+  /// Converts Arabic-Indic (٠-٩) and Extended Arabic-Indic (۰-۹) digits to
+  /// ASCII 0-9, leaving everything else untouched. Egypt-first app: users on
+  /// an Arabic keyboard type these in phone and money fields.
+  static String foldDigits(String input) {
+    if (input.isEmpty) return input;
+    final buffer = StringBuffer();
+    for (final rune in input.runes) {
+      if (rune >= 0x0660 && rune <= 0x0669) {
+        buffer.writeCharCode(0x30 + (rune - 0x0660)); // Arabic-Indic
+      } else if (rune >= 0x06F0 && rune <= 0x06F9) {
+        buffer.writeCharCode(0x30 + (rune - 0x06F0)); // Extended Arabic-Indic
+      } else {
+        buffer.writeCharCode(rune);
+      }
+    }
+    return buffer.toString();
+  }
+
   static String normalizeEgyptLocal(String value) {
-    var cleaned = value.replaceAll(RegExp(r'\D'), '');
-    if (cleaned.startsWith('20') && cleaned.length == 12) {
+    var cleaned = foldDigits(value).replaceAll(RegExp(r'\D'), '');
+    // `00` international prefix (people paste `0020…` from contacts/WhatsApp).
+    if (cleaned.startsWith('00')) {
+      cleaned = cleaned.substring(2);
+    }
+    // `20…` E.164 country code, with or without the following trunk `0`
+    // (`201012345678` = 12, `2001012345678` = 13).
+    if (cleaned.startsWith('20') &&
+        (cleaned.length == 12 || cleaned.length == 13)) {
       cleaned = cleaned.substring(2);
     }
     if (cleaned.length == 10 && cleaned.startsWith('1')) {
@@ -283,6 +333,8 @@ abstract final class AppValidators {
 
   static String toE164Egypt(String localNumber) {
     final cleaned = normalizeEgyptLocal(localNumber);
+    // Don't fabricate a bare `+20` from empty/garbage input.
+    if (cleaned.isEmpty) return '';
     if (cleaned.startsWith('0')) return '+20${cleaned.substring(1)}';
     return '+20$cleaned';
   }

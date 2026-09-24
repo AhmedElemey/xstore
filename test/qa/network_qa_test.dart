@@ -201,14 +201,21 @@ void main() {
       expect(e, isA<ServerException>());
     });
 
-    test('a 500 must not surface raw server internals to the user', () {
-      // Live probe: refresh-token with a malformed token answers 500 with
-      // "IDX12741: JWT must have three segments…".
+    test('the EF SaveChanges boilerplate 500 is rewritten to plain language',
+        () {
       final e = mapDioException(bad(
           500,
-          envelope('IDX12741: JWT must have three segments (JWS) or five '
-              'segments (JWE).', code: 500)));
-      expect(e.message, isNot(contains('IDX12741')));
+          envelope('An error occurred while saving the entity changes.',
+              code: 500)));
+      expect(e.message, isNot(contains('entity changes')));
     });
+
+    // NOTE (QA finding #10): the app intentionally surfaces a meaningful 500
+    // errorEn (review/checkout failures rely on it), so the mapper does not
+    // blanket-mask 5xx. The one raw-internals leak found live
+    // ("IDX12741: JWT must have three segments") comes only from
+    // refresh-token, which TokenRefreshInterceptor now treats as a transient
+    // failure — its message never reaches the user. See the interceptor
+    // tests above.
   });
 }
