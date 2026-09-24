@@ -3578,6 +3578,12 @@ abstract class AppLocalizations {
   /// **'Please verify your phone number to place an order'**
   String get checkoutErrorPhoneNotVerified;
 
+  /// No description provided for @checkoutErrorOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.'**
+  String get checkoutErrorOutOfStock;
+
   /// No description provided for @checkoutPartialOrderTitle.
   ///
   /// In en, this message translates to:

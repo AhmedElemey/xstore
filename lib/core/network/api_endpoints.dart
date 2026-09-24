@@ -151,6 +151,12 @@ abstract final class ApiEndpoints {
   // listing reappear as merely paused-and-resumable), so /cancel is the
   // closer semantic match for a listing the vendor wants gone for good.
   static String apiListingCancel(String id) => '$apiListings/$id/cancel';
+  // CONFIRMED (Postman + live probe, 2026-09-24): public GET, Result
+  // envelope with a bool `data` — "can this listing fill `quantity` right
+  // now". Unknown/inactive id → 404 "Listing not found."; quantity <= 0 →
+  // 400. Checked for every line before checkout places any order.
+  static String apiListingStock(String id, int quantity) =>
+      '$apiListings/$id/stock?quantity=$quantity';
 
   // Orders. CONFIRMED (Postman collection + live probe, 2026-08-14): the
   // backend model is ONE listing per order (POST body is
@@ -201,13 +207,7 @@ abstract final class ApiEndpoints {
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
 
-  // ---------------------------------------------------------------------
-  // Vendor reports — PROPOSED, not yet built on the backend (2026-09-15).
-  // Full contract spec is documented on
-  // VendorReportsRemoteDataSourceImpl in
-  // lib/features/reports/data/datasources/vendor_reports_remote_datasource.dart.
-  // Until the backend ships this route, a live submission 404s and the
-  // failure is surfaced to the user — that is expected, not a bug.
-  // ---------------------------------------------------------------------
+  // Vendor reports. CONFIRMED (Postman collection + live 401-not-404
+  // probe, 2026-09-24); body contract on VendorReportsRemoteDataSourceImpl.
   static const String vendorReports = '$_api/reports/vendor';
 }

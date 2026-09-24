@@ -608,6 +608,7 @@
   "checkoutPaymentSecure": "Your payment info is encrypted",
   "checkoutErrorGeneric": "Could not place order",
   "checkoutErrorPhoneNotVerified": "Please verify your phone number to place an order",
+  "checkoutErrorOutOfStock": "Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.",
   "checkoutPartialOrderTitle": "Part of your order didn't go through",
   "checkoutPartialOrderWarning": "{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.",
   "@checkoutPartialOrderWarning": {

@@ -13,6 +13,7 @@ String checkoutErrorMessage(BuildContext context, String? k) => switch (k) {
       'offline' => context.l10n.noInternet,
       'noConsumer' => context.l10n.signInPrompt,
       phoneNotVerifiedErrorCode => context.l10n.checkoutErrorPhoneNotVerified,
+      outOfStockErrorCode => context.l10n.checkoutErrorOutOfStock,
       _ => context.l10n.checkoutErrorGeneric,
     };
 
