@@ -86,6 +86,7 @@ class VendorOrderCard extends StatelessWidget {
                                 Text(
                                   DateFormat(
                                     'HH:mm',
+                                    context.l10n.localeName,
                                   ).format(order.createdAt.toLocal()),
                                   style: AppTypography.bodySmall.copyWith(
                                     color: context.textSecondary,

@@ -81,7 +81,7 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
               },
               child: Text(
                 '${context.l10n.ordersEstimatedDeliveryLabel}: '
-                '${DateFormat('EEEE, MMM d, yyyy').format(_date)}',
+                '${DateFormat('EEEE, MMM d, yyyy', context.l10n.localeName).format(_date)}',
               ),
             ),
             const SizedBox(height: AppSpacing.md),

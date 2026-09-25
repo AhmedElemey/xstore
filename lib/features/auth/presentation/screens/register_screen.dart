@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -422,7 +421,7 @@ class _StepPersonal extends StatelessWidget {
   Widget build(BuildContext context) {
     final dobLabel = s.dateOfBirth == null
         ? context.l10n.dateOfBirthOptional
-        : DateFormat('d MMM yyyy').format(s.dateOfBirth!);
+        : context.formatDate(s.dateOfBirth!);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),

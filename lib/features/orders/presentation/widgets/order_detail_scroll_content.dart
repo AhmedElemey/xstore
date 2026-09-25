@@ -189,7 +189,7 @@ class _StatusBanner extends StatelessWidget {
                   order.status == OrderStatus.confirmed)) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d', context.l10n.localeName).format(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.white,
                 fontWeight: FontWeight.w600,
@@ -586,7 +586,7 @@ class _TrackingCard extends StatelessWidget {
           ),
           if (order.estimatedDelivery != null)
             Text(
-              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d').format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d', context.l10n.localeName).format(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodySmall,
             ),
           const SizedBox(height: AppSpacing.md),

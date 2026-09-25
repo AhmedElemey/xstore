@@ -348,7 +348,8 @@ class _ShippingInfoCard extends StatelessWidget {
               ),
             ),
             Text(
-              DateFormat('EEEE, MMM d, yyyy').format(eta.toLocal()),
+              DateFormat('EEEE, MMM d, yyyy', context.l10n.localeName)
+                  .format(eta.toLocal()),
               style: AppTypography.bodyMedium,
             ),
           ],
