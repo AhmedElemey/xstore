@@ -41,7 +41,7 @@ A `PostToolUse` hook on `mcp__github__merge_pull_request` (see `.claude/settings
    >
    > Be aggressive but safe. Assume the goal is to simplify the codebase, improve maintainability, and remove anything that does not provide value.
 
-3. If a prior audit's findings are still in this skill file's memory (recent conversation, or a prior report), re-verify each one against the CURRENT code before repeating it — don't pad the new report with stale findings (see the 2026-09-11 "audit is a snapshot" lesson in `lessons.md`), and don't silently skip re-checking just because a finding was reported once.
+3. If a prior audit's findings are still in this skill file's memory (recent conversation, or a prior report), re-verify each one against the CURRENT code before repeating it — don't pad the new report with stale findings (see the "Dead-code deletions" lesson in `lessons.md`), and don't silently skip re-checking just because a finding was reported once.
 4. **Before recommending any deletion, verify it doesn't break the build** — a symbol can have a live reference the grep pass missed (a deleted route constant with one missed reference has broken `dev` before). If you executed deletions from a previous run of this audit, grep one more time across the whole `lib/` and `test/` trees for anything on the delete list before considering the pass done.
 5. Report the findings to the user and ask how they'd like to proceed (report only, or open a cleanup PR) — unless this specific conversation already told you to auto-apply confirmed-safe deletions, in which case do that on a fresh branch off `dev` and open a PR. This section only guarantees the audit itself runs on schedule; it doesn't authorize skipping the user's say on what happens with the results.
 
