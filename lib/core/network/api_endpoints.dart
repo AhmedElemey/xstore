@@ -100,12 +100,6 @@ abstract final class ApiEndpoints {
   static const String catalogCategories = '$_api/categories';
   static const String banners = '$_api/banners';
 
-  /// Generic upload endpoint. CONFIRMED (Postman collection): multipart
-  /// POST, file field key `file`, entityType path segment is one of
-  /// `listing`/`avatar`/`banner`. Replaces the old `/api/auth/avatar`
-  /// guess, which was never confirmed against the backend.
-  static String apiUpload(String entityType) => '$_api/uploads/$entityType';
-
   // Wishlist (all authenticated / user-scoped)
   static const String wishlist = '$_api/wishlist';
   static String wishlistItems(String consumerId) =>
