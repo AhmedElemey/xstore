@@ -198,6 +198,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     state = state.copyWith(needsRegistration: false);
   }
 
+  // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
   Future<void> signInWithApple() async {
     if (state.isAnyLoading) return;
     state = state.copyWith(

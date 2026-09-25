@@ -520,7 +520,7 @@ abstract class _NotificationEntity implements NotificationEntity {
 
 /// @nodoc
 mixin _$NotificationGroup {
-  String get label => throw _privateConstructorUsedError;
+  NotificationGroupKind get kind => throw _privateConstructorUsedError;
   List<NotificationEntity> get notifications =>
       throw _privateConstructorUsedError;
 
@@ -535,7 +535,8 @@ abstract class $NotificationGroupCopyWith<$Res> {
           NotificationGroup value, $Res Function(NotificationGroup) then) =
       _$NotificationGroupCopyWithImpl<$Res, NotificationGroup>;
   @useResult
-  $Res call({String label, List<NotificationEntity> notifications});
+  $Res call(
+      {NotificationGroupKind kind, List<NotificationEntity> notifications});
 }
 
 /// @nodoc
@@ -551,14 +552,14 @@ class _$NotificationGroupCopyWithImpl<$Res, $Val extends NotificationGroup>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? label = null,
+    Object? kind = null,
     Object? notifications = null,
   }) {
     return _then(_value.copyWith(
-      label: null == label
-          ? _value.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String,
+      kind: null == kind
+          ? _value.kind
+          : kind // ignore: cast_nullable_to_non_nullable
+              as NotificationGroupKind,
       notifications: null == notifications
           ? _value.notifications
           : notifications // ignore: cast_nullable_to_non_nullable
@@ -575,7 +576,8 @@ abstract class _$$NotificationGroupImplCopyWith<$Res>
       __$$NotificationGroupImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String label, List<NotificationEntity> notifications});
+  $Res call(
+      {NotificationGroupKind kind, List<NotificationEntity> notifications});
 }
 
 /// @nodoc
@@ -589,14 +591,14 @@ class __$$NotificationGroupImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? label = null,
+    Object? kind = null,
     Object? notifications = null,
   }) {
     return _then(_$NotificationGroupImpl(
-      label: null == label
-          ? _value.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String,
+      kind: null == kind
+          ? _value.kind
+          : kind // ignore: cast_nullable_to_non_nullable
+              as NotificationGroupKind,
       notifications: null == notifications
           ? _value._notifications
           : notifications // ignore: cast_nullable_to_non_nullable
@@ -609,12 +611,12 @@ class __$$NotificationGroupImplCopyWithImpl<$Res>
 
 class _$NotificationGroupImpl implements _NotificationGroup {
   const _$NotificationGroupImpl(
-      {required this.label,
+      {required this.kind,
       required final List<NotificationEntity> notifications})
       : _notifications = notifications;
 
   @override
-  final String label;
+  final NotificationGroupKind kind;
   final List<NotificationEntity> _notifications;
   @override
   List<NotificationEntity> get notifications {
@@ -625,7 +627,7 @@ class _$NotificationGroupImpl implements _NotificationGroup {
 
   @override
   String toString() {
-    return 'NotificationGroup(label: $label, notifications: $notifications)';
+    return 'NotificationGroup(kind: $kind, notifications: $notifications)';
   }
 
   @override
@@ -633,14 +635,14 @@ class _$NotificationGroupImpl implements _NotificationGroup {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$NotificationGroupImpl &&
-            (identical(other.label, label) || other.label == label) &&
+            (identical(other.kind, kind) || other.kind == kind) &&
             const DeepCollectionEquality()
                 .equals(other._notifications, _notifications));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, label, const DeepCollectionEquality().hash(_notifications));
+      runtimeType, kind, const DeepCollectionEquality().hash(_notifications));
 
   @JsonKey(ignore: true)
   @override
@@ -652,12 +654,12 @@ class _$NotificationGroupImpl implements _NotificationGroup {
 
 abstract class _NotificationGroup implements NotificationGroup {
   const factory _NotificationGroup(
-          {required final String label,
+          {required final NotificationGroupKind kind,
           required final List<NotificationEntity> notifications}) =
       _$NotificationGroupImpl;
 
   @override
-  String get label;
+  NotificationGroupKind get kind;
   @override
   List<NotificationEntity> get notifications;
   @override

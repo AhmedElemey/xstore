@@ -88,8 +88,6 @@ extension LocalizationContext on BuildContext {
 
   IconData get chevronForward =>
       isArabic ? LucideIcons.chevronLeft : LucideIcons.chevronRight;
-  IconData get chevronBack =>
-      isArabic ? LucideIcons.chevronRight : LucideIcons.chevronLeft;
 
   IconData get arrowForwardIcon =>
       isArabic ? LucideIcons.arrowLeft : LucideIcons.arrowRight;

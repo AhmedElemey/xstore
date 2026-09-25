@@ -10,6 +10,7 @@ class SocialLoginRow extends StatelessWidget {
     return Column(
       children: [
         const GoogleSignInButton(),
+        // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
       ],
     );
   }

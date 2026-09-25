@@ -215,6 +215,7 @@ GoRouter goRouter(GoRouterRef ref) {
           const CourierLoginScreen(),
         ),
       ),
+      // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
       GoRoute(
         path: AppRoutes.socialRoleSelect,
         pageBuilder: (context, state) => slideRightTransition(

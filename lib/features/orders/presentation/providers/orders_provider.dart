@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
@@ -244,11 +243,6 @@ class OrdersNotifier extends _$OrdersNotifier {
     return copy;
   }
 
-  int tabCount(OrderStatus? status) {
-    if (status == null) return state.orders.length;
-    return state.orders.where((e) => e.status == status).length;
-  }
-
   List<OrderStatus> filtersForRole(bool vendor) =>
       vendor ? _vendorFilters : _consumerFilters;
 
@@ -420,7 +414,6 @@ class OrdersNotifier extends _$OrdersNotifier {
                     courierName: info.courierName ?? o.courierName,
                     estimatedDelivery:
                         info.estimatedDelivery ?? o.estimatedDelivery,
-                    trackingLocation: AppStrings.ordersCurrentLocationMock,
                     shippedAt: now,
                     updatedAt: now,
                   )

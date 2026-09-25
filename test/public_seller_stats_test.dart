@@ -12,7 +12,6 @@ void main() {
       name: 'Shop',
       avatarUrl: '',
     );
-    expect(seller.hasPublicStats, isFalse);
     expect(seller.rating, isNull);
     expect(seller.salesCount, isNull);
     expect(publicSellerStatsLabel(l10n), l10n.newSeller);

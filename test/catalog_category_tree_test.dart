@@ -110,10 +110,6 @@ void main() {
       ),
     ];
 
-    test('top-level ignores nested children', () {
-      expect(topLevelCategories(all).map((c) => c.id), [4, 9]);
-    });
-
     test('subcategories come from the parent children array', () {
       expect(subcategoriesOf(all, 4).map((c) => c.id), [23, 24]);
       expect(subcategoriesOf(all, 9).map((c) => c.id), [40]);

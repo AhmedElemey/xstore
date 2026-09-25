@@ -16,15 +16,6 @@ enum OrderStatus {
   cancelled,
 }
 
-int orderStatusToWire(OrderStatus status) => switch (status) {
-      OrderStatus.pending => 0,
-      OrderStatus.confirmed => 1,
-      OrderStatus.processing => 2,
-      OrderStatus.shipped => 3,
-      OrderStatus.delivered => 4,
-      OrderStatus.cancelled => 5,
-    };
-
 /// C# `OrderStatus` member name. `PUT /vendor/orders/status` binds
 /// `status` as `System.String` — an int 400s with `$.status` plus a
 /// cascading `request` required error.

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
@@ -64,7 +65,9 @@ abstract final class NotificationsFeedSlivers {
           slivers: [
             SliverPersistentHeader(
               pinned: true,
-              delegate: NotificationGroupHeaderDelegate(g.label),
+              delegate: NotificationGroupHeaderDelegate(
+                _groupLabel(context, g.kind),
+              ),
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate(
@@ -93,5 +96,15 @@ abstract final class NotificationsFeedSlivers {
         ),
       const SliverToBoxAdapter(child: NotificationActionBar()),
     ];
+  }
+
+  static String _groupLabel(BuildContext context, NotificationGroupKind kind) {
+    final l10n = context.l10n;
+    return switch (kind) {
+      NotificationGroupKind.today => l10n.notificationsGroupToday,
+      NotificationGroupKind.yesterday => l10n.notificationsGroupYesterday,
+      NotificationGroupKind.thisWeek => l10n.notificationsGroupThisWeek,
+      NotificationGroupKind.earlier => l10n.notificationsGroupEarlier,
+    };
   }
 }

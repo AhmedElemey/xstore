@@ -20,13 +20,11 @@ class StubWishlistRemoteDataSource implements WishlistRemoteDataSource {
       String? wishlistItemId,
     })?
     onRemoveFromWishlist,
-    Future<void> Function(String consumerId)? onClearWishlist,
     Future<WishlistItemEntity> Function(String listingId, {String? wishId})?
     onBuildFromListingId,
   }) : _onGetWishlist = onGetWishlist,
        _onAddToWishlist = onAddToWishlist,
        _onRemoveFromWishlist = onRemoveFromWishlist,
-       _onClearWishlist = onClearWishlist,
        _onBuildFromListingId = onBuildFromListingId;
 
   final Future<List<WishlistItemEntity>> Function(String consumerId)?
@@ -42,7 +40,6 @@ class StubWishlistRemoteDataSource implements WishlistRemoteDataSource {
     String? wishlistItemId,
   })?
   _onRemoveFromWishlist;
-  final Future<void> Function(String consumerId)? _onClearWishlist;
   final Future<WishlistItemEntity> Function(String listingId, {String? wishId})?
   _onBuildFromListingId;
 
@@ -76,13 +73,6 @@ class StubWishlistRemoteDataSource implements WishlistRemoteDataSource {
       listingId: listingId,
       wishlistItemId: wishlistItemId,
     );
-  }
-
-  @override
-  Future<void> clearWishlist(String consumerId) {
-    final cb = _onClearWishlist;
-    if (cb == null) throw UnimplementedError('clearWishlist not stubbed');
-    return cb(consumerId);
   }
 
   @override

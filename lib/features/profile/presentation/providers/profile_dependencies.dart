@@ -6,7 +6,6 @@ import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
-import '../../domain/usecases/get_vendor_store_profile_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 
 part 'profile_dependencies.g.dart';
@@ -24,13 +23,6 @@ ProfileRepository profileRepository(ProfileRepositoryRef ref) {
 @riverpod
 GetProfileUseCase getProfileUseCase(GetProfileUseCaseRef ref) {
   return GetProfileUseCase(ref.watch(profileRepositoryProvider));
-}
-
-@riverpod
-GetVendorStoreProfileUseCase getVendorStoreProfileUseCase(
-  GetVendorStoreProfileUseCaseRef ref,
-) {
-  return GetVendorStoreProfileUseCase(ref.watch(profileRepositoryProvider));
 }
 
 @riverpod

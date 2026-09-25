@@ -41,8 +41,6 @@ abstract interface class AuthRemoteDataSource {
     required String newPassword,
     required String confirmNewPassword,
   });
-  Future<({String token, String refreshToken})> refreshToken(String token);
-
   /// See [forgotPassword] doc — same debug-OTP-echo behavior.
   Future<String?> sendEmailOtp(String email);
   Future<void> verifyEmailOtp({required String email, required String otpToken});
@@ -331,27 +329,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'confirmNewPassword': confirmNewPassword,
         },
         options: ApiAuthHeaders.public(),
-      );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
-  Future<({String token, String refreshToken})> refreshToken(
-    String token,
-  ) async {
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.refreshToken,
-        data: {'token': token},
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return (
-        token: data['token'] as String,
-        refreshToken: data['refreshToken'] as String? ?? '',
       );
     } on DioException catch (e) {
       throw mapDioException(e);

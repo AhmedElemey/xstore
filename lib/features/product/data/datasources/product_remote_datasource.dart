@@ -9,6 +9,7 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
+import '../../../../core/network/json_list_unwrap.dart';
 import '../../../../core/network/paginated_result.dart';
 import '../../../home/domain/entities/deal_entity.dart';
 import '../../../listing/data/models/listing_model.dart';
@@ -391,7 +392,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final listingMap = _listingMap(json);
     final listing = ListingModel.fromJson(listingMap).toEntity();
 
-    final compare = _num(json['compareAtPrice'] ?? json['compare_at_price']);
+    final compare = jsonDouble(json['compareAtPrice'] ?? json['compare_at_price']);
     final stock = (json['stockQuantity'] ?? json['stock'] ?? json['quantity'])
         as num?;
     final loc = (json['locationLine'] ??
@@ -488,7 +489,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   ReviewSummaryEntity? _parseReviewSummary(Object? raw) {
     if (raw is! Map) return null;
     final m = Map<String, dynamic>.from(raw);
-    final avg = _num(m['average'] ?? m['avg']);
+    final avg = jsonDouble(m['average'] ?? m['avg']);
     final total =
         (m['totalCount'] ?? m['count'] ?? m['total'] ?? 0) as num?;
     if (total == null || total.toInt() <= 0) {
@@ -516,7 +517,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final total = _int(json['reviewCount'], fallback: 0);
     if (total <= 0) return null;
     return ReviewSummaryEntity(
-      average: _num(json['rating']),
+      average: jsonDouble(json['rating']),
       totalCount: total,
     );
   }
@@ -529,7 +530,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           (m['userAvatarUrl'] ?? m['avatarUrl'] ?? m['avatar'])?.toString(),
       date: DateTime.tryParse((m['date'] ?? m['createdAt'] ?? '').toString()) ??
           DateTime.now(),
-      stars: _num(m['stars'] ?? m['rating']),
+      stars: jsonDouble(m['stars'] ?? m['rating']),
       text: (m['text'] ?? m['comment'] ?? m['body'] ?? '').toString(),
       helpfulCount: _int(m['helpfulCount'] ?? m['helpful'], fallback: 0),
     );
@@ -545,7 +546,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
               m['avatarUrl'] ??
               m['avatar'])
           ?.toString(),
-      rating: _num(m['rating'] ?? m['stars']),
+      rating: jsonDouble(m['rating'] ?? m['stars']),
       comment: (m['comment'] ?? m['text'] ?? '').toString(),
       helpfulCount: _int(m['helpfulCount'] ?? m['helpful'], fallback: 0),
       createdAt:
@@ -570,7 +571,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   ProductDetailEntity _similarProduct(Map<String, dynamic> m) {
     final listingJson = _listingMap(m);
     final listing = ListingModel.fromJson(listingJson).toEntity();
-    final compare = _num(m['compareAtPrice'] ?? m['compare_at_price']);
+    final compare = jsonDouble(m['compareAtPrice'] ?? m['compare_at_price']);
     return ProductDetailEntity(
       listing: listing,
       compareAtPrice: compare == 0 ? null : compare,
@@ -587,10 +588,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   DealEntity _dealFromSimilarEntry(Map<String, dynamic> m) {
     final listingJson = _listingMap(m);
     final listing = ListingModel.fromJson(listingJson).toEntity();
-    final compare = _num(m['compareAtPrice'] ?? m['compare_at_price']);
+    final compare = jsonDouble(m['compareAtPrice'] ?? m['compare_at_price']);
     final discountPct = compare > listing.price && compare > 0
         ? ((compare - listing.price) / compare) * 100
-        : _num(m['discountPercent'] ?? m['discount']);
+        : jsonDouble(m['discountPercent'] ?? m['discount']);
     return DealEntity(
       id: listing.id,
       title: listing.title,
@@ -647,9 +648,6 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     if (v is num) return v.toInt();
     return int.tryParse(v.toString());
   }
-
-  double _num(Object? v) =>
-      v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0;
 
   int _int(Object? v, {required int fallback}) {
     if (v is num) return v.toInt();

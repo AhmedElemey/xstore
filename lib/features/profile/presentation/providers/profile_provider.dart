@@ -541,14 +541,6 @@ class ProfileNotifier extends _$ProfileNotifier {
     return true;
   }
 
-  void clearAvatarFile() {
-    final cleared = state.copyWith(editAvatarFile: null);
-    final u = cleared.user;
-    state = cleared.copyWith(
-      hasChanges: u != null && !_profileEditEqualsUser(cleared, u),
-    );
-  }
-
   void markAvatarRemoved() {
     final cleared = state.copyWith(editAvatarFile: null, avatarRemoved: true);
     final u = cleared.user;

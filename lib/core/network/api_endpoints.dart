@@ -32,6 +32,7 @@ abstract final class ApiEndpoints {
   // the real backend and are kept only until the backend adds routes.
   // ---------------------------------------------------------------------
 
+  // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
   // TODO(backend): no social token-exchange route exists yet.
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';

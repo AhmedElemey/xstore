@@ -24,7 +24,6 @@ import '../../domain/usecases/register_vendor_usecase.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/verify_forgot_password_otp_usecase.dart';
-import '../../domain/usecases/refresh_token_usecase.dart';
 import '../../domain/usecases/send_email_otp_usecase.dart';
 import '../../domain/usecases/verify_email_otp_usecase.dart';
 import '../../domain/usecases/send_phone_otp_backend_usecase.dart';
@@ -102,11 +101,6 @@ VerifyForgotPasswordOtpUseCase verifyForgotPasswordOtpUseCase(
   VerifyForgotPasswordOtpUseCaseRef ref,
 ) {
   return VerifyForgotPasswordOtpUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-RefreshTokenUseCase refreshTokenUseCase(RefreshTokenUseCaseRef ref) {
-  return RefreshTokenUseCase(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
@@ -495,8 +489,6 @@ class RegisterNotifier extends _$RegisterNotifier {
     }
     updateField(dateOfBirth: dateOnly);
   }
-
-  void clearStepErrors() => state = state.copyWith(stepErrors: {});
 
   Future<void> pickStoreLogo() async {
     final picker = ImagePicker();

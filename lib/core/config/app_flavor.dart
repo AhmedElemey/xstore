@@ -15,8 +15,6 @@ enum AppFlavor {
 
   bool get isDev => this == AppFlavor.dev;
 
-  bool get isProd => this == AppFlavor.prod;
-
   /// Client ingestion key for the matching Amplitude project. Overridable
   /// at build time with `--dart-define=AMPLITUDE_API_KEY=...`. These are
   /// project write keys, same class as a Firebase/Maps key — they already
