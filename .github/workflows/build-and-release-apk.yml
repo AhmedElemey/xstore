@@ -83,6 +83,11 @@ env:
   FLUTTER_VERSION: "3.35.6"
   API_BASE_URL_DEV: "https://xstoreegy002-001-site1.etempurl.com"
   API_BASE_URL_PROD: "https://xstoreegy002-001-site1.etempurl.com"
+  # Amplitude project ingestion keys — like a Firebase/Maps API key, meant to ship
+  # inside the client, not treated as a secret. See
+  # docs_business/backend/08_AMPLITUDE_INTEGRATION.md.
+  AMPLITUDE_API_KEY_DEV: "997771c9a79e1c8d7448c4c8359c3025"
+  AMPLITUDE_API_KEY_PROD: "cc112c1d0642a9a8e7fb28a3f8566f12"
 
 jobs:
   build-and-release:
@@ -139,8 +144,10 @@ jobs:
         run: |
           if [ "$BUILD_FLAVOR" = "dev" ]; then
             echo "API_URL=${API_BASE_URL_DEV}" >> "$GITHUB_ENV"
+            echo "AMPLITUDE_KEY=${AMPLITUDE_API_KEY_DEV}" >> "$GITHUB_ENV"
           else
             echo "API_URL=${API_BASE_URL_PROD}" >> "$GITHUB_ENV"
+            echo "AMPLITUDE_KEY=${AMPLITUDE_API_KEY_PROD}" >> "$GITHUB_ENV"
           fi
 
       - name: Flutter clean
@@ -169,6 +176,7 @@ jobs:
             --flavor "$BUILD_FLAVOR" \
             -t "lib/main_${BUILD_FLAVOR}.dart" \
             --dart-define=API_BASE_URL="$API_URL" \
+            --dart-define=AMPLITUDE_API_KEY="$AMPLITUDE_KEY" \
             --dart-define=MOCK=false
 
       - name: Remove signing material from workspace
@@ -198,6 +206,22 @@ jobs:
           fi
           gh release create "$TAG" "$APK_PATH" "${ARGS[@]}"
           echo "RELEASE_URL=${RELEASE_HOST}/${RELEASE_REPO}/releases/tag/${TAG}" >> "$GITHUB_ENV"
+
+      - name: Write build summary
+        run: |
+          APP_ID=$( [ "$BUILD_FLAVOR" = "dev" ] && echo "com.xstore.app.dev" || echo "com.xstore.app" )
+          {
+            echo "### xStore \`${BUILD_FLAVOR}\` build"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Flavor | \`${BUILD_FLAVOR}\` |"
+            echo "| App ID | \`${APP_ID}\` |"
+            echo "| Version | ${FULL_VERSION} |"
+            echo "| Build number | ${BUILD_RUN_NUMBER} |"
+            echo "| APK | \`${APK_PATH}\` |"
+            echo "| Release | ${RELEASE_URL} |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send email notification
         run: |

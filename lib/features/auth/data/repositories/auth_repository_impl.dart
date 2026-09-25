@@ -536,6 +536,11 @@ class AuthRepositoryImpl implements AuthRepository {
         storeCityId: user.storeCityId,
         storeGovernmentId: user.storeGovernmentId,
         storeId: user.storeId,
+        isEmailVerificationRequired: user.isEmailVerificationRequired,
+        isPhoneVerificationRequired: user.isPhoneVerificationRequired,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        hasPassword: user.hasPassword,
       );
       await _persistUser(model);
       return const Right(unit);

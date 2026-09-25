@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/exceptions.dart';
 import 'package:xstore/core/mock/mock_config.dart';
+import 'package:xstore/core/network/app_error_messages.dart';
 import 'package:xstore/features/cart/data/datasources/cart_remote_datasource.dart';
 import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
@@ -26,6 +27,8 @@ class _ScriptedInterceptor extends Interceptor {
     final result = _respond(options);
     if (result is DioException) {
       handler.reject(result);
+    } else if (result is Response) {
+      handler.resolve(result);
     } else {
       handler.resolve(
         Response(requestOptions: options, statusCode: 200, data: result),
@@ -286,7 +289,7 @@ void main() {
       expect(result.vendorName, 'Sara');
       expect(result.vendorRating, 4.9);
       expect(result.quantity, 2);
-      // Free shipping above the 20,000 threshold.
+      // No listing shippingCost / shippingAvailable → no invented fee.
       expect(result.shippingCost, 0.0);
     });
 
@@ -300,8 +303,45 @@ void main() {
       expect(result.vendorId, 'vendor_unknown');
       expect(result.vendorName, '—');
       expect(result.vendorRating, isNull);
-      // Below the 20,000 free-shipping threshold.
-      expect(result.shippingCost, 500.0);
+      // No listing shippingCost / shippingAvailable → no invented 500 fee.
+      expect(result.shippingCost, 0.0);
+    });
+
+    test('uses the listing shippingCost when shipping is available', () async {
+      dio = buildDio(
+        (_) => {
+          'id': 'listing_1',
+          'title': 'Updated Product',
+          'price': 100,
+          'shippingAvailable': true,
+          'shippingCost': 35,
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+
+      final result = await datasource.buildLineFromListing('listing_1', 1);
+
+      expect(result.shippingAvailable, isTrue);
+      expect(result.shippingCost, 35);
+    });
+
+    test('pickup-only listing does not charge the listing shippingCost',
+        () async {
+      dio = buildDio(
+        (_) => {
+          'id': 'listing_1',
+          'title': 'Pickup item',
+          'price': 100,
+          'shippingAvailable': false,
+          'shippingCost': 500,
+        },
+      );
+      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+
+      final result = await datasource.buildLineFromListing('listing_1', 1);
+
+      expect(result.shippingAvailable, isFalse);
+      expect(result.shippingCost, 0);
     });
 
     test('throws ServerException on an empty response body', () async {
@@ -484,6 +524,198 @@ void main() {
       );
 
       expect((await datasource.getCart('consumer_1')).items, isEmpty);
+    });
+  }, skip: skipMock);
+
+  group('placeOrder stock pre-check', () {
+    const address = OrderAddress(
+      fullName: 'Jane',
+      phone: '0100',
+      street: 'St',
+      city: 'Cairo',
+      wilaya: 'Cairo',
+    );
+    PlaceOrderParams params(List<CartItemEntity> items) => PlaceOrderParams(
+          consumerId: 'consumer_1',
+          items: items,
+          deliveryAddress: address,
+          paymentMethod: PaymentMethod.cashOnDelivery,
+          subtotal: 0,
+          shippingTotal: 0,
+          discount: 0,
+          total: 0,
+        );
+    final line1 = _cartItem(id: 'cart_item_1', listingId: 'listing_1');
+    final line2 = _cartItem(id: 'cart_item_2', listingId: 'listing_2')
+        .copyWith(quantity: 3);
+
+    late List<String> ordered;
+    StubOrdersRemoteDataSource recordingOrders() => StubOrdersRemoteDataSource(
+          onCreateOrder: ({
+            required listingId,
+            required quantity,
+            required latitude,
+            required longitude,
+            required fallbackItem,
+            required fallbackAddress,
+            required fallbackPayment,
+            notes,
+          }) async {
+            ordered.add(listingId);
+            return OrderModel(
+              id: 'order_$listingId',
+              consumerId: 'consumer_1',
+              consumerName: 'Jane',
+              consumerPhone: '0100',
+              vendorId: 'vendor_1',
+              vendorName: 'Ahmed',
+              vendorStoreName: 'Ahmed Store',
+              items: [fallbackItem],
+              status: OrderStatus.pending,
+              paymentMethod: fallbackPayment,
+              deliveryAddress: fallbackAddress,
+              subtotal: fallbackItem.total,
+              shippingCost: 0,
+              discount: 0,
+              total: fallbackItem.total,
+              createdAt: DateTime(2026, 8, 1),
+              updatedAt: DateTime(2026, 8, 1),
+            );
+          },
+        );
+
+    Future<void> seedCart(Object? Function(RequestOptions) respond) async {
+      ordered = [];
+      datasource = CartRemoteDataSourceImpl(buildDio(respond), recordingOrders());
+      await datasource.addOrUpdateItem(consumerId: 'consumer_1', item: line1);
+      await datasource.addOrUpdateItem(consumerId: 'consumer_1', item: line2);
+    }
+
+    Map<String, dynamic> stockBody(bool ok) =>
+        {'isSuccess': true, 'data': ok, 'statusCode': 200};
+
+    final throwsOutOfStock = throwsA(
+      isA<ServerException>()
+          .having((e) => e.message, 'message', outOfStockErrorCode),
+    );
+
+    Future<CartItemEntity> cartLine(String id) async =>
+        (await datasource.getCart('consumer_1'))
+            .items
+            .firstWhere((e) => e.id == id);
+
+    test('checks every line with its own quantity, then places the orders',
+        () async {
+      final stockPaths = <String>[];
+      await seedCart((o) {
+        stockPaths.add(o.path);
+        return stockBody(true);
+      });
+
+      await datasource.placeOrder(params([line1, line2]));
+
+      expect(stockPaths, [
+        '/api/listings/listing_1/stock?quantity=1',
+        '/api/listings/listing_2/stock?quantity=3',
+      ]);
+      expect(ordered, ['listing_1', 'listing_2']);
+    });
+
+    test('a short line blocks the whole checkout and is capped to what is left',
+        () async {
+      await seedCart((o) {
+        if (o.path.endsWith('/stock?quantity=3')) return stockBody(false);
+        if (o.path.contains('/stock')) return stockBody(true);
+        return {'id': 'listing_2', 'title': 'PS5', 'stockQuantity': 1};
+      });
+
+      await expectLater(
+        datasource.placeOrder(params([line1, line2])),
+        throwsOutOfStock,
+      );
+
+      expect(ordered, isEmpty, reason: 'no line may be ordered');
+      final capped = await cartLine('cart_item_2');
+      expect(capped.quantity, 1);
+      expect(capped.maxQuantity, 1);
+      expect(capped.isAvailable, isTrue);
+      expect((await cartLine('cart_item_1')).quantity, 1);
+    });
+
+    test('a 404 (listing gone) marks the line unavailable', () async {
+      await seedCart((o) {
+        if (o.path.contains('listing_2/stock')) {
+          return Response(
+            requestOptions: o,
+            statusCode: 404,
+            data: {'isSuccess': false, 'data': false, 'errorEn': 'Listing not found.'},
+          );
+        }
+        if (o.path.contains('/stock')) return stockBody(true);
+        return DioException.badResponse(
+          statusCode: 404,
+          requestOptions: o,
+          response: Response(requestOptions: o, statusCode: 404),
+        );
+      });
+
+      await expectLater(
+        datasource.placeOrder(params([line1, line2])),
+        throwsOutOfStock,
+      );
+
+      expect(ordered, isEmpty);
+      expect((await cartLine('cart_item_2')).isAvailable, isFalse);
+    });
+
+    test('refused even though the listing claims enough → unavailable, '
+        'so the same quantity is not resubmitted', () async {
+      await seedCart((o) {
+        if (o.path.endsWith('/stock?quantity=3')) return stockBody(false);
+        if (o.path.contains('/stock')) return stockBody(true);
+        return {'id': 'listing_2', 'title': 'PS5', 'stockQuantity': 5};
+      });
+
+      await expectLater(
+        datasource.placeOrder(params([line1, line2])),
+        throwsOutOfStock,
+      );
+
+      final line = await cartLine('cart_item_2');
+      expect(line.isAvailable, isFalse);
+      expect(line.quantity, 3);
+    });
+
+    test('a stock-check outage does not block checkout', () async {
+      await seedCart((o) => DioException.connectionError(
+            requestOptions: o,
+            reason: 'offline',
+          ));
+
+      await datasource.placeOrder(params([line1, line2]));
+
+      expect(ordered, ['listing_1', 'listing_2']);
+    });
+  }, skip: skipMock);
+
+  group('buildLineFromListing stock', () {
+    test('reads stockQuantity as the line max', () async {
+      dio = buildDio((_) => {'id': 'l', 'title': 'T', 'stockQuantity': 4});
+      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+
+      final line = await datasource.buildLineFromListing('l', 1);
+
+      expect(line.maxQuantity, 4);
+      expect(line.isAvailable, isTrue);
+    });
+
+    test('missing stock is unavailable, not an invented quantity', () async {
+      dio = buildDio((_) => {'id': 'l', 'title': 'T'});
+      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+
+      final line = await datasource.buildLineFromListing('l', 1);
+
+      expect(line.isAvailable, isFalse);
     });
   }, skip: skipMock);
 }

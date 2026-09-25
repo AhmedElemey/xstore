@@ -59,7 +59,12 @@ class QuantityControl extends StatelessWidget {
               Material(
                 color: AppColors.transparent,
                 child: InkWell(
-                  onTap: enabled ? onEditQuantity : null,
+                  // Non-null onTap so a disabled control still wins the
+                  // gesture arena over CartItemCard's outer InkWell.
+                  onTap: enabled ? onEditQuantity : () {},
+                  enableFeedback: enabled,
+                  splashColor: enabled ? null : AppColors.transparent,
+                  highlightColor: enabled ? null : AppColors.transparent,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm,
@@ -119,12 +124,16 @@ class _QtySegment extends StatelessWidget {
     return Material(
       color: AppColors.transparent,
       child: InkWell(
-        onTap: enabled
-            ? () {
-                HapticFeedback.lightImpact();
-                onTap();
-              }
-            : null,
+        // Always attach a recognizer. `onTap: null` lets the tap fall
+        // through to CartItemCard and open the product.
+        onTap: () {
+          if (!enabled) return;
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        enableFeedback: enabled,
+        splashColor: enabled ? null : AppColors.transparent,
+        highlightColor: enabled ? null : AppColors.transparent,
         borderRadius: BorderRadius.circular(AppSpacing.x3l),
         child: Padding(
           padding: const EdgeInsets.symmetric(

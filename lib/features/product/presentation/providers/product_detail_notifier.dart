@@ -20,6 +20,11 @@ class ProductDetail extends _$ProductDetail {
   // throws an unhandled StateError.
   var _disposed = false;
 
+  // Riverpod reuses this instance when the provider is invalidated (e.g.
+  // after posting a review), so this keeps `view_item` to one per screen
+  // open instead of one per rebuild.
+  var _viewTracked = false;
+
   ProductDetailState _fromEntity(ProductDetailEntity e) {
     return ProductDetailState(
       listing: e.listing,
@@ -114,16 +119,19 @@ class ProductDetail extends _$ProductDetail {
     ref.onDispose(() => _disposed = true);
     final entity = await _fetchEntity(listingId);
     final merged = await _enriched(listingId, entity);
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.viewItem,
-      properties: {
-        AnalyticsProps.itemId: merged.listing.id,
-        AnalyticsProps.category: merged.listing.categoryLabel,
-        AnalyticsProps.sellerId: merged.listing.vendorId,
-        AnalyticsProps.priceEgp: merged.listing.price,
-        AnalyticsProps.guest: ref.read(authProvider).valueOrNull == null,
-      },
-    );
+    if (!_viewTracked) {
+      _viewTracked = true;
+      ref.read(analyticsServiceProvider).track(
+        AnalyticsEvents.viewItem,
+        properties: {
+          AnalyticsProps.itemId: merged.listing.id,
+          AnalyticsProps.category: merged.listing.categoryLabel,
+          AnalyticsProps.sellerId: merged.listing.vendorId,
+          AnalyticsProps.priceEgp: merged.listing.price,
+          AnalyticsProps.guest: ref.read(authProvider).valueOrNull == null,
+        },
+      );
+    }
     return _fromEntity(merged);
   }
 

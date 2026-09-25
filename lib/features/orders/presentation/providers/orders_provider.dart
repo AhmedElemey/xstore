@@ -257,8 +257,9 @@ class OrdersNotifier extends _$OrdersNotifier {
     OrderStatus status, {
     required String role,
     DeliveryMethod? deliveryMethod,
-    String? reason,
   }) {
+    // No cancel/reject `reason`: it is localized or free text typed by the
+    // user — the order API already stores it, joinable by order_id.
     ref.read(analyticsServiceProvider).track(
       AnalyticsEvents.orderStatusChanged,
       properties: {
@@ -266,7 +267,6 @@ class OrdersNotifier extends _$OrdersNotifier {
         AnalyticsProps.status: status.name,
         AnalyticsProps.role: role,
         if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
-        if (reason != null) AnalyticsProps.reason: reason,
       },
     );
   }
@@ -306,7 +306,6 @@ class OrdersNotifier extends _$OrdersNotifier {
           orderId,
           OrderStatus.cancelled,
           role: _isVendor ? 'vendor' : 'consumer',
-          reason: reason,
         );
       },
     );
@@ -378,7 +377,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       },
       (o) {
         _mergeOrder(o);
-        _trackOrderStatus(orderId, OrderStatus.cancelled, role: 'vendor', reason: reason);
+        _trackOrderStatus(orderId, OrderStatus.cancelled, role: 'vendor');
       },
     );
   }
@@ -408,7 +407,9 @@ class OrdersNotifier extends _$OrdersNotifier {
     final original = _orderById(orderId);
     if (original == null) return;
     final now = DateTime.now();
-    final tn = info.trackingNumber ?? 'XS-TRACK-$orderId';
+    final tn = info.trackingNumber?.trim().isNotEmpty == true
+        ? info.trackingNumber
+        : 'XS-TRACK-$orderId';
     state = state.copyWith(
       orders: state.orders
           .map(

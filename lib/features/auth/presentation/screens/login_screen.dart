@@ -8,6 +8,8 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
@@ -435,6 +437,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   .read(guestModeProvider.notifier)
                                   .enable();
                               if (!context.mounted) return;
+                              ref
+                                  .read(analyticsServiceProvider)
+                                  .track(AnalyticsEvents.guestModeStarted);
                               context.go(AppRoutes.home);
                             },
                             child: Text(

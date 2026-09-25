@@ -16,8 +16,6 @@ abstract final class AppStrings {
   static const phoneRequired = 'Phone number is required';
   static const phoneInvalidLength = 'Must be 11 digits';
   static const phoneInvalidPrefix = 'Must start with 010, 011, 012, or 015';
-  static const phoneInvalidNumber = 'Invalid phone number';
-  static const phoneTooManyRequests = 'Too many attempts. Try again later.';
   static const sendVerificationCode = 'Send Verification Code';
   static const verifyAndContinue = 'Verify & Continue';
   static const verifyYourNumber = 'Verify your number';
@@ -27,15 +25,10 @@ abstract final class AppStrings {
   static const didntReceiveCode = "Didn't receive the code?";
   static const resendCode = 'Resend Code';
   static const otpInvalidCode = 'Incorrect code. Please try again.';
-  static const otpSessionExpired = 'Code expired. Request a new one.';
   static const smsRatesNote = 'Standard SMS rates may apply';
   static const noInternet = 'No internet connection. Please try again.';
   static const genericError = 'Something went wrong. Please try again.';
-  static const emailTab = 'Email';
-  static const phoneTab = 'Phone';
   static const continueWithGoogle = 'Continue with Google';
-  static const continueWithApple = 'Continue with Apple';
-  static const continueWithFacebook = 'Continue with Facebook';
   static const socialLoginDivider = 'or continue with';
   static const welcomeBack = 'Welcome back';
   static const chooseYourRole = 'How will you use xStore?';
@@ -65,8 +58,6 @@ abstract final class AppStrings {
   static String notificationsUnreadBannerLine(int n) =>
       '🔔 You have $n unread notifications';
   static const notificationsEmptyAllTitle = "You're all caught up! 🎉";
-  static const notificationsEmptyAllSubtitle =
-      "No notifications yet. We'll notify you about orders, deals, and important updates.";
   static String notificationsEmptyFilterTitle(String filter) =>
       'No $filter notifications';
   static String notificationsEmptyFilterSubtitle(String scope) =>
@@ -131,12 +122,7 @@ abstract final class AppStrings {
   static const newListing = 'New Listing';
 
   // Profile
-  static const vendorAccount = 'Vendor Account';
-  static const customerAccount = 'Customer account';
   static const theme = 'Theme';
-  static const themeSystem = 'System';
-  static const themeLight = 'Light';
-  static const themeDark = 'Dark';
   static const darkMode = 'Dark Mode';
   static const lightMode = 'Light Mode';
 
@@ -152,27 +138,17 @@ abstract final class AppStrings {
   static const sectionDangerZone = 'DANGER ZONE';
   static const menuMyListings = 'My Listings';
   static const menuMyOrders = 'My Orders';
-  static const menuAnalytics = 'Analytics';
-  static const menuEarnings = 'Earnings';
   static const menuWishlist = 'Wishlist';
-  static const menuRecentlyViewed = 'Recently Viewed';
-  static const menuMyReviews = 'My Reviews';
   static const menuPersonalInfo = 'Personal Info';
   static const socialLinks = 'Social links';
   static const menuChangePassword = 'Change Password';
-  static const menuNotificationsSettings = 'Notifications';
-  static const menuLanguage = 'Language';
   static const menuPaymentMethods = 'Payment Methods';
   static const menuAddresses = 'My Addresses';
-  static const menuDarkMode = 'Dark Mode';
-  static const menuPushNotifications = 'Push Notifications';
-  static const menuEmailUpdates = 'Email Updates';
   static const menuHelpCenter = 'Help Center';
   static const menuTerms = 'Terms of Service';
   static const menuPrivacy = 'Privacy Policy';
   static const menuRateApp = 'Rate xStore';
   static const menuShareApp = 'Share xStore';
-  static const manageStore = 'Manage Store';
   static const statSales = 'Sales';
   static const statSalesShort = 'sales';
   static const statRating = 'Rating';
@@ -180,26 +156,11 @@ abstract final class AppStrings {
   static const statOrders = 'Orders';
   static const statWishlist = 'Wishlist';
   static const statTotalSaved = 'Total Saved';
-  static const currencyDzd = 'EGP';
   static const storeInformation = 'Store Information';
-  static const fullNameLabel = 'Full Name';
-  static const emailAddressLabel = 'Email Address';
-  static const phoneNumberLabel = 'Phone Number';
-  static const dateOfBirthLabel = 'Date of Birth';
-  static const locationCityLabel = 'Location / City';
-  static const bioLabel = 'Bio / About';
-  static const bioHint = 'Tell buyers a bit about yourself';
-  static const storeNameLabel = 'Store Name';
   static const storeCategoryLabel = 'Store Category';
-  static const storeDescriptionLabel = 'Store Description';
-  static const storeCityLabel = 'Store City';
-  static const storeWilayaLabel = 'Store Wilaya';
-  static const whatsappLabel = 'WhatsApp Number';
   static const instagramLabel = 'Instagram handle';
   static const facebookLabel = 'Facebook page';
   static const logoutConfirmTitle = 'Log out of xStore?';
-  static const logoutConfirmSubtitle =
-      "You'll need to login again to access your account";
   static const cancel = 'Cancel';
   static const logOut = 'Log Out';
   static const deleteAccount = 'Delete Account';
@@ -208,15 +169,10 @@ abstract final class AppStrings {
   static const deleteAccountTypeHint = 'Type DELETE to confirm';
   static const deleteMyAccount = 'Delete My Account';
   static const deleteConfirmKeyword = 'DELETE';
-  static const choosePhotoSource = 'Profile photo';
   static const takePhoto = 'Camera';
   static const chooseFromGallery = 'Gallery';
   static const removePhoto = 'Remove Photo';
   static const profileUpdatedSuccess = 'Profile updated';
-  static const languageTitle = 'Language';
-  static const languageEnglish = 'English';
-  static const languageFrench = 'French';
-  static const languageArabic = 'Arabic';
   static const profileFooterLine = 'xStore v1.0.0 · Made with ❤️ in Egypt';
   static const statStoreViews = 'Views';
   static const statStoreSaves = 'Saves';
@@ -224,14 +180,12 @@ abstract final class AppStrings {
   static const storeMetaLinePrefix = 'Since ';
   /// Buyer-facing vendor store header (profile card still uses [storeMetaLinePrefix]).
   static const storeJoinedPrefix = 'Joined ';
-  static const followStore = 'Follow Store';
   static const share = 'Share';
   static const storeDescriptionHeading = 'About the store';
   static const allCategoriesChip = 'All';
   static const vendorStoreStatListings = 'Active Listings';
   static const vendorStoreStatSales = 'Total Sales';
   static const vendorStoreStatResponse = 'Response Rate';
-  static const placeholderScreenSubtitle = 'This screen is coming soon.';
   static const shareXStoreMessage =
       'Shop and sell on xStore — Egypt\'s modern marketplace.';
   /// Placeholder listing URLs for “Rate xStore”.
@@ -253,7 +207,6 @@ abstract final class AppStrings {
   static const exploreSearchPlaceholder = 'Search listings…';
   static const clearAllFilters = 'Clear All';
   static const filters = 'Filters';
-  static const addFilters = '+ Filters';
   static const applyFilters = 'Apply Filters';
   static String applyFiltersCount(int n) => '$applyFilters ($n)';
   static const resetFilters = 'Reset';
@@ -279,17 +232,12 @@ abstract final class AppStrings {
   static const minRating = 'Minimum rating';
   static const location = 'Location';
   static const shippingOnly = 'Shipping available';
-  static const gridView = 'Grid';
-  static const listView = 'List';
   static const ratingStars4Plus = '⭐ 4+';
   static const ratingStars3Plus = '⭐ 3+';
   static const ratingStars2Plus = '⭐ 2+';
-  static const starChar = '★';
 
   // Orders
   static const ordersEmptyTitle = 'No orders yet';
-  static const ordersEmptySubtitle =
-      'When you buy something, your orders will show up here.';
   static const ordersIncomingTitle = 'Incoming Orders';
   static const ordersMyTitle = 'My Orders';
   static const ordersSearchHint = 'Search order or product…';
@@ -300,7 +248,6 @@ abstract final class AppStrings {
   static const ordersFilterShipped = 'Shipped';
   static const ordersFilterDelivered = 'Delivered';
   static const ordersFilterCancelled = 'Cancelled';
-  static const ordersFilterRefunded = 'Refunded';
   static const ordersSortHighestValue = 'Highest Value';
   static const ordersSortNeedsAction = 'Needs Action';
   static const ordersCountLabel = 'orders';
@@ -314,13 +261,10 @@ abstract final class AppStrings {
   static String ordersMoreItems(int n) =>
       n == 1 ? '+ $n $ordersMoreItemsSuffix' : '+ $n $ordersMoreItemsSuffixPlural';
   static const ordersQtyTotalLinePrefix = 'Qty';
-  static const ordersFromStorePrefix = 'From';
   static const ordersEstimatedDelivery = '🚚 Estimated';
-  static const ordersPaymentLine = 'Payment';
   static const ordersTrackOrder = 'Track Order';
   static const ordersViewDetails = 'View Details';
   static const ordersCancelOrder = 'Cancel Order';
-  static const ordersConfirmReceipt = 'Confirm Receipt';
   static const ordersLeaveReview = 'Leave Review';
   static const ordersReorder = 'Reorder';
   static const ordersRejectOrder = 'Reject';
@@ -328,18 +272,12 @@ abstract final class AppStrings {
   static const ordersMarkProcessing = 'Mark as Processing';
   static const ordersMarkShipped = 'Mark as Shipped';
   static const ordersMarkDelivered = 'Mark as Delivered';
-  static const ordersViewTracking = 'View Tracking';
   static const ordersShopAgain = '🛒 Shop Again';
   static const ordersEmptyFilteredTitle = 'No matching orders';
-  static const ordersEmptyConsumerSubtitle =
-      'Start shopping to see your orders here';
   static const ordersBrowseProducts = 'Browse Products';
-  static const ordersDetailTitlePrefix = 'Order #';
   static const ordersShareSummary = 'Share order';
   static const ordersSoldBy = 'Sold by';
   static const ordersBuyerInfo = 'Buyer Info';
-  static const ordersMessageSeller = '💬 Message Seller';
-  static const ordersMessageSellerSoon = 'Messaging — coming soon';
   static const ordersWhatsapp = '💬 WhatsApp';
   static const ordersDeliveryAddressTitle = 'Delivery Address';
   static const ordersItemsSectionTitle = 'Items Ordered';
@@ -354,7 +292,6 @@ abstract final class AppStrings {
   static const ordersPaidBadge = 'Paid';
   static const ordersPaymentPendingBadge = 'Pending';
   static const ordersViewProduct = 'View Product';
-  static const ordersCopyTracking = 'Copy';
   static const ordersTrackingCopied = 'Copied to clipboard';
   static const ordersTrackOnCourier = 'Track on Courier Website';
   static const ordersCourierWebsiteSoon = 'Courier tracking — coming soon';
@@ -371,9 +308,6 @@ abstract final class AppStrings {
   static const ordersCancelReasonBetterPrice = 'Found better price';
   static const ordersCancelReasonMistake = 'Ordered by mistake';
   static const ordersCancelReasonOther = 'Other';
-  static const ordersConfirmReceiptTitle = 'Confirm receipt?';
-  static const ordersConfirmReceiptBody =
-      'Confirm you received this order?';
   static const ordersConfirm = 'Confirm';
   static const ordersRejectDialogTitle = 'Reject order';
   static const ordersRejectReasonHint = 'Reason for rejection';
@@ -399,17 +333,13 @@ abstract final class AppStrings {
   static const statusSubtitleShipped = 'Your order is on the way!';
   static const statusSubtitleDelivered = 'Order delivered successfully';
   static const statusSubtitleCancelled = 'This order was cancelled';
-  static const statusSubtitleRefunded = 'Refund processed';
   static const ordersFiltersMoreSoon = 'More filters — coming soon';
   static const orderHashPrefix = 'Order #';
-  static const vendorNeedsAttention = 'Needs attention';
 
   // Wishlist
   static const wishlistEmptyTitle = 'Your wishlist is empty';
   static const wishlistEmptySubtitle =
       'Save items you love by tapping the heart icon on any product';
-  static const wishlistDiscoverProducts = 'Discover products';
-  static String wishlistAppBarTitle(int n) => 'My Wishlist ($n)';
   static const wishlistForBuyersTitle = 'Wishlist is for Buyers';
   static const wishlistForBuyersSubtitle =
       'Create a consumer account to save and track your favorite products';
@@ -418,11 +348,8 @@ abstract final class AppStrings {
   static const wishlistCancelSelect = 'Cancel';
   static String wishlistSelectedCount(int n) => '$n selected';
   static const wishlistSort = 'Sort';
-  static const wishlistSortRecentlyAdded = 'Recently Added';
   static const wishlistSortPriceLow = 'Price: Low to High';
   static const wishlistSortPriceHigh = 'Price: High to Low';
-  static const wishlistSortPriceDrop = 'Price Drop';
-  static const wishlistSortBiggestDiscount = 'Biggest Discount';
   static const wishlistSortNameAz = 'Name A–Z';
   static const wishlistFilterAll = 'All';
   static const wishlistFilterAvailable = 'Available';
@@ -433,32 +360,25 @@ abstract final class AppStrings {
   static const wishlistPriceDropBannerSubtitle =
       'Prices dropped since you saved them';
   static const wishlistViewPriceDrops = 'View Price Drops';
-  static const wishlistPriceDropBadge = 'Price Drop';
   static String wishlistPriceDropPercent(int p) => '↓ $p% Price Drop';
   static const wishlistOutOfStock = 'Out of Stock';
   static const wishlistInCartBadge = '✓ In Cart';
   static const wishlistRemove = '♡ Remove';
   static const wishlistAddToCart = '🛒 Add to Cart';
   static const wishlistInCartCta = '✓ In Cart';
-  static const wishlistSwipeAddCart = 'Add to Cart';
   static const wishlistMoveAllToCart = 'Move All to Cart';
   static const wishlistShareWishlist = 'Share Wishlist';
-  static String wishlistMoveAllSummary(int n) => '$n items added to cart';
   static const wishlistViewCart = 'View Cart';
   static String wishlistShareText(String link) =>
       'Check out my wishlist on xStore! 🛍️\n$link';
   static String wishlistItemsAvailableLine(int total, int avail) =>
       '$total items · $avail available';
-  static const wishlistRemoveSelected = 'Remove Selected';
   static String wishlistAddToCartSelected(int n) => 'Add to Cart ($n)';
   static String wishlistRemoveSelectedCount(int n) => 'Remove Selected ($n)';
   static const wishlistSavedSnack = 'Saved to Wishlist ❤️';
   static const wishlistView = 'View';
   static const wishlistRemovedSnack = 'Removed from Wishlist';
-  static String wishlistFilterEmptyTitle(String filterName) =>
-      'No $filterName items';
   static const wishlistShowAllItems = 'Show All Items';
-  static const wishlistReviewsWord = 'reviews';
   static const wishlistGridContentDesc = 'Grid view';
   static const wishlistListContentDesc = 'List view';
   static const wishlistNoAvailableItems = 'No available items';
@@ -472,25 +392,20 @@ abstract final class AppStrings {
   // Cart (consumer)
   static String cartAppBarTitle(int n) => 'My Cart ($n items)';
   static const cartForBuyersTitle = 'Cart is for Buyers';
-  static const cartForBuyersSubtitle =
-      'Switch to a consumer account to shop on xStore';
   static const cartExploreAsBuyer = 'Explore as Buyer';
   static const cartClearTitle = 'Clear your entire cart?';
   static String cartClearBody(int n) =>
       'This will remove all $n items from your cart.';
   static const cartClearConfirm = 'Clear Cart';
-  static const cartSelectAll = 'Select All';
   static String cartSelectAllCount(int n) => 'Select All ($n items)';
   static const cartTotalLabel = 'Total';
   static const cartEmptyTitle = 'Your cart is empty';
   static const cartEmptySubtitle =
       "Looks like you haven't added anything to your cart yet";
   static const cartStartShopping = 'Start Shopping';
-  static const cartOrWishlist = 'Or check your Wishlist';
-  static const cartWishlistArrow = 'Wishlist →';
+  static const cartOrWishlist = 'Or check your Wishlist →';
   static const cartRemove = '🗑 Remove';
   static const cartSaveForLater = '♡ Save for Later';
-  static const cartUnavailableBadge = 'Unavailable';
   static const cartUnavailableHint =
       'This item is no longer available';
   static const cartSwipeRemove = 'Remove';
@@ -513,12 +428,9 @@ abstract final class AppStrings {
   static const cartShippingLine = 'Shipping';
   static String cartCouponLine(String code) => 'Coupon ($code)';
   static const cartTotalLine = 'Total';
-  static const cartCashOnDeliveryNote = '💳 Cash on Delivery available';
-  static const cartSecureCheckout = '🔒 Secure checkout guaranteed';
   static const cartProceedCheckout = 'Proceed to Checkout';
   static String cartProceedCheckoutTotal(String total) =>
       'Proceed to Checkout ($total)';
-  static String cartCheckoutItems(int n) => 'Checkout ($n items)';
   static const cartYouMayAlsoLike = 'You May Also Like';
   static const checkoutTitle = 'Checkout';
   static const checkoutContinue = 'Continue';
@@ -529,10 +441,7 @@ abstract final class AppStrings {
   static const checkoutAddAddress = '+ Add New Address';
   static const checkoutSaveAddress = 'Save Address';
   static const checkoutFullName = 'Full Name';
-  static const checkoutPhone = 'Phone';
   static const checkoutStreet = 'Street';
-  static const checkoutCity = 'City';
-  static const checkoutWilaya = 'Wilaya';
   static const checkoutPostalCode = 'Postal Code';
   static const checkoutSetDefault = 'Set as Default';
   static const checkoutEdit = 'Edit';
@@ -540,39 +449,23 @@ abstract final class AppStrings {
   static const checkoutPayCodTitle = '💵 Cash on Delivery';
   static const checkoutPayCodSubtitle = 'Pay when your order arrives';
   static const checkoutPayCibTitle = '💳 CIB Card';
-  static const checkoutPayCibSubtitle = 'Debit/Credit card payment';
-  static const checkoutPayDahabiTitle = '🟡 Dahabicard';
-  static const checkoutPayDahabiSubtitle = 'Egypt Post golden card';
-  static const checkoutPayBaridiTitle = '🟢 BaridiMob';
-  static const checkoutPayBaridiSubtitle = 'Egypt Post mobile payment';
   static const checkoutCardExpiry = 'MM/YY';
   static const checkoutCardCvv = 'CVV';
   static const checkoutCardNumber = 'Card number';
   static const checkoutDeliveryNoteLabel = 'Delivery note (optional)';
-  static const checkoutDeliveryNoteHint =
-      'Add a note for your vendor (e.g. leave at door, call on arrival)';
   static const checkoutReviewTitle = 'Review Your Order';
   static String checkoutItemsFromSellers(int items, int sellers) =>
       '$items items from $sellers sellers';
   static const checkoutEstimatedDelivery = '🚚 Estimated: 3–5 business days';
   static const checkoutTermsBefore = 'By placing this order you agree to our';
-  static const checkoutTermsAnd = 'and';
-  static const checkoutReturnPolicy = 'Return Policy';
-  static const checkoutPlaceOrder = '🛒 Place Order';
   static String checkoutPlaceOrderTotal(String total) =>
       '🛒 Place Order · $total';
   static const checkoutErrorNoAddress = 'Please select or add an address';
   static const checkoutErrorNoPayment = 'Please select a payment method';
   static const checkoutErrorNoItems = 'No items selected for checkout';
-  static const checkoutErrorCard = 'Please enter a valid card number';
-  static const checkoutErrorExpiry = 'Enter a valid expiry date (MM/YY)';
-  static const checkoutErrorCvv = 'Enter a valid CVV (3–4 digits)';
-  static const checkoutPaymentSecure = 'Your payment info is encrypted';
   static const checkoutErrorGeneric = 'Could not place order';
   static const orderPlacedTitle = 'Order Placed! 🎉';
   static String orderPlacedNumber(String id) => 'Order #$id';
-  static const orderPlacedSubtitle =
-      "We'll notify you when your vendor confirms your order";
   static const orderTrackCta = 'Track My Order';
   static const orderContinueShopping = 'Continue Shopping';
   static const couponDetailSave10 = '10% discount applied!';
@@ -595,15 +488,10 @@ abstract final class AppStrings {
   static const readLess = 'Read less';
   static const quantity = 'Quantity';
   static const stockQuantityRequired = 'Stock quantity *';
-  static const chatSeller = 'Chat';
-  static const chatSellerSoon = 'Chat with seller — coming soon';
   static const addedToCart = 'Added to cart!';
-  static const expressCheckoutSoon = 'Express checkout — coming soon';
   static const buyNow = 'Buy now';
   static const visitStore = 'Visit Store';
   static const verifiedSeller = '✅ Verified Seller';
-  static const sellerRatingMid = ' Seller · ';
-  static const sellerSalesSuffix = ' sales';
   static const onlyLeftPrefix = 'Only ';
   static const onlyLeftSuffix = ' left!';
 
@@ -613,14 +501,12 @@ abstract final class AppStrings {
   static const listingViews = 'Views';
   static const listingSaves = 'Saves';
   static const listingInquiries = 'Inquiries';
-  static const editListing = 'Edit';
   static const editListingMenu = 'Edit Listing';
   static const viewStatsMenu = 'View Stats';
   static const listingStatsHeading = 'Listing stats';
   static const subcategoryPickerPrefix = 'Subcategory — ';
   static const pauseListing = 'Pause';
   static const resumeListing = 'Resume';
-  static const listingStats = 'Statistics';
   static const deleteListing = 'Delete';
   static const draft = 'Draft';
   static const active = 'Active';
@@ -632,22 +518,14 @@ abstract final class AppStrings {
   // Shared / errors
   static const retry = 'Retry';
   static const errorGeneric = 'Something went wrong';
-  static const emptyInbox = 'Nothing here yet';
 
   // Screen titles (alias nav where aligned)
-  static const homeTitle = navHome;
-  static const exploreTitle = navExplore;
   static const cartTitle = navCart;
-  static const profileTitle = navProfile;
-  static const ordersTitle = navOrders;
-  static const loginTitle = login;
-  static const registerTitle = register;
 
   // Vendor incoming orders
   static const incomingOrders = 'Incoming Orders';
   static const vendorSearchHint = 'Search by order ID or buyer name';
   static const vendorConfirmAllPending = 'Confirm All Pending';
-  static const vendorViewAnalytics = 'View Analytics';
   static const vendorStatPendingOrders = 'Pending';
   static const vendorStatActiveOrders = 'Active';
   static const vendorStatTotalOrders = 'Total';
@@ -659,7 +537,6 @@ abstract final class AppStrings {
   static const vendorSortHighestValue = 'Highest Value';
   static const vendorSortNeedsAction = 'Needs Action';
   static const vendorSortBuyerName = 'By Buyer Name A–Z';
-  static const vendorNewOrder = 'NEW ORDER';
   static const vendorRejectOrder = 'Reject Order';
   static const vendorConfirmOrder = 'Confirm Order';
   static const vendorConfirmOrderShort = 'Confirm';
@@ -672,18 +549,13 @@ abstract final class AppStrings {
   static const vendorNoStatusOrders = 'No orders for this status';
   static const vendorNoStatusOrdersSubtitle = 'Try another filter or show all orders';
   static const vendorShippingInfoTitle = 'Shipping Information';
-  static const vendorViewOnMap = 'View on Map';
   static const vendorCollectOnDelivery = 'Collect on delivery';
   static const vendorRejectTitle = 'Reject this order?';
-  static const vendorRejectWarning =
-      'This action cannot be undone. The buyer will be notified.';
   static const vendorConfirmRejection = 'Confirm Rejection';
   static const vendorConfirmShipment = 'Confirm Shipment';
   static String vendorLowStockHint(int qty) => '$qty units remaining after this order';
   static const vendorExportOrders = 'Export Orders';
   static const vendorOrderSettings = 'Order Settings';
-  static const vendorPrintOrder = 'Print Order';
-  static const vendorReportIssue = 'Report Issue';
   static const vendorReasonItemUnavailable = 'Item no longer available';
   static const vendorReasonOutOfStock = 'Out of stock';
   static const vendorReasonCannotDeliver = 'Cannot deliver to buyer location';
@@ -692,7 +564,6 @@ abstract final class AppStrings {
   static const vendorReasonOther = 'Other';
   static const vendorTypeReasonHint = 'Type reason';
   static const vendorTrackingHint = 'XS-TRACK-2024-001';
-  static const vendorShippingNoteHint = 'Package handed to courier, estimated 3–5 days';
   static const vendorOrderRejectedSnack = 'Order rejected. Buyer notified.';
   static const vendorOrderConfirmedSnack = 'Order confirmed';
   static const vendorOrderProcessingSnack = 'Order marked as processing';
@@ -704,12 +575,9 @@ abstract final class AppStrings {
   static const vendorStatusShipped = 'Order is on the way';
   static const vendorStatusDelivered = 'Order delivered successfully';
   static const vendorStatusCancelled = 'This order was cancelled';
-  static const vendorStatusRefunded = 'Refunded';
 
   // Store hours
   static const storeHours = 'Store Hours';
-  static const storeOpenNow = 'Open Now';
-  static const storeClosedNow = 'Closed';
   static const storeStatusOpen = 'Your store is currently OPEN';
   static const storeStatusClosed = 'Your store is currently CLOSED';
   static const storeOpenDesc = 'Customers can place orders now';
@@ -738,17 +606,12 @@ abstract final class AppStrings {
   static const from = 'From';
   static const to = 'To';
   static const copyFrom = 'Copy from:';
-  static const copyingFrom = 'Copying from:';
   static const applyToSelectedDays = 'Apply to Selected Days';
   static const selectAllDays = 'Select All';
   static const deselectAllDays = 'Deselect All';
   static const openLabel = 'Open';
   static const closedLabel = 'Closed';
-  static String opensAt(String time) => 'Opens at $time';
-  static String closesAt(String time) => 'Closes at $time';
-  static String opensOn(String day, String time) => 'Opens $day at $time';
   static const storeHoursTitle = 'Store Hours';
-  static const todayLabel = 'Today';
   static const daySaturday = 'Saturday';
   static const daySunday = 'Sunday';
   static const dayMonday = 'Monday';
@@ -756,20 +619,10 @@ abstract final class AppStrings {
   static const dayWednesday = 'Wednesday';
   static const dayThursday = 'Thursday';
   static const dayFriday = 'Friday';
-  static const dayShortSat = 'Sat';
-  static const dayShortSun = 'Sun';
-  static const dayShortMon = 'Mon';
-  static const dayShortTue = 'Tue';
-  static const dayShortWed = 'Wed';
-  static const dayShortThu = 'Thu';
-  static const dayShortFri = 'Fri';
   static const invalidHoursError = 'Closing time must be after opening time';
   static const discardChanges = 'Discard Changes';
-  static const discardChangesConfirm = 'Discard unsaved changes?';
   static String applyPresetConfirm(String preset) =>
       'Apply $preset hours to all days?';
-  static const storeClosedWarning =
-      'This store is currently closed. You can still order — seller will respond when they reopen.';
 
   // Vendor location
   static const storeLocation = 'Store Location';

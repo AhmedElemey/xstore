@@ -49,7 +49,6 @@ abstract final class AppColors {
 
   // Compatibility aliases used across feature UIs.
   static const background = lightBackground;
-  static const cardBg = lightSurface;
   static const textPrimary = lightTextPrimary;
   static const textSecondary = lightTextSecondary;
   static const textDisabled = lightTextDisabled;
@@ -69,9 +68,6 @@ abstract final class AppColors {
   /// Google sign-in border color.
   static const googleOAuthOutlineGrey = Color(0xFFDADCE0);
 
-  /// Facebook brand primary.
-  static const facebookBrandBlue = Color(0xFF1877F2);
-
   /// Skeleton / shimmer neutral highlight (~gray-50).
   static const neutral50 = Color(0xFFF9FAFB);
 
@@ -85,7 +81,6 @@ abstract final class AppColors {
   static const orderStatusShipped = Color(0xFF8B5CF6);
   static const orderStatusDelivered = Color(0xFF22C55E);
   static const orderStatusCancelled = Color(0xFFEF4444);
-  static const orderStatusRefunded = Color(0xFF6B7280);
 
   /// Unread notification row (tint + banner accents).
   static const notificationUnreadBackground = Color(0xFFEEF2FF);

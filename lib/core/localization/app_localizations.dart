@@ -3083,14 +3083,8 @@ abstract class AppLocalizations {
   /// No description provided for @cartOrWishlist.
   ///
   /// In en, this message translates to:
-  /// **'Or check your Wishlist'**
+  /// **'Or check your Wishlist →'**
   String get cartOrWishlist;
-
-  /// No description provided for @cartWishlistArrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Wishlist →'**
-  String get cartWishlistArrow;
 
   /// No description provided for @cartRemove.
   ///
@@ -3187,12 +3181,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shipping'**
   String get cartShippingLine;
-
-  /// No description provided for @cartFreeShippingThresholdNote.
-  ///
-  /// In en, this message translates to:
-  /// **'🚚 Items priced {threshold} and up ship free'**
-  String cartFreeShippingThresholdNote(Object threshold);
 
   /// No description provided for @cartTotalLine.
   ///
@@ -3589,6 +3577,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please verify your phone number to place an order'**
   String get checkoutErrorPhoneNotVerified;
+
+  /// No description provided for @checkoutErrorOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.'**
+  String get checkoutErrorOutOfStock;
 
   /// No description provided for @checkoutPartialOrderTitle.
   ///

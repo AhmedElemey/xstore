@@ -4,12 +4,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../addresses/presentation/providers/address_book_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/place_order_params.dart';
 import 'cart_provider.dart';
+import 'cart_state.dart';
 import 'checkout_state.dart';
 
 part 'checkout_provider.g.dart';
@@ -59,6 +61,9 @@ class Checkout extends _$Checkout {
   void selectAddress(int index) {
     if (index < 0 || index >= state.savedAddresses.length) return;
     state = state.copyWith(selectedAddressIndex: index);
+    ref
+        .read(analyticsServiceProvider)
+        .track(AnalyticsEvents.checkoutAddressSelected);
   }
 
   void addAddress(OrderAddress a) {
@@ -69,6 +74,9 @@ class Checkout extends _$Checkout {
       savedAddresses: list,
       selectedAddressIndex: list.length - 1,
     );
+    ref
+        .read(analyticsServiceProvider)
+        .track(AnalyticsEvents.checkoutAddressAdded);
   }
 
   void updateAddress(int index, OrderAddress a) {
@@ -139,21 +147,38 @@ class Checkout extends _$Checkout {
     state = state.copyWith(currentStep: state.currentStep - 1, error: null);
   }
 
+  void _trackPlacementFailed(String reason, CartState cart) {
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.orderPlacementFailed,
+      properties: {
+        AnalyticsProps.reason: reason,
+        AnalyticsProps.cartValueEgp: cart.total,
+        AnalyticsProps.itemCount: cart.selectedAvailableItems.length,
+      },
+    );
+  }
+
   Future<OrderEntity?> placeOrder() async {
+    // A second tap can land before the disabled button re-renders; one
+    // order per cart line means a re-entry would place duplicates.
+    if (state.isPlacingOrder) return null;
+    final cart = ref.read(cartProvider);
     if (!ref.read(isOnlineProvider)) {
       state = state.copyWith(error: 'offline');
+      _trackPlacementFailed('offline', cart);
       return null;
     }
-    final cart = ref.read(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
     final selected = cart.selectedAvailableItems.toList();
     if (selected.isEmpty) {
       state = state.copyWith(error: 'noItems');
+      _trackPlacementFailed('noItems', cart);
       return null;
     }
     final idx = state.selectedAddressIndex;
     if (idx == null || idx < 0 || idx >= state.savedAddresses.length) {
       state = state.copyWith(error: 'noAddress');
+      _trackPlacementFailed('noAddress', cart);
       return null;
     }
     state = state.copyWith(isPlacingOrder: true, error: null);
@@ -163,6 +188,7 @@ class Checkout extends _$Checkout {
         : ref.read(authProvider).valueOrNull?.id ?? '';
     if (consumerId.isEmpty) {
       state = state.copyWith(isPlacingOrder: false, error: 'noConsumer');
+      _trackPlacementFailed('noConsumer', cart);
       return null;
     }
     final params = PlaceOrderParams(
@@ -186,11 +212,33 @@ class Checkout extends _$Checkout {
     // or a stable code like phoneNotVerifiedErrorCode) in its own state —
     // read it through rather than collapsing every failure to 'failed'.
     final cartError = ref.read(cartProvider).error;
+    final failureReason = order == null ? (cartError ?? 'failed') : null;
     state = state.copyWith(
       isPlacingOrder: false,
       placedOrderId: order?.id,
-      error: order == null ? (cartError ?? 'failed') : null,
+      error: failureReason,
     );
+    if (failureReason == outOfStockErrorCode) {
+      // The stock check already capped/disabled the short lines in the
+      // session cart; reload it so the cart shows them before a retry.
+      await cartNotifier.fetchCart();
+      if (_disposed) return order;
+    }
+    if (failureReason != null) {
+      // Cart's error is the server's free-text message for most failures —
+      // only stable codes go to analytics.
+      const stableCodes = {
+        'failed',
+        kOfflineErrorCode,
+        phoneNotVerifiedErrorCode,
+        rateLimitErrorCode,
+        outOfStockErrorCode,
+      };
+      _trackPlacementFailed(
+        stableCodes.contains(failureReason) ? failureReason : 'server_error',
+        cart,
+      );
+    }
     return order;
   }
 }

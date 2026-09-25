@@ -1,6 +1,8 @@
 # xStore — Report Vendor Backend Handoff
 
-**Status:** client-side implemented and shipping (mobile app), backend endpoint **not yet built**.
+**Status (2026-09-24):** client-side implemented; the backend route now exists (in the Postman
+collection, and the hosted API answers 401 rather than 404 to an unauthenticated call). An
+authenticated end-to-end submit has not been checked yet. See `10_REPORTS_BLOCK_STOCK_AUDIT.md`.
 **Companion:** none yet — this is the only doc for this feature. Once the endpoint exists, an
 admin-facing report list/queue (see "Open questions" below) would be the natural next companion
 doc, similar to how `03_ANALYTICS_EVENTS_HANDOFF.md` feeds the admin dashboard's Analytics tab.
@@ -17,9 +19,8 @@ it does not affect the vendor's public rating and is not shown to other consumer
 `lib/features/reports/` in the Flutter app (domain/data/presentation layers) is fully wired:
 a "Report Vendor" button sits next to "Visit Store" on the order detail screen (consumer view
 only), opens a sheet to pick a reason and an optional/required comment, and POSTs to the
-endpoint below via `VendorReportsRemoteDataSourceImpl`. Until this endpoint exists, the POST
-gets a 404 and the app surfaces a real error to the user — this is expected and intentional
-(no fake "queued for later" success state), not a bug to work around on the mobile side.
+endpoint below via `VendorReportsRemoteDataSourceImpl`. A failed POST shows a real error to the
+user; there is no fake "queued for later" success state.
 
 ## Endpoint
 
@@ -36,8 +37,8 @@ is not a vendor-only or admin-only route. The reporter's own identity comes from
 
 ```json
 {
-  "vendorId": "vendor_123",
-  "orderId": "order_456",
+  "vendorId": 123,
+  "orderId": 456,
   "reason": "Fraud",
   "comment": "Paid but item never shipped, no response after 2 weeks."
 }

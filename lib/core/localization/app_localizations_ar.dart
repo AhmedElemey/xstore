@@ -1529,10 +1529,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartStartShopping => 'ابدأ التسوق';
 
   @override
-  String get cartOrWishlist => 'أو شوف المفضلة';
-
-  @override
-  String get cartWishlistArrow => '← المفضلة';
+  String get cartOrWishlist => 'أو شوف المفضلة ←';
 
   @override
   String get cartRemove => '🗑 إزالة';
@@ -1581,11 +1578,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cartShippingLine => 'الشحن';
-
-  @override
-  String cartFreeShippingThresholdNote(Object threshold) {
-    return '🚚 المنتجات اللي سعرها $threshold وأكتر شحنها مجاني';
-  }
 
   @override
   String get cartTotalLine => 'الإجمالي';
@@ -1788,6 +1780,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get checkoutErrorPhoneNotVerified =>
       'من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب';
+
+  @override
+  String get checkoutErrorOutOfStock =>
+      'في منتجات الكمية المتاحة منها مابقتش كفاية. حدّثنا سلتك — راجعها واطلب تاني. لسه ماتمش أي طلب.';
 
   @override
   String get checkoutPartialOrderTitle => 'جزء من طلبك ماتمش';

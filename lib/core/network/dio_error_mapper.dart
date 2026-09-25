@@ -1,7 +1,16 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 
 import '../error/exceptions.dart';
+import '../localization/app_localizations.dart';
 import 'app_error_messages.dart';
+
+/// Whether user-facing error text should be Arabic. Kept in sync by
+/// `AppLocaleNotifier` (the app's language setting): this mapper runs inside
+/// datasources with no BuildContext or ref, but the backend envelope
+/// carries both `errorEn` and `errorAr`.
+bool errorMessagesInArabic = false;
 
 /// Maps a [DioException] to an [AppException], shared across datasources.
 ///
@@ -14,12 +23,18 @@ AppException mapDioException(DioException e) {
     case DioExceptionType.sendTimeout:
     case DioExceptionType.receiveTimeout:
     case DioExceptionType.connectionError:
-      return const NetworkException(
-        'Network unavailable. Please check your connection and try again.',
+      return NetworkException(
+        errorMessagesInArabic
+            ? lookupAppLocalizations(const Locale('ar')).noInternet
+            : 'Network unavailable. Please check your connection and try again.',
       );
     case DioExceptionType.badResponse:
       final code = e.response?.statusCode;
+      // Stable-code matching below keys on the ENGLISH text; only the text
+      // shown to the user switches language.
       final serverMessage = _serverErrorMessage(e.response?.data);
+      final displayMessage =
+          _arabicServerMessage(e.response?.data) ?? serverMessage;
       if (code == 401 || code == 403) {
         if (serverMessage != null) {
           final lower = serverMessage.toLowerCase();
@@ -30,7 +45,7 @@ AppException mapDioException(DioException e) {
           }
           if (lower.contains('pause threshold') ||
               lower.contains('order status updates are paused')) {
-            return ServerException(serverMessage);
+            return ServerException(displayMessage);
           }
           // Live probe 2026-08-29: the same endpoint now 403s with
           // "Account must be verified to create listings." when email/
@@ -40,7 +55,7 @@ AppException mapDioException(DioException e) {
             return const ServerException(accountNotVerifiedErrorCode);
           }
         }
-        return UnauthorizedException(serverMessage ?? e.message);
+        return UnauthorizedException(displayMessage ?? e.message);
       }
       if (code == 429) {
         return const ServerException(rateLimitErrorCode);
@@ -65,10 +80,12 @@ AppException mapDioException(DioException e) {
           }
         }
         final message =
-            _validationMessage(e.response?.data) ?? serverMessage;
+            _validationMessage(e.response?.data) ?? displayMessage;
         if (message != null) return ServerException(message);
       }
-      return ServerException(_friendlyServerMessage(code, serverMessage) ?? e.message);
+      return ServerException(
+        _friendlyServerMessage(serverMessage, displayMessage) ?? e.message,
+      );
     default:
       return ServerException(e.message);
   }
@@ -78,7 +95,9 @@ AppException mapDioException(DioException e) {
 /// `{"error": "..."}`, `{"message": "..."}`, `{"error": {"message": "..."}}`,
 /// or the CONFIRMED (live probe, 2026-08-14) envelope
 /// `{"isSuccess": false, "data": null, "errorEn": "...", "errorAr": "..."}`.
-/// `errorEn` is checked first since the mapper has no locale context here.
+/// `errorEn` is checked first: the stable-code matching keys on English.
+/// The text shown to the user comes from [_arabicServerMessage] when the
+/// app is in Arabic.
 String? _serverErrorMessage(Object? data) {
   if (data is! Map) return null;
   final errorEn = data['errorEn'];
@@ -96,6 +115,13 @@ String? _serverErrorMessage(Object? data) {
   return null;
 }
 
+/// The envelope's `errorAr`, when the app is in Arabic and one was sent.
+String? _arabicServerMessage(Object? data) {
+  if (!errorMessagesInArabic || data is! Map) return null;
+  final errorAr = data['errorAr'];
+  return errorAr is String && errorAr.isNotEmpty ? errorAr : null;
+}
+
 String? _validationMessage(Object? data) {
   if (data is! Map) return null;
   final errors = data['errors'];
@@ -109,10 +135,12 @@ String? _validationMessage(Object? data) {
 
 /// ASP.NET EF Core SaveChanges failures return opaque boilerplate — replace
 /// with actionable text the listing/checkout UI can show as-is.
-String? _friendlyServerMessage(int? code, String? serverMessage) {
-  if (serverMessage == null || serverMessage.isEmpty) return serverMessage;
+String? _friendlyServerMessage(String? serverMessage, String? displayMessage) {
+  if (serverMessage == null || serverMessage.isEmpty) return displayMessage;
   if (serverMessage.contains('saving the entity changes')) {
-    return 'The server could not save your changes. Please try again later.';
+    return errorMessagesInArabic
+        ? lookupAppLocalizations(const Locale('ar')).genericError
+        : 'The server could not save your changes. Please try again later.';
   }
-  return serverMessage;
+  return displayMessage;
 }

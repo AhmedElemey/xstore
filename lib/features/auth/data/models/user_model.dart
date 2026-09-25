@@ -237,7 +237,16 @@ UserModel userModelFromProfileResponse(
       userJson['id'] = resolvedId;
     }
   }
-  return UserModel.fromJson(userJson);
+  // wire's verification flags are top-level siblings of `user`/`store` in
+  // the response, not part of userJson — UserModel.fromJson never sees them
+  // on its own, so merge them in explicitly.
+  return UserModel.fromJson(userJson).copyWith(
+    isEmailVerificationRequired: wire.isEmailVerificationRequired,
+    isPhoneVerificationRequired: wire.isPhoneVerificationRequired,
+    isEmailVerified: wire.isEmailVerified,
+    isPhoneVerified: wire.isPhoneVerified,
+    hasPassword: wire.hasPassword,
+  );
 }
 
 /// Extracts the merged user map from a profile response wrapper.
@@ -286,6 +295,11 @@ class UserModel with _$UserModel {
     int? storeCityId,
     int? storeGovernmentId,
     int? storeId,
+    @Default(false) bool isEmailVerificationRequired,
+    @Default(false) bool isPhoneVerificationRequired,
+    @Default(false) bool isEmailVerified,
+    @Default(false) bool isPhoneVerified,
+    @Default(true) bool hasPassword,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -344,6 +358,15 @@ class UserModel with _$UserModel {
       return pick(json[key]) ?? (altKey != null ? pick(json[altKey]) : null);
     }
 
+    // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`. Live
+    // get-profile sends `0001-01-01T00:00:00` (C# default(DateTime)) when no
+    // birth date was given — that is "unset", not year 1.
+    final parsedBirthDate =
+        parseDate('dateOfBirth', altKey: 'birthDate', dateOnly: true);
+    final dateOfBirth = parsedBirthDate != null && parsedBirthDate.year < 1900
+        ? null
+        : parsedBirthDate;
+
     return UserModel(
       // CONFIRMED: `id` is a JSON number on the real backend, not a string.
       id: json['id']?.toString() ?? '',
@@ -354,7 +377,7 @@ class UserModel with _$UserModel {
           '',
       email: json['email'] as String? ?? '',
       phoneNumber: json['phoneNumber'] as String? ?? '',
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: optString('avatarUrl'),
       role: parseRole(),
       // isVerified lives on the user object. isEmailVerified/isPhoneVerified
       // are top-level profile-wrapper flags — parsed in parseProfileResponse,
@@ -373,7 +396,7 @@ class UserModel with _$UserModel {
       storeDescription: optString('storeDescription') ??
           optString('storeDescriptionEn') ??
           optString('storeDescriptionAr'),
-      storeLogoUrl: json['storeLogoUrl'] as String?,
+      storeLogoUrl: optString('storeLogoUrl', altKey: 'storeImageUrl'),
       storeCity: optString('storeCity') ?? _nestedPlaceName(json['city']),
       storeWilaya: optString('storeWilaya') ??
           _nestedPlaceName(json['government']) ??
@@ -391,8 +414,7 @@ class UserModel with _$UserModel {
       town: json['town'] is String ? optString('town') : null,
       detailAddress: json['detailAddress'] as String?,
       bio: json['bio'] as String?,
-      // CONFIRMED: real response sends `birthDate`, not `dateOfBirth`.
-      dateOfBirth: parseDate('dateOfBirth', altKey: 'birthDate', dateOnly: true),
+      dateOfBirth: dateOfBirth,
       // update-profile writes instagramPage; get-profile may return either key.
       instagramHandle: optString('instagramHandle', altKey: 'instagramPage'),
       facebookPage: json['facebookPage'] as String?,
@@ -411,6 +433,13 @@ class UserModel with _$UserModel {
           _nestedId(json['government']) ??
           _nestedId(json['governorate']),
       storeId: (json['storeId'] as num?)?.toInt(),
+      isEmailVerificationRequired:
+          json['isEmailVerificationRequired'] as bool? ?? false,
+      isPhoneVerificationRequired:
+          json['isPhoneVerificationRequired'] as bool? ?? false,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
+      isPhoneVerified: json['isPhoneVerified'] as bool? ?? false,
+      hasPassword: json['hasPassword'] as bool? ?? true,
     );
   }
 }
@@ -452,6 +481,11 @@ extension UserModelX on UserModel {
         storeCityId: storeCityId,
         storeGovernmentId: storeGovernmentId,
         storeId: storeId,
+        isEmailVerificationRequired: isEmailVerificationRequired,
+        isPhoneVerificationRequired: isPhoneVerificationRequired,
+        isEmailVerified: isEmailVerified,
+        isPhoneVerified: isPhoneVerified,
+        hasPassword: hasPassword,
       );
 
   Map<String, dynamic> toJson() => {
@@ -494,5 +528,10 @@ extension UserModelX on UserModel {
         if (storeCityId != null) 'storeCityId': storeCityId,
         if (storeGovernmentId != null) 'storeGovernmentId': storeGovernmentId,
         if (storeId != null) 'storeId': storeId,
+        'isEmailVerificationRequired': isEmailVerificationRequired,
+        'isPhoneVerificationRequired': isPhoneVerificationRequired,
+        'isEmailVerified': isEmailVerified,
+        'isPhoneVerified': isPhoneVerified,
+        'hasPassword': hasPassword,
       };
 }

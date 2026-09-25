@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -323,6 +325,13 @@ class _SellerSection extends ConsumerWidget {
       ),
     );
     if (!context.mounted || result != true) return;
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.vendorReportSubmitted,
+      properties: {
+        AnalyticsProps.sellerId: order.vendorId,
+        AnalyticsProps.orderId: order.id,
+      },
+    );
     AppSnackbar.success(context, context.l10n.reportVendorSuccess);
   }
 

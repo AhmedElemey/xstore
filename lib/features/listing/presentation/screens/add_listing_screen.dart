@@ -222,7 +222,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
-    final isEditing = ref.read(listingFormNotifierProvider).editingListingId.isNotEmpty;
+    final formBeforeSubmit = ref.read(listingFormNotifierProvider);
+    final isEditing = formBeforeSubmit.editingListingId.isNotEmpty;
+    final isPublishingDraft =
+        formBeforeSubmit.editingStatus == ListingStatus.draft;
     final retryLabel = context.l10n.retry;
     final ok = await notifier.submit(context.l10n);
     if (!mounted) {
@@ -231,7 +234,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (ok) {
       AppSnackbar.success(
         context,
-        isEditing
+        isEditing && !isPublishingDraft
             ? context.l10n.listingUpdatedSuccess
             : context.l10n.listingPublishedSuccess,
       );
@@ -316,6 +319,20 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         backgroundColor: context.backgroundColor,
         surfaceTintColor: AppColors.transparent,
         centerTitle: true,
+        // "Add Listing" is a bottom-nav tab root — no back button, same as
+        // Home/Explore/etc. Editing only ever gets here via context.go from
+        // My Listings (a tab switch, not a push), which leaves no back
+        // stack to pop, so this is the only way back without the bottom
+        // nav. _syncEditingListing already resets the form when the
+        // widget's editingListing later goes back to null (a fresh "Add"),
+        // so this doesn't need to reset anything itself.
+        leading: isEditing
+            ? IconButton(
+                icon: Icon(context.arrowBackIcon),
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                onPressed: () => context.go(AppRoutes.listingMy),
+              )
+            : null,
         title: Text(isEditing ? context.l10n.editListingMenu : context.l10n.addListing),
         actions: [
           // Drafts are a create-flow concept only — editing an existing
@@ -415,7 +432,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                 AppSpacing.lg,
               ),
               child: _PublishBar(
-                publishLabel: isEditing
+                publishLabel: isEditing &&
+                        form.editingStatus != ListingStatus.draft
                     ? context.l10n.updateListing
                     : context.l10n.publishListing,
                 enabled: canSubmit && !form.isSubmitting,
@@ -499,6 +517,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           errorText: errors['photos'],
           onOpenPicker: openPhotoPicker,
           onRemove: notifier.removePhoto,
+          onRemoveExisting: notifier.removeExistingPhoto,
           onReorder: notifier.reorderPhotos,
         ),
         const Gap(AppSpacing.x3l),

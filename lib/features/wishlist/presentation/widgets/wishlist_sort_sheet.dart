@@ -10,16 +10,10 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 
 String wishlistSortLabel(BuildContext context, WishlistSortOption o) {
   switch (o) {
-    case WishlistSortOption.recentlyAdded:
-      return context.l10n.wishlistSortRecentlyAdded;
     case WishlistSortOption.priceLowToHigh:
       return context.l10n.wishlistSortPriceLow;
     case WishlistSortOption.priceHighToLow:
       return context.l10n.wishlistSortPriceHigh;
-    case WishlistSortOption.priceDrop:
-      return context.l10n.wishlistSortPriceDrop;
-    case WishlistSortOption.biggestDiscount:
-      return context.l10n.wishlistSortBiggestDiscount;
     case WishlistSortOption.nameAZ:
       return context.l10n.wishlistSortNameAz;
   }

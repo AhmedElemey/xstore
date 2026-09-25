@@ -22,15 +22,21 @@ UserEntity _user(String id) => UserEntity(
   phoneNumber: '01012345678',
 );
 
-OrderAddress _address({String fullName = 'Jane Doe', bool isDefault = false}) =>
-    OrderAddress(
-      fullName: fullName,
-      phone: '01012345678',
-      street: '1 Test Street',
-      city: 'Cairo',
-      wilaya: 'Cairo',
-      isDefault: isDefault,
-    );
+OrderAddress _address({
+  String fullName = 'Jane Doe',
+  bool isDefault = false,
+  int? cityId,
+  int? governorateId,
+}) => OrderAddress(
+  fullName: fullName,
+  phone: '01012345678',
+  street: '1 Test Street',
+  city: 'Cairo',
+  wilaya: 'Cairo',
+  isDefault: isDefault,
+  cityId: cityId,
+  governorateId: governorateId,
+);
 
 class _FakeAuth extends Auth {
   _FakeAuth(this._user);
@@ -154,6 +160,25 @@ void main() {
     expect(reopened.read(addressBookProvider), hasLength(1));
     expect(reopened.read(addressBookProvider).single.fullName, 'Jane Doe');
   });
+
+  test(
+    'persists cityId/governorateId so the display can be re-resolved in '
+    'whichever locale is active later, not just the names at save time',
+    () async {
+      final container = await _buildContainer('consumer_1');
+      container
+          .read(addressBookProvider.notifier)
+          .addAddress(_address(cityId: 7, governorateId: 3));
+      await Future<void>.delayed(Duration.zero);
+
+      final reopened = await _buildContainer('consumer_1');
+      await Future<void>.delayed(Duration.zero);
+
+      final saved = reopened.read(addressBookProvider).single;
+      expect(saved.cityId, 7);
+      expect(saved.governorateId, 3);
+    },
+  );
 
   test("one consumer's addresses are never shown to another", () async {
     final first = await _buildContainer('consumer_1');

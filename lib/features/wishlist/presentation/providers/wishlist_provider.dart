@@ -17,7 +17,7 @@ extension WishlistStateX on WishlistState {
   int get itemCount => items.length;
 
   int get priceDropCount =>
-      items.where((e) => (e.priceDropPercent ?? 0) > 0).length;
+      items.where((e) => e.effectiveDropPercent > 0).length;
 
   int get availableCount => items.where((e) => e.isAvailable).length;
 }
@@ -43,6 +43,10 @@ class Wishlist extends _$Wishlist {
   WishlistState build() {
     ref.onDispose(() => _sessionEpoch++);
     // Cart sync: ref.listen(cartProvider) lives on [WishlistScreen] per app spec.
+    // fireImmediately: this keepAlive notifier is often first read *after*
+    // auth already has a user (home hearts, profile count). A plain listen
+    // only sees later transitions, so the list stayed empty until
+    // pull-to-refresh.
     ref.listen(authProvider, (prev, next) {
       if (next.isLoading) return;
       final u = next.valueOrNull;
@@ -52,7 +56,7 @@ class Wishlist extends _$Wishlist {
         _sessionEpoch++;
         Future.microtask(() => state = const WishlistState());
       }
-    });
+    }, fireImmediately: true);
     return const WishlistState();
   }
 
@@ -65,39 +69,18 @@ class Wishlist extends _$Wishlist {
         list = list.where((e) => e.isAvailable).toList();
         break;
       case WishlistFilter.priceDropped:
-        list = list.where((e) => (e.priceDropPercent ?? 0) > 0).toList();
+        list = list.where((e) => e.effectiveDropPercent > 0).toList();
         break;
       case WishlistFilter.inCart:
         list = list.where((e) => e.isInCart).toList();
         break;
     }
     switch (state.sortOption) {
-      case WishlistSortOption.recentlyAdded:
-        list.sort((a, b) => b.addedAt.compareTo(a.addedAt));
-        break;
       case WishlistSortOption.priceLowToHigh:
         list.sort((a, b) => a.price.compareTo(b.price));
         break;
       case WishlistSortOption.priceHighToLow:
         list.sort((a, b) => b.price.compareTo(a.price));
-        break;
-      case WishlistSortOption.priceDrop:
-        list.sort((a, b) {
-          final da = a.priceDropPercent ?? 0;
-          final db = b.priceDropPercent ?? 0;
-          return db.compareTo(da);
-        });
-        break;
-      case WishlistSortOption.biggestDiscount:
-        list.sort((a, b) {
-          double disc(WishlistItemEntity e) {
-            final c = e.compareAtPrice;
-            if (c == null || c <= e.price) return 0;
-            return (c - e.price) / c;
-          }
-
-          return disc(b).compareTo(disc(a));
-        });
         break;
       case WishlistSortOption.nameAZ:
         list.sort(

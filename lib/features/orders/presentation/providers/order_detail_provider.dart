@@ -100,7 +100,6 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
       result,
       prev,
       role: _isVendor ? 'vendor' : 'consumer',
-      reason: reason,
     );
   }
 
@@ -138,7 +137,7 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
           reason: reason,
           vendorId: _vendorId,
         );
-    _finalizeMutation(result, prev, reason: reason);
+    _finalizeMutation(result, prev);
   }
 
   Future<void> markProcessing() async {
@@ -218,7 +217,6 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
     OrderEntity prev, {
     String role = 'vendor',
     DeliveryMethod? deliveryMethod,
-    String? reason,
   }) {
     // Every mutation awaits its use case before calling this; if the screen
     // was popped mid-request the notifier is disposed — skip the state write
@@ -243,7 +241,6 @@ class OrderDetailNotifier extends _$OrderDetailNotifier {
             AnalyticsProps.status: o.status.name,
             AnalyticsProps.role: role,
             if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
-            if (reason != null) AnalyticsProps.reason: reason,
           },
         );
       },

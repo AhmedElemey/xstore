@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -43,6 +45,18 @@ class WishlistConsumerBody extends ConsumerStatefulWidget {
 }
 
 class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
+  @override
+  void initState() {
+    super.initState();
+    // keepAlive + IndexedStack: first mount is the only initState for the
+    // whole session. RouteReentryRefresh covers later tab switches, not
+    // this first open.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(wishlistProvider.notifier).fetchWishlist());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final notifier = ref.read(wishlistProvider.notifier);

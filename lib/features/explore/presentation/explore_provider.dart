@@ -47,6 +47,12 @@ class Explore extends _$Explore {
       final key => key,
     };
     if (query.isNotEmpty) {
+      if (categoryKey != null) {
+        ref.read(analyticsServiceProvider).track(
+          AnalyticsEvents.categoryViewed,
+          properties: {AnalyticsProps.category: categoryKey},
+        );
+      }
       onQueryChanged(query);
     }
   }
@@ -134,13 +140,24 @@ class Explore extends _$Explore {
         );
         final trimmed = q.trim();
         if (trimmed.isNotEmpty) {
+          // People paste phone numbers / emails into search — keep the
+          // product words, never the contact details.
+          final query = trimmed
+              .replaceAll(RegExp(r'\S+@\S+'), '[email]')
+              .replaceAll(RegExp(r'\d{7,}'), '[number]');
           ref.read(analyticsServiceProvider).track(
             AnalyticsEvents.searchPerformed,
             properties: {
-              AnalyticsProps.query: trimmed,
+              AnalyticsProps.query: query,
               AnalyticsProps.resultCount: sorted.length,
             },
           );
+          if (sorted.isEmpty) {
+            ref.read(analyticsServiceProvider).track(
+              AnalyticsEvents.searchNoResults,
+              properties: {AnalyticsProps.query: query},
+            );
+          }
         }
       },
     );
@@ -179,6 +196,15 @@ class Explore extends _$Explore {
 
   void applyFilters(FilterState f) {
     state = state.copyWith(filters: f);
+    ref.read(analyticsServiceProvider).track(
+      AnalyticsEvents.filterApplied,
+      properties: {
+        AnalyticsProps.categoryCount: f.categories.length,
+        AnalyticsProps.conditionCount: f.conditions.length,
+        AnalyticsProps.hasPriceRange: f.minPrice != null || f.maxPrice != null,
+        AnalyticsProps.shippingOnly: f.shippingOnly,
+      },
+    );
     unawaited(search(state.query));
   }
 

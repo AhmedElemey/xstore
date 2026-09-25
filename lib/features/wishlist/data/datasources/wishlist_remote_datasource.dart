@@ -5,6 +5,7 @@ import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/json_list_unwrap.dart';
+import '../../../cart/domain/entities/cart_shipping_rules.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 
 abstract interface class WishlistRemoteDataSource {
@@ -219,9 +220,11 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
         : int.tryParse(stockRaw?.toString() ?? '') ?? 1;
 
     final shipAvail =
-        json['shippingAvailable'] != false &&
-        root['shippingAvailable'] != false;
-    final shippingCost = shipAvail ? (price >= 20000 ? 0.0 : 500.0) : 0.0;
+        (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
+    final shippingCost = cartLineShippingCost(
+      shippingAvailable: shipAvail,
+      listingShippingCost: _num(root['shippingCost'] ?? json['shippingCost']),
+    );
 
     return WishlistItemEntity(
       id: id,
@@ -356,6 +359,8 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     final rating = ratingRaw == null || _num(ratingRaw) <= 0
         ? null
         : _num(ratingRaw);
+    final shipAvail =
+        (json['shippingAvailable'] ?? listing['shippingAvailable']) == true;
     return WishlistItemEntity(
       id: _mapString(json, ['id']),
       listingId: listingId,
@@ -386,10 +391,13 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
           1,
       isAvailable: json['isAvailable'] != false,
       isInCart: json['isInCart'] == true,
-      shippingAvailable:
-          json['shippingAvailable'] != false &&
-          listing['shippingAvailable'] != false,
-      shippingCost: _num(json['shippingCost']),
+      shippingAvailable: shipAvail,
+      shippingCost: cartLineShippingCost(
+        shippingAvailable: shipAvail,
+        listingShippingCost: _num(
+          json['shippingCost'] ?? listing['shippingCost'],
+        ),
+      ),
       addedAt:
           DateTime.tryParse((json['addedAt'] ?? '').toString()) ??
           DateTime.now(),

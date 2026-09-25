@@ -17,11 +17,8 @@ enum WishlistFilter {
 }
 
 enum WishlistSortOption {
-  recentlyAdded,
   priceLowToHigh,
   priceHighToLow,
-  priceDrop,
-  biggestDiscount,
   nameAZ,
 }
 
@@ -32,7 +29,7 @@ class WishlistState with _$WishlistState {
     @Default([]) List<WishlistItemEntity> filteredItems,
     @Default(<String>{}) Set<String> wishlistedListingIds,
     @Default(WishlistFilter.all) WishlistFilter selectedFilter,
-    @Default(WishlistSortOption.recentlyAdded) WishlistSortOption sortOption,
+    @Default(WishlistSortOption.priceLowToHigh) WishlistSortOption sortOption,
     @Default(WishlistViewMode.list) WishlistViewMode viewMode,
     @Default(<String>{}) Set<String> selectedItemIds,
     @Default(false) bool isSelectionMode,

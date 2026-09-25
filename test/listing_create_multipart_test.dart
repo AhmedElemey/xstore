@@ -94,6 +94,7 @@ void main() {
       expect(fields['shippingCost'], '5.99');
       expect(fields['location'], 'Cairo');
       expect(fields['condition'], '1');
+      expect(fields['status'], '1');
       expect(fields['Attributes[0].Key'], 'Color');
       expect(fields['Attributes[0].Value'], 'Red');
 
@@ -203,6 +204,78 @@ void main() {
       );
 
       expect(interceptor.capturedFormData!.files, isEmpty);
+    });
+  });
+
+  group('ListingRemoteDataSource updateListing keepImageUrls', () {
+    late Dio dio;
+    late _CapturingInterceptor interceptor;
+    late ListingRemoteDataSourceImpl datasource;
+
+    setUp(() {
+      dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
+      interceptor = _CapturingInterceptor();
+      dio.interceptors.add(interceptor);
+      datasource = ListingRemoteDataSourceImpl(dio);
+    });
+
+    test('sends remaining hosted urls and omits them when not passed', () async {
+      await datasource.updateListing(
+        id: '42',
+        titleEn: 'Edited',
+        titleAr: 'Edited',
+        descriptionEn: 'desc',
+        descriptionAr: 'وصف',
+        price: 10,
+        categoryId: 2,
+        condition: ListingCondition.good,
+        brand: '',
+        stockQuantity: 1,
+        shippingAvailable: false,
+        shippingCost: 0,
+        location: 'Giza',
+        attributes: const {},
+        imagePaths: const [],
+        status: ListingStatus.active,
+        keepImageUrls: const [
+          'https://example.com/keep.jpg',
+          'https://example.com/also.jpg',
+        ],
+      );
+
+      final fields = {
+        for (final f in interceptor.capturedFormData!.fields) f.key: f.value,
+      };
+      expect(fields['imageUrls[0]'], 'https://example.com/keep.jpg');
+      expect(fields['imageUrls[1]'], 'https://example.com/also.jpg');
+      expect(interceptor.capturedFormData!.files, isEmpty);
+
+      interceptor.capturedFormData = null;
+      await datasource.updateListing(
+        id: '42',
+        titleEn: 'Edited',
+        titleAr: 'Edited',
+        descriptionEn: 'desc',
+        descriptionAr: 'وصف',
+        price: 10,
+        categoryId: 2,
+        condition: ListingCondition.good,
+        brand: '',
+        stockQuantity: 1,
+        shippingAvailable: false,
+        shippingCost: 0,
+        location: 'Giza',
+        attributes: const {},
+        imagePaths: const [],
+        status: ListingStatus.active,
+      );
+
+      expect(
+        interceptor.capturedFormData!.fields.any(
+          (f) => f.key.startsWith('imageUrls'),
+        ),
+        isFalse,
+      );
     });
   });
 }

@@ -1526,10 +1526,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartStartShopping => 'Start Shopping';
 
   @override
-  String get cartOrWishlist => 'Or check your Wishlist';
-
-  @override
-  String get cartWishlistArrow => 'Wishlist →';
+  String get cartOrWishlist => 'Or check your Wishlist →';
 
   @override
   String get cartRemove => '🗑 Remove';
@@ -1578,11 +1575,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartShippingLine => 'Shipping';
-
-  @override
-  String cartFreeShippingThresholdNote(Object threshold) {
-    return '🚚 Items priced $threshold and up ship free';
-  }
 
   @override
   String get cartTotalLine => 'Total';
@@ -1785,6 +1777,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checkoutErrorPhoneNotVerified =>
       'Please verify your phone number to place an order';
+
+  @override
+  String get checkoutErrorOutOfStock =>
+      'Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.';
 
   @override
   String get checkoutPartialOrderTitle =>

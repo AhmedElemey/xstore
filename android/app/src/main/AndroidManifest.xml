@@ -24,6 +24,11 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_api_key" />
+        <!-- screen_view comes only from AnalyticsService's go_router
+             listener; native auto-reporting would log MainActivity. -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

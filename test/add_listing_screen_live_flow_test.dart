@@ -45,6 +45,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
@@ -267,13 +268,103 @@ void main() {
       ]);
       await _settle(tester);
 
-      expect(find.text('Update Listing'), findsOneWidget);
+      // Update Listing is disabled until something actually changes — an
+      // untouched update would otherwise round-trip the whole listing to
+      // the backend for no reason, which can knock a paused/active listing
+      // back into pending review (see the 2026-09-21 flutter-review lesson
+      // on this). Editing the name is the change here.
+      final nameField = find.widgetWithText(TextField, 'Wireless Mouse');
+      expect(nameField, findsOneWidget);
+      await tester.enterText(nameField, 'Wireless Mouse Pro');
+      await tester.pump();
 
-      await tester.tap(find.text('Update Listing'));
+      final updateButton = find.text('Update Listing');
+      expect(updateButton, findsOneWidget);
+      await tester.tap(updateButton);
       await _settle(tester);
 
       expect(find.text('Listing updated successfully'), findsOneWidget);
       // Navigated to My Listings after a successful update.
+      expect(find.text('My Listings Screen'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Update Listing stays disabled until a field actually changes, and no '
+    'PUT request fires from tapping it while disabled',
+    skip: MockConfig.useMock,
+    (tester) async {
+      // No 'PUT /api/listings' route scripted — if the disabled button
+      // somehow still fired a request, _RoutedInterceptor would reject it
+      // as unscripted and the test would surface that failure.
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+        allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
+        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+      ]);
+      await _settle(tester);
+
+      InkWell updateInkWell() => tester.widget<InkWell>(
+        find.ancestor(
+          of: find.text('Update Listing'),
+          matching: find.byType(InkWell),
+        ),
+      );
+
+      expect(
+        updateInkWell().onTap,
+        isNull,
+        reason: 'nothing was changed since the listing loaded for edit',
+      );
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Wireless Mouse'),
+        'Wireless Mouse Pro',
+      );
+      await tester.pump();
+
+      expect(updateInkWell().onTap, isNotNull);
+
+      // Undoing the change (back to the loaded value) disables it again —
+      // this isn't "was the field ever touched", it's "does the form
+      // currently differ from what's saved".
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Wireless Mouse Pro'),
+        'Wireless Mouse',
+      );
+      await tester.pump();
+
+      expect(updateInkWell().onTap, isNull);
+    },
+  );
+
+  testWidgets(
+    'the edit form has a back button that returns to My Listings',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({'GET ${ApiEndpoints.getProfile}': (_) => _profileJson()});
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+        allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
+        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+      ]);
+      await _settle(tester);
+
+      final backButton = find.byIcon(LucideIcons.arrowLeft);
+      expect(backButton, findsOneWidget);
+
+      await tester.tap(backButton);
+      await _settle(tester);
+
       expect(find.text('My Listings Screen'), findsOneWidget);
     },
   );

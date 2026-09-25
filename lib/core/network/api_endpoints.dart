@@ -136,12 +136,13 @@ abstract final class ApiEndpoints {
   static String apiListingDetail(String id) => '$apiListings/$id';
   static String apiListingSimilar(String id, {int count = 6}) =>
       '$apiListings/$id/similar?count=$count';
+  // CONFIRMED live 400: `"Only cancelled listings can be re-submitted."`
+  // — not paused, not rejected.
   static String apiListingResubmit(String id) => '$apiListings/$id/resubmit';
-  // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
-  // Used for pause — sidesteps the multipart image-wipe risk that the
-  // generic PUT /api/listings update carries (see ListingRemoteDataSource
-  // `_listingFormData`). No equivalent "activate"/"resume" route exists
-  // in the collection, so resume still goes through the generic update.
+  // CONFIRMED (Postman + live 400): bodyless pause PUT. Rejects unless
+  // the listing is already Active (`"Only active listings can be
+  // deactivated."`). `/activate` is not a route (empty 404). Do not use
+  // /deactivate or /resubmit to resume a paused listing.
   static String apiListingDeactivate(String id) => '$apiListings/$id/deactivate';
   // CONFIRMED (Postman collection): dedicated status-only PUT, no body.
   // Used for "Delete listing" — the collection has no DELETE endpoint for
@@ -150,6 +151,12 @@ abstract final class ApiEndpoints {
   // listing reappear as merely paused-and-resumable), so /cancel is the
   // closer semantic match for a listing the vendor wants gone for good.
   static String apiListingCancel(String id) => '$apiListings/$id/cancel';
+  // CONFIRMED (Postman + live probe, 2026-09-24): public GET, Result
+  // envelope with a bool `data` — "can this listing fill `quantity` right
+  // now". Unknown/inactive id → 404 "Listing not found."; quantity <= 0 →
+  // 400. Checked for every line before checkout places any order.
+  static String apiListingStock(String id, int quantity) =>
+      '$apiListings/$id/stock?quantity=$quantity';
 
   // Orders. CONFIRMED (Postman collection + live probe, 2026-08-14): the
   // backend model is ONE listing per order (POST body is
@@ -193,22 +200,14 @@ abstract final class ApiEndpoints {
   static const String home = '$_api/home';
 
   // ---------------------------------------------------------------------
-  // Analytics — PROPOSED, not yet built on the backend. Contract spec for
-  // the backend team: docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md.
-  // The client batches events locally and POSTs here; until the backend
-  // ships the route it 404s and events stay queued (see
-  // AnalyticsService._flush, which backs off on repeated 404s instead of
-  // hammering a route that doesn't exist yet).
+  // Analytics collector (live, 202 {accepted}). Contract:
+  // docs_business/backend/03_ANALYTICS_EVENTS_HANDOFF.md. The client
+  // batches events locally and POSTs here while signed in; a 404 or error
+  // keeps them queued and backs off (AnalyticsService._runFlush).
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
 
-  // ---------------------------------------------------------------------
-  // Vendor reports — PROPOSED, not yet built on the backend (2026-09-15).
-  // Full contract spec is documented on
-  // VendorReportsRemoteDataSourceImpl in
-  // lib/features/reports/data/datasources/vendor_reports_remote_datasource.dart.
-  // Until the backend ships this route, a live submission 404s and the
-  // failure is surfaced to the user — that is expected, not a bug.
-  // ---------------------------------------------------------------------
+  // Vendor reports. CONFIRMED (Postman collection + live 401-not-404
+  // probe, 2026-09-24); body contract on VendorReportsRemoteDataSourceImpl.
   static const String vendorReports = '$_api/reports/vendor';
 }

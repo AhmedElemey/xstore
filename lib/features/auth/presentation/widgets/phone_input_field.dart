@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
 
 class PhoneInputField extends StatelessWidget {
   const PhoneInputField({
@@ -34,16 +35,19 @@ class PhoneInputField extends StatelessWidget {
   /// change" flows that must not accept inline typing.
   final VoidCallback? onTap;
 
-  String _normalizeEgyptInput(String value) {
-    final digits = value.replaceAll(RegExp(r'\D'), '');
-    if (digits.startsWith('1')) {
-      return digits.replaceFirst('1', '01');
-    }
-    return digits;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final national = AppValidators.egyptNationalSignificantNumber(controller.text);
+    if (national != controller.text) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (controller.text == national) return;
+        controller.value = TextEditingValue(
+          text: national,
+          selection: TextSelection.collapsed(offset: national.length),
+        );
+      });
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -79,29 +83,31 @@ class PhoneInputField extends StatelessWidget {
                 onChanged: readOnly
                     ? null
                     : (value) {
-                        final normalized = _normalizeEgyptInput(value);
-                        if (controller.text != normalized) {
+                        final national =
+                            AppValidators.egyptNationalSignificantNumber(
+                          value,
+                        );
+                        if (controller.text != national) {
                           controller.value = TextEditingValue(
-                            text: normalized,
+                            text: national,
                             selection: TextSelection.collapsed(
-                              offset: normalized.length,
+                              offset: national.length,
                             ),
                           );
                         }
-                        onChanged(normalized);
+                        onChanged(AppValidators.normalizeEgyptLocal(national));
                       },
                 enabled: enabled,
                 keyboardType: TextInputType.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(11),
+                inputFormatters: const [
+                  _EgyptNationalPhoneFormatter(),
                 ],
                 style: AppTypography.bodyLarge.copyWith(
                   color: context.textPrimary,
                 ),
                 decoration: InputDecoration(
                   fillColor: AppColors.transparent,
-                  hintText: '01012345678',
+                  hintText: '1012345678',
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(right: 8),
                     child: Icon(LucideIcons.phone),
@@ -158,6 +164,23 @@ class PhoneInputField extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _EgyptNationalPhoneFormatter extends TextInputFormatter {
+  const _EgyptNationalPhoneFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final national =
+        AppValidators.egyptNationalSignificantNumber(newValue.text);
+    return TextEditingValue(
+      text: national,
+      selection: TextSelection.collapsed(offset: national.length),
     );
   }
 }
