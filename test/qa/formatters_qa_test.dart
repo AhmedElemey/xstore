@@ -1,10 +1,17 @@
 // QA suite (2026-09-24): pure formatting helpers.
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/utils/formatters.dart';
 
 void main() {
+  // The app gets these from GlobalMaterialLocalizations; a unit test has none.
+  setUpAll(() async {
+    await initializeDateFormatting('en');
+    await initializeDateFormatting('ar');
+  });
+
   group('formatNotificationTime', () {
     final now = DateTime(2026, 9, 24, 12, 0);
     final en = lookupAppLocalizations(const Locale('en'));
@@ -34,8 +41,24 @@ void main() {
       expect(ar.notificationsTimeYesterday, isNot(en.notificationsTimeYesterday));
     });
 
+    test('earlier this week shows the weekday', () {
+      // now is Thu 24 Sep 2026; Tue 22 Sep is in the same week.
+      expect(f(DateTime(2026, 9, 22, 12)), 'Tue');
+    });
+
     test('older than a week shows month/day', () {
       expect(f(DateTime(2026, 8, 1, 12)), 'Aug 1');
+    });
+
+    test('weekday and month names follow the passed locale', () {
+      final ar = lookupAppLocalizations(const Locale('ar'));
+      final weekday =
+          Formatters.formatNotificationTime(DateTime(2026, 9, 22, 12), ar, now: now);
+      final older =
+          Formatters.formatNotificationTime(DateTime(2026, 8, 1, 12), ar, now: now);
+      expect(weekday, 'الثلاثاء');
+      expect(older, contains('أغسطس'));
+      expect(older, isNot(contains('Aug')));
     });
 
     test('a future timestamp (clock skew) does not throw or show negatives',

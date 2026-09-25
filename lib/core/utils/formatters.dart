@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../localization/app_localizations.dart';
 
 abstract final class Formatters {
@@ -34,25 +36,12 @@ abstract final class Formatters {
       return l10n.notificationsTimeHoursAgo(diff.inHours.clamp(1, 23));
     }
     final startOfWeek = today.subtract(Duration(days: today.weekday - DateTime.monday));
+    // Locale date symbols are loaded by GlobalMaterialLocalizations before
+    // any screen renders; plain unit tests call initializeDateFormatting.
+    final locale = l10n.localeName;
     if (!itemDay.isBefore(startOfWeek) && itemDay.isBefore(today)) {
-      // Avoid DateFormat.E — requires initializeDateFormatting in main.
-      const dow = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      return dow[t.weekday - 1];
+      return DateFormat.E(locale).format(t);
     }
-    const mon = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${mon[t.month - 1]} ${t.day}';
+    return DateFormat.MMMd(locale).format(t);
   }
 }
