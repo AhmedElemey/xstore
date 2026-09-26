@@ -136,9 +136,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
           git commit -m "chore: bump build number to ${FULL_VERSION} [skip ci]"
-          # main may have moved while this run was queued — rebase the bump on top.
-          git pull --rebase origin main
-          git push
+          # The branch may have moved while this run was queued — rebase the bump
+          # on top. Pull the branch being built (main on push; any branch on a
+          # manual run) — pulling main into another branch's shallow checkout
+          # replays its whole history and conflicts.
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
 
       - name: Resolve API base URL for flavor
         run: |
