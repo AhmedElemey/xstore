@@ -475,7 +475,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `listing_remote_datasource.dart` `_listingFormData`, `test/listing_create_multipart_test.dart`.
 
 ### 2026-08-29 — Hide unfinished features completely
-- **Rule:** Don't ship profile tiles or preference switches for features that aren't live: comment them with `TODO(phase-2)` and drop their `ref.watch`. Keep route constants but redirect them to profile; `rg` every other entry into the path (app-bar gear, aliases, inbox icons) and remove guest-accessible entries plus their tests in the same change. Currently deferred: payment methods, saved addresses menu, store hours, packages, push/email prefs, help center, notification settings.
+- **Rule:** Don't ship profile tiles or preference switches for features that aren't live: comment them with `TODO(phase-2)` and drop their `ref.watch`. Keep route constants but redirect them to profile; `rg` every other entry into the path (app-bar gear, aliases, inbox icons) and remove guest-accessible entries plus their tests in the same change. Currently deferred: payment methods, saved addresses menu, store hours, packages, push/email prefs, help center, notification settings, seller chat (product chat button, `_messageSeller`, `/chat/:threadId` → notifications). Live WhatsApp contact buttons (store, orders) stay.
 - **Where it applies:** `profile_menu_blocks.dart`, `profile_sliver_app_bar.dart`, `app_router.dart`, `app_routes.dart`.
 
 ### 2026-08-29 — There is no cart API

@@ -9,7 +9,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 
 /// Orbit product bar: quantity stepper pill and the glowing Add to cart.
-/// Buy now and chat live in the page ([ProductActionsRow]).
+/// Buy now lives in the page ([ProductActionsRow]). Seller chat is deferred.
 class ProductStickyBar extends StatelessWidget {
   const ProductStickyBar({
     super.key,
@@ -127,17 +127,16 @@ class _StepButton extends StatelessWidget {
   }
 }
 
-/// App-only product actions the design has no slot for: message the seller
-/// and buy now. Sits under the product header.
+/// App-only product action the design has no slot for: buy now.
+/// Seller chat is parked for the next phase (see the TODO in [build]).
+/// Sits under the product header.
 class ProductActionsRow extends StatelessWidget {
   const ProductActionsRow({
     super.key,
-    required this.onChat,
     required this.onBuyNow,
     required this.stockLeft,
   });
 
-  final VoidCallback onChat;
   final VoidCallback onBuyNow;
 
   /// Shows "Only N left" when stock is low (1–5).
@@ -163,20 +162,24 @@ class ProductActionsRow extends StatelessWidget {
           ],
           Row(
             children: [
-              OutlinedButton(
-                onPressed: onChat,
-                style: OutlinedButton.styleFrom(
-                  shape: const CircleBorder(),
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(48, 48),
-                ),
-                child: Icon(
-                  LucideIcons.messageCircle,
-                  size: 20,
-                  semanticLabel: context.l10n.chatSeller,
-                ),
-              ),
-              const Gap(AppSpacing.md),
+              // TODO(phase-2): Seller chat is deferred to the next phase.
+              // Restore this button, `onChat`, and `_messageSeller` when
+              // in-app chat ships, and include it app-wide (product, store,
+              // orders, and the /chat route).
+              // OutlinedButton(
+              //   onPressed: onChat,
+              //   style: OutlinedButton.styleFrom(
+              //     shape: const CircleBorder(),
+              //     padding: EdgeInsets.zero,
+              //     minimumSize: const Size(48, 48),
+              //   ),
+              //   child: Icon(
+              //     LucideIcons.messageCircle,
+              //     size: 20,
+              //     semanticLabel: context.l10n.chatSeller,
+              //   ),
+              // ),
+              // const Gap(AppSpacing.md),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onBuyNow,

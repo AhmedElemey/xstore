@@ -31,7 +31,6 @@ void main() {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ProductActionsRow(
-                  onChat: () {},
                   onBuyNow: () {},
                   stockLeft: 3,
                 ),

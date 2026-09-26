@@ -434,6 +434,9 @@ GoRouter goRouter(GoRouterRef ref) {
         path: AppRoutes.notificationSettings,
         redirect: (_, __) => AppRoutes.profile,
       ),
+      // TODO(phase-2): In-app seller chat deferred to the next phase.
+      // Redirects to notifications until chat ships app-wide (product,
+      // store, and orders). Keep AppRoutes.chatThread for restore.
       GoRoute(
         path: '/chat/:threadId',
         redirect: (_, __) => AppRoutes.notifications,

@@ -73,6 +73,8 @@ abstract final class AppRoutes {
   static const sendPackage = '/send-package';
   static const myPackages = '/my-packages';
 
+  // TODO(phase-2): Seller chat deferred to the next phase — route
+  // currently redirects to notifications (see app_router.dart).
   static String chatThread(String threadId) => '/chat/$threadId';
 }
 
