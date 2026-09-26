@@ -66,6 +66,9 @@ extension BuildContextX on BuildContext {
 
   Color get primaryColor => colorScheme.primary;
 
+  /// Orbit "amber means cash": prices and cash-on-delivery amounts.
+  Color get cashColor => isDark ? AppColors.cash : AppColors.cashOnLight;
+
   Color get overlayColor =>
       isDark ? AppColors.darkOverlay : AppColors.lightOverlay;
 

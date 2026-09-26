@@ -64,7 +64,7 @@ class ProductHeader extends StatelessWidget {
                 context.formatCurrency(price),
                 style: AppTypography.titleSmall.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.primary,
+                  color: context.cashColor,
                 ),
               ),
               if (hasCompare) ...[

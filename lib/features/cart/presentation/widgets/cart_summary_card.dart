@@ -116,7 +116,7 @@ class CartSummaryCard extends ConsumerWidget {
           style: (emphasize ? AppTypography.titleMedium : AppTypography.bodyMedium)
               .copyWith(
             color: valueColor ??
-                (emphasize ? AppColors.primary : context.textPrimary),
+                (emphasize ? context.cashColor : context.textPrimary),
             fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
           ),
         ),

@@ -242,7 +242,7 @@ class WishlistItemCard extends ConsumerWidget {
                                         overflow: TextOverflow.ellipsis,
                                         style: AppTypography.titleSmall
                                             .copyWith(
-                                          color: AppColors.primary,
+                                          color: context.cashColor,
                                           fontWeight: FontWeight.w800,
                                         ),
                                       ),

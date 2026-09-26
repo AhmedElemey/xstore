@@ -164,7 +164,7 @@ class CartItemCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.titleMedium.copyWith(
                                   color: available
-                                      ? context.textPrimary
+                                      ? context.cashColor
                                       : context.textDisabled,
                                   fontWeight: FontWeight.w800,
                                 ),

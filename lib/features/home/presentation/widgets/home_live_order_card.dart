@@ -105,7 +105,6 @@ class _LiveOrderCard extends StatelessWidget {
     final statusLabel = orderStatusLabel(context, order.status);
     final dueInCash =
         order.paymentMethod == PaymentMethod.cashOnDelivery && !order.isPaid;
-    final cashColor = context.isDark ? AppColors.cash : AppColors.cashOnLight;
     final radius = BorderRadius.circular(24);
 
     return Material(
@@ -170,7 +169,7 @@ class _LiveOrderCard extends StatelessWidget {
                     child: dueInCash
                         ? _CashLine(
                             amount: context.formatCurrency(order.total),
-                            color: cashColor,
+                            color: context.cashColor,
                           )
                         : Text(
                             order.vendorStoreName.isNotEmpty

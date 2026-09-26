@@ -141,7 +141,7 @@ class ProductListCard extends StatelessWidget {
                                   Text(
                                     context.formatCurrency(item.price),
                                     style: AppTypography.labelLarge.copyWith(
-                                      color: AppColors.primary,
+                                      color: context.cashColor,
                                     ),
                                   ),
                                   if (item.compareAtPrice != null) ...[

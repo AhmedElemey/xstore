@@ -104,7 +104,7 @@ class OrderPriceBreakdown extends ConsumerWidget {
             Text(
               context.formatCurrency(order.total),
               style: AppTypography.titleMedium.copyWith(
-                color: AppColors.primary,
+                color: context.cashColor,
                 fontWeight: FontWeight.w700,
               ),
             ),

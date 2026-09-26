@@ -176,7 +176,7 @@ class _Footer extends StatelessWidget {
                   child: Text(
                     context.formatCurrency(price),
                     style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.primary,
+                      color: context.cashColor,
                       fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
