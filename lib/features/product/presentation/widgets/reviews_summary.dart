@@ -121,10 +121,11 @@ class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
                                       ? counts[5 - star] / maxBar
                                       : 0,
                                   minHeight: 8,
-                                  backgroundColor: theme
-                                      .colorScheme.surfaceContainerHighest,
-                                  color: theme.colorScheme.primary
-                                      .withValues(alpha: 0.7),
+                                  backgroundColor:
+                                      theme.colorScheme.surfaceContainerHighest,
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                               ),
                             ),
@@ -180,89 +181,131 @@ class _ReviewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bodyStyle = theme.textTheme.bodyMedium;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final overflows = _reviewTextOverflows(
+            text: review.text,
+            style: bodyStyle,
+            maxWidth: constraints.maxWidth,
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundImage: review.userAvatarUrl != null &&
-                        review.userAvatarUrl!.isNotEmpty
-                    ? AppNetworkImage.cached(review.userAvatarUrl!)
-                    : null,
-                child: review.userAvatarUrl == null ||
-                        review.userAvatarUrl!.isEmpty
-                    ? Text(
-                        authorName.isNotEmpty
-                            ? authorName[0].toUpperCase()
-                            : '?',
-                      )
-                    : null,
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundImage:
+                        review.userAvatarUrl != null &&
+                            review.userAvatarUrl!.isNotEmpty
+                        ? AppNetworkImage.cached(review.userAvatarUrl!)
+                        : null,
+                    child:
+                        review.userAvatarUrl == null ||
+                            review.userAvatarUrl!.isEmpty
+                        ? Text(
+                            authorName.isNotEmpty
+                                ? authorName[0].toUpperCase()
+                                : '?',
+                          )
+                        : null,
+                  ),
+                  const Gap(AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          authorName,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          Formatters.shortDate(review.date),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: List.generate(5, (i) {
+                      return Icon(
+                        i < review.stars.round()
+                            ? LucideIcons.star
+                            : LucideIcons.starOff,
+                        size: AppSpacing.xl,
+                        color: AppColors.warning,
+                      );
+                    }),
+                  ),
+                ],
               ),
-              const Gap(AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      authorName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      Formatters.shortDate(review.date),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+              const Gap(AppSpacing.sm),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topLeft,
+                child: Text(
+                  review.text,
+                  maxLines: expanded ? null : _collapsedReviewLines,
+                  overflow: expanded
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
+                  style: bodyStyle,
                 ),
               ),
-              Row(
-                children: List.generate(5, (i) {
-                  return Icon(
-                    i < review.stars.round()
-                        ? LucideIcons.star
-                        : LucideIcons.starOff,
-                    size: AppSpacing.xl,
-                    color: AppColors.warning,
-                  );
-                }),
+              if (expanded || overflows)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: onToggle,
+                    child: Text(
+                      expanded ? context.l10n.readLess : context.l10n.readMore,
+                    ),
+                  ),
+                ),
+              Text(
+                '${context.l10n.helpfulPrompt}${review.helpfulCount}',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
+              Divider(height: AppSpacing.x2l),
             ],
-          ),
-          const Gap(AppSpacing.sm),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topLeft,
-            child: Text(
-              review.text,
-              maxLines: expanded ? null : 2,
-              overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: onToggle,
-              child: Text(expanded ? context.l10n.readLess : context.l10n.readMore),
-            ),
-          ),
-          Text(
-            '${context.l10n.helpfulPrompt}${review.helpfulCount}',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Divider(height: AppSpacing.x2l),
-        ],
+          );
+        },
       ),
     );
   }
+}
+
+const _collapsedReviewLines = 2;
+
+bool _reviewTextOverflows({
+  required String text,
+  required TextStyle? style,
+  required double maxWidth,
+  required TextDirection textDirection,
+  required TextScaler textScaler,
+}) {
+  if (text.trim().isEmpty || !maxWidth.isFinite || maxWidth <= 0) {
+    return false;
+  }
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    maxLines: _collapsedReviewLines,
+    textDirection: textDirection,
+    textScaler: textScaler,
+  )..layout(maxWidth: maxWidth);
+  final overflows = painter.didExceedMaxLines;
+  painter.dispose();
+  return overflows;
 }

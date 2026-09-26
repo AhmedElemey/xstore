@@ -58,8 +58,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   void _onScroll() {
     final threshold = AppSpacing.x4l * 2 + AppSpacing.x3l + AppSpacing.md;
-    final next =
-        (_scrollController.offset / threshold).clamp(0.0, 1.0).toDouble();
+    final next = (_scrollController.offset / threshold)
+        .clamp(0.0, 1.0)
+        .toDouble();
     if ((next - _appBarFill.value).abs() > 0.02) {
       _appBarFill.value = next;
     }
@@ -73,7 +74,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Future<void> _shareListing(String title, String id) async {
-    await Share.share('$title — ${context.l10n.appName} · ${AppRoutes.product}/$id');
+    await Share.share(
+      '$title — ${context.l10n.appName} · ${AppRoutes.product}/$id',
+    );
   }
 
   // TODO(phase-2): Seller chat is deferred to the next phase. Restore this
@@ -170,8 +173,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             body: Center(child: Text(context.l10n.productNotFound)),
           );
         }
-        final notifier =
-            ref.read(productDetailProvider(widget.productId).notifier);
+        final notifier = ref.read(
+          productDetailProvider(widget.productId).notifier,
+        );
         final sessionUser = ref.watch(
           authProvider.select((a) => a.valueOrNull),
         );
@@ -179,7 +183,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         final ownerId = listing.vendorId.isNotEmpty
             ? listing.vendorId
             : (data.seller?.id ?? '');
-        final isOwnListing = sessionUser != null &&
+        final isOwnListing =
+            sessionUser != null &&
             sessionUser.id.isNotEmpty &&
             ownerId.isNotEmpty &&
             sessionUser.id == ownerId;
@@ -208,8 +213,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       stretch: true,
                       expandedHeight: 360,
                       elevation: 0,
-                      backgroundColor: context.backgroundColor
-                          .withValues(alpha: fill * 0.92),
+                      backgroundColor: context.backgroundColor.withValues(
+                        alpha: fill * 0.92,
+                      ),
                       surfaceTintColor: AppColors.transparent,
                       systemOverlayStyle: context.isDark
                           ? SystemUiOverlayStyle.light
@@ -221,8 +227,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                         child: Center(
                           child: OrbitCircleButton(
-                            tooltip: MaterialLocalizations.of(context)
-                                .backButtonTooltip,
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).backButtonTooltip,
                             onPressed: () => context.pop(),
                             child: Icon(
                               Directionality.of(context) == TextDirection.rtl
@@ -259,7 +266,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           imageUrls: listing.imageUrls,
                           selectedIndex: data.selectedImageIndex,
                           onPageChanged: notifier.selectImage,
-                          listingId: listing.id,
                         ).animate().fadeIn(duration: AppAnimations.medium),
                       ),
                     );
@@ -271,9 +277,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(30),
                     ),
-                    border: Border(
-                      top: BorderSide(color: context.borderColor),
-                    ),
+                    border: Border(top: BorderSide(color: context.borderColor)),
                   ),
                   sliver: SliverMainAxisGroup(
                     slivers: [
@@ -285,13 +289,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           0,
                         ),
                         sliver: SliverToBoxAdapter(
-                          child: ProductHeader(
-                            listing: listing,
-                            compareAtPrice: data.compareAtPrice,
-                            locationLine: data.locationLine,
-                          ).fadeSlideIn(
-                            delay: const Duration(milliseconds: 150),
-                          ),
+                          child:
+                              ProductHeader(
+                                listing: listing,
+                                compareAtPrice: data.compareAtPrice,
+                                locationLine: data.locationLine,
+                              ).fadeSlideIn(
+                                delay: const Duration(milliseconds: 150),
+                              ),
                         ),
                       ),
                       if (data.seller != null) ...[
@@ -330,11 +335,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         sliver: SliverToBoxAdapter(
                           child: ProductRatingLink(
                             onTap: _scrollToReviews,
-                            ratingLabel: reviewSummary != null &&
+                            ratingLabel:
+                                reviewSummary != null &&
                                     reviewSummary.totalCount > 0
                                 ? reviewSummary.average.toStringAsFixed(1)
                                 : null,
-                            reviewCountLabel: reviewSummary != null &&
+                            reviewCountLabel:
+                                reviewSummary != null &&
                                     reviewSummary.totalCount > 0
                                 ? _formatCount(reviewSummary.totalCount)
                                 : null,
@@ -375,7 +382,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         ),
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: (showCartBar
+                          height:
+                              (showCartBar
                                   ? AppSpacing.x4l * 2 + AppSpacing.x3l
                                   : AppSpacing.x3l) +
                               MediaQuery.paddingOf(context).bottom,
@@ -395,28 +403,32 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   padding: EdgeInsets.only(
                     bottom: MediaQuery.viewInsetsOf(context).bottom,
                   ),
-                  child: ProductStickyBar(
-                    isAddingToCart: data.isAddingToCart,
-                    quantity: data.quantity,
-                    maxQuantity: data.stockQuantity,
-                    onDecrement: notifier.decrementQuantity,
-                    onIncrement: notifier.incrementQuantity,
-                    onAddToCart: () async {
-                      if (!requireLogin(context, ref)) return;
-                      await notifier.addToCart();
-                      if (!context.mounted) return;
-                      final cartError = ref.read(cartProvider).error;
-                      if (cartError != null) {
-                        AppSnackbar.error(
-                          context,
-                          resolveAppError(context, cartError),
-                        );
-                        ref.read(cartProvider.notifier).clearError();
-                        return;
-                      }
-                      AppSnackbar.success(context, context.l10n.addedToCart);
-                    },
-                  ).animate().slideY(
+                  child:
+                      ProductStickyBar(
+                        isAddingToCart: data.isAddingToCart,
+                        quantity: data.quantity,
+                        maxQuantity: data.stockQuantity,
+                        onDecrement: notifier.decrementQuantity,
+                        onIncrement: notifier.incrementQuantity,
+                        onAddToCart: () async {
+                          if (!requireLogin(context, ref)) return;
+                          await notifier.addToCart();
+                          if (!context.mounted) return;
+                          final cartError = ref.read(cartProvider).error;
+                          if (cartError != null) {
+                            AppSnackbar.error(
+                              context,
+                              resolveAppError(context, cartError),
+                            );
+                            ref.read(cartProvider.notifier).clearError();
+                            return;
+                          }
+                          AppSnackbar.success(
+                            context,
+                            context.l10n.addedToCart,
+                          );
+                        },
+                      ).animate().slideY(
                         begin: 1,
                         end: 0,
                         duration: AppAnimations.medium,
@@ -430,9 +442,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   String _formatCount(int n) {
     final s = n.toString();
-    return s.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (_) => ',',
-    );
+    return s.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   }
 }

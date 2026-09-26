@@ -4,7 +4,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductImageGallery extends StatefulWidget {
@@ -14,7 +13,6 @@ class ProductImageGallery extends StatefulWidget {
     required this.imageUrls,
     required this.selectedIndex,
     required this.onPageChanged,
-    required this.listingId,
     this.bottomInset = 0,
   });
 
@@ -24,7 +22,6 @@ class ProductImageGallery extends StatefulWidget {
   final List<String> imageUrls;
   final int selectedIndex;
   final ValueChanged<int> onPageChanged;
-  final String listingId;
   final double bottomInset;
 
   @override
@@ -109,9 +106,8 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   // above plain screen resolution so zoomed-in detail stays
                   // sharp instead of upscaling a screen-sized decode.
                   memCacheWidth: 1600,
-                  placeholder: (_, __) => const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
+                  placeholder: (_, __) =>
+                      const Center(child: CircularProgressIndicator.adaptive()),
                   errorWidget: (_, __, ___) => ColoredBox(
                     color: context.textDisabled,
                     child: Icon(
@@ -123,15 +119,6 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
               ),
             );
           },
-        ),
-        Positioned(
-          top: MediaQuery.paddingOf(context).top + AppSpacing.sm,
-          right: AppSpacing.x3l + AppSpacing.x2l,
-          child: WishHeartButton(
-            listingId: widget.listingId,
-            size: 22,
-            onDarkBackground: true,
-          ),
         ),
         Positioned(
           left: 0,
@@ -146,7 +133,9 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   final active = i == widget.selectedIndex;
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                    ),
                     width: active ? AppSpacing.xl : AppSpacing.sm,
                     height: AppSpacing.sm,
                     decoration: BoxDecoration(
@@ -163,7 +152,9 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                 height: AppSpacing.x4l + AppSpacing.xs,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   itemCount: urls.length,
                   separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
                   itemBuilder: (context, i) {
@@ -178,14 +169,16 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                           width: AppSpacing.x4l,
                           height: AppSpacing.x4l,
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.sm),
+                            borderRadius: BorderRadius.circular(AppSpacing.sm),
                             border: Border.all(
                               color: sel
                                   ? context.surfaceColor
-                                  : context.surfaceColor.withValues(alpha: 0.35),
-                              width:
-                                  sel ? AppSpacing.xs / 2 : AppSpacing.xs / 4,
+                                  : context.surfaceColor.withValues(
+                                      alpha: 0.35,
+                                    ),
+                              width: sel
+                                  ? AppSpacing.xs / 2
+                                  : AppSpacing.xs / 4,
                             ),
                           ),
                           clipBehavior: Clip.antiAlias,

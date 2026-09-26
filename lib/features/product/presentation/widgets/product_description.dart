@@ -16,51 +16,97 @@ class ProductDescription extends StatelessWidget {
   final bool expanded;
   final VoidCallback onToggle;
 
+  static const _collapsedLines = 2;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bodyStyle = (theme.textTheme.bodyMedium ?? const TextStyle())
+        .copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          height: 1.45,
+          fontWeight: FontWeight.w400,
+        );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.description,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topLeft,
-            child: Text(
-              text,
-              maxLines: expanded ? null : 4,
-              overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.45,
-                fontWeight: FontWeight.w400,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showToggle = _exceedsLineLimit(
+            text: text,
+            style: bodyStyle,
+            maxWidth: constraints.maxWidth,
+            maxLines: _collapsedLines,
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+            locale: Localizations.localeOf(context),
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.description,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          ),
-          const Gap(AppSpacing.sm),
-          GestureDetector(
-            onTap: onToggle,
-            child: Text(
-              expanded
-                  ? '${context.l10n.readLess} ${context.arrowBack}'
-                  : '${context.l10n.readMore} ${context.arrowForward}',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
+              const Gap(AppSpacing.md),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topLeft,
+                child: Text(
+                  text,
+                  maxLines: expanded ? null : _collapsedLines,
+                  overflow: expanded
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
+                  style: bodyStyle,
+                ),
               ),
-            ),
-          ),
-        ],
+              if (showToggle) ...[
+                const Gap(AppSpacing.sm),
+                GestureDetector(
+                  onTap: onToggle,
+                  child: Text(
+                    expanded
+                        ? '${context.l10n.readLess} ${context.arrowBack}'
+                        : '${context.l10n.readMore} ${context.arrowForward}',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
+}
+
+bool _exceedsLineLimit({
+  required String text,
+  required TextStyle style,
+  required double maxWidth,
+  required int maxLines,
+  required TextDirection textDirection,
+  required TextScaler textScaler,
+  required Locale locale,
+}) {
+  if (!maxWidth.isFinite || text.isEmpty) return false;
+
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    maxLines: maxLines,
+    textDirection: textDirection,
+    textScaler: textScaler,
+    locale: locale,
+  )..layout(maxWidth: maxWidth);
+  final exceeds = painter.didExceedMaxLines;
+  painter.dispose();
+  return exceeds;
 }
