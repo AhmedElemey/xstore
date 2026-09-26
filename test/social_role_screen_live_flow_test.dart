@@ -4,12 +4,11 @@
 // AuthRepositoryImpl -> AuthRemoteDataSourceImpl chain (a hand-built real
 // AuthRepositoryImpl, stubbing only the two Firebase-touching params).
 //
-// Google flow: `checkGoogleUser` plus Firebase `isNewUser` decide. An
-// identity that already has an account (lookup hit, or `isNewUser: false`
-// after a lookup miss) logs straight in and goes home. A brand-new
-// identity (`isNewUser: true` and no backend match) goes to this screen
-// (`needsRoleSelection` + `pendingSocialResult`); picking a type calls the
-// chosen role's Google endpoint, which creates the account and logs in.
+// Google flow: only `checkGoogleUser` decides (Firebase `isNewUser` is
+// ignored). A registered identity logs straight in and goes home; any other
+// goes to this screen (`needsRoleSelection` + `pendingSocialResult`), and
+// picking a type calls the chosen role's Google endpoint, which creates the
+// account and logs in.
 //
 // SocialRoleScreen itself never calls Google sign-in — that fires from the
 // login screen's Google button before this screen is even pushed, and the
@@ -239,8 +238,8 @@ void main() {
   );
 
   test(
-    'a returning Firebase Google identity logs in as consumer when '
-    'check-user reports no Google-linked account',
+    'a returning Firebase identity that check-user does not know still goes '
+    'to the account-type screen (isNewUser is ignored)',
     skip: MockConfig.useMock,
     () async {
       var consumerLoginCalls = 0;
@@ -286,23 +285,22 @@ void main() {
       await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
       final social = container.read(socialAuthProvider);
-      expect(social.needsRoleSelection, isFalse);
-      expect(social.error, isNull);
-      expect(consumerLoginCalls, 1);
-
-      await container.read(analyticsServiceProvider).ready;
+      expect(social.needsRoleSelection, isTrue);
+      expect(social.pendingSocialResult, isNotNull);
+      expect(consumerLoginCalls, 0,
+          reason: 'no login until the user picks an account type');
     },
   );
 
   test(
-    'a returning Google identity retries vendor login when consumer returns '
-    'a different-role conflict',
+    'a registered Google identity with an unreadable role retries vendor '
+    'login when consumer returns a different-role conflict',
     skip: MockConfig.useMock,
     () async {
       var vendorLoginCalls = 0;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
-          'exists': false,
+          'exists': true,
           'role': null,
         },
         'POST ${ApiEndpoints.googleConsumerLogin}': (options) => DioException(

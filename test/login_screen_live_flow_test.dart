@@ -337,18 +337,22 @@ void main() {
   );
 
   testWidgets(
-    'Google sign-in for a returning Firebase identity does not send the '
-    'user to Register when check-user reports no Google-linked account',
+    'Google sign-in for a registered account logs in with its role and '
+    'skips the account-type screen',
     skip: MockConfig.useMock,
     (tester) async {
+      var consumerLoginCalls = 0;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
-          'exists': false,
-          'role': null,
+          'exists': true,
+          'role': 'Consumer',
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
-          'token': 'access-token-email-account',
-          'refreshToken': 'refresh-token-email-account',
+        'POST ${ApiEndpoints.googleConsumerLogin}': (_) {
+          consumerLoginCalls++;
+          return {
+            'token': 'access-token-email-account',
+            'refreshToken': 'refresh-token-email-account',
+          };
         },
         'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
       });
@@ -382,6 +386,12 @@ void main() {
       await tester.tap(find.text('Continue with Google'));
       await _settle(tester);
 
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      expect(consumerLoginCalls, 1);
+      expect(container.read(socialAuthProvider).needsRoleSelection, isFalse);
+      expect(container.read(authProvider).valueOrNull, isNotNull);
       expect(find.text('Register Screen'), findsNothing);
     },
   );
