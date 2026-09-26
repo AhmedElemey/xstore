@@ -28,7 +28,6 @@ import '../widgets/product_header.dart';
 import '../widgets/product_image_gallery.dart';
 import '../widgets/product_specifications.dart';
 import '../widgets/product_sticky_bar.dart';
-import '../widgets/quick_actions_row.dart';
 import '../widgets/reviews_summary.dart';
 import '../widgets/seller_card.dart';
 import '../widgets/similar_products_section.dart';
