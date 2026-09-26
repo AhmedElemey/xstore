@@ -2078,7 +2078,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterEmailHint => 'you@email.com';
 
   @override
-  String get passwordMask => '********';
+  String get enterPasswordHint => 'Enter your password';
 
   @override
   String get minSixChars => 'Min 6 characters';
@@ -2112,9 +2112,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createOneArrow => 'Create one →';
-
-  @override
-  String get guestContinue => 'Continue as Guest';
 
   @override
   String get guestLoginRequired => 'Sign in to use this feature';
@@ -3124,7 +3121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreetingEvening => 'Good evening';
 
   @override
-  String get homeFreshInOrbit => 'Fresh in orbit';
+  String get homeFreshInOrbit => 'Fresh in xStore';
 
   @override
   String get homeSearchProductsStores => 'Search products and stores';

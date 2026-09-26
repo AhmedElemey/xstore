@@ -59,7 +59,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<Either<Failure, Unit>> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   }) async {
     try {

@@ -20,7 +20,6 @@ abstract final class AnalyticsEvents {
   static const String loginPromptShown = 'login_prompt_shown';
   static const String onboardingCompleted = 'onboarding_completed';
   static const String onboardingSkipped = 'onboarding_skipped';
-  static const String guestModeStarted = 'guest_mode_started';
   static const String deepLinkOpened = 'deep_link_opened';
 
   // Discovery.

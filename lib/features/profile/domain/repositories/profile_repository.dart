@@ -17,7 +17,7 @@ abstract interface class ProfileRepository {
   });
 
   Future<Either<Failure, Unit>> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   });
 

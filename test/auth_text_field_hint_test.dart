@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:xstore/core/theme/app_theme.dart';
@@ -24,6 +25,33 @@ Widget _app({required Widget child}) {
 }
 
 void main() {
+  testWidgets('password mask hint screenshot', (tester) async {
+    final loader = FontLoader('Manrope')
+      ..addFont(rootBundle.load('assets/fonts/Manrope-Regular.ttf'));
+    await loader.load();
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _app(
+        child: const AuthTextField(
+          label: 'Password',
+          hint: 'Enter your password',
+          obscureText: true,
+          suffixIcon: IconButton(
+            onPressed: null,
+            icon: Icon(LucideIcons.eye),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(AuthTextField),
+      matchesGoldenFile('goldens/password_hint.png'),
+    );
+  });
+
   testWidgets('email and password hints have a visible slot on a phone', (
     tester,
   ) async {

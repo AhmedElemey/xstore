@@ -738,7 +738,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   // a user who just tapped Delete Account at the bottom of the screen
   // would never see.
   Future<({bool deleted, String? error})> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   }) async {
     final epoch = _sessionEpoch;

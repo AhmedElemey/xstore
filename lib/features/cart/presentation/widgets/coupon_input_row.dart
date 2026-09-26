@@ -1,3 +1,5 @@
+// TODO(phase-2): Cart promo code entry is deferred. CartConsumerBody
+// does not mount this widget until phase 2; keep it for restore.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

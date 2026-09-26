@@ -272,10 +272,24 @@ void main() {
     'an account without a password only submits new + confirm',
     (tester) async {
       RequestOptions? postedRequest;
+      var profileFetches = 0;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.changePassword}': (options) {
           postedRequest = options;
           return <String, dynamic>{};
+        },
+        'GET ${ApiEndpoints.getProfile}': (_) {
+          profileFetches++;
+          return <String, dynamic>{
+            'user': {
+              'id': 1,
+              'email': 'social@test.com',
+              'fullName': 'Social User',
+              'phoneNumber': '01000000000',
+            },
+            'store': null,
+            'hasPassword': 'Yes',
+          };
         },
       });
 
@@ -312,6 +326,14 @@ void main() {
       });
       expect(find.text('Your password was changed.'), findsOneWidget);
       expect(find.text('Open Change Password'), findsOneWidget);
+      expect(profileFetches, 1);
+      final container = ProviderScope.containerOf(
+        tester.element(find.text('Open Change Password')),
+      );
+      expect(
+        container.read(profileNotifierProvider).profile?.hasPassword,
+        isTrue,
+      );
     },
   );
 }

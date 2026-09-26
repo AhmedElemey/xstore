@@ -12,8 +12,8 @@
 // added — the same wire contract test/checkout_order_flow_test.dart's
 // reorder-style tests already exercise. So this test seeds the cart via
 // that real `addFromListing` call (as a real "add to cart" action would),
-// then drives the screen's own remove/coupon actions purely against
-// in-memory state.
+// then drives the screen's own remove action purely against in-memory
+// state. Promo code entry is parked for phase 2 (see CouponInputRow).
 //
 // Run with: flutter test test/cart_screen_live_flow_test.dart
 import 'dart:async';
@@ -209,7 +209,7 @@ void main() {
   );
 
   testWidgets(
-    'consumer sees coupons are unavailable in live mode',
+    'promo code entry is parked for phase 2',
     skip: MockConfig.useMock,
     (tester) async {
       final dio = _fakeDio({
@@ -223,35 +223,10 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Wireless Earbuds'), findsOneWidget);
-
-      // With only one item, the coupon row's layout position (inside the
-      // CustomScrollView, whose `cacheExtent: 1000` lays it out even past
-      // the scrollview's own clipped viewport) coincides with the fixed
-      // CartCheckoutBar footer's on-screen rect — `find.text('Apply')`
-      // reports it as found, but tapping there actually hits the footer
-      // underneath the (clipped, not actually visible) coupon row. Scroll
-      // it further up first so it's genuinely on screen before tapping.
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, -150));
-      await _settle(tester);
-
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Enter coupon code…'),
-        'SAVE10',
-      );
-      // The Apply button's `onPressed` is only non-null once the entered
-      // text has actually rebuilt the widget — without this pump the
-      // button is still disabled from the pre-entry build and the tap
-      // below is a silent no-op.
-      await tester.pump();
-      await tester.tap(find.text('Apply'));
-      await _settle(tester);
-
+      expect(find.text('🏷️ Have a promo code?'), findsNothing);
       expect(
-        find.text('Coupons aren\'t available yet'),
-        findsOneWidget,
-        reason: 'CartRemoteDataSourceImpl.applyCoupon always throws '
-            "CouponException('unavailable') in live mode — there is no "
-            'backend coupon endpoint yet',
+        find.widgetWithText(TextField, 'Enter coupon code…'),
+        findsNothing,
       );
     },
   );

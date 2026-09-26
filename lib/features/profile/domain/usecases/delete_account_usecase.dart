@@ -9,7 +9,7 @@ class DeleteAccountUseCase {
   final ProfileRepository _repository;
 
   Future<Either<Failure, Unit>> call({
-    required String password,
+    String? password,
     required String confirmationText,
   }) {
     return _repository.deleteAccount(

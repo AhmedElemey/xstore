@@ -715,7 +715,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `product_detail_screen.dart`.
 
 ### 2026-09-08 — Hidden UI stays in source, commented out
-- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store.
+- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart promo code row (`coupon_input_row.dart`, usage in `cart_consumer_body.dart`, phase 2), cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store.
 - **Where it applies:** Cart, wishlist and profile UI.
 
 ### 2026-09-08 — Wishlist and cart card hierarchy
@@ -855,8 +855,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `logging_interceptor.dart`, `dio_provider.dart`, `social_auth_datasource.dart`, `test/logging_interceptor_test.dart`.
 
 ### 2026-09-13 — hasPassword controls the current-password field
-- **Rule:** get-profile's `hasPassword` is Yes/No (also bool or 0/1), top-level then nested `user`; missing means true. When false, hide the current-password field and omit `currentPassword`. Don't refresh profile or read `authProvider` from Change Password on success (it starts restore timers in tests).
-- **Where it applies:** `user_model.dart` `_yesNoFlag`, `ProfileEntity.hasPassword`, `change_password_screen.dart`, `AuthRemoteDataSource.changePassword`.
+- **Rule:** get-profile's `hasPassword` is Yes/No (also bool or 0/1), top-level then nested `user`; missing means true. When false, hide the current-password field and omit it (`currentPassword` on change-password, `password` on delete-account). Delete account then shows a confirm dialog and still sends `confirmationText: DELETE`. After a successful change-password, force-refresh with the already-loaded profile user (`refreshProfileData(user:, force: true)`); never read `authProvider` from that screen — it starts restore timers in tests. Skip the refresh when profile has no user.
+- **Where it applies:** `user_model.dart` `_yesNoFlag`, `ProfileEntity.hasPassword`, `change_password_screen.dart`, `AuthRemoteDataSource.changePassword`, `delete_account_dialog.dart`, `profile_menu_blocks.dart`, `profile_remote_datasource.dart` `deleteAccount`.
 
 ### 2026-09-15 — Widgets take typed entities, never dynamic
 - **Rule:** A widget's data parameter is the real domain type, never `dynamic` with `as` casts, even for a one-off card.
@@ -923,8 +923,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `add_listing_screen.dart`, `listing_form_notifier.dart`.
 
 ### 2026-09-21 — Share links use real website URLs
-- **Rule:** Outbound share/legal URLs come from `legal_links.dart` (`xstoreWebsiteOrigin`, and paths that exist: `/en|ar/download`, `/en/terms`, `/en/privacy`). Never invent `xstore.app` URLs or map in-app routes onto web paths.
-- **Where it applies:** `move_all_to_cart_bar.dart`, any `Share.share`.
+- **Rule:** App and wishlist shares use `legal_links.dart` (`xstoreDownloadUrl`, plus `/en/terms` and `/en/privacy`). A listing share uses `productDeepLink` (`https://xstore.com/product/<id>`), the same host and path `routeFromDeepLinkUri` opens — never the in-app path `/product/<id>`, a download URL, or an invented `xstore.app` host.
+- **Where it applies:** `product_detail_screen.dart`, `deep_link_route.dart`, `legal_links.dart`, any `Share.share`.
 
 ### 2026-09-21 — Phone fields showing +20 edit the 10-digit national number
 - **Rule:** With a `+20` prefix on screen, the field holds `1XXXXXXXXX`; convert to the 11-digit `01…` only for the API (`normalizeEgyptLocal`). Never prepend `0` in the widget.
@@ -1025,3 +1025,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-26 — Seller and courier screens use the warm Orbit accent
 - **Rule:** Shopper screens use `context.primaryColor` (plasma/violet); seller and courier screens use amber: `context.cashColor` for highlights and selected chips, and `XstoreButton(warm: true)` (amber→orange, dark ink) for primary actions (`height: 44` inside cards). Section headings on these screens are small uppercase labels, so tests find `'ACTIVE'`, `'HISTORY'`, `'COLLECTED ORDERS'`, not the arb value.
 - **Where it applies:** `lib/features/orders` (vendor), `listing`, `commission`, `delivery`, `vendor_store_screen.dart`, `courier_login_screen.dart`, `xstore_button.dart`.
+
+### 2026-09-26 — Sized orbs must center their glyph
+- **Rule:** A fixed-size circle (`AnimatedContainer` / `Container` with width and height) pins its child to the top-start unless `alignment: Alignment.center` is set. The Orbit dock orb needs that alignment so the cart and Add Listing glyphs sit in the middle of the disc; the count badge stays on the icon via `NotificationIconBadge`.
+- **Where it applies:** `xstore_bottom_nav.dart` (`_DockOrb`), any sized icon disc.

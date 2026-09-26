@@ -253,6 +253,7 @@ class _DockOrb extends StatelessWidget {
         child: AnimatedContainer(
           duration: AppAnimations.normal,
           curve: AppAnimations.enter,
+          alignment: Alignment.center,
           width: 52,
           height: 52,
           decoration: BoxDecoration(

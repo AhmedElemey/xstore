@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -89,7 +91,16 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       (_) {
         setState(() => _isLoading = false);
         AppSnackbar.success(context, l10n.changePasswordSuccess);
+        // Pass the loaded profile user so this screen never reads
+        // authProvider (that starts session-restore work). force skips the
+        // 30s refresh cooldown so hasPassword and the rest of get-profile
+        // are current when the user lands back on Profile.
+        final user = ref.read(profileNotifierProvider).profile?.user;
+        final notifier = ref.read(profileNotifierProvider.notifier);
         context.pop();
+        if (user != null) {
+          unawaited(notifier.refreshProfileData(user: user, force: true));
+        }
       },
     );
   }

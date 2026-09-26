@@ -16,6 +16,7 @@ import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../core/deeplink/deep_link_route.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -75,7 +76,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Future<void> _shareListing(String title, String id) async {
     await Share.share(
-      '$title — ${context.l10n.appName} · ${AppRoutes.product}/$id',
+      '$title — ${context.l10n.appName}\n${productDeepLink(id)}',
     );
   }
 

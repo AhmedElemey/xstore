@@ -58,27 +58,52 @@ class ProfileMenuBlocks extends ConsumerWidget {
   }
 
   Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final hasPassword =
+        ref.read(profileNotifierProvider).profile?.hasPassword ??
+        ref.read(authProvider).valueOrNull?.hasPassword ??
+        true;
+    if (!hasPassword) {
+      final confirmed = await showAnimatedDialog<bool>(
+        context: context,
+        child: const PasswordlessDeleteAccountDialog(),
+      );
+      if (confirmed != true || !context.mounted) return;
+      await _submitAccountDeletion(
+        context,
+        ref,
+        confirmationText: context.l10n.deleteConfirmKeyword,
+      );
+      return;
+    }
+
     await showAnimatedDialog<void>(
       context: context,
       child: DeleteAccountDialog(
-        onConfirm: (password, confirmationText) async {
-          final result =
-              await ref.read(profileNotifierProvider.notifier).deleteAccount(
-                    password: password,
-                    confirmationText: confirmationText,
-                  );
-          if (result.deleted) {
-            await ref.read(authProvider.notifier).logout();
-            return;
-          }
-          if (!context.mounted || result.error == null) return;
-          AppSnackbar.error(
-            context,
-            resolveAppError(context, result.error),
-          );
-        },
+        onConfirm: (password, confirmationText) => _submitAccountDeletion(
+          context,
+          ref,
+          password: password,
+          confirmationText: confirmationText,
+        ),
       ),
     );
+  }
+
+  Future<void> _submitAccountDeletion(
+    BuildContext context,
+    WidgetRef ref, {
+    String? password,
+    required String confirmationText,
+  }) async {
+    final result = await ref
+        .read(profileNotifierProvider.notifier)
+        .deleteAccount(password: password, confirmationText: confirmationText);
+    if (result.deleted) {
+      await ref.read(authProvider.notifier).logout();
+      return;
+    }
+    if (!context.mounted || result.error == null) return;
+    AppSnackbar.error(context, resolveAppError(context, result.error));
   }
 
   @override
@@ -184,24 +209,8 @@ class ProfileMenuBlocks extends ConsumerWidget {
             const LanguageToggleTile(),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Center(
-          child: TextButton(
-            onPressed: onLogout,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.errorLight,
-              minimumSize: const Size(88, 44),
-            ),
-            child: Text(
-              context.l10n.logOut,
-              style: AppTypography.bodyMedium.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ),
+        gap,
         // App-only settings and links the design has no slot for.
-        const SizedBox(height: AppSpacing.x2l),
         const ProfileMenuSection(children: [ThemeToggleTile()]),
         gap,
         ProfileMenuSection(
@@ -233,14 +242,41 @@ class ProfileMenuBlocks extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        Center(
-          child: TextButton(
-            onPressed: () => _deleteAccount(context, ref),
-            child: Text(
-              context.l10n.deleteAccount,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: onLogout,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.errorLight,
+                  minimumSize: const Size(0, 44),
+                ),
+                child: Text(
+                  context.l10n.logOut,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
             ),
-          ),
+            Expanded(
+              child: TextButton(
+                onPressed: () => _deleteAccount(context, ref),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  minimumSize: const Size(0, 44),
+                ),
+                child: Text(
+                  context.l10n.deleteAccount,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.lg),
         Center(

@@ -28,7 +28,7 @@ abstract interface class ProfileRemoteDataSource {
   });
 
   Future<void> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   });
 
@@ -536,7 +536,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<void> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   }) async {
     if (MockConfig.useMock) {
@@ -545,10 +545,14 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
     try {
       // CONFIRMED (Postman collection): DELETE /api/auth/delete-account,
-      // JSON body {password, confirmationText}.
+      // JSON body {password, confirmationText}. Social accounts
+      // (hasPassword: false) omit password; confirmationText stays "DELETE".
       await _dio.delete<void>(
         ApiEndpoints.deleteAccount,
-        data: {'password': password, 'confirmationText': confirmationText},
+        data: {
+          if (password != null && password.isNotEmpty) 'password': password,
+          'confirmationText': confirmationText,
+        },
         options: ApiAuthHeaders.authenticated(),
       );
     } on DioException catch (e) {

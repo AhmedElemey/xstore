@@ -81,6 +81,25 @@ void main() {
     );
 
     test(
+      'omits password when the account has none',
+      skip: MockConfig.useMock
+          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
+          : false,
+      () async {
+        RequestOptions? captured;
+        dio = buildDio((options) {
+          captured = options;
+          return null;
+        });
+        datasource = ProfileRemoteDataSourceImpl(dio);
+
+        await datasource.deleteAccount(confirmationText: 'DELETE');
+
+        expect(captured!.data, {'confirmationText': 'DELETE'});
+      },
+    );
+
+    test(
       'succeeds when the backend returns an empty 200',
       skip: MockConfig.useMock
           ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'

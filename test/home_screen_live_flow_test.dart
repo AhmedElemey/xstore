@@ -227,7 +227,7 @@ void main() {
       );
       await _settle(tester);
 
-      // Orbit layout: category orbs and "Fresh in orbit" (new arrivals)
+      // Orbit layout: category orbs and "Fresh in xStore" (new arrivals)
       // lead; banners and hot deals follow further down.
       expect(find.text('Electronics'), findsOneWidget);
       expect(

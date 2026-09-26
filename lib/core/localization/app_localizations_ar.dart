@@ -2078,7 +2078,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterEmailHint => '[AR] you@email.com';
 
   @override
-  String get passwordMask => '[AR] ********';
+  String get enterPasswordHint => 'ادخل كلمة المرور';
 
   @override
   String get minSixChars => '6 أحرف على الأقل';
@@ -2112,9 +2112,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get createOneArrow => 'إنشاء حساب ←';
-
-  @override
-  String get guestContinue => 'كمل كزائر';
 
   @override
   String get guestLoginRequired => 'سجل دخولك عشان تستخدم الميزة دي';
@@ -3113,7 +3110,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeGreetingEvening => 'مساء الخير';
 
   @override
-  String get homeFreshInOrbit => 'جديد في المدار';
+  String get homeFreshInOrbit => 'جديد في xStore';
 
   @override
   String get homeSearchProductsStores => 'ابحث عن منتجات ومتاجر';

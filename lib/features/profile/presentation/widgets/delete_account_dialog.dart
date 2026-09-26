@@ -6,14 +6,46 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Confirm-only dialog for accounts with `hasPassword: false`.
+/// The caller sends `confirmationText` itself after this returns true.
+class PasswordlessDeleteAccountDialog extends StatelessWidget {
+  const PasswordlessDeleteAccountDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      icon: const Icon(
+        LucideIcons.alertTriangle,
+        color: AppColors.error,
+        size: 40,
+      ),
+      title: Text(context.l10n.deleteAccountDialogTitle),
+      content: Text(
+        context.l10n.deleteAccountPermanentWarning,
+        style: AppTypography.bodySmall,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(context.l10n.deleteMyAccount),
+        ),
+      ],
+    );
+  }
+}
+
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({super.key, required this.onConfirm});
 
-  /// Backend requires both the account password and the typed confirmation
-  /// keyword (`DELETE /api/auth/delete-account` body: `{password,
-  /// confirmationText}`).
+  /// Shown when the account has a password. Backend body is
+  /// `{password, confirmationText}`.
   final Future<void> Function(String password, String confirmationText)
-      onConfirm;
+  onConfirm;
 
   @override
   State<DeleteAccountDialog> createState() => _DeleteAccountDialogState();
@@ -33,16 +65,24 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final ok = _confirmController.text.trim() == context.l10n.deleteConfirmKeyword &&
+    final ok =
+        _confirmController.text.trim() == context.l10n.deleteConfirmKeyword &&
         _passwordController.text.isNotEmpty;
     return AlertDialog(
-      icon: const Icon(LucideIcons.alertTriangle, color: AppColors.error, size: 40),
+      icon: const Icon(
+        LucideIcons.alertTriangle,
+        color: AppColors.error,
+        size: 40,
+      ),
       title: Text(context.l10n.deleteAccountPermanentWarning),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(context.l10n.deleteAccountDialogTitle, style: AppTypography.bodySmall),
+          Text(
+            context.l10n.deleteAccountDialogTitle,
+            style: AppTypography.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.lg),
           TextField(
             controller: _passwordController,

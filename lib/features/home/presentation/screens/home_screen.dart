@@ -115,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Orbit order: live order, category orbs, Fresh in orbit.
+                  // Orbit order: live order, category orbs, Fresh in xStore.
                   const HomeLiveOrderCard(),
                   categories.toWidget(
                     data: (data) => CategoryChipRow(

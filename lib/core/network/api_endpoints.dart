@@ -68,8 +68,9 @@ abstract final class ApiEndpoints {
   static const String verifyPhone = '$_api/auth/verify-phone';
 
   /// CONFIRMED (Postman collection): `DELETE /api/auth/delete-account`, JSON
-  /// body `{"password": "...", "confirmationText": "DELETE"}`. Replaces the
-  /// old `DELETE /users/me` guess, which had no route on this backend.
+  /// body `{"password": "...", "confirmationText": "DELETE"}`. Omit `password`
+  /// when get-profile `hasPassword` is false. Replaces the old
+  /// `DELETE /users/me` guess, which had no route on this backend.
   static const String deleteAccount = '$_api/auth/delete-account';
 
   /// Passwordless login: request an SMS OTP for an EXISTING account, then

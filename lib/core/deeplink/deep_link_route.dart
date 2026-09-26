@@ -4,7 +4,14 @@ import '../router/app_routes.dart';
 /// for. Update here — and in the native manifests plus the backend
 /// `.well-known` files — when the production domain is finalized. See
 /// docs_business/launch_todos/07_deep_linking.md.
-const supportedDeepLinkHosts = {'xstore.com', 'www.xstore.com'};
+const productDeepLinkHost = 'xstore.com';
+
+const supportedDeepLinkHosts = {productDeepLinkHost, 'www.xstore.com'};
+
+/// Public listing URL. Same host and `/product/:id` path
+/// [routeFromDeepLinkUri] opens, so a shared link lands on that listing.
+String productDeepLink(String listingId) =>
+    'https://$productDeepLinkHost/product/${Uri.encodeComponent(listingId)}';
 
 /// Resolves an incoming Universal/App Link URI to a go_router path, or null
 /// if the link isn't one xStore recognizes.

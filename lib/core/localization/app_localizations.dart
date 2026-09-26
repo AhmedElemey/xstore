@@ -4022,11 +4022,11 @@ abstract class AppLocalizations {
   /// **'you@email.com'**
   String get enterEmailHint;
 
-  /// No description provided for @passwordMask.
+  /// No description provided for @enterPasswordHint.
   ///
   /// In en, this message translates to:
-  /// **'********'**
-  String get passwordMask;
+  /// **'Enter your password'**
+  String get enterPasswordHint;
 
   /// No description provided for @minSixChars.
   ///
@@ -4087,12 +4087,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create one →'**
   String get createOneArrow;
-
-  /// No description provided for @guestContinue.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue as Guest'**
-  String get guestContinue;
 
   /// No description provided for @guestLoginRequired.
   ///
@@ -5921,7 +5915,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeFreshInOrbit.
   ///
   /// In en, this message translates to:
-  /// **'Fresh in orbit'**
+  /// **'Fresh in xStore'**
   String get homeFreshInOrbit;
 
   /// No description provided for @homeSearchProductsStores.

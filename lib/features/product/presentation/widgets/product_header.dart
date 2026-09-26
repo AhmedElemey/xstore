@@ -132,7 +132,7 @@ class ProductRatingLink extends StatelessWidget {
       color: context.textPrimary,
     );
     return InkWell(
-      onTap: onTap,
+      onTap: hasRating ? onTap : null,
       borderRadius: BorderRadius.circular(AppSpacing.sm),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 44),
@@ -153,21 +153,21 @@ class ProductRatingLink extends StatelessWidget {
                   color: context.textSecondary,
                 ),
               ),
+              const Spacer(),
+              Text(context.l10n.productReadReviews, style: style),
+              const Gap(AppSpacing.xs),
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.arrowLeft
+                    : LucideIcons.arrowRight,
+                size: 16,
+                color: context.textPrimary,
+              ),
             ] else
               Text(
                 context.l10n.noReviewsYet,
                 style: style.copyWith(color: context.textSecondary),
               ),
-            const Spacer(),
-            Text(context.l10n.productReadReviews, style: style),
-            const Gap(AppSpacing.xs),
-            Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? LucideIcons.arrowLeft
-                  : LucideIcons.arrowRight,
-              size: 16,
-              color: context.textPrimary,
-            ),
           ],
         ),
       ),

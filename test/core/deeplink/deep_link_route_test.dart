@@ -4,6 +4,15 @@ import 'package:xstore/core/router/app_routes.dart';
 
 void main() {
   group('routeFromDeepLinkUri', () {
+    test('productDeepLink is a product link the app opens', () {
+      final link = productDeepLink('abc-123');
+      expect(link, 'https://xstore.com/product/abc-123');
+      expect(
+        routeFromDeepLinkUri(Uri.parse(link)),
+        '${AppRoutes.product}/abc-123',
+      );
+    });
+
     test('resolves a product link on the primary host', () {
       expect(
         routeFromDeepLinkUri(Uri.parse('https://xstore.com/product/abc-123')),

@@ -54,7 +54,7 @@ class _MissingStoreRepo implements ProfileRepository {
 
   @override
   Future<Either<Failure, Unit>> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   }) => throw UnimplementedError();
 }
@@ -265,7 +265,7 @@ class _PublicStoreRepo implements ProfileRepository {
 
   @override
   Future<Either<Failure, Unit>> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   }) => throw UnimplementedError();
 }
@@ -313,7 +313,7 @@ class _OwnStoreRepo implements ProfileRepository {
 
   @override
   Future<Either<Failure, Unit>> deleteAccount({
-    required String password,
+    String? password,
     required String confirmationText,
   }) => throw UnimplementedError();
 }

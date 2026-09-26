@@ -12,7 +12,9 @@ import 'cart_recommended_strip.dart';
 import 'cart_select_all_row.dart';
 import 'cart_summary_card.dart';
 import 'cart_vendor_group.dart';
-import 'coupon_input_row.dart';
+// TODO(phase-2): Promo code entry is deferred. Restore this import with
+// CouponInputRow in the list below.
+// import 'coupon_input_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeletons/cart_skeleton.dart';
@@ -42,7 +44,9 @@ class CartConsumerBody extends ConsumerWidget {
       return const CartEmptyState();
     }
     // Orbit cart: Select all, then one glass card per store.
-    final childCount = groups.length + 7;
+    // Promo code (CouponInputRow + the gap under it) is phase 2 — restore
+    // those two tails and set this back to groups.length + 7.
+    final childCount = groups.length + 5;
 
     return ColoredBox(
       color: context.backgroundColor,
@@ -94,19 +98,19 @@ class CartConsumerBody extends ConsumerWidget {
                             ),
                           );
                         }
+                        // TODO(phase-2): Promo code entry is deferred.
+                        // Restore these two tails ahead of the summary:
+                        //   return const CouponInputRow();
+                        //   return const Gap(AppSpacing.lg);
                         final tail = index - groups.length - 1;
                         switch (tail) {
                           case 0:
-                            return const CouponInputRow();
-                          case 1:
-                            return const Gap(AppSpacing.lg);
-                          case 2:
                             return const CartSummaryCard();
-                          case 3:
+                          case 1:
                             return const Gap(AppSpacing.x2l);
-                          case 4:
+                          case 2:
                             return const CartRecommendedStrip();
-                          case 5:
+                          case 3:
                             return const Gap(AppSpacing.x4l);
                           default:
                             return const SizedBox.shrink();
