@@ -14,7 +14,11 @@ abstract final class AppTypography {
   /// CSS-equivalent rem: `rem(1) == 16px`, `rem(0.875) == 14px`, etc.
   static double rem(double factor) => remPx * factor;
 
-  static const String fontFamily = 'Inter';
+  static const String fontFamily = 'Manrope';
+
+  /// Wide display face for the Orbit look — headlines only, never body copy.
+  /// Latin-only subset; Arabic falls through to the locale font.
+  static const String displayFontFamily = 'Unbounded';
   static const List<String> fontFamilyFallback = [
     '.SF UI Text',
     '.SF UI Display',
@@ -30,20 +34,25 @@ abstract final class AppTypography {
     fontFamilyFallback: fontFamilyFallback,
   );
 
-  static TextStyle get displayLarge => _base.copyWith(
+  static TextStyle get _display => _base.copyWith(
+    fontFamily: displayFontFamily,
+    letterSpacing: -0.2,
+  );
+
+  static TextStyle get displayLarge => _display.copyWith(
     fontSize: rem(2),
     fontWeight: FontWeight.w700,
     height: 1.2,
   );
 
-  static TextStyle get displayMedium => _base.copyWith(
+  static TextStyle get displayMedium => _display.copyWith(
     fontSize: rem(1.75),
     fontWeight: FontWeight.w700,
     height: 1.2,
   );
 
-  static TextStyle get titleLarge => _base.copyWith(
-    fontSize: rem(1.5),
+  static TextStyle get titleLarge => _display.copyWith(
+    fontSize: rem(1.375),
     fontWeight: FontWeight.w600,
     height: 1.3,
   );

@@ -17,6 +17,7 @@ import '../providers/otp_resend_cooldown.dart';
 import '../widgets/otp_input_field.dart';
 import '../widgets/otp_resend_row.dart';
 import 'reset_password_screen.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 /// Second step of forgot-password: enter the OTP emailed by
 /// [ForgotPasswordScreen]. Does not call the verify endpoint — that
@@ -134,7 +135,7 @@ class _ForgotPasswordOtpScreenState
           onPressed: () => context.pop(),
         ),
       ),
-      body: SafeArea(
+      body: SpaceBackground(child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
@@ -184,7 +185,7 @@ class _ForgotPasswordOtpScreenState
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

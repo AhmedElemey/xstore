@@ -27,6 +27,7 @@ import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class MyListingsScreen extends ConsumerStatefulWidget {
   const MyListingsScreen({super.key});
@@ -264,7 +265,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           );
         },
       ),
-      body: Column(
+      body: SpaceBackground(child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -328,7 +329,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             ),
           ),
         ],
-      ),
+      )),
       ),
     );
   }

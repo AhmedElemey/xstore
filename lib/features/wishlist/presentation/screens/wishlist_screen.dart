@@ -11,6 +11,7 @@ import '../../../cart/presentation/providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../widgets/wishlist_consumer_body.dart';
 import '../widgets/wishlist_vendor_guard.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class WishlistScreen extends ConsumerWidget {
   const WishlistScreen({super.key});
@@ -65,7 +66,7 @@ class WishlistScreen extends ConsumerWidget {
           surfaceTintColor: AppColors.transparent,
           elevation: 0,
         ),
-        body: const WishlistConsumerBody(),
+        body: SpaceBackground(child: const WishlistConsumerBody()),
       ),
     );
   }

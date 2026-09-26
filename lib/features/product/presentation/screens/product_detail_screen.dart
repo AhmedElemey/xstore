@@ -35,6 +35,7 @@ import '../widgets/quick_actions_row.dart';
 import '../widgets/reviews_summary.dart';
 import '../widgets/seller_card.dart';
 import '../widgets/similar_products_section.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key, required this.productId});
@@ -185,7 +186,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           extendBody: true,
           extendBodyBehindAppBar: true,
           resizeToAvoidBottomInset: true,
-          body: Stack(
+          body: SpaceBackground(child: Stack(
             children: [
               CustomScrollView(
                 controller: _scrollController,
@@ -352,7 +353,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ],
               ),
             ],
-          ),
+          )),
           bottomNavigationBar: isOwnListing
               ? null
               : AnimatedPadding(

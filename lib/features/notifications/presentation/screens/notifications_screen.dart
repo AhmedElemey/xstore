@@ -12,6 +12,7 @@ import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
 import '../widgets/notification_filter_tabs.dart';
 import '../widgets/notifications_feed_slivers.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -98,7 +99,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           // ),
         ],
       ),
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: n.refreshNotifications,
         child: CustomScrollView(
@@ -114,7 +115,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ...NotificationsFeedSlivers.build(context: context, ref: ref, onDelete: _delete),
           ],
         ),
-      ),
+      )),
     );
   }
 }

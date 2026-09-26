@@ -31,6 +31,7 @@ import '../widgets/product_grid_card.dart';
 import '../widgets/product_list_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/search_suggestions_overlay.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -177,7 +178,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
           await notifier.search(state.query);
@@ -444,7 +445,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

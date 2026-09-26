@@ -16,6 +16,7 @@ import '../providers/social_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/role_selector_card.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
 // Only Apple/Facebook reach this screen (Google is login-only).
@@ -40,7 +41,7 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
     final pending = social.pendingSocialResult;
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           Expanded(
             flex: 42,
@@ -145,7 +146,7 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

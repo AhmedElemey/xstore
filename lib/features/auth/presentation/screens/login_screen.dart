@@ -30,6 +30,7 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/phone_input_field.dart';
 import '../widgets/social_button.dart';
 import '../widgets/social_login_row.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -229,7 +230,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           Expanded(
             flex: 50,
@@ -461,7 +462,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

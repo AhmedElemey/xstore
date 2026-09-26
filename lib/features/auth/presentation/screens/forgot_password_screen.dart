@@ -15,6 +15,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -96,7 +97,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: SafeArea(
+      body: SpaceBackground(child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
@@ -156,7 +157,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

@@ -18,6 +18,7 @@ import '../providers/courier_packages_provider.dart';
 import '../widgets/delivery_fail_sheet.dart';
 import '../widgets/delivery_order_card.dart';
 import '../widgets/package_delivery_card.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 /// Courier home tab: today's run. Active pick-ups/drop-offs on top,
 /// finished tasks below, cash-in-hand summary in the header.
@@ -150,7 +151,7 @@ class _CourierDeliveriesScreenState
       },
       child: Scaffold(
       appBar: AppBar(title: Text(context.l10n.courierDeliveriesTitle)),
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(courierCashWalletProvider);
           await Future.wait([
@@ -234,7 +235,7 @@ class _CourierDeliveriesScreenState
                   ),
                 ],
               ),
-      ),
+      )),
       ),
     );
   }

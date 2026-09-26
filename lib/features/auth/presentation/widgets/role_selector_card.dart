@@ -49,7 +49,7 @@ class RoleSelectorCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isSelected ? selectionBorderColor : AppColors.lightBorder,
+                color: isSelected ? selectionBorderColor : context.borderColor,
                 width: isSelected ? 2 : 1,
               ),
             ),

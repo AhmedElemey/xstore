@@ -21,6 +21,7 @@ import '../providers/phone_auth_provider.dart';
 import '../widgets/otp_input_field.dart';
 import '../widgets/otp_resend_row.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -74,7 +75,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           Container(
             height: MediaQuery.sizeOf(context).height * 0.35,
@@ -215,7 +216,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

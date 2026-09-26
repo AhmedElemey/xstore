@@ -32,6 +32,7 @@ import '../widgets/home_header.dart';
 import '../widgets/hot_deals_section.dart';
 import '../widgets/new_arrivals_grid.dart';
 import '../widgets/recommended_section.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -77,7 +78,7 @@ class HomeScreen extends ConsumerWidget {
         ref.invalidate(recommendedProvider);
       },
       child: Scaffold(
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
           ref.invalidate(bannersProvider);
@@ -207,7 +208,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
       ),
     );
   }

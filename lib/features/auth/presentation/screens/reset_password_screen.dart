@@ -14,6 +14,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 /// In-memory extra for [ResetPasswordScreen]. GoRouter does not serialize
 /// `extra`, so a cold deep link without it redirects to forgot-password.
@@ -123,7 +124,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: SafeArea(
+      body: SpaceBackground(child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
@@ -198,7 +199,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

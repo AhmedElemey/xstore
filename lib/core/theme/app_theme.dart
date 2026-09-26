@@ -19,6 +19,8 @@ abstract final class AppTheme {
       onSurface: AppColors.lightTextPrimary,
     ).copyWith(
       onSurfaceVariant: AppColors.lightTextSecondary,
+      tertiary: AppColors.accent,
+      onTertiary: AppColors.white,
       outline: AppColors.lightBorder,
       outlineVariant: AppColors.lightBorder,
       surfaceContainer: AppColors.lightSurfaceVariant,
@@ -49,16 +51,18 @@ abstract final class AppTheme {
   static ThemeData get dark {
     final scheme = const ColorScheme(
       brightness: Brightness.dark,
-      primary: AppColors.primaryLight,
-      onPrimary: AppColors.darkBackground,
-      secondary: AppColors.accentLight,
-      onSecondary: AppColors.darkBackground,
+      primary: AppColors.plasma,
+      onPrimary: AppColors.space,
+      secondary: AppColors.nova,
+      onSecondary: AppColors.space,
       error: AppColors.errorLight,
       onError: AppColors.darkBackground,
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkTextPrimary,
     ).copyWith(
       onSurfaceVariant: AppColors.darkTextSecondary,
+      tertiary: AppColors.cash,
+      onTertiary: AppColors.space,
       outline: AppColors.darkBorder,
       outlineVariant: AppColors.darkBorder,
       surfaceContainer: AppColors.darkSurfaceVariant,
@@ -121,8 +125,13 @@ abstract final class AppTheme {
     final inputHintStyle = textTheme.bodyMedium?.copyWith(color: textHint);
 
     final baseInputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: borderColor),
+    );
+    const pill = StadiumBorder();
+    final buttonLabel = textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w800,
+      letterSpacing: 0.1,
     );
 
     return ThemeData(
@@ -236,8 +245,8 @@ abstract final class AppTheme {
         elevation: 0,
         shadowColor: cardShadowColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: borderColor.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(22),
+          side: BorderSide(color: borderColor.withValues(alpha: 0.7)),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -270,13 +279,13 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         modalBackgroundColor: elevatedSurface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: elevatedSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         titleTextStyle: textTheme.titleSmall?.copyWith(color: textPrimary),
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
       ),
@@ -305,8 +314,31 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         backgroundColor: elevatedSurface,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: textPrimary),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: borderColor),
+        ),
         actionTextColor: scheme.primary,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(shape: pill, textStyle: buttonLabel),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          shape: pill,
+          elevation: 0,
+          textStyle: buttonLabel,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: pill,
+          side: BorderSide(color: borderColor),
+          textStyle: buttonLabel,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(textStyle: buttonLabel),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,

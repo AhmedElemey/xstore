@@ -12,6 +12,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
+import '../../../../shared/widgets/space_background.dart';
 import '../providers/auth_provider.dart';
 import '../providers/guest_mode_provider.dart';
 
@@ -107,84 +108,162 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
-  static const _deepIndigo = AppColors.primaryDark;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primary,
-              _deepIndigo,
-            ],
-          ),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ScaleTransition(
-                      scale: Tween<double>(begin: 0.85, end: 1).animate(_logoScale),
-                      child: Text(
-                        'xStore',
-                        style: AppTypography.displayLarge.copyWith(
-                          fontSize: AppTypography.rem(3),
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.white,
-                          letterSpacing: -1,
-                          shadows: [
-                            Shadow(
-                              color: AppColors.white.withValues(alpha: 0.4),
-                              blurRadius: 28,
-                            ),
-                          ],
+      backgroundColor: AppColors.transparent,
+      body: SpaceBackground(
+        child: SizedBox.expand(
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ScaleTransition(
+                        scale: Tween<double>(
+                          begin: 0.85,
+                          end: 1,
+                        ).animate(_logoScale),
+                        child: const _OrbitPlanet(),
+                      ),
+                      const SizedBox(height: AppSpacing.x2l),
+                      ScaleTransition(
+                        scale: Tween<double>(
+                          begin: 0.85,
+                          end: 1,
+                        ).animate(_logoScale),
+                        child: Text(
+                          'xStore',
+                          style: AppTypography.displayLarge.copyWith(
+                            fontSize: AppTypography.rem(2.75),
+                            fontWeight: FontWeight.w800,
+                            color: context.textPrimary,
+                            shadows: [
+                              Shadow(
+                                color: context.primaryColor.withValues(
+                                  alpha: 0.45,
+                                ),
+                                blurRadius: 28,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    FadeTransition(
-                      opacity: _taglineOpacity,
-                      child: Text(
-                        context.l10n.tagline,
-                        style: AppTypography.bodyLarge.copyWith(
-                          color: AppColors.white.withValues(alpha: 0.92),
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(height: AppSpacing.md),
+                      FadeTransition(
+                        opacity: _taglineOpacity,
+                        child: Text(
+                          context.l10n.tagline,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: context.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.x4l),
-              child: SizedBox(
-                width: MediaQuery.sizeOf(context).width * 0.4,
-                child: Shimmer.fromColors(
-                  baseColor: AppColors.white.withValues(alpha: 0.25),
-                  highlightColor: AppColors.white.withValues(alpha: 0.65),
-                  period: const Duration(milliseconds: 1200),
-                  child: Container(
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(2),
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.x4l),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width * 0.4,
+                  child: Shimmer.fromColors(
+                    baseColor: context.primaryColor.withValues(alpha: 0.25),
+                    highlightColor: context.primaryColor,
+                    period: const Duration(milliseconds: 1200),
+                    child: Container(
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: context.primaryColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// The Orbit mark: a lit planet crossed by a tilted ring and a small moon.
+class _OrbitPlanet extends StatelessWidget {
+  const _OrbitPlanet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 240,
+      height: 160,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 132,
+            height: 132,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                center: Alignment(-0.36, -0.44),
+                colors: [
+                  AppColors.white,
+                  Color(0xFF9EE9FF),
+                  Color(0xFF6C7BFF),
+                  Color(0xFF2A1B6B),
+                  Color(0xFF0C0F2A),
+                ],
+                stops: [0, 0.12, 0.45, 0.78, 1],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF7CA0FF).withValues(alpha: 0.5),
+                  blurRadius: 60,
+                ),
+              ],
+            ),
+          ),
+          Transform.rotate(
+            angle: -0.24,
+            child: Container(
+              width: 236,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(
+                  Radius.elliptical(118, 25),
+                ),
+                border: Border.all(
+                  color: AppColors.plasma.withValues(alpha: 0.6),
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 18,
+            top: 92,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.cash,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.cash.withValues(alpha: 0.8),
+                    blurRadius: 14,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

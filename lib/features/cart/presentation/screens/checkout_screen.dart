@@ -18,6 +18,7 @@ import '../widgets/checkout_review_section.dart';
 import '../widgets/order_confirmation_sheet.dart';
 import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class CheckoutScreen extends ConsumerWidget {
   const CheckoutScreen({super.key});
@@ -126,7 +127,7 @@ class CheckoutScreen extends ConsumerWidget {
           },
         ),
       ),
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           CheckoutProgress(step: st.currentStep),
           CheckoutErrorBanner(messageKey: st.error),
@@ -146,7 +147,7 @@ class CheckoutScreen extends ConsumerWidget {
             onPressed: busy ? null : onPrimary,
           ),
         ],
-      ),
+      )),
     );
   }
 }

@@ -49,6 +49,13 @@ class _XstoreButtonState extends State<XstoreButton>
 
   @override
   Widget build(BuildContext context) {
+    // Orbit: plasma→nova glow with dark ink in dark mode; deep violet with
+    // white ink in light mode (plasma cyan can't carry white text).
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final colors = dark
+        ? const [AppColors.plasma, AppColors.nova]
+        : const [AppColors.primaryDark, AppColors.primary];
+    final ink = dark ? AppColors.space : AppColors.white;
     return Semantics(
       button: true,
       enabled: _enabled,
@@ -64,7 +71,7 @@ class _XstoreButtonState extends State<XstoreButton>
             child: Material(
               color: AppColors.transparent,
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(28),
                 onTap: _enabled
                     ? () {
                         _pressController.reverse();
@@ -81,19 +88,17 @@ class _XstoreButtonState extends State<XstoreButton>
                   decoration: BoxDecoration(
                     gradient: widget.isLoading
                         ? null
-                        : const LinearGradient(
-                            colors: [AppColors.primary, AppColors.accent],
-                          ),
+                        : LinearGradient(colors: colors),
                     color: widget.isLoading
                         ? Theme.of(context).colorScheme.surfaceContainerHighest
                         : null,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(28),
                     boxShadow: widget.isLoading
                         ? null
                         : [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
-                              blurRadius: 12,
+                              color: colors.first.withValues(alpha: 0.35),
+                              blurRadius: 24,
                               offset: const Offset(0, 4),
                             ),
                           ],
@@ -103,12 +108,12 @@ class _XstoreButtonState extends State<XstoreButton>
                     transitionBuilder: (child, anim) =>
                         FadeTransition(opacity: anim, child: child),
                     child: widget.isLoading
-                        ? const SizedBox(
-                            key: ValueKey<String>('loading'),
+                        ? SizedBox(
+                            key: const ValueKey<String>('loading'),
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
-                              color: AppColors.white,
+                              color: Theme.of(context).colorScheme.primary,
                               strokeWidth: 2.5,
                             ),
                           )
@@ -121,8 +126,8 @@ class _XstoreButtonState extends State<XstoreButton>
                               widget.label,
                               textAlign: TextAlign.center,
                               style: AppTypography.labelLarge.copyWith(
-                                color: AppColors.white,
-                                fontWeight: FontWeight.w700,
+                                color: ink,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),

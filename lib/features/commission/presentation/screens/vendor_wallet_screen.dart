@@ -12,6 +12,7 @@ import '../../domain/entities/vendor_commission_wallet.dart';
 import '../providers/commission_config_provider.dart';
 import '../providers/vendor_commission_wallet_provider.dart';
 import '../widgets/vendor_commission_alert_banner.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 /// Vendor's own commission-fee overview: revenue/orders read from the same
 /// `GET /api/vendor/orders` envelope the incoming-orders tab already fetches
@@ -39,7 +40,7 @@ class VendorWalletScreen extends ConsumerWidget {
         elevation: 0,
         title: Text(context.l10n.navWallet),
       ),
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(vendorCommissionSnapshotProvider);
           ref.invalidate(vendorCommissionWalletProvider);
@@ -78,7 +79,7 @@ class VendorWalletScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
       ),
     );
   }

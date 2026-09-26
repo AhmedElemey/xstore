@@ -18,6 +18,7 @@ import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/phone_input_field.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 /// Demo OTP accepted while courier auth is mock-only. Replaced by the real
 /// backend OTP once delivery accounts go live server-side.
@@ -129,7 +130,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
         title: Text(context.l10n.courierLoginTitle),
         leading: BackButton(onPressed: () => context.pop()),
       ),
-      body: SafeArea(
+      body: SpaceBackground(child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
@@ -250,7 +251,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

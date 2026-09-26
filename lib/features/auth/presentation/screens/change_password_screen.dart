@@ -13,6 +13,7 @@ import '../../../../shared/widgets/xstore_button.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -113,7 +114,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       appBar: AppBar(
         title: Text(context.l10n.menuChangePassword),
       ),
-      body: SafeArea(
+      body: SpaceBackground(child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.x2l),
           child: Column(
@@ -203,7 +204,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

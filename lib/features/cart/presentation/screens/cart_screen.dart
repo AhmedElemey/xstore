@@ -10,6 +10,7 @@ import '../providers/cart_provider.dart';
 import '../widgets/cart_clear_cart_sheet.dart';
 import '../widgets/cart_consumer_body.dart';
 import '../widgets/cart_vendor_buyers_only.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -56,7 +57,7 @@ class CartScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: const CartConsumerBody(),
+      body: SpaceBackground(child: const CartConsumerBody()),
     );
   }
 }

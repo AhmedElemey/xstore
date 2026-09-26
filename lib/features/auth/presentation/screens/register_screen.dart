@@ -31,6 +31,7 @@ import '../widgets/role_selector_card.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/social_login_row.dart';
 import '../widgets/phone_input_field.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -197,7 +198,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           onPressed: () => _onBack(s, n),
         ),
       ),
-      body: Stack(
+      body: SpaceBackground(child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -287,7 +288,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           if (s.showVendorSuccessOverlay) _VendorSuccessOverlay(name: s.fullName),
         ],
-      ),
+      )),
     );
   }
 

@@ -21,6 +21,7 @@ import '../widgets/vendor_order_stats_banner.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class VendorOrdersScreen extends ConsumerStatefulWidget {
   const VendorOrdersScreen({super.key});
@@ -187,7 +188,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           const SizedBox(height: AppSpacing.md),
           VendorOrderStatsBanner(
@@ -400,7 +401,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
             ),
           ),
         ],
-      ),
+      )),
       ),
     );
   }

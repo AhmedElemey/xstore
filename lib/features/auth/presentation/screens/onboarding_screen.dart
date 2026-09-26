@@ -14,6 +14,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -61,7 +62,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           Expanded(
             flex: 55,
@@ -191,7 +192,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

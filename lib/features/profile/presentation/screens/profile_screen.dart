@@ -26,6 +26,7 @@ import '../widgets/vendor_store_card.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
+import '../../../../shared/widgets/space_background.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -102,7 +103,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ref.read(profileNotifierProvider.notifier).refreshProfileData(),
       child: Scaffold(
       backgroundColor: context.backgroundColor,
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         onRefresh: _onRefresh,
         child: CustomScrollView(
           controller: _scroll,
@@ -264,7 +265,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           ],
         ),
-      ),
+      )),
       ),
     );
   }
