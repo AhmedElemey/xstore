@@ -1,22 +1,15 @@
-// Screen-level, LIVE-mode test of the real SocialRoleScreen, plus a
-// provider-level test of the Google sign-in flow that no longer reaches
-// this screen at all. Matches login_screen_live_flow_test.dart's established
-// pattern for exercising the real AuthRepositoryImpl -> AuthRemoteDataSourceImpl
-// chain (a hand-built real AuthRepositoryImpl, stubbing only the two
-// Firebase-touching constructor params).
+// Screen-level, LIVE-mode test of the real SocialRoleScreen, plus
+// provider-level tests of the Google sign-in flow. Matches
+// login_screen_live_flow_test.dart's pattern for exercising the real
+// AuthRepositoryImpl -> AuthRemoteDataSourceImpl chain (a hand-built real
+// AuthRepositoryImpl, stubbing only the two Firebase-touching params).
 //
-// Google is now a login-only shortcut: `checkGoogleUser` plus Firebase
-// `isNewUser` decide whether to log in or send the user to register,
-// before the picker is ever considered. An identity that already has an
-// account (lookup hit, or `isNewUser: false` after a lookup miss) skips
-// straight to home. A brand-new identity (`isNewUser: true` and no
-// backend match) no longer auto-creates via this screen —
-// `SocialAuthState.needsRegistration` is set instead, and it's the
-// login/register screens (not this one) that react to it by navigating
-// to Register (see login_screen_live_flow_test.dart for that half).
-// SocialRoleScreen's picker + `completeSocialRegistration`'s Google
-// branch are exercised here only via the "existing identity" path;
-// Apple/Facebook still use the picker for their own new-user flow, unchanged.
+// Google flow: `checkGoogleUser` plus Firebase `isNewUser` decide. An
+// identity that already has an account (lookup hit, or `isNewUser: false`
+// after a lookup miss) logs straight in and goes home. A brand-new
+// identity (`isNewUser: true` and no backend match) goes to this screen
+// (`needsRoleSelection` + `pendingSocialResult`); picking a type calls the
+// chosen role's Google endpoint, which creates the account and logs in.
 //
 // SocialRoleScreen itself never calls Google sign-in — that fires from the
 // login screen's Google button before this screen is even pushed, and the
@@ -61,6 +54,7 @@ import 'package:xstore/core/router/router_notifier.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/providers/social_auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/social_role_screen.dart';
@@ -165,18 +159,31 @@ void main() {
   });
 
   test(
-    'a Google identity with no matching account sets needsRegistration and '
-    'never calls the auto-create login endpoint',
+    'a new Google identity goes to the account-type screen, and choosing '
+    'seller registers and logs in with the vendor endpoint only',
+    skip: MockConfig.useMock,
     () async {
-      // Deliberately no googleConsumerLogin/googleVendorLogin route scripted
-      // — if the app still tried to auto-create an account here, the
-      // interceptor would reject the unscripted request and this test would
-      // fail with a clear signal rather than silently passing.
+      var consumerLoginCalls = 0;
+      var vendorLoginCalls = 0;
+      Object? vendorBody;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': false,
           'role': null,
         },
+        'POST ${ApiEndpoints.googleConsumerLogin}': (_) {
+          consumerLoginCalls++;
+          return {'token': 'wrong', 'refreshToken': 'wrong'};
+        },
+        'POST ${ApiEndpoints.googleVendorLogin}': (options) {
+          vendorLoginCalls++;
+          vendorBody = options.data;
+          return {
+            'token': 'access-token-new-vendor',
+            'refreshToken': 'refresh-token-new-vendor',
+          };
+        },
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
       });
 
       final container = ProviderContainer(
@@ -203,15 +210,31 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      // A plain test() (unlike testWidgets) doesn't run inside
-      // AutomatedTestWidgetsFlutterBinding's FakeAsync zone, so a direct
-      // await here is safe — no unawaited/pump dance needed.
+      // A plain test() doesn't run in FakeAsync, so a direct await is safe.
       await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
-      final social = container.read(socialAuthProvider);
-      expect(social.needsRegistration, isTrue);
+      var social = container.read(socialAuthProvider);
+      expect(social.needsRoleSelection, isTrue);
+      expect(social.pendingSocialResult?.idToken, 'google-id-token-no-account');
+      expect(consumerLoginCalls + vendorLoginCalls, 0,
+          reason: 'no account is created before a type is chosen');
+
+      await container
+          .read(socialAuthProvider.notifier)
+          .completeSocialRegistration(UserRole.vendor);
+
+      social = container.read(socialAuthProvider);
+      expect(vendorLoginCalls, 1);
+      expect(consumerLoginCalls, 0,
+          reason: 'never retried as the other role for a new account');
+      expect((vendorBody as Map)['idToken'], 'google-id-token-no-account');
       expect(social.needsRoleSelection, isFalse);
       expect(social.pendingSocialResult, isNull);
+      expect(social.error, isNull);
+      expect(container.read(authProvider).valueOrNull, isNotNull,
+          reason: 'the new account is logged in, so the router goes home');
+
+      await container.read(analyticsServiceProvider).ready;
     },
   );
 
@@ -263,7 +286,6 @@ void main() {
       await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
       final social = container.read(socialAuthProvider);
-      expect(social.needsRegistration, isFalse);
       expect(social.needsRoleSelection, isFalse);
       expect(social.error, isNull);
       expect(consumerLoginCalls, 1);
@@ -348,7 +370,6 @@ void main() {
       await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
       final social = container.read(socialAuthProvider);
-      expect(social.needsRegistration, isFalse);
       expect(social.error, isNull);
       expect(vendorLoginCalls, 1);
 

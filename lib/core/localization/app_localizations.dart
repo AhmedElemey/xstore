@@ -374,12 +374,6 @@ abstract class AppLocalizations {
   /// **'there'**
   String get socialWelcomeFallbackName;
 
-  /// No description provided for @googleAccountNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No account found for this Google account. Please register.'**
-  String get googleAccountNotFound;
-
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:

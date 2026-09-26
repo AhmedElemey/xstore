@@ -44,6 +44,7 @@ import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dar
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/auth/presentation/providers/social_auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/login_screen.dart';
 import 'package:xstore/shared/widgets/xstore_button.dart';
 
@@ -278,14 +279,14 @@ void main() {
   );
 
   testWidgets(
-    'Google sign-in with no matching account sends the user to Register, '
-    'not the buyer/seller picker',
+    'Google sign-in with no matching account asks for the account type '
+    'instead of sending the user to Register',
     skip: MockConfig.useMock,
     (tester) async {
       final dio = _fakeDio({
-        // checkGoogleUser reports no account for this identity — Google is
-        // login-only, so the app must route to full registration instead of
-        // auto-creating an account (it never collects a phone/password).
+        // checkGoogleUser reports no account for this identity, so the app
+        // asks for the account type first; nothing is created yet (no
+        // google/{role}/login route is scripted).
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': false,
           'role': null,
@@ -323,7 +324,14 @@ void main() {
       await tester.tap(find.text('Continue with Google'));
       await _settle(tester);
 
-      expect(find.text('Register Screen'), findsOneWidget);
+      // This harness router has no redirect; the app's redirect sends
+      // needsRoleSelection to the account-type screen (router tests cover it).
+      final social = ProviderScope.containerOf(
+        tester.element(find.byType(LoginScreen)),
+      ).read(socialAuthProvider);
+      expect(social.needsRoleSelection, isTrue);
+      expect(social.pendingSocialResult, isNotNull);
+      expect(find.text('Register Screen'), findsNothing);
       expect(find.text('Home Screen'), findsNothing);
     },
   );

@@ -20,8 +20,8 @@ import '../widgets/auth_header.dart';
 import '../widgets/role_selector_card.dart';
 import '../../../../shared/widgets/space_background.dart';
 
-// TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
-// Only Apple/Facebook reach this screen (Google is login-only).
+/// Account type for a new social sign-in (Google today; Apple/Facebook are
+/// parked). Picking a type registers and logs in, then the router goes home.
 class SocialRoleScreen extends ConsumerStatefulWidget {
   const SocialRoleScreen({super.key});
 

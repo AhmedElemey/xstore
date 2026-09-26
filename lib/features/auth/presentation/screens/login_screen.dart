@@ -205,13 +205,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         _shakeController.forward(from: 0);
       }
     });
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next && mounted) {
-        ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
-        AppSnackbar.error(context, context.l10n.googleAccountNotFound);
-        context.go(AppRoutes.register);
-      }
-    });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
       if (next != null && next != prev && mounted) {
         AppSnackbar.error(context, next);

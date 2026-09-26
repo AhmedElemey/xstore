@@ -171,14 +171,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         AppSnackbar.error(context, next.error!);
       }
     });
-    // Already on the register screen — just consume the flag (a Google
-    // sign-in with no matching account can fire this from here too, via the
-    // same SocialLoginRow), no navigation needed.
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next) {
-        ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
-      }
-    });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
       if (next != null && next != prev && mounted) {
         AppSnackbar.error(context, next);

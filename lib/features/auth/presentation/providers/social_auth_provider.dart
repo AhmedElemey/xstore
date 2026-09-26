@@ -15,7 +15,6 @@ class SocialAuthState {
     this.error,
     this.pendingSocialResult,
     this.needsRoleSelection = false,
-    this.needsRegistration = false,
   });
 
   final bool isGoogleLoading;
@@ -23,12 +22,11 @@ class SocialAuthState {
   final bool isFacebookLoading;
   final String? error;
   final SocialAuthResult? pendingSocialResult;
-  final bool needsRoleSelection;
 
-  /// A Google sign-in found no existing account for this identity — the
-  /// caller (login/register screen) should navigate to the full register
-  /// flow and consume this by calling [SocialAuthNotifier.acknowledgeNeedsRegistration].
-  final bool needsRegistration;
+  /// A social sign-in with no existing account: the router sends the user
+  /// to the account-type screen, which finishes with
+  /// [SocialAuthNotifier.completeSocialRegistration].
+  final bool needsRoleSelection;
 
   bool get isAnyLoading => isGoogleLoading || isAppleLoading || isFacebookLoading;
 
@@ -41,7 +39,6 @@ class SocialAuthState {
     SocialAuthResult? pendingSocialResult,
     bool clearPending = false,
     bool? needsRoleSelection,
-    bool? needsRegistration,
   }) {
     return SocialAuthState(
       isGoogleLoading: isGoogleLoading ?? this.isGoogleLoading,
@@ -50,7 +47,6 @@ class SocialAuthState {
       error: clearError ? null : (error ?? this.error),
       pendingSocialResult: clearPending ? null : (pendingSocialResult ?? this.pendingSocialResult),
       needsRoleSelection: needsRoleSelection ?? this.needsRoleSelection,
-      needsRegistration: needsRegistration ?? this.needsRegistration,
     );
   }
 }
@@ -73,20 +69,16 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     await result.fold(_handleFailure, _handleGoogleSuccess);
   }
 
-  /// Google is a login-only shortcut, not a self-service account creator:
-  /// ask the backend (read-only `checkGoogleUser`) whether this identity
-  /// already has an account. If it does, log straight in with that existing
-  /// role via the role-specific endpoint (which also auto-creates, but is
-  /// never asked to here).
+  /// Ask the backend (read-only `checkGoogleUser`) whether this identity
+  /// already has an account. If it does, log straight in with that role.
   ///
   /// `check-user` looks up a Google-linked identity, not an email/password
   /// account that happens to share this Gmail. Firebase `isNewUser: false`
   /// means this Google identity has signed in before, so when the lookup
-  /// misses we still log in as consumer rather than sending them to
-  /// register. A brand-new Google identity (`isNewUser: true` and no
-  /// backend match) goes to the normal register flow — Google never
-  /// collects a phone number or password, which the rest of the app
-  /// treats as required account fields.
+  /// misses we still log in as consumer. A brand-new Google identity
+  /// (`isNewUser: true` and no backend match) goes to the account-type
+  /// screen; [completeSocialRegistration] then registers and logs in with
+  /// the chosen role in one call (the role endpoint creates the account).
   Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
     final idToken = result.idToken;
     if (idToken == null || idToken.isEmpty) {
@@ -135,7 +127,8 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       isAppleLoading: false,
       isFacebookLoading: false,
       clearError: true,
-      needsRegistration: true,
+      pendingSocialResult: result,
+      needsRoleSelection: true,
     );
   }
 
@@ -173,13 +166,20 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     );
   }
 
-  void _adoptGoogleSession(UserEntity user) {
-    state = state.copyWith(isGoogleLoading: false, clearError: true);
+  void _adoptGoogleSession(UserEntity user, {bool registered = false}) {
+    // Clear the role-screen state first so the router doesn't bounce the
+    // new session back to it.
+    state = state.copyWith(
+      isGoogleLoading: false,
+      clearError: true,
+      clearPending: true,
+      needsRoleSelection: false,
+    );
     // Session already persisted by the repository; adopt it synchronously
     // so the router moves off login to home.
     ref.read(authProvider.notifier).adoptSession(user);
     ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.loginSuccess,
+      registered ? AnalyticsEvents.registerSuccess : AnalyticsEvents.loginSuccess,
       properties: {
         AnalyticsProps.method: 'google',
         AnalyticsProps.role: user.role.name,
@@ -189,13 +189,6 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
 
   bool _isDifferentRoleConflict(Object failure) {
     return failure.toString().toLowerCase().contains('different role');
-  }
-
-  /// Consumes [SocialAuthState.needsRegistration] once the caller has
-  /// navigated to the register screen, so it doesn't fire again on a later,
-  /// unrelated visit to that screen.
-  void acknowledgeNeedsRegistration() {
-    state = state.copyWith(needsRegistration: false);
   }
 
   // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
@@ -225,14 +218,33 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     await result.fold(_handleFailure, _handleSuccess);
   }
 
-  /// Only reachable for Apple/Facebook new users now — a new Google identity
-  /// never sets [SocialAuthState.pendingSocialResult] (see
-  /// [_handleGoogleSuccess]), so `pending.provider` here is never
-  /// [SocialProvider.google]. Apple/Facebook new users still use a local
-  /// session until the generic social backend route ships.
+  /// Finishes a new social sign-in once the user picks an account type.
+  /// Google: the role endpoint creates the account and logs in, then the
+  /// router goes home. Apple/Facebook still use a local session until the
+  /// generic social backend route ships.
   Future<void> completeSocialRegistration(UserRole role) async {
     final pending = state.pendingSocialResult;
-    if (pending == null) return;
+    if (pending == null || state.isAnyLoading) return;
+
+    if (pending.provider == SocialProvider.google) {
+      final idToken = pending.idToken;
+      if (idToken == null || idToken.isEmpty) return;
+      state = state.copyWith(isGoogleLoading: true, clearError: true);
+      // The chosen role only — no retry as the other role, which would
+      // create the wrong kind of account.
+      final result = await ref
+          .read(googleLoginUseCaseProvider)
+          .call(idToken: idToken, role: role);
+      if (!mounted) return;
+      result.fold(
+        (failure) => state = state.copyWith(
+          isGoogleLoading: false,
+          error: failure.toString(),
+        ),
+        (user) => _adoptGoogleSession(user, registered: true),
+      );
+      return;
+    }
 
     await ref.read(authProvider.notifier).setUser(
           pending.toUserEntity(role),
