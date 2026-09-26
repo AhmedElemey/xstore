@@ -671,7 +671,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileUpdatedSuccess => 'تم تحديث الملف';
 
   @override
-  String get profileFooterLine => 'xStore v1.0.0 · صُنع بـ ❤️ في مصر';
+  String profileFooterLine(String version) {
+    return 'xStore $version';
+  }
 
   @override
   String get statStoreViews => 'مشاهدات';

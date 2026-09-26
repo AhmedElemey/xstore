@@ -137,42 +137,42 @@ class OrderActionButtons extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            OutlinedButton.icon(
-              onPressed: busy
-                  ? null
-                  : () async {
-                      await notifier.updateDeliveryLocation();
-                      if (!context.mounted) return;
-                      final e =
-                          ref.read(orderDetailNotifierProvider(orderId)).error;
-                      if (e == 'locationServiceDisabled') {
-                        AppSnackbar.error(
-                          context,
-                          context.l10n.locationServiceDisabled,
-                        );
-                        ref
-                            .read(orderDetailNotifierProvider(orderId).notifier)
-                            .clearError();
-                      } else if (e == 'locationPermissionDenied') {
-                        AppSnackbar.error(
-                          context,
-                          context.l10n.locationPermissionDenied,
-                        );
-                        ref
-                            .read(orderDetailNotifierProvider(orderId).notifier)
-                            .clearError();
-                      } else if (e != null) {
-                        _err(context, ref, orderId);
-                      } else {
-                        AppSnackbar.success(
-                          context,
-                          context.l10n.ordersDeliveryLocationUpdated,
-                        );
-                      }
-                    },
-              icon: const Icon(Icons.my_location, size: 18),
-              label: Text(context.l10n.ordersUpdateDeliveryLocation),
-            ),
+            // OutlinedButton.icon(
+            //   onPressed: busy
+            //       ? null
+            //       : () async {
+            //           await notifier.updateDeliveryLocation();
+            //           if (!context.mounted) return;
+            //           final e =
+            //               ref.read(orderDetailNotifierProvider(orderId)).error;
+            //           if (e == 'locationServiceDisabled') {
+            //             AppSnackbar.error(
+            //               context,
+            //               context.l10n.locationServiceDisabled,
+            //             );
+            //             ref
+            //                 .read(orderDetailNotifierProvider(orderId).notifier)
+            //                 .clearError();
+            //           } else if (e == 'locationPermissionDenied') {
+            //             AppSnackbar.error(
+            //               context,
+            //               context.l10n.locationPermissionDenied,
+            //             );
+            //             ref
+            //                 .read(orderDetailNotifierProvider(orderId).notifier)
+            //                 .clearError();
+            //           } else if (e != null) {
+            //             _err(context, ref, orderId);
+            //           } else {
+            //             AppSnackbar.success(
+            //               context,
+            //               context.l10n.ordersDeliveryLocationUpdated,
+            //             );
+            //           }
+            //         },
+            //   icon: const Icon(Icons.my_location, size: 18),
+            //   label: Text(context.l10n.ordersUpdateDeliveryLocation),
+            // ),
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton(
               onPressed: busy

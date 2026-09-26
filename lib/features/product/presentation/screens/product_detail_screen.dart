@@ -351,7 +351,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                       // App-only sections the design has no slot for.
                       const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                      const SliverToBoxAdapter(child: QuickActionsRow()),
+                      // const SliverToBoxAdapter(child: QuickActionsRow()),
                       const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                       SliverToBoxAdapter(
                         child: ProductSpecifications(

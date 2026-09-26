@@ -44,6 +44,7 @@ class CartItemCard extends StatelessWidget {
             ? context.l10n.cartShippingFree
             : context.l10n.cartShippingPaid(item.shippingCost.round()))
         : context.l10n.cartPickupOnly;
+        debugPrint('shippingLabel: $shippingLabel');
     final shippingColor = item.shippingAvailable
         ? (item.shippingCost <= 0
             ? AppColors.success

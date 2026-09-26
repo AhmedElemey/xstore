@@ -1385,8 +1385,8 @@ abstract class AppLocalizations {
   /// No description provided for @profileFooterLine.
   ///
   /// In en, this message translates to:
-  /// **'xStore v1.0.0 · Made with ❤️ in Egypt'**
-  String get profileFooterLine;
+  /// **'xStore {version}'**
+  String profileFooterLine(String version);
 
   /// No description provided for @statStoreViews.
   ///

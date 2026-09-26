@@ -242,7 +242,14 @@
   "chooseFromGallery": "Gallery",
   "removePhoto": "Remove Photo",
   "profileUpdatedSuccess": "Profile updated",
-  "profileFooterLine": "xStore v1.0.0 · Made with ❤️ in Egypt",
+  "profileFooterLine": "xStore {version}",
+  "@profileFooterLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "statStoreViews": "Views",
   "statStoreSaves": "Saves",
   "statStoreActive": "Active",

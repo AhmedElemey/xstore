@@ -668,7 +668,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileUpdatedSuccess => 'Profile updated';
 
   @override
-  String get profileFooterLine => 'xStore v1.0.0 · Made with ❤️ in Egypt';
+  String profileFooterLine(String version) {
+    return 'xStore $version';
+  }
 
   @override
   String get statStoreViews => 'Views';

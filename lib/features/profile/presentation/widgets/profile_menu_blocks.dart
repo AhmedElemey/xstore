@@ -26,6 +26,9 @@ import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
+/// Profile footer version. Change this string to update what users see.
+const appVersionLabel = '1.0.0';
+
 class ProfileMenuBlocks extends ConsumerWidget {
   const ProfileMenuBlocks({
     super.key,
@@ -281,7 +284,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         Center(
           child: Text(
-            context.l10n.profileFooterLine,
+            context.l10n.profileFooterLine(appVersionLabel),
             style: AppTypography.labelSmall.copyWith(
               color: context.textSecondary,
             ),

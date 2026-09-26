@@ -242,7 +242,14 @@
   "chooseFromGallery": "المعرض",
   "removePhoto": "حذف الصورة",
   "profileUpdatedSuccess": "تم تحديث الملف",
-  "profileFooterLine": "xStore v1.0.0 · صُنع بـ ❤️ في مصر",
+  "profileFooterLine": "xStore {version}",
+  "@profileFooterLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "statStoreViews": "مشاهدات",
   "statStoreSaves": "محفوظات",
   "statStoreActive": "نشط",

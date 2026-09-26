@@ -140,6 +140,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
         // pure overhead for no scroll behavior anyone needs.
         Column(
           children: group.items.map((item) {
+            debugPrint('item: $item');
             final selected = selectedIds.contains(item.id);
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
