@@ -2073,7 +2073,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signInToContinueShopping => 'سجل الدخول عشان تكمل التسوق';
 
   @override
-  String get enterEmailHint => '[AR] you@email.com';
+  String get enterEmailHint => 'you@email.com';
+
+  @override
+  String get writeEmailAddressHint => 'اكتب بريدك الإلكتروني';
 
   @override
   String get enterPasswordHint => 'ادخل كلمة المرور';

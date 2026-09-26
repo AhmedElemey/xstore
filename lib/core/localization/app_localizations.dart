@@ -4016,6 +4016,12 @@ abstract class AppLocalizations {
   /// **'you@email.com'**
   String get enterEmailHint;
 
+  /// No description provided for @writeEmailAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your email address'**
+  String get writeEmailAddressHint;
+
   /// No description provided for @enterPasswordHint.
   ///
   /// In en, this message translates to:

@@ -109,7 +109,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               const Gap(AppSpacing.spacing28),
               AuthTextField(
                 label: context.l10n.email,
-                hint: context.l10n.enterEmailHint,
+                hint: context.l10n.writeEmailAddressHint,
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 errorText: _error,

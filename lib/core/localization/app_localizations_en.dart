@@ -2076,6 +2076,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterEmailHint => 'you@email.com';
 
   @override
+  String get writeEmailAddressHint => 'Write your email address';
+
+  @override
   String get enterPasswordHint => 'Enter your password';
 
   @override

@@ -935,6 +935,7 @@
   "sendOtpSubtitle": "We'll send a verification code to your Egyptian number",
   "signInToContinueShopping": "Sign in to continue shopping",
   "enterEmailHint": "you@email.com",
+  "writeEmailAddressHint": "Write your email address",
   "enterPasswordHint": "Enter your password",
   "minSixChars": "Min 6 characters",
   "forgotPassword": "Forgot Password?",
