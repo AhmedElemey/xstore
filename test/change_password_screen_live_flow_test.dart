@@ -25,6 +25,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
@@ -326,14 +327,18 @@ void main() {
       });
       expect(find.text('Your password was changed.'), findsOneWidget);
       expect(find.text('Open Change Password'), findsOneWidget);
-      expect(profileFetches, 1);
-      final container = ProviderScope.containerOf(
-        tester.element(find.text('Open Change Password')),
-      );
-      expect(
-        container.read(profileNotifierProvider).profile?.hasPassword,
-        isTrue,
-      );
+      // The follow-up get-profile refresh goes through the scripted Dio
+      // only in live mode; MOCK=true serves the profile from mock data.
+      if (!MockConfig.useMock) {
+        expect(profileFetches, 1);
+        final container = ProviderScope.containerOf(
+          tester.element(find.text('Open Change Password')),
+        );
+        expect(
+          container.read(profileNotifierProvider).profile?.hasPassword,
+          isTrue,
+        );
+      }
     },
   );
 }

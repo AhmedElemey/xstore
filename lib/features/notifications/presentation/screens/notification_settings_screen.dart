@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../../shared/widgets/space_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -99,12 +101,8 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
     }
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.notificationSettingsTitle, style: AppTypography.titleMedium),
-        backgroundColor: context.backgroundColor,
-        surfaceTintColor: AppColors.transparent,
-      ),
-      body: ListView(
+      appBar: AppBar(title: Text(context.l10n.notificationSettingsTitle)),
+      body: SpaceBackground(child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           Padding(
@@ -148,12 +146,12 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
             _Row(icon: LucideIcons.smartphone, label: context.l10n.notificationSettingsSms, value: _vals[_kSms]!, onChanged: (v) => _set(_kSms, v)),
           ]),
           const SizedBox(height: AppSpacing.x2l),
-          FilledButton(
+          XstoreButton(
+            label: context.l10n.notificationSettingsSave,
             onPressed: _savePressed,
-            child: Text(context.l10n.notificationSettingsSave),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -168,18 +166,8 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.x2l),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(AppSpacing.lg),
-          boxShadow: [
-            BoxShadow(
-              color: context.textPrimary.withValues(alpha: 0.04),
-              blurRadius: AppSpacing.sm,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      child: GlassCard(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -211,13 +199,11 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
+      leading: Icon(icon, color: context.primaryColor),
       title: Text(label, style: AppTypography.bodyMedium),
       trailing: Switch.adaptive(
         value: value,
         onChanged: onChanged,
-        activeTrackColor: AppColors.primary.withValues(alpha: 0.45),
-        activeThumbColor: AppColors.white,
       ),
     );
   }

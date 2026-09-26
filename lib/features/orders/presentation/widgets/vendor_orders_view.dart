@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/space_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/animations/app_animations.dart';
@@ -81,12 +82,11 @@ class _VendorOrdersViewState extends ConsumerState<VendorOrdersView> {
       }
     });
 
-    return ColoredBox(
-      color: context.backgroundColor,
+    return SpaceBackground(
       child: Column(
         children: [
           Material(
-            color: context.surfaceColor,
+            color: AppColors.transparent,
             elevation: 0,
             child: SafeArea(
               bottom: false,

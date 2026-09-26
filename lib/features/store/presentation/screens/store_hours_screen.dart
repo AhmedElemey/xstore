@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/space_background.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,7 +38,7 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(title: Text(context.l10n.storeHoursTitle)),
-      body: current == null || state.isLoading
+      body: SpaceBackground(child: current == null || state.isLoading
           ? const StoreHoursSkeleton()
           : Column(
               children: [
@@ -146,7 +147,7 @@ class _StoreHoursScreenState extends ConsumerState<StoreHoursScreen> {
                   ),
                 ),
               ],
-            ),
+            )),
     );
   }
 }
