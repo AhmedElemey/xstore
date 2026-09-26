@@ -806,12 +806,6 @@ abstract class AppLocalizations {
   /// **'Draft saved'**
   String get listingDraftSaved;
 
-  /// No description provided for @newListing.
-  ///
-  /// In en, this message translates to:
-  /// **'New Listing'**
-  String get newListing;
-
   /// No description provided for @listingPhotoSectionTitle.
   ///
   /// In en, this message translates to:
@@ -1436,12 +1430,6 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get share;
 
-  /// No description provided for @storeDescriptionHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'About the store'**
-  String get storeDescriptionHeading;
-
   /// No description provided for @allCategoriesChip.
   ///
   /// In en, this message translates to:
@@ -1885,12 +1873,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total'**
   String get ordersStatTotalLabel;
-
-  /// No description provided for @ordersQtyTotalLinePrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Qty'**
-  String get ordersQtyTotalLinePrefix;
 
   /// No description provided for @ordersEstimatedDelivery.
   ///
@@ -3338,18 +3320,6 @@ abstract class AppLocalizations {
   /// **' left!'**
   String get onlyLeftSuffix;
 
-  /// No description provided for @listingTotalListings.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Listings'**
-  String get listingTotalListings;
-
-  /// No description provided for @listingSoldStat.
-  ///
-  /// In en, this message translates to:
-  /// **'Sold'**
-  String get listingSoldStat;
-
   /// No description provided for @listingViews.
   ///
   /// In en, this message translates to:
@@ -3578,18 +3548,6 @@ abstract class AppLocalizations {
   /// **'Confirm All Pending'**
   String get vendorConfirmAllPending;
 
-  /// No description provided for @vendorStatPendingOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get vendorStatPendingOrders;
-
-  /// No description provided for @vendorStatActiveOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get vendorStatActiveOrders;
-
   /// No description provided for @vendorStatTotalOrders.
   ///
   /// In en, this message translates to:
@@ -3721,18 +3679,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm Shipment'**
   String get vendorConfirmShipment;
-
-  /// No description provided for @vendorExportOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Orders'**
-  String get vendorExportOrders;
-
-  /// No description provided for @vendorOrderSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Order Settings'**
-  String get vendorOrderSettings;
 
   /// No description provided for @vendorReasonItemUnavailable.
   ///
@@ -6097,6 +6043,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get profileEdit;
+
+  /// No description provided for @myListingsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get myListingsFilterAll;
+
+  /// No description provided for @myListingsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} total'**
+  String myListingsTotal(int n);
+
+  /// No description provided for @myListingsInStock.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} in stock'**
+  String myListingsInStock(int n);
+
+  /// No description provided for @commissionEachSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Each sale'**
+  String get commissionEachSale;
+
+  /// No description provided for @commissionCustomerPays.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer pays'**
+  String get commissionCustomerPays;
+
+  /// No description provided for @walletFeePerOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee per order'**
+  String get walletFeePerOrder;
+
+  /// No description provided for @walletPauseLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'New listings pause when unpaid fees reach {limit}.'**
+  String walletPauseLimit(String limit);
+
+  /// No description provided for @courierDeliveryKicker.
+  ///
+  /// In en, this message translates to:
+  /// **'XSTORE DELIVERY'**
+  String get courierDeliveryKicker;
 }
 
 class _AppLocalizationsDelegate

@@ -369,9 +369,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingDraftSaved => 'تم حفظ المسودة';
 
   @override
-  String get newListing => 'إعلان جديد';
-
-  @override
   String get listingPhotoSectionTitle => 'صور المنتج';
 
   @override
@@ -698,9 +695,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get share => 'مشاركة';
 
   @override
-  String get storeDescriptionHeading => 'عن المتجر';
-
-  @override
   String get allCategoriesChip => 'الكل';
 
   @override
@@ -926,9 +920,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersStatTotalLabel => 'الإجمالي';
-
-  @override
-  String get ordersQtyTotalLinePrefix => 'الكمية';
 
   @override
   String get ordersEstimatedDelivery => '🚚 متوقع';
@@ -1673,12 +1664,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onlyLeftSuffix => ' فقط!';
 
   @override
-  String get listingTotalListings => 'إجمالي الإعلانات';
-
-  @override
-  String get listingSoldStat => 'مباع';
-
-  @override
   String get listingViews => 'مشاهدات';
 
   @override
@@ -1795,12 +1780,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorConfirmAllPending => 'تأكيد كل الطلبات المعلقة';
 
   @override
-  String get vendorStatPendingOrders => 'معلقة';
-
-  @override
-  String get vendorStatActiveOrders => 'نشطة';
-
-  @override
   String get vendorStatTotalOrders => 'إجمالي';
 
   @override
@@ -1866,12 +1845,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorConfirmShipment => 'تأكيد الشحن';
-
-  @override
-  String get vendorExportOrders => 'تصدير الطلبات';
-
-  @override
-  String get vendorOrderSettings => 'إعدادات الطلبات';
 
   @override
   String get vendorReasonItemUnavailable => 'المنتج لم يعد متاحاً';
@@ -3229,4 +3202,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileEdit => 'تعديل';
+
+  @override
+  String get myListingsFilterAll => 'الكل';
+
+  @override
+  String myListingsTotal(int n) {
+    return '$n إجمالي';
+  }
+
+  @override
+  String myListingsInStock(int n) {
+    return '$n متوفر';
+  }
+
+  @override
+  String get commissionEachSale => 'لكل عملية بيع';
+
+  @override
+  String get commissionCustomerPays => 'يدفع العميل';
+
+  @override
+  String get walletFeePerOrder => 'الرسوم لكل طلب';
+
+  @override
+  String walletPauseLimit(String limit) {
+    return 'تتوقف الإعلانات الجديدة عندما تصل الرسوم غير المدفوعة إلى $limit.';
+  }
+
+  @override
+  String get courierDeliveryKicker => 'توصيل إكس ستور';
 }

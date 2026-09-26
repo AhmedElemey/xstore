@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/space_background.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -151,7 +153,7 @@ class _MyPackageRequestsScreenState
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: SpaceBackground(child: RefreshIndicator(
         onRefresh: () =>
             ref.read(deliveryRequestsProvider.notifier).refreshRequests(),
         child: state.isLoading && state.requests.isEmpty
@@ -200,7 +202,7 @@ class _MyPackageRequestsScreenState
                   ),
                 ],
               ),
-      ),
+      )),
     );
   }
 }
@@ -228,8 +230,8 @@ class _PackageRequestCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        color: glassFill(context),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: context.borderColor),
       ),
       child: Column(

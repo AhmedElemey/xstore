@@ -368,9 +368,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingDraftSaved => 'Draft saved';
 
   @override
-  String get newListing => 'New Listing';
-
-  @override
   String get listingPhotoSectionTitle => 'Product Photos';
 
   @override
@@ -695,9 +692,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get share => 'Share';
 
   @override
-  String get storeDescriptionHeading => 'About the store';
-
-  @override
   String get allCategoriesChip => 'All';
 
   @override
@@ -923,9 +917,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersStatTotalLabel => 'Total';
-
-  @override
-  String get ordersQtyTotalLinePrefix => 'Qty';
 
   @override
   String get ordersEstimatedDelivery => '🚚 Estimated';
@@ -1670,12 +1661,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlyLeftSuffix => ' left!';
 
   @override
-  String get listingTotalListings => 'Total Listings';
-
-  @override
-  String get listingSoldStat => 'Sold';
-
-  @override
   String get listingViews => 'Views';
 
   @override
@@ -1794,12 +1779,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorConfirmAllPending => 'Confirm All Pending';
 
   @override
-  String get vendorStatPendingOrders => 'Pending';
-
-  @override
-  String get vendorStatActiveOrders => 'Active';
-
-  @override
   String get vendorStatTotalOrders => 'Total';
 
   @override
@@ -1865,12 +1844,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorConfirmShipment => 'Confirm Shipment';
-
-  @override
-  String get vendorExportOrders => 'Export Orders';
-
-  @override
-  String get vendorOrderSettings => 'Order Settings';
 
   @override
   String get vendorReasonItemUnavailable => 'Item no longer available';
@@ -3235,4 +3208,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileEdit => 'Edit';
+
+  @override
+  String get myListingsFilterAll => 'All';
+
+  @override
+  String myListingsTotal(int n) {
+    return '$n total';
+  }
+
+  @override
+  String myListingsInStock(int n) {
+    return '$n in stock';
+  }
+
+  @override
+  String get commissionEachSale => 'Each sale';
+
+  @override
+  String get commissionCustomerPays => 'Customer pays';
+
+  @override
+  String get walletFeePerOrder => 'Fee per order';
+
+  @override
+  String walletPauseLimit(String limit) {
+    return 'New listings pause when unpaid fees reach $limit.';
+  }
+
+  @override
+  String get courierDeliveryKicker => 'XSTORE DELIVERY';
 }

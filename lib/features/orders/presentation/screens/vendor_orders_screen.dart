@@ -1,10 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -70,9 +73,6 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
     final pendingCount = ref.watch(
       vendorOrdersProvider.select((s) => s.pendingCount),
     );
-    final activeCount = ref.watch(
-      vendorOrdersProvider.select((s) => s.activeCount),
-    );
     final totalCount = ref.watch(
       vendorOrdersProvider.select((s) => s.totalCount),
     );
@@ -122,80 +122,32 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
       onReentry: (ref) => ref.read(vendorOrdersProvider.notifier).fetchOrders(),
       child: Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.surfaceColor,
-        elevation: 0,
-        title: _searching
-            ? TextField(
-                controller: _search,
-                autofocus: true,
-                onChanged: ref.read(vendorOrdersProvider.notifier).updateSearch,
-                decoration: InputDecoration(
-                  hintText: context.l10n.vendorSearchHint,
-                  border: InputBorder.none,
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      _search.clear();
-                      ref.read(vendorOrdersProvider.notifier).updateSearch('');
-                    },
-                  ),
-                ),
-              )
-            : Row(
-                children: [
-                  Text(context.l10n.ordersIncomingTitle),
-                  if (pendingCount > 0) ...[
-                    const SizedBox(width: AppSpacing.xs),
-                    PulsingAnimationBuilder(
-                      duration: const Duration(milliseconds: 1000),
-                      builder: (_, animation, child) => Transform.scale(
-                        scale: 1 + 0.16 * math.sin(animation.value * math.pi),
-                        child: child,
-                      ),
-                      child: const Icon(
-                        Icons.circle,
-                        size: 10,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-        actions: [
-          IconButton(
-            icon: Icon(_searching ? Icons.arrow_back : Icons.search),
-            onPressed: () {
-              setState(() => _searching = !_searching);
-              if (!_searching) {
-                _search.clear();
-                ref.read(vendorOrdersProvider.notifier).updateSearch('');
-              }
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (v) => context.showSnack(v),
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: context.l10n.vendorExportOrders,
-                child: Text(context.l10n.vendorExportOrders),
-              ),
-              PopupMenuItem(
-                value: context.l10n.vendorOrderSettings,
-                child: Text(context.l10n.vendorOrderSettings),
-              ),
-            ],
-          ),
-        ],
-      ),
       body: SpaceBackground(child: Column(
         children: [
+          SafeArea(
+            bottom: false,
+            child: _Header(
+              pendingCount: pendingCount,
+              searching: _searching,
+              search: _search,
+              onToggleSearch: () {
+                setState(() => _searching = !_searching);
+                if (!_searching) {
+                  _search.clear();
+                  ref.read(vendorOrdersProvider.notifier).updateSearch('');
+                }
+              },
+              onSearch: ref.read(vendorOrdersProvider.notifier).updateSearch,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           VendorOrderStatsBanner(
             pendingCount: pendingCount,
-            activeCount: activeCount,
+            processingCount: statusCounts.processing,
+            shippedCount: statusCounts.shipped,
             totalCount: totalCount,
             totalRevenue: totalRevenue,
+            onFilter: ref.read(vendorOrdersProvider.notifier).applyFilter,
             onConfirmAllPending: () async {
               final ok = await showDialog<bool>(
                 context: context,
@@ -223,7 +175,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
               context.showSnack(context.l10n.vendorOrdersConfirmed(count));
             },
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.xs),
           VendorOrderFilterTabs(
             selected: selectedFilter,
             totalCount: totalCount,
@@ -402,6 +354,118 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
           ),
         ],
       )),
+      ),
+    );
+  }
+}
+
+/// Store orb, store name and the screen title, with search (app-only) on
+/// the end.
+class _Header extends ConsumerWidget {
+  const _Header({
+    required this.pendingCount,
+    required this.searching,
+    required this.search,
+    required this.onToggleSearch,
+    required this.onSearch,
+  });
+
+  final int pendingCount;
+  final bool searching;
+  final TextEditingController search;
+  final VoidCallback onToggleSearch;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final storeName = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.storeName?.trim() ?? ''),
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: orbitOrbGradient(2),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: searching
+                ? TextField(
+                    controller: search,
+                    autofocus: true,
+                    onChanged: onSearch,
+                    decoration: InputDecoration(
+                      hintText: context.l10n.vendorSearchHint,
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (storeName.isNotEmpty)
+                        Text(
+                          storeName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: context.textSecondary,
+                          ),
+                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              context.l10n.ordersIncomingTitle,
+                              style: AppTypography.titleMedium.copyWith(
+                                fontFamily: AppTypography.displayFontFamily,
+                                fontWeight: FontWeight.w800,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (pendingCount > 0) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            PulsingAnimationBuilder(
+                              duration: const Duration(milliseconds: 1000),
+                              builder: (_, animation, child) =>
+                                  Transform.scale(
+                                scale: 1 +
+                                    0.16 * math.sin(animation.value * math.pi),
+                                child: child,
+                              ),
+                              child: Icon(
+                                Icons.circle,
+                                size: 10,
+                                color: context.cashColor,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          OrbitCircleButton(
+            tooltip: context.l10n.vendorSearchHint,
+            onPressed: onToggleSearch,
+            child: Icon(
+              searching ? LucideIcons.x : LucideIcons.search,
+              size: 20,
+              color: context.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
   }

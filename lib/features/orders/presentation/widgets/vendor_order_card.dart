@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../domain/entities/order_entity.dart';
 import 'order_status_badge.dart';
 
@@ -31,271 +33,180 @@ class VendorOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = order.consumerName.trim();
-    final phone = order.consumerPhone.trim();
-    final cityLine = [
+    final place = [
+      if (name.isNotEmpty) name,
       if (order.deliveryAddress.city.trim().isNotEmpty)
         order.deliveryAddress.city.trim(),
-      if (order.deliveryAddress.wilaya.trim().isNotEmpty)
-        order.deliveryAddress.wilaya.trim(),
-    ].join(', ');
+    ].join(' · ');
     final item = order.items.isEmpty ? null : order.items.first;
-    final accent = orderStatusColor(order.status);
-    final radius = BorderRadius.circular(AppSpacing.lg);
+    final isNew = order.status == OrderStatus.pending;
+    final warm = context.cashColor;
+    final accent = isNew ? warm : orderStatusColor(order.status);
+    final extra = order.items.length - 1;
+    final title = item == null
+        ? '${context.l10n.orderHashPrefix}${order.formattedOrderId}'
+        : '${item.listingName}${item.quantity > 1 ? ' × ${item.quantity}' : ''}'
+            '${extra > 0 ? ' +$extra' : ''}';
     final actions = _actions(context);
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: isNew
+            ? [
+                BoxShadow(color: warm.withValues(alpha: 0.08), spreadRadius: 4),
+                BoxShadow(color: warm.withValues(alpha: 0.12), blurRadius: 30),
+              ]
+            : null,
       ),
-      child: Material(
-        color: context.surfaceColor,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => context.push('${AppRoutes.vendorOrders}/${order.id}'),
-          child: Ink(
-            decoration: BoxDecoration(
-              border: Border.all(color: accent.withValues(alpha: 0.45)),
-              borderRadius: radius,
-            ),
-            child: Stack(
+      child: GlassCard(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        borderColor: isNew ? warm.withValues(alpha: 0.5) : null,
+        onTap: () => context.push('${AppRoutes.vendorOrders}/${order.id}'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accent,
+                    boxShadow: [BoxShadow(color: accent, blurRadius: 10)],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    '${orderStatusLabel(context, order.status).toUpperCase()}'
+                    ' · ${Formatters.formatNotificationTime(order.createdAt, context.l10n)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: accent,
+                    ),
+                  ),
+                ),
+                Text(
+                  '#${order.formattedOrderId}',
+                  style: AppTypography.labelSmall.copyWith(
+                    color: context.textSecondary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: SizedBox(
+                    width: 52,
+                    height: 52,
+                    child: item != null && item.listingImage.trim().isNotEmpty
+                        ? AppCachedNetworkImage(
+                            imageUrl: item.listingImage,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 156,
+                            memCacheHeight: 156,
+                          )
+                        : DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: orbitOrbGradient(3),
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                                  style: AppTypography.titleSmall.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat(
-                                    'HH:mm',
-                                    context.l10n.localeName,
-                                  ).format(order.createdAt.toLocal()),
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: context.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          OrderStatusBadge(status: order.status, compact: true),
-                        ],
-                      ),
-                      if (name.isNotEmpty ||
-                          phone.isNotEmpty ||
-                          cityLine.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        if (name.isNotEmpty)
-                          Text(
-                            name,
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        if (phone.isNotEmpty)
-                          Text(
-                            phone,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: context.textSecondary,
-                            ),
-                          ),
-                        if (cityLine.isNotEmpty)
-                          Text(
-                            cityLine,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: context.textSecondary,
-                            ),
-                          ),
-                      ],
-                      if (item != null) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.xs,
-                              ),
-                              child: SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: item.listingImage.trim().isNotEmpty
-                                    ? AppCachedNetworkImage(
-                                        imageUrl: item.listingImage,
-                                        fit: BoxFit.cover,
-                                        memCacheWidth: 96,
-                                        memCacheHeight: 96,
-                                      )
-                                    : ColoredBox(
-                                        color: context.textDisabled.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.listingName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${context.formatCurrency(item.price)} · ${context.l10n.ordersQtyTotalLinePrefix} ${item.quantity}',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: context.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: AppSpacing.md),
                       Text(
-                        '${_paymentMethodLabel(context, order.paymentMethod)} · ${context.formatCurrency(order.total)}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: context.textSecondary,
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodyLarge.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: context.textPrimary,
                         ),
                       ),
-                      if (actions != null) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        actions,
+                      if (place.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          place,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: context.textSecondary,
+                          ),
+                        ),
                       ],
                     ],
                   ),
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  context.formatCurrency(order.total),
+                  style: AppTypography.bodyLarge.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: warm,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ],
             ),
-          ),
+            if (actions != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              actions,
+            ],
+          ],
         ),
       ),
     );
   }
 
   Widget? _actions(BuildContext context) {
-    final compact = OutlinedButton.styleFrom(
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-    if (order.status == OrderStatus.pending) {
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
+    Widget warmAction(String label, VoidCallback onTap) => XstoreButton(
+          label: label,
+          warm: true,
+          height: 44,
+          onPressed: onTap,
+        );
+    return switch (order.status) {
+      OrderStatus.pending => Row(
+          children: [
+            OutlinedButton(
               onPressed: onReject,
-              style: compact.copyWith(
-                foregroundColor: const WidgetStatePropertyAll(AppColors.error),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.errorLight,
+                side: BorderSide(
+                  color: AppColors.errorLight.withValues(alpha: 0.45),
+                ),
+                minimumSize: const Size(0, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
               ),
-              child: Text(
-                context.l10n.vendorRejectOrder,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(context.l10n.vendorRejectOrder),
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: FilledButton(
-              onPressed: onConfirm,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.success,
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                context.l10n.vendorConfirmOrder,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: warmAction(context.l10n.vendorConfirmOrder, onConfirm),
             ),
-          ),
-        ],
-      );
-    }
-    if (order.status == OrderStatus.confirmed) {
-      return SizedBox(
-        width: double.infinity,
-        child: OutlinedButton(
-          onPressed: onProcessing,
-          style: compact.copyWith(
-            foregroundColor: const WidgetStatePropertyAll(AppColors.accent),
-          ),
-          child: Text(context.l10n.vendorMarkProcessing),
+          ],
         ),
-      );
-    }
-    if (order.status == OrderStatus.processing) {
-      return SizedBox(
-        width: double.infinity,
-        child: FilledButton(
-          onPressed: onShipped,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.accent,
-            visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(context.l10n.vendorMarkShipped),
-        ),
-      );
-    }
-    if (order.status == OrderStatus.shipped) {
-      return SizedBox(
-        width: double.infinity,
-        child: FilledButton(
-          onPressed: onDelivered,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.accent,
-            visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(context.l10n.vendorMarkDelivered),
-        ),
-      );
-    }
-    return null;
+      OrderStatus.confirmed =>
+        warmAction(context.l10n.vendorMarkProcessing, onProcessing),
+      OrderStatus.processing =>
+        warmAction(context.l10n.vendorMarkShipped, onShipped),
+      OrderStatus.shipped =>
+        warmAction(context.l10n.vendorMarkDelivered, onDelivered),
+      OrderStatus.delivered || OrderStatus.cancelled => null,
+    };
   }
-
-  String _paymentMethodLabel(BuildContext context, PaymentMethod method) =>
-      switch (method) {
-        PaymentMethod.cashOnDelivery =>
-          context.l10n.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
-        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
-        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
-      };
 }

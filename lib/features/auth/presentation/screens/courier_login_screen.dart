@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/auth_header.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -126,39 +128,29 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.courierLoginTitle),
-        leading: BackButton(onPressed: () => context.pop()),
-      ),
+      appBar: AppBar(),
       body: SpaceBackground(child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 72,
-                height: 72,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: context.primaryColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  LucideIcons.truck,
-                  size: 34,
-                  color: context.primaryColor,
-                ),
-              ),
-              const Gap(AppSpacing.md),
-              Text(
-                context.l10n.courierLoginSubtitle,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.textSecondary,
-                ),
-              ),
+              const _CourierHero(),
               const Gap(AppSpacing.lg),
+              Text(
+                context.l10n.courierDeliveryKicker,
+                style: AppTypography.labelSmall.copyWith(
+                  color: context.cashColor,
+                  letterSpacing: 1.4,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Gap(AppSpacing.xs + 2),
+              AuthHeader(
+                title: context.l10n.courierLoginTitle,
+                subtitle: context.l10n.courierLoginSubtitle,
+              ),
+              const Gap(AppSpacing.xl),
               _ModeToggle(
                 mode: _mode,
                 onChanged: login.isLoading
@@ -181,7 +173,6 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                   label: context.l10n.courierModePassword,
                   controller: _password,
                   obscureText: !login.isPasswordVisible,
-                  prefixIcon: const Icon(LucideIcons.lock, size: 18),
                   suffixIcon: IconButton(
                     onPressed: () => ref
                         .read(loginNotifierProvider.notifier)
@@ -197,6 +188,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                 ),
                 const Gap(AppSpacing.lg),
                 XstoreButton(
+                  warm: true,
                   label: context.l10n.login,
                   isLoading: login.isLoading,
                   onPressed: login.isLoading || !_phoneValid || !_passwordValid
@@ -218,6 +210,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                   ),
                   const Gap(AppSpacing.lg),
                   XstoreButton(
+                    warm: true,
                     label: context.l10n.courierVerifyAndLogin,
                     isLoading: login.isLoading,
                     onPressed: login.isLoading || !_otpComplete
@@ -233,6 +226,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                   ),
                 ] else
                   XstoreButton(
+                    warm: true,
                     label: context.l10n.courierSendCode,
                     isLoading: false,
                     onPressed: login.isLoading || !_phoneValid ? null : _sendOtp,
@@ -268,13 +262,13 @@ class _ModeToggle extends StatelessWidget {
       final selected = mode == m;
       return Expanded(
         child: InkWell(
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
+          borderRadius: BorderRadius.circular(20),
           onTap: onChanged == null ? null : () => onChanged!(m),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            height: 40,
             decoration: BoxDecoration(
-              color: selected ? context.primaryColor : AppColors.transparent,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
+              color: selected ? context.cashColor : AppColors.transparent,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -282,13 +276,13 @@ class _ModeToggle extends StatelessWidget {
                 Icon(
                   icon,
                   size: 16,
-                  color: selected ? Colors.white : context.textSecondary,
+                  color: selected ? const Color(0xFF140A04) : context.textSecondary,
                 ),
                 const Gap(AppSpacing.xs),
                 Text(
                   label,
                   style: AppTypography.labelMedium.copyWith(
-                    color: selected ? Colors.white : context.textSecondary,
+                    color: selected ? const Color(0xFF140A04) : context.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -302,8 +296,9 @@ class _ModeToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
+        color: glassFill(context),
         border: Border.all(color: context.borderColor),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
         children: [
@@ -318,6 +313,46 @@ class _ModeToggle extends StatelessWidget {
             LucideIcons.messageSquare,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Amber planet with a truck, crossed by a dashed orbit.
+class _CourierHero extends StatelessWidget {
+  const _CourierHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: SizedBox(
+        height: 170,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Transform.rotate(
+              angle: -0.17,
+              child: Container(
+                width: 300,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.elliptical(150, 30),
+                  ),
+                  border: Border.all(
+                    color: context.cashColor.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+            const OrbitGlyphOrb(
+              icon: LucideIcons.truck,
+              paletteIndex: 3,
+              size: 110,
+            ),
+          ],
+        ),
       ),
     );
   }

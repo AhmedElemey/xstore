@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/space_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
@@ -253,7 +253,7 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.sendPackageTitle)),
-      body: SafeArea(
+      body: SpaceBackground(child: SafeArea(
         child: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -360,6 +360,7 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
                 ListenableBuilder(
                   listenable: _fields,
                   builder: (context, _) => XstoreButton(
+                    warm: true,
                     label: context.l10n.sendPackageSubmit,
                     isLoading: isSubmitting,
                     onPressed: isSubmitting || !_canSubmit ? null : _submit,
@@ -370,16 +371,17 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
             ),
           ),
         ),
-      ),
+      )),
     );
   }
 
   Widget _sectionTitle(BuildContext context, String title) {
     return Text(
-      title,
-      style: AppTypography.titleMedium.copyWith(
-        color: context.textPrimary,
-        fontWeight: FontWeight.w700,
+      title.toUpperCase(),
+      style: AppTypography.labelSmall.copyWith(
+        color: context.cashColor,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.2,
       ),
     );
   }
@@ -395,15 +397,16 @@ class _CashAtPickupNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        color: context.cashColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.cashColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             LucideIcons.banknote,
-            color: AppColors.primary,
+            color: context.cashColor,
             size: 20,
           ),
           const SizedBox(width: AppSpacing.sm),

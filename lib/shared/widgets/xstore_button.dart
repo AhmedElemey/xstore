@@ -11,11 +11,19 @@ class XstoreButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.isLoading = false,
+    this.warm = false,
+    this.height = 56,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+
+  /// Seller and courier screens use the warm amber→orange gradient.
+  final bool warm;
+
+  /// Compact actions inside cards use 44.
+  final double height;
 
   @override
   State<XstoreButton> createState() => _XstoreButtonState();
@@ -52,10 +60,16 @@ class _XstoreButtonState extends State<XstoreButton>
     // Orbit: plasma→nova glow with dark ink in dark mode; deep violet with
     // white ink in light mode (plasma cyan can't carry white text).
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final colors = dark
-        ? const [AppColors.plasma, AppColors.nova]
-        : const [AppColors.primaryDark, AppColors.primary];
-    final ink = dark ? AppColors.space : AppColors.white;
+    final colors = widget.warm
+        ? const [AppColors.cash, _ember]
+        : dark
+            ? const [AppColors.plasma, AppColors.nova]
+            : const [AppColors.primaryDark, AppColors.primary];
+    final ink = widget.warm
+        ? _warmInk
+        : dark
+            ? AppColors.space
+            : AppColors.white;
     return Semantics(
       button: true,
       enabled: _enabled,
@@ -83,7 +97,7 @@ class _XstoreButtonState extends State<XstoreButton>
                 child: AnimatedContainer(
                   duration: AppAnimations.normal,
                   curve: AppAnimations.smooth,
-                  height: 56,
+                  height: widget.height,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     gradient: widget.isLoading
@@ -141,3 +155,6 @@ class _XstoreButtonState extends State<XstoreButton>
     );
   }
 }
+
+const _ember = Color(0xFFFF8A5B);
+const _warmInk = Color(0xFF140A04);

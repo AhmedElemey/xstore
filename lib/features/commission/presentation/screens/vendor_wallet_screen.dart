@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -35,11 +36,7 @@ class VendorWalletScreen extends ConsumerWidget {
       },
       child: Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.surfaceColor,
-        elevation: 0,
-        title: Text(context.l10n.navWallet),
-      ),
+      appBar: AppBar(title: Text(context.l10n.navWallet)),
       body: SpaceBackground(child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(vendorCommissionSnapshotProvider);
@@ -49,37 +46,118 @@ class VendorWalletScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
+            _FeeHero(
+              feePerOrder: context.formatCurrency(feePerOrder),
+              pauseLimit: wallet == null
+                  ? null
+                  : context.formatCurrency(wallet.pauseThresholdEgp),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                _Stat(
+                  value: '${stats?.totalCount ?? 0}',
+                  label: context.l10n.vendorStatTotalOrders,
+                ),
+                const SizedBox(width: 10),
+                _Stat(
+                  value: context.formatCurrency(stats?.totalRevenue ?? 0),
+                  label: context.l10n.vendorStatRevenue,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
             if (wallet != null) VendorCommissionAlertBanner(wallet: wallet),
             if (wallet != null &&
                 wallet.alertLevel == VendorCommissionAlertLevel.none)
               const _GoodStandingCard(),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: context.surfaceColor,
-                borderRadius: BorderRadius.circular(AppSpacing.xl),
-                border: Border.all(color: context.borderColor),
-              ),
-              child: Row(
-                children: [
-                  _Stat(
-                    value: context.formatCurrency(stats?.totalRevenue ?? 0),
-                    label: context.l10n.vendorStatRevenue,
-                  ),
-                  _Stat(
-                    value: '${stats?.totalCount ?? 0}',
-                    label: context.l10n.vendorStatTotalOrders,
-                  ),
-                  _Stat(
-                    value: context.formatCurrency(feePerOrder),
-                    label: context.l10n.commissionPlatformFee,
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       )),
+      ),
+    );
+  }
+}
+
+/// Gradient hero: the flat platform fee per order and the unpaid-fee limit
+/// at which new listings pause. (The owed balance itself is admin-only and
+/// never reaches the vendor app.)
+class _FeeHero extends StatelessWidget {
+  const _FeeHero({required this.feePerOrder, required this.pauseLimit});
+
+  final String feePerOrder;
+  final String? pauseLimit;
+
+  @override
+  Widget build(BuildContext context) {
+    final warm = context.cashColor;
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.nova.withValues(alpha: 0.22),
+            warm.withValues(alpha: 0.14),
+          ],
+        ),
+        border: Border.all(color: warm.withValues(alpha: 0.4)),
+      ),
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            top: -50,
+            end: -50,
+            child: Opacity(
+              opacity: 0.35,
+              child: Container(
+                width: 170,
+                height: 170,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: orbitOrbGradient(3),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.walletFeePerOrder.toUpperCase(),
+                  style: AppTypography.labelSmall.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: warm,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  feePerOrder,
+                  style: AppTypography.titleLarge.copyWith(
+                    fontSize: 38,
+                    fontWeight: FontWeight.w700,
+                    color: context.textPrimary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                if (pauseLimit != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    context.l10n.walletPauseLimit(pauseLimit!),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -94,24 +172,30 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: AppTypography.titleMedium.copyWith(
-              color: context.textPrimary,
-              fontWeight: FontWeight.w800,
+      child: GlassCard(
+        radius: 18,
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: AppTypography.labelSmall.copyWith(
+                color: context.textSecondary,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppTypography.labelSmall.copyWith(
-              color: context.textSecondary,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.titleLarge.copyWith(
+                fontWeight: FontWeight.w800,
+                color: context.textPrimary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -127,7 +211,7 @@ class _GoodStandingCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.success.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
       ),
       child: Row(

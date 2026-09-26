@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/space_background.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -282,6 +285,20 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     }
   }
 
+  Future<void> _saveDraft() async {
+    final notifier = ref.read(listingFormNotifierProvider.notifier);
+    notifier.updateField('name', _name.text);
+    notifier.updateField('priceInput', _price.text);
+    notifier.updateField('compareAtPriceInput', _compare.text);
+    notifier.updateField('description', _description.text);
+    notifier.updateField('brand', _brand.text);
+    notifier.updateField('location', _location.text);
+    notifier.updateField('shippingCostInput', _shippingCost.text);
+    await notifier.saveDraft();
+    if (!mounted) return;
+    AppSnackbar.success(context, context.l10n.listingDraftSaved);
+  }
+
   @override
   Widget build(BuildContext context) {
     final form = ref.watch(listingFormNotifierProvider);
@@ -316,16 +333,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: context.backgroundColor,
-        surfaceTintColor: AppColors.transparent,
-        centerTitle: true,
-        // "Add Listing" is a bottom-nav tab root — no back button, same as
-        // Home/Explore/etc. Editing only ever gets here via context.go from
-        // My Listings (a tab switch, not a push), which leaves no back
-        // stack to pop, so this is the only way back without the bottom
-        // nav. _syncEditingListing already resets the form when the
-        // widget's editingListing later goes back to null (a fresh "Add"),
-        // so this doesn't need to reset anything itself.
+        // "Add Listing" is a bottom-nav tab root — no back button. Editing
+        // only arrives via context.go from My Listings (a tab switch), so
+        // its back goes there explicitly.
         leading: isEditing
             ? IconButton(
                 icon: Icon(context.arrowBackIcon),
@@ -334,41 +344,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
               )
             : null,
         title: Text(isEditing ? context.l10n.editListingMenu : context.l10n.addListing),
-        actions: [
-          // Drafts are a create-flow concept only — editing an existing
-          // listing writes straight to the server via Update Listing.
-          if (!isEditing)
-            TextButton(
-              style:
-                  TextButton.styleFrom(foregroundColor: context.textSecondary),
-              onPressed: form.isSubmitting
-                  ? null
-                  : () async {
-                      notifier.updateField('name', _name.text);
-                      notifier.updateField('priceInput', _price.text);
-                      notifier.updateField('compareAtPriceInput', _compare.text);
-                      notifier.updateField('description', _description.text);
-                      notifier.updateField('brand', _brand.text);
-                      notifier.updateField('location', _location.text);
-                      notifier.updateField(
-                        'shippingCostInput',
-                        _shippingCost.text,
-                      );
-                      await notifier.saveDraft();
-                      if (!context.mounted) {
-                        return;
-                      }
-                      // ignore: use_build_context_synchronously
-                      AppSnackbar.success(
-                        context,
-                        context.l10n.listingDraftSaved,
-                      );
-                    },
-              child: Text(context.l10n.saveDraft),
-            ),
-        ],
       ),
-      body: Column(
+      body: SpaceBackground(child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -431,19 +408,42 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                 AppSpacing.lg,
                 AppSpacing.lg,
               ),
-              child: _PublishBar(
-                publishLabel: isEditing &&
-                        form.editingStatus != ListingStatus.draft
-                    ? context.l10n.updateListing
-                    : context.l10n.publishListing,
-                enabled: canSubmit && !form.isSubmitting,
-                loading: form.isSubmitting,
-                onPressed: _publish,
+              child: Row(
+                children: [
+                  // Drafts are a create-flow concept only — editing writes
+                  // straight to the server via Update Listing.
+                  if (!isEditing) ...[
+                    OutlinedButton(
+                      onPressed: form.isSubmitting ? null : _saveDraft,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.textPrimary,
+                        backgroundColor: glassFill(context),
+                        minimumSize: const Size(0, 56),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                      ),
+                      child: Text(context.l10n.saveDraft),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                  ],
+                  Expanded(
+                    child: XstoreButton(
+                      label: isEditing &&
+                              form.editingStatus != ListingStatus.draft
+                          ? context.l10n.updateListing
+                          : context.l10n.publishListing,
+                      warm: true,
+                      isLoading: form.isSubmitting,
+                      onPressed: canSubmit && !form.isSubmitting
+                          ? _publish
+                          : null,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 
@@ -774,36 +774,21 @@ class _ListingShippingAttributesSection extends StatelessWidget {
   }
 }
 
+/// Amber section label that groups the form ("BASIC INFO").
 class _AccentSectionTitle extends StatelessWidget {
-  // ignore: prefer_const_constructors_in_immutables — title comes from l10n at runtime
-  _AccentSectionTitle(this.title);
+  const _AccentSectionTitle(this.title);
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 22,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        SizedBox(width: context.scaledPx(10)),
-        Expanded(
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
-              letterSpacing: context.scaledPx(-0.2),
-            ),
-          ),
-        ),
-      ],
+    return Text(
+      title.toUpperCase(),
+      style: AppTypography.labelSmall.copyWith(
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.2,
+        color: context.cashColor,
+      ),
     );
   }
 }
@@ -829,39 +814,33 @@ class _PickerField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: context.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: context.scaledPx(6)),
+        OrbitFieldLabel(label),
+        SizedBox(height: context.scaledPx(8)),
         Material(
-          color: context.surfaceVariantColor,
-          borderRadius: BorderRadius.circular(12),
+          color: glassFill(context),
+          borderRadius: BorderRadius.circular(16),
           child: Semantics(
             button: true,
             label: '${label.isNotEmpty ? '$label · ' : ''}$value',
             child: InkWell(
               onTap: onTap,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               splashColor: context.primaryColor.withValues(alpha: 0.08),
               highlightColor: context.primaryColor.withValues(alpha: 0.06),
               child: InputDecorator(
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: context.surfaceVariantColor,
+                  fillColor: glassFill(context),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                      color: hasError ? AppColors.error : context.textDisabled,
+                      color: hasError ? AppColors.error : context.borderColor,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                      color: hasError ? AppColors.error : context.textDisabled,
+                      color: hasError ? AppColors.error : context.borderColor,
                     ),
                   ),
                   contentPadding: EdgeInsets.symmetric(
@@ -900,74 +879,6 @@ class _PickerField extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _PublishBar extends StatelessWidget {
-  const _PublishBar({
-    required this.publishLabel,
-    required this.enabled,
-    required this.loading,
-    required this.onPressed,
-  });
-
-  final String publishLabel;
-  final bool enabled;
-  final bool loading;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final gradient = LinearGradient(
-      colors: enabled
-          ? [AppColors.primary, AppColors.accent]
-          : [AppColors.materialGrey400, AppColors.materialGrey500],
-    );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: enabled
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.35),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: Material(
-          color: AppColors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: enabled && !loading ? onPressed : null,
-            child: Center(
-              child: loading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: AppColors.white,
-                      ),
-                    )
-                  : Text(
-                      publishLabel,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: AppTypography.rem(1),
-                      ),
-                    ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

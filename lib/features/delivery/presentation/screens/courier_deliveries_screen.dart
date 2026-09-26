@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -150,7 +154,6 @@ class _CourierDeliveriesScreenState
         ref.read(courierPackagesProvider.notifier).fetchPackages();
       },
       child: Scaffold(
-      appBar: AppBar(title: Text(context.l10n.courierDeliveriesTitle)),
       body: SpaceBackground(child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(courierCashWalletProvider);
@@ -165,7 +168,9 @@ class _CourierDeliveriesScreenState
                 controller: _scroll,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  const SliverToBoxAdapter(child: _CashSummaryHeader()),
+                  const SliverToBoxAdapter(
+                    child: SafeArea(bottom: false, child: _CashSummaryHeader()),
+                  ),
                   if (state.error != null)
                     SliverToBoxAdapter(
                       child: _InlineError(
@@ -254,11 +259,12 @@ class _CourierDeliveriesScreenState
           children: [
             Expanded(
               child: Text(
-                title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                title.toUpperCase(),
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                  color: context.textSecondary,
+                ),
               ),
             ),
             if (trailing != null)
@@ -326,13 +332,18 @@ class _CourierDeliveriesScreenState
 }
 
 /// Compact cash-in-hand strip; the Cash tab has the full breakdown.
+/// Orbit route header: courier name, the screen title, and a glass chip
+/// with the cash in hand (opens the Cash tab); then the hand-over warning.
 class _CashSummaryHeader extends ConsumerWidget {
   const _CashSummaryHeader();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wallet = ref.watch(courierCashWalletProvider).valueOrNull;
-    if (wallet == null) return const SizedBox.shrink();
+    final name = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.name.trim() ?? ''),
+    );
+    final warm = context.cashColor;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -344,52 +355,79 @@ class _CashSummaryHeader extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: context.primaryColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-            ),
-            child: Row(
-              children: [
-                Icon(LucideIcons.wallet, color: context.primaryColor),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    context.l10n.courierCashInHand,
-                    style: Theme.of(context).textTheme.bodyMedium,
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (name.isNotEmpty)
+                      Text(
+                        name,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: context.textSecondary,
+                        ),
+                      ),
+                    Text(
+                      context.l10n.courierDeliveriesTitle,
+                      style: AppTypography.titleMedium.copyWith(
+                        fontFamily: AppTypography.displayFontFamily,
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (wallet != null)
+                GlassCard(
+                  radius: 16,
+                  onTap: () => context.go(AppRoutes.courierCash),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        context.l10n.courierCashInHand,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: context.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        context.formatCurrency(wallet.cashInHandEgp),
+                        style: AppTypography.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: warm,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  context.formatCurrency(wallet.cashInHandEgp),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: context.primaryColor,
-                      ),
-                ),
-              ],
-            ),
+            ],
           ),
-          if (wallet.handoverDue) ...[
-            const SizedBox(height: AppSpacing.sm),
+          if (wallet != null && wallet.handoverDue) ...[
+            const SizedBox(height: AppSpacing.md),
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSpacing.md),
+                color: warm.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: warm.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    LucideIcons.alertTriangle,
-                    color: AppColors.warning,
-                    size: 18,
-                  ),
+                  Icon(LucideIcons.alertTriangle, color: warm, size: 18),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       context.l10n.courierHandoverDueBanner,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.textPrimary,
+                      ),
                     ),
                   ),
                 ],

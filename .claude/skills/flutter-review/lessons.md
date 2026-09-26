@@ -1021,3 +1021,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-26 — Orbit form primitives: uppercase labels, one password-rule source
 - **Rule:** Field labels go through `OrbitFieldLabel` (via `AuthTextField`/`PhoneInputField`), which uppercases them, so tests find `'CURRENT PASSWORD *'`, not the arb value. Password checklists and strength meters read `Validators.passwordRules`, the same source as `registerPassword`, never their own regexes. When a redesign moves a form's submit below extra content, tests reach it with `scrollUntilVisible` (lazy `ListView`) or `ensureVisible` (`SingleChildScrollView`).
 - **Where it applies:** `auth_text_field.dart`, `phone_input_field.dart`, `password_strength_bar.dart`, `validators.dart`, auth/profile form tests.
+
+### 2026-09-26 — Seller and courier screens use the warm Orbit accent
+- **Rule:** Shopper screens use `context.primaryColor` (plasma/violet); seller and courier screens use amber: `context.cashColor` for highlights and selected chips, and `XstoreButton(warm: true)` (amber→orange, dark ink) for primary actions (`height: 44` inside cards). Section headings on these screens are small uppercase labels, so tests find `'ACTIVE'`, `'HISTORY'`, `'COLLECTED ORDERS'`, not the arb value.
+- **Where it applies:** `lib/features/orders` (vendor), `listing`, `commission`, `delivery`, `vendor_store_screen.dart`, `courier_login_screen.dart`, `xstore_button.dart`.

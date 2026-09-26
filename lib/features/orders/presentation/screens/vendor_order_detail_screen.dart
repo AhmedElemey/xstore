@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/space_background.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -54,19 +57,36 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
     ref.listen(vendorOrderDetailProvider(widget.orderId), (p, n) { if (n.error != null && n.error != p?.error) { context.showSnack(n.error!); notifier.clearError(); } });
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: CustomScrollView(
+      body: SpaceBackground(child: CustomScrollView(
         slivers: [
           SliverAppBar(
-            pinned: true, backgroundColor: context.surfaceColor, elevation: 0,
-            title: Text('${context.l10n.orderHashPrefix}${o.formattedOrderId}'),
+            pinned: true,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${context.l10n.orderHashPrefix}${o.formattedOrderId}'),
+                Text(
+                  DateFormat('d MMM, h:mm a', context.l10n.localeName)
+                      .format(o.createdAt.toLocal()),
+                  style: AppTypography.labelSmall.copyWith(
+                    color: context.textSecondary,
+                  ),
+                ),
+              ],
+            ),
             actions: [
-              IconButton(
+              OrbitCircleButton(
                 tooltip: context.l10n.share,
-                icon: const Icon(Icons.ios_share_rounded),
                 onPressed: () => Share.share(
                   '${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${context.formatCurrency(o.total)}',
                 ),
+                child: Icon(
+                  LucideIcons.share,
+                  size: 20,
+                  color: context.textPrimary,
+                ),
               ),
+              const SizedBox(width: AppSpacing.lg),
             ],
           ),
           SliverToBoxAdapter(
@@ -118,13 +138,13 @@ class _VendorOrderDetailScreenState extends ConsumerState<VendorOrderDetailScree
                 ],
                 if (o.status == OrderStatus.cancelled) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  Container(padding: const EdgeInsets.all(AppSpacing.md), decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppSpacing.md)), child: Text('${context.l10n.ordersCancelReasonSection}: ${o.cancelReason ?? '-'}')),
+                  Container(padding: const EdgeInsets.all(AppSpacing.md), decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(16)), child: Text('${context.l10n.ordersCancelReasonSection}: ${o.cancelReason ?? '-'}')),
                 ],
               ]),
             ),
           ),
         ],
-      ),
+      )),
       bottomNavigationBar: Material(
         color: context.surfaceColor,
         child: VendorOrderActionSheet(
@@ -144,11 +164,12 @@ class _Card extends StatelessWidget {
   const _Card({required this.child});
   final Widget child;
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => SizedBox(
         width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(color: context.surfaceColor, borderRadius: BorderRadius.circular(AppSpacing.lg), boxShadow: [BoxShadow(color: context.cardShadowColor, blurRadius: 10)]),
-        child: child,
+        child: GlassCard(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: child,
+        ),
       );
 }
 
@@ -165,8 +186,8 @@ class _BuyerInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(context.l10n.ordersBuyerInfo, style: AppTypography.titleMedium),
-          const SizedBox(height: AppSpacing.lg),
+          Text(context.l10n.ordersBuyerInfo, style: AppTypography.labelLarge.copyWith(color: context.textSecondary)),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               ClipOval(
@@ -206,42 +227,49 @@ class _BuyerInfoCard extends StatelessWidget {
                         child: Text(
                           phone,
                           style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.primary,
+                            color: context.primaryColor,
                           ),
                         ),
                       ),
                   ],
                 ),
               ),
+              if (phone.isNotEmpty)
+                OrbitCircleButton(
+                  tooltip: context.l10n.ordersWhatsapp,
+                  onPressed: () async {
+                    final opened = await launchWhatsApp(phone: phone);
+                    if (!opened && context.mounted) {
+                      AppSnackbar.info(
+                        context,
+                        context.l10n.whatsappSellerUnavailable,
+                      );
+                    }
+                  },
+                  child: const Icon(
+                    LucideIcons.messageCircle,
+                    size: 20,
+                    color: AppColors.success,
+                  ),
+                ),
             ],
           ),
-          if (phone.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () async {
-                final opened = await launchWhatsApp(phone: phone);
-                if (!opened && context.mounted) {
-                  AppSnackbar.info(
-                    context,
-                    context.l10n.whatsappSellerUnavailable,
-                  );
-                }
-              },
-              child: Text(context.l10n.ordersWhatsapp),
-            ),
-          ],
+
         ],
       ),
     );
   }
 
   Widget _letterBox(String letter) {
-    return ColoredBox(
-      color: AppColors.primary,
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: orbitOrbGradient(0)),
       child: Center(
         child: Text(
           letter,
-          style: AppTypography.titleMedium.copyWith(color: AppColors.white),
+          style: AppTypography.titleMedium.copyWith(
+            color: AppColors.space,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
     );
@@ -380,14 +408,15 @@ class _StatusHeader extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: c,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        color: c.withValues(alpha: 0.12),
+        border: Border.all(color: c.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         text,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
+              color: c,
+              fontWeight: FontWeight.w700,
             ),
       ),
     );

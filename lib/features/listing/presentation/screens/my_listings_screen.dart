@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../../core/constants/app_colors.dart';
 
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -22,7 +22,6 @@ import '../widgets/listing_empty_state.dart';
 import '../widgets/listing_filter_tabs.dart';
 import '../widgets/listing_options_sheet.dart';
 import '../widgets/listing_sort_bar.dart';
-import '../widgets/listing_stats_banner.dart';
 import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
@@ -37,30 +36,6 @@ class MyListingsScreen extends ConsumerStatefulWidget {
 }
 
 class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
-  final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
-
-  void _onScrollNotification(ScrollNotification n) {
-    if (n is! UserScrollNotification) {
-      return;
-    }
-    final dir = n.direction;
-    if (dir == ScrollDirection.forward) {
-      if (_fabVisible.value) {
-        _fabVisible.value = false;
-      }
-    } else if (dir == ScrollDirection.reverse) {
-      if (!_fabVisible.value) {
-        _fabVisible.value = true;
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _fabVisible.dispose();
-    super.dispose();
-  }
-
   Future<void> _openSearch() async {
     await showAnimatedDialog<void>(
       context: context,
@@ -207,14 +182,13 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       myListingsNotifierProvider.select((s) => s.isLoading),
     );
     final error = ref.watch(myListingsNotifierProvider.select((s) => s.error));
-    final stats = ref.watch(
+    final counts = ref.watch(
       myListingsNotifierProvider.select((s) {
-        final all = s.listings;
-        final active = all
-            .where((e) => e.status == ListingStatus.active)
-            .length;
-        final sold = all.where((e) => e.status == ListingStatus.sold).length;
-        return (totalCount: all.length, activeCount: active, soldCount: sold);
+        final byStatus = <ListingStatus, int>{};
+        for (final l in s.listings) {
+          byStatus[l.status] = (byStatus[l.status] ?? 0) + 1;
+        }
+        return byStatus;
       }),
     );
 
@@ -233,38 +207,6 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           ref.read(myListingsNotifierProvider.notifier).fetchListings(),
       child: Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        title: Text(context.l10n.myListings),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.search),
-            onPressed: _openSearch,
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: _fabVisible,
-        builder: (context, fabVisible, _) {
-          return AnimatedSlide(
-            duration: const Duration(milliseconds: 220),
-            offset: fabVisible ? Offset.zero : const Offset(0, 2),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: fabVisible ? 1 : 0,
-              child: FloatingActionButton.extended(
-                onPressed: () => context.go(AppRoutes.listingAdd),
-                icon: const Icon(LucideIcons.plus),
-                label: Text(context.l10n.newListing),
-              ),
-            ),
-          );
-        },
-      ),
       body: SpaceBackground(child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -278,6 +220,35 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.md),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            context.l10n.myListings,
+                            style: AppTypography.titleLarge.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          context.l10n.myListingsTotal(listings.length),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: context.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const Gap(AppSpacing.md),
+                _SearchPill(onTap: _openSearch),
+                const Gap(AppSpacing.md),
                 Consumer(
                   builder: (context, ref, _) {
                     final wallet = ref
@@ -287,16 +258,13 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                     return VendorCommissionAlertBanner(wallet: wallet);
                   },
                 ),
-                ListingStatsBanner(
-                  totalCount: stats.totalCount,
-                  activeCount: stats.activeCount,
-                  soldCount: stats.soldCount,
-                ),
               ],
             ),
           ),
           ListingFilterTabs(
             selected: selectedFilter,
+            total: listings.length,
+            counts: counts,
             onFilterSelected: ref
                 .read(myListingsNotifierProvider.notifier)
                 .applyFilter,
@@ -313,19 +281,13 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 .setViewMode,
           ),
           Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (n) {
-                _onScrollNotification(n);
-                return false;
-              },
-              child: _buildBody(
-                isLoading: isLoading,
-                listings: listings,
-                filtered: filtered,
-                selectedFilter: selectedFilter,
-                viewMode: viewMode,
-                error: error,
-              ),
+            child: _buildBody(
+              isLoading: isLoading,
+              listings: listings,
+              filtered: filtered,
+              selectedFilter: selectedFilter,
+              viewMode: viewMode,
+              error: error,
             ),
           ),
         ],
@@ -512,6 +474,52 @@ class _ListingSearchDialogState extends State<_ListingSearchDialog> {
           child: Text(context.l10n.myListingsSearchSubmit),
         ),
       ],
+    );
+  }
+}
+
+/// Glass search pill that opens the listing search dialog.
+class _SearchPill extends ConsumerWidget {
+  const _SearchPill({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(
+      myListingsNotifierProvider.select((s) => s.searchQuery),
+    );
+    return Material(
+      color: glassFill(context),
+      shape: StadiumBorder(side: BorderSide(color: context.borderColor)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 48,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Row(
+              children: [
+                Icon(LucideIcons.search, size: 18, color: context.cashColor),
+                const Gap(AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    query.isEmpty ? context.l10n.myListingsSearchHint : query,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: query.isEmpty
+                          ? context.textSecondary
+                          : context.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

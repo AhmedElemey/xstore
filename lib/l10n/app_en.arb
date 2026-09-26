@@ -118,7 +118,6 @@
   "updateListing": "Update Listing",
   "saveDraft": "Save Draft",
   "listingDraftSaved": "Draft saved",
-  "newListing": "New Listing",
   "listingPhotoSectionTitle": "Product Photos",
   "listingPhotoSectionSubtitle": "Add 1–5 photos (first = cover)",
   "listingAddPhotoTile": "Add photos",
@@ -251,7 +250,6 @@
   "storeJoinedPrefix": "Joined ",
   "storeUnavailableNow": "This store isn't available right now",
   "share": "Share",
-  "storeDescriptionHeading": "About the store",
   "allCategoriesChip": "All",
   "vendorStoreStatListings": "Active Listings",
   "vendorStoreStatSales": "Total Sales",
@@ -326,7 +324,6 @@
   "ordersStatActiveLabelTitle": "Active",
   "ordersStatMonthLabel": "Month",
   "ordersStatTotalLabel": "Total",
-  "ordersQtyTotalLinePrefix": "Qty",
   "ordersEstimatedDelivery": "🚚 Estimated",
   "ordersTrackOrder": "Track Order",
   "ordersViewDetails": "View Details",
@@ -575,8 +572,6 @@
   "verifiedSeller": "✅ Verified Seller",
   "onlyLeftPrefix": "Only ",
   "onlyLeftSuffix": " left!",
-  "listingTotalListings": "Total Listings",
-  "listingSoldStat": "Sold",
   "listingViews": "Views",
   "listingSaves": "Saves",
   "listingInquiries": "Inquiries",
@@ -615,8 +610,6 @@
   "incomingOrders": "Incoming Orders",
   "vendorSearchHint": "Search by order ID or buyer name",
   "vendorConfirmAllPending": "Confirm All Pending",
-  "vendorStatPendingOrders": "Pending",
-  "vendorStatActiveOrders": "Active",
   "vendorStatTotalOrders": "Total",
   "vendorStatRevenue": "Revenue",
   "vendorConfirmAllPendingTitle": "Confirm all pending orders?",
@@ -639,8 +632,6 @@
   "vendorRejectTitle": "Reject this order?",
   "vendorConfirmRejection": "Confirm Rejection",
   "vendorConfirmShipment": "Confirm Shipment",
-  "vendorExportOrders": "Export Orders",
-  "vendorOrderSettings": "Order Settings",
   "vendorReasonItemUnavailable": "Item no longer available",
   "vendorReasonOutOfStock": "Out of stock",
   "vendorReasonCannotDeliver": "Cannot deliver to buyer location",
@@ -1423,5 +1414,34 @@
   },
   "profileEmailVerifiedBadge": "✓ Email verified",
   "profilePhoneVerifiedBadge": "✓ Phone verified",
-  "profileEdit": "Edit"
+  "profileEdit": "Edit",
+  "myListingsFilterAll": "All",
+  "myListingsTotal": "{n} total",
+  "myListingsInStock": "{n} in stock",
+  "@myListingsTotal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@myListingsInStock": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "commissionEachSale": "Each sale",
+  "commissionCustomerPays": "Customer pays",
+  "walletFeePerOrder": "Fee per order",
+  "walletPauseLimit": "New listings pause when unpaid fees reach {limit}.",
+  "@walletPauseLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "courierDeliveryKicker": "XSTORE DELIVERY"
 }

@@ -200,6 +200,8 @@ void main() {
       await tester.enterText(fields.at(1), 'Password123');
       await tester.pump();
 
+      // The planet hero pushes the button below an 800×600 test window.
+      await tester.ensureVisible(find.widgetWithText(XstoreButton, 'Login'));
       await tester.tap(find.widgetWithText(XstoreButton, 'Login'));
       await _settle(tester);
 

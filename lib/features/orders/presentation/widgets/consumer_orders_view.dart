@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/space_background.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/animations/app_animations.dart';
@@ -81,12 +85,11 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
       }
     });
 
-    return ColoredBox(
-      color: context.backgroundColor,
+    return SpaceBackground(
       child: Column(
         children: [
           Material(
-            color: context.surfaceColor,
+            color: AppColors.transparent,
             elevation: 0,
             child: SafeArea(
               bottom: false,
@@ -116,23 +119,32 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                               onChanged: notifier.updateSearch,
                             ),
                           )
-                        : Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Text(
-                                context.l10n.ordersMyTitle,
-                                style: Theme.of(context).textTheme.titleLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional.centerEnd,
-                                child: IconButton(
-                                  icon: const Icon(Icons.search_rounded),
-                                  onPressed: () =>
-                                      notifier.setSearching(true),
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    context.l10n.ordersMyTitle,
+                                    style: AppTypography.titleLarge.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      color: context.textPrimary,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                                OrbitCircleButton(
+                                  tooltip: context.l10n.ordersSearchHint,
+                                  onPressed: () => notifier.setSearching(true),
+                                  child: Icon(
+                                    LucideIcons.search,
+                                    size: 20,
+                                    color: context.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                   ),
                   const ConsumerOrderTabs(),

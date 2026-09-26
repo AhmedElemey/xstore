@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -27,123 +27,83 @@ class ListingCardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
-    final accent = listingStatusAccent(context, listing.status);
-    final radius = BorderRadius.circular(16);
-    // Inset so the drop shadow sits inside the grid cell and isn't
-    // covered by the neighboring tile.
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: [
-            BoxShadow(
-              color: context.cardShadowColor,
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Material(
-          color: context.surfaceColor,
-          borderRadius: radius,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Ink(
-              decoration: BoxDecoration(
-                border: Border.all(color: accent.withValues(alpha: 0.45)),
-                borderRadius: radius,
-              ),
+      padding: const EdgeInsets.all(AppSpacing.xs + 2),
+      child: GlassCard(
+        radius: 22,
+        padding: const EdgeInsets.all(10),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: imageHeight,
               child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ListingThumbnail(
+                    imageUrl: thumb,
+                    width: double.infinity,
+                    height: imageHeight,
+                    borderRadius: 16,
+                  ),
+                  // Live listings need no tag; anything else says why.
+                  if (listing.status != ListingStatus.active)
+                    PositionedDirectional(
+                      top: AppSpacing.sm,
+                      end: AppSpacing.sm,
+                      child: StatusBadge(status: listing.status, compact: true),
+                    ),
+                ],
+              ),
+            ),
+            const Gap(AppSpacing.sm),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: imageHeight,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ListingThumbnail(
-                            imageUrl: thumb,
-                            width: double.infinity,
-                            height: imageHeight,
-                            borderRadius: 0,
-                          ),
-                          Positioned(
-                            top: AppSpacing.md,
-                            right: AppSpacing.md,
-                            child: StatusBadge(
-                              status: listing.status,
-                              compact: true,
-                            ),
-                          ),
-                        ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        listing.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: context.textPrimary,
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.md,
-                        AppSpacing.md,
-                        AppSpacing.xs,
-                        AppSpacing.md,
+                      const Gap(AppSpacing.xs),
+                      Text(
+                        context.formatCurrency(listing.price),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: context.cashColor,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  listing.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.body15.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const Gap(AppSpacing.sm),
-                                Text(
-                                  context.formatCurrency(listing.price),
-                                  style: AppTypography.body15.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (onOpenMenu != null)
-                            IconButton(
-                              icon: const Icon(
-                                LucideIcons.moreVertical,
-                                size: 18,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 20,
-                                minHeight: 20,
-                              ),
-                              onPressed: onOpenMenu,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
-                ),
+                if (onOpenMenu != null)
+                  IconButton(
+                    tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+                    icon: Icon(
+                      LucideIcons.moreVertical,
+                      size: 18,
+                      color: context.textSecondary,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    onPressed: onOpenMenu,
+                  ),
               ],
             ),
-            ),
-          ),
+          ],
         ),
       ),
     );

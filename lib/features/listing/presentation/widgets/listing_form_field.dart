@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/animations/animated_widgets.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -74,39 +75,35 @@ class _ListingFormFieldState extends State<ListingFormField> {
         : (widget.maxLines ?? 1);
 
     final normalBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: context.textDisabled),
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: context.borderColor),
     );
     final focusedNormal = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: context.cashColor, width: 1.5),
     );
-    const errorUnderline = UnderlineInputBorder(
-      borderSide: BorderSide(color: AppColors.error, width: 2),
+    final errorUnderline = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: const BorderSide(color: AppColors.error, width: 1.5),
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.label.isNotEmpty) ...[
-          Text(
-            widget.label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelLarge?.copyWith(color: context.textPrimary),
-          ),
-          SizedBox(height: context.scaledPx(6)),
+          OrbitFieldLabel(widget.label),
+          SizedBox(height: context.scaledPx(8)),
         ],
         Builder(
           builder: (context) {
             final box = AnimatedContainer(
               duration: const Duration(milliseconds: 160),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: _focused && !hasError
                     ? [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.18),
+                          color: context.cashColor.withValues(alpha: 0.18),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -140,7 +137,7 @@ class _ListingFormFieldState extends State<ListingFormField> {
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: context.textHint),
                   filled: true,
-                  fillColor: context.surfaceVariantColor,
+                  fillColor: glassFill(context),
                   prefixIcon: widget.prefix == null
                       ? null
                       : IconTheme.merge(

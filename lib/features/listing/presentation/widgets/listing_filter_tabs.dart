@@ -1,43 +1,49 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Status chips with counts ("Active · 10"); the selected one is amber.
 class ListingFilterTabs extends StatelessWidget {
   const ListingFilterTabs({
     super.key,
     required this.selected,
+    required this.total,
+    required this.counts,
     required this.onFilterSelected,
   });
 
   /// `null` selects “All”.
   final ListingStatus? selected;
+  final int total;
+  final Map<ListingStatus, int> counts;
   final ValueChanged<ListingStatus?> onFilterSelected;
-
-  static const _chips = <({String label, ListingStatus? status})>[
-    (label: 'All', status: null),
-    (label: 'Active', status: ListingStatus.active),
-    (label: 'Pending', status: ListingStatus.pending),
-    (label: 'Paused', status: ListingStatus.paused),
-    (label: 'Sold', status: ListingStatus.sold),
-    (label: 'Rejected', status: ListingStatus.rejected),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final chips = <(String, ListingStatus?)>[
+      (l10n.myListingsFilterAll, null),
+      (l10n.active, ListingStatus.active),
+      (l10n.pending, ListingStatus.pending),
+      (l10n.paused, ListingStatus.paused),
+      (l10n.sold, ListingStatus.sold),
+      (l10n.rejected, ListingStatus.rejected),
+    ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
-          for (final c in _chips) ...[
+          for (final (label, status) in chips) ...[
             _FilterChipPill(
-              label: c.label,
-              selected: selected == c.status,
-              onTap: () => onFilterSelected(c.status),
+              label: '$label · ${status == null ? total : counts[status] ?? 0}',
+              selected: selected == status,
+              onTap: () => onFilterSelected(status),
             ),
             const Gap(AppSpacing.sm),
           ],
@@ -60,34 +66,25 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final outline = context.borderColor.withValues(alpha: 0.8);
+    final warm = context.cashColor;
     return Material(
-      color: AppColors.transparent,
+      color: selected ? warm : glassFill(context),
+      shape: StadiumBorder(
+        side: BorderSide(color: selected ? warm : context.borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary : context.surfaceColor,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: selected ? AppColors.primary : outline,
-              width: 1.2,
-            ),
-          ),
+        child: Container(
+          height: 36,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: selected
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : context.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: AppTypography.bodySmall.copyWith(
+              fontWeight: FontWeight.w700,
+              color: selected ? const Color(0xFF140A04) : context.textPrimary,
+            ),
           ),
         ),
       ),

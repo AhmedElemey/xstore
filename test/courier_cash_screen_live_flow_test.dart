@@ -167,7 +167,7 @@ void main() {
       // Renders both in the header summary and the collected-order tile's
       // own amount — a legitimate duplicate, not a bug.
       expect(find.text('300 LE'), findsWidgets);
-      expect(find.text('Collected orders'), findsOneWidget);
+      expect(find.text('COLLECTED ORDERS'), findsOneWidget);
       expect(find.text('701'), findsOneWidget);
     },
   );

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../shared/widgets/space_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/order_detail_provider.dart';
 import '../widgets/order_action_buttons.dart';
@@ -65,33 +66,27 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       child: Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: order == null
-            ? AppBar(
-                leading: BackButton(onPressed: _onBack),
-                backgroundColor: context.surfaceColor,
-                elevation: 0,
-              )
+            ? AppBar(leading: BackButton(onPressed: _onBack))
             : null,
         body: order == null && state.isLoading
             ? const OrderDetailSkeleton()
             : order == null
                 ? Center(child: Text(state.error ?? context.l10n.errorGeneric))
-                : Column(
+                : SpaceBackground(child: Column(
                     children: [
                       Expanded(
                         child: CustomScrollView(
                           slivers: [
                             SliverAppBar(
                               pinned: true,
-                              elevation: 0,
-                              backgroundColor: context.surfaceColor,
                               leading: BackButton(onPressed: _onBack),
                               title: Text(
                                 '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                                style: AppTypography.titleMedium,
                               ),
                               actions: [
                                 IconButton(
-                                  icon: const Icon(Icons.ios_share_rounded),
+                                  tooltip: context.l10n.share,
+                                  icon: const Icon(LucideIcons.share),
                                   onPressed: () {
                                     Share.share(
                                       '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${order.formattedOrderId}\n${orderStatusLabel(context, order.status)}\n${context.formatCurrency(order.total)}',
@@ -107,7 +102,6 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                       SafeArea(
                         top: false,
                         child: Material(
-                          elevation: 8,
                           color: context.surfaceColor,
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(
@@ -124,7 +118,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                         ),
                       ),
                     ],
-                  ),
+                  )),
       ),
     );
   }

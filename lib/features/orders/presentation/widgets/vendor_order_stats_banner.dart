@@ -1,155 +1,128 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../domain/entities/order_entity.dart';
+import 'order_status_badge.dart';
 
+/// Orbit seller stat tiles (new / preparing / ready; tapping one filters the
+/// list), then an app-only line with the totals and "confirm all pending".
 class VendorOrderStatsBanner extends StatelessWidget {
   const VendorOrderStatsBanner({
     super.key,
     required this.pendingCount,
-    required this.activeCount,
+    required this.processingCount,
+    required this.shippedCount,
     required this.totalCount,
     required this.totalRevenue,
+    required this.onFilter,
     required this.onConfirmAllPending,
   });
 
   final int pendingCount;
-  final int activeCount;
+  final int processingCount;
+  final int shippedCount;
   final int totalCount;
   final double totalRevenue;
+  final ValueChanged<OrderStatus> onFilter;
   final VoidCallback onConfirmAllPending;
 
   @override
   Widget build(BuildContext context) {
-    final fill = Color.lerp(context.surfaceColor, AppColors.primary, 0.9)!;
-    const onFill = Colors.white;
-    final muted = Colors.white.withValues(alpha: 0.75);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(AppSpacing.xl),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              _item(
-                context,
-                '$pendingCount',
-                context.l10n.vendorStatPendingOrders,
-                valueColor: AppColors.warning,
-                labelColor: AppColors.warning,
-              ),
-              _divider(muted),
-              _item(
-                context,
-                '$activeCount',
-                context.l10n.vendorStatActiveOrders,
-                valueColor: onFill,
-                labelColor: muted,
-              ),
-              _divider(muted),
-              _item(
-                context,
-                '$totalCount',
-                context.l10n.vendorStatTotalOrders,
-                valueColor: onFill,
-                labelColor: muted,
-              ),
-              _divider(muted),
-              _item(
-                context,
-                context.formatCurrency(totalRevenue),
-                context.l10n.vendorStatRevenue,
-                valueColor: onFill,
-                labelColor: muted,
-              ),
+              for (final (i, status, count) in [
+                (0, OrderStatus.pending, pendingCount),
+                (1, OrderStatus.processing, processingCount),
+                (2, OrderStatus.shipped, shippedCount),
+              ]) ...[
+                if (i > 0) const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: _Tile(
+                    count: count,
+                    label: orderStatusLabel(context, status),
+                    highlight: i == 0,
+                    onTap: () => onFilter(status),
+                  ),
+                ),
+              ],
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Divider(color: muted.withValues(alpha: 0.35), height: 1),
-          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              _chip(
-                context,
-                label: context.l10n.vendorConfirmAllPending,
-                onTap: onConfirmAllPending,
+              Expanded(
+                child: Text(
+                  '$totalCount ${context.l10n.vendorStatTotalOrders} · '
+                  '${context.formatCurrency(totalRevenue)}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.textSecondary,
+                  ),
+                ),
               ),
+              if (pendingCount > 0)
+                TextButton(
+                  onPressed: onConfirmAllPending,
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.cashColor,
+                  ),
+                  child: Text(context.l10n.vendorConfirmAllPending),
+                ),
             ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _item(
-    BuildContext context,
-    String value,
-    String label, {
-    String? suffix,
-    Color? valueColor,
-    Color? labelColor,
-  }) {
-    final valueFg = valueColor ?? context.textPrimary;
-    final labelFg = labelColor ?? context.textSecondary;
-    return Expanded(
+class _Tile extends StatelessWidget {
+  const _Tile({
+    required this.count,
+    required this.label,
+    required this.highlight,
+    required this.onTap,
+  });
+
+  final int count;
+  final String label;
+  final bool highlight;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final warm = context.cashColor;
+    return GlassCard(
+      radius: 18,
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      color: highlight ? warm.withValues(alpha: 0.12) : null,
+      borderColor: highlight ? warm.withValues(alpha: 0.4) : null,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RichText(
-            text: TextSpan(
-              text: value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: valueFg,
-                fontWeight: FontWeight.w800,
-              ),
-              children: [
-                if (suffix != null)
-                  TextSpan(
-                    text: ' $suffix',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: valueFg.withValues(alpha: 0.9),
-                    ),
-                  ),
-              ],
+          Text(
+            '$count',
+            style: AppTypography.titleLarge.copyWith(
+              fontWeight: FontWeight.w800,
+              color: highlight ? warm : context.textPrimary,
             ),
           ),
           Text(
             label,
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: labelFg),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.labelSmall.copyWith(
+              color: context.textSecondary,
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _divider(Color color) => Container(
-    width: 1,
-    height: AppSpacing.x3l,
-    color: color.withValues(alpha: 0.35),
-  );
-
-  Widget _chip(
-    BuildContext context, {
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white),
-        foregroundColor: Colors.white,
-      ),
-      child: Text(
-        label,
-        style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

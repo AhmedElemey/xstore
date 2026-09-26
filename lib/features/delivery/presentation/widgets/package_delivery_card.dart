@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -38,14 +40,11 @@ class PackageDeliveryCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
-        boxShadow: [
-          BoxShadow(color: context.cardShadowColor, blurRadius: 12),
-        ],
+        color: glassFill(context),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -131,20 +130,25 @@ class PackageDeliveryCard extends StatelessWidget {
           if (action != CourierPackageAction.none) ...[
             const SizedBox(height: AppSpacing.md),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (atPickupStage)
-                  FilledButton.icon(
+                  Expanded(
+                  child: XstoreButton(
+                    label: context.l10n.courierPackagePickUpAction,
+                    warm: true,
+                    height: 44,
                     onPressed: onPickedUp,
-                    icon: const Icon(LucideIcons.banknote, size: 16),
-                    label: Text(context.l10n.courierPackagePickUpAction),
-                  )
-                else
-                  FilledButton.icon(
-                    onPressed: onDelivered,
-                    icon: const Icon(LucideIcons.checkCircle2, size: 16),
-                    label: Text(context.l10n.courierDeliverAction),
                   ),
+                )
+                else
+                  Expanded(
+                  child: XstoreButton(
+                    label: context.l10n.courierDeliverAction,
+                    warm: true,
+                    height: 44,
+                    onPressed: onDelivered,
+                  ),
+                ),
               ],
             ),
           ],

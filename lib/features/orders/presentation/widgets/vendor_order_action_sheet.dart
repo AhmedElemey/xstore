@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
@@ -44,63 +45,32 @@ class VendorOrderActionSheet extends StatelessWidget {
   }
 
   Widget _buildByStatus(BuildContext context) {
-    if (order.status == OrderStatus.pending) {
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
+    Widget warm(String label, VoidCallback onTap) =>
+        XstoreButton(label: label, warm: true, onPressed: onTap);
+    return switch (order.status) {
+      OrderStatus.pending => Row(
+          children: [
+            OutlinedButton(
               onPressed: onReject,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: AppColors.errorLight,
+                side: BorderSide(
+                  color: AppColors.errorLight.withValues(alpha: 0.45),
+                ),
+                minimumSize: const Size(0, 56),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
               ),
-              child: Text(
-                context.l10n.vendorRejectOrder,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(context.l10n.vendorRejectOrder),
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: FilledButton(
-              onPressed: onConfirm,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.success,
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                context.l10n.vendorConfirmOrderShort,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: warm(context.l10n.vendorConfirmOrderShort, onConfirm),
             ),
-          ),
-        ],
-      );
-    }
-    if (order.status == OrderStatus.confirmed) {
-      return FilledButton(
-        onPressed: onProcessing,
-        style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-        child: Text(context.l10n.vendorMarkProcessing),
-      );
-    }
-    if (order.status == OrderStatus.shipped) {
-      return FilledButton(
-        onPressed: onDelivered,
-        style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-        child: Text(context.l10n.vendorMarkDelivered),
-      );
-    }
-    return FilledButton(
-      onPressed: onShipped,
-      style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-      child: Text(context.l10n.vendorMarkShipped),
-    );
+          ],
+        ),
+      OrderStatus.confirmed => warm(context.l10n.vendorMarkProcessing, onProcessing),
+      OrderStatus.shipped => warm(context.l10n.vendorMarkDelivered, onDelivered),
+      _ => warm(context.l10n.vendorMarkShipped, onShipped),
+    };
   }
 }
