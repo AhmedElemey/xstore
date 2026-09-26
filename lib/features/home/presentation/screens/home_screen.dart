@@ -181,7 +181,7 @@ class HomeScreen extends ConsumerWidget {
                   const Gap(AppSpacing.lg),
                   const RecommendedSection(),
                   const Gap(AppSpacing.lg),
-                  const HomeTrustChips(),
+                  // const HomeTrustChips(),
                   const Gap(AppSpacing.x3l),
                 ]),
               ),
