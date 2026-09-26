@@ -9,7 +9,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -24,6 +23,7 @@ import '../../domain/entities/search_result_entity.dart';
 import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
+import '../widgets/explore_radar_header.dart';
 import '../widgets/explore_empty_state.dart';
 import '../widgets/explore_error_state.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -258,6 +258,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         error: (_, __) => const SizedBox.shrink(),
                       ),
                       const Gap(AppSpacing.lg),
+                      ExploreRadarHeader(
+                        resultCount: state.results.length,
+                        queryLabel: state.query.isEmpty
+                            ? context.l10n.allListingsLabel
+                            : state.query,
+                      ),
+                      const Gap(AppSpacing.md),
                       ActiveFiltersRow(
                         filters: state.filters,
                         onRemoveCategory: (c) {
@@ -275,35 +282,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       const Gap(AppSpacing.md),
                       Row(
                         children: [
-                          Expanded(
-                            child: Text.rich(
-                              TextSpan(
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: context.textSecondary,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: '${state.results.length}',
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: context.textPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  TextSpan(text: ' · ${context.l10n.resultsFor} '),
-                                  TextSpan(
-                                    text: state.query.isEmpty
-                                        ? context.l10n.allListingsLabel
-                                        : state.query,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      color: context.textPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
+                          const Spacer(),
                           DropdownButton<ExploreSortOption>(
                             value: state.sortOption,
                             underline: const SizedBox.shrink(),
@@ -352,6 +331,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 const SliverFillRemaining(child: ExploreSkeleton())
               else if (state.results.isEmpty && state.error != null)
                 SliverFillRemaining(
+                  // Grows past the viewport (and scrolls) when the radar
+                  // leaves less room than the state needs.
+                  hasScrollBody: false,
                   child: ExploreErrorState(
                     error: state.error,
                     onRetry: () => notifier.search(state.query),
@@ -359,6 +341,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 )
               else if (state.results.isEmpty)
                 SliverFillRemaining(
+                  // Grows past the viewport (and scrolls) when the radar
+                  // leaves less room than the state needs.
+                  hasScrollBody: false,
                   child: ExploreEmptyState(
                     onPickCategory: (slug) {
                       notifier.bootstrapFromRouteCategory(slug);

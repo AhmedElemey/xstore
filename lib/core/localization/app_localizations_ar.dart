@@ -3173,4 +3173,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'مرتبط بطلب';
+
+  @override
+  String homeLiveOrderCashReady(String amount) {
+    return 'جهّز $amount نقدًا';
+  }
+
+  @override
+  String get homeLiveOrderTrack => 'تتبّع';
+
+  @override
+  String get exploreRadarLabel => 'حولك';
+
+  @override
+  String exploreRadarResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتيجة',
+      few: '$count نتائج',
+      two: 'نتيجتان',
+      one: 'نتيجة واحدة',
+      zero: 'لا توجد نتائج',
+    );
+    return '$_temp0';
+  }
 }

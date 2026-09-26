@@ -6055,6 +6055,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Linked to an order'**
   String get packageOrderLinkedLabel;
+
+  /// No description provided for @homeLiveOrderCashReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Have {amount} cash ready'**
+  String homeLiveOrderCashReady(String amount);
+
+  /// No description provided for @homeLiveOrderTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get homeLiveOrderTrack;
+
+  /// No description provided for @exploreRadarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Around you'**
+  String get exploreRadarLabel;
+
+  /// No description provided for @exploreRadarResults.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No results} =1{1 result} other{{count} results}}'**
+  String exploreRadarResults(int count);
 }
 
 class _AppLocalizationsDelegate

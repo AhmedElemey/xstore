@@ -1378,5 +1378,23 @@
   "requestCustomDeliveryAction": "طلب توصيل مخصص",
   "packageRejectReasonHint": "السبب (اختياري)",
   "packageRequestAgainAction": "إعادة الطلب",
-  "packageOrderLinkedLabel": "مرتبط بطلب"
+  "packageOrderLinkedLabel": "مرتبط بطلب",
+  "homeLiveOrderCashReady": "جهّز {amount} نقدًا",
+  "@homeLiveOrderCashReady": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeLiveOrderTrack": "تتبّع",
+  "exploreRadarLabel": "حولك",
+  "exploreRadarResults": "{count, plural, =0{لا توجد نتائج} =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} other{{count} نتيجة}}",
+  "@exploreRadarResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

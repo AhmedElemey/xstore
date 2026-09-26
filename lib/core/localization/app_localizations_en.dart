@@ -3186,4 +3186,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'Linked to an order';
+
+  @override
+  String homeLiveOrderCashReady(String amount) {
+    return 'Have $amount cash ready';
+  }
+
+  @override
+  String get homeLiveOrderTrack => 'Track';
+
+  @override
+  String get exploreRadarLabel => 'Around you';
+
+  @override
+  String exploreRadarResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
 }

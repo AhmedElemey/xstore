@@ -1385,5 +1385,23 @@
   "requestCustomDeliveryAction": "Request custom delivery",
   "packageRejectReasonHint": "Reason (optional)",
   "packageRequestAgainAction": "Request again",
-  "packageOrderLinkedLabel": "Linked to an order"
+  "packageOrderLinkedLabel": "Linked to an order",
+  "homeLiveOrderCashReady": "Have {amount} cash ready",
+  "@homeLiveOrderCashReady": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeLiveOrderTrack": "Track",
+  "exploreRadarLabel": "Around you",
+  "exploreRadarResults": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "@exploreRadarResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

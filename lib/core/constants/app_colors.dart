@@ -20,6 +20,9 @@ abstract final class AppColors {
   static const plasma = Color(0xFF7CF0FF);
   static const nova = primaryLight;
   static const cash = accentLight;
+
+  /// [cash] fails contrast on light grounds; amber-700 carries money text there.
+  static const cashOnLight = Color(0xFFB45309);
   static const space = Color(0xFF06081A);
 
   // Light scheme

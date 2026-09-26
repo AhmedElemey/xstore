@@ -1009,3 +1009,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-26 — Orbit design: dark-first tokens, starfield behind the body
 - **Rule:** The Orbit redesign is dark-first (`AppThemeMode` defaults to dark; a saved choice wins). Use theme colours (`context.primaryColor` = plasma in dark, violet in light) — `AppColors.plasma` can't carry white text, so never use it as a light-mode fill. Money/COD amounts use `AppColors.cash`. Screen backdrops wrap the Scaffold `body` in `SpaceBackground` (dark: deep-space starfield; light: "daylight orbit" dawn gradient, pastel nebulae, faint violet stars, orbit rings — keep light-mode decoration faint so text stays crisp); keep Scaffolds opaque, because a transparent Scaffold lets the previous route show through during push transitions and un-pins sticky headers that paint `context.backgroundColor`. Replace hardcoded `AppColors.light*` in widgets with `context.*` getters so dark mode holds.
 - **Where it applies:** `space_background.dart`, `app_theme.dart`, `app_colors.dart`, `xstore_bottom_nav.dart`, `xstore_button.dart`, any new screen.
+
+### 2026-09-26 — Content added above a SliverFillRemaining state must not squeeze it
+- **Rule:** An empty, error or placeholder state in `SliverFillRemaining` gets only the space left under the slivers above it. When you add a header (for example the Explore radar), give fixed-height states `hasScrollBody: false` so they grow and scroll instead of overflowing. Tests run in an 800×600 window, so they catch this before small phones do.
+- **Where it applies:** `explore_screen.dart` and any screen whose states sit in `SliverFillRemaining`.
+
+### 2026-09-26 — Home cards reuse the owning notifier, fetching only when it's empty
+- **Rule:** A Home summary of another feature's data (the live order card) watches that feature's keepAlive notifier with `select` and reuses its fetch — no new datasource or endpoint. Fetch only when the notifier is empty and not loading (`postFrame` plus a check on sign-in, queued in a microtask behind the notifier's own auth reset), and refresh it on pull-to-refresh. Screen tests keep passing because unscripted routes just error and the card stays hidden.
+- **Where it applies:** `home_live_order_card.dart`, `home_screen.dart`, any cross-feature summary card.

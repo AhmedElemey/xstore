@@ -14,6 +14,7 @@ import '../../../../core/utils/extensions/async_value_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../../orders/presentation/providers/orders_provider.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
@@ -29,6 +30,7 @@ import '../widgets/category_chip_row.dart';
 import '../widgets/featured_categories_banner.dart';
 import '../widgets/hero_banner_carousel.dart';
 import '../widgets/home_header.dart';
+import '../widgets/home_live_order_card.dart';
 import '../widgets/hot_deals_section.dart';
 import '../widgets/new_arrivals_grid.dart';
 import '../widgets/recommended_section.dart';
@@ -86,6 +88,10 @@ class HomeScreen extends ConsumerWidget {
           ref.invalidate(categoriesProvider);
           ref.invalidate(newArrivalsProvider);
           ref.invalidate(recommendedProvider);
+          final user = ref.read(authProvider).valueOrNull;
+          if (user?.role == UserRole.consumer) {
+            ref.read(ordersNotifierProvider.notifier).fetchOrders();
+          }
           await Future.wait([
             ref.read(bannersProvider.future),
             ref.read(hotDealsProvider.future),
@@ -123,6 +129,7 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  const HomeLiveOrderCard(),
                   banners.toWidget(
                     data: (data) => HeroBannerCarousel(
                       banners: data,
