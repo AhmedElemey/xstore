@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -30,58 +31,38 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.md),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final boundedH = constraints.hasBoundedHeight;
-
-            if (boundedH) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _ProductImage(
-                      theme: theme,
-                      imageUrl: imageUrl,
-                      listingId: listingId,
-                    ),
-                  ),
-                  _Footer(
-                    theme: theme,
-                    title: title,
-                    price: price,
-                    discountPercent: discountPercent,
-                  ),
-                ],
-              );
-            }
-
+    // Orbit product tile: glass card, rounded image with the heart on it,
+    // bold title, amber price.
+    return GlassCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.sm + 2),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final image = ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: _ProductImage(
+              theme: theme,
+              imageUrl: imageUrl,
+              listingId: listingId,
+            ),
+          );
+          final footer = _Footer(
+            theme: theme,
+            title: title,
+            price: price,
+            discountPercent: discountPercent,
+          );
+          if (constraints.hasBoundedHeight) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: _ProductImage(
-                    theme: theme,
-                    imageUrl: imageUrl,
-                    listingId: listingId,
-                  ),
-                ),
-                _Footer(
-                  theme: theme,
-                  title: title,
-                  price: price,
-                  discountPercent: discountPercent,
-                ),
-              ],
+              children: [Expanded(child: image), footer],
             );
-          },
-        ),
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [AspectRatio(aspectRatio: 1, child: image), footer],
+          );
+        },
       ),
     );
   }
@@ -133,7 +114,11 @@ class _ProductImage extends StatelessWidget {
         Positioned(
           top: AppSpacing.sm,
           right: AppSpacing.sm,
-          child: WishHeartButton(listingId: listingId!, size: AppSpacing.x2l),
+          child: WishHeartButton(
+            listingId: listingId!,
+            size: 20,
+            onDarkBackground: true,
+          ),
         ),
       ],
     );
@@ -156,7 +141,7 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(2, AppSpacing.sm, 2, 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -165,7 +150,10 @@ class _Footer extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
           ),
           const Gap(AppSpacing.xs),
           Row(
@@ -175,9 +163,10 @@ class _Footer extends StatelessWidget {
                   textDirection: TextDirection.ltr,
                   child: Text(
                     context.formatCurrency(price),
-                    style: AppTypography.bodySmall.copyWith(
+                    style: AppTypography.bodyMedium.copyWith(
                       color: context.cashColor,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

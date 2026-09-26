@@ -155,7 +155,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     icon: LucideIcons.heart,
                     iconBackground: AppColors.accent,
                     label: context.l10n.menuWishlist,
-                    onTap: () => context.go(AppRoutes.wishlist),
+                    onTap: () => context.push(AppRoutes.wishlist),
                   ),
                   // Saved delivery addresses only matter for the buying
                   // flow — vendors and couriers can't place orders in this

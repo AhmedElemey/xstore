@@ -89,7 +89,7 @@ class WishHeartButton extends ConsumerWidget {
         message: context.l10n.wishlistSavedSnack,
         action: SnackBarAction(
           label: context.l10n.wishlistView,
-          onPressed: () => context.go(AppRoutes.wishlist),
+          onPressed: () => context.push(AppRoutes.wishlist),
         ),
       );
     } else if (!nowWishlisted && wasWishlisted) {

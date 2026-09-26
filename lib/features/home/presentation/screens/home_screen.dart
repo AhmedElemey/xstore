@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -9,11 +8,9 @@ import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/extensions/async_value_extensions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
@@ -56,9 +53,6 @@ class HomeScreen extends ConsumerWidget {
     final isConsumer = ref.watch(
       authProvider.select((auth) => auth.valueOrNull?.role != UserRole.vendor),
     );
-    final cartCount = isConsumer
-        ? ref.watch(cartProvider.select((s) => s.itemCount))
-        : 0;
 
     final initialLoading =
         (!banners.hasValue && banners.isLoading) ||
@@ -103,25 +97,17 @@ class HomeScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverAppBar(
-              pinned: true,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              backgroundColor: context.backgroundColor,
-              automaticallyImplyLeading: false,
-              toolbarHeight: 0,
-              expandedHeight:
-                  AppSpacing.x4l * 3 + AppSpacing.x3l + AppSpacing.lg,
-              flexibleSpace: FlexibleSpaceBar(
-                background: HomeHeader(
+            SliverToBoxAdapter(
+              child: SafeArea(
+                bottom: false,
+                child: HomeHeader(
                   onSearchTap: () => context.go(AppRoutes.explore),
-                  onCartTap: isConsumer
+                  onWishlistTap: isConsumer
                       ? () {
                           if (!requireLogin(context, ref)) return;
-                          context.push(AppRoutes.cart);
+                          context.push(AppRoutes.wishlist);
                         }
                       : null,
-                  cartItemCount: cartCount,
                 ).fadeSlideIn(duration: AppAnimations.medium),
               ),
             ),
@@ -129,30 +115,8 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // Orbit order: live order, category orbs, Fresh in orbit.
                   const HomeLiveOrderCard(),
-                  banners.toWidget(
-                    data: (data) => HeroBannerCarousel(
-                      banners: data,
-                      onBannerTap: (url) => context.go(url),
-                    ).scaleIn(
-                      delay: const Duration(milliseconds: 100),
-                    ),
-                    loading: () => const _BannerShimmer(),
-                    errorBuilder: (e) => ErrorStateWidget(
-                      message: e.toString(),
-                      onRetry: () => ref.invalidate(bannersProvider),
-                    ),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  Text(
-                    context.l10n.shopByCategory,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ).fadeSlideIn(
-                    delay: const Duration(milliseconds: 200),
-                  ),
-                  const Gap(AppSpacing.md),
                   categories.toWidget(
                     data: (data) => CategoryChipRow(
                       categories: data,
@@ -173,6 +137,34 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const Gap(AppSpacing.lg),
+                  newArrivals.toWidget(
+                    data: (data) => NewArrivalsGrid(
+                      items: data,
+                      onOpenProduct: (listing) =>
+                          _openListing(context, listing.id),
+                      onSeeAll: () => context.go(AppRoutes.explore),
+                    ),
+                    loading: () => const _DealsSkeleton(),
+                    errorBuilder: (e) => ErrorStateWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(newArrivalsProvider),
+                    ),
+                  ),
+                  // Sections the design doesn't have keep their backend
+                  // content, restyled, below the design's layout.
+                  const Gap(AppSpacing.x2l),
+                  banners.toWidget(
+                    data: (data) => HeroBannerCarousel(
+                      banners: data,
+                      onBannerTap: (url) => context.go(url),
+                    ),
+                    loading: () => const _BannerShimmer(),
+                    errorBuilder: (e) => ErrorStateWidget(
+                      message: e.toString(),
+                      onRetry: () => ref.invalidate(bannersProvider),
+                    ),
+                  ),
+                  const Gap(AppSpacing.lg),
                   deals.toWidget(
                     data: (data) => HotDealsSection(
                       deals: data,
@@ -185,30 +177,11 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const Gap(AppSpacing.lg),
-                  FeaturedCategoriesBanner()
-                      .animate()
-                      .fadeIn(duration: AppAnimations.normal)
-                      .slideY(
-                        begin: 0.06,
-                        end: 0,
-                        duration: AppAnimations.medium,
-                        curve: AppAnimations.enter,
-                      ),
-                  const Gap(AppSpacing.lg),
-                  newArrivals.toWidget(
-                    data: (data) => NewArrivalsGrid(
-                      items: data,
-                      onOpenProduct: (listing) =>
-                          _openListing(context, listing.id),
-                    ),
-                    loading: () => const _DealsSkeleton(),
-                    errorBuilder: (e) => ErrorStateWidget(
-                      message: e.toString(),
-                      onRetry: () => ref.invalidate(newArrivalsProvider),
-                    ),
-                  ),
+                  const FeaturedCategoriesBanner(),
                   const Gap(AppSpacing.lg),
                   const RecommendedSection(),
+                  const Gap(AppSpacing.lg),
+                  const HomeTrustChips(),
                   const Gap(AppSpacing.x3l),
                 ]),
               ),

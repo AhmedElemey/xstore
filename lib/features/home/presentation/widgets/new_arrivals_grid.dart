@@ -5,14 +5,21 @@ import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import 'product_card.dart';
 
 class NewArrivalsGrid extends StatelessWidget {
-  const NewArrivalsGrid({super.key, required this.items, this.onOpenProduct});
+  const NewArrivalsGrid({
+    super.key,
+    required this.items,
+    this.onOpenProduct,
+    this.onSeeAll,
+  });
 
   final List<ListingEntity> items;
   final void Function(ListingEntity listing)? onOpenProduct;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +30,12 @@ class NewArrivalsGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.newArrivals,
-          style: Theme.of(context).textTheme.titleMedium,
+        OrbitSectionHeader(
+          title: context.l10n.homeFreshInOrbit,
+          actionLabel: onSeeAll == null ? null : context.l10n.seeAll,
+          onAction: onSeeAll,
         ),
-        const Gap(AppSpacing.md),
+        const Gap(AppSpacing.sm),
         LayoutBuilder(
           builder: (context, constraints) {
             const crossAxisCount = 2;

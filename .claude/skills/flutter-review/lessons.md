@@ -942,9 +942,9 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** On removal, send `''` on both the write key (`storeImageUrl`/`userImageUrl`) and the GET key (`storeLogoUrl`/`avatarUrl`), with no file part. After the PUT and the post-save GET, force that URL to null if this save cleared it — the backend may still echo the old URL. Parse blank URLs as null.
 - **Where it applies:** `profile_remote_datasource.dart`, `user_model.dart`, `profile_provider.dart` `saveProfile`.
 
-### 2026-09-22 — Wishlist nav heart
-- **Rule:** The consumer wishlist tab shows a filled red heart (`Icons.favorite_rounded`, `AppColors.error`) when `wishlistProvider.select((s) => s.itemCount > 0)`, even when selected — no count badge unless asked.
-- **Where it applies:** `xstore_bottom_nav.dart`.
+### 2026-09-22 — Wishlist heart lives in Home's header
+- **Rule:** The Orbit dock has no Wishlist tab (Home, Explore, Cart orb, Orders, Profile); `/wishlist` is a stack route opened with `context.push` from Home's header heart, which shows a filled red heart when `wishlistProvider.select((s) => s.itemCount > 0)`. No count badge unless asked. The Cart orb pushes `/cart` after `requireLogin`.
+- **Where it applies:** `xstore_bottom_nav.dart`, `home_header.dart`, `app_router.dart`.
 
 ### 2026-09-22 — Events tracked during service init change test expectations
 - **Rule:** `app_open` is tracked in `AnalyticsService._init()`, so tests can't assume an empty queue after `ready`. Assert with `contains`/`isNot(contains(...))`, or `await service.flushNow()` right after `ready` for a clean start — the init flush is unawaited and racy. Adding any init-time event means auditing `queuedEventNames`, `.single` and `hasLength` assertions.

@@ -1396,5 +1396,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "homeGreetingMorning": "صباح الخير",
+  "homeGreetingAfternoon": "مساء الخير",
+  "homeGreetingEvening": "مساء الخير",
+  "homeFreshInOrbit": "جديد في المدار",
+  "homeSearchProductsStores": "ابحث عن منتجات ومتاجر",
+  "homeMoreToExplore": "المزيد لتستكشفه"
 }

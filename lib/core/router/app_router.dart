@@ -71,9 +71,6 @@ List<StatefulShellBranch> _consumerShellBranches() => [
         routes: [_shellTab(AppRoutes.explore, const ExploreScreen())],
       ),
       StatefulShellBranch(
-        routes: [_shellTab(AppRoutes.wishlist, const WishlistScreen())],
-      ),
-      StatefulShellBranch(
         routes: [_shellTab(AppRoutes.orders, const OrdersScreen())],
       ),
       StatefulShellBranch(
@@ -286,6 +283,15 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const CartScreen(),
+        ),
+      ),
+      // Orbit dock has no Wishlist tab — it opens from Home's heart button.
+      GoRoute(
+        path: AppRoutes.wishlist,
+        pageBuilder: (context, state) => slideUpTransition(
+          context,
+          state,
+          const WishlistScreen(),
         ),
       ),
       GoRoute(

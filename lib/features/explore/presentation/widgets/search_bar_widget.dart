@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class SearchBarWidget extends StatelessWidget {
   const SearchBarWidget({
@@ -31,12 +31,13 @@ class SearchBarWidget extends StatelessWidget {
           autofocus: true,
           onChanged: onChanged,
           textInputAction: TextInputAction.search,
+          // Orbit search pill: glass fill, plasma icon, glowing edge on focus.
           decoration: InputDecoration(
             hintText: context.l10n.exploreSearchPlaceholder,
             hintStyle: AppTypography.bodyMedium.copyWith(
               color: context.textHint,
             ),
-            prefixIcon: Icon(LucideIcons.search, color: context.textSecondary),
+            prefixIcon: Icon(LucideIcons.search, color: context.primaryColor),
             suffixIcon: v.text.isEmpty
                 ? null
                 : IconButton(
@@ -44,18 +45,18 @@ class SearchBarWidget extends StatelessWidget {
                     icon: Icon(LucideIcons.x, color: context.textSecondary),
                   ),
             filled: true,
-            fillColor: context.surfaceColor,
+            fillColor: glassFill(context),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              borderSide: BorderSide(color: context.textDisabled),
+              borderRadius: BorderRadius.circular(26),
+              borderSide: BorderSide(color: context.borderColor),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              borderSide: BorderSide(color: context.textDisabled),
+              borderRadius: BorderRadius.circular(26),
+              borderSide: BorderSide(color: context.borderColor),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderRadius: BorderRadius.circular(26),
+              borderSide: BorderSide(color: context.primaryColor, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: context.scaledPx(AppSpacing.lg),

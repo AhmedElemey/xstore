@@ -8,11 +8,11 @@ import '../../core/animations/app_animations.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/router/app_routes.dart';
 import '../../core/utils/extensions/context_extensions.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
-import '../../features/wishlist/presentation/providers/wishlist_provider.dart';
 import '../utils/require_login.dart';
 import 'notification_icon_badge.dart';
 
@@ -23,13 +23,18 @@ class XstoreBottomNav extends ConsumerWidget {
 
   final StatefulNavigationShell shell;
 
-  void _onTap(BuildContext context, WidgetRef ref, int index) {
+  void _goBranch(BuildContext context, WidgetRef ref, int branch) {
     // Home (0) and Explore (1) are guest-browsable; every other tab is
     // account-bound. Ask guests to sign in instead of letting the route
     // redirect bounce them to the login screen with no explanation.
     // Signed-in users (any role) pass straight through.
-    if (index >= 2 && !requireLogin(context, ref)) return;
-    shell.goBranch(index, initialLocation: index == shell.currentIndex);
+    if (branch >= 2 && !requireLogin(context, ref)) return;
+    shell.goBranch(branch, initialLocation: branch == shell.currentIndex);
+  }
+
+  void _openCart(BuildContext context, WidgetRef ref) {
+    if (!requireLogin(context, ref)) return;
+    context.push(AppRoutes.cart);
   }
 
   @override
@@ -37,63 +42,42 @@ class XstoreBottomNav extends ConsumerWidget {
     final role = ref.watch(
       authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
     );
-    final isVendor = role == UserRole.vendor;
     final cartCount = role == UserRole.consumer
         ? ref.watch(cartProvider.select((s) => s.itemCount))
         : 0;
-    final hasWishlistItems =
-        role == UserRole.consumer &&
-        ref.watch(wishlistProvider.select((s) => s.itemCount > 0));
 
-    // Tab sets mirror the shell branches per role in app_router.dart —
-    // keep both lists in sync when adding a tab. Vendors have no Home/Explore
-    // tab — they don't browse the marketplace inside their own shell.
-    final labels = switch (role) {
+    // Items mirror the shell branches per role in app_router.dart — keep both
+    // in sync. An item with a `branch` switches tabs; the shopper's Cart orb
+    // is not a tab, it pushes the cart screen.
+    final items = switch (role) {
       UserRole.vendor => [
-        context.l10n.navOrders,
-        context.l10n.myListings,
-        context.l10n.navAddListing,
-        context.l10n.navWallet,
-        context.l10n.navProfile,
+        _DockItem(context.l10n.navOrders, LucideIcons.package, branch: 0),
+        _DockItem(context.l10n.myListings, LucideIcons.layoutGrid, branch: 1),
+        _DockItem(context.l10n.navAddListing, LucideIcons.plus, branch: 2, orb: true),
+        _DockItem(context.l10n.navWallet, LucideIcons.wallet, branch: 3),
+        _DockItem(context.l10n.navProfile, LucideIcons.user, branch: 4),
       ],
       UserRole.courier => [
-        context.l10n.navDeliveries,
-        context.l10n.navCash,
-        context.l10n.navProfile,
+        _DockItem(context.l10n.navDeliveries, LucideIcons.truck, branch: 0),
+        _DockItem(context.l10n.navCash, LucideIcons.wallet, branch: 1),
+        _DockItem(context.l10n.navProfile, LucideIcons.user, branch: 2),
       ],
       UserRole.consumer => [
-        context.l10n.navHome,
-        context.l10n.navExplore,
-        context.l10n.navWishlist,
-        context.l10n.navOrders,
-        context.l10n.navProfile,
+        _DockItem(context.l10n.navHome, LucideIcons.home, branch: 0),
+        _DockItem(context.l10n.navExplore, LucideIcons.compass, branch: 1),
+        _DockItem(
+          context.l10n.cartTitle,
+          LucideIcons.shoppingCart,
+          orb: true,
+          badge: cartCount,
+        ),
+        _DockItem(context.l10n.navOrders, LucideIcons.package, branch: 2),
+        _DockItem(context.l10n.navProfile, LucideIcons.user, branch: 3),
       ],
     };
 
-    final icons = switch (role) {
-      UserRole.vendor => [
-        LucideIcons.list,
-        LucideIcons.layoutGrid,
-        LucideIcons.plus,
-        LucideIcons.wallet,
-        LucideIcons.user,
-      ],
-      UserRole.courier => [
-        LucideIcons.truck,
-        LucideIcons.wallet,
-        LucideIcons.user,
-      ],
-      UserRole.consumer => [
-        LucideIcons.home,
-        LucideIcons.search,
-        LucideIcons.heart,
-        LucideIcons.package,
-        LucideIcons.user,
-      ],
-    };
-
-    // Orbit dock: a floating glass pill on the page background. The vendor
-    // Add Listing tab is the glowing orb in the middle.
+    // Orbit dock: a floating glass pill on the page background; the centre
+    // item is a glowing orb (shopper cart, seller Add Listing).
     final dark = context.isDark;
     return ColoredBox(
       color: context.backgroundColor,
@@ -102,7 +86,7 @@ class XstoreBottomNav extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
-            AppSpacing.xs,
+            AppSpacing.md,
             AppSpacing.lg,
             AppSpacing.md,
           ),
@@ -125,48 +109,34 @@ class XstoreBottomNav extends ConsumerWidget {
               ],
             ),
             child: SizedBox(
-              height: 64,
+              height: 68,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: List.generate(labels.length, (index) {
-                  final selected = shell.currentIndex == index;
-                  final accentMid = isVendor && index == 2;
-                  // Same filled+red heart as product cards when the list
-                  // isn't empty. Color stays error even on the selected tab
-                  // so "you have saved items" isn't lost in the primary tint.
-                  final wishlistFilled =
-                      role == UserRole.consumer &&
-                      index == 2 &&
-                      hasWishlistItems;
-
-                  return Expanded(
-                    child: AnimatedTap(
-                      onTap: () => _onTap(context, ref, index),
-                      child: accentMid
-                          ? _DockOrb(
-                              icon: icons[index],
-                              label: labels[index],
-                              selected: selected,
-                            )
-                          : _DockTab(
-                              icon: wishlistFilled
-                                  ? Icons.favorite_rounded
-                                  : icons[index],
-                              iconColor: wishlistFilled
-                                  ? AppColors.error
-                                  : null,
-                              label: labels[index],
-                              selected: selected,
-                              // Cart has no tab of its own (it's opened from
-                              // Home's app bar) — echo the count on Home.
-                              badgeCount:
-                                  role == UserRole.consumer && index == 0
-                                  ? cartCount
-                                  : 0,
-                            ),
+                children: [
+                  for (final item in items)
+                    Expanded(
+                      child: AnimatedTap(
+                        onTap: () => item.branch == null
+                            ? _openCart(context, ref)
+                            : _goBranch(context, ref, item.branch!),
+                        child: item.orb
+                            ? _DockOrb(
+                                icon: item.icon,
+                                label: item.label,
+                                selected: item.branch == shell.currentIndex,
+                                badgeCount: item.badge,
+                                // Shopper cart glows plasma; seller Add
+                                // Listing glows amber.
+                                warm: role == UserRole.vendor,
+                              )
+                            : _DockTab(
+                                icon: item.icon,
+                                label: item.label,
+                                selected: item.branch == shell.currentIndex,
+                              ),
+                      ),
                     ),
-                  );
-                }),
+                ],
               ),
             ),
           ),
@@ -176,20 +146,34 @@ class XstoreBottomNav extends ConsumerWidget {
   }
 }
 
+class _DockItem {
+  const _DockItem(
+    this.label,
+    this.icon, {
+    this.branch,
+    this.orb = false,
+    this.badge = 0,
+  });
+
+  final String label;
+  final IconData icon;
+
+  /// Shell branch to switch to; null for the cart orb (a pushed route).
+  final int? branch;
+  final bool orb;
+  final int badge;
+}
+
 class _DockTab extends StatelessWidget {
   const _DockTab({
     required this.icon,
     required this.label,
     required this.selected,
-    required this.badgeCount,
-    this.iconColor,
   });
 
   final IconData icon;
   final String label;
   final bool selected;
-  final int badgeCount;
-  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -204,12 +188,9 @@ class _DockTab extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            NotificationIconBadge(
-              count: badgeCount,
-              child: Transform.scale(
-                scale: 1.0 + (t * 0.12),
-                child: Icon(icon, color: iconColor ?? blended, size: 22),
-              ),
+            Transform.scale(
+              scale: 1.0 + (t * 0.12),
+              child: Icon(icon, color: blended, size: 22),
             ),
             const SizedBox(height: 4),
             Text(
@@ -251,11 +232,15 @@ class _DockOrb extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.selected,
+    required this.badgeCount,
+    required this.warm,
   });
 
   final IconData icon;
   final String label;
   final bool selected;
+  final int badgeCount;
+  final bool warm;
 
   @override
   Widget build(BuildContext context) {
@@ -272,19 +257,25 @@ class _DockOrb extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const RadialGradient(
-              center: Alignment(-0.3, -0.4),
-              colors: [Color(0xFFFFF4DE), AppColors.cash, AppColors.primary],
-              stops: [0, 0.4, 1],
+            gradient: RadialGradient(
+              center: const Alignment(-0.3, -0.4),
+              colors: warm
+                  ? const [Color(0xFFFFF4DE), AppColors.cash, AppColors.primary]
+                  : const [Color(0xFFE9FDFF), AppColors.plasma, AppColors.primary],
+              stops: const [0, 0.4, 1],
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.cash.withValues(alpha: selected ? 0.75 : 0.45),
+                color: (warm ? AppColors.cash : AppColors.plasma)
+                    .withValues(alpha: selected ? 0.75 : 0.5),
                 blurRadius: selected ? 24 : 16,
               ),
             ],
           ),
-          child: Icon(icon, color: AppColors.space, size: 26),
+          child: NotificationIconBadge(
+            count: badgeCount,
+            child: Icon(icon, color: AppColors.space, size: 26),
+          ),
         ),
       ),
     );

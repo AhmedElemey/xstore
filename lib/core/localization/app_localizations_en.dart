@@ -3209,4 +3209,22 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get homeGreetingMorning => 'Good morning';
+
+  @override
+  String get homeGreetingAfternoon => 'Good afternoon';
+
+  @override
+  String get homeGreetingEvening => 'Good evening';
+
+  @override
+  String get homeFreshInOrbit => 'Fresh in orbit';
+
+  @override
+  String get homeSearchProductsStores => 'Search products and stores';
+
+  @override
+  String get homeMoreToExplore => 'More to explore';
 }

@@ -24,6 +24,7 @@ import '../explore_provider.dart';
 import '../explore_state.dart';
 import '../widgets/active_filters_row.dart';
 import '../widgets/explore_radar_header.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../widgets/explore_empty_state.dart';
 import '../widgets/explore_error_state.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -159,26 +160,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.navExplore),
-        backgroundColor: context.backgroundColor,
-        actions: [
-          IconButton(
-            tooltip: context.l10n.filters,
-            onPressed: () => _openFilters(
-              context,
-              state.filters,
-              categoryOptions,
-            ),
-            icon: Badge(
-              isLabelVisible: filterCount > 0,
-              label: Text('$filterCount'),
-              child: const Icon(LucideIcons.slidersHorizontal),
-            ),
-          ),
-        ],
-      ),
-      body: SpaceBackground(child: RefreshIndicator(
+      // Orbit Explore has no title bar: the search pill and a round filter
+      // button sit at the top of the page.
+      body: SpaceBackground(child: SafeArea(bottom: false, child: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
           await notifier.search(state.query);
@@ -199,16 +183,40 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      SearchBarWidget(
-                        controller: _q,
-                        focusNode: _focus,
-                        onChanged: (v) {
-                          notifier.onQueryChanged(v);
-                        },
-                        onClear: () {
-                          _q.clear();
-                          notifier.clearQueryField();
-                        },
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SearchBarWidget(
+                              controller: _q,
+                              focusNode: _focus,
+                              onChanged: (v) {
+                                notifier.onQueryChanged(v);
+                              },
+                              onClear: () {
+                                _q.clear();
+                                notifier.clearQueryField();
+                              },
+                            ),
+                          ),
+                          const Gap(AppSpacing.sm),
+                          OrbitCircleButton(
+                            tooltip: context.l10n.filters,
+                            onPressed: () => _openFilters(
+                              context,
+                              state.filters,
+                              categoryOptions,
+                            ),
+                            child: Badge(
+                              isLabelVisible: filterCount > 0,
+                              label: Text('$filterCount'),
+                              child: Icon(
+                                LucideIcons.slidersHorizontal,
+                                size: 20,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       if (state.suggestions.isNotEmpty && _focus.hasFocus) ...[
                         const Gap(AppSpacing.sm),
@@ -430,7 +438,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ],
           ),
         ),
-      )),
+      ))),
     );
   }
 }

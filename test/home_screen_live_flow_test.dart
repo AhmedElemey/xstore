@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:xstore/features/home/presentation/widgets/hot_deals_section.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
@@ -127,6 +128,13 @@ Map<String, dynamic> _homeAggregateJson() => {
   'recommendedForYou': <dynamic>[],
 };
 
+/// A title inside the Hot Deals section (the recommended strip can echo the
+/// same listing further down).
+Finder _hotDeal(String title) => find.descendant(
+  of: find.byType(HotDealsSection),
+  matching: find.text(title),
+);
+
 Widget _harness(List<Override> overrides) => ProviderScope(
   overrides: overrides,
   child: const MaterialApp(
@@ -219,20 +227,29 @@ void main() {
       );
       await _settle(tester);
 
-      expect(find.text('Summer Sale'), findsOneWidget);
+      // Orbit layout: category orbs and "Fresh in orbit" (new arrivals)
+      // lead; banners and hot deals follow further down.
       expect(find.text('Electronics'), findsOneWidget);
       expect(
-        find.text('Wireless Earbuds', skipOffstage: false),
+        find.text('Bluetooth Speaker', skipOffstage: false),
         findsOneWidget,
       );
 
-      // New Arrivals renders further down than the sliver's cache extent
-      // reaches at rest — that Element isn't built at all yet, so a real
-      // scroll (not just `skipOffstage: false`) is needed to reach it.
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+      await tester.scrollUntilVisible(
+        find.text('Summer Sale'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       await _settle(tester);
+      expect(find.text('Summer Sale'), findsOneWidget);
 
-      expect(find.text('Bluetooth Speaker'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        _hotDeal('Wireless Earbuds'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await _settle(tester);
+      expect(_hotDeal('Wireless Earbuds'), findsOneWidget);
     },
   );
 
@@ -254,16 +271,17 @@ void main() {
       );
       await _settle(tester);
 
-      // The hot-deal tile is within the sliver's cache extent (so
-      // `find.text` locates it) but below the physical test viewport, so
-      // `tester.tap`'s computed offset falls outside the root render
-      // view's bounds — scroll it fully into view first.
-      expect(find.text('Wireless Earbuds', skipOffstage: false), findsOneWidget);
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+      // Hot deals sit below the Orbit sections — scroll the tile fully into
+      // view so `tester.tap` lands inside the viewport.
+      await tester.scrollUntilVisible(
+        _hotDeal('Wireless Earbuds'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       await _settle(tester);
 
-      expect(find.text('Wireless Earbuds'), findsOneWidget);
-      await tester.tap(find.text('Wireless Earbuds'));
+      expect(_hotDeal('Wireless Earbuds'), findsOneWidget);
+      await tester.tap(_hotDeal('Wireless Earbuds'));
       await _settle(tester);
 
       expect(

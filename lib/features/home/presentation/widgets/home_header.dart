@@ -6,91 +6,133 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../shared/widgets/notification_bell_button.dart';
-import '../../../../shared/widgets/notification_icon_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/notification_bell_button.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../wishlist/presentation/providers/wishlist_provider.dart';
 
+/// Orbit Home header: greeting and name, wishlist heart and bell on glass
+/// discs, then the search pill.
 class HomeHeader extends ConsumerWidget {
   const HomeHeader({
     super.key,
     required this.onSearchTap,
-    this.onCartTap,
-    this.cartItemCount = 0,
+    this.onWishlistTap,
   });
 
   final VoidCallback onSearchTap;
-  final VoidCallback? onCartTap;
-  final int cartItemCount;
+
+  /// Null hides the heart (vendors don't have a wishlist).
+  final VoidCallback? onWishlistTap;
+
+  String _greeting(BuildContext context) {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return context.l10n.homeGreetingMorning;
+    if (hour < 17) return context.l10n.homeGreetingAfternoon;
+    return context.l10n.homeGreetingEvening;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Text(
-                  context.l10n.appName,
-                  style: AppTypography.titleLarge.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const Spacer(),
-                if (onCartTap != null)
-                  IconButton(
-                    onPressed: onCartTap,
-                    icon: NotificationIconBadge(
-                      count: cartItemCount,
-                      child: Icon(
-                        LucideIcons.shoppingCart,
+    final name = ref.watch(
+      authProvider.select((a) => a.valueOrNull?.name.trim() ?? ''),
+    );
+    final firstName = name.isEmpty ? '' : name.split(RegExp(r'\s+')).first;
+    final hasSaved = onWishlistTap != null &&
+        ref.watch(wishlistProvider.select((s) => s.itemCount > 0));
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _greeting(context),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.textSecondary,
+                      ),
+                    ),
+                    const Gap(2),
+                    Text(
+                      firstName.isEmpty ? context.l10n.appName : firstName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.titleSmall.copyWith(
+                        fontWeight: FontWeight.w800,
                         color: context.textPrimary,
                       ),
                     ),
-                  ),
-                NotificationBellButton(
-                  icon: LucideIcons.bellDot,
-                  tooltip: context.l10n.notifications,
+                  ],
                 ),
+              ),
+              if (onWishlistTap != null) ...[
+                OrbitCircleButton(
+                  tooltip: context.l10n.navWishlist,
+                  onPressed: onWishlistTap,
+                  child: Icon(
+                    hasSaved ? Icons.favorite_rounded : LucideIcons.heart,
+                    size: 21,
+                    color: hasSaved ? AppColors.errorLight : context.textPrimary,
+                  ),
+                ),
+                const Gap(AppSpacing.sm),
               ],
-            ),
-            const Gap(AppSpacing.md),
-            Material(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              child: InkWell(
-                onTap: onSearchTap,
-                borderRadius: BorderRadius.circular(AppSpacing.md),
-                child: Container(
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: glassFill(context),
+                  border: Border.all(color: context.borderColor),
+                ),
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: NotificationBellButton(
+                    icon: LucideIcons.bell,
+                    tooltip: context.l10n.notifications,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Gap(AppSpacing.lg),
+          Material(
+            color: glassFill(context),
+            shape: StadiumBorder(side: BorderSide(color: context.borderColor)),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onSearchTap,
+              child: SizedBox(
+                height: 52,
+                child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppSpacing.md),
-                    border: Border.all(color: context.textDisabled),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         LucideIcons.search,
-                        color: context.textSecondary,
-                        size: AppSpacing.x2l,
+                        color: context.primaryColor,
+                        size: 20,
                       ),
                       const Gap(AppSpacing.md),
                       Expanded(
                         child: Text(
-                          context.l10n.searchHint,
+                          context.l10n.homeSearchProductsStores,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodyMedium.copyWith(
                             color: context.textSecondary,
                           ),
@@ -101,53 +143,48 @@ class HomeHeader extends ConsumerWidget {
                 ),
               ),
             ),
-            const Gap(AppSpacing.md),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _TrustChip(
-                    label: context.l10n.freeShippingBadge,
-                  ),
-                  const Gap(AppSpacing.sm),
-                  _TrustChip(
-                    label: context.l10n.securePayBadge,
-                  ),
-                  const Gap(AppSpacing.sm),
-                  _TrustChip(
-                    label: context.l10n.easyReturnsBadge,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TrustChip extends StatelessWidget {
-  const _TrustChip({required this.label});
-
-  final String label;
+/// The trust promises that used to sit under the search bar; the design has
+/// no slot for them, so Home shows them lower down.
+class HomeTrustChips extends StatelessWidget {
+  const HomeTrustChips({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.x3l),
-        border: Border.all(color: context.textDisabled),
-      ),
-      child: Text(
-        label,
-        style: AppTypography.labelSmall.copyWith(color: context.textSecondary),
-      ),
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final label in [
+          context.l10n.freeShippingBadge,
+          context.l10n.securePayBadge,
+          context.l10n.easyReturnsBadge,
+        ])
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs + 2,
+            ),
+            decoration: BoxDecoration(
+              color: glassFill(context),
+              borderRadius: BorderRadius.circular(AppSpacing.x3l),
+              border: Border.all(color: context.borderColor),
+            ),
+            child: Text(
+              label,
+              style: AppTypography.labelSmall.copyWith(
+                color: context.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -144,8 +144,10 @@ abstract final class AppTheme {
       hintColor: textHint,
       fontFamily: AppTypography.fontFamily,
       textTheme: textTheme,
+      // Orbit headers: left-aligned title in the display face, and the back
+      // button on a glass disc (see [actionIconTheme]).
       appBarTheme: AppBarTheme(
-        centerTitle: true,
+        centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: backgroundColor,
@@ -154,9 +156,30 @@ abstract final class AppTheme {
         iconTheme: IconThemeData(color: iconPrimary),
         actionsIconTheme: IconThemeData(color: iconPrimary),
         systemOverlayStyle: systemUiOverlayStyle,
-        titleTextStyle: textTheme.titleMedium?.copyWith(
+        leadingWidth: 64,
+        titleSpacing: 4,
+        titleTextStyle: AppTypography.titleSmall.copyWith(
+          fontFamily: AppTypography.displayFontFamily,
           color: textPrimary,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      actionIconTheme: ActionIconThemeData(
+        backButtonIconBuilder: (context) => _GlassDiscIcon(
+          icon: Icons.arrow_back_ios_new_rounded,
+          borderColor: borderColor,
+          fill: scheme.brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.white.withValues(alpha: 0.85),
+          color: textPrimary,
+        ),
+        closeButtonIconBuilder: (context) => _GlassDiscIcon(
+          icon: Icons.close_rounded,
+          borderColor: borderColor,
+          fill: scheme.brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.white.withValues(alpha: 0.85),
+          color: textPrimary,
         ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -388,6 +411,36 @@ abstract final class AppTheme {
           contentPadding: inputPadding,
         ),
       ),
+    );
+  }
+}
+
+/// Back/close glyph on a 40 px glass disc — the Orbit header button.
+class _GlassDiscIcon extends StatelessWidget {
+  const _GlassDiscIcon({
+    required this.icon,
+    required this.borderColor,
+    required this.fill,
+    required this.color,
+  });
+
+  final IconData icon;
+  final Color borderColor;
+  final Color fill;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    // Icons.arrow_back_ios_new_rounded mirrors itself in RTL.
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: fill,
+        border: Border.all(color: borderColor),
+      ),
+      child: Icon(icon, size: 18, color: color),
     );
   }
 }

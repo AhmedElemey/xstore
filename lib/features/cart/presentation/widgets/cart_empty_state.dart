@@ -57,7 +57,7 @@ class CartEmptyState extends StatelessWidget {
                 onPressed: () => context.go(AppRoutes.explore),
               ),
               TextButton(
-                onPressed: () => context.go(AppRoutes.wishlist),
+                onPressed: () => context.push(AppRoutes.wishlist),
                 child: Text(
                   context.l10n.cartOrWishlist,
                   style: AppTypography.labelLarge.copyWith(

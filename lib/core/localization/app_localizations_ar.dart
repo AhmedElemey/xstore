@@ -3198,4 +3198,22 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get homeGreetingMorning => 'صباح الخير';
+
+  @override
+  String get homeGreetingAfternoon => 'مساء الخير';
+
+  @override
+  String get homeGreetingEvening => 'مساء الخير';
+
+  @override
+  String get homeFreshInOrbit => 'جديد في المدار';
+
+  @override
+  String get homeSearchProductsStores => 'ابحث عن منتجات ومتاجر';
+
+  @override
+  String get homeMoreToExplore => 'المزيد لتستكشفه';
 }

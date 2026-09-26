@@ -231,7 +231,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       onOrdersTap: () => context.go(
                         isVendor ? AppRoutes.vendorOrders : AppRoutes.orders,
                       ),
-                      onWishlistTap: () => context.go(AppRoutes.wishlist),
+                      onWishlistTap: () => context.push(AppRoutes.wishlist),
                     ),
                   ),
                 ),

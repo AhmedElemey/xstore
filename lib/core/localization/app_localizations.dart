@@ -6079,6 +6079,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No results} =1{1 result} other{{count} results}}'**
   String exploreRadarResults(int count);
+
+  /// No description provided for @homeGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get homeGreetingMorning;
+
+  /// No description provided for @homeGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get homeGreetingAfternoon;
+
+  /// No description provided for @homeGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get homeGreetingEvening;
+
+  /// No description provided for @homeFreshInOrbit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh in orbit'**
+  String get homeFreshInOrbit;
+
+  /// No description provided for @homeSearchProductsStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products and stores'**
+  String get homeSearchProductsStores;
+
+  /// No description provided for @homeMoreToExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'More to explore'**
+  String get homeMoreToExplore;
 }
 
 class _AppLocalizationsDelegate

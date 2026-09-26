@@ -1403,5 +1403,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingEvening": "Good evening",
+  "homeFreshInOrbit": "Fresh in orbit",
+  "homeSearchProductsStores": "Search products and stores",
+  "homeMoreToExplore": "More to explore"
 }
