@@ -13,11 +13,9 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
-import '../../../wishlist/presentation/providers/wishlist_provider.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu_blocks.dart';
 import '../widgets/profile_sheets.dart';
-import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/profile_verification_banner.dart';
 import '../widgets/vendor_store_card.dart';
@@ -110,11 +108,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           clipBehavior: Clip.none,
           slivers: [
-            ProfileSliverAppBar(
-              scrollController: _scroll,
-              userName: u.name,
-              avatarUrl: u.avatarUrl,
-              avatarFile: profileState.editAvatarFile,
+            SliverToBoxAdapter(
+              child: SizedBox(height: MediaQuery.paddingOf(context).top),
             ),
             if (profileState.isLoading && profile == null)
               const SliverFillRemaining(child: ProfileSkeleton())
@@ -158,18 +153,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               SliverToBoxAdapter(
-                child: Transform.translate(
-                  offset: const Offset(0, -AppSpacing.profileAvatarHalfOut),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.sm),
-                    child: ProfileHeader(
-                      user: u,
-                      avatarFile: profileState.editAvatarFile,
-                      onEditProfile: () => context.push(AppRoutes.profileEdit),
-                      onAvatarTap: () => showProfileAvatarPickerSheet(
-                        context: context,
-                        ref: ref,
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                  ),
+                  child: ProfileHeader(
+                    user: u,
+                    emailVerified: profile?.isEmailVerified ?? false,
+                    phoneVerified: !phoneMissing &&
+                        (profile?.isPhoneVerified ?? false),
+                    avatarFile: profileState.editAvatarFile,
+                    onEditProfile: () => context.push(AppRoutes.profileEdit),
+                    onAvatarTap: () => showProfileAvatarPickerSheet(
+                      context: context,
+                      ref: ref,
                     ),
                   ),
                 ),
@@ -197,14 +197,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ),
                 ),
-              // Couriers have no orders/wishlist/saved-amount or vendor
-              // sales stats — ProfileStatsRow only branches vendor vs.
-              // everything-else, so without this gate a courier would see
-              // consumer stats (always 0) whose taps push routes blocked by
-              // the courier route guard. Delivery-specific stats (deliveries
-              // count, cash wallet balance) belong in the delivery module,
-              // out of scope here — omit the row entirely for now.
-              if (!user.isCourier)
+              // Sellers keep their sales stats and store card under the
+              // header; shoppers see their counts on the menu rows instead.
+              if (isVendor && profile != null) ...[
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
@@ -214,43 +209,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       AppSpacing.md,
                     ),
                     child: ProfileStatsRow(
-                      role: isVendor ? UserRole.vendor : user.role,
-                      sales: profile?.user.totalSales,
-                      rating: profile?.user.rating,
-                      responsePercent: profile?.responseRatePercent,
-                      orders: profile?.ordersCount,
-                      // getProfile has no confirmed backend source for this
-                      // yet (defaults to 0), but the wishlist endpoint is
-                      // live and wishlistProvider already keeps itself in
-                      // sync via its own authProvider listener — read the
-                      // real count from there instead of the profile stub.
-                      wishlistCount:
-                          ref.watch(wishlistProvider.select((s) => s.itemCount)),
-                      savedDzd: profile?.savedAmountDzd,
+                      sales: profile.user.totalSales,
+                      rating: profile.user.rating,
+                      responsePercent: profile.responseRatePercent,
                       onSalesTap: () => context.go(AppRoutes.listingMy),
-                      onOrdersTap: () => context.go(
-                        isVendor ? AppRoutes.vendorOrders : AppRoutes.orders,
-                      ),
-                      onWishlistTap: () => context.push(AppRoutes.wishlist),
                     ),
                   ),
                 ),
-              if (isVendor && profile != null)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppSpacing.lg,
-                      bottom: AppSpacing.lg,
-                    ),
-                    child: VendorStoreCard(
-                      profile: profile,
-                      // Hidden on the card; keep the route wired for restore.
-                      // onManageStore: sellerId.isEmpty
-                      //     ? null
-                      //     : () => context.push(AppRoutes.sellerPath(sellerId)),
-                    ),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                    child: VendorStoreCard(profile: profile),
                   ),
                 ),
+              ],
             ],
             SliverToBoxAdapter(
               child: Padding(

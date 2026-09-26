@@ -7,13 +7,13 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../../../shared/widgets/space_background.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -31,12 +31,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     LucideIcons.shoppingBag,
     LucideIcons.store,
     LucideIcons.shieldCheck,
-  ];
-
-  static const _slideColors = [
-    [AppColors.primaryLight, AppColors.primary],
-    [AppColors.accentLight, AppColors.accent],
-    [AppColors.successLight, AppColors.success],
   ];
 
   Future<void> _finish({required bool skipped}) async {
@@ -59,124 +53,128 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final count = _slideIcons.length;
+    final last = _page == count - 1;
+    String two(int n) => n.toString().padLeft(2, '0');
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: SpaceBackground(child: Column(
-        children: [
-          Expanded(
-            flex: 55,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _slideIcons.length,
-              onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder: (context, i) {
-                return _IllustrationArea(
-                  icon: _slideIcons[i],
-                  gradientColors: _slideColors[i],
-                );
-              },
-            ),
-          ),
-          Expanded(
-            flex: 45,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: context.surfaceColor,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    color: context.cardShadowColor,
-                    blurRadius: 24,
-                    offset: Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 28, 24, 24 + bottomInset),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: SpaceBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(28, AppSpacing.md, 28, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
                   children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => _finish(skipped: true),
-                        child: Text(
-                          context.l10n.skip,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: context.textSecondary,
-                          ),
+                    Expanded(
+                      child: Text(
+                        '${two(_page + 1)} / ${two(count)}',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: context.textSecondary,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
-                    const Gap(AppSpacing.xs),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(_slideIcons.length, (i) {
-                        final active = i == _page;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeOutCubic,
-                          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                          height: 8,
-                          width: active ? 28 : 8,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: active
-                                ? AppColors.primary
-                                : context.textDisabled,
-                          ),
-                        );
-                      }),
+                    TextButton(
+                      onPressed: () => _finish(skipped: true),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.primaryColor,
+                      ),
+                      child: Text(context.l10n.skip),
                     ),
-                    const Gap(AppSpacing.xl),
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 320),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        child: SingleChildScrollView(
-                          key: ValueKey(_page),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                [
-                                  context.l10n.onboardingTitle1,
-                                  context.l10n.onboardingTitle2,
-                                  context.l10n.onboardingTitle3,
-                                ][_page],
-                                style: AppTypography.titleLarge.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: context.textPrimary,
-                                ),
-                              ),
-                              const Gap(AppSpacing.md),
-                              Text(
-                                [
-                                  context.l10n.onboardingSubtitle1,
-                                  context.l10n.onboardingSubtitle2,
-                                  context.l10n.onboardingSubtitle3,
-                                ][_page],
-                                maxLines: 3,
-                                style: AppTypography.body15.copyWith(
-                                  height: 1.45,
-                                  color: context.textSecondary,
-                                ),
-                              ),
-                            ],
+                  ],
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: count,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemBuilder: (context, i) => _Illustration(
+                      icon: _slideIcons[i],
+                      paletteIndex: i,
+                    ),
+                  ),
+                ),
+                // Text scrolls inside its slice so long translations never
+                // overflow on short screens.
+                SizedBox(
+                  height: 190,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: SingleChildScrollView(
+                      key: ValueKey(_page),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            [
+                              context.l10n.onboardingTitle1,
+                              context.l10n.onboardingTitle2,
+                              context.l10n.onboardingTitle3,
+                            ][_page],
+                            style: AppTypography.titleLarge.copyWith(
+                              fontSize: 30,
+                              height: 1.15,
+                              fontWeight: FontWeight.w800,
+                              color: context.textPrimary,
+                            ),
                           ),
-                        ),
+                          const Gap(AppSpacing.lg),
+                          Text(
+                            [
+                              context.l10n.onboardingSubtitle1,
+                              context.l10n.onboardingSubtitle2,
+                              context.l10n.onboardingSubtitle3,
+                            ][_page],
+                            style: AppTypography.bodyLarge.copyWith(
+                              height: 1.55,
+                              color: context.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const Gap(AppSpacing.xl),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: List.generate(count, (i) {
+                          final active = i == _page;
+                          final accent = context.primaryColor;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 280),
+                            curve: Curves.easeOutCubic,
+                            margin: const EdgeInsetsDirectional.only(
+                              end: AppSpacing.sm,
+                            ),
+                            height: 8,
+                            width: active ? 28 : 8,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: active ? accent : context.borderColor,
+                              boxShadow: active
+                                  ? [
+                                      BoxShadow(
+                                        color: accent.withValues(alpha: 0.7),
+                                        blurRadius: 10,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                          );
+                        }),
                       ),
                     ),
                     XstoreButton(
-                      label: _page == _slideIcons.length - 1
-                          ? context.l10n.getStarted
-                          : context.l10n.next,
+                      label: last ? context.l10n.getStarted : context.l10n.next,
                       onPressed: () {
-                        if (_page < _slideIcons.length - 1) {
+                        if (!last) {
                           _pageController.nextPage(
                             duration: const Duration(milliseconds: 380),
                             curve: Curves.easeOutCubic,
@@ -188,52 +186,52 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        ],
-      )),
+        ),
+      ),
     );
   }
 }
 
-class _IllustrationArea extends StatelessWidget {
-  const _IllustrationArea({
-    required this.icon,
-    required this.gradientColors,
-  });
+/// A lit planet crossed by a tilted orbit ring, carrying the slide's icon.
+class _Illustration extends StatelessWidget {
+  const _Illustration({required this.icon, required this.paletteIndex});
 
   final IconData icon;
-  final List<Color> gradientColors;
+  final int paletteIndex;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: context.backgroundColor,
+    final ring = context.primaryColor.withValues(alpha: 0.5);
+    return ExcludeSemantics(
       child: Center(
-        child: Container(
-          width: 200,
-          height: 200,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: gradientColors,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: gradientColors.last.withValues(alpha: 0.35),
-                blurRadius: 40,
-                offset: const Offset(0, 16),
+        child: SizedBox(
+          width: 320,
+          height: 240,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              OrbitGlyphOrb(
+                icon: icon,
+                paletteIndex: paletteIndex,
+                size: 190,
+              ),
+              Transform.rotate(
+                angle: -0.21,
+                child: Container(
+                  width: 320,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(
+                      Radius.elliptical(160, 36),
+                    ),
+                    border: Border.all(color: ring, width: 1.5),
+                  ),
+                ),
               ),
             ],
-          ),
-          child: Icon(
-            icon,
-            size: 88,
-            color: AppColors.white.withValues(alpha: 0.95),
           ),
         ),
       ),

@@ -140,9 +140,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get continueWithFacebook => 'كمل بـ Facebook';
 
   @override
-  String get socialLoginDivider => 'أو كمل بـ';
-
-  @override
   String get welcomeBack => 'أهلاً بيك';
 
   @override
@@ -150,14 +147,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get socialRoleSubtitle => 'خطوة أخيرة — اختار نوع حسابك';
-
-  @override
-  String socialWelcomeGreeting(String name) {
-    return 'أهلاً بيك، $name! 👋';
-  }
-
-  @override
-  String get socialRoleLastStep => 'خطوة أخيرة — هتستخدم xStore إزاي؟';
 
   @override
   String get socialWelcomeFallbackName => 'يا صاحبي';
@@ -564,21 +553,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
-  String get sectionMyActivity => 'نشاطي';
-
-  @override
-  String get sectionAccountSettings => 'إعدادات الحساب';
-
-  @override
-  String get sectionPreferences => 'التفضيلات';
-
-  @override
-  String get sectionSupport => 'الدعم';
-
-  @override
-  String get sectionDangerZone => 'منطقة الخطر';
-
-  @override
   String get menuMyListings => 'إعلاناتي';
 
   @override
@@ -589,9 +563,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get menuWishlist => 'المفضلة';
-
-  @override
-  String get menuPersonalInfo => 'البيانات الشخصية';
 
   @override
   String get socialLinks => 'روابط التواصل';
@@ -637,15 +608,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statResponse => 'الرد';
-
-  @override
-  String get statOrders => 'الطلبات';
-
-  @override
-  String get statWishlist => 'المفضلة';
-
-  @override
-  String get statTotalSaved => 'إجمالي التوفير';
 
   @override
   String get storeInformation => 'بيانات المتجر';
@@ -2264,15 +2226,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get buyerSubtitle => 'اكتشف واشتري منتجات من بائعين موثوقين';
 
   @override
-  String get buyerFeature1 => '[AR] Browse thousands of products';
-
-  @override
-  String get buyerFeature2 => '[AR] Secure checkout & payments';
-
-  @override
-  String get buyerFeature3 => '[AR] Track your orders in real time';
-
-  @override
   String get buyerFeature4 => '[AR] Save favorites to wishlist';
 
   @override
@@ -2280,18 +2233,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sellerSubtitle => 'اعرض منتجاتك وابدأ تربح اليوم';
-
-  @override
-  String get sellerFeature1 => '[AR] List unlimited products';
-
-  @override
-  String get sellerFeature2 => '[AR] Manage orders & inventory';
-
-  @override
-  String get sellerFeature3 => '[AR] Analytics & sales insights';
-
-  @override
-  String get sellerFeature4 => '[AR] Direct chat with buyers';
 
   @override
   String get dateOfBirthOptional => 'تاريخ الميلاد (اختياري)';
@@ -3256,4 +3197,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String notificationsUnreadCount(int n) {
     return '$n غير مقروء';
   }
+
+  @override
+  String get authOr => 'أو';
+
+  @override
+  String get passwordRuleLength => '8 أحرف على الأقل';
+
+  @override
+  String get passwordRuleLower => 'حرف صغير';
+
+  @override
+  String get passwordRuleUpper => 'حرف كبير';
+
+  @override
+  String get passwordRuleNumber => 'رقم';
+
+  @override
+  String get passwordRuleSymbol => 'رمز مثل # أو @';
+
+  @override
+  String profileOrdersActive(int n) {
+    return '$n نشط';
+  }
+
+  @override
+  String get profileEmailVerifiedBadge => '✓ البريد موثّق';
+
+  @override
+  String get profilePhoneVerifiedBadge => '✓ الهاتف موثّق';
+
+  @override
+  String get profileEdit => 'تعديل';
 }

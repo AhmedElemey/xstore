@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
@@ -24,6 +25,7 @@ class AuthTextField extends StatelessWidget {
     this.inputFormatters,
     this.textInputAction,
     this.errorText,
+    this.labelTrailing,
   });
 
   final String label;
@@ -42,19 +44,15 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final String? errorText;
 
+  /// Action shown at the end of the label line (e.g. "Forgot password?").
+  final Widget? labelTrailing;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: AppTypography.rem(0.8125),
-            fontWeight: FontWeight.w600,
-            color: context.textPrimary,
-          ),
-        ),
+        OrbitFieldLabel(label, trailing: labelTrailing),
         SizedBox(height: context.scaledPx(8)),
         TextFormField(
           controller: controller,
@@ -74,8 +72,9 @@ class AuthTextField extends StatelessWidget {
               color: context.textSecondary,
             ),
             filled: true,
-            fillColor: context.surfaceColor,
+            fillColor: glassFill(context),
             isDense: true,
+            constraints: const BoxConstraints(minHeight: 54),
             floatingLabelBehavior: FloatingLabelBehavior.never,
             prefixIcon: prefixIcon,
             prefixIconColor: context.iconSecondary,
@@ -89,32 +88,23 @@ class AuthTextField extends StatelessWidget {
             suffixIconColor: context.iconSecondary,
             contentPadding: EdgeInsets.symmetric(
               horizontal: context.scaledPx(16),
-              vertical: context.scaledPx(AppSpacing.inputContentPaddingV),
+              vertical: context.scaledPx(AppSpacing.inputContentPaddingV + 4),
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: context.borderColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: context.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
-            ),
+            border: _border(context.borderColor),
+            enabledBorder: _border(context.borderColor),
+            focusedBorder: _border(context.primaryColor, width: 1.5),
+            errorBorder: _border(AppColors.error),
+            focusedErrorBorder: _border(AppColors.error, width: 1.5),
             errorText: errorText,
           ),
         ),
       ],
     );
   }
+
+  static OutlineInputBorder _border(Color color, {double width = 1}) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: color, width: width),
+      );
 }

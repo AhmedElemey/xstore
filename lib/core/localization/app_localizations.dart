@@ -350,12 +350,6 @@ abstract class AppLocalizations {
   /// **'Continue with Facebook'**
   String get continueWithFacebook;
 
-  /// No description provided for @socialLoginDivider.
-  ///
-  /// In en, this message translates to:
-  /// **'or continue with'**
-  String get socialLoginDivider;
-
   /// No description provided for @welcomeBack.
   ///
   /// In en, this message translates to:
@@ -373,18 +367,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One last step — choose your account type'**
   String get socialRoleSubtitle;
-
-  /// No description provided for @socialWelcomeGreeting.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome, {name}! 👋'**
-  String socialWelcomeGreeting(String name);
-
-  /// No description provided for @socialRoleLastStep.
-  ///
-  /// In en, this message translates to:
-  /// **'One last step — how will you use xStore?'**
-  String get socialRoleLastStep;
 
   /// No description provided for @socialWelcomeFallbackName.
   ///
@@ -1172,36 +1154,6 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @sectionMyActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'MY ACTIVITY'**
-  String get sectionMyActivity;
-
-  /// No description provided for @sectionAccountSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'ACCOUNT SETTINGS'**
-  String get sectionAccountSettings;
-
-  /// No description provided for @sectionPreferences.
-  ///
-  /// In en, this message translates to:
-  /// **'PREFERENCES'**
-  String get sectionPreferences;
-
-  /// No description provided for @sectionSupport.
-  ///
-  /// In en, this message translates to:
-  /// **'SUPPORT'**
-  String get sectionSupport;
-
-  /// No description provided for @sectionDangerZone.
-  ///
-  /// In en, this message translates to:
-  /// **'DANGER ZONE'**
-  String get sectionDangerZone;
-
   /// No description provided for @menuMyListings.
   ///
   /// In en, this message translates to:
@@ -1225,12 +1177,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wishlist'**
   String get menuWishlist;
-
-  /// No description provided for @menuPersonalInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Personal Info'**
-  String get menuPersonalInfo;
 
   /// No description provided for @socialLinks.
   ///
@@ -1321,24 +1267,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Response'**
   String get statResponse;
-
-  /// No description provided for @statOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Orders'**
-  String get statOrders;
-
-  /// No description provided for @statWishlist.
-  ///
-  /// In en, this message translates to:
-  /// **'Wishlist'**
-  String get statWishlist;
-
-  /// No description provided for @statTotalSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Saved'**
-  String get statTotalSaved;
 
   /// No description provided for @storeInformation.
   ///
@@ -4382,24 +4310,6 @@ abstract class AppLocalizations {
   /// **'Discover and buy products from verified sellers'**
   String get buyerSubtitle;
 
-  /// No description provided for @buyerFeature1.
-  ///
-  /// In en, this message translates to:
-  /// **'Browse thousands of products'**
-  String get buyerFeature1;
-
-  /// No description provided for @buyerFeature2.
-  ///
-  /// In en, this message translates to:
-  /// **'Secure checkout & payments'**
-  String get buyerFeature2;
-
-  /// No description provided for @buyerFeature3.
-  ///
-  /// In en, this message translates to:
-  /// **'Track your orders in real time'**
-  String get buyerFeature3;
-
   /// No description provided for @buyerFeature4.
   ///
   /// In en, this message translates to:
@@ -4417,30 +4327,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'List your products and start earning today'**
   String get sellerSubtitle;
-
-  /// No description provided for @sellerFeature1.
-  ///
-  /// In en, this message translates to:
-  /// **'List unlimited products'**
-  String get sellerFeature1;
-
-  /// No description provided for @sellerFeature2.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage orders & inventory'**
-  String get sellerFeature2;
-
-  /// No description provided for @sellerFeature3.
-  ///
-  /// In en, this message translates to:
-  /// **'Analytics & sales insights'**
-  String get sellerFeature3;
-
-  /// No description provided for @sellerFeature4.
-  ///
-  /// In en, this message translates to:
-  /// **'Direct chat with buyers'**
-  String get sellerFeature4;
 
   /// No description provided for @dateOfBirthOptional.
   ///
@@ -6151,6 +6037,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n} unread'**
   String notificationsUnreadCount(int n);
+
+  /// No description provided for @authOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get authOr;
+
+  /// No description provided for @passwordRuleLength.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get passwordRuleLength;
+
+  /// No description provided for @passwordRuleLower.
+  ///
+  /// In en, this message translates to:
+  /// **'A lowercase letter'**
+  String get passwordRuleLower;
+
+  /// No description provided for @passwordRuleUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'An uppercase letter'**
+  String get passwordRuleUpper;
+
+  /// No description provided for @passwordRuleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'A number'**
+  String get passwordRuleNumber;
+
+  /// No description provided for @passwordRuleSymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'A symbol, like # or @'**
+  String get passwordRuleSymbol;
+
+  /// No description provided for @profileOrdersActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} active'**
+  String profileOrdersActive(int n);
+
+  /// No description provided for @profileEmailVerifiedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Email verified'**
+  String get profileEmailVerifiedBadge;
+
+  /// No description provided for @profilePhoneVerifiedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Phone verified'**
+  String get profilePhoneVerifiedBadge;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get profileEdit;
 }
 
 class _AppLocalizationsDelegate

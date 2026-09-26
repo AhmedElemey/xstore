@@ -1,66 +1,27 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
+/// Orbit glass group of profile rows separated by hairlines.
 class ProfileMenuSection extends StatelessWidget {
-  const ProfileMenuSection({
-    super.key,
-    required this.title,
-    required this.children,
-  });
+  const ProfileMenuSection({super.key, required this.children});
 
-  final String title;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (title.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.xs,
-              bottom: AppSpacing.sm,
-            ),
-            child: Text(
-              title,
-              style: AppTypography.labelSmall.copyWith(
-                color: context.textSecondary,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        Container(
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(AppSpacing.lg),
-            boxShadow: [
-              BoxShadow(
-                color: context.textPrimary.withValues(alpha: 0.06),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              for (var i = 0; i < children.length; i++) ...[
-                children[i],
-                if (i < children.length - 1)
-                  Padding(
-                    padding: EdgeInsets.only(left: 64, right: AppSpacing.lg),
-                    child: Divider(height: 1, color: context.textDisabled),
-                  ),
-              ],
-            ],
-          ),
-        ),
-      ],
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1)
+              Divider(height: 1, thickness: 1, color: context.borderColor),
+          ],
+        ],
+      ),
     );
   }
 }

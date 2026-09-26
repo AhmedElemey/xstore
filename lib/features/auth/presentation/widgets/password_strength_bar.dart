@@ -1,198 +1,87 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../providers/auth_states.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/utils/validators.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
+int _rulesMet(String password) {
+  final r = Validators.passwordRules(password);
+  return [r.length, r.lower, r.upper, r.digit, r.symbol].where((m) => m).length;
+}
+
+/// Four-segment strength meter under a new-password field: red, amber, then
+/// green as more of the password rules are met.
 class PasswordStrengthBar extends StatelessWidget {
-  const PasswordStrengthBar({
-    super.key,
-    required this.password,
-  });
+  const PasswordStrengthBar({super.key, required this.password});
 
   final String password;
 
-  static PasswordStrength _strengthFor(String p) {
-    if (p.isEmpty) return PasswordStrength.none;
-    final hasUpper = RegExp(r'[A-Z]').hasMatch(p);
-    final hasNum = RegExp(r'[0-9]').hasMatch(p);
-    final hasSym =
-        RegExp(r'''[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;`~']''').hasMatch(p);
-    if (p.length >= 8 && hasUpper && hasNum && hasSym) {
-      return PasswordStrength.strong;
-    }
-    if (p.length >= 8 && (hasNum || hasSym)) {
-      return PasswordStrength.good;
-    }
-    if (p.length >= 6) {
-      return PasswordStrength.fair;
-    }
-    return PasswordStrength.weak;
-  }
-
-  static int _filledSegments(PasswordStrength s) {
-    switch (s) {
-      case PasswordStrength.none:
-        return 0;
-      case PasswordStrength.weak:
-        return 1;
-      case PasswordStrength.fair:
-        return 2;
-      case PasswordStrength.good:
-        return 3;
-      case PasswordStrength.strong:
-        return 4;
-    }
-  }
-
-  static String _label(PasswordStrength s) {
-    switch (s) {
-      case PasswordStrength.none:
-        return '';
-      case PasswordStrength.weak:
-        return 'Weak';
-      case PasswordStrength.fair:
-        return 'Fair';
-      case PasswordStrength.good:
-        return 'Good';
-      case PasswordStrength.strong:
-        return 'Strong';
-    }
-  }
-
-  static List<Color> _segmentColors(PasswordStrength s) {
-    switch (s) {
-      case PasswordStrength.none:
-        return [
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-        ];
-      case PasswordStrength.weak:
-        return [
-          AppColors.error,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-        ];
-      case PasswordStrength.fair:
-        return [
-          AppColors.error,
-          AppColors.warning,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-        ];
-      case PasswordStrength.good:
-        return [
-          AppColors.error,
-          AppColors.warning,
-          const Color(0xFFEAB308),
-          AppColors.lightBorder,
-        ];
-      case PasswordStrength.strong:
-        return [
-          AppColors.success,
-          AppColors.success,
-          AppColors.success,
-          AppColors.success,
-        ];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final strength = _strengthFor(password);
-    final filled = _filledSegments(strength);
-    final colors = _segmentColors(strength);
-    final label = _label(strength);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: List.generate(4, (i) {
-            final active = i < filled;
-            return Expanded(
+    final met = password.isEmpty ? 0 : _rulesMet(password);
+    final filled = (met * 4 / 5).round();
+    final color = filled <= 1
+        ? AppColors.error
+        : filled == 2
+            ? context.cashColor
+            : AppColors.success;
+    return ExcludeSemantics(
+      child: Row(
+        children: [
+          for (var i = 0; i < 4; i++) ...[
+            if (i > 0) const SizedBox(width: 6),
+            Expanded(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOut,
-                margin: EdgeInsets.only(right: i < 3 ? 6 : 0),
-                height: 6,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: active ? colors[i] : context.borderColor,
-                  borderRadius: BorderRadius.circular(4),
+                  color: i < filled ? color : context.borderColor,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            );
-          }),
-        ),
-        if (label.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            style: AppTypography.body12.copyWith(
-              fontWeight: FontWeight.w600,
-              color: strength == PasswordStrength.strong
-                  ? AppColors.success
-                  : context.textSecondary,
             ),
-          ),
+          ],
         ],
-        const SizedBox(height: AppSpacing.md),
-        _RequirementRow(
-          met: password.length >= 8,
-          text: 'At least 8 characters',
-        ),
-        _RequirementRow(
-          met: RegExp(r'[A-Z]').hasMatch(password),
-          text: 'One uppercase letter',
-        ),
-        _RequirementRow(
-          met: RegExp(r'[0-9]').hasMatch(password),
-          text: 'One number',
-        ),
-        _RequirementRow(
-          met: RegExp(r'''[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;`~']''')
-              .hasMatch(password),
-          text: 'One special character (!@#\$...)',
-        ),
-      ],
+      ),
     );
   }
 }
 
-class _RequirementRow extends StatelessWidget {
-  const _RequirementRow({
-    required this.met,
-    required this.text,
-  });
+/// Glass checklist of the password rules, ticking each one as it is met.
+class PasswordRulesCard extends StatelessWidget {
+  const PasswordRulesCard({super.key, required this.password});
 
-  final bool met;
-  final String text;
+  final String password;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
+    final r = Validators.passwordRules(password);
+    final l10n = context.l10n;
+    final rules = [
+      (r.length, l10n.passwordRuleLength),
+      (r.lower, l10n.passwordRuleLower),
+      (r.digit, l10n.passwordRuleNumber),
+      (r.upper, l10n.passwordRuleUpper),
+      (r.symbol, l10n.passwordRuleSymbol),
+    ];
+    return GlassCard(
+      radius: 20,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            met ? Icons.check_circle : Icons.circle_outlined,
-            size: 18,
-            color: met ? AppColors.success : context.textDisabled,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              text,
-              style: AppTypography.bodySmall.copyWith(
-                color: met ? AppColors.success : context.textSecondary,
+          for (var i = 0; i < rules.length; i++) ...[
+            if (i > 0) const SizedBox(height: 10),
+            Text(
+              '${rules[i].$1 ? '✓' : '○'}  ${rules[i].$2}',
+              style: AppTypography.bodyMedium.copyWith(
+                color: rules[i].$1 ? AppColors.success : context.textSecondary,
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

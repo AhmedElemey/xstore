@@ -42,12 +42,9 @@
   "continueWithGoogle": "Continue with Google",
   "continueWithApple": "Continue with Apple",
   "continueWithFacebook": "Continue with Facebook",
-  "socialLoginDivider": "or continue with",
   "welcomeBack": "Welcome back",
   "chooseYourRole": "How will you use xStore?",
   "socialRoleSubtitle": "One last step — choose your account type",
-  "socialWelcomeGreeting": "Welcome, {name}! 👋",
-  "socialRoleLastStep": "One last step — how will you use xStore?",
   "socialWelcomeFallbackName": "there",
   "googleAccountNotFound": "No account found for this Google account. Please register.",
   "searchHint": "Search products...",
@@ -193,16 +190,10 @@
   "save": "Save",
   "saveChanges": "Save Changes",
   "settings": "Settings",
-  "sectionMyActivity": "MY ACTIVITY",
-  "sectionAccountSettings": "ACCOUNT SETTINGS",
-  "sectionPreferences": "PREFERENCES",
-  "sectionSupport": "SUPPORT",
-  "sectionDangerZone": "DANGER ZONE",
   "menuMyListings": "My Listings",
   "menuMyOrders": "My Orders",
   "menuEarnings": "Earnings",
   "menuWishlist": "Wishlist",
-  "menuPersonalInfo": "Personal Info",
   "socialLinks": "Social links",
   "menuChangePassword": "Change Password",
   "menuNotificationsSettings": "Notifications",
@@ -218,9 +209,6 @@
   "statSalesShort": "sales",
   "statRating": "Rating",
   "statResponse": "Response",
-  "statOrders": "Orders",
-  "statWishlist": "Wishlist",
-  "statTotalSaved": "Total Saved",
   "storeInformation": "Store Information",
   "storeCategoryLabel": "Store Category",
   "whatsappProductPrefill": "Hi, I'm interested in {title}",
@@ -856,13 +844,6 @@
       }
     }
   },
-  "@socialWelcomeGreeting": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "@storeUrlPreview": {
     "placeholders": {
       "slug": {
@@ -1003,16 +984,9 @@
   "chooseHowUse": "Choose how you want to use xStore. You can always add the other role later.",
   "iAmBuyer": "I'm a Buyer",
   "buyerSubtitle": "Discover and buy products from verified sellers",
-  "buyerFeature1": "Browse thousands of products",
-  "buyerFeature2": "Secure checkout & payments",
-  "buyerFeature3": "Track your orders in real time",
   "buyerFeature4": "Save favorites to wishlist",
   "iAmSeller": "I'm a Seller",
   "sellerSubtitle": "List your products and start earning today",
-  "sellerFeature1": "List unlimited products",
-  "sellerFeature2": "Manage orders & inventory",
-  "sellerFeature3": "Analytics & sales insights",
-  "sellerFeature4": "Direct chat with buyers",
   "dateOfBirthOptional": "Date of Birth (optional)",
   "tellUsAboutYou": "Tell us about you",
   "infoOnProfile": "This information will be on your profile",
@@ -1432,5 +1406,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "authOr": "or",
+  "passwordRuleLength": "At least 8 characters",
+  "passwordRuleLower": "A lowercase letter",
+  "passwordRuleUpper": "An uppercase letter",
+  "passwordRuleNumber": "A number",
+  "passwordRuleSymbol": "A symbol, like # or @",
+  "profileOrdersActive": "{n} active",
+  "@profileOrdersActive": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "profileEmailVerifiedBadge": "✓ Email verified",
+  "profilePhoneVerifiedBadge": "✓ Phone verified",
+  "profileEdit": "Edit"
 }

@@ -1,131 +1,56 @@
 import 'package:flutter/material.dart';
+
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../auth/domain/entities/user_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
+/// Seller stats on the profile: sales, rating and response rate.
 class ProfileStatsRow extends StatelessWidget {
   const ProfileStatsRow({
     super.key,
-    required this.role,
     this.sales,
     this.rating,
     this.responsePercent,
-    this.orders,
-    this.wishlistCount,
-    this.savedDzd,
     this.onSalesTap,
-    this.onRatingTap,
-    this.onResponseTap,
-    this.onOrdersTap,
-    this.onWishlistTap,
-    this.onSavedTap,
   });
 
-  final UserRole role;
   final int? sales;
   final double? rating;
   final int? responsePercent;
-  final int? orders;
-  final int? wishlistCount;
-  final int? savedDzd;
   final VoidCallback? onSalesTap;
-  final VoidCallback? onRatingTap;
-  final VoidCallback? onResponseTap;
-  final VoidCallback? onOrdersTap;
-  final VoidCallback? onWishlistTap;
-  final VoidCallback? onSavedTap;
 
   @override
   Widget build(BuildContext context) {
-    if (role == UserRole.vendor) {
-      return _Card(
-        child: Row(
-          children: [
-            Expanded(
-              child: _StatCell(
-                value: '${sales ?? 0}',
-                label: context.l10n.statSales,
-                onTap: onSalesTap,
-              ),
-            ),
-            const _VertDivider(),
-            Expanded(
-              child: _StatCell(
-                value: '${rating?.toStringAsFixed(1) ?? '0.0'} ★',
-                label: context.l10n.statRating,
-                onTap: onRatingTap,
-              ),
-            ),
-            const _VertDivider(),
-            Expanded(
-              child: _StatCell(
-                value: '${responsePercent ?? 0}%',
-                label: context.l10n.statResponse,
-                onTap: onResponseTap,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return _Card(
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
             child: _StatCell(
-              value: '${orders ?? 0}',
-              label: context.l10n.statOrders,
-              onTap: onOrdersTap,
+              value: '${sales ?? 0}',
+              label: context.l10n.statSales,
+              onTap: onSalesTap,
             ),
           ),
           const _VertDivider(),
           Expanded(
             child: _StatCell(
-              value: '${wishlistCount ?? 0}',
-              label: context.l10n.statWishlist,
-              onTap: onWishlistTap,
+              value: '${rating?.toStringAsFixed(1) ?? '0.0'} ★',
+              label: context.l10n.statRating,
             ),
           ),
           const _VertDivider(),
           Expanded(
             child: _StatCell(
-              value: context.formatCurrency((savedDzd ?? 0) / 100.0),
-              label: context.l10n.statTotalSaved,
-              onTap: onSavedTap,
+              value: '${responsePercent ?? 0}%',
+              label: context.l10n.statResponse,
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _Card extends StatelessWidget {
-  const _Card({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }
@@ -138,7 +63,7 @@ class _VertDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: context.textDisabled.withValues(alpha: 0.5),
+      color: context.borderColor,
     );
   }
 }
@@ -165,14 +90,16 @@ class _StatCell extends StatelessWidget {
             Text(
               value,
               style: AppTypography.titleMedium.copyWith(
-                color: AppColors.primary,
+                color: context.primaryColor,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const Gap(AppSpacing.xs),
             Text(
               label,
-              style: AppTypography.bodySmall,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textSecondary,
+              ),
               textAlign: TextAlign.center,
               maxLines: 2,
             ),

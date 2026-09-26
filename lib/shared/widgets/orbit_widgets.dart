@@ -137,3 +137,97 @@ RadialGradient orbitOrbGradient(int index) {
     stops: const [0, 0.4, 1],
   );
 }
+
+/// Small uppercase field label ("MOBILE NUMBER") above Orbit inputs, with an
+/// optional trailing action on the same line (e.g. "Forgot password?").
+class OrbitFieldLabel extends StatelessWidget {
+  const OrbitFieldLabel(this.text, {super.key, this.trailing});
+
+  final String text;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(
+      text.toUpperCase(),
+      style: AppTypography.labelSmall.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1,
+        color: context.textSecondary,
+      ),
+    );
+    if (trailing == null) return label;
+    return Row(
+      children: [
+        Expanded(child: label),
+        trailing!,
+      ],
+    );
+  }
+}
+
+/// Glowing planet disc carrying an icon (OTP, forgot password, empty
+/// states). [ringed] adds the dashed and solid orbit rings around it.
+class OrbitGlyphOrb extends StatelessWidget {
+  const OrbitGlyphOrb({
+    super.key,
+    required this.icon,
+    this.paletteIndex = 0,
+    this.size = 84,
+    this.ringed = false,
+  });
+
+  final IconData icon;
+  final int paletteIndex;
+  final double size;
+  final bool ringed;
+
+  @override
+  Widget build(BuildContext context) {
+    final glow = orbitOrbPalettes[paletteIndex % orbitOrbPalettes.length][1];
+    final orb = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: orbitOrbGradient(paletteIndex),
+        boxShadow: [
+          BoxShadow(color: glow.withValues(alpha: 0.5), blurRadius: 40),
+        ],
+      ),
+      child: Icon(icon, size: size * 0.4, color: AppColors.space),
+    );
+    if (!ringed) return ExcludeSemantics(child: orb);
+    final ring = size * 2.35;
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: ring,
+        height: ring,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: ring,
+              height: ring,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: glow.withValues(alpha: 0.4)),
+              ),
+            ),
+            Container(
+              width: ring * 0.7,
+              height: ring * 0.7,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.nova.withValues(alpha: 0.35),
+                ),
+              ),
+            ),
+            orb,
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -139,9 +139,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithFacebook => 'Continue with Facebook';
 
   @override
-  String get socialLoginDivider => 'or continue with';
-
-  @override
   String get welcomeBack => 'Welcome back';
 
   @override
@@ -149,14 +146,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get socialRoleSubtitle => 'One last step — choose your account type';
-
-  @override
-  String socialWelcomeGreeting(String name) {
-    return 'Welcome, $name! 👋';
-  }
-
-  @override
-  String get socialRoleLastStep => 'One last step — how will you use xStore?';
 
   @override
   String get socialWelcomeFallbackName => 'there';
@@ -561,21 +550,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get sectionMyActivity => 'MY ACTIVITY';
-
-  @override
-  String get sectionAccountSettings => 'ACCOUNT SETTINGS';
-
-  @override
-  String get sectionPreferences => 'PREFERENCES';
-
-  @override
-  String get sectionSupport => 'SUPPORT';
-
-  @override
-  String get sectionDangerZone => 'DANGER ZONE';
-
-  @override
   String get menuMyListings => 'My Listings';
 
   @override
@@ -586,9 +560,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuWishlist => 'Wishlist';
-
-  @override
-  String get menuPersonalInfo => 'Personal Info';
 
   @override
   String get socialLinks => 'Social links';
@@ -634,15 +605,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statResponse => 'Response';
-
-  @override
-  String get statOrders => 'Orders';
-
-  @override
-  String get statWishlist => 'Wishlist';
-
-  @override
-  String get statTotalSaved => 'Total Saved';
 
   @override
   String get storeInformation => 'Store Information';
@@ -2267,15 +2229,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buyerSubtitle => 'Discover and buy products from verified sellers';
 
   @override
-  String get buyerFeature1 => 'Browse thousands of products';
-
-  @override
-  String get buyerFeature2 => 'Secure checkout & payments';
-
-  @override
-  String get buyerFeature3 => 'Track your orders in real time';
-
-  @override
   String get buyerFeature4 => 'Save favorites to wishlist';
 
   @override
@@ -2283,18 +2236,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sellerSubtitle => 'List your products and start earning today';
-
-  @override
-  String get sellerFeature1 => 'List unlimited products';
-
-  @override
-  String get sellerFeature2 => 'Manage orders & inventory';
-
-  @override
-  String get sellerFeature3 => 'Analytics & sales insights';
-
-  @override
-  String get sellerFeature4 => 'Direct chat with buyers';
 
   @override
   String get dateOfBirthOptional => 'Date of Birth (optional)';
@@ -3262,4 +3203,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationsUnreadCount(int n) {
     return '$n unread';
   }
+
+  @override
+  String get authOr => 'or';
+
+  @override
+  String get passwordRuleLength => 'At least 8 characters';
+
+  @override
+  String get passwordRuleLower => 'A lowercase letter';
+
+  @override
+  String get passwordRuleUpper => 'An uppercase letter';
+
+  @override
+  String get passwordRuleNumber => 'A number';
+
+  @override
+  String get passwordRuleSymbol => 'A symbol, like # or @';
+
+  @override
+  String profileOrdersActive(int n) {
+    return '$n active';
+  }
+
+  @override
+  String get profileEmailVerifiedBadge => '✓ Email verified';
+
+  @override
+  String get profilePhoneVerifiedBadge => '✓ Phone verified';
+
+  @override
+  String get profileEdit => 'Edit';
 }

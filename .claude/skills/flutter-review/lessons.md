@@ -1017,3 +1017,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-26 — Home cards reuse the owning notifier, fetching only when it's empty
 - **Rule:** A Home summary of another feature's data (the live order card) watches that feature's keepAlive notifier with `select` and reuses its fetch — no new datasource or endpoint. Fetch only when the notifier is empty and not loading (`postFrame` plus a check on sign-in, queued in a microtask behind the notifier's own auth reset), and refresh it on pull-to-refresh. Screen tests keep passing because unscripted routes just error and the card stays hidden.
 - **Where it applies:** `home_live_order_card.dart`, `home_screen.dart`, any cross-feature summary card.
+
+### 2026-09-26 — Orbit form primitives: uppercase labels, one password-rule source
+- **Rule:** Field labels go through `OrbitFieldLabel` (via `AuthTextField`/`PhoneInputField`), which uppercases them, so tests find `'CURRENT PASSWORD *'`, not the arb value. Password checklists and strength meters read `Validators.passwordRules`, the same source as `registerPassword`, never their own regexes. When a redesign moves a form's submit below extra content, tests reach it with `scrollUntilVisible` (lazy `ListView`) or `ensureVisible` (`SingleChildScrollView`).
+- **Where it applies:** `auth_text_field.dart`, `phone_input_field.dart`, `password_strength_bar.dart`, `validators.dart`, auth/profile form tests.

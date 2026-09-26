@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -22,12 +23,30 @@ class OtpResendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!canResend) {
-      return Text(
-        '${context.l10n.resendCodeIn} 0:${resendCooldown.toString().padLeft(2, '0')}',
-        style: AppTypography.bodySmall.copyWith(
-          color: context.textSecondary,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(LucideIcons.clock, size: 16, color: context.textSecondary),
+          const SizedBox(width: 8),
+          Text.rich(
+            TextSpan(
+              text: '${context.l10n.resendCodeIn} ',
+              children: [
+                TextSpan(
+                  text: '0:${resendCooldown.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+            style: AppTypography.bodyMedium.copyWith(
+              color: context.textSecondary,
+            ),
+          ),
+        ],
       );
     }
     return Row(
@@ -40,6 +59,7 @@ class OtpResendRow extends StatelessWidget {
         ),
         TextButton(
           onPressed: isSending ? null : onResend,
+          style: TextButton.styleFrom(foregroundColor: context.primaryColor),
           child: Text(context.l10n.resendCode),
         ),
       ],

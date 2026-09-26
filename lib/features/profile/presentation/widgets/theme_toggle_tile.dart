@@ -17,7 +17,7 @@ class ThemeToggleTile extends ConsumerWidget {
 
     return ProfileSwitchTile(
       icon: isDark ? LucideIcons.moon : LucideIcons.sun,
-      iconBackground: AppColors.primary,
+      iconColor: AppColors.nova,
       label: isDark ? context.l10n.darkMode : context.l10n.lightMode,
       value: isDark,
       onChanged: (_) =>

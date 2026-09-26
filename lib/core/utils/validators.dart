@@ -69,15 +69,24 @@ abstract final class Validators {
   /// which let a password through client-side that the server would then
   /// bounce with a confusing 400 at submit time.
   static String? registerPassword(AppLocalizations l10n, String password) {
-    if (password.length < 8) return l10n.validationPasswordMinEight;
-    if (!_hasUppercase.hasMatch(password) ||
-        !_hasLowercase.hasMatch(password) ||
-        !_hasDigit.hasMatch(password) ||
-        !_hasSpecialChar.hasMatch(password)) {
+    final rules = passwordRules(password);
+    if (!rules.length) return l10n.validationPasswordMinEight;
+    if (!rules.upper || !rules.lower || !rules.digit || !rules.symbol) {
       return l10n.validationPasswordComplexity;
     }
     return null;
   }
+
+  /// Which [registerPassword] rules [password] meets (the rules checklist
+  /// and strength bar read these so they never disagree with validation).
+  static ({bool length, bool lower, bool upper, bool digit, bool symbol})
+      passwordRules(String password) => (
+            length: password.length >= 8,
+            lower: _hasLowercase.hasMatch(password),
+            upper: _hasUppercase.hasMatch(password),
+            digit: _hasDigit.hasMatch(password),
+            symbol: _hasSpecialChar.hasMatch(password),
+          );
 
   static String? confirmPasswordMatches(
     AppLocalizations l10n,

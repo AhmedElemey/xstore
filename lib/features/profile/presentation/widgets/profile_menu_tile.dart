@@ -5,78 +5,66 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Orbit profile row: tinted icon tile, bold label and an optional value
+/// ("2 active", "English") or trailing widget at the end.
 class ProfileMenuTile extends StatelessWidget {
   const ProfileMenuTile({
     super.key,
     required this.icon,
-    required this.iconBackground,
+    required this.iconColor,
     required this.label,
-    this.subtitle,
-    this.subtitleColor,
+    this.value,
     this.onTap,
-    this.showChevron = true,
     this.trailing,
     this.trailingBadgeCount,
   });
 
   final IconData icon;
-  final Color iconBackground;
+  final Color iconColor;
   final String label;
-  final String? subtitle;
-  final Color? subtitleColor;
+  final String? value;
   final VoidCallback? onTap;
-  final bool showChevron;
   final Widget? trailing;
   final int? trailingBadgeCount;
 
   @override
   Widget build(BuildContext context) {
-    final padded = Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: AppSpacing.x3l + AppSpacing.xs,
-            height: AppSpacing.x3l + AppSpacing.xs,
-            decoration: BoxDecoration(
-              color: iconBackground.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(AppSpacing.md),
+    final badge = trailingBadgeCount ?? 0;
+    final row = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 54),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            child: Icon(
-              icon,
-              color: iconBackground,
-              size: AppSpacing.x2l - AppSpacing.xs,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.bodyLarge.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: context.textPrimary,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: subtitle == null
-                ? Text(
-                    label,
-                    style: AppTypography.bodyLarge,
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(label, style: AppTypography.bodyLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: subtitleColor ?? context.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-          if (trailing != null)
-            trailing!
-          else ...[
-            if ((trailingBadgeCount ?? 0) > 0)
+            if (value != null)
+              Text(
+                value!,
+                style: AppTypography.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.textSecondary,
+                ),
+              ),
+            if (badge > 0)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm,
@@ -87,35 +75,19 @@ class ProfileMenuTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.x4l),
                 ),
                 child: Text(
-                  '${trailingBadgeCount!}',
+                  '$badge',
                   style: AppTypography.labelSmall.copyWith(
                     color: AppColors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-            if ((trailingBadgeCount ?? 0) > 0) const SizedBox(width: AppSpacing.sm),
-            if (showChevron)
-              Icon(
-                context.chevronForward,
-                size: AppSpacing.x2l,
-                color: context.textSecondary,
-              ),
+            if (trailing != null) trailing!,
           ],
-        ],
+        ),
       ),
     );
-
-    if (onTap != null) {
-      return Material(
-        color: AppColors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-          child: padded,
-        ),
-      );
-    }
-    return padded;
+    if (onTap == null) return row;
+    return InkWell(onTap: onTap, child: row);
   }
 }

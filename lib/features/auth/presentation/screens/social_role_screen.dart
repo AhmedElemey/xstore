@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/social_auth_provider.dart';
@@ -39,283 +41,159 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
     });
     final social = ref.watch(socialAuthProvider);
     final pending = social.pendingSocialResult;
+    void cancel() {
+      ref.read(socialAuthProvider.notifier).cancelSocialRegistration();
+      context.go(AppRoutes.login);
+    }
+
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: SpaceBackground(child: Column(
-        children: [
-          Expanded(
-            flex: 42,
-            child: AuthHeader(
-              heightFraction: 1,
-              title: context.l10n.chooseYourRole,
-              subtitle: context.l10n.socialRoleSubtitle,
-              logoSize: 32,
-            ),
-          ),
-          Expanded(
-            flex: 58,
-            child: Transform.translate(
-              offset: const Offset(0, -18),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                decoration: BoxDecoration(
-                  color: context.surfaceColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                child: ListView(
-                  children: [
-                    Center(
-                      child: Transform.translate(
-                        offset: const Offset(0, -8),
-                        child: _SocialWelcomeAvatar(
-                          displayName: pending?.displayName,
-                          photoUrl: pending?.photoUrl,
-                          provider: pending?.provider,
-                        ),
-                      ),
-                    ),
-                    const Gap(AppSpacing.spacing10),
-                    Text(
-                      context.l10n.socialWelcomeGreeting(
-                        pending?.displayName ??
-                            context.l10n.socialWelcomeFallbackName,
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const Gap(AppSpacing.xs),
-                    Text(
-                      context.l10n.socialRoleLastStep,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: context.textSecondary),
-                    ),
-                    const Gap(AppSpacing.spacing18),
-                    RoleSelectorCard(
-                      title: context.l10n.iAmBuyer,
-                      subtitle: context.l10n.buyerSubtitle,
-                      icon: Icons.shopping_bag_outlined,
-                      accentColor: AppColors.primary,
-                      selectionBorderColor: AppColors.primary,
-                      isSelected: _selectedRole == UserRole.consumer,
-                      onTap: () => setState(() => _selectedRole = UserRole.consumer),
-                      features: [
-                        context.l10n.buyerFeature1,
-                        context.l10n.buyerFeature2,
-                      ],
-                    ),
-                    RoleSelectorCard(
-                      title: context.l10n.iAmSeller,
-                      subtitle: context.l10n.sellerSubtitle,
-                      icon: Icons.storefront_outlined,
-                      accentColor: AppColors.accent,
-                      selectionBorderColor: AppColors.accent,
-                      isSelected: _selectedRole == UserRole.vendor,
-                      onTap: () => setState(() => _selectedRole = UserRole.vendor),
-                      features: [
-                        context.l10n.sellerFeature1,
-                        context.l10n.sellerFeature2,
-                      ],
-                    ),
-                    const Gap(AppSpacing.md),
-                    XstoreButton(
-                      label: context.l10n.continueLabel,
-                      isLoading: social.isAnyLoading,
-                      onPressed: _selectedRole == null || social.isAnyLoading
-                          ? null
-                          : () => ref
-                              .read(socialAuthProvider.notifier)
-                              .completeSocialRegistration(_selectedRole!),
-                    ),
-                    const Gap(AppSpacing.sm),
-                    Center(
-                      child: TextButton(
-                        onPressed: social.isAnyLoading
-                            ? null
-                            : () {
-                                ref
-                                    .read(socialAuthProvider.notifier)
-                                    .cancelSocialRegistration();
-                                context.go(AppRoutes.login);
-                              },
-                        child: Text(context.l10n.cancel),
-                      ),
-                    ),
-                  ],
-                ),
+      appBar: AppBar(
+        leadingWidth: 64,
+        leading: Padding(
+          padding: const EdgeInsetsDirectional.only(start: AppSpacing.lg),
+          child: Center(
+            child: OrbitCircleButton(
+              tooltip: context.l10n.cancel,
+              onPressed: social.isAnyLoading ? null : cancel,
+              child: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.chevronRight
+                    : LucideIcons.chevronLeft,
+                size: 22,
+                color: context.textPrimary,
               ),
             ),
           ),
-        ],
-      )),
-    );
-  }
-}
-
-class _SocialWelcomeAvatar extends StatelessWidget {
-  const _SocialWelcomeAvatar({
-    required this.displayName,
-    required this.photoUrl,
-    required this.provider,
-  });
-
-  static const _diameter = 96.0;
-  static const _ringWidth = 3.0;
-
-  final String? displayName;
-  final String? photoUrl;
-  final SocialProvider? provider;
-
-  @override
-  Widget build(BuildContext context) {
-    final dpr = MediaQuery.devicePixelRatioOf(context);
-    final cacheSize = (_diameter * dpr).round();
-    final hasPhoto = photoUrl != null && photoUrl!.trim().isNotEmpty;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.profileHeaderGradientEnd],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.28),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+        ),
+      ),
+      body: SpaceBackground(
+        child: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, AppSpacing.sm, 24, 28),
+            children: [
+              if (pending != null) ...[
+                _AccountChip(result: pending),
+                const Gap(AppSpacing.xl),
+              ],
+              AuthHeader(
+                title: context.l10n.chooseYourRole,
+                subtitle: context.l10n.socialRoleSubtitle,
+              ),
+              const Gap(AppSpacing.xl),
+              RoleSelectorCard(
+                title: context.l10n.iAmBuyer,
+                subtitle: context.l10n.buyerSubtitle,
+                icon: LucideIcons.shoppingBag,
+                paletteIndex: 0,
+                isSelected: _selectedRole == UserRole.consumer,
+                onTap: () => setState(() => _selectedRole = UserRole.consumer),
+              ),
+              const Gap(AppSpacing.md),
+              RoleSelectorCard(
+                title: context.l10n.iAmSeller,
+                subtitle: context.l10n.sellerSubtitle,
+                icon: LucideIcons.store,
+                paletteIndex: 3,
+                isSelected: _selectedRole == UserRole.vendor,
+                onTap: () => setState(() => _selectedRole = UserRole.vendor),
+              ),
+              const Gap(AppSpacing.x3l),
+              XstoreButton(
+                label: context.l10n.continueLabel,
+                isLoading: social.isAnyLoading,
+                onPressed: _selectedRole == null || social.isAnyLoading
+                    ? null
+                    : () => ref
+                        .read(socialAuthProvider.notifier)
+                        .completeSocialRegistration(_selectedRole!),
               ),
             ],
           ),
-          padding: const EdgeInsets.all(_ringWidth),
-          child: Container(
+        ),
+      ),
+    );
+  }
+}
+
+/// The signed-in social account: avatar orb, name and "email · Provider".
+class _AccountChip extends StatelessWidget {
+  const _AccountChip({required this.result});
+
+  final SocialAuthResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (result.displayName ?? '').trim();
+    final photo = (result.photoUrl ?? '').trim();
+    final provider = switch (result.provider) {
+      SocialProvider.google => 'Google',
+      SocialProvider.facebook => 'Facebook',
+      SocialProvider.apple => 'Apple',
+    };
+    final email = (result.email ?? '').trim();
+    return GlassCard(
+      radius: 18,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md + 2,
+        vertical: AppSpacing.md,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: context.surfaceColor,
+              gradient: orbitOrbGradient(3),
             ),
-            padding: const EdgeInsets.all(_ringWidth),
-            child: ClipOval(
-              child: SizedBox(
-                width: _diameter,
-                height: _diameter,
-                child: hasPhoto
-                    ? AppCachedNetworkImage(
-                        imageUrl: photoUrl!,
-                        width: _diameter,
-                        height: _diameter,
-                        fit: BoxFit.cover,
-                        memCacheWidth: cacheSize,
-                        memCacheHeight: cacheSize,
-                        placeholder: (_, __) => _InitialsFallback(
-                          displayName: displayName,
-                          diameter: _diameter,
-                        ),
-                        errorWidget: (_, __, ___) => _InitialsFallback(
-                          displayName: displayName,
-                          diameter: _diameter,
-                        ),
-                      )
-                    : _InitialsFallback(
-                        displayName: displayName,
-                        diameter: _diameter,
-                      ),
-              ),
-            ),
-          ),
-        ),
-        if (provider != null)
-          Positioned(
-            right: 2,
-            bottom: 2,
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.xs),
-              decoration: BoxDecoration(
-                color: context.surfaceColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+            child: photo.isNotEmpty
+                ? AppCachedNetworkImage(
+                    imageUrl: photo,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 120,
+                    memCacheHeight: 120,
+                  )
+                : Text(
+                    name.isEmpty ? '?' : name[0].toUpperCase(),
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.space,
+                    ),
                   ),
-                ],
-              ),
-              child: _SocialProviderBadge(provider: provider!),
+          ),
+          const Gap(AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name.isEmpty ? context.l10n.socialWelcomeFallbackName : name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: context.textPrimary,
+                  ),
+                ),
+                Text(
+                  email.isEmpty ? provider : '$email · $provider',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-      ],
-    );
-  }
-}
-
-class _InitialsFallback extends StatelessWidget {
-  const _InitialsFallback({
-    required this.displayName,
-    required this.diameter,
-  });
-
-  final String? displayName;
-  final double diameter;
-
-  @override
-  Widget build(BuildContext context) {
-    final parts =
-        (displayName ?? '').trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty);
-    final initials = parts
-        .take(2)
-        .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
-        .join();
-    final label = initials.isEmpty ? '?' : initials;
-
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primaryLight, AppColors.primary],
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: TextStyle(
-          color: AppColors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: diameter * 0.32,
-        ),
+        ],
       ),
     );
-  }
-}
-
-class _SocialProviderBadge extends StatelessWidget {
-  const _SocialProviderBadge({required this.provider});
-
-  final SocialProvider provider;
-
-  @override
-  Widget build(BuildContext context) {
-    return switch (provider) {
-      SocialProvider.google => SvgPicture.asset(
-          'assets/icons/google_logo.svg',
-          width: 20,
-          height: 20,
-        ),
-      SocialProvider.facebook => SvgPicture.asset(
-          'assets/icons/facebook_logo.svg',
-          width: 20,
-          height: 20,
-        ),
-      SocialProvider.apple => Icon(
-          Icons.apple,
-          size: 22,
-          color: context.isDark ? AppColors.white : AppColors.black,
-        ),
-    };
   }
 }

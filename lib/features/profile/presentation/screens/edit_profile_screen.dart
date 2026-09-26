@@ -8,6 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:xstore/features/store_categories/domain/entities/store_category_entity.dart';
 
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../../shared/widgets/space_background.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -679,28 +682,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       return const Scaffold(body: EditProfileSkeleton());
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.editProfile),
-        actions: [
-          if (s.isUpdating)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.only(right: AppSpacing.lg),
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: canSave ? _save : null,
-              child: Text(context.l10n.save),
-            ),
-        ],
-      ),
-      body: ListView(
+      appBar: AppBar(title: Text(context.l10n.editProfile)),
+      body: SpaceBackground(
+        child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           Center(
@@ -713,26 +697,23 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
           ),
           const Gap(AppSpacing.x2l),
-          Text(context.l10n.menuPersonalInfo, style: AppTypography.titleMedium),
-          const Gap(AppSpacing.md),
+          OrbitFieldLabel(context.l10n.fullNameRequired),
+          const Gap(AppSpacing.sm),
           TextField(
             controller: _name,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.user),
-              border: const OutlineInputBorder(),
-            ),
             onChanged: (v) => ref
                 .read(profileNotifierProvider.notifier)
                 .updateField('name', v),
           ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
+          OrbitFieldLabel(context.l10n.email),
+          const Gap(AppSpacing.sm),
           TextField(
             controller: _email,
             readOnly: true,
             keyboardType: TextInputType.emailAddress,
             onTap: isVendor ? null : _changeEmail,
             decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.mail),
               suffixIcon: _VerificationStatus(
                 verified: _typedEmailIsVerified(s),
                 onVerify: _email.text.trim().isEmpty
@@ -745,10 +726,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 minWidth: 0,
                 minHeight: 0,
               ),
-              border: const OutlineInputBorder(),
             ),
           ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
           PhoneInputField(
             controller: _phone,
             readOnly: true,
@@ -763,18 +743,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             onChanged: (_) {},
           ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
+          OrbitFieldLabel(context.l10n.dateOfBirthOptional),
+          const Gap(AppSpacing.sm),
           TextField(
             controller: _dobText,
             readOnly: true,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.calendar),
-              suffixIcon: const Icon(LucideIcons.chevronDown),
-              border: const OutlineInputBorder(),
+            decoration: const InputDecoration(
+              suffixIcon: Icon(LucideIcons.calendar),
             ),
             onTap: _pickDob,
           ),
-          const Gap(AppSpacing.md),
+          const Gap(AppSpacing.lg),
           // Single user location (governorate + city) for all roles; vendors
           // reuse this same pair as the store location.
           LocationCascadeField(
@@ -787,10 +767,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
           if (isVendor) ...[
             const Gap(AppSpacing.x2l),
-            Text(
-              context.l10n.storeInformation,
-              style: AppTypography.titleMedium,
-            ),
+            OrbitSectionHeader(title: context.l10n.storeInformation),
             const Gap(AppSpacing.md),
             Center(
               child: Column(
@@ -818,7 +795,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               decoration: InputDecoration(
                 labelText: context.l10n.storeNameRequired,
                 prefixIcon: const Icon(LucideIcons.store),
-                border: const OutlineInputBorder(),
               ),
               onChanged: (v) => ref
                   .read(profileNotifierProvider.notifier)
@@ -831,7 +807,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               decoration: InputDecoration(
                 prefixIcon: const Icon(LucideIcons.tags),
                 suffixIcon: const Icon(LucideIcons.chevronDown),
-                border: const OutlineInputBorder(),
               ),
               onTap: _pickCategory,
             ),
@@ -842,7 +817,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               decoration: InputDecoration(
                 labelText: context.l10n.storeDescriptionRequired,
                 prefixIcon: const Icon(LucideIcons.fileText),
-                border: const OutlineInputBorder(),
               ),
               onChanged: (v) => ref
                   .read(profileNotifierProvider.notifier)
@@ -865,7 +839,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
           ],
           const Gap(AppSpacing.x2l),
-          Text(context.l10n.socialLinks, style: AppTypography.titleMedium),
+          OrbitSectionHeader(title: context.l10n.socialLinks),
           const Gap(AppSpacing.md),
           TextField(
             controller: _instagram,
@@ -873,7 +847,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               labelText: context.l10n.instagramLabel,
               prefixIcon: const Icon(LucideIcons.instagram),
               prefixText: '@',
-              border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref
                 .read(profileNotifierProvider.notifier)
@@ -886,52 +859,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               labelText: context.l10n.facebookLabel,
               prefixIcon: const Icon(LucideIcons.facebook),
               prefixText: 'fb.com/',
-              border: const OutlineInputBorder(),
             ),
             onChanged: (v) => ref
                 .read(profileNotifierProvider.notifier)
                 .updateField('facebook', v),
           ),
           const Gap(AppSpacing.x3l),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, AppColors.profileHeaderGradientEnd],
-              ),
-            ),
-            child: Material(
-              color: AppColors.primary.withValues(alpha: 0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(AppSpacing.md),
-                onTap: canSave ? _save : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  child: Center(
-                    child: s.isUpdating
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator.adaptive(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.white,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            context.l10n.saveChanges,
-                            style: AppTypography.labelLarge.copyWith(
-                              color: AppColors.white,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ),
+          XstoreButton(
+            label: context.l10n.saveChanges,
+            isLoading: s.isUpdating,
+            onPressed: canSave ? _save : null,
           ),
           const Gap(AppSpacing.x3l),
         ],
+        ),
       ),
     );
   }

@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
@@ -13,6 +12,7 @@ import '../../../../shared/widgets/xstore_button.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/password_strength_bar.dart';
 import '../../../../shared/widgets/space_background.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -120,20 +120,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                context.l10n.strongPasswordHint,
-                style: AppTypography.body15.copyWith(
-                  height: 1.4,
-                  color: context.textSecondary,
-                ),
-              ),
-              const Gap(AppSpacing.x2l),
               if (hasPassword) ...[
                 AuthTextField(
                   label: context.l10n.currentPasswordRequired,
                   controller: _current,
                   obscureText: !_currentVisible,
-                  prefixIcon: const Icon(LucideIcons.lock),
                   suffixIcon: IconButton(
                     onPressed: () =>
                         setState(() => _currentVisible = !_currentVisible),
@@ -155,7 +146,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 label: context.l10n.newPasswordRequired,
                 controller: _next,
                 obscureText: !_nextVisible,
-                prefixIcon: const Icon(LucideIcons.lock),
                 suffixIcon: IconButton(
                   onPressed: () => setState(() => _nextVisible = !_nextVisible),
                   icon: Icon(
@@ -170,12 +160,16 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   }
                 },
               ),
+              const Gap(AppSpacing.sm),
+              ListenableBuilder(
+                listenable: _next,
+                builder: (context, _) => PasswordStrengthBar(password: _next.text),
+              ),
               const Gap(AppSpacing.lg),
               AuthTextField(
                 label: context.l10n.confirmPasswordRequired,
                 controller: _confirm,
                 obscureText: !_confirmVisible,
-                prefixIcon: const Icon(LucideIcons.shieldCheck),
                 suffixIcon: IconButton(
                   onPressed: () =>
                       setState(() => _confirmVisible = !_confirmVisible),
@@ -190,6 +184,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     setState(() => _confirmError = null);
                   }
                 },
+              ),
+              const Gap(AppSpacing.lg),
+              ListenableBuilder(
+                listenable: _next,
+                builder: (context, _) => PasswordRulesCard(password: _next.text),
               ),
               const Gap(AppSpacing.x2l),
               ListenableBuilder(

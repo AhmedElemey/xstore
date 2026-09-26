@@ -230,73 +230,72 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: SpaceBackground(child: Column(
-        children: [
-          Expanded(
-            flex: 50,
-            child: AuthHeader(
-              heightFraction: 1,
-              title: context.l10n.welcomeBack,
-              subtitle: context.l10n.signInToContinueShopping,
-              logoSize: 32,
+      body: SpaceBackground(
+        child: Stack(
+          children: [
+            const PositionedDirectional(
+              top: -60,
+              end: -70,
+              child: _Planet(size: 200),
             ),
-          ),
-          Expanded(
-            flex: 90,
-            child: Transform.translate(
-              offset: const Offset(0, -24),
-              child: AnimatedBuilder(
-                animation: _shakeController,
-                builder: (context, child) {
-                  final t = _shakeController.value;
-                  final ox = 10 * (1 - t) * math.sin(t * 6.28318 * 4);
-                  return Transform.translate(
-                    offset: Offset(ox, 0),
-                    child: child,
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.surfaceColor,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.cardShadowColor,
-                        blurRadius: 20,
-                        offset: Offset(0, -4),
-                      ),
-                    ],
-                  ),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 15, 24, 24),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 40, 24, 28),
+                child: AnimatedBuilder(
+                  animation: _shakeController,
+                  builder: (context, child) {
+                    final t = _shakeController.value;
+                    final ox = 10 * (1 - t) * math.sin(t * 6.28318 * 4);
+                    return Transform.translate(
+                      offset: Offset(ox, 0),
+                      child: child,
+                    );
+                  },
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _LoginRegisterTabs(
-                          onRegisterTap: () =>
-                              context.push(AppRoutes.register),
+                        AuthHeader(
+                          showWordmark: true,
+                          title: l10n.welcomeBack,
+                          subtitle: l10n.signInToContinueShopping,
                         ),
-                        const Gap(AppSpacing.xl),
+                        const Gap(AppSpacing.x2l),
                         PhoneInputField(
                           controller: _phone,
-                          errorText:
-                              login.error != null && login.error == phoneFormatError
-                                  ? login.error
-                                  : null,
-                          onChanged: (v) =>
-                              ref.read(loginNotifierProvider.notifier).updatePhone(v),
+                          errorText: login.error != null &&
+                                  login.error == phoneFormatError
+                              ? login.error
+                              : null,
+                          onChanged: (v) => ref
+                              .read(loginNotifierProvider.notifier)
+                              .updatePhone(v),
                         ),
-                        const Gap(AppSpacing.lg),
+                        const Gap(AppSpacing.xl),
                         AuthTextField(
-                          label: context.l10n.password,
-                          hint: context.l10n.passwordMask,
+                          label: l10n.password,
+                          hint: l10n.passwordMask,
                           controller: _password,
                           obscureText: !login.isPasswordVisible,
                           textInputAction: TextInputAction.done,
-                          prefixIcon: const Icon(LucideIcons.lock),
+                          labelTrailing: TextButton(
+                            onPressed: () =>
+                                context.push(AppRoutes.forgotPassword),
+                            style: TextButton.styleFrom(
+                              foregroundColor: context.primaryColor,
+                              minimumSize: const Size(44, 32),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xs,
+                              ),
+                            ),
+                            child: Text(
+                              l10n.forgotPassword,
+                              style: AppTypography.bodySmall.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
                           suffixIcon: IconButton(
                             onPressed: () => ref
                                 .read(loginNotifierProvider.notifier)
@@ -308,15 +307,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               color: context.iconSecondary,
                             ),
                           ),
-                          errorText:
-                              login.error != null && login.error == passwordFormatError
-                                  ? login.error
-                                  : null,
+                          errorText: login.error != null &&
+                                  login.error == passwordFormatError
+                              ? login.error
+                              : null,
                           onChanged: (v) => ref
                               .read(loginNotifierProvider.notifier)
                               .updatePassword(v),
                           validator: (v) =>
-                              Validators.loginPassword(context.l10n, v ?? ''),
+                              Validators.loginPassword(l10n, v ?? ''),
                         ),
                         if (login.error != null && notifierAuthError) ...[
                           const Gap(AppSpacing.sm),
@@ -327,40 +326,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             ),
                           ),
                         ],
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () =>
-                                context.push(AppRoutes.forgotPassword),
-                            child: Text(
-                              context.l10n.forgotPassword,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.accent,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // App-only: remember me.
                         Row(
                           children: [
                             Checkbox(
                               value: login.rememberMe,
-                              activeColor: AppColors.primary,
                               onChanged: (_) => ref
                                   .read(loginNotifierProvider.notifier)
                                   .toggleRememberMe(),
                             ),
                             Text(
-                              context.l10n.rememberMe,
+                              l10n.rememberMe,
                               style: AppTypography.bodyMedium.copyWith(
-                                color: context.textPrimary,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],
                         ),
                         const Gap(AppSpacing.sm),
                         XstoreButton(
-                          label: context.l10n.login,
+                          label: l10n.login,
                           isLoading: login.isLoading,
                           onPressed: login.isLoading ||
                                   phoneFormatError != null ||
@@ -375,55 +360,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                         const Gap(AppSpacing.xl),
                         const AuthDivider(),
+                        const Gap(AppSpacing.xl),
+                        const SocialLoginRow(),
                         const Gap(AppSpacing.md),
+                        // App-only: one-time-code login by phone.
                         SocialButton(
                           onTap: _openPhoneLoginSheet,
                           isLoading: false,
                           icon: Icon(
                             LucideIcons.smartphone,
-                            size: 22,
+                            size: 20,
                             color: context.textPrimary,
                           ),
-                          label: context.l10n.continueWithPhoneNumber,
-                          borderColor: context.borderColor,
-                          bgColor: AppColors.transparent,
-                          textColor: context.textPrimary,
+                          label: l10n.continueWithPhoneNumber,
                         ),
-                        // Courier login deferred to phase 2 — delivery
-                        // feature is out of scope for phase 1 launch.
-                        // const Gap(AppSpacing.md),
-                        // SocialButton(
-                        //   onTap: () => context.push(AppRoutes.courierLogin),
-                        //   isLoading: false,
-                        //   icon: Icon(
-                        //     LucideIcons.truck,
-                        //     size: 22,
-                        //     color: context.primaryColor,
-                        //   ),
-                        //   label: context.l10n.loginAsCourier,
-                        //   borderColor: context.borderColor,
-                        //   bgColor: AppColors.transparent,
-                        //   textColor: context.textPrimary,
-                        // ),
-                        const Gap(AppSpacing.md),
-                        const SocialLoginRow(),
-                        const Gap(AppSpacing.md),
+                        const Gap(AppSpacing.x2l),
                         Center(
                           child: TextButton(
-                            onPressed: () =>
-                                context.push(AppRoutes.register),
-                            child: RichText(
-                              text: TextSpan(
+                            onPressed: () => context.push(AppRoutes.register),
+                            child: Text.rich(
+                              TextSpan(
+                                text: '${l10n.dontHaveAccount} ',
                                 style: AppTypography.bodyMedium.copyWith(
                                   color: context.textSecondary,
                                 ),
                                 children: [
-                                  TextSpan(text: '${context.l10n.dontHaveAccount}  '),
                                   TextSpan(
-                                    text: context.l10n.createOneArrow,
+                                    text: l10n.createOneArrow,
                                     style: TextStyle(
-                                      color: AppColors.accent,
-                                      fontWeight: FontWeight.w700,
+                                      color: context.primaryColor,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ],
@@ -444,77 +410,65 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               context.go(AppRoutes.home);
                             },
                             child: Text(
-                              context.l10n.guestContinue,
+                              l10n.guestContinue,
                               style: AppTypography.bodyMedium.copyWith(
                                 color: context.textSecondary,
                                 fontWeight: FontWeight.w600,
                                 decoration: TextDecoration.underline,
+                                decorationColor: context.textSecondary,
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _LoginRegisterTabs extends StatelessWidget {
-  const _LoginRegisterTabs({required this.onRegisterTap});
+/// The lit planet peeking in at the top corner of the sign-in screen.
+class _Planet extends StatelessWidget {
+  const _Planet({required this.size});
 
-  final VoidCallback onRegisterTap;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              Text(
-                context.l10n.login,
-                style: AppTypography.navTabLarge.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
-                ),
-              ),
-              const Gap(AppSpacing.sm),
-              Container(
-                height: 3,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+    return IgnorePointer(
+      child: Opacity(
+        opacity: 0.8,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const RadialGradient(
+              center: Alignment(-0.36, -0.44),
+              colors: [
+                Color(0xFFFFFFFF),
+                Color(0xFF9EE9FF),
+                Color(0xFF6C7BFF),
+                Color(0xFF2A1B6B),
+                Color(0xFF0C0F2A),
+              ],
+              stops: [0, 0.12, 0.45, 0.78, 1],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7CA0FF).withValues(alpha: 0.5),
+                blurRadius: 60,
               ),
             ],
           ),
         ),
-        Expanded(
-          child: InkWell(
-            onTap: onRegisterTap,
-            child: Column(
-              children: [
-                Text(
-                  context.l10n.register,
-                  style: AppTypography.navTabMedium.copyWith(
-                    color: context.textSecondary.withValues(alpha: 0.85),
-                  ),
-                ),
-                const Gap(AppSpacing.sm),
-                const SizedBox(height: 3),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

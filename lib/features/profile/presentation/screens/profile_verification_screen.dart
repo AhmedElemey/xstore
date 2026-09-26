@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../../shared/widgets/space_background.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -109,6 +112,7 @@ class _ProfileVerificationScreenState
       }
     });
 
+    final accent = context.primaryColor;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -117,49 +121,88 @@ class _ProfileVerificationScreenState
               : context.l10n.verifyYourNumber,
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                isEmail
-                    ? '${context.l10n.codeSentTo} ${args.contactValue}'
-                    : context.l10n.phoneOtpSentToAssociatedEmail,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.textSecondary,
+      body: SpaceBackground(
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GlassCard(
+                  radius: 22,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  borderColor: accent.withValues(alpha: 0.35),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: accent, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accent.withValues(alpha: 0.4),
+                                  blurRadius: 14,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isEmail ? LucideIcons.mail : LucideIcons.phone,
+                              size: 16,
+                              color: accent,
+                            ),
+                          ),
+                          const Gap(AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              isEmail
+                                  ? '${context.l10n.codeSentTo} ${args.contactValue}'
+                                  : context.l10n.phoneOtpSentToAssociatedEmail,
+                              style: AppTypography.bodyMedium.copyWith(
+                                height: 1.45,
+                                color: context.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(AppSpacing.lg),
+                      OtpInputField(
+                        controller: _otp,
+                        enabled: !state.isVerifying,
+                        errorText: _errorText(state.error),
+                        onCompleted: (_) => _verify(),
+                      ),
+                      const Gap(AppSpacing.md),
+                      Center(
+                        child: OtpResendRow(
+                          canResend: state.canResend,
+                          resendCooldown: state.resendCooldown,
+                          isSending: state.isSending,
+                          onResend: () => ref
+                              .read(profileVerificationProvider(args).notifier)
+                              .resend(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Gap(AppSpacing.xl),
-              Center(
-                child: OtpInputField(
-                  controller: _otp,
-                  enabled: !state.isVerifying,
-                  errorText: _errorText(state.error),
-                  onCompleted: (_) => _verify(),
+                const Gap(AppSpacing.x2l),
+                XstoreButton(
+                  label: context.l10n.verifyAndContinue,
+                  isLoading: state.isVerifying,
+                  onPressed: _otp.text.length == 6 && !state.isVerifying
+                      ? _verify
+                      : null,
                 ),
-              ),
-              const Gap(AppSpacing.lg),
-              XstoreButton(
-                label: context.l10n.verifyAndContinue,
-                isLoading: state.isVerifying,
-                onPressed: _otp.text.length == 6 && !state.isVerifying
-                    ? _verify
-                    : null,
-              ),
-              const Gap(AppSpacing.md),
-              Center(
-                child: OtpResendRow(
-                  canResend: state.canResend,
-                  resendCooldown: state.resendCooldown,
-                  isSending: state.isSending,
-                  onResend: () => ref
-                      .read(profileVerificationProvider(args).notifier)
-                      .resend(),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

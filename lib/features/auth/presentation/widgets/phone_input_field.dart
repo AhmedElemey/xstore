@@ -8,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class PhoneInputField extends StatelessWidget {
   const PhoneInputField({
@@ -51,28 +52,21 @@ class PhoneInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.phoneNumber,
-          style: AppTypography.bodyMedium.copyWith(
-            color: context.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const Gap(AppSpacing.xs),
+        OrbitFieldLabel(context.l10n.phoneNumber),
+        const Gap(AppSpacing.sm),
         SizedBox(
-          height: 52,
+          height: 54,
           child: Material(
             color: AppColors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.transparent,
-                borderRadius: BorderRadius.circular(12),
+                color: glassFill(context),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: errorText != null
                       ? AppColors.error
                       : context.borderColor,
-                  width: 1.5,
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -108,19 +102,29 @@ class PhoneInputField extends StatelessWidget {
                 decoration: InputDecoration(
                   fillColor: AppColors.transparent,
                   hintText: '1012345678',
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(LucideIcons.phone),
+                  // "+20" in the accent colour, split from the number by a
+                  // hairline, as in the Orbit design.
+                  prefixIcon: Container(
+                    margin: const EdgeInsetsDirectional.only(end: 10),
+                    padding: const EdgeInsetsDirectional.only(end: 10),
+                    decoration: BoxDecoration(
+                      border: BorderDirectional(
+                        end: BorderSide(color: context.borderColor),
+                      ),
+                    ),
+                    child: Text(
+                      '+20',
+                      textDirection: TextDirection.ltr,
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: context.primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
                   ),
                   prefixIconConstraints: const BoxConstraints(
                     minWidth: 24,
                     minHeight: 24,
-                  ),
-                  prefixText: '🇪🇬 +20 ',
-                  prefixStyle: AppTypography.bodyMedium.copyWith(
-                    color: context.textPrimary,
-
-                    fontWeight: FontWeight.w600,
                   ),
 
                   suffixIcon:

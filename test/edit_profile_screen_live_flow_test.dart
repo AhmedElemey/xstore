@@ -241,7 +241,13 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'Updated Buyer');
       await tester.pump();
 
-      await tester.tap(find.text('Save'));
+      // Save lives at the bottom of the form (Orbit design).
+      await tester.scrollUntilVisible(
+        find.text('Save Changes'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Save Changes'));
       await _settle(tester);
 
       expect(find.text('Profile updated'), findsOneWidget);

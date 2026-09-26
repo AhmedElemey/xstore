@@ -8,7 +8,6 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
@@ -21,6 +20,7 @@ import '../providers/phone_auth_provider.dart';
 import '../widgets/otp_input_field.dart';
 import '../widgets/otp_resend_row.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../../../shared/widgets/space_background.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
@@ -73,150 +73,153 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
     });
     final display = AppValidators.formatEgyptPhone(AppValidators.toE164Egypt(st.phoneNumber));
 
+    Future<void> verify() async {
+      final ok = await ref.read(phoneAuthProvider.notifier).verifyOtp();
+      if (!context.mounted || !ok) return;
+      await maybeShowLocationPermissionPrompt(context, ref);
+      if (!context.mounted) return;
+      context.go(AppRoutes.home);
+    }
+
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: SpaceBackground(child: Column(
-        children: [
-          Container(
-            height: MediaQuery.sizeOf(context).height * 0.35,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.primary, AppColors.primaryDark],
+      appBar: AppBar(
+        leadingWidth: 64,
+        leading: Padding(
+          padding: const EdgeInsetsDirectional.only(start: AppSpacing.lg),
+          child: Center(
+            child: OrbitCircleButton(
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: () {
+                ref.read(phoneAuthProvider.notifier).reset();
+                context.pop();
+              },
+              child: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.chevronRight
+                    : LucideIcons.chevronLeft,
+                size: 22,
+                color: context.textPrimary,
               ),
             ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () {
-                        ref.read(phoneAuthProvider.notifier).reset();
-                        context.pop();
-                      },
-                      icon: const Icon(Icons.arrow_back, color: AppColors.white),
-                    ),
+          ),
+        ),
+      ),
+      body: SpaceBackground(
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, AppSpacing.sm, 24, 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Center(
+                  child: OrbitGlyphOrb(
+                    icon: LucideIcons.messageSquare,
+                    size: 64,
+                    ringed: true,
                   ),
-                  const Spacer(),
-                  const Icon(LucideIcons.smartphone, color: AppColors.white, size: 80),
-                  const Spacer(),
-                ],
-              ),
+                ),
+                const Gap(AppSpacing.x2l),
+                Text(
+                  context.l10n.verifyYourNumber,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.titleLarge.copyWith(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: context.textPrimary,
+                  ),
+                ),
+                const Gap(AppSpacing.sm),
+                Text.rich(
+                  TextSpan(
+                    text: '${context.l10n.otpEnterCodeSentTo} ',
+                    children: [
+                      TextSpan(
+                        text: '+20 $display',
+                        style: TextStyle(
+                          color: context.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyLarge.copyWith(
+                    height: 1.5,
+                    color: context.textSecondary,
+                  ),
+                ),
+                const Gap(AppSpacing.x2l),
+                AnimatedBuilder(
+                  animation: _shakeAnimation,
+                  builder: (_, child) => Transform.translate(
+                    offset: Offset(sin(_shakeAnimation.value * pi) * 8, 0),
+                    child: child,
+                  ),
+                  child: OtpInputField(
+                    controller: _otp,
+                    enabled: !st.isVerifyingOtp,
+                    errorText: st.otpError,
+                    onCompleted: (code) async {
+                      ref.read(phoneAuthProvider.notifier).updateOtp(code);
+                      await verify();
+                    },
+                  ),
+                ),
+                const Gap(AppSpacing.xl),
+                Center(
+                  child: OtpResendRow(
+                    canResend: st.canResend,
+                    resendCooldown: st.resendCooldown,
+                    isSending: st.isSendingOtp,
+                    onResend: () async {
+                      await ref
+                          .read(phoneAuthProvider.notifier)
+                          .resendOtp(context.l10n);
+                      if (!context.mounted) return;
+                      // Mock mode sends no real SMS — the fixed test
+                      // code is echoed back for local dev/testing.
+                      final debugOtp = ref.read(phoneAuthProvider).debugOtp;
+                      if (kDebugMode &&
+                          debugOtp != null &&
+                          debugOtp.isNotEmpty) {
+                        AppSnackbar.info(context, 'Debug OTP: $debugOtp');
+                      }
+                    },
+                  ),
+                ),
+                const Gap(AppSpacing.x4l),
+                XstoreButton(
+                  label: context.l10n.verifyAndContinue,
+                  isLoading: st.isVerifyingOtp,
+                  onPressed: st.otpCode.length == 6 && !st.isVerifyingOtp
+                      ? verify
+                      : null,
+                ),
+                const Gap(AppSpacing.sm),
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.primaryColor,
+                    ),
+                    child: Text(context.l10n.changeNumber),
+                  ),
+                ),
+                Text(
+                  context.l10n.otpContactSupport,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: context.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            child: Transform.translate(
-              offset: const Offset(0, -24),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                decoration: BoxDecoration(
-                  color: context.surfaceColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      context.l10n.verifyYourNumber,
-                      style: AppTypography.titleLarge.copyWith(color: context.textPrimary),
-                    ),
-                    const Gap(AppSpacing.sm),
-                    Text(
-                      context.l10n.otpEnterCodeSentTo,
-                      style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
-                    ),
-                    const Gap(AppSpacing.xs),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '🇪🇬 +20 $display',
-                          style: AppTypography.bodyLarge.copyWith(
-                            color: context.textPrimary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => context.pop(),
-                          child: Text(context.l10n.changeNumber),
-                        ),
-                      ],
-                    ),
-                    const Gap(AppSpacing.lg),
-                    AnimatedBuilder(
-                      animation: _shakeAnimation,
-                      builder: (_, child) => Transform.translate(
-                        offset: Offset(sin(_shakeAnimation.value * pi) * 8, 0),
-                        child: child,
-                      ),
-                      child: OtpInputField(
-                        controller: _otp,
-                        enabled: !st.isVerifyingOtp,
-                        errorText: st.otpError,
-                        onCompleted: (code) async {
-                          ref.read(phoneAuthProvider.notifier).updateOtp(code);
-                          final ok = await ref.read(phoneAuthProvider.notifier).verifyOtp();
-                          if (!context.mounted || !ok) return;
-                          await maybeShowLocationPermissionPrompt(context, ref);
-                          if (!context.mounted) return;
-                          context.go(AppRoutes.home);
-                        },
-                      ),
-                    ),
-                    const Gap(AppSpacing.lg),
-                    XstoreButton(
-                      label: context.l10n.verifyAndContinue,
-                      isLoading: st.isVerifyingOtp,
-                      onPressed: st.otpCode.length == 6 && !st.isVerifyingOtp
-                          ? () async {
-                              final ok = await ref
-                                  .read(phoneAuthProvider.notifier)
-                                  .verifyOtp();
-                              if (!context.mounted || !ok) return;
-                              await maybeShowLocationPermissionPrompt(
-                                context,
-                                ref,
-                              );
-                              if (!context.mounted) return;
-                              context.go(AppRoutes.home);
-                            }
-                          : null,
-                    ),
-                    const Gap(AppSpacing.md),
-                    OtpResendRow(
-                      canResend: st.canResend,
-                      resendCooldown: st.resendCooldown,
-                      isSending: st.isSendingOtp,
-                      onResend: () async {
-                        await ref
-                            .read(phoneAuthProvider.notifier)
-                            .resendOtp(context.l10n);
-                        if (!context.mounted) return;
-                        // Mock mode sends no real SMS — the fixed test
-                        // code is echoed back for local dev/testing.
-                        final debugOtp = ref.read(phoneAuthProvider).debugOtp;
-                        if (kDebugMode &&
-                            debugOtp != null &&
-                            debugOtp.isNotEmpty) {
-                          AppSnackbar.info(context, 'Debug OTP: $debugOtp');
-                        }
-                      },
-                    ),
-                    const Spacer(),
-                    Text(
-                      context.l10n.otpContactSupport,
-                      style: AppTypography.labelSmall.copyWith(color: context.textDisabled),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      )),
+        ),
+      ),
     );
   }
 }

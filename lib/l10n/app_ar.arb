@@ -42,12 +42,9 @@
   "continueWithGoogle": "كمل بـ Google",
   "continueWithApple": "كمل بـ Apple",
   "continueWithFacebook": "كمل بـ Facebook",
-  "socialLoginDivider": "أو كمل بـ",
   "welcomeBack": "أهلاً بيك",
   "chooseYourRole": "هتستخدم xStore إزاي؟",
   "socialRoleSubtitle": "خطوة أخيرة — اختار نوع حسابك",
-  "socialWelcomeGreeting": "أهلاً بيك، {name}! 👋",
-  "socialRoleLastStep": "خطوة أخيرة — هتستخدم xStore إزاي؟",
   "socialWelcomeFallbackName": "يا صاحبي",
   "googleAccountNotFound": "لا يوجد حساب مرتبط بحساب جوجل ده. من فضلك سجّل حساب جديد.",
   "searchHint": "ابحث عن منتجات...",
@@ -193,16 +190,10 @@
   "save": "حفظ",
   "saveChanges": "حفظ التغييرات",
   "settings": "الإعدادات",
-  "sectionMyActivity": "نشاطي",
-  "sectionAccountSettings": "إعدادات الحساب",
-  "sectionPreferences": "التفضيلات",
-  "sectionSupport": "الدعم",
-  "sectionDangerZone": "منطقة الخطر",
   "menuMyListings": "إعلاناتي",
   "menuMyOrders": "طلباتي",
   "menuEarnings": "الأرباح",
   "menuWishlist": "المفضلة",
-  "menuPersonalInfo": "البيانات الشخصية",
   "socialLinks": "روابط التواصل",
   "menuChangePassword": "تغيير كلمة المرور",
   "menuNotificationsSettings": "الإشعارات",
@@ -218,9 +209,6 @@
   "statSalesShort": "مبيعات",
   "statRating": "التقييم",
   "statResponse": "الرد",
-  "statOrders": "الطلبات",
-  "statWishlist": "المفضلة",
-  "statTotalSaved": "إجمالي التوفير",
   "storeInformation": "بيانات المتجر",
   "storeCategoryLabel": "فئة المتجر",
   "whatsappProductPrefill": "مرحباً، مهتم بالإعلان {title}",
@@ -849,13 +837,6 @@
       }
     }
   },
-  "@socialWelcomeGreeting": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "@storeUrlPreview": {
     "placeholders": {
       "slug": {
@@ -997,16 +978,9 @@
   "chooseHowUse": "اختار طريقة استخدام xStore. تقدر تضيف الدور الآخر لاحقاً.",
   "iAmBuyer": "أنا مشتري",
   "buyerSubtitle": "اكتشف واشتري منتجات من بائعين موثوقين",
-  "buyerFeature1": "[AR] Browse thousands of products",
-  "buyerFeature2": "[AR] Secure checkout & payments",
-  "buyerFeature3": "[AR] Track your orders in real time",
   "buyerFeature4": "[AR] Save favorites to wishlist",
   "iAmSeller": "أنا بائع",
   "sellerSubtitle": "اعرض منتجاتك وابدأ تربح اليوم",
-  "sellerFeature1": "[AR] List unlimited products",
-  "sellerFeature2": "[AR] Manage orders & inventory",
-  "sellerFeature3": "[AR] Analytics & sales insights",
-  "sellerFeature4": "[AR] Direct chat with buyers",
   "dateOfBirthOptional": "تاريخ الميلاد (اختياري)",
   "tellUsAboutYou": "احكيلنا عنك",
   "infoOnProfile": "المعلومات دي هتظهر في ملفك الشخصي",
@@ -1404,5 +1378,15 @@
   "wishlistTitle": "المحفوظات",
   "wishlistItemCount": "{n, plural, =0{لا منتجات} =1{منتج واحد} =2{منتجان} few{{n} منتجات} many{{n} منتجًا} other{{n} منتج}}",
   "wishlistInStockCount": "{n} متوفر",
-  "notificationsUnreadCount": "{n} غير مقروء"
+  "notificationsUnreadCount": "{n} غير مقروء",
+  "authOr": "أو",
+  "passwordRuleLength": "8 أحرف على الأقل",
+  "passwordRuleLower": "حرف صغير",
+  "passwordRuleUpper": "حرف كبير",
+  "passwordRuleNumber": "رقم",
+  "passwordRuleSymbol": "رمز مثل # أو @",
+  "profileOrdersActive": "{n} نشط",
+  "profileEmailVerifiedBadge": "✓ البريد موثّق",
+  "profilePhoneVerifiedBadge": "✓ الهاتف موثّق",
+  "profileEdit": "تعديل"
 }

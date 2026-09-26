@@ -29,8 +29,10 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
 import '../widgets/role_selector_card.dart';
 import '../widgets/auth_divider.dart';
+import '../widgets/auth_header.dart';
 import '../widgets/social_login_row.dart';
 import '../widgets/phone_input_field.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../../../shared/widgets/space_background.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -186,16 +188,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final labels = s.totalSteps == 4
         ? [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity, context.l10n.stepStore]
         : [context.l10n.stepRole, context.l10n.stepInfo, context.l10n.stepSecurity];
-    final progress = s.currentStep / s.totalSteps;
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: context.backgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, color: context.iconPrimary),
-          onPressed: () => _onBack(s, n),
+        leadingWidth: 64,
+        leading: Padding(
+          padding: const EdgeInsetsDirectional.only(start: AppSpacing.lg),
+          child: Center(
+            child: OrbitCircleButton(
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: () => _onBack(s, n),
+              child: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.chevronRight
+                    : LucideIcons.chevronLeft,
+                size: 22,
+                color: context.textPrimary,
+              ),
+            ),
+          ),
+        ),
+        title: Text(
+          context.l10n.stepOf(s.currentStep, s.totalSteps).toUpperCase(),
+          style: AppTypography.labelSmall.copyWith(
+            color: context.textSecondary,
+            letterSpacing: 1,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
       ),
       body: SpaceBackground(child: Stack(
@@ -205,50 +225,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: Text(
-                  context.l10n.stepOf(s.currentStep, s.totalSteps),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: context.textSecondary,
-                  ),
-                ),
-              ),
-              const Gap(AppSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor: context.textDisabled.withValues(alpha: 0.35),
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              const Gap(AppSpacing.sm),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(
-                    labels.length,
-                    (i) => Expanded(
-                      child: Text(
-                        labels[i],
-                        textAlign: TextAlign.center,
-                        style: AppTypography.labelSmall.copyWith(
-                          fontWeight: i + 1 == s.currentStep
-                              ? FontWeight.w800
-                              : FontWeight.w500,
-                          color: i + 1 <= s.currentStep
-                              ? AppColors.primary
-                              : context.textDisabled,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                child: _StepTrail(current: s.currentStep, labels: labels),
               ),
               const Gap(AppSpacing.lg),
               Expanded(
@@ -338,20 +315,9 @@ class _StepRole extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
-        Text(
-          context.l10n.joinAs,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-            color: context.textPrimary,
-          ),
-        ),
-        const Gap(AppSpacing.spacing10),
-        Text(
-          context.l10n.chooseHowUse,
-          style: AppTypography.body15.copyWith(
-            height: 1.4,
-            color: context.textSecondary,
-          ),
+        AuthHeader(
+          title: context.l10n.joinAs,
+          subtitle: context.l10n.chooseHowUse,
         ),
         const Gap(AppSpacing.xl),
         if (s.stepErrors.containsKey('role'))
@@ -366,34 +332,21 @@ class _StepRole extends StatelessWidget {
           title: context.l10n.iAmBuyer,
           subtitle: context.l10n.buyerSubtitle,
           icon: LucideIcons.shoppingBag,
-          accentColor: AppColors.primary,
-          selectionBorderColor: AppColors.primary,
+          paletteIndex: 0,
           isSelected: s.selectedRole == UserRole.consumer,
           onTap: () => n.updateRole(UserRole.consumer),
-          features: [
-            context.l10n.buyerFeature1,
-            context.l10n.buyerFeature2,
-            context.l10n.buyerFeature3,
-            context.l10n.buyerFeature4,
-          ],
         ),
+        const Gap(AppSpacing.md),
         RoleSelectorCard(
           title: context.l10n.iAmSeller,
           subtitle: context.l10n.sellerSubtitle,
           icon: LucideIcons.store,
-          accentColor: AppColors.accent,
-          selectionBorderColor: AppColors.accent,
+          paletteIndex: 3,
           isSelected: s.selectedRole == UserRole.vendor,
           onTap: () => n.updateRole(UserRole.vendor),
-          features: [
-            context.l10n.sellerFeature1,
-            context.l10n.sellerFeature2,
-            context.l10n.sellerFeature3,
-            context.l10n.sellerFeature4,
-          ],
         ),
         const Gap(AppSpacing.xl),
-        AuthDivider(label: context.l10n.socialLoginDivider),
+        const AuthDivider(),
         const Gap(AppSpacing.xl),
         const SocialLoginRow(),
       ],
@@ -427,24 +380,15 @@ class _StepPersonal extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
-        Text(
-          context.l10n.tellUsAboutYou,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.infoOnProfile,
-          style:
-              AppTypography.body15.copyWith(color: context.textSecondary),
+        AuthHeader(
+          title: context.l10n.tellUsAboutYou,
+          subtitle: context.l10n.infoOnProfile,
         ),
         const Gap(AppSpacing.xl),
         AuthTextField(
           label: context.l10n.fullNameRequired,
           hint: context.l10n.fullNameHint,
           controller: fullName,
-          prefixIcon: const Icon(LucideIcons.user),
           errorText: s.stepErrors['fullName'],
           onChanged: (v) => n.updateField(fullName: v),
         ),
@@ -458,8 +402,7 @@ class _StepPersonal extends StatelessWidget {
               hint: context.l10n.enterEmailHint,
               controller: email,
               keyboardType: TextInputType.emailAddress,
-              prefixIcon: const Icon(LucideIcons.mail),
-              errorText: s.stepErrors['email'],
+                  errorText: s.stepErrors['email'],
               suffixIcon: ok
                   ? const Icon(Icons.check_circle, color: AppColors.success)
                   : null,
@@ -481,7 +424,7 @@ class _StepPersonal extends StatelessWidget {
           readOnly: true,
           onTap: onPickDob,
           hint: dobLabel,
-          prefixIcon: const Icon(LucideIcons.calendar),
+          suffixIcon: const Icon(LucideIcons.calendar),
           errorText: s.stepErrors['dob'],
         ),
         const Gap(AppSpacing.inputContentPaddingH),
@@ -517,17 +460,9 @@ class _StepSecurity extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
-        Text(
-          context.l10n.secureYourAccount,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.strongPasswordHint,
-          style:
-              AppTypography.body15.copyWith(color: context.textSecondary),
+        AuthHeader(
+          title: context.l10n.secureYourAccount,
+          subtitle: context.l10n.strongPasswordHint,
         ),
         const Gap(AppSpacing.xl),
         AuthTextField(
@@ -535,7 +470,6 @@ class _StepSecurity extends StatelessWidget {
           hint: '********',
           controller: password,
           obscureText: !s.isPasswordVisible,
-          prefixIcon: const Icon(LucideIcons.lock),
           suffixIcon: IconButton(
             onPressed: () => n.togglePasswordVisibility(),
             icon: Icon(
@@ -546,7 +480,7 @@ class _StepSecurity extends StatelessWidget {
           errorText: s.stepErrors['password'],
           onChanged: n.updatePasswordFields,
         ),
-        const Gap(AppSpacing.md),
+        const Gap(AppSpacing.sm),
         PasswordStrengthBar(password: s.password),
         const Gap(AppSpacing.lg),
         AuthTextField(
@@ -554,7 +488,6 @@ class _StepSecurity extends StatelessWidget {
           hint: '********',
           controller: confirm,
           obscureText: !s.isConfirmPasswordVisible,
-          prefixIcon: const Icon(LucideIcons.shieldCheck),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -577,6 +510,8 @@ class _StepSecurity extends StatelessWidget {
           errorText: s.stepErrors['confirm'],
           onChanged: n.updateConfirmPassword,
         ),
+        const Gap(AppSpacing.lg),
+        PasswordRulesCard(password: s.password),
         const Gap(AppSpacing.lg),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,7 +541,7 @@ class _StepSecurity extends StatelessWidget {
                         context.l10n.termsOfService,
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.accent,
+                          color: context.primaryColor,
                         ),
                       ),
                     ),
@@ -622,7 +557,7 @@ class _StepSecurity extends StatelessWidget {
                         context.l10n.privacyPolicy,
                         style: AppTypography.bodyMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.accent,
+                          color: context.primaryColor,
                         ),
                       ),
                     ),
@@ -730,17 +665,9 @@ class _StepStore extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       children: [
-        Text(
-          context.l10n.setUpYourStore,
-          style: AppTypography.titleLarge.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const Gap(AppSpacing.sm),
-        Text(
-          context.l10n.tellBuyersStore,
-          style:
-              AppTypography.body15.copyWith(color: context.textSecondary),
+        AuthHeader(
+          title: context.l10n.setUpYourStore,
+          subtitle: context.l10n.tellBuyersStore,
         ),
         const Gap(AppSpacing.xl),
         AuthTextField(
@@ -935,6 +862,93 @@ class _VendorSuccessOverlay extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Orbit wizard progress: done steps are filled with a check, the current
+/// one is a glowing ring, later ones are dim; labels sit underneath.
+class _StepTrail extends StatelessWidget {
+  const _StepTrail({required this.current, required this.labels});
+
+  final int current;
+  final List<String> labels;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = context.primaryColor;
+    final idle = context.borderColor;
+    final nodes = <Widget>[];
+    for (var i = 1; i <= labels.length; i++) {
+      if (i > 1) {
+        nodes.add(
+          Expanded(
+            child: Container(height: 2, color: i <= current ? accent : idle),
+          ),
+        );
+      }
+      nodes.add(
+        Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: i < current ? accent : null,
+            border: i < current
+                ? null
+                : Border.all(color: i == current ? accent : idle, width: 2),
+            boxShadow: i <= current
+                ? [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.5),
+                      blurRadius: 16,
+                    ),
+                  ]
+                : null,
+          ),
+          child: i < current
+              ? Icon(
+                  LucideIcons.check,
+                  size: 16,
+                  color: context.isDark ? AppColors.space : AppColors.white,
+                )
+              : i == current
+                  ? Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accent,
+                      ),
+                    )
+                  : null,
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ExcludeSemantics(child: Row(children: nodes)),
+        const Gap(AppSpacing.sm),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (var i = 1; i <= labels.length; i++)
+              Text(
+                labels[i - 1],
+                style: AppTypography.labelSmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: i < current
+                      ? accent
+                      : i == current
+                          ? context.textPrimary
+                          : context.textSecondary,
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

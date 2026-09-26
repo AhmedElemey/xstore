@@ -5,16 +5,16 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../../../shared/widgets/space_background.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -90,12 +90,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, color: context.iconPrimary),
-          onPressed: () => context.pop(),
-        ),
       ),
       body: SpaceBackground(child: SafeArea(
         child: Padding(
@@ -103,21 +97,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                context.l10n.resetPasswordTitle,
-                style: AppTypography.titleLarge.copyWith(
-                  fontSize: AppTypography.rem(1.625),
-                  fontWeight: FontWeight.w800,
-                  color: context.textPrimary,
-                ),
+              const Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: OrbitGlyphOrb(icon: LucideIcons.keyRound, paletteIndex: 2),
               ),
-              const Gap(AppSpacing.md),
-              Text(
-                context.l10n.forgotPasswordSubtitle,
-                style: AppTypography.body15.copyWith(
-                  height: 1.4,
-                  color: context.textSecondary,
-                ),
+              const Gap(AppSpacing.xl),
+              AuthHeader(
+                title: context.l10n.resetPasswordTitle,
+                subtitle: context.l10n.forgotPasswordSubtitle,
               ),
               const Gap(AppSpacing.spacing28),
               AuthTextField(
@@ -125,7 +112,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 hint: context.l10n.enterEmailHint,
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                prefixIcon: const Icon(LucideIcons.mail),
                 errorText: _error,
                 onChanged: (_) {
                   if (_error != null) {
@@ -150,7 +136,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   context.l10n.backToLogin,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                   ),
                 ),
               ),

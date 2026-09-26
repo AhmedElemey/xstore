@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class OtpInputField extends StatelessWidget {
   const OtpInputField({
@@ -27,28 +28,29 @@ class OtpInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaultTheme = PinTheme(
       width: 48,
-      height: 56,
+      height: 60,
       textStyle: AppTypography.titleLarge.copyWith(
         color: context.textPrimary,
         fontWeight: FontWeight.w700,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.borderColor, width: 1.5),
+        color: glassFill(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.borderColor),
       ),
     );
+    final accent = context.primaryColor;
     final focusedTheme = defaultTheme.copyWith(
       decoration: defaultTheme.decoration!.copyWith(
-        border: Border.all(color: AppColors.primary, width: 2),
+        border: Border.all(color: accent, width: 2),
+        boxShadow: [
+          BoxShadow(color: accent.withValues(alpha: 0.14), spreadRadius: 4),
+          BoxShadow(color: accent.withValues(alpha: 0.3), blurRadius: 20),
+        ],
       ),
     );
-    final filledTheme = defaultTheme.copyWith(
-      decoration: defaultTheme.decoration!.copyWith(
-        color: context.isDark ? AppColors.darkSurfaceVariant : AppColors.notificationUnreadBackground,
-        border: Border.all(color: AppColors.primary, width: 1.5),
-      ),
-    );
+    final filledTheme = defaultTheme;
     final errorTheme = defaultTheme.copyWith(
       decoration: defaultTheme.decoration!.copyWith(
         border: Border.all(color: AppColors.error, width: 1.5),
@@ -58,6 +60,7 @@ class OtpInputField extends StatelessWidget {
     return Column(
       children: [
         Pinput(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           controller: controller,
           length: 6,
           defaultPinTheme: defaultTheme,
