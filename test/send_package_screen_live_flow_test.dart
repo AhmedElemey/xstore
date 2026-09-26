@@ -26,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/core/mock/mock_config.dart';
@@ -110,7 +111,8 @@ Widget _routedHarness(List<Override> overrides) {
     ],
   );
   return ProviderScope(
-    overrides: overrides,
+    // The app opens in Arabic by default; this test reads English names.
+    overrides: [appIsArabicProvider.overrideWithValue(false), ...overrides],
     child: MaterialApp.router(
       routerConfig: router,
       localizationsDelegates: const [
