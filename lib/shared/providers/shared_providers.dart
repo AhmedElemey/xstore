@@ -16,8 +16,9 @@ class AppThemeMode extends _$AppThemeMode {
   @override
   ThemeMode build() {
     _loadSavedTheme();
-    // Orbit is a dark-first design; a saved choice (including light) wins.
-    return ThemeMode.dark;
+    // First launch (nothing saved yet) opens in light mode; a saved choice
+    // (including dark) wins.
+    return ThemeMode.light;
   }
 
   Future<void> _loadSavedTheme() async {
@@ -28,7 +29,7 @@ class AppThemeMode extends _$AppThemeMode {
 
       final saved = ThemeMode.values.firstWhere(
         (mode) => mode.name == name,
-        orElse: () => ThemeMode.dark,
+        orElse: () => ThemeMode.light,
       );
       if (state != saved) {
         state = saved;

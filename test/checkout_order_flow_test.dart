@@ -45,6 +45,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/analytics/analytics_service.dart';
 import 'package:xstore/core/analytics/event_names.dart';
 import 'package:xstore/core/constants/prefs_keys.dart';
@@ -421,6 +422,10 @@ void main() {
           checkout: () => _SeededAddressCheckout(),
         ),
       );
+      // The app opens in Arabic; this checks the English message.
+      await container
+          .read(appLocaleProvider.notifier)
+          .setLanguage(AppLanguage.english);
 
       final order = await container.read(checkoutProvider.notifier).placeOrder();
 

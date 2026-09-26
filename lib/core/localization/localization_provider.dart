@@ -8,8 +8,9 @@ import '../network/dio_error_mapper.dart';
 enum AppLanguage { english, arabic }
 
 class AppLocaleNotifier extends StateNotifier<AppLanguage> {
-  AppLocaleNotifier(this.ref) : super(AppLanguage.english) {
-    errorMessagesInArabic = false;
+  // First launch (nothing saved yet) opens in Arabic; a saved choice wins.
+  AppLocaleNotifier(this.ref) : super(AppLanguage.arabic) {
+    errorMessagesInArabic = true;
     _loadSavedLanguage();
   }
 
@@ -30,7 +31,7 @@ class AppLocaleNotifier extends StateNotifier<AppLanguage> {
     if (saved == null) return;
     state = AppLanguage.values.firstWhere(
       (e) => e.name == saved,
-      orElse: () => AppLanguage.english,
+      orElse: () => AppLanguage.arabic,
     );
   }
 

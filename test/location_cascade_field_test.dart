@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/features/cities/domain/entities/city_entity.dart';
@@ -40,6 +41,8 @@ Widget _app({
 }) {
   return ProviderScope(
     overrides: [
+      // The app opens in Arabic by default; these tests read English names.
+      appIsArabicProvider.overrideWithValue(false),
       allGovernmentsProvider.overrideWith((ref) async {
         if (error != null) throw error;
         if (delay != null) await Future<void>.delayed(delay);
