@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../shared/widgets/cart_icon_button.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -166,18 +166,12 @@ class ProductGridCard extends StatelessWidget {
                           listingId: item.id,
                           size: AppSpacing.x2l,
                         ),
-                        if (showAddToCart) ...[
-                          const Gap(AppSpacing.sm),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                onAddToCart();
-                              },
-                              child: Text(context.l10n.addToCart),
-                            ),
+                        const Spacer(),
+                        if (showAddToCart)
+                          CartIconButton(
+                            listingId: item.id,
+                            onPressed: onAddToCart,
                           ),
-                        ],
                       ],
                     ),
                   ],

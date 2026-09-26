@@ -3232,4 +3232,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courierDeliveryKicker => 'توصيل إكس ستور';
+
+  @override
+  String get cartIconInCart => 'في السلة';
 }

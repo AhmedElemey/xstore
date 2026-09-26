@@ -6091,6 +6091,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'XSTORE DELIVERY'**
   String get courierDeliveryKicker;
+
+  /// No description provided for @cartIconInCart.
+  ///
+  /// In en, this message translates to:
+  /// **'In cart'**
+  String get cartIconInCart;
 }
 
 class _AppLocalizationsDelegate

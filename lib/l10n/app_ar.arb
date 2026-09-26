@@ -1387,5 +1387,6 @@
   "commissionCustomerPays": "يدفع العميل",
   "walletFeePerOrder": "الرسوم لكل طلب",
   "walletPauseLimit": "تتوقف الإعلانات الجديدة عندما تصل الرسوم غير المدفوعة إلى {limit}.",
-  "courierDeliveryKicker": "توصيل إكس ستور"
+  "courierDeliveryKicker": "توصيل إكس ستور",
+  "cartIconInCart": "في السلة"
 }

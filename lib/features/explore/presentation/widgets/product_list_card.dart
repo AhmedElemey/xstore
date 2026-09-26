@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../shared/widgets/cart_icon_button.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -159,18 +159,7 @@ class ProductListCard extends StatelessWidget {
                 WishHeartButton(listingId: item.id, size: 20),
                 if (showAddToCart) ...[
                   const Gap(AppSpacing.xs),
-                  OrbitCircleButton(
-                    tooltip: context.l10n.addToCart,
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      onAddToCart();
-                    },
-                    child: Icon(
-                      LucideIcons.shoppingCart,
-                      size: 18,
-                      color: context.primaryColor,
-                    ),
-                  ),
+                  CartIconButton(listingId: item.id, onPressed: onAddToCart),
                 ],
               ],
             ),

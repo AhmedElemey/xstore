@@ -3238,4 +3238,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courierDeliveryKicker => 'XSTORE DELIVERY';
+
+  @override
+  String get cartIconInCart => 'In cart';
 }

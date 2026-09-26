@@ -1443,5 +1443,6 @@
       }
     }
   },
-  "courierDeliveryKicker": "XSTORE DELIVERY"
+  "courierDeliveryKicker": "XSTORE DELIVERY",
+  "cartIconInCart": "In cart"
 }

@@ -220,7 +220,7 @@ class _CartDisc extends StatelessWidget {
       constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       padding: EdgeInsets.zero,
       icon: Icon(
-        inCart ? LucideIcons.check : LucideIcons.shoppingCart,
+        LucideIcons.shoppingCart,
         size: 18,
         color: inCart ? AppColors.success : context.primaryColor,
       ),
