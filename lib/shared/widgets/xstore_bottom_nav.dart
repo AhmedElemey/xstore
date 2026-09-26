@@ -115,7 +115,10 @@ class XstoreBottomNav extends ConsumerWidget {
               border: Border.all(color: context.borderColor),
               boxShadow: [
                 BoxShadow(
-                  color: context.cardShadowColor,
+                  // Light mode: a soft violet halo instead of a grey drop.
+                  color: dark
+                      ? context.cardShadowColor
+                      : AppColors.primary.withValues(alpha: 0.16),
                   blurRadius: 28,
                   offset: const Offset(0, 10),
                 ),
