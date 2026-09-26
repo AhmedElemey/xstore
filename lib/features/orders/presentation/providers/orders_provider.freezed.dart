@@ -19,6 +19,10 @@ mixin _$OrdersState {
   List<OrderEntity> get orders => throw _privateConstructorUsedError;
   List<OrderEntity> get filteredOrders => throw _privateConstructorUsedError;
   OrderStatus? get selectedFilter => throw _privateConstructorUsedError;
+
+  /// Shopper tab grouping (Active / Delivered / Cancelled); null keeps the
+  /// per-status filter the seller view uses.
+  OrderTab? get tab => throw _privateConstructorUsedError;
   OrderSortOption get sortOption => throw _privateConstructorUsedError;
   String get searchQuery => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
@@ -44,6 +48,7 @@ abstract class $OrdersStateCopyWith<$Res> {
       {List<OrderEntity> orders,
       List<OrderEntity> filteredOrders,
       OrderStatus? selectedFilter,
+      OrderTab? tab,
       OrderSortOption sortOption,
       String searchQuery,
       bool isLoading,
@@ -73,6 +78,7 @@ class _$OrdersStateCopyWithImpl<$Res, $Val extends OrdersState>
     Object? orders = null,
     Object? filteredOrders = null,
     Object? selectedFilter = freezed,
+    Object? tab = freezed,
     Object? sortOption = null,
     Object? searchQuery = null,
     Object? isLoading = null,
@@ -96,6 +102,10 @@ class _$OrdersStateCopyWithImpl<$Res, $Val extends OrdersState>
           ? _value.selectedFilter
           : selectedFilter // ignore: cast_nullable_to_non_nullable
               as OrderStatus?,
+      tab: freezed == tab
+          ? _value.tab
+          : tab // ignore: cast_nullable_to_non_nullable
+              as OrderTab?,
       sortOption: null == sortOption
           ? _value.sortOption
           : sortOption // ignore: cast_nullable_to_non_nullable
@@ -160,6 +170,7 @@ abstract class _$$OrdersStateImplCopyWith<$Res>
       {List<OrderEntity> orders,
       List<OrderEntity> filteredOrders,
       OrderStatus? selectedFilter,
+      OrderTab? tab,
       OrderSortOption sortOption,
       String searchQuery,
       bool isLoading,
@@ -188,6 +199,7 @@ class __$$OrdersStateImplCopyWithImpl<$Res>
     Object? orders = null,
     Object? filteredOrders = null,
     Object? selectedFilter = freezed,
+    Object? tab = freezed,
     Object? sortOption = null,
     Object? searchQuery = null,
     Object? isLoading = null,
@@ -211,6 +223,10 @@ class __$$OrdersStateImplCopyWithImpl<$Res>
           ? _value.selectedFilter
           : selectedFilter // ignore: cast_nullable_to_non_nullable
               as OrderStatus?,
+      tab: freezed == tab
+          ? _value.tab
+          : tab // ignore: cast_nullable_to_non_nullable
+              as OrderTab?,
       sortOption: null == sortOption
           ? _value.sortOption
           : sortOption // ignore: cast_nullable_to_non_nullable
@@ -258,6 +274,7 @@ class _$OrdersStateImpl implements _OrdersState {
       {final List<OrderEntity> orders = const <OrderEntity>[],
       final List<OrderEntity> filteredOrders = const <OrderEntity>[],
       this.selectedFilter,
+      this.tab,
       this.sortOption = OrderSortOption.newest,
       this.searchQuery = '',
       this.isLoading = false,
@@ -290,6 +307,11 @@ class _$OrdersStateImpl implements _OrdersState {
 
   @override
   final OrderStatus? selectedFilter;
+
+  /// Shopper tab grouping (Active / Delivered / Cancelled); null keeps the
+  /// per-status filter the seller view uses.
+  @override
+  final OrderTab? tab;
   @override
   @JsonKey()
   final OrderSortOption sortOption;
@@ -318,7 +340,7 @@ class _$OrdersStateImpl implements _OrdersState {
 
   @override
   String toString() {
-    return 'OrdersState(orders: $orders, filteredOrders: $filteredOrders, selectedFilter: $selectedFilter, sortOption: $sortOption, searchQuery: $searchQuery, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, error: $error, stats: $stats, isSearching: $isSearching)';
+    return 'OrdersState(orders: $orders, filteredOrders: $filteredOrders, selectedFilter: $selectedFilter, tab: $tab, sortOption: $sortOption, searchQuery: $searchQuery, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, error: $error, stats: $stats, isSearching: $isSearching)';
   }
 
   @override
@@ -331,6 +353,7 @@ class _$OrdersStateImpl implements _OrdersState {
                 .equals(other._filteredOrders, _filteredOrders) &&
             (identical(other.selectedFilter, selectedFilter) ||
                 other.selectedFilter == selectedFilter) &&
+            (identical(other.tab, tab) || other.tab == tab) &&
             (identical(other.sortOption, sortOption) ||
                 other.sortOption == sortOption) &&
             (identical(other.searchQuery, searchQuery) ||
@@ -353,6 +376,7 @@ class _$OrdersStateImpl implements _OrdersState {
       const DeepCollectionEquality().hash(_orders),
       const DeepCollectionEquality().hash(_filteredOrders),
       selectedFilter,
+      tab,
       sortOption,
       searchQuery,
       isLoading,
@@ -375,6 +399,7 @@ abstract class _OrdersState implements OrdersState {
       {final List<OrderEntity> orders,
       final List<OrderEntity> filteredOrders,
       final OrderStatus? selectedFilter,
+      final OrderTab? tab,
       final OrderSortOption sortOption,
       final String searchQuery,
       final bool isLoading,
@@ -391,6 +416,11 @@ abstract class _OrdersState implements OrdersState {
   List<OrderEntity> get filteredOrders;
   @override
   OrderStatus? get selectedFilter;
+  @override
+
+  /// Shopper tab grouping (Active / Delivered / Cancelled); null keeps the
+  /// per-status filter the seller view uses.
+  OrderTab? get tab;
   @override
   OrderSortOption get sortOption;
   @override

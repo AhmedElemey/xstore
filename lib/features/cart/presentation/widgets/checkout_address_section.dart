@@ -10,6 +10,7 @@ import '../../../addresses/presentation/widgets/remove_address_sheet.dart';
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/address_location_display.dart';
+import 'checkout_progress.dart';
 
 class CheckoutAddressSection extends ConsumerWidget {
   const CheckoutAddressSection({super.key});
@@ -22,11 +23,9 @@ class CheckoutAddressSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          context.l10n.checkoutDeliveryTitle,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+        CheckoutSectionTitle(
+          number: 1,
+          title: context.l10n.checkoutDeliveryTitle,
         ),
         const SizedBox(height: AppSpacing.md),
         if (st.savedAddresses.isEmpty)

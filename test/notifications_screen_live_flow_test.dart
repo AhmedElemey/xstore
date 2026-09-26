@@ -174,7 +174,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text('🔔 You have 1 unread notifications'),
+        find.text('1 unread'),
         findsOneWidget,
       );
       expect(find.text('Mark all read'), findsOneWidget);

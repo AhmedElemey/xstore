@@ -7,7 +7,6 @@ part 'checkout_state.freezed.dart';
 @freezed
 class CheckoutState with _$CheckoutState {
   const factory CheckoutState({
-    @Default(1) int currentStep,
     @Default(<OrderAddress>[]) List<OrderAddress> savedAddresses,
     int? selectedAddressIndex,
     PaymentMethod? selectedPayment,

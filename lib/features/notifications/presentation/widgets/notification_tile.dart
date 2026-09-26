@@ -9,11 +9,11 @@ import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
-import '../../../../shared/widgets/pulsing_dot.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import '../../domain/entities/notification_entity.dart';
 import 'notification_type_visual.dart';
 
-export 'notification_type_visual.dart' show notificationTypeVisual;
+export 'notification_type_visual.dart' show notificationTypeIcon;
 
 class NotificationTile extends StatelessWidget {
   const NotificationTile({
@@ -69,11 +69,13 @@ class NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nv = notificationTypeVisual(entity.type);
+    final icon = notificationTypeIcon(entity.type);
     final u = !entity.isRead;
     final dur = markAllReadAnimating ? const Duration(milliseconds: 320) : Duration.zero;
     final img = entity.imageUrl;
     final thumb = img != null && img.isNotEmpty;
+    final accent = context.primaryColor;
+    final radius = BorderRadius.circular(20);
     return Dismissible(
       key: ValueKey<String>(entity.id),
       direction: u ? DismissDirection.horizontal : DismissDirection.endToStart,
@@ -129,123 +131,102 @@ class NotificationTile extends StatelessWidget {
           ),
         ),
       ),
-      child: RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: 5,
+        ),
         child: AnimatedContainer(
           duration: dur,
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: u
-                ? AppColors.notificationUnreadBackground
-                : context.surfaceColor,
-            border: Border(
-              left: BorderSide(
-                color: u ? AppColors.primary : AppColors.transparent,
-                width: AppSpacing.xs - 1,
-              ),
+            color: u ? accent.withValues(alpha: 0.07) : glassFill(context),
+            borderRadius: radius,
+            border: Border.all(
+              color: u ? accent.withValues(alpha: 0.3) : context.borderColor,
             ),
           ),
           child: Material(
             color: AppColors.transparent,
+            borderRadius: radius,
+            clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: onTap,
               onLongPress: () => _menu(context),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+                padding: const EdgeInsets.all(14),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: AppSpacing.x4l,
-                      height: AppSpacing.x4l,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          CircleAvatar(
-                            radius: AppSpacing.x4l / 2,
-                            backgroundColor: nv.bg,
-                            child: Icon(nv.ic, color: nv.fg, size: AppSpacing.x2l - AppSpacing.xs),
-                          ),
-                          if (u)
-                            const Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: PulsingDot(
-                                size: AppSpacing.sm,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                        ],
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: orbitOrbGradient(entity.type.index),
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 18,
+                        color: context.isDark
+                            ? AppColors.space
+                            : AppColors.white,
                       ),
                     ),
-                    SizedBox(width: AppSpacing.md),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  entity.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight:
-                                        u ? FontWeight.w700 : FontWeight.w500,
-                                    color: context.textPrimary,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: AppSpacing.sm),
-                              Text(
-                                Formatters.formatNotificationTime(
-                                  entity.createdAt,
-                                  context.l10n,
-                                ),
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: context.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: AppSpacing.xs),
                           Text(
-                            entity.body,
+                            entity.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            entity.body,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(
+                              height: 1.45,
                               color: context.textSecondary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (thumb) SizedBox(width: AppSpacing.sm),
-                    if (thumb)
+                    if (thumb) ...[
+                      const SizedBox(width: AppSpacing.sm),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(AppSpacing.sm),
                         child: AppCachedNetworkImage(
                           imageUrl: img,
-                          width: AppSpacing.x4l,
-                          height: AppSpacing.x4l,
+                          width: 40,
+                          height: 40,
                           fit: BoxFit.cover,
-                          memCacheWidth: 192,
-                          memCacheHeight: 192,
+                          memCacheWidth: 120,
+                          memCacheHeight: 120,
                           placeholder: (_, __) =>
                               ColoredBox(color: context.textDisabled),
                           errorWidget: (_, __, ___) =>
                               ColoredBox(color: context.textDisabled),
                         ),
                       ),
-                    if (thumb) SizedBox(width: AppSpacing.xs),
-                    Padding(
-                      padding: const EdgeInsets.only(left: AppSpacing.xs),
-                      child: Icon(
-                        context.chevronForward,
-                        size: AppSpacing.x2l - AppSpacing.xs,
-                        color: context.iconSecondary,
+                    ],
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      Formatters.formatNotificationTime(
+                        entity.createdAt,
+                        context.l10n,
+                      ),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: context.textSecondary,
                       ),
                     ),
                   ],

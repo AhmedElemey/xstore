@@ -1,8 +1,6 @@
-// ProductStickyBar's "Add to Cart" / "Buy now" buttons truncated on narrow
-// screens (reported: "Add to ..." instead of the full label) because their
-// Row split the available width evenly regardless of each label's length.
-// Both buttons now wrap their icon+label in a FittedBox that scales the
-// whole row down to fit instead of ellipsizing the text.
+// The product bar's "Add to cart" label once truncated on narrow screens
+// ("Add to ..."). The bar is now a quantity stepper plus Add to cart, with
+// Buy now in ProductActionsRow; both labels must still render in full.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -29,11 +27,23 @@ void main() {
         home: Scaffold(
           body: Align(
             alignment: Alignment.bottomCenter,
-            child: ProductStickyBar(
-              onChat: () {},
-              onAddToCart: () {},
-              onBuyNow: () {},
-              isAddingToCart: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ProductActionsRow(
+                  onChat: () {},
+                  onBuyNow: () {},
+                  stockLeft: 3,
+                ),
+                ProductStickyBar(
+                  onAddToCart: () {},
+                  isAddingToCart: false,
+                  quantity: 1,
+                  maxQuantity: 3,
+                  onDecrement: () {},
+                  onIncrement: () {},
+                ),
+              ],
             ),
           ),
         ),

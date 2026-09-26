@@ -532,7 +532,7 @@
     }
   },
   "checkoutPartialOrderAck": "Got it",
-  "orderPlacedTitle": "Order Placed! 🎉",
+  "orderPlacedTitle": "Order placed",
   "orderTrackCta": "Track My Order",
   "orderContinueShopping": "Continue Shopping",
   "couponDetailSave10": "10% discount applied!",
@@ -676,7 +676,6 @@
   "mensFashion": "Men's Fashion",
   "womensFashion": "Women's Fashion",
   "notificationsEmptyAllTitle": "You're all caught up! 🎉",
-  "notificationsUnreadBannerLine": "🔔 You have {n} unread notifications",
   "notificationsEmptyFilterTitle": "No {filter} notifications",
   "notificationsEmptyFilterSubtitle": "Your {scope} notifications will appear here",
   "notificationsDeletedSnack": "\"{title}\" removed",
@@ -702,19 +701,11 @@
   "cartCouponApplied": "✅ \"{code}\" — {detail}",
   "cartSubtotalLine": "Subtotal ({n} items)",
   "cartCouponLine": "Coupon ({code})",
-  "cartProceedCheckoutTotal": "Proceed to Checkout ({total})",
   "checkoutItemsFromSellers": "{items} items from {sellers} sellers",
-  "checkoutPlaceOrderTotal": "🛒 Place Order · {total}",
+  "checkoutPlaceOrderTotal": "Place Order · {total}",
   "orderPlacedNumber": "Order #{id}",
   "vendorOrdersConfirmed": "{n} orders confirmed successfully",
   "vendorLowStockHint": "{qty} units remaining after this order",
-  "@notificationsUnreadBannerLine": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "@notificationsEmptyFilterTitle": {
     "placeholders": {
       "filter": {
@@ -920,13 +911,6 @@
   "@cartCouponLine": {
     "placeholders": {
       "code": {
-        "type": "String"
-      }
-    }
-  },
-  "@cartProceedCheckoutTotal": {
-    "placeholders": {
-      "total": {
         "type": "String"
       }
     }
@@ -1409,5 +1393,44 @@
   "homeGreetingEvening": "Good evening",
   "homeFreshInOrbit": "Fresh in orbit",
   "homeSearchProductsStores": "Search products and stores",
-  "homeMoreToExplore": "More to explore"
+  "ordersTabActive": "Active",
+  "ordersCardItemsDate": "{count, plural, =1{1 item} other{{count} items}} · {date}",
+  "@ordersCardItemsDate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cartPayInCash": "Pay in cash",
+  "orderPlacedBody": "Your stores have your order. We'll notify you at every step.",
+  "productReadReviews": "Read",
+  "wishlistTitle": "Saved",
+  "wishlistItemCount": "{n, plural, =1{1 item} other{{n} items}}",
+  "@wishlistItemCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wishlistInStockCount": "{n} in stock",
+  "@wishlistInStockCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsUnreadCount": "{n} unread",
+  "@notificationsUnreadCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

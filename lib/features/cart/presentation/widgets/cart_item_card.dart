@@ -32,7 +32,7 @@ class CartItemCard extends StatelessWidget {
   final VoidCallback onSaveForLater;
   final VoidCallback onOpenProduct;
 
-  static const double _imageSize = 112;
+  static const double _imageSize = 72;
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +50,9 @@ class CartItemCard extends StatelessWidget {
             : context.textSecondary)
         : AppColors.error;
 
+    // Sits inside the store's glass card, so no fill of its own.
     return Material(
-      color: context.surfaceColor,
+      color: AppColors.transparent,
       borderRadius: BorderRadius.circular(AppSpacing.md),
       child: InkWell(
         onTap: available ? onOpenProduct : null,

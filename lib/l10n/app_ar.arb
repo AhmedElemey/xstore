@@ -532,7 +532,7 @@
     }
   },
   "checkoutPartialOrderAck": "تمام",
-  "orderPlacedTitle": "تم الطلب! 🎉",
+  "orderPlacedTitle": "تم الطلب",
   "orderTrackCta": "تابع طلبي",
   "orderContinueShopping": "كمّل التسوق",
   "couponDetailSave10": "تم تطبيق خصم 10%!",
@@ -676,7 +676,6 @@
   "mensFashion": "موضة رجالي",
   "womensFashion": "موضة حريمي",
   "notificationsEmptyAllTitle": "كل حاجة تمام! 🎉",
-  "notificationsUnreadBannerLine": "🔔 عندك {n} إشعارات غير مقروءة",
   "notificationsEmptyFilterTitle": "مفيش إشعارات {filter}",
   "notificationsEmptyFilterSubtitle": "إشعارات {scope} هتظهر هنا",
   "notificationsDeletedSnack": "تم حذف \"{title}\"",
@@ -702,19 +701,11 @@
   "cartCouponApplied": "✅ \"{code}\" — {detail}",
   "cartSubtotalLine": "الإجمالي الفرعي ({n} عناصر)",
   "cartCouponLine": "الكوبون ({code})",
-  "cartProceedCheckoutTotal": "إتمام الشراء ({total})",
   "checkoutItemsFromSellers": "{items} عناصر من {sellers} بائعين",
-  "checkoutPlaceOrderTotal": "🛒 تأكيد الطلب · {total}",
+  "checkoutPlaceOrderTotal": "تأكيد الطلب · {total}",
   "orderPlacedNumber": "طلب #{id}",
   "vendorOrdersConfirmed": "تم تأكيد {n} طلب بنجاح",
   "vendorLowStockHint": "متبقي {qty} وحدة بعد الطلب ده",
-  "@notificationsUnreadBannerLine": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "@notificationsEmptyFilterTitle": {
     "placeholders": {
       "filter": {
@@ -913,13 +904,6 @@
   "@cartCouponLine": {
     "placeholders": {
       "code": {
-        "type": "String"
-      }
-    }
-  },
-  "@cartProceedCheckoutTotal": {
-    "placeholders": {
-      "total": {
         "type": "String"
       }
     }
@@ -1402,5 +1386,23 @@
   "homeGreetingEvening": "مساء الخير",
   "homeFreshInOrbit": "جديد في المدار",
   "homeSearchProductsStores": "ابحث عن منتجات ومتاجر",
-  "homeMoreToExplore": "المزيد لتستكشفه"
+  "ordersTabActive": "النشطة",
+  "ordersCardItemsDate": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} · {date}",
+  "@ordersCardItemsDate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cartPayInCash": "الدفع نقدًا",
+  "orderPlacedBody": "وصل طلبك إلى المتاجر. سنبلغك بكل خطوة.",
+  "productReadReviews": "اقرأ",
+  "wishlistTitle": "المحفوظات",
+  "wishlistItemCount": "{n, plural, =0{لا منتجات} =1{منتج واحد} =2{منتجان} few{{n} منتجات} many{{n} منتجًا} other{{n} منتج}}",
+  "wishlistInStockCount": "{n} متوفر",
+  "notificationsUnreadCount": "{n} غير مقروء"
 }

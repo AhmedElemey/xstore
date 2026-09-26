@@ -16,7 +16,6 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$CheckoutState {
-  int get currentStep => throw _privateConstructorUsedError;
   List<OrderAddress> get savedAddresses => throw _privateConstructorUsedError;
   int? get selectedAddressIndex => throw _privateConstructorUsedError;
   PaymentMethod? get selectedPayment => throw _privateConstructorUsedError;
@@ -37,8 +36,7 @@ abstract class $CheckoutStateCopyWith<$Res> {
       _$CheckoutStateCopyWithImpl<$Res, CheckoutState>;
   @useResult
   $Res call(
-      {int currentStep,
-      List<OrderAddress> savedAddresses,
+      {List<OrderAddress> savedAddresses,
       int? selectedAddressIndex,
       PaymentMethod? selectedPayment,
       String deliveryNote,
@@ -60,7 +58,6 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentStep = null,
     Object? savedAddresses = null,
     Object? selectedAddressIndex = freezed,
     Object? selectedPayment = freezed,
@@ -70,10 +67,6 @@ class _$CheckoutStateCopyWithImpl<$Res, $Val extends CheckoutState>
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
-      currentStep: null == currentStep
-          ? _value.currentStep
-          : currentStep // ignore: cast_nullable_to_non_nullable
-              as int,
       savedAddresses: null == savedAddresses
           ? _value.savedAddresses
           : savedAddresses // ignore: cast_nullable_to_non_nullable
@@ -115,8 +108,7 @@ abstract class _$$CheckoutStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {int currentStep,
-      List<OrderAddress> savedAddresses,
+      {List<OrderAddress> savedAddresses,
       int? selectedAddressIndex,
       PaymentMethod? selectedPayment,
       String deliveryNote,
@@ -136,7 +128,6 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentStep = null,
     Object? savedAddresses = null,
     Object? selectedAddressIndex = freezed,
     Object? selectedPayment = freezed,
@@ -146,10 +137,6 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
     Object? error = freezed,
   }) {
     return _then(_$CheckoutStateImpl(
-      currentStep: null == currentStep
-          ? _value.currentStep
-          : currentStep // ignore: cast_nullable_to_non_nullable
-              as int,
       savedAddresses: null == savedAddresses
           ? _value._savedAddresses
           : savedAddresses // ignore: cast_nullable_to_non_nullable
@@ -186,8 +173,7 @@ class __$$CheckoutStateImplCopyWithImpl<$Res>
 
 class _$CheckoutStateImpl implements _CheckoutState {
   const _$CheckoutStateImpl(
-      {this.currentStep = 1,
-      final List<OrderAddress> savedAddresses = const <OrderAddress>[],
+      {final List<OrderAddress> savedAddresses = const <OrderAddress>[],
       this.selectedAddressIndex,
       this.selectedPayment,
       this.deliveryNote = '',
@@ -196,9 +182,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
       this.error})
       : _savedAddresses = savedAddresses;
 
-  @override
-  @JsonKey()
-  final int currentStep;
   final List<OrderAddress> _savedAddresses;
   @override
   @JsonKey()
@@ -225,7 +208,7 @@ class _$CheckoutStateImpl implements _CheckoutState {
 
   @override
   String toString() {
-    return 'CheckoutState(currentStep: $currentStep, savedAddresses: $savedAddresses, selectedAddressIndex: $selectedAddressIndex, selectedPayment: $selectedPayment, deliveryNote: $deliveryNote, isPlacingOrder: $isPlacingOrder, placedOrderId: $placedOrderId, error: $error)';
+    return 'CheckoutState(savedAddresses: $savedAddresses, selectedAddressIndex: $selectedAddressIndex, selectedPayment: $selectedPayment, deliveryNote: $deliveryNote, isPlacingOrder: $isPlacingOrder, placedOrderId: $placedOrderId, error: $error)';
   }
 
   @override
@@ -233,8 +216,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CheckoutStateImpl &&
-            (identical(other.currentStep, currentStep) ||
-                other.currentStep == currentStep) &&
             const DeepCollectionEquality()
                 .equals(other._savedAddresses, _savedAddresses) &&
             (identical(other.selectedAddressIndex, selectedAddressIndex) ||
@@ -253,7 +234,6 @@ class _$CheckoutStateImpl implements _CheckoutState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      currentStep,
       const DeepCollectionEquality().hash(_savedAddresses),
       selectedAddressIndex,
       selectedPayment,
@@ -271,8 +251,7 @@ class _$CheckoutStateImpl implements _CheckoutState {
 
 abstract class _CheckoutState implements CheckoutState {
   const factory _CheckoutState(
-      {final int currentStep,
-      final List<OrderAddress> savedAddresses,
+      {final List<OrderAddress> savedAddresses,
       final int? selectedAddressIndex,
       final PaymentMethod? selectedPayment,
       final String deliveryNote,
@@ -280,8 +259,6 @@ abstract class _CheckoutState implements CheckoutState {
       final String? placedOrderId,
       final String? error}) = _$CheckoutStateImpl;
 
-  @override
-  int get currentStep;
   @override
   List<OrderAddress> get savedAddresses;
   @override

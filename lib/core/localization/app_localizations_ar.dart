@@ -1542,7 +1542,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutPartialOrderAck => 'تمام';
 
   @override
-  String get orderPlacedTitle => 'تم الطلب! 🎉';
+  String get orderPlacedTitle => 'تم الطلب';
 
   @override
   String get orderTrackCta => 'تابع طلبي';
@@ -1981,11 +1981,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsEmptyAllTitle => 'كل حاجة تمام! 🎉';
 
   @override
-  String notificationsUnreadBannerLine(int n) {
-    return '🔔 عندك $n إشعارات غير مقروءة';
-  }
-
-  @override
   String notificationsEmptyFilterTitle(String filter) {
     return 'مفيش إشعارات $filter';
   }
@@ -2111,18 +2106,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String cartProceedCheckoutTotal(String total) {
-    return 'إتمام الشراء ($total)';
-  }
-
-  @override
   String checkoutItemsFromSellers(int items, int sellers) {
     return '$items عناصر من $sellers بائعين';
   }
 
   @override
   String checkoutPlaceOrderTotal(String total) {
-    return '🛒 تأكيد الطلب · $total';
+    return 'تأكيد الطلب · $total';
   }
 
   @override
@@ -3215,5 +3205,55 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeSearchProductsStores => 'ابحث عن منتجات ومتاجر';
 
   @override
-  String get homeMoreToExplore => 'المزيد لتستكشفه';
+  String get ordersTabActive => 'النشطة';
+
+  @override
+  String ordersCardItemsDate(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج',
+      few: '$count منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+    );
+    return '$_temp0 · $date';
+  }
+
+  @override
+  String get cartPayInCash => 'الدفع نقدًا';
+
+  @override
+  String get orderPlacedBody => 'وصل طلبك إلى المتاجر. سنبلغك بكل خطوة.';
+
+  @override
+  String get productReadReviews => 'اقرأ';
+
+  @override
+  String get wishlistTitle => 'المحفوظات';
+
+  @override
+  String wishlistItemCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n منتج',
+      many: '$n منتجًا',
+      few: '$n منتجات',
+      two: 'منتجان',
+      one: 'منتج واحد',
+      zero: 'لا منتجات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wishlistInStockCount(int n) {
+    return '$n متوفر';
+  }
+
+  @override
+  String notificationsUnreadCount(int n) {
+    return '$n غير مقروء';
+  }
 }

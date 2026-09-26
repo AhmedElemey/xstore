@@ -5,18 +5,23 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
+import '../../../../shared/widgets/space_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
+import '../../domain/entities/product_review_entity.dart';
 import '../../domain/entities/review_entity.dart';
 import '../../domain/entities/review_write_params.dart';
+import '../providers/product_detail_notifier.dart';
 import '../providers/product_reviews_notifier.dart';
 import '../widgets/already_reviewed_sheet.dart';
 
@@ -153,47 +158,191 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     final myId = viewer?.id;
     final viewerName = viewer?.displayName(context.isArabic);
 
+    final summary = _summaryOf(state.reviews);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.reviewsTitle),
         actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.pencil),
+          OrbitCircleButton(
+            tooltip: context.l10n.writeReview,
             onPressed: () => _openWriteReviewSheet(),
+            child: Icon(
+              LucideIcons.pencil,
+              size: 20,
+              color: context.textPrimary,
+            ),
+          ),
+          const Gap(AppSpacing.lg),
+        ],
+      ),
+      body: SpaceBackground(
+        child: state.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : state.reviews.isEmpty
+                ? Center(child: Text(context.l10n.noReviewsYet))
+                : ListView.builder(
+                    controller: _scroll,
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.x3l,
+                    ),
+                    itemCount: state.reviews.length +
+                        1 +
+                        (state.isLoadingMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: AppSpacing.lg),
+                          child: _RatingOverview(summary: summary),
+                        );
+                      }
+                      final i = index - 1;
+                      if (i >= state.reviews.length) {
+                        return const Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final review = state.reviews[i];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: _ReviewCard(
+                          review: review,
+                          orbIndex: i,
+                          authorName: reviewAuthorLabel(
+                            wireName: review.userName,
+                            reviewUserId: review.userId,
+                            viewerId: viewer?.id,
+                            viewerEmail: viewer?.email,
+                            viewerDisplayName: viewerName,
+                          ),
+                          isMine: review.userId == myId,
+                          onEdit: () => _openWriteReviewSheet(editing: review),
+                          onDelete: () => _confirmDelete(review.id),
+                        ),
+                      );
+                    },
+                  ),
+      ),
+    );
+  }
+
+  /// The product page's summary (whole-listing counts) when it is loaded,
+  /// else one built from the reviews fetched so far.
+  ReviewSummaryEntity _summaryOf(List<ReviewEntity> reviews) {
+    final detail = productDetailProvider(widget.listingId);
+    final fromDetail = ref.exists(detail)
+        ? ref.watch(detail.select((a) => a.valueOrNull?.reviewSummary))
+        : null;
+    if (fromDetail != null && fromDetail.totalCount > 0) return fromDetail;
+    final counts = List<int>.filled(5, 0);
+    var sum = 0.0;
+    for (final r in reviews) {
+      sum += r.rating;
+      counts[5 - r.rating.round().clamp(1, 5)]++;
+    }
+    return ReviewSummaryEntity(
+      average: reviews.isEmpty ? 0 : sum / reviews.length,
+      totalCount: reviews.length,
+      starCounts: counts,
+    );
+  }
+}
+
+/// Orbit rating card: amber ring with the average, and 5→1 star bars.
+class _RatingOverview extends StatelessWidget {
+  const _RatingOverview({required this.summary});
+
+  final ReviewSummaryEntity summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = summary.totalCount;
+    final counted = summary.starCounts.fold<int>(0, (a, b) => a + b);
+    return GlassCard(
+      radius: 24,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 110,
+            height: 110,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CircularProgressIndicator(
+                  value: (summary.average / 5).clamp(0.0, 1.0),
+                  strokeWidth: 8,
+                  color: context.cashColor,
+                  backgroundColor: context.borderColor,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      summary.average.toStringAsFixed(1),
+                      style: AppTypography.titleLarge.copyWith(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      '$total${context.l10n.reviewsSuffix}',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const Gap(18),
+          Expanded(
+            child: Column(
+              children: [
+                for (var i = 0; i < 5; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 12,
+                          child: Text(
+                            '${5 - i}',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: context.textSecondary,
+                            ),
+                          ),
+                        ),
+                        const Gap(AppSpacing.sm),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              minHeight: 6,
+                              value: counted == 0
+                                  ? 0
+                                  : summary.starCounts[i] / counted,
+                              color: context.cashColor,
+                              backgroundColor: context.borderColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.reviews.isEmpty
-              ? Center(child: Text(context.l10n.noReviewsYet))
-              : ListView.builder(
-                  controller: _scroll,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: state.reviews.length + (state.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= state.reviews.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    final review = state.reviews[index];
-                    return _ReviewCard(
-                      review: review,
-                      authorName: reviewAuthorLabel(
-                        wireName: review.userName,
-                        reviewUserId: review.userId,
-                        viewerId: viewer?.id,
-                        viewerEmail: viewer?.email,
-                        viewerDisplayName: viewerName,
-                      ),
-                      isMine: review.userId == myId,
-                      onEdit: () => _openWriteReviewSheet(editing: review),
-                      onDelete: () => _confirmDelete(review.id),
-                    );
-                  },
-                ),
     );
   }
 }
@@ -201,6 +350,7 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
 class _ReviewCard extends StatelessWidget {
   const _ReviewCard({
     required this.review,
+    required this.orbIndex,
     required this.authorName,
     required this.isMine,
     required this.onEdit,
@@ -208,6 +358,7 @@ class _ReviewCard extends StatelessWidget {
   });
 
   final ReviewEntity review;
+  final int orbIndex;
   final String authorName;
   final bool isMine;
   final VoidCallback onEdit;
@@ -215,55 +366,85 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+    final avatar = review.userAvatar;
+    final hasAvatar = avatar != null && avatar.isNotEmpty;
+    final stars = review.rating.round().clamp(0, 5);
+    return GlassCard(
+      radius: 20,
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundImage:
-                    review.userAvatar != null && review.userAvatar!.isNotEmpty
-                        ? AppNetworkImage.cached(review.userAvatar!)
-                        : null,
-                child: review.userAvatar == null || review.userAvatar!.isEmpty
-                    ? Text(
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: orbitOrbGradient(orbIndex),
+                ),
+                child: hasAvatar
+                    ? AppCachedNetworkImage(
+                        imageUrl: avatar,
+                        width: 34,
+                        height: 34,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 102,
+                        memCacheHeight: 102,
+                      )
+                    : Text(
                         authorName.isNotEmpty
                             ? authorName[0].toUpperCase()
                             : '?',
-                      )
-                    : null,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: AppColors.space,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
               ),
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.sm + 2),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       authorName,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
+                      ),
                     ),
                     Text(
                       Formatters.shortDate(review.createdAt),
-                      style: theme.textTheme.labelSmall
-                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: context.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Row(
-                children: List.generate(
-                  5,
-                  (i) => Icon(
-                    i < review.rating.round()
-                        ? LucideIcons.star
-                        : LucideIcons.starOff,
-                    size: AppSpacing.xl,
-                    color: AppColors.warning,
+              Semantics(
+                label: '$stars/5',
+                child: ExcludeSemantics(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: '★' * stars),
+                        TextSpan(
+                          text: '★' * (5 - stars),
+                          style: TextStyle(color: context.borderColor),
+                        ),
+                      ],
+                    ),
+                    style: AppTypography.labelMedium.copyWith(
+                      color: context.cashColor,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -284,8 +465,13 @@ class _ReviewCard extends StatelessWidget {
             ],
           ),
           const Gap(AppSpacing.sm),
-          Text(review.comment, style: theme.textTheme.bodyMedium),
-          Divider(height: AppSpacing.x2l),
+          Text(
+            review.comment,
+            style: AppTypography.bodyMedium.copyWith(
+              height: 1.55,
+              color: context.textPrimary,
+            ),
+          ),
         ],
       ),
     );

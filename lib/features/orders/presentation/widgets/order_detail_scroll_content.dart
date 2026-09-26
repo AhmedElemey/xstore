@@ -26,6 +26,7 @@ import 'report_vendor_sheet.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class OrderDetailScrollContent extends ConsumerWidget {
   const OrderDetailScrollContent({super.key, required this.order});
@@ -45,6 +46,23 @@ class OrderDetailScrollContent extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: _WhiteCard(child: OrderTimeline(order: order)),
         ),
+        // Orbit: the courier / tracking card sits right under the timeline.
+        if (order.status == OrderStatus.shipped &&
+            (order.trackingNumber != null || order.courierName != null)) ...[
+          const SizedBox(height: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Text(
+              context.l10n.ordersTrackingSectionTitle,
+              style: AppTypography.titleMedium,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: _TrackingCard(order: order),
+          ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -72,22 +90,6 @@ class OrderDetailScrollContent extends ConsumerWidget {
           _SellerSection(order: order)
         else
           _BuyerSection(order: order),
-        if (order.status == OrderStatus.shipped &&
-            (order.trackingNumber != null || order.courierName != null)) ...[
-          const SizedBox(height: AppSpacing.lg),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Text(
-              context.l10n.ordersTrackingSectionTitle,
-              style: AppTypography.titleMedium,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: _TrackingCard(order: order),
-          ),
-        ],
         const SizedBox(height: AppSpacing.lg),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -144,34 +146,42 @@ class _StatusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = orderStatusColor(order.status);
     final sub = _subtitle(context, order.status);
+    // Orbit status strip: status-tinted glass with a glowing icon disc.
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.x2l),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: c,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: c.withValues(alpha: 0.35),
-            blurRadius: AppSpacing.lg,
-            offset: const Offset(0, AppSpacing.sm),
-          ),
-        ],
+        gradient: LinearGradient(
+          colors: [c.withValues(alpha: 0.18), c.withValues(alpha: 0.06)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: c.withValues(alpha: 0.45)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(_iconFor(order.status), color: AppColors.white, size: 28),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c.withValues(alpha: 0.2),
+                  boxShadow: [
+                    BoxShadow(color: c.withValues(alpha: 0.4), blurRadius: 16),
+                  ],
+                ),
+                child: Icon(_iconFor(order.status), color: c, size: 22),
+              ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   orderStatusLabel(context, order.status),
-                  style: AppTypography.titleCompact.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -181,7 +191,7 @@ class _StatusBanner extends StatelessWidget {
           Text(
             sub,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.white.withValues(alpha: 0.95),
+              color: context.textSecondary,
             ),
           ),
           if (order.estimatedDelivery != null &&
@@ -191,8 +201,8 @@ class _StatusBanner extends StatelessWidget {
             Text(
               '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d', context.l10n.localeName).format(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.w600,
+                color: c,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -225,21 +235,16 @@ class _WhiteCard extends StatelessWidget {
 
   final Widget child;
 
+  // Orbit glass section card.
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.05),
-            blurRadius: AppSpacing.md,
-            offset: const Offset(0, AppSpacing.xs),
-          ),
-        ],
+        color: glassFill(context),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
       child: child,
     );

@@ -178,3 +178,83 @@ class _PulsingDot extends StatelessWidget {
     );
   }
 }
+
+/// Orbit shopper tabs: a segmented pill — Active · N, Delivered, Cancelled.
+class ConsumerOrderTabs extends ConsumerWidget {
+  const ConsumerOrderTabs({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(
+      ordersNotifierProvider.select((s) => s.tab ?? OrderTab.active),
+    );
+    final activeCount = ref.watch(
+      ordersNotifierProvider.select(
+        (s) => s.orders.where((o) => OrderTab.active.includes(o.status)).length,
+      ),
+    );
+    final notifier = ref.read(ordersNotifierProvider.notifier);
+    final tabs = [
+      (
+        OrderTab.active,
+        activeCount > 0
+            ? '${context.l10n.ordersTabActive} · $activeCount'
+            : context.l10n.ordersTabActive,
+      ),
+      (OrderTab.delivered, context.l10n.ordersFilterDelivered),
+      (OrderTab.cancelled, context.l10n.ordersFilterCancelled),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Container(
+        height: 46,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: context.isDark
+              ? AppColors.white.withValues(alpha: 0.05)
+              : AppColors.white.withValues(alpha: 0.82),
+          borderRadius: BorderRadius.circular(23),
+          border: Border.all(color: context.borderColor),
+        ),
+        child: Row(
+          children: [
+            for (final (tab, label) in tabs)
+              Expanded(
+                child: Semantics(
+                  selected: tab == selected,
+                  button: true,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => notifier.applyTab(tab),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: tab == selected
+                            ? context.textPrimary
+                            : AppColors.transparent,
+                        borderRadius: BorderRadius.circular(19),
+                      ),
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight:
+                              tab == selected ? FontWeight.w800 : FontWeight.w700,
+                          color: tab == selected
+                              ? context.backgroundColor
+                              : context.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

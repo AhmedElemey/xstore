@@ -107,46 +107,6 @@ class Checkout extends _$Checkout {
     state = state.copyWith(deliveryNote: v);
   }
 
-  String? _validateStep1() {
-    if (state.savedAddresses.isEmpty) return 'noAddress';
-    if (state.selectedAddressIndex == null) return 'noAddress';
-    return null;
-  }
-
-  String? _validateStep2() {
-    // COD is the only launch method; no card capture.
-    return null;
-  }
-
-  bool nextStep() {
-    state = state.copyWith(error: null);
-    switch (state.currentStep) {
-      case 1:
-        final e = _validateStep1();
-        if (e != null) {
-          state = state.copyWith(error: e);
-          return false;
-        }
-        state = state.copyWith(currentStep: 2);
-        return true;
-      case 2:
-        final e = _validateStep2();
-        if (e != null) {
-          state = state.copyWith(error: e);
-          return false;
-        }
-        state = state.copyWith(currentStep: 3);
-        return true;
-      default:
-        return true;
-    }
-  }
-
-  void previousStep() {
-    if (state.currentStep <= 1) return;
-    state = state.copyWith(currentStep: state.currentStep - 1, error: null);
-  }
-
   void _trackPlacementFailed(String reason, CartState cart) {
     ref.read(analyticsServiceProvider).track(
       AnalyticsEvents.orderPlacementFailed,

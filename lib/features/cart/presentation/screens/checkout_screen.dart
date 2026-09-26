@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/cart_provider.dart';
@@ -29,11 +29,9 @@ class CheckoutScreen extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final notifier = ref.read(checkoutProvider.notifier);
 
+    // Orbit checkout is one page: the footer always places the order;
+    // placeOrder() itself rejects a missing address (shown in the banner).
     Future<void> onPrimary() async {
-      if (st.currentStep < 3) {
-        notifier.nextStep();
-        return;
-      }
       // Proactive check — the backend rejects this with the same
       // phoneNotVerifiedErrorCode below, but checking first skips a
       // guaranteed-failing request and gets the OTP sheet up sooner.
@@ -99,46 +97,40 @@ class CheckoutScreen extends ConsumerWidget {
         );
         if (!context.mounted) return;
       }
-      await showOrderConfirmationSheet(context, orderId: order.id);
+      await showOrderConfirmationSheet(
+        context,
+        orderId: order.id,
+        cashDue: order.paymentMethod == PaymentMethod.cashOnDelivery
+            ? order.total
+            : null,
+      );
     }
 
     final busy = st.isPlacingOrder;
-    final label = st.currentStep < 3
-        ? context.l10n.checkoutContinue
-        : context.l10n.checkoutPlaceOrderTotal(
-            context.formatCurrency(cart.total),
-          );
+    final label = context.l10n.checkoutPlaceOrderTotal(
+      context.formatCurrency(cart.total),
+    );
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.checkoutTitle),
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (st.currentStep > 1) {
-              notifier.previousStep();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-        ),
-      ),
+      appBar: AppBar(title: Text(context.l10n.checkoutTitle)),
       body: SpaceBackground(child: Column(
         children: [
-          CheckoutProgress(step: st.currentStep),
+          CheckoutProgress(hasAddress: st.selectedAddressIndex != null),
           CheckoutErrorBanner(messageKey: st.error),
-          Expanded(
+          const Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: switch (st.currentStep) {
-                1 => const CheckoutAddressSection(),
-                2 => const CheckoutPaymentSection(),
-                _ => const CheckoutReviewSection(),
-              },
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CheckoutAddressSection(),
+                  SizedBox(height: AppSpacing.x2l),
+                  CheckoutPaymentSection(),
+                  SizedBox(height: AppSpacing.x2l),
+                  CheckoutReviewSection(),
+                ],
+              ),
             ),
           ),
           CheckoutPrimaryFooter(

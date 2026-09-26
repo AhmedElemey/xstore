@@ -221,13 +221,11 @@ void main() {
       ]);
       await _settle(tester);
 
-      // WishlistHeaderBar's "My Wishlist (n)" title was intentionally
-      // hidden (kept in source, not shown) by the wishlist UI polish pass —
-      // the AppBar now shows a plain, count-less title instead.
-      expect(find.text('Wishlist'), findsOneWidget);
+      // Orbit: the AppBar reads "Saved"; each tile's heart removes it.
+      expect(find.text('Saved'), findsOneWidget);
       expect(find.text('Wireless Earbuds'), findsOneWidget);
 
-      await tester.tap(find.textContaining('Remove'));
+      await tester.tap(find.byTooltip('♡ Remove'));
       await _settle(tester);
 
       expect(deleteRequest, isNotNull);
@@ -281,8 +279,9 @@ void main() {
       ]);
       await _settle(tester);
 
-      expect(find.textContaining('Add to Cart'), findsOneWidget);
-      await tester.tap(find.textContaining('Add to Cart'));
+      // The tile's cart disc (app-only; the design has no per-item add).
+      expect(find.byTooltip('🛒 Add to Cart'), findsOneWidget);
+      await tester.tap(find.byTooltip('🛒 Add to Cart'));
       await _settle(tester);
 
       expect(listingRequest, isNotNull);

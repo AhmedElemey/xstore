@@ -28,7 +28,12 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
     super.initState();
     _scroll.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ordersNotifierProvider.notifier).fetchOrders();
+      if (!mounted) return;
+      final notifier = ref.read(ordersNotifierProvider.notifier);
+      if (ref.read(ordersNotifierProvider).tab == null) {
+        notifier.applyTab(OrderTab.active);
+      }
+      notifier.fetchOrders();
     });
   }
 
@@ -130,7 +135,7 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                             ],
                           ),
                   ),
-                  const OrderFilterTabs(isVendor: false),
+                  const ConsumerOrderTabs(),
                 ],
               ),
             ),

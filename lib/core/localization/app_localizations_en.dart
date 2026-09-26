@@ -1538,7 +1538,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutPartialOrderAck => 'Got it';
 
   @override
-  String get orderPlacedTitle => 'Order Placed! 🎉';
+  String get orderPlacedTitle => 'Order placed';
 
   @override
   String get orderTrackCta => 'Track My Order';
@@ -1980,11 +1980,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsEmptyAllTitle => 'You\'re all caught up! 🎉';
 
   @override
-  String notificationsUnreadBannerLine(int n) {
-    return '🔔 You have $n unread notifications';
-  }
-
-  @override
   String notificationsEmptyFilterTitle(String filter) {
     return 'No $filter notifications';
   }
@@ -2110,18 +2105,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartProceedCheckoutTotal(String total) {
-    return 'Proceed to Checkout ($total)';
-  }
-
-  @override
   String checkoutItemsFromSellers(int items, int sellers) {
     return '$items items from $sellers sellers';
   }
 
   @override
   String checkoutPlaceOrderTotal(String total) {
-    return '🛒 Place Order · $total';
+    return 'Place Order · $total';
   }
 
   @override
@@ -3226,5 +3216,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSearchProductsStores => 'Search products and stores';
 
   @override
-  String get homeMoreToExplore => 'More to explore';
+  String get ordersTabActive => 'Active';
+
+  @override
+  String ordersCardItemsDate(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 · $date';
+  }
+
+  @override
+  String get cartPayInCash => 'Pay in cash';
+
+  @override
+  String get orderPlacedBody =>
+      'Your stores have your order. We\'ll notify you at every step.';
+
+  @override
+  String get productReadReviews => 'Read';
+
+  @override
+  String get wishlistTitle => 'Saved';
+
+  @override
+  String wishlistItemCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wishlistInStockCount(int n) {
+    return '$n in stock';
+  }
+
+  @override
+  String notificationsUnreadCount(int n) {
+    return '$n unread';
+  }
 }

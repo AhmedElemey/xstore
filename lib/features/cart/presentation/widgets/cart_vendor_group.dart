@@ -13,6 +13,7 @@ import '../providers/cart_provider.dart';
 import 'cart_item_card.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class CartVendorGroupBlock extends ConsumerWidget {
   const CartVendorGroupBlock({
@@ -29,9 +30,58 @@ class CartVendorGroupBlock extends ConsumerWidget {
       cartProvider.select((c) => c.selectedItemIds),
     );
 
-    return Column(
+    // Orbit store card: glass panel, glowing dot + store name, then items.
+    return GlassCard(
+      radius: 22,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        0,
+      ),
+      onTap: null,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        InkWell(
+          onTap: () => context.push(
+            '${AppRoutes.sellerProfile}/${group.vendorId}',
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.sm),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.primaryColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.primaryColor.withValues(alpha: 0.7),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    group.vendorStoreName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: context.primaryColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         // Vendor header (store name + rating / "New Seller") — keep for restore.
         // Material(
         //   color: AppColors.primary.withValues(alpha: 0.06),
@@ -164,6 +214,7 @@ class CartVendorGroupBlock extends ConsumerWidget {
           }).toList(),
         ),
       ],
+      ),
     );
   }
 

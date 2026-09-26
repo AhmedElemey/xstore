@@ -8,6 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import 'checkout_progress.dart';
 
 /// Launch checkout is Cash on Delivery only — no card fields are collected.
 class CheckoutPaymentSection extends ConsumerStatefulWidget {
@@ -44,12 +45,7 @@ class _CheckoutPaymentSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.checkoutPaymentTitle,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        CheckoutSectionTitle(number: 2, title: l10n.checkoutPaymentTitle),
         const SizedBox(height: AppSpacing.md),
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),

@@ -63,10 +63,9 @@ abstract final class NotificationsFeedSlivers {
       for (final g in groups)
         SliverMainAxisGroup(
           slivers: [
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: NotificationGroupHeaderDelegate(
-                _groupLabel(context, g.kind),
+            SliverToBoxAdapter(
+              child: NotificationGroupHeaderBar(
+                label: _groupLabel(context, g.kind),
               ),
             ),
             SliverList(

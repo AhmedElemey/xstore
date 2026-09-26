@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../providers/wishlist_provider.dart';
@@ -15,7 +15,7 @@ import 'wishlist_empty_state.dart';
 // Select + list/grid + sort toolbar lives in wishlist_header_bar.dart —
 // uncomment the WishlistHeaderBar line below (and this import) to restore.
 // import 'wishlist_header_bar.dart';
-import 'wishlist_item_card.dart';
+import 'wishlist_grid_card.dart';
 import 'wishlist_price_drop_banner.dart';
 import 'wishlist_selection_bar.dart';
 import 'wishlist_sort_row.dart';
@@ -90,6 +90,17 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (items.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Text(
+              context.l10n.wishlistItemCount(items.length),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textSecondary,
+              ),
+            ),
+          ),
+        // App-only: price-drop banner and filter chips.
         const WishlistPriceDropBanner(),
         const WishlistSortRow(),
         // Select + list/grid + sort toolbar — kept in code, hidden for now.
@@ -138,23 +149,28 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       );
     }
 
-    return ListView.separated(
+    return GridView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      cacheExtent: 1000,
       padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
         AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
+        AppSpacing.lg,
         AppSpacing.x4l,
       ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisExtent: WishlistGridCard.extent,
+      ),
       itemCount: filtered.length,
-      separatorBuilder: (_, __) => const Gap(AppSpacing.md),
       itemBuilder: (context, i) {
         final item = filtered[i];
         return RepaintBoundary(
-          child: WishlistItemCard(
-            key: ValueKey<String>('wishlist-list-item-${item.id}'),
+          child: WishlistGridCard(
+            key: ValueKey<String>('wishlist-grid-item-${item.id}'),
             item: item,
+            index: i,
             selectionMode: state.isSelectionMode,
             selected: state.selectedItemIds.contains(item.id),
             onToggleSelect: () => notifier.toggleItemSelection(item.id),

@@ -1,98 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-import '../providers/wishlist_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/xstore_button.dart';
+import '../providers/wishlist_provider.dart';
 
+/// Orbit wishlist footer: "N in stock · total" and Move all to cart.
 class MoveAllToCartBar extends ConsumerWidget {
   const MoveAllToCartBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final counts = ref.watch(
-      wishlistProvider.select(
-        (s) => (
-          total: s.items.length,
-          avail: s.items.where((e) => e.isAvailable).length,
-          addable: s.items.where((e) => e.isAvailable && !e.isInCart).length,
-        ),
-      ),
+      wishlistProvider.select((s) {
+        var avail = 0;
+        var addable = 0;
+        var total = 0.0;
+        for (final e in s.items) {
+          if (!e.isAvailable) continue;
+          avail++;
+          total += e.price;
+          if (!e.isInCart) addable++;
+        }
+        return (avail: avail, addable: addable, total: total);
+      }),
     );
-    final total = counts.total;
-    final avail = counts.avail;
+    if (counts.avail == 0) return const SizedBox.shrink();
     final addable = counts.addable;
-    if (total == 0 || avail == 0) return const SizedBox.shrink();
+    final base = AppTypography.bodySmall.copyWith(
+      color: context.textSecondary,
+    );
 
-    return Material(
-      elevation: 8,
-      shadowColor: context.textPrimary.withValues(alpha: 0.1),
-      color: context.surfaceColor,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        border: Border(top: BorderSide(color: context.borderColor)),
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
-            AppSpacing.md,
             AppSpacing.lg,
-            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.lg,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Row(
             children: [
-              Text(
-                context.l10n.wishlistItemsAvailableLine(total, avail),
-                style: AppTypography.bodySmall.copyWith(
-                  color: context.textSecondary,
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    text: '${context.l10n.wishlistInStockCount(counts.avail)}'
+                        ' · ',
+                    children: [
+                      TextSpan(
+                        text: context.formatCurrency(counts.total),
+                        style: base.copyWith(
+                          color: context.cashColor,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                  style: base,
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: addable == 0
-                          ? null
-                          : () async {
-                              final n = addable;
-                              await ref
-                                  .read(wishlistProvider.notifier)
-                                  .moveAllToCart();
-                              if (!context.mounted) return;
-                              AppSnackbar.show(
-                                context,
-                                message: context.l10n.wishlistAddedToCartCount(n),
-                                action: SnackBarAction(
-                                  label: context.l10n.wishlistViewCart,
-                                  onPressed: () =>
-                                      context.push(AppRoutes.cart),
-                                ),
-                              );
-                            },
-                      child: Text(context.l10n.wishlistMoveAllToCart),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Share.share(
-                          context.l10n.wishlistShareText(
-                            xstoreDownloadUrl(isArabic: context.isArabic),
+              const SizedBox(width: AppSpacing.md),
+              XstoreButton(
+                label: context.l10n.wishlistMoveAllToCart,
+                onPressed: addable == 0
+                    ? null
+                    : () async {
+                        await ref
+                            .read(wishlistProvider.notifier)
+                            .moveAllToCart();
+                        if (!context.mounted) return;
+                        AppSnackbar.show(
+                          context,
+                          message:
+                              context.l10n.wishlistAddedToCartCount(addable),
+                          action: SnackBarAction(
+                            label: context.l10n.wishlistViewCart,
+                            onPressed: () => context.push(AppRoutes.cart),
                           ),
                         );
                       },
-                      child: Text(context.l10n.wishlistShareWishlist),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

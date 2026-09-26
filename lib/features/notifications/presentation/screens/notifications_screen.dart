@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/notification_entity.dart';
@@ -70,35 +69,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final n = ref.read(notificationsProvider.notifier);
-    final unreadCount = ref.watch(
-      notificationsProvider.select((s) => s.unreadCount),
-    );
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.backgroundColor,
-        surfaceTintColor: AppColors.transparent,
-        centerTitle: true,
-        title: Text(
-          context.l10n.notifications,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
-            color: context.textPrimary,
-          ),
-        ),
-        actions: [
-          if (unreadCount > 0)
-            TextButton(
-              onPressed: n.markAllRead,
-              child: Text(context.l10n.notificationsMarkAllRead, style: AppTypography.labelLarge.copyWith(color: AppColors.primary)),
-            ),
-          // IconButton(
-          //   icon: const Icon(LucideIcons.settings),
-          //   onPressed: () => context.push(AppRoutes.notificationSettings),
-          //   tooltip: context.l10n.notificationSettingsTitle,
-          // ),
-        ],
-      ),
+      appBar: AppBar(title: Text(context.l10n.notifications)),
       body: SpaceBackground(child: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: n.refreshNotifications,

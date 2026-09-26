@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/cart_provider.dart';
@@ -36,40 +35,27 @@ class CartSelectAllRow extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Material(
-        color: context.surfaceColor,
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: InkWell(
+        onTap: notifier.toggleSelectAll,
         borderRadius: BorderRadius.circular(AppSpacing.md),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          child: Row(
-            children: [
-              Checkbox(
-                value: boxValue,
-                tristate: true,
-                onChanged: (_) => notifier.toggleSelectAll(),
-                activeColor: AppColors.primary,
-              ),
-              Expanded(
-                child: Text(
-                  context.l10n.cartSelectAllCount(cart.itemsCount),
-                  style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Text(
-                '${context.l10n.cartTotalLabel}: ${context.formatCurrency(cart.total)}',
-                style: AppTypography.labelLarge.copyWith(
-                  color: AppColors.primary,
+        child: Row(
+          children: [
+            Checkbox(
+              value: boxValue,
+              tristate: true,
+              onChanged: (_) => notifier.toggleSelectAll(),
+            ),
+            Expanded(
+              child: Text(
+                context.l10n.cartSelectAllCount(cart.itemsCount),
+                style: AppTypography.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: context.textPrimary,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -3083,7 +3083,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderPlacedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Order Placed! 🎉'**
+  /// **'Order placed'**
   String get orderPlacedTitle;
 
   /// No description provided for @orderTrackCta.
@@ -3944,12 +3944,6 @@ abstract class AppLocalizations {
   /// **'You\'re all caught up! 🎉'**
   String get notificationsEmptyAllTitle;
 
-  /// No description provided for @notificationsUnreadBannerLine.
-  ///
-  /// In en, this message translates to:
-  /// **'🔔 You have {n} unread notifications'**
-  String notificationsUnreadBannerLine(int n);
-
   /// No description provided for @notificationsEmptyFilterTitle.
   ///
   /// In en, this message translates to:
@@ -4100,12 +4094,6 @@ abstract class AppLocalizations {
   /// **'Coupon ({code})'**
   String cartCouponLine(String code);
 
-  /// No description provided for @cartProceedCheckoutTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Proceed to Checkout ({total})'**
-  String cartProceedCheckoutTotal(String total);
-
   /// No description provided for @checkoutItemsFromSellers.
   ///
   /// In en, this message translates to:
@@ -4115,7 +4103,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutPlaceOrderTotal.
   ///
   /// In en, this message translates to:
-  /// **'🛒 Place Order · {total}'**
+  /// **'Place Order · {total}'**
   String checkoutPlaceOrderTotal(String total);
 
   /// No description provided for @orderPlacedNumber.
@@ -6110,11 +6098,59 @@ abstract class AppLocalizations {
   /// **'Search products and stores'**
   String get homeSearchProductsStores;
 
-  /// No description provided for @homeMoreToExplore.
+  /// No description provided for @ordersTabActive.
   ///
   /// In en, this message translates to:
-  /// **'More to explore'**
-  String get homeMoreToExplore;
+  /// **'Active'**
+  String get ordersTabActive;
+
+  /// No description provided for @ordersCardItemsDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} · {date}'**
+  String ordersCardItemsDate(int count, String date);
+
+  /// No description provided for @cartPayInCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay in cash'**
+  String get cartPayInCash;
+
+  /// No description provided for @orderPlacedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your stores have your order. We\'ll notify you at every step.'**
+  String get orderPlacedBody;
+
+  /// No description provided for @productReadReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get productReadReviews;
+
+  /// No description provided for @wishlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get wishlistTitle;
+
+  /// No description provided for @wishlistItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 item} other{{n} items}}'**
+  String wishlistItemCount(int n);
+
+  /// No description provided for @wishlistInStockCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} in stock'**
+  String wishlistInStockCount(int n);
+
+  /// No description provided for @notificationsUnreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} unread'**
+  String notificationsUnreadCount(int n);
 }
 
 class _AppLocalizationsDelegate

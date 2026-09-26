@@ -340,10 +340,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Continue')); // address step -> payment step
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Continue')); // payment step -> review step
-      await tester.pumpAndSettle();
+      // Single-page checkout: address, payment and review are all on
+      // screen; the footer places the order directly.
       await tester.tap(find.textContaining('Place Order'));
       await tester.pumpAndSettle();
 

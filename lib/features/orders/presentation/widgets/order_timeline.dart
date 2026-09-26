@@ -140,7 +140,7 @@ class _TimelineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final dotColor = isCancelNode
         ? AppColors.error
-        : (nodeFilled ? AppColors.success : context.textDisabled);
+        : (nodeFilled ? context.primaryColor : context.textDisabled);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -201,6 +201,7 @@ class _TimelineRow extends StatelessWidget {
                         dashed: !nodeFilled && !isCancelNode,
                         solid: nodeFilled || isCancelNode,
                         pendingColor: context.textDisabled,
+                        doneColor: context.primaryColor,
                       ),
                     ),
                   ),
@@ -217,7 +218,12 @@ class _TimelineRow extends StatelessWidget {
                   Text(
                     label,
                     style: AppTypography.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w800,
+                      color: isCurrent && !isCancelNode
+                          ? context.primaryColor
+                          : (nodeFilled || isCancelNode
+                              ? context.textPrimary
+                              : context.textSecondary),
                     ),
                   ),
                   Text(
@@ -249,16 +255,18 @@ class _LinePainter extends CustomPainter {
     required this.dashed,
     required this.solid,
     required this.pendingColor,
+    required this.doneColor,
   });
 
   final bool dashed;
   final bool solid;
   final Color pendingColor;
+  final Color doneColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = solid ? AppColors.success : pendingColor
+      ..color = solid ? doneColor : pendingColor
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     final mid = size.width / 2;
@@ -277,5 +285,8 @@ class _LinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LinePainter oldDelegate) =>
-      oldDelegate.dashed != dashed || oldDelegate.solid != solid;
+      oldDelegate.dashed != dashed ||
+      oldDelegate.solid != solid ||
+      oldDelegate.doneColor != doneColor ||
+      oldDelegate.pendingColor != pendingColor;
 }

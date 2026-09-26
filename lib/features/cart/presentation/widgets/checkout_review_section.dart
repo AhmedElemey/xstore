@@ -13,6 +13,8 @@ import '../providers/checkout_provider.dart';
 import 'cart_summary_card.dart';
 import 'checkout_payment_section.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import 'checkout_progress.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class CheckoutReviewSection extends ConsumerWidget {
   const CheckoutReviewSection({super.key});
@@ -39,21 +41,15 @@ class CheckoutReviewSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Material(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(AppSpacing.lg),
-          elevation: 1,
-          shadowColor: context.textPrimary.withValues(alpha: 0.06),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
+        GlassCard(
+          radius: 20,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  context.l10n.checkoutReviewTitle,
-                  style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                CheckoutSectionTitle(
+                  number: 3,
+                  title: context.l10n.checkoutReviewTitle,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
@@ -131,7 +127,6 @@ class CheckoutReviewSection extends ConsumerWidget {
                 ],
               ],
             ),
-          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         const CartSummaryCard(),

@@ -20,6 +20,7 @@ import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 
 class OrderCard extends ConsumerWidget {
   const OrderCard({
@@ -35,201 +36,136 @@ class OrderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(ordersNotifierProvider.notifier);
     final first = order.items.isNotEmpty ? order.items.first : null;
-    final more = order.items.length - 1;
+    final itemCount = order.items.fold<int>(0, (n, i) => n + i.quantity);
     final accent = orderStatusColor(order.status);
-    final radius = BorderRadius.circular(AppSpacing.lg);
+    final live = order.status != OrderStatus.delivered &&
+        order.status != OrderStatus.cancelled;
+    final who = isVendor
+        ? order.consumerName
+        : (order.vendorStoreName.isNotEmpty
+            ? order.vendorStoreName
+            : order.vendorName);
 
-    // Same chrome as VendorOrderCard: soft shadow outside clip, status-tint
-    // outline, and a 4px left accent bar.
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: context.surfaceColor,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => context.push(AppRoutes.orderPath(order.id)),
-          child: Ink(
-            decoration: BoxDecoration(
-              border: Border.all(color: accent.withValues(alpha: 0.45)),
-              borderRadius: radius,
-            ),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                              style: AppTypography.bodyLarge.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          OrderStatusBadge(status: order.status, compact: true),
-                        ],
-                      ),
-                      Divider(height: AppSpacing.lg),
-                      if (first != null) ...[
-                        if (isVendor) ...[
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: order.consumerAvatar.isNotEmpty
-                                    ? AppNetworkImage.network(
-                                        order.consumerAvatar,
-                                        cacheSize: 120,
-                                      )
-                                    : null,
-                                child: order.consumerAvatar.isEmpty
-                                    ? Text(
-                                        order.consumerName.isNotEmpty
-                                            ? order.consumerName[0]
-                                                .toUpperCase()
-                                            : '?',
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      order.consumerName,
-                                      style: AppTypography.bodyLarge.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      '📞 ${order.consumerPhone}',
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                    Text(
-                                      '📍 ${order.deliveryAddress.city}, ${order.deliveryAddress.wilaya}',
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Divider(height: AppSpacing.lg),
-                        ],
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.sm,
-                              ),
-                              child: SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: first.listingImage.isNotEmpty
-                                    ? AppCachedNetworkImage(
-                                        imageUrl: first.listingImage,
-                                        fit: BoxFit.cover,
-                                        memCacheWidth: 180,
-                                        memCacheHeight: 180,
-                                      )
-                                    : Container(
-                                        color: context.textDisabled.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    first.listingName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodyLarge.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (more > 0)
-                                    Text(
-                                      context.l10n.ordersMoreItems(more),
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                  const SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${context.formatCurrency(first.total)}',
-                                    style: AppTypography.bodyLarge.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      Divider(height: AppSpacing.lg),
-                      if (!isVendor)
-                        Text(
-                          '📦 ${order.vendorStoreName} · ${_shortDate(context, order.createdAt)}',
-                          style: AppTypography.bodySmall,
-                        )
-                      else
-                        Text(
-                          '💳 ${paymentShort(context, order)} · ${_shortDate(context, order.createdAt)}',
-                          style: AppTypography.bodySmall,
-                        ),
-                      if (!isVendor &&
-                          (order.status == OrderStatus.shipped ||
-                              order.status == OrderStatus.confirmed) &&
-                          order.estimatedDelivery != null) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          '${context.l10n.ordersEstimatedDelivery}: ${_eta(context, order.estimatedDelivery!)}',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: AppSpacing.md),
-                      _actions(context, ref, notifier),
-                    ],
+    // Orbit order card: status pill and number, thumbnail with store (or
+    // buyer) and date, amber total, and a five-step trail while in flight.
+    return GlassCard(
+      radius: 22,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      borderColor: live ? accent.withValues(alpha: 0.45) : null,
+      onTap: () => context.push(AppRoutes.orderPath(order.id)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm + 2,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  orderStatusLabel(context, order.status).toUpperCase(),
+                  style: AppTypography.labelSmall.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
                   ),
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
+              ),
+              const Spacer(),
+              Text(
+                '#${order.formattedOrderId}',
+                style: AppTypography.labelMedium.copyWith(
+                  color: context.textSecondary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: first != null && first.listingImage.isNotEmpty
+                      ? AppCachedNetworkImage(
+                          imageUrl: first.listingImage,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 168,
+                          memCacheHeight: 168,
+                        )
+                      : DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: orbitOrbGradient(order.id.hashCode),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      who,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.ordersCardItemsDate(
+                        itemCount,
+                        _shortDate(context, order.createdAt),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                context.formatCurrency(order.total),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: context.cashColor,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+          ),
+          if (live) ...[
+            const SizedBox(height: AppSpacing.md),
+            _Trail(step: _step(order.status), color: accent),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          _actions(context, ref, notifier),
+        ],
       ),
     );
   }
+
+  static int _step(OrderStatus s) => switch (s) {
+        OrderStatus.pending => 0,
+        OrderStatus.confirmed => 1,
+        OrderStatus.processing => 2,
+        OrderStatus.shipped => 3,
+        OrderStatus.delivered || OrderStatus.cancelled => 4,
+      };
 
   Widget _actions(
     BuildContext context,
@@ -369,9 +305,6 @@ class OrderCard extends ConsumerWidget {
 
   String _shortDate(BuildContext context, DateTime d) =>
       DateFormat('MMM d, yyyy', context.l10n.localeName).format(d);
-
-  String _eta(BuildContext context, DateTime d) =>
-      DateFormat('EEEE, MMM d', context.l10n.localeName).format(d);
 
   Future<void> _cancelConsumer(
     BuildContext context,
@@ -701,5 +634,40 @@ class OrderCard extends ConsumerWidget {
       AppSnackbar.error(context, err);
       ref.read(ordersNotifierProvider.notifier).clearError();
     }
+  }
+}
+
+/// Five short segments, lit up to the order's current step.
+class _Trail extends StatelessWidget {
+  const _Trail({required this.step, required this.color});
+
+  final int step;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Row(
+        children: [
+          for (var i = 0; i < 5; i++) ...[
+            if (i > 0) const SizedBox(width: 4),
+            Expanded(
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  color: i <= step
+                      ? color
+                      : context.textSecondary.withValues(alpha: 0.18),
+                  boxShadow: i == step
+                      ? [BoxShadow(color: color.withValues(alpha: 0.7), blurRadius: 8)]
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

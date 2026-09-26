@@ -15,12 +15,30 @@ part 'orders_provider.g.dart';
 
 const int _pageSize = 10;
 
+/// The shopper's Orbit order tabs: in-flight, delivered, cancelled.
+enum OrderTab {
+  active,
+  delivered,
+  cancelled;
+
+  bool includes(OrderStatus status) => switch (this) {
+        OrderTab.active => status != OrderStatus.delivered &&
+            status != OrderStatus.cancelled,
+        OrderTab.delivered => status == OrderStatus.delivered,
+        OrderTab.cancelled => status == OrderStatus.cancelled,
+      };
+}
+
 @freezed
 class OrdersState with _$OrdersState {
   const factory OrdersState({
     @Default(<OrderEntity>[]) List<OrderEntity> orders,
     @Default(<OrderEntity>[]) List<OrderEntity> filteredOrders,
     OrderStatus? selectedFilter,
+
+    /// Shopper tab grouping (Active / Delivered / Cancelled); null keeps the
+    /// per-status filter the seller view uses.
+    OrderTab? tab,
     @Default(OrderSortOption.newest) OrderSortOption sortOption,
     @Default('') String searchQuery,
     @Default(false) bool isLoading,
@@ -176,6 +194,11 @@ class OrdersNotifier extends _$OrdersNotifier {
     await fetchOrders();
   }
 
+  void applyTab(OrderTab tab) {
+    state = state.copyWith(tab: tab);
+    _recomputeDerived();
+  }
+
   void applyFilter(OrderStatus? status) {
     state = state.copyWith(selectedFilter: status);
     _recomputeDerived();
@@ -210,6 +233,10 @@ class OrdersNotifier extends _$OrdersNotifier {
     final f = state.selectedFilter;
     if (f != null) {
       list = list.where((o) => o.status == f).toList();
+    }
+    final tab = state.tab;
+    if (tab != null) {
+      list = list.where((o) => tab.includes(o.status)).toList();
     }
 
     list = _sorted(list, state.sortOption);
