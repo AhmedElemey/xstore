@@ -67,22 +67,22 @@ class WishlistScreen extends ConsumerWidget {
                 ? context.l10n.wishlistSelectedCount(selection.selectedCount)
                 : context.l10n.wishlistTitle,
           ),
-          actions: [
-            OrbitCircleButton(
-              tooltip: context.l10n.wishlistShareWishlist,
-              onPressed: () => Share.share(
-                context.l10n.wishlistShareText(
-                  xstoreDownloadUrl(isArabic: context.isArabic),
-                ),
-              ),
-              child: Icon(
-                LucideIcons.share,
-                size: 20,
-                color: context.textPrimary,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
-          ],
+          // actions: [
+          //   OrbitCircleButton(
+          //     tooltip: context.l10n.wishlistShareWishlist,
+          //     onPressed: () => Share.share(
+          //       context.l10n.wishlistShareText(
+          //         xstoreDownloadUrl(isArabic: context.isArabic),
+          //       ),
+          //     ),
+          //     child: Icon(
+          //       LucideIcons.share,
+          //       size: 20,
+          //       color: context.textPrimary,
+          //     ),
+          //   ),
+          //   const SizedBox(width: AppSpacing.lg),
+          // ],
         ),
         body: SpaceBackground(child: const WishlistConsumerBody()),
       ),
