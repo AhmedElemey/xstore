@@ -70,15 +70,11 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   }
 
   /// Ask the backend (read-only `checkGoogleUser`) whether this identity
-  /// already has an account. If it does, log straight in with that role.
-  ///
-  /// `check-user` looks up a Google-linked identity, not an email/password
-  /// account that happens to share this Gmail. Firebase `isNewUser: false`
-  /// means this Google identity has signed in before, so when the lookup
-  /// misses we still log in as consumer. A brand-new Google identity
-  /// (`isNewUser: true` and no backend match) goes to the account-type
-  /// screen; [completeSocialRegistration] then registers and logs in with
-  /// the chosen role in one call (the role endpoint creates the account).
+  /// already has an account. Registered: log straight in with that role.
+  /// Not registered (or the lookup failed): go to the account-type screen;
+  /// [completeSocialRegistration] then registers and logs in with the
+  /// chosen role in one call (the role endpoint creates the account).
+  /// Firebase `isNewUser` plays no part — only the backend knows.
   Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
     final idToken = result.idToken;
     if (idToken == null || idToken.isEmpty) {
@@ -103,8 +99,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     });
     if (kDebugMode) {
       debugPrint(
-        'google check-user parsed: exists=$exists role=$existingRole '
-        'isNewUser=${result.isNewUser}',
+        'google check-user parsed: exists=$exists role=$existingRole',
       );
     }
 
@@ -113,11 +108,9 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       return;
     }
 
-    // Lookup miss, unparseable role, or a failed check-user call: a
-    // returning Firebase identity still belongs to an existing account
-    // (often email/password with the same Gmail). Log in rather than
-    // sending them to register.
-    if (exists || !result.isNewUser) {
+    // Registered but the role didn't parse: log in, retrying the other
+    // role on a "different role" conflict.
+    if (exists) {
       await _loginWithGoogleRole(idToken, UserRole.consumer);
       return;
     }
