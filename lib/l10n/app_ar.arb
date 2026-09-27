@@ -1190,7 +1190,14 @@
   "validationStoreCityWilayaRequired": "المدينة والمحافظة مطلوبين",
   "listingValidationPhotosRequired": "ضيف صورة واحدة على الأقل",
   "listingValidationNameRequired": "اسم المنتج مطلوب",
-  "listingValidationNameMax": "أقصى 100 حرف",
+  "listingValidationNameMax": "أقصى {max} حرف",
+  "@listingValidationNameMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "listingValidationPriceInvalid": "اكتب سعر صحيح",
   "listingValidationDescriptionRequired": "الوصف مطلوب",
   "listingValidationDescriptionMax": "أقصى 1000 حرف",

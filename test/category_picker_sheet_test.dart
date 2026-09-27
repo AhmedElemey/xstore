@@ -3,6 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xstore/features/app_settings/domain/app_settings.dart';
+import 'package:xstore/features/app_settings/presentation/app_settings_providers.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
@@ -308,6 +310,8 @@ void main() {
             // vendorCommissionSnapshotProvider read hitting the real,
             // unmocked dioProvider — see the 2026-08-29 flutter-review lesson.
             vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+            // The title limit reads General Settings; don't fetch them for real.
+            appSettingsProvider.overrideWith((ref) async => AppSettings.empty),
           ],
           home: const AddListingScreen(),
         ),

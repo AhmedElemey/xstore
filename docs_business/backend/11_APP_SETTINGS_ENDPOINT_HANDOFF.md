@@ -145,6 +145,13 @@ the two flags can stay on permanently. Versions compare numerically (`2.0.10` > 
 | `android_store_url` | String | `https://play.google.com/store/apps/details?id=com.xstore.app` |
 | `ios_store_url` | String | `https://apps.apple.com` — **set this** once the App Store listing exists |
 
+**Listing title limit:** the Add/Edit Listing form reads `listing-title-max-character`
+(Integer) for the title's character limit, both the counter while typing and the check on
+submit. Missing, non-integer or ≤ 0 values fall back to 100. A saved draft or existing listing
+longer than a newly lowered limit is not cut; the form shows "Max N characters" until the vendor
+shortens it. The backend should enforce the same limit on listing create/update (and its DB
+column must allow at least the largest value an admin may set).
+
 **Keys to create in the dashboard** once the backend is live:
 
 | Key | Type | Suggested value |
@@ -153,6 +160,7 @@ the two flags can stay on permanently. Versions compare numerically (`2.0.10` > 
 | `force_update_required` | Boolean | `false` (turn on to block older versions) |
 | `soft_update_required` | Boolean | `true` |
 | `ios_store_url` | String | `https://apps.apple.com/app/id<APP_ID>` |
+| `listing-title-max-character` | Integer | the max listing title length, e.g. `170` |
 
 ## Reference implementation — `app_settings_reference/`
 

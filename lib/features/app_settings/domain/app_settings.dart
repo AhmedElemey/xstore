@@ -6,6 +6,7 @@ abstract final class AppSettingKeys {
   static const minimumAppVersion = 'minimum_app_version';
   static const androidStoreUrl = 'android_store_url';
   static const iosStoreUrl = 'ios_store_url';
+  static const listingTitleMaxCharacter = 'listing-title-max-character';
 }
 
 enum AppUpdateRequirement { none, optional, required }

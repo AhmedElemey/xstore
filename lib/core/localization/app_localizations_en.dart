@@ -2768,7 +2768,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingValidationNameRequired => 'Product name is required';
 
   @override
-  String get listingValidationNameMax => 'Max 100 characters';
+  String listingValidationNameMax(int max) {
+    return 'Max $max characters';
+  }
 
   @override
   String get listingValidationPriceInvalid => 'Enter a valid price';

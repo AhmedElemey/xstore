@@ -2759,7 +2759,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingValidationNameRequired => 'اسم المنتج مطلوب';
 
   @override
-  String get listingValidationNameMax => 'أقصى 100 حرف';
+  String listingValidationNameMax(int max) {
+    return 'أقصى $max حرف';
+  }
 
   @override
   String get listingValidationPriceInvalid => 'اكتب سعر صحيح';

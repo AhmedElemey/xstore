@@ -1197,7 +1197,14 @@
   "validationStoreCityWilayaRequired": "City and governorate are required",
   "listingValidationPhotosRequired": "Add at least one photo",
   "listingValidationNameRequired": "Product name is required",
-  "listingValidationNameMax": "Max 100 characters",
+  "listingValidationNameMax": "Max {max} characters",
+  "@listingValidationNameMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "listingValidationPriceInvalid": "Enter a valid price",
   "listingValidationDescriptionRequired": "Description is required",
   "listingValidationDescriptionMax": "Max 1000 characters",

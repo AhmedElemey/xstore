@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/network/dio_provider.dart';
+import '../../../../core/utils/validators.dart';
+import '../../../app_settings/domain/app_settings.dart';
+import '../../../app_settings/presentation/app_settings_providers.dart';
 import '../../data/datasources/listing_remote_datasource.dart';
 import '../../data/repositories/listing_repository_impl.dart';
 import '../../domain/repositories/listing_repository.dart';
@@ -67,4 +70,17 @@ DeactivateListingUseCase deactivateListingUseCase(
   DeactivateListingUseCaseRef ref,
 ) {
   return DeactivateListingUseCase(ref.watch(listingRepositoryProvider));
+}
+
+/// Max listing title length, set by the admin as `listing-title-max-character`
+/// (General Settings). Falls back to [kListingTitleMaxLengthDefault] while the
+/// settings load, or when the key is missing, not a whole number, or ≤ 0.
+@riverpod
+int listingTitleMaxLength(ListingTitleMaxLengthRef ref) {
+  final settings = ref.watch(appSettingsProvider).valueOrNull;
+  final max = settings?.valueOf<int>(
+    AppSettingKeys.listingTitleMaxCharacter,
+    kListingTitleMaxLengthDefault,
+  );
+  return max != null && max > 0 ? max : kListingTitleMaxLengthDefault;
 }

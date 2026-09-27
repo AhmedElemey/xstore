@@ -495,6 +495,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
         shippingAvailable: state.shippingAvailable,
         shippingCostInput: state.shippingCostInput,
         existingPhotoCount: state.existingImageUrls.length,
+        nameMaxLength: ref.read(listingTitleMaxLengthProvider),
       );
 
   double? get _compareAtForSubmit {

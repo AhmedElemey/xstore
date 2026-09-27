@@ -20,6 +20,7 @@ import '../../../commission/presentation/providers/vendor_commission_wallet_prov
 import '../../../commission/presentation/widgets/commission_breakdown_card.dart';
 import '../../../commission/presentation/widgets/vendor_commission_alert_banner.dart';
 import '../data/listing_categories_data.dart';
+import '../providers/listing_dependencies.dart';
 import '../providers/listing_form_notifier.dart';
 import '../providers/listing_form_state.dart';
 import '../utils/catalog_category_tree.dart';
@@ -527,7 +528,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           label: context.l10n.listingProductNameLabel,
           controller: nameController,
           hint: context.l10n.listingProductNameHint,
-          maxLength: 100,
+          maxLength: ref.watch(listingTitleMaxLengthProvider),
           errorText: errors['name'],
           onChanged: (v) => notifier.updateField('name', v),
         ),

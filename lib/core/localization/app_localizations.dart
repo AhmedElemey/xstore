@@ -5321,8 +5321,8 @@ abstract class AppLocalizations {
   /// No description provided for @listingValidationNameMax.
   ///
   /// In en, this message translates to:
-  /// **'Max 100 characters'**
-  String get listingValidationNameMax;
+  /// **'Max {max} characters'**
+  String listingValidationNameMax(int max);
 
   /// No description provided for @listingValidationPriceInvalid.
   ///
