@@ -407,8 +407,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `auth_provider.dart`, `analytics_service.dart`, `profile_provider.dart`, `profile_menu_blocks.dart`, related tests.
 
 ### 2026-08-28 — iOS system context menu and navigator-wrapping widgets
-- **Rule:** Keep `MediaQuery.supportsShowingSystemContextMenu` false in `MaterialApp.builder` (the iOS system menu asserts without an active text input connection). Don't animate or insert/remove siblings above a widget wrapping the navigator — it remounts every route. When Flutter names a chrome widget like `OfflineBannerHost` as the error-causing widget, it's an ancestor, not the culprit.
-- **Where it applies:** `app.dart`, `offline_banner.dart`.
+- **Rule:** Keep `MediaQuery.supportsShowingSystemContextMenu` false in `MaterialApp.builder` (the iOS system menu asserts without an active text input connection). Don't animate or insert/remove siblings above a widget wrapping the navigator — it remounts every route. When Flutter names a chrome widget like `OfflineBannerHost` as the error-causing widget, it's an ancestor, not the culprit. App-wide overlays there (`OfflineBannerHost`, `AppUpdateGate`) keep a fixed child list and toggle content inside a stable slot. That level has no Navigator or Overlay: no dialogs, sheets, snackbars or `Tooltip` (so no `XstoreButton`); use plain Material buttons.
+- **Where it applies:** `app.dart`, `offline_banner.dart`, `app_update_gate.dart`.
 
 ### 2026-08-28 — Reset debug platform overrides inside the test body
 - **Rule:** Clear `debugDefaultTargetPlatformOverride` in a `try/finally` around the test body — `_verifyInvariants` runs before `addTearDown`.

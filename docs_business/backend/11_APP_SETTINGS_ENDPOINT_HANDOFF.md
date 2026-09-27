@@ -1,11 +1,13 @@
 # xStore — General Settings (Remote App Config) Backend Handoff
 
-**Status (2026-09-26):** admin dashboard UI built (`XStoreAdminDashboard`, System → General
-Settings). Backend **not built yet**; the hosted API answers 401 to every unauthenticated path,
-so its existence can't be probed. A drop-in reference implementation is in
-[`app_settings_reference/`](app_settings_reference/). It compiles on .NET 8, and every endpoint
-and error case below was exercised against it over HTTP (in-memory DB). The mobile app does not
-call it yet.
+**Status (2026-09-27):** admin dashboard UI built (`XStoreAdminDashboard`, System → General
+Settings). The **mobile app reads the settings at launch** and enforces the update rules below
+(`lib/features/app_settings/`). Backend **not built yet**; the hosted API answers 401 to every
+unauthenticated path, so its existence can't be probed. Until it is deployed, the app's fetch
+fails quietly and every key uses its built-in default, so nothing changes for users. A drop-in
+reference implementation is in [`app_settings_reference/`](app_settings_reference/). It compiles
+on .NET 8, and every endpoint and error case below was exercised against it over HTTP
+(in-memory DB).
 
 ## What this is
 
@@ -114,16 +116,43 @@ It is one flat map with native JSON types, so the app makes one call at startup 
 server caches the map in memory and drops the cache on every admin write, so a change is
 visible on the next request (plus up to 60 s of client/proxy caching).
 
-### Mobile integration notes (for the Flutter team)
+### How the mobile app uses it (built)
 
-- Anonymous, so call it **before login**, e.g. in the splash/bootstrap flow. Force-update must
-  work for logged-out users too.
-- **Always ship a built-in default for every key** and use it when the key is missing, has an
-  unexpected type, or the request fails. Settings can be deleted from the dashboard at any time.
-- Keep the last good response (and its ETag) in local storage. Send `If-None-Match` on the next
-  launch; on 304, reuse the stored map.
-- Suggested endpoint constant: `static const String appSettings = '$_api/app-settings';`
-  in `lib/core/network/api_endpoints.dart`. Unwrap `data` as with other Result-envelope calls.
+`appSettingsProvider` fetches `GET /api/app-settings` once per launch (anonymous, so it works
+before login) and keeps the result for the session. Any failure (API down, not deployed, bad
+body) falls back to empty settings, so every key uses its built-in default. Read other keys with
+`settings.valueOf<T>(key, fallback)`; a key that is missing or has the wrong type returns the
+fallback.
+
+`AppUpdateGate` (in `MaterialApp.builder`, above every screen) compares the installed version
+(`package_info_plus`) with `minimum_app_version`:
+
+| Installed version | `force_update_required` | `soft_update_required` | App shows |
+|---|---|---|---|
+| ≥ `minimum_app_version` (or no minimum set) | any | any | nothing |
+| < minimum | `true` | any | full-screen **Update required** with only **Update now** |
+| < minimum | `false` / missing | `true` | dismissible card: **Update now** / **Later** (until next launch) |
+| < minimum | `false` / missing | `false` / missing | nothing |
+
+Only apps older than the minimum are ever prompted, so updating always clears the prompt, and
+the two flags can stay on permanently. Versions compare numerically (`2.0.10` > `2.0.4`); the
+`+build` suffix is ignored.
+
+**Update now** opens the store URL from these settings:
+
+| Key | Type | Default when missing |
+|---|---|---|
+| `android_store_url` | String | `https://play.google.com/store/apps/details?id=com.xstore.app` |
+| `ios_store_url` | String | `https://apps.apple.com` — **set this** once the App Store listing exists |
+
+**Keys to create in the dashboard** once the backend is live:
+
+| Key | Type | Suggested value |
+|---|---|---|
+| `minimum_app_version` | String | the oldest version you still support, e.g. `1.0.0` |
+| `force_update_required` | Boolean | `false` (turn on to block older versions) |
+| `soft_update_required` | Boolean | `true` |
+| `ios_store_url` | String | `https://apps.apple.com/app/id<APP_ID>` |
 
 ## Reference implementation — `app_settings_reference/`
 

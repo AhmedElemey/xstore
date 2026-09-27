@@ -1378,5 +1378,11 @@
   "requestCustomDeliveryAction": "طلب توصيل مخصص",
   "packageRejectReasonHint": "السبب (اختياري)",
   "packageRequestAgainAction": "إعادة الطلب",
-  "packageOrderLinkedLabel": "مرتبط بطلب"
+  "packageOrderLinkedLabel": "مرتبط بطلب",
+  "updateRequiredTitle": "التحديث مطلوب",
+  "updateRequiredMessage": "هذا الإصدار من xStore لم يعد مدعومًا. يرجى التحديث لمواصلة استخدام التطبيق.",
+  "updateAvailableTitle": "يتوفر إصدار جديد",
+  "updateAvailableMessage": "حدّث xStore للحصول على أحدث الميزات والإصلاحات.",
+  "updateNow": "حدّث الآن",
+  "later": "لاحقًا"
 }

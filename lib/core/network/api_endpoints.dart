@@ -202,6 +202,11 @@ abstract final class ApiEndpoints {
   // ---------------------------------------------------------------------
   static const String analyticsEvents = '$_api/analytics/events';
 
+  // Remote app config (anonymous, read at launch). PROPOSED — not deployed
+  // yet; a failure falls back to built-in defaults. Contract:
+  // docs_business/backend/11_APP_SETTINGS_ENDPOINT_HANDOFF.md.
+  static const String appSettings = '$_api/app-settings';
+
   // Vendor reports. CONFIRMED (Postman collection + live 401-not-404
   // probe, 2026-09-24); body contract on VendorReportsRemoteDataSourceImpl.
   static const String vendorReports = '$_api/reports/vendor';

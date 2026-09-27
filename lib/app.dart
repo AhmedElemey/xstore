@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/app_settings/presentation/app_update_gate.dart';
 import 'features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 import 'core/deeplink/deep_link_handling_provider.dart';
 import 'core/localization/app_localizations.dart';
@@ -42,8 +43,10 @@ class XstoreApp extends ConsumerWidget {
               Theme.of(context),
               media.textScaler,
             ),
-            child: OfflineBannerHost(
-              child: child ?? const SizedBox.shrink(),
+            child: AppUpdateGate(
+              child: OfflineBannerHost(
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         );

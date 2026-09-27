@@ -3173,4 +3173,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'مرتبط بطلب';
+
+  @override
+  String get updateRequiredTitle => 'التحديث مطلوب';
+
+  @override
+  String get updateRequiredMessage =>
+      'هذا الإصدار من xStore لم يعد مدعومًا. يرجى التحديث لمواصلة استخدام التطبيق.';
+
+  @override
+  String get updateAvailableTitle => 'يتوفر إصدار جديد';
+
+  @override
+  String get updateAvailableMessage =>
+      'حدّث xStore للحصول على أحدث الميزات والإصلاحات.';
+
+  @override
+  String get updateNow => 'حدّث الآن';
+
+  @override
+  String get later => 'لاحقًا';
 }
