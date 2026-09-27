@@ -407,8 +407,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `auth_provider.dart`, `analytics_service.dart`, `profile_provider.dart`, `profile_menu_blocks.dart`, related tests.
 
 ### 2026-08-28 — iOS system context menu and navigator-wrapping widgets
-- **Rule:** Keep `MediaQuery.supportsShowingSystemContextMenu` false in `MaterialApp.builder` (the iOS system menu asserts without an active text input connection). Don't animate or insert/remove siblings above a widget wrapping the navigator — it remounts every route. When Flutter names a chrome widget like `OfflineBannerHost` as the error-causing widget, it's an ancestor, not the culprit.
-- **Where it applies:** `app.dart`, `offline_banner.dart`.
+- **Rule:** Keep `MediaQuery.supportsShowingSystemContextMenu` false in `MaterialApp.builder` (the iOS system menu asserts without an active text input connection). Don't animate or insert/remove siblings above a widget wrapping the navigator — it remounts every route. When Flutter names a chrome widget like `OfflineBannerHost` as the error-causing widget, it's an ancestor, not the culprit. App-wide overlays there (`OfflineBannerHost`, `AppUpdateGate`) keep a fixed child list and toggle content inside a stable slot. That level has no Navigator or Overlay: no dialogs, sheets, snackbars or `Tooltip` (so no `XstoreButton`); use plain Material buttons.
+- **Where it applies:** `app.dart`, `offline_banner.dart`, `app_update_gate.dart`.
 
 ### 2026-08-28 — Reset debug platform overrides inside the test body
 - **Rule:** Clear `debugDefaultTargetPlatformOverride` in a `try/finally` around the test body — `_verifyInvariants` runs before `addTearDown`.
@@ -447,8 +447,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `dio_provider.dart`, any future "this error means the session is dead" signal.
 
 ### 2026-08-29 — Screens showing commission read vendor order stats
-- **Rule:** `commissionFeeEgpForCategoryProvider` always watches `vendorCommissionSnapshotProvider`, which fetches vendor order stats (a real Timer under `MOCK=true`). Tests mounting Add Listing or commission widgets with a vendor session override `vendorCommissionSnapshotProvider` directly (e.g. `overrideWith((ref) async => null)`).
-- **Where it applies:** Tests over `AddListingScreen`, `CommissionBreakdownCard`, `VendorCommissionAlertBanner`.
+- **Rule:** `commissionFeeEgpForCategoryProvider` always watches `vendorCommissionSnapshotProvider`, which fetches vendor order stats (a real Timer under `MOCK=true`). Tests mounting Add Listing or commission widgets with a vendor session override `vendorCommissionSnapshotProvider` directly (e.g. `overrideWith((ref) async => null)`). Add Listing also reads `listingTitleMaxLengthProvider` → `appSettingsProvider`, a real Dio fetch whose 5 s timeout Timer outlives the test unless Dio is scripted: override `appSettingsProvider.overrideWith((ref) async => AppSettings.empty)`.
+- **Where it applies:** Tests over `AddListingScreen`, `CommissionBreakdownCard`, `VendorCommissionAlertBanner`, and any screen reading `appSettingsProvider`.
 
 ### 2026-08-29 — Home is the Active catalog; Explore is a 50 km geo search
 - **Rule:** `GET /api/home` returns the unfiltered Active catalog; `GET /api/listings` only returns Active listings within 50 km of `X-Latitude`/`X-Longitude` (seed stores have bad coordinates). When the nearby search's first page is empty, Explore falls back to the home aggregate (deduped, narrowed by keyword/filters) — never send fake coordinates. Parse tiles from the live DTO (`title`/`titleEn`, `categoryNameEn`, `userName`/`storeName`) and drop non-public statuses with `isPublicLiveListingStatus`.

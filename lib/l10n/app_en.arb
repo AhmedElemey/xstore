@@ -1197,7 +1197,14 @@
   "validationStoreCityWilayaRequired": "City and governorate are required",
   "listingValidationPhotosRequired": "Add at least one photo",
   "listingValidationNameRequired": "Product name is required",
-  "listingValidationNameMax": "Max 100 characters",
+  "listingValidationNameMax": "Max {max} characters",
+  "@listingValidationNameMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "listingValidationPriceInvalid": "Enter a valid price",
   "listingValidationDescriptionRequired": "Description is required",
   "listingValidationDescriptionMax": "Max 1000 characters",
@@ -1385,5 +1392,11 @@
   "requestCustomDeliveryAction": "Request custom delivery",
   "packageRejectReasonHint": "Reason (optional)",
   "packageRequestAgainAction": "Request again",
-  "packageOrderLinkedLabel": "Linked to an order"
+  "packageOrderLinkedLabel": "Linked to an order",
+  "updateRequiredTitle": "Update required",
+  "updateRequiredMessage": "This version of xStore is no longer supported. Please update to keep using the app.",
+  "updateAvailableTitle": "A new version is available",
+  "updateAvailableMessage": "Update xStore to get the latest features and fixes.",
+  "updateNow": "Update now",
+  "later": "Later"
 }

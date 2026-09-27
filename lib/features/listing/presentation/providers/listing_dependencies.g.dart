@@ -160,5 +160,25 @@ final deactivateListingUseCaseProvider =
 
 typedef DeactivateListingUseCaseRef
     = AutoDisposeProviderRef<DeactivateListingUseCase>;
+String _$listingTitleMaxLengthHash() =>
+    r'8ef1678330c35e2c41fb9fdae5fddab6d5d00ffb';
+
+/// Max listing title length, set by the admin as `listing-title-max-character`
+/// (General Settings). Falls back to [kListingTitleMaxLengthDefault] while the
+/// settings load, or when the key is missing, not a whole number, or ≤ 0.
+///
+/// Copied from [listingTitleMaxLength].
+@ProviderFor(listingTitleMaxLength)
+final listingTitleMaxLengthProvider = AutoDisposeProvider<int>.internal(
+  listingTitleMaxLength,
+  name: r'listingTitleMaxLengthProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$listingTitleMaxLengthHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef ListingTitleMaxLengthRef = AutoDisposeProviderRef<int>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

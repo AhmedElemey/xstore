@@ -2768,7 +2768,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingValidationNameRequired => 'Product name is required';
 
   @override
-  String get listingValidationNameMax => 'Max 100 characters';
+  String listingValidationNameMax(int max) {
+    return 'Max $max characters';
+  }
 
   @override
   String get listingValidationPriceInvalid => 'Enter a valid price';
@@ -3186,4 +3188,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'Linked to an order';
+
+  @override
+  String get updateRequiredTitle => 'Update required';
+
+  @override
+  String get updateRequiredMessage =>
+      'This version of xStore is no longer supported. Please update to keep using the app.';
+
+  @override
+  String get updateAvailableTitle => 'A new version is available';
+
+  @override
+  String get updateAvailableMessage =>
+      'Update xStore to get the latest features and fixes.';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String get later => 'Later';
 }

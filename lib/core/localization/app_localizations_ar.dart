@@ -2759,7 +2759,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingValidationNameRequired => 'اسم المنتج مطلوب';
 
   @override
-  String get listingValidationNameMax => 'أقصى 100 حرف';
+  String listingValidationNameMax(int max) {
+    return 'أقصى $max حرف';
+  }
 
   @override
   String get listingValidationPriceInvalid => 'اكتب سعر صحيح';
@@ -3173,4 +3175,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'مرتبط بطلب';
+
+  @override
+  String get updateRequiredTitle => 'التحديث مطلوب';
+
+  @override
+  String get updateRequiredMessage =>
+      'هذا الإصدار من xStore لم يعد مدعومًا. يرجى التحديث لمواصلة استخدام التطبيق.';
+
+  @override
+  String get updateAvailableTitle => 'يتوفر إصدار جديد';
+
+  @override
+  String get updateAvailableMessage =>
+      'حدّث xStore للحصول على أحدث الميزات والإصلاحات.';
+
+  @override
+  String get updateNow => 'حدّث الآن';
+
+  @override
+  String get later => 'لاحقًا';
 }

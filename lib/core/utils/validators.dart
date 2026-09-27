@@ -173,7 +173,7 @@ abstract final class Validators {
       return true;
     }
     final name = input.name.trim();
-    if (name.isEmpty || name.length > 100) return true;
+    if (name.isEmpty || name.length > input.nameMaxLength) return true;
     final price = parseMoneyInput(input.priceInput);
     if (price == null || price <= 0) return true;
     if (_compareAtInvalid(input.compareAtPriceInput, price)) return true;
@@ -213,8 +213,8 @@ abstract final class Validators {
     final name = input.name.trim();
     if (name.isEmpty) {
       err['name'] = l10n.listingValidationNameRequired;
-    } else if (name.length > 100) {
-      err['name'] = l10n.listingValidationNameMax;
+    } else if (name.length > input.nameMaxLength) {
+      err['name'] = l10n.listingValidationNameMax(input.nameMaxLength);
     }
 
     final price = parseMoneyInput(input.priceInput);
@@ -257,6 +257,9 @@ abstract final class Validators {
   }
 }
 
+/// Listing title limit when the admin hasn't set `listing-title-max-character`.
+const kListingTitleMaxLengthDefault = 100;
+
 /// Inputs for listing publish validation (mirrors [ListingFormState] fields used in checks).
 class ListingFormValidationInput {
   const ListingFormValidationInput({
@@ -273,6 +276,7 @@ class ListingFormValidationInput {
     required this.shippingAvailable,
     required this.shippingCostInput,
     this.existingPhotoCount = 0,
+    this.nameMaxLength = kListingTitleMaxLengthDefault,
   });
 
   final List<String> photoPaths;
@@ -291,6 +295,10 @@ class ListingFormValidationInput {
   /// Remote photos already on the listing being edited — counts toward the
   /// "at least one photo" requirement alongside newly picked [photoPaths].
   final int existingPhotoCount;
+
+  /// Admin-configurable (`listing-title-max-character`, see
+  /// `listingTitleMaxLengthProvider`).
+  final int nameMaxLength;
 }
 
 /// Egypt phone normalization and E.164 helpers (non-UI).
