@@ -207,11 +207,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         _shakeController.forward(from: 0);
       }
     });
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next && mounted) {
+    ref.listen(socialAuthProvider.select((s) => s.googleRegistration), (prev, next) {
+      if (next != null && mounted) {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
-        AppSnackbar.error(context, context.l10n.googleAccountNotFound);
-        context.go(AppRoutes.register);
+        AppSnackbar.info(context, context.l10n.googleAccountNotFound);
+        context.go(AppRoutes.register, extra: next);
       }
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {

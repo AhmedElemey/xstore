@@ -136,13 +136,16 @@ Map<String, dynamic> _profileJson() => {
   'isPhoneVerified': false,
 };
 
-Widget _routedHarness(List<Override> overrides) {
+Widget _routedHarness(
+  List<Override> overrides, {
+  SocialAuthResult? googlePrefill,
+}) {
   final router = GoRouter(
     initialLocation: AppRoutes.register,
     routes: [
       GoRoute(
         path: AppRoutes.register,
-        builder: (_, __) => const RegisterScreen(),
+        builder: (_, __) => RegisterScreen(googlePrefill: googlePrefill),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -290,6 +293,55 @@ void main() {
         container.read(authProvider).valueOrNull?.id,
         'consumer_1',
       );
+    },
+  );
+
+  testWidgets(
+    'a Google sign-in with no account prefills name and email on step 2',
+    (tester) async {
+      await tester.pumpWidget(
+        _routedHarness(
+          [dioProvider.overrideWithValue(_fakeDio({}))],
+          googlePrefill: const SocialAuthResult(
+            provider: SocialProvider.google,
+            uid: 'google-uid',
+            email: 'googler@gmail.com',
+            displayName: 'Google User',
+            idToken: 'google-id-token',
+            isNewUser: true,
+          ),
+        ),
+      );
+      await _settle(tester);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(RegisterScreen)),
+        listen: false,
+      );
+      final s = container.read(registerNotifierProvider);
+      expect(s.fullName, 'Google User');
+      expect(s.email, 'googler@gmail.com');
+
+      await tester.tap(find.text("I'm a Buyer"));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(XstoreButton, 'Continue'));
+      await _settle(tester);
+
+      expect(find.widgetWithText(TextFormField, 'Google User'), findsOneWidget);
+      final emailField = find.widgetWithText(TextFormField, 'googler@gmail.com');
+      expect(emailField, findsOneWidget);
+      final emailInput = tester.widget<TextField>(
+        find.descendant(of: emailField, matching: find.byType(TextField)),
+      );
+      expect(emailInput.readOnly, isTrue);
+      // Name stays editable.
+      final nameInput = tester.widget<TextField>(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Google User'),
+          matching: find.byType(TextField),
+        ),
+      );
+      expect(nameInput.readOnly, isFalse);
     },
   );
 }

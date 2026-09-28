@@ -49,7 +49,7 @@
   "socialWelcomeGreeting": "Welcome, {name}! 👋",
   "socialRoleLastStep": "One last step — how will you use xStore?",
   "socialWelcomeFallbackName": "there",
-  "googleAccountNotFound": "No account found for this Google account. Please register.",
+  "googleAccountNotFound": "No account yet for this Google account. Finish signing up, we've filled in your details.",
   "searchHint": "Search products...",
   "hotDeals": "🔥 Hot Deals",
   "newArrivals": "✨ New Arrivals",

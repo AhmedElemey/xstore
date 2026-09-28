@@ -20,6 +20,7 @@ import '../../../../shared/widgets/birth_date_picker.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../store_categories/domain/entities/store_category_entity.dart';
 import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
+import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -33,7 +34,11 @@ import '../widgets/social_login_row.dart';
 import '../widgets/phone_input_field.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.googlePrefill});
+
+  /// Google profile of a sign-in that matched no account; its email and
+  /// name prefill step 2. The user still picks a role, phone and password.
+  final SocialAuthResult? googlePrefill;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -49,12 +54,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _storeDesc = TextEditingController();
   final _whatsapp = TextEditingController();
 
+  /// Email came from a Google sign-in — it's the identity being registered,
+  /// so it can't be edited.
+  var _emailFromGoogle = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(registerNotifierProvider.notifier).reset();
+      final prefill = widget.googlePrefill;
+      if (prefill != null) _applyGooglePrefill(prefill);
     });
+  }
+
+  void _applyGooglePrefill(SocialAuthResult r) {
+    final name = r.displayName?.trim() ?? '';
+    final email = r.email?.trim() ?? '';
+    if (name.isNotEmpty) _fullName.text = name;
+    if (email.isNotEmpty) {
+      _email.text = email;
+      setState(() => _emailFromGoogle = true);
+    }
+    ref.read(registerNotifierProvider.notifier).updateField(
+          fullName: name.isEmpty ? null : name,
+          email: email.isEmpty ? null : email,
+        );
   }
 
   @override
@@ -168,12 +194,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         AppSnackbar.error(context, next.error!);
       }
     });
-    // Already on the register screen — just consume the flag (a Google
-    // sign-in with no matching account can fire this from here too, via the
-    // same SocialLoginRow), no navigation needed.
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next) {
+    // Already on the register screen (Google via the same SocialLoginRow
+    // matched no account) — prefill in place, no navigation needed.
+    ref.listen(socialAuthProvider.select((s) => s.googleRegistration), (prev, next) {
+      if (next != null && mounted) {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
+        _applyGooglePrefill(next);
       }
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
@@ -301,6 +327,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           n: n,
           fullName: _fullName,
           email: _email,
+          emailReadOnly: _emailFromGoogle,
           phone: _phone,
           onPickDob: () => _pickDob(n, s),
         );
@@ -406,6 +433,7 @@ class _StepPersonal extends StatelessWidget {
     required this.n,
     required this.fullName,
     required this.email,
+    required this.emailReadOnly,
     required this.phone,
     required this.onPickDob,
   });
@@ -414,6 +442,7 @@ class _StepPersonal extends StatelessWidget {
   final RegisterNotifier n;
   final TextEditingController fullName;
   final TextEditingController email;
+  final bool emailReadOnly;
   final TextEditingController phone;
   final VoidCallback onPickDob;
 
@@ -456,12 +485,15 @@ class _StepPersonal extends StatelessWidget {
               label: context.l10n.emailAddressRequired,
               hint: context.l10n.enterEmailHint,
               controller: email,
+              readOnly: emailReadOnly,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),
               errorText: s.stepErrors['email'],
-              suffixIcon: ok
-                  ? const Icon(Icons.check_circle, color: AppColors.success)
-                  : null,
+              suffixIcon: emailReadOnly
+                  ? Icon(LucideIcons.lock, color: context.textSecondary)
+                  : ok
+                      ? const Icon(Icons.check_circle, color: AppColors.success)
+                      : null,
               onChanged: (v) => n.updateField(email: v),
             );
           },

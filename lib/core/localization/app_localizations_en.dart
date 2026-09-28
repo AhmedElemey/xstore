@@ -163,7 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get googleAccountNotFound =>
-      'No account found for this Google account. Please register.';
+      'No account yet for this Google account. Finish signing up, we\'ve filled in your details.';
 
   @override
   String get searchHint => 'Search products...';

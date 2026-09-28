@@ -15,7 +15,7 @@ class SocialAuthState {
     this.error,
     this.pendingSocialResult,
     this.needsRoleSelection = false,
-    this.needsRegistration = false,
+    this.googleRegistration,
   });
 
   final bool isGoogleLoading;
@@ -26,9 +26,12 @@ class SocialAuthState {
   final bool needsRoleSelection;
 
   /// A Google sign-in found no existing account for this identity — the
-  /// caller (login/register screen) should navigate to the full register
-  /// flow and consume this by calling [SocialAuthNotifier.acknowledgeNeedsRegistration].
-  final bool needsRegistration;
+  /// caller (login/register screen) should open the full register flow
+  /// prefilled with this Google profile (email, name) and consume it by
+  /// calling [SocialAuthNotifier.acknowledgeNeedsRegistration].
+  final SocialAuthResult? googleRegistration;
+
+  bool get needsRegistration => googleRegistration != null;
 
   bool get isAnyLoading => isGoogleLoading || isAppleLoading || isFacebookLoading;
 
@@ -41,7 +44,8 @@ class SocialAuthState {
     SocialAuthResult? pendingSocialResult,
     bool clearPending = false,
     bool? needsRoleSelection,
-    bool? needsRegistration,
+    SocialAuthResult? googleRegistration,
+    bool clearGoogleRegistration = false,
   }) {
     return SocialAuthState(
       isGoogleLoading: isGoogleLoading ?? this.isGoogleLoading,
@@ -50,7 +54,9 @@ class SocialAuthState {
       error: clearError ? null : (error ?? this.error),
       pendingSocialResult: clearPending ? null : (pendingSocialResult ?? this.pendingSocialResult),
       needsRoleSelection: needsRoleSelection ?? this.needsRoleSelection,
-      needsRegistration: needsRegistration ?? this.needsRegistration,
+      googleRegistration: clearGoogleRegistration
+          ? null
+          : (googleRegistration ?? this.googleRegistration),
     );
   }
 }
@@ -135,7 +141,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       isAppleLoading: false,
       isFacebookLoading: false,
       clearError: true,
-      needsRegistration: true,
+      googleRegistration: result,
     );
   }
 
@@ -195,7 +201,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   /// navigated to the register screen, so it doesn't fire again on a later,
   /// unrelated visit to that screen.
   void acknowledgeNeedsRegistration() {
-    state = state.copyWith(needsRegistration: false);
+    state = state.copyWith(clearGoogleRegistration: true);
   }
 
   // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
