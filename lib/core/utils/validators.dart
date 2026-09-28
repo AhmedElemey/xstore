@@ -177,29 +177,6 @@ abstract final class Validators {
     return value;
   }
 
-  static bool listingFormHasErrors(ListingFormValidationInput input) {
-    if (input.photoPaths.isEmpty && input.existingPhotoCount == 0) {
-      return true;
-    }
-    final name = input.name.trim();
-    if (name.isEmpty || name.length > 100) return true;
-    final price = parseMoneyInput(input.priceInput);
-    if (price == null || price <= 0) return true;
-    if (_compareAtInvalid(input.compareAtPriceInput, price)) return true;
-    final desc = input.description.trim();
-    if (desc.isEmpty || desc.length > 1000) return true;
-    if (input.categoryId.isEmpty) return true;
-    if (input.subcategoryId.isEmpty && input.categoryId.isNotEmpty) return true;
-    if (input.condition.isEmpty) return true;
-    if (input.quantity < 1) return true;
-    if (input.location.trim().isEmpty) return true;
-    if (input.shippingAvailable) {
-      final sc = parseMoneyInput(input.shippingCostInput);
-      if (sc == null || sc < 0) return true;
-    }
-    return false;
-  }
-
   /// Empty is fine (optional). If set, must parse and be strictly > [price].
   static bool _compareAtInvalid(String raw, double? price) {
     final trimmed = raw.trim();

@@ -8,7 +8,7 @@
 // This deliberately covers the EDIT path (editingListing: _existingListing,
 // same fixture as test/add_listing_screen_edit_prefill_test.dart), not
 // creating a brand-new listing — a new listing needs at least one photo
-// (Validators.listingFormHasErrors requires photoPaths.isNotEmpty OR
+// (Validators.listingFormErrors requires photoPaths.isNotEmpty OR
 // existingPhotoCount > 0), and picking one for real would need the
 // image_picker platform channel, which isn't available under
 // flutter_test. Editing a listing that already has a hosted image
