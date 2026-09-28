@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xstore/core/error/exceptions.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/app_error_messages.dart';
@@ -40,22 +43,21 @@ class _ScriptedInterceptor extends Interceptor {
 CartItemEntity _cartItem({
   String id = 'cart_item_1',
   String listingId = 'listing_1',
-}) =>
-    CartItemEntity(
-      id: id,
-      listingId: listingId,
-      listingName: 'PS5 Console',
-      listingImage: 'https://example.test/ps5.jpg',
-      vendorId: 'vendor_1',
-      vendorName: 'Ahmed',
-      vendorStoreName: 'Ahmed Store',
-      price: 95000,
-      quantity: 1,
-      maxQuantity: 3,
-      category: 'Electronics',
-      condition: 'New',
-      addedAt: DateTime(2026, 8, 1),
-    );
+}) => CartItemEntity(
+  id: id,
+  listingId: listingId,
+  listingName: 'PS5 Console',
+  listingImage: 'https://example.test/ps5.jpg',
+  vendorId: 'vendor_1',
+  vendorName: 'Ahmed',
+  vendorStoreName: 'Ahmed Store',
+  price: 95000,
+  quantity: 1,
+  maxQuantity: 3,
+  category: 'Electronics',
+  condition: 'New',
+  addedAt: DateTime(2026, 8, 1),
+);
 
 Map<String, dynamic> _fullCartJson() => {
   'id': 'cart_main',
@@ -111,6 +113,9 @@ void main() {
   }
 
   setUp(() {
+    // Once any test calls setMockInitialValues, later saves actually land.
+    // Wipe them here so one test's cart is not restored into the next.
+    SharedPreferences.setMockInitialValues({});
     CartRemoteDataSourceImpl.clearSessionCache();
     dio = buildDio((_) => null);
     datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
@@ -127,56 +132,68 @@ void main() {
       : false;
 
   group('in-memory cart (live has no /cart API)', () {
-    test('getCart returns the empty session snapshot without hitting the network',
-        () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return _fullCartJson();
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+    test(
+      'getCart returns the empty session snapshot without hitting the network',
+      () async {
+        RequestOptions? captured;
+        dio = buildDio((options) {
+          captured = options;
+          return _fullCartJson();
+        });
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
 
-      final result = await datasource.getCart('consumer_1');
+        final result = await datasource.getCart('consumer_1');
 
-      expect(captured, isNull);
-      expect(result.items, isEmpty);
-      expect(result.consumerId, 'consumer_1');
-    });
+        expect(captured, isNull);
+        expect(result.items, isEmpty);
+        expect(result.consumerId, 'consumer_1');
+      },
+    );
 
-    test('addOrUpdateItem stores the line locally and getCart reads it back',
-        () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return _fullCartJson();
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+    test(
+      'addOrUpdateItem stores the line locally and getCart reads it back',
+      () async {
+        RequestOptions? captured;
+        dio = buildDio((options) {
+          captured = options;
+          return _fullCartJson();
+        });
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
 
-      await datasource.addOrUpdateItem(
-        consumerId: 'consumer_1',
-        item: _cartItem(),
-      );
-      final result = await datasource.getCart('consumer_1');
+        await datasource.addOrUpdateItem(
+          consumerId: 'consumer_1',
+          item: _cartItem(),
+        );
+        final result = await datasource.getCart('consumer_1');
 
-      expect(captured, isNull);
-      expect(result.items, hasLength(1));
-      expect(result.items.single.listingId, 'listing_1');
-      expect(result.items.single.quantity, 1);
-    });
+        expect(captured, isNull);
+        expect(result.items, hasLength(1));
+        expect(result.items.single.listingId, 'listing_1');
+        expect(result.items.single.quantity, 1);
+      },
+    );
 
-    test('addOrUpdateItem of the same listing increases quantity up to max',
-        () async {
-      await datasource.addOrUpdateItem(
-        consumerId: 'consumer_1',
-        item: _cartItem(),
-      );
-      await datasource.addOrUpdateItem(
-        consumerId: 'consumer_1',
-        item: _cartItem(),
-      );
-      final result = await datasource.getCart('consumer_1');
-      expect(result.items.single.quantity, 2);
-    });
+    test(
+      'addOrUpdateItem of the same listing increases quantity up to max',
+      () async {
+        await datasource.addOrUpdateItem(
+          consumerId: 'consumer_1',
+          item: _cartItem(),
+        );
+        await datasource.addOrUpdateItem(
+          consumerId: 'consumer_1',
+          item: _cartItem(),
+        );
+        final result = await datasource.getCart('consumer_1');
+        expect(result.items.single.quantity, 2);
+      },
+    );
 
     test('removeItem drops the line from the session snapshot', () async {
       await datasource.addOrUpdateItem(
@@ -234,7 +251,11 @@ void main() {
       expect(
         () => datasource.applyCoupon(code: 'SAVE10', eligibleSubtotal: 6000),
         throwsA(
-          isA<CouponException>().having((e) => e.message, 'message', 'unavailable'),
+          isA<CouponException>().having(
+            (e) => e.message,
+            'message',
+            'unavailable',
+          ),
         ),
       );
       expect(captured, isNull);
@@ -287,25 +308,107 @@ void main() {
       expect(result.listingImage, 'https://example.test/single.jpg');
       expect(result.vendorId, 'vendor_9');
       expect(result.vendorName, 'Sara');
+      expect(result.vendorStoreName, 'Sara Shop');
       expect(result.vendorRating, 4.9);
       expect(result.quantity, 2);
       // No listing shippingCost / shippingAvailable → no invented fee.
       expect(result.shippingCost, 0.0);
     });
 
-    test('falls back to vendor_unknown / em dash when no seller is present',
-        () async {
-      dio = buildDio((_) => {'id': 'listing_1', 'title': 'Mystery', 'price': 500});
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+    test(
+      'reads flat userId, userName and storeName when there is no seller object',
+      () async {
+        dio = buildDio(
+          (_) => {
+            'id': 'listing_9',
+            'title': 'Tshirt',
+            'price': 200,
+            'userId': 42,
+            'userName': 'Sara',
+            'storeName': 'Sara Shop',
+            'userAvatar': 'https://example.test/sara.jpg',
+            'stockQuantity': 3,
+          },
+        );
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
 
-      final result = await datasource.buildLineFromListing('listing_1', 1);
+        final result = await datasource.buildLineFromListing('listing_9', 1);
 
-      expect(result.vendorId, 'vendor_unknown');
-      expect(result.vendorName, '—');
-      expect(result.vendorRating, isNull);
-      // No listing shippingCost / shippingAvailable → no invented 500 fee.
-      expect(result.shippingCost, 0.0);
-    });
+        expect(result.vendorId, '42');
+        expect(result.vendorName, 'Sara');
+        expect(result.vendorStoreName, 'Sara Shop');
+        expect(result.vendorAvatar, 'https://example.test/sara.jpg');
+      },
+    );
+
+    test(
+      'a saved line with a blank vendor name is filled from the listing',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'cart_items_v1_buyer_9': jsonEncode([
+            {
+              'id': 'cart_item_1',
+              'listingId': 'listing_9',
+              'listingName': 'Tshirt',
+              'price': 200,
+              'quantity': 1,
+              'vendorName': '—',
+              'vendorStoreName': '',
+            },
+          ]),
+        });
+        addTearDown(() => SharedPreferences.setMockInitialValues({}));
+        dio = buildDio(
+          (_) => {
+            'id': 'listing_9',
+            'title': 'Tshirt',
+            'price': 200,
+            'userId': 'vendor_42',
+            'userName': 'Sara',
+            'storeName': 'Sara Shop',
+            'stockQuantity': 3,
+          },
+        );
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
+
+        final result = await datasource.getCart('buyer_9');
+
+        expect(result.items, hasLength(1));
+        expect(result.items.single.id, 'cart_item_1');
+        expect(result.items.single.quantity, 1);
+        expect(result.items.single.vendorId, 'vendor_42');
+        expect(result.items.single.vendorName, 'Sara');
+        expect(result.items.single.vendorStoreName, 'Sara Shop');
+      },
+    );
+
+    test(
+      'falls back to vendor_unknown / em dash when no seller is present',
+      () async {
+        dio = buildDio(
+          (_) => {'id': 'listing_1', 'title': 'Mystery', 'price': 500},
+        );
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
+
+        final result = await datasource.buildLineFromListing('listing_1', 1);
+
+        expect(result.vendorId, 'vendor_unknown');
+        expect(result.vendorName, '—');
+        expect(result.vendorStoreName, '—');
+        expect(result.vendorRating, isNull);
+        // No listing shippingCost / shippingAvailable → no invented 500 fee.
+        expect(result.shippingCost, 0.0);
+      },
+    );
 
     test('uses the listing shippingCost when shipping is available', () async {
       dio = buildDio(
@@ -325,24 +428,29 @@ void main() {
       expect(result.shippingCost, 35);
     });
 
-    test('pickup-only listing does not charge the listing shippingCost',
-        () async {
-      dio = buildDio(
-        (_) => {
-          'id': 'listing_1',
-          'title': 'Pickup item',
-          'price': 100,
-          'shippingAvailable': false,
-          'shippingCost': 500,
-        },
-      );
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+    test(
+      'pickup-only listing does not charge the listing shippingCost',
+      () async {
+        dio = buildDio(
+          (_) => {
+            'id': 'listing_1',
+            'title': 'Pickup item',
+            'price': 100,
+            'shippingAvailable': false,
+            'shippingCost': 500,
+          },
+        );
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
 
-      final result = await datasource.buildLineFromListing('listing_1', 1);
+        final result = await datasource.buildLineFromListing('listing_1', 1);
 
-      expect(result.shippingAvailable, isFalse);
-      expect(result.shippingCost, 0);
-    });
+        expect(result.shippingAvailable, isFalse);
+        expect(result.shippingCost, 0);
+      },
+    );
 
     test('throws ServerException on an empty response body', () async {
       dio = buildDio((_) => null);
@@ -356,75 +464,81 @@ void main() {
   }, skip: skipMock);
 
   group('placeOrder', () {
-    test('throws ServerException immediately for an empty cart (no orders call)',
-        () async {
-      dio = buildDio((_) => null);
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
+    test(
+      'throws ServerException immediately for an empty cart (no orders call)',
+      () async {
+        dio = buildDio((_) => null);
+        datasource = CartRemoteDataSourceImpl(
+          dio,
+          StubOrdersRemoteDataSource(),
+        );
 
-      expect(
-        () => datasource.placeOrder(
-          PlaceOrderParams(
-            consumerId: 'consumer_1',
-            items: const [],
-            deliveryAddress: const OrderAddress(
-              fullName: 'Jane',
-              phone: '0100',
-              street: 'St',
-              city: 'Cairo',
-              wilaya: 'Cairo',
+        expect(
+          () => datasource.placeOrder(
+            PlaceOrderParams(
+              consumerId: 'consumer_1',
+              items: const [],
+              deliveryAddress: const OrderAddress(
+                fullName: 'Jane',
+                phone: '0100',
+                street: 'St',
+                city: 'Cairo',
+                wilaya: 'Cairo',
+              ),
+              paymentMethod: PaymentMethod.cashOnDelivery,
+              subtotal: 0,
+              shippingTotal: 0,
+              discount: 0,
+              total: 0,
             ),
-            paymentMethod: PaymentMethod.cashOnDelivery,
-            subtotal: 0,
-            shippingTotal: 0,
-            discount: 0,
-            total: 0,
           ),
-        ),
-        throwsA(isA<ServerException>()),
-      );
-    });
+          throwsA(isA<ServerException>()),
+        );
+      },
+    );
 
     test('places one order per cart line and combines them', () async {
       final calls = <String>[];
       dio = buildDio((_) => null);
       final orders = StubOrdersRemoteDataSource(
-        onCreateOrder: ({
-          required listingId,
-          required quantity,
-          required latitude,
-          required longitude,
-          required fallbackItem,
-          required fallbackAddress,
-          required fallbackPayment,
-          notes,
-        }) async {
-          calls.add(listingId);
-          // No real GPS fix in a unit test — AppLocationCache falls back
-          // to its Cairo constant.
-          expect(latitude, 30.0444);
-          expect(longitude, 31.2357);
-          expect(fallbackPayment, PaymentMethod.cashOnDelivery);
-          expect(notes, 'Ring the bell');
-          return OrderModel(
-            id: 'order_$listingId',
-            consumerId: 'consumer_1',
-            consumerName: 'Jane',
-            consumerPhone: '0100',
-            vendorId: 'vendor_1',
-            vendorName: 'Ahmed',
-            vendorStoreName: 'Ahmed Store',
-            items: [fallbackItem],
-            status: OrderStatus.pending,
-            paymentMethod: fallbackPayment,
-            deliveryAddress: fallbackAddress,
-            subtotal: fallbackItem.total,
-            shippingCost: 0,
-            discount: 0,
-            total: fallbackItem.total,
-            createdAt: DateTime(2026, 8, 1),
-            updatedAt: DateTime(2026, 8, 1),
-          );
-        },
+        onCreateOrder:
+            ({
+              required listingId,
+              required quantity,
+              required latitude,
+              required longitude,
+              required fallbackItem,
+              required fallbackAddress,
+              required fallbackPayment,
+              notes,
+            }) async {
+              calls.add(listingId);
+              // No real GPS fix in a unit test — AppLocationCache falls back
+              // to its Cairo constant.
+              expect(latitude, 30.0444);
+              expect(longitude, 31.2357);
+              expect(fallbackPayment, PaymentMethod.cashOnDelivery);
+              expect(notes, 'Ring the bell');
+              return OrderModel(
+                id: 'order_$listingId',
+                consumerId: 'consumer_1',
+                consumerName: 'Jane',
+                consumerPhone: '0100',
+                vendorId: 'vendor_1',
+                vendorName: 'Ahmed',
+                vendorStoreName: 'Ahmed Store',
+                items: [fallbackItem],
+                status: OrderStatus.pending,
+                paymentMethod: fallbackPayment,
+                deliveryAddress: fallbackAddress,
+                subtotal: fallbackItem.total,
+                shippingCost: 0,
+                discount: 0,
+                total: fallbackItem.total,
+                createdAt: DateTime(2026, 8, 1),
+                updatedAt: DateTime(2026, 8, 1),
+              );
+            },
       );
       datasource = CartRemoteDataSourceImpl(dio, orders);
 
@@ -462,69 +576,72 @@ void main() {
       expect(result.notes, 'Ring the bell');
     });
 
-    test('clears the in-memory cart after a successful live placeOrder',
-        () async {
-      await datasource.addOrUpdateItem(
-        consumerId: 'consumer_1',
-        item: _cartItem(),
-      );
-      expect((await datasource.getCart('consumer_1')).items, hasLength(1));
-
-      final orders = StubOrdersRemoteDataSource(
-        onCreateOrder: ({
-          required listingId,
-          required quantity,
-          required latitude,
-          required longitude,
-          required fallbackItem,
-          required fallbackAddress,
-          required fallbackPayment,
-          notes,
-        }) async {
-          return OrderModel(
-            id: 'order_$listingId',
-            consumerId: 'consumer_1',
-            consumerName: 'Jane',
-            consumerPhone: '0100',
-            vendorId: 'vendor_1',
-            vendorName: 'Ahmed',
-            vendorStoreName: 'Ahmed Store',
-            items: [fallbackItem],
-            status: OrderStatus.pending,
-            paymentMethod: fallbackPayment,
-            deliveryAddress: fallbackAddress,
-            subtotal: fallbackItem.total,
-            shippingCost: 0,
-            discount: 0,
-            total: fallbackItem.total,
-            createdAt: DateTime(2026, 8, 1),
-            updatedAt: DateTime(2026, 8, 1),
-          );
-        },
-      );
-      datasource = CartRemoteDataSourceImpl(dio, orders);
-
-      await datasource.placeOrder(
-        PlaceOrderParams(
+    test(
+      'clears the in-memory cart after a successful live placeOrder',
+      () async {
+        await datasource.addOrUpdateItem(
           consumerId: 'consumer_1',
-          items: [_cartItem()],
-          deliveryAddress: const OrderAddress(
-            fullName: 'Jane',
-            phone: '0100',
-            street: 'St',
-            city: 'Cairo',
-            wilaya: 'Cairo',
-          ),
-          paymentMethod: PaymentMethod.cashOnDelivery,
-          subtotal: 95000,
-          shippingTotal: 0,
-          discount: 0,
-          total: 95000,
-        ),
-      );
+          item: _cartItem(),
+        );
+        expect((await datasource.getCart('consumer_1')).items, hasLength(1));
 
-      expect((await datasource.getCart('consumer_1')).items, isEmpty);
-    });
+        final orders = StubOrdersRemoteDataSource(
+          onCreateOrder:
+              ({
+                required listingId,
+                required quantity,
+                required latitude,
+                required longitude,
+                required fallbackItem,
+                required fallbackAddress,
+                required fallbackPayment,
+                notes,
+              }) async {
+                return OrderModel(
+                  id: 'order_$listingId',
+                  consumerId: 'consumer_1',
+                  consumerName: 'Jane',
+                  consumerPhone: '0100',
+                  vendorId: 'vendor_1',
+                  vendorName: 'Ahmed',
+                  vendorStoreName: 'Ahmed Store',
+                  items: [fallbackItem],
+                  status: OrderStatus.pending,
+                  paymentMethod: fallbackPayment,
+                  deliveryAddress: fallbackAddress,
+                  subtotal: fallbackItem.total,
+                  shippingCost: 0,
+                  discount: 0,
+                  total: fallbackItem.total,
+                  createdAt: DateTime(2026, 8, 1),
+                  updatedAt: DateTime(2026, 8, 1),
+                );
+              },
+        );
+        datasource = CartRemoteDataSourceImpl(dio, orders);
+
+        await datasource.placeOrder(
+          PlaceOrderParams(
+            consumerId: 'consumer_1',
+            items: [_cartItem()],
+            deliveryAddress: const OrderAddress(
+              fullName: 'Jane',
+              phone: '0100',
+              street: 'St',
+              city: 'Cairo',
+              wilaya: 'Cairo',
+            ),
+            paymentMethod: PaymentMethod.cashOnDelivery,
+            subtotal: 95000,
+            shippingTotal: 0,
+            discount: 0,
+            total: 95000,
+          ),
+        );
+
+        expect((await datasource.getCart('consumer_1')).items, isEmpty);
+      },
+    );
   }, skip: skipMock);
 
   group('placeOrder stock pre-check', () {
@@ -536,22 +653,25 @@ void main() {
       wilaya: 'Cairo',
     );
     PlaceOrderParams params(List<CartItemEntity> items) => PlaceOrderParams(
-          consumerId: 'consumer_1',
-          items: items,
-          deliveryAddress: address,
-          paymentMethod: PaymentMethod.cashOnDelivery,
-          subtotal: 0,
-          shippingTotal: 0,
-          discount: 0,
-          total: 0,
-        );
+      consumerId: 'consumer_1',
+      items: items,
+      deliveryAddress: address,
+      paymentMethod: PaymentMethod.cashOnDelivery,
+      subtotal: 0,
+      shippingTotal: 0,
+      discount: 0,
+      total: 0,
+    );
     final line1 = _cartItem(id: 'cart_item_1', listingId: 'listing_1');
-    final line2 = _cartItem(id: 'cart_item_2', listingId: 'listing_2')
-        .copyWith(quantity: 3);
+    final line2 = _cartItem(
+      id: 'cart_item_2',
+      listingId: 'listing_2',
+    ).copyWith(quantity: 3);
 
     late List<String> ordered;
     StubOrdersRemoteDataSource recordingOrders() => StubOrdersRemoteDataSource(
-          onCreateOrder: ({
+      onCreateOrder:
+          ({
             required listingId,
             required quantity,
             required latitude,
@@ -582,65 +702,78 @@ void main() {
               updatedAt: DateTime(2026, 8, 1),
             );
           },
-        );
+    );
 
     Future<void> seedCart(Object? Function(RequestOptions) respond) async {
       ordered = [];
-      datasource = CartRemoteDataSourceImpl(buildDio(respond), recordingOrders());
+      datasource = CartRemoteDataSourceImpl(
+        buildDio(respond),
+        recordingOrders(),
+      );
       await datasource.addOrUpdateItem(consumerId: 'consumer_1', item: line1);
       await datasource.addOrUpdateItem(consumerId: 'consumer_1', item: line2);
     }
 
-    Map<String, dynamic> stockBody(bool ok) =>
-        {'isSuccess': true, 'data': ok, 'statusCode': 200};
+    Map<String, dynamic> stockBody(bool ok) => {
+      'isSuccess': true,
+      'data': ok,
+      'statusCode': 200,
+    };
 
     final throwsOutOfStock = throwsA(
-      isA<ServerException>()
-          .having((e) => e.message, 'message', outOfStockErrorCode),
+      isA<ServerException>().having(
+        (e) => e.message,
+        'message',
+        outOfStockErrorCode,
+      ),
     );
 
     Future<CartItemEntity> cartLine(String id) async =>
-        (await datasource.getCart('consumer_1'))
-            .items
-            .firstWhere((e) => e.id == id);
+        (await datasource.getCart(
+          'consumer_1',
+        )).items.firstWhere((e) => e.id == id);
 
-    test('checks every line with its own quantity, then places the orders',
-        () async {
-      final stockPaths = <String>[];
-      await seedCart((o) {
-        stockPaths.add(o.path);
-        return stockBody(true);
-      });
+    test(
+      'checks every line with its own quantity, then places the orders',
+      () async {
+        final stockPaths = <String>[];
+        await seedCart((o) {
+          stockPaths.add(o.path);
+          return stockBody(true);
+        });
 
-      await datasource.placeOrder(params([line1, line2]));
+        await datasource.placeOrder(params([line1, line2]));
 
-      expect(stockPaths, [
-        '/api/listings/listing_1/stock?quantity=1',
-        '/api/listings/listing_2/stock?quantity=3',
-      ]);
-      expect(ordered, ['listing_1', 'listing_2']);
-    });
+        expect(stockPaths, [
+          '/api/listings/listing_1/stock?quantity=1',
+          '/api/listings/listing_2/stock?quantity=3',
+        ]);
+        expect(ordered, ['listing_1', 'listing_2']);
+      },
+    );
 
-    test('a short line blocks the whole checkout and is capped to what is left',
-        () async {
-      await seedCart((o) {
-        if (o.path.endsWith('/stock?quantity=3')) return stockBody(false);
-        if (o.path.contains('/stock')) return stockBody(true);
-        return {'id': 'listing_2', 'title': 'PS5', 'stockQuantity': 1};
-      });
+    test(
+      'a short line blocks the whole checkout and is capped to what is left',
+      () async {
+        await seedCart((o) {
+          if (o.path.endsWith('/stock?quantity=3')) return stockBody(false);
+          if (o.path.contains('/stock')) return stockBody(true);
+          return {'id': 'listing_2', 'title': 'PS5', 'stockQuantity': 1};
+        });
 
-      await expectLater(
-        datasource.placeOrder(params([line1, line2])),
-        throwsOutOfStock,
-      );
+        await expectLater(
+          datasource.placeOrder(params([line1, line2])),
+          throwsOutOfStock,
+        );
 
-      expect(ordered, isEmpty, reason: 'no line may be ordered');
-      final capped = await cartLine('cart_item_2');
-      expect(capped.quantity, 1);
-      expect(capped.maxQuantity, 1);
-      expect(capped.isAvailable, isTrue);
-      expect((await cartLine('cart_item_1')).quantity, 1);
-    });
+        expect(ordered, isEmpty, reason: 'no line may be ordered');
+        final capped = await cartLine('cart_item_2');
+        expect(capped.quantity, 1);
+        expect(capped.maxQuantity, 1);
+        expect(capped.isAvailable, isTrue);
+        expect((await cartLine('cart_item_1')).quantity, 1);
+      },
+    );
 
     test('a 404 (listing gone) marks the line unavailable', () async {
       await seedCart((o) {
@@ -648,7 +781,11 @@ void main() {
           return Response(
             requestOptions: o,
             statusCode: 404,
-            data: {'isSuccess': false, 'data': false, 'errorEn': 'Listing not found.'},
+            data: {
+              'isSuccess': false,
+              'data': false,
+              'errorEn': 'Listing not found.',
+            },
           );
         }
         if (o.path.contains('/stock')) return stockBody(true);
@@ -687,10 +824,10 @@ void main() {
     });
 
     test('a stock-check outage does not block checkout', () async {
-      await seedCart((o) => DioException.connectionError(
-            requestOptions: o,
-            reason: 'offline',
-          ));
+      await seedCart(
+        (o) =>
+            DioException.connectionError(requestOptions: o, reason: 'offline'),
+      );
 
       await datasource.placeOrder(params([line1, line2]));
 

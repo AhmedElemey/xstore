@@ -14,6 +14,7 @@ import 'package:xstore/features/commission/presentation/providers/commission_con
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
+import 'package:xstore/shared/widgets/xstore_button.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
 
@@ -126,6 +127,35 @@ void main() {
 
       expect(find.text('199.50'), findsOneWidget);
       expect(find.text('Update Listing'), findsOneWidget);
+      expect(
+        tester.widget<XstoreButton>(find.byType(XstoreButton)).onPressed,
+        isNull,
+      );
+    },
+  );
+
+  testWidgets(
+    'Publish on an empty form shows field errors instead of ignoring the tap',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_app(home: const AddListingScreen()));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      expect(
+        tester.widget<XstoreButton>(find.byType(XstoreButton)).onPressed,
+        isNotNull,
+      );
+
+      await tester.tap(find.text('🚀 Publish Listing'));
+      await tester.pump();
+
+      expect(find.text('Product name is required'), findsOneWidget);
+      expect(find.text('Please fix the highlighted fields'), findsOneWidget);
     },
   );
 }

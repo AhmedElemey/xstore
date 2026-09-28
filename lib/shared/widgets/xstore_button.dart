@@ -136,12 +136,16 @@ class _XstoreButtonState extends State<XstoreButton>
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.xl,
                             ),
-                            child: Text(
-                              widget.label,
-                              textAlign: TextAlign.center,
-                              style: AppTypography.labelLarge.copyWith(
-                                color: ink,
-                                fontWeight: FontWeight.w800,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                widget.label,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                style: AppTypography.labelLarge.copyWith(
+                                  color: ink,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),

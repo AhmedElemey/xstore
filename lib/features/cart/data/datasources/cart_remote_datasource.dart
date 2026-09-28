@@ -99,16 +99,57 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (raw == null || _restoredFor != consumerId) return;
       for (final json in (jsonDecode(raw) as List).whereType<Map>()) {
         final item = _savedItemFromJson(Map<String, dynamic>.from(json));
-        if (item != null &&
-            !_items.any((e) => e.listingId == item.listingId)) {
+        if (item != null && !_items.any((e) => e.listingId == item.listingId)) {
           _items.add(item);
           merged = true;
         }
       }
+      if (_restoredFor != consumerId) return;
+      if (await _fillBlankVendorNames()) merged = true;
     } catch (_) {
       // Fail open: an unreadable saved cart is just an empty cart.
     }
     if (merged) await _saveCart(consumerId);
+  }
+
+  /// Older saved lines were built before flat `userName`/`storeName` were
+  /// read, so the header had nothing to paint. Re-read those listings once.
+  Future<bool> _fillBlankVendorNames() async {
+    var changed = false;
+    for (var i = 0; i < _items.length; i++) {
+      if (_vendorLabel(_items[i]).isNotEmpty) continue;
+      final line = _items[i];
+      try {
+        final fresh = await buildLineFromListing(line.listingId, line.quantity);
+        // Signed out during the fetch: don't write into the next session.
+        if (_restoredFor == null) return changed;
+        if (_vendorLabel(fresh).isEmpty) continue;
+        _items[i] = line.copyWith(
+          vendorId: fresh.vendorId == 'vendor_unknown'
+              ? line.vendorId
+              : fresh.vendorId,
+          vendorName: fresh.vendorName,
+          vendorStoreName: fresh.vendorStoreName,
+          vendorAvatar: fresh.vendorAvatar.isNotEmpty
+              ? fresh.vendorAvatar
+              : line.vendorAvatar,
+          vendorRating: fresh.vendorRating ?? line.vendorRating,
+          vendorVerified: fresh.vendorVerified || line.vendorVerified,
+        );
+        changed = true;
+      } on ServerException {
+        // Listing gone or unreadable — keep the saved line.
+      }
+    }
+    return changed;
+  }
+
+  static String _vendorLabel(CartItemEntity item) {
+    final store = item.vendorStoreName.trim();
+    if (store.isNotEmpty && store != '—') return store;
+    final name = item.vendorName.trim();
+    if (name.isNotEmpty && name != '—') return name;
+    return '';
   }
 
   Future<void> _saveCart(String consumerId) async {
@@ -127,28 +168,28 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   static Map<String, Object?> _savedItemToJson(CartItemEntity e) => {
-        'id': e.id,
-        'listingId': e.listingId,
-        'listingName': e.listingName,
-        'listingImage': e.listingImage,
-        'listingSlug': e.listingSlug,
-        'vendorId': e.vendorId,
-        'vendorName': e.vendorName,
-        'vendorStoreName': e.vendorStoreName,
-        'vendorAvatar': e.vendorAvatar,
-        'vendorRating': e.vendorRating,
-        'vendorVerified': e.vendorVerified,
-        'price': e.price,
-        'compareAtPrice': e.compareAtPrice,
-        'quantity': e.quantity,
-        'maxQuantity': e.maxQuantity,
-        'category': e.category,
-        'condition': e.condition,
-        'shippingAvailable': e.shippingAvailable,
-        'shippingCost': e.shippingCost,
-        'isAvailable': e.isAvailable,
-        'addedAt': e.addedAt.toIso8601String(),
-      };
+    'id': e.id,
+    'listingId': e.listingId,
+    'listingName': e.listingName,
+    'listingImage': e.listingImage,
+    'listingSlug': e.listingSlug,
+    'vendorId': e.vendorId,
+    'vendorName': e.vendorName,
+    'vendorStoreName': e.vendorStoreName,
+    'vendorAvatar': e.vendorAvatar,
+    'vendorRating': e.vendorRating,
+    'vendorVerified': e.vendorVerified,
+    'price': e.price,
+    'compareAtPrice': e.compareAtPrice,
+    'quantity': e.quantity,
+    'maxQuantity': e.maxQuantity,
+    'category': e.category,
+    'condition': e.condition,
+    'shippingAvailable': e.shippingAvailable,
+    'shippingCost': e.shippingCost,
+    'isAvailable': e.isAvailable,
+    'addedAt': e.addedAt.toIso8601String(),
+  };
 
   static CartItemEntity? _savedItemFromJson(Map<String, dynamic> j) {
     final id = j['id'];
@@ -190,7 +231,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   (String name, String store, String avatar, double rating, bool verified)
-      _vendorDisplay(String vendorId) {
+  _vendorDisplay(String vendorId) {
     if (vendorId == 'vendor_002') {
       return (
         'Karim Hassan',
@@ -305,13 +346,20 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     );
   }
 
-  CartItemEntity _fromListing(String listingId, int quantity, {String? cartItemId}) {
+  CartItemEntity _fromListing(
+    String listingId,
+    int quantity, {
+    String? cartItemId,
+  }) {
     final m = mockListingModels.firstWhere((e) => e.id == listingId);
     final vid = _vendorIdForListing(listingId);
     final vd = _vendorDisplay(vid);
     final compare = mockCompareAtByListingId[listingId];
-    final img = m.imageUrls.isNotEmpty ? m.imageUrls.first : MockImages.product(20);
-    final id = cartItemId ?? 'cart_item_${DateTime.now().microsecondsSinceEpoch}';
+    final img = m.imageUrls.isNotEmpty
+        ? m.imageUrls.first
+        : MockImages.product(20);
+    final id =
+        cartItemId ?? 'cart_item_${DateTime.now().microsecondsSinceEpoch}';
     return CartItemEntity(
       id: id,
       listingId: m.id,
@@ -352,29 +400,49 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     String? cartItemId,
   }) {
     final root = _listingPayloadRoot(json);
-    final id = cartItemId ?? 'cart_item_${DateTime.now().microsecondsSinceEpoch}';
+    final id =
+        cartItemId ?? 'cart_item_${DateTime.now().microsecondsSinceEpoch}';
     final listingId = (root['id'] ?? '').toString();
 
     final price = jsonDouble(root['price']);
 
-    final sellerRaw = root['seller'] ?? root['vendor'] ?? json['seller'] ?? json['vendor'];
-    final seller = sellerRaw is Map ? Map<String, dynamic>.from(sellerRaw) : <String, dynamic>{};
+    final sellerRaw =
+        root['seller'] ?? root['vendor'] ?? json['seller'] ?? json['vendor'];
+    final seller = sellerRaw is Map
+        ? Map<String, dynamic>.from(sellerRaw)
+        : <String, dynamic>{};
 
-    final vid = (root['vendorId'] ??
-            root['sellerId'] ??
-            seller['id'] ??
-            seller['vendorId'] ??
-            '')
-        .toString();
+    // Live listings send flat userId/userName/storeName, not a nested seller.
+    // Reading only the nested object left the cart header with an empty name,
+    // which looks like invisible text on the glass card in both themes.
+    final vid =
+        (root['vendorId'] ??
+                root['sellerId'] ??
+                root['userId'] ??
+                seller['id'] ??
+                seller['vendorId'] ??
+                '')
+            .toString();
 
-    final vendorName = (seller['name'] ?? seller['displayName'] ?? '').toString();
+    final vendorName =
+        (seller['name'] ?? seller['displayName'] ?? root['userName'] ?? '')
+            .toString()
+            .trim();
     final storeName =
-        (seller['storeName'] ?? seller['businessName'] ?? vendorName).toString();
-    final avatar = (seller['avatarUrl'] ?? seller['avatar'] ?? '').toString();
+        (seller['storeName'] ??
+                seller['businessName'] ??
+                root['storeName'] ??
+                vendorName)
+            .toString()
+            .trim();
+    final avatar =
+        (seller['avatarUrl'] ?? seller['avatar'] ?? root['userAvatar'] ?? '')
+            .toString();
     final sellerRatingRaw = seller['rating'] ?? seller['averageRating'];
     // Missing/zero rating means "no reviews yet" — never fabricate a score.
-    final sellerRating =
-        sellerRatingRaw == null ? null : jsonDouble(sellerRatingRaw);
+    final sellerRating = sellerRatingRaw == null
+        ? null
+        : jsonDouble(sellerRatingRaw);
     final verified = seller['verified'] == true || seller['isVerified'] == true;
 
     final imgs = root['imageUrls'];
@@ -389,12 +457,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final cat = catRaw is String
         ? catRaw
         : catRaw is Map && catRaw['name'] is String
-            ? catRaw['name'] as String
-            : catRaw?.toString() ?? '';
+        ? catRaw['name'] as String
+        : catRaw?.toString() ?? '';
 
     final condRaw = root['conditionLabel'] ?? root['condition'];
-    final condition =
-        condRaw is String ? condRaw : condRaw?.toString() ?? '';
+    final condition = condRaw is String ? condRaw : condRaw?.toString() ?? '';
 
     // Missing stock is 0 (unavailable) — never an invented number.
     final stock = _intFromJson(
@@ -406,7 +473,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
     final shippingCost = cartLineShippingCost(
       shippingAvailable: shipAvail,
-      listingShippingCost: jsonDouble(root['shippingCost'] ?? json['shippingCost']),
+      listingShippingCost: jsonDouble(
+        root['shippingCost'] ?? json['shippingCost'],
+      ),
     );
 
     return CartItemEntity(
@@ -417,9 +486,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       listingSlug: (root['slug'] ?? listingId).toString(),
       vendorId: vid.isEmpty ? 'vendor_unknown' : vid,
       vendorName: vendorName.isEmpty ? '—' : vendorName,
-      vendorStoreName: storeName.isEmpty ? vendorName : storeName,
+      vendorStoreName: storeName.isEmpty
+          ? (vendorName.isEmpty ? '—' : vendorName)
+          : storeName,
       vendorAvatar: avatar,
-      vendorRating: (sellerRating != null && sellerRating > 0) ? sellerRating : null,
+      vendorRating: (sellerRating != null && sellerRating > 0)
+          ? sellerRating
+          : null,
       vendorVerified: verified,
       price: price,
       compareAtPrice: compare,
@@ -655,7 +728,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       await _saveCart(params.consumerId);
       throw const ServerException(outOfStockErrorCode);
     }
-    final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
+    final fallbackAddress = OrderAddressModelX.fromEntity(
+      params.deliveryAddress,
+    );
     // A map-pinned delivery address (see showMapAddressPicker) carries its
     // own coordinates — prefer those over the device's last-known GPS fix,
     // since the two can legitimately differ (ordering for a different
@@ -664,7 +739,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     // lat/lng and fall back to AppLocationCache exactly as before.
     final pinnedLat = params.deliveryAddress.latitude;
     final pinnedLng = params.deliveryAddress.longitude;
-    final hasValidPin = pinnedLat != null &&
+    final hasValidPin =
+        pinnedLat != null &&
         pinnedLng != null &&
         AppLocationCache.isInEgypt(pinnedLat, pinnedLng);
     final orderLatitude = hasValidPin ? pinnedLat : AppLocationCache.latitude;
@@ -726,7 +802,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     _coupon = null;
     _couponCodeInput = null;
     return first.copyWith(
-      items: createdOrders.expand((o) => o.items).map((m) => m.toEntity()).toList(),
+      items: createdOrders
+          .expand((o) => o.items)
+          .map((m) => m.toEntity())
+          .toList(),
       subtotal: params.subtotal,
       shippingCost: params.shippingTotal,
       discount: params.discount,
@@ -778,7 +857,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   /// Used when adding from product — builds line from catalog.
   @override
-  Future<CartItemEntity> buildLineFromListing(String listingId, int quantity) async {
+  Future<CartItemEntity> buildLineFromListing(
+    String listingId,
+    int quantity,
+  ) async {
     if (MockConfig.useMock) {
       return _fromListing(listingId, quantity);
     }

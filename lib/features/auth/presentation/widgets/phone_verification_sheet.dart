@@ -23,6 +23,10 @@ Future<bool> verifyPhoneNow(
 ) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
+    // Shell tabs (Add Listing) dispose their State if the sheet is pushed
+    // on the branch navigator — the caller's post-await mounted check then
+    // drops the action. The root navigator leaves that route mounted.
+    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.surfaceColor,
     shape: const RoundedRectangleBorder(

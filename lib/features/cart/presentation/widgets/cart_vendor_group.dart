@@ -16,10 +16,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/orbit_widgets.dart';
 
 class CartVendorGroupBlock extends ConsumerWidget {
-  const CartVendorGroupBlock({
-    super.key,
-    required this.group,
-  });
+  const CartVendorGroupBlock({super.key, required this.group});
 
   final CartVendorGroup group;
 
@@ -29,6 +26,8 @@ class CartVendorGroupBlock extends ConsumerWidget {
     final selectedIds = ref.watch(
       cartProvider.select((c) => c.selectedItemIds),
     );
+
+    final vendorLabel = _vendorLabel(group);
 
     // Orbit store card: glass panel, glowing dot + store name, then items.
     return GlassCard(
@@ -41,182 +40,196 @@ class CartVendorGroupBlock extends ConsumerWidget {
       ),
       onTap: null,
       child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          onTap: () => context.push(
-            '${AppRoutes.sellerProfile}/${group.vendorId}',
-          ),
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: context.primaryColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.primaryColor.withValues(alpha: 0.7),
-                        blurRadius: 8,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (vendorLabel.isNotEmpty)
+            InkWell(
+              onTap: () =>
+                  context.push('${AppRoutes.sellerProfile}/${group.vendorId}'),
+              borderRadius: BorderRadius.circular(AppSpacing.sm),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.primaryColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.primaryColor.withValues(alpha: 0.7),
+                            blurRadius: 8,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    group.vendorStoreName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelLarge.copyWith(
-                      color: context.primaryColor,
-                      fontWeight: FontWeight.w800,
                     ),
-                  ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        vendorLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: context.textPrimary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        // Vendor header (store name + rating / "New Seller") — keep for restore.
-        // Material(
-        //   color: AppColors.primary.withValues(alpha: 0.06),
-        //   borderRadius: BorderRadius.circular(AppSpacing.md),
-        //   child: InkWell(
-        //     onTap: () => context.push(
-        //       '${AppRoutes.sellerProfile}/${group.vendorId}',
-        //     ),
-        //     borderRadius: BorderRadius.circular(AppSpacing.md),
-        //     child: Padding(
-        //       padding: const EdgeInsets.symmetric(
-        //         horizontal: AppSpacing.md,
-        //         vertical: AppSpacing.sm + AppSpacing.xs,
-        //       ),
-        //       child: Column(
-        //         crossAxisAlignment: CrossAxisAlignment.start,
-        //         children: [
-        //           Row(
-        //             children: [
-        //               Text(
-        //                 '🏪 ${group.vendorStoreName}',
-        //                 style: AppTypography.titleMedium.copyWith(
-        //                   fontWeight: FontWeight.w700,
-        //                 ),
-        //               ),
-        //               // Item count beside store name — keep for restore.
-        //               // const SizedBox(width: AppSpacing.sm),
-        //               // Text(
-        //               //   '(${group.items.length} items)',
-        //               //   style: AppTypography.bodySmall.copyWith(
-        //               //     color: context.textSecondary,
-        //               //     fontWeight: FontWeight.w500,
-        //               //   ),
-        //               // ),
-        //             ],
-        //           ),
-        //           const SizedBox(height: AppSpacing.xs),
-        //           Text(
-        //             group.vendorRating != null
-        //                 ? '${context.l10n.starChar} ${group.vendorRating!.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}'
-        //                 : context.l10n.newSeller,
-        //             style: AppTypography.labelSmall.copyWith(
-        //               color: context.textSecondary,
-        //             ),
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        // const SizedBox(height: AppSpacing.md),
-        // Plain Column, not a nested shrinkWrap ListView: this feature's
-        // parent scrollable already handles the whole cart's scrolling via
-        // slivers, and a vendor's item count is small/bounded (never an
-        // independently long list), so a second Scrollable here would be
-        // pure overhead for no scroll behavior anyone needs.
-        Column(
-          children: group.items.map((item) {
-            debugPrint('item: $item');
-            final selected = selectedIds.contains(item.id);
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: RepaintBoundary(
-                child: Dismissible(
-                  key: ValueKey<String>('dismiss_${item.id}'),
-                  direction: item.isAvailable
-                      ? DismissDirection.endToStart
-                      : DismissDirection.none,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: AppColors.error,
-                      borderRadius: BorderRadius.circular(AppSpacing.lg),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.delete_outline, color: AppColors.white),
-                        Text(
-                          context.l10n.cartSwipeRemove,
-                          style: AppTypography.labelSmall.copyWith(
+          // Vendor header (store name + rating / "New Seller") — keep for restore.
+          // Material(
+          //   color: AppColors.primary.withValues(alpha: 0.06),
+          //   borderRadius: BorderRadius.circular(AppSpacing.md),
+          //   child: InkWell(
+          //     onTap: () => context.push(
+          //       '${AppRoutes.sellerProfile}/${group.vendorId}',
+          //     ),
+          //     borderRadius: BorderRadius.circular(AppSpacing.md),
+          //     child: Padding(
+          //       padding: const EdgeInsets.symmetric(
+          //         horizontal: AppSpacing.md,
+          //         vertical: AppSpacing.sm + AppSpacing.xs,
+          //       ),
+          //       child: Column(
+          //         crossAxisAlignment: CrossAxisAlignment.start,
+          //         children: [
+          //           Row(
+          //             children: [
+          //               Text(
+          //                 '🏪 ${group.vendorStoreName}',
+          //                 style: AppTypography.titleMedium.copyWith(
+          //                   fontWeight: FontWeight.w700,
+          //                 ),
+          //               ),
+          //               // Item count beside store name — keep for restore.
+          //               // const SizedBox(width: AppSpacing.sm),
+          //               // Text(
+          //               //   '(${group.items.length} items)',
+          //               //   style: AppTypography.bodySmall.copyWith(
+          //               //     color: context.textSecondary,
+          //               //     fontWeight: FontWeight.w500,
+          //               //   ),
+          //               // ),
+          //             ],
+          //           ),
+          //           const SizedBox(height: AppSpacing.xs),
+          //           Text(
+          //             group.vendorRating != null
+          //                 ? '${context.l10n.starChar} ${group.vendorRating!.toStringAsFixed(1)}${context.l10n.reviewsDotSeparator}${context.l10n.verifiedSeller}'
+          //                 : context.l10n.newSeller,
+          //             style: AppTypography.labelSmall.copyWith(
+          //               color: context.textSecondary,
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          // const SizedBox(height: AppSpacing.md),
+          // Plain Column, not a nested shrinkWrap ListView: this feature's
+          // parent scrollable already handles the whole cart's scrolling via
+          // slivers, and a vendor's item count is small/bounded (never an
+          // independently long list), so a second Scrollable here would be
+          // pure overhead for no scroll behavior anyone needs.
+          Column(
+            children: group.items.map((item) {
+              final selected = selectedIds.contains(item.id);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: RepaintBoundary(
+                  child: Dismissible(
+                    key: ValueKey<String>('dismiss_${item.id}'),
+                    direction: item.isAvailable
+                        ? DismissDirection.endToStart
+                        : DismissDirection.none,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(AppSpacing.lg),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.delete_outline,
                             color: AppColors.white,
                           ),
-                        ),
-                      ],
+                          Text(
+                            context.l10n.cartSwipeRemove,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  confirmDismiss: (_) async {
-                    ref.read(cartProvider.notifier).removeItem(item.id);
-                    if (context.mounted) {
-                      _showUndoSnack(context, ref, item.listingName);
-                    }
-                    return true;
-                  },
-                  child: CartItemCard(
-                    key: ValueKey<String>('cart-item-${item.id}'),
-                    item: item,
-                    selected: selected,
-                    onToggleSelect: () => notifier.toggleItemSelection(item.id),
-                    onDecrement: () {
-                      if (item.quantity <= 1) {
+                    confirmDismiss: (_) async {
+                      ref.read(cartProvider.notifier).removeItem(item.id);
+                      if (context.mounted) {
+                        _showUndoSnack(context, ref, item.listingName);
+                      }
+                      return true;
+                    },
+                    child: CartItemCard(
+                      key: ValueKey<String>('cart-item-${item.id}'),
+                      item: item,
+                      selected: selected,
+                      onToggleSelect: () =>
+                          notifier.toggleItemSelection(item.id),
+                      onDecrement: () {
+                        if (item.quantity <= 1) {
+                          notifier.removeItem(item.id);
+                          if (context.mounted) {
+                            _showUndoSnack(context, ref, item.listingName);
+                          }
+                        } else {
+                          notifier.updateQuantity(item.id, item.quantity - 1);
+                        }
+                      },
+                      onIncrement: () {
+                        if (item.quantity < item.maxQuantity) {
+                          notifier.updateQuantity(item.id, item.quantity + 1);
+                        }
+                      },
+                      onEditQuantity: () => _promptQty(context, ref, item),
+                      onRemove: () {
                         notifier.removeItem(item.id);
                         if (context.mounted) {
                           _showUndoSnack(context, ref, item.listingName);
                         }
-                      } else {
-                        notifier.updateQuantity(item.id, item.quantity - 1);
-                      }
-                    },
-                    onIncrement: () {
-                      if (item.quantity < item.maxQuantity) {
-                        notifier.updateQuantity(item.id, item.quantity + 1);
-                      }
-                    },
-                    onEditQuantity: () => _promptQty(context, ref, item),
-                    onRemove: () {
-                      notifier.removeItem(item.id);
-                      if (context.mounted) {
-                        _showUndoSnack(context, ref, item.listingName);
-                      }
-                    },
-                    onSaveForLater: () => notifier.saveForLater(item.id),
-                    onOpenProduct: () => context.push(
-                      '${AppRoutes.product}/${item.listingId}',
+                      },
+                      onSaveForLater: () => notifier.saveForLater(item.id),
+                      onOpenProduct: () => context.push(
+                        '${AppRoutes.product}/${item.listingId}',
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
+  }
+
+  /// Store name, then the seller's name. A blank or the em-dash placeholder
+  /// is not a label — it used to leave only the dot, which reads as missing
+  /// text in both themes.
+  static String _vendorLabel(CartVendorGroup group) {
+    final store = group.vendorStoreName.trim();
+    if (store.isNotEmpty && store != '—') return store;
+    final name = group.vendorName.trim();
+    if (name.isNotEmpty && name != '—') return name;
+    return '';
   }
 
   void _showUndoSnack(BuildContext context, WidgetRef ref, String name) {

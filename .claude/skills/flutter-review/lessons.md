@@ -904,7 +904,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 
 ### 2026-09-21 — Side-by-side buttons with different label lengths
 - **Rule:** Wrap each button's icon + label in `FittedBox(fit: BoxFit.scaleDown, child: Row(mainAxisSize: MainAxisSize.min, ...))` instead of `Flexible` + ellipsis, so the longer label (which differs by locale) scales instead of truncating.
-- **Where it applies:** `product_sticky_bar.dart`, other button rows.
+- **Where it applies:** `product_sticky_bar.dart`, `xstore_button.dart` (the label is a `FittedBox`), other button rows.
 
 ### 2026-09-21 — Disabled nested tap targets keep a non-null onTap
 - **Rule:** An `InkWell`/`IconButton` inside a tappable card keeps `onTap` non-null when disabled (`if (!enabled) return;`); `onTap: null` lets the card's tap win.
@@ -999,7 +999,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Tests for fixed bugs.
 
 ### 2026-09-24 — Async persistence: snapshot before await, never cache a static Future
-- **Rule:** Take the data snapshot before the first `await` (a sign-out during the await would otherwise save an empty cart). Never cache a Future in a static field — it outlives test zones and turns one stalled read into a permanent hang; keep a plain "restored for this user" marker and make restore idempotent (restore once, then save again after merging). The cart's `_items` is the user's cart — don't cap it. Tests running the real cart datasource call `CartRemoteDataSourceImpl.clearSessionCache()` and `SharedPreferences.setMockInitialValues` in `setUp`. Don't invent wire fields the backend hasn't agreed (order address/phone/note are blocked on the contract).
+- **Rule:** Take the data snapshot before the first `await` (a sign-out during the await would otherwise save an empty cart). Never cache a Future in a static field — it outlives test zones and turns one stalled read into a permanent hang; keep a plain "restored for this user" marker and make restore idempotent (restore once, then save again after merging). The cart's `_items` is the user's cart — don't cap it. Tests running the real cart datasource call `CartRemoteDataSourceImpl.clearSessionCache()` and `SharedPreferences.setMockInitialValues({})` in `setUp` — one test that calls `setMockInitialValues` turns later `_saveCart` calls on for the whole isolate, so the next test restores the previous cart unless `setUp` wipes prefs. Don't invent wire fields the backend hasn't agreed (order address/phone/note are blocked on the contract).
 - **Where it applies:** `cart_remote_datasource.dart` (`_restoreSavedCart`, `_saveCart`), persistence code, cart tests.
 
 ### 2026-09-25 — All user-facing text goes through l10n
@@ -1029,3 +1029,15 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-26 — Sized orbs must center their glyph
 - **Rule:** A fixed-size circle (`AnimatedContainer` / `Container` with width and height) pins its child to the top-start unless `alignment: Alignment.center` is set. The Orbit dock orb needs that alignment so the cart and Add Listing glyphs sit in the middle of the disc; the count badge stays on the icon via `NotificationIconBadge`.
 - **Where it applies:** `xstore_bottom_nav.dart` (`_DockOrb`), any sized icon disc.
+
+### 2026-09-26 — Cart vendor names come from flat listing fields
+- **Rule:** `GET /api/listings/{id}` sends flat `userId`/`userName`/`storeName`/`userAvatar`, not a nested seller. Cart lines must read those (same as wishlist) or the store header is an empty string, which looks like missing text in both themes. Paint the name with `context.textPrimary`; `context.primaryColor` is the dot accent. A blank or `—` is not a label. Saved lines that predate the parser are re-read once on restore.
+- **Where it applies:** `cart_remote_datasource.dart` (`_fromListingPayload`, `_fillBlankVendorNames`), `cart_vendor_group.dart`, `wishlist_remote_datasource.dart`.
+
+### 2026-09-27 — A form's primary button must be able to show its own errors
+- **Rule:** Don't disable Publish/Submit only because the form is incomplete when that press is what runs `validate()` and paints field errors — the control looks dead. Keep it enabled and validate on press (before any auth gate). Disable it for an in-flight submit, and for an unchanged non-draft edit whose PUT has server side effects.
+- **Where it applies:** `add_listing_screen.dart`, `listing_form_notifier.dart` `canSubmit`, other long forms whose footer button is the only validation trigger.
+
+### 2026-09-27 — Verification sheets from shell tabs use the root navigator
+- **Rule:** `verifyEmailNow` / `verifyPhoneNow` must pass `useRootNavigator: true`. A sheet pushed on a `StatefulShellBranch` navigator disposes that route's `State`; the caller's `if (!mounted) return` after `requirePhoneVerified` then skips the real action (Add Listing publish).
+- **Where it applies:** `email_verification_sheet.dart`, `phone_verification_sheet.dart`, `require_phone_verified.dart`, `add_listing_screen.dart`.
