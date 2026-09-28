@@ -668,7 +668,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     final s = ref.watch(profileNotifierProvider);
     final u = s.user;
-    final isVendor = u?.hasStore ?? false;
+    // Role, not hasStore: a Google-created seller can have no store record yet
+    // and still needs the store section (name, category, location) to list.
+    final isVendor = u?.isVendor ?? false;
 
     if (!_synced && u != null) {
       _synced = true;

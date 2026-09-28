@@ -91,7 +91,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
 
     final u = profile?.user ?? user;
-    final isVendor = u.hasStore;
+    final isVendor = u.isVendor; // role-based, same as the shell tabs
     final phoneMissing = AppValidators.isMissingPhoneNumber(u.phoneNumber);
     // final sellerId = u.id.isNotEmpty ? u.id : user.id;
 

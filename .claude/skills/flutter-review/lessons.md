@@ -1045,3 +1045,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-27 — Verification sheets from shell tabs use the root navigator
 - **Rule:** `verifyEmailNow` / `verifyPhoneNow` must pass `useRootNavigator: true`. A sheet pushed on a `StatefulShellBranch` navigator disposes that route's `State`; the caller's `if (!mounted) return` after `requirePhoneVerified` then skips the real action (Add Listing publish).
 - **Where it applies:** `email_verification_sheet.dart`, `phone_verification_sheet.dart`, `require_phone_verified.dart`, `add_listing_screen.dart`.
+
+### 2026-09-28 — Vendor UI keys off role, not hasStore
+- **Rule:** Decide vendor-only UI with `user.isVendor` (role, or a store) — the same test the shell tabs use — never `hasStore` alone. A Google-created seller can have the vendor role with no store record yet (`hasStore` = `storeId != null`), and gating on the store hid the only place to create it (Edit Profile's store name/category/location).
+- **Where it applies:** `edit_profile_screen.dart`, `profile_screen.dart`, any screen branching on vendor vs consumer.
