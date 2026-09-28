@@ -24,6 +24,7 @@
   "profileEmailNotVerified": "Your email is not verified",
   "profilePhoneNotVerified": "Your phone number is not verified",
   "profilePhoneMissing": "Your phone number is not set",
+  "profileEmailMissing": "Your email is not set",
   "verifyNow": "Verify Now",
   "addNow": "Add Now",
   "changeNumber": "Change",

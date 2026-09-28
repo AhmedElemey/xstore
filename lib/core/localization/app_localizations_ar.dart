@@ -83,6 +83,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profilePhoneMissing => 'رقم هاتفك غير موجود';
 
   @override
+  String get profileEmailMissing => 'بريدك الإلكتروني غير موجود';
+
+  @override
   String get verifyNow => 'وثّق الآن';
 
   @override

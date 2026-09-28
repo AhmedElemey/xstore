@@ -22,6 +22,7 @@ import '../../../commission/presentation/providers/commission_config_provider.da
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../../commission/presentation/widgets/commission_breakdown_card.dart';
 import '../../../commission/presentation/widgets/vendor_commission_alert_banner.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../data/listing_categories_data.dart';
 import '../providers/listing_form_notifier.dart';
 import '../providers/listing_form_state.dart';
@@ -67,6 +68,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   // synced so didUpdateWidget can react to that change; initState alone
   // would miss it.
   bool _hasSyncedEditingListing = false;
+  bool _checkingProfile = false;
   String? _syncedEditingListingId;
 
   void _syncEditingListing() {
@@ -224,6 +226,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       AppSnackbar.error(context, context.l10n.listingValidationFixFields);
       return;
     }
+    if (ref.read(listingFormNotifierProvider).editingListingId.isEmpty &&
+        !await _profileReadyForListing()) {
+      return;
+    }
+    if (!mounted) return;
 
     final formBeforeSubmit = ref.read(listingFormNotifierProvider);
     final isEditing = formBeforeSubmit.editingListingId.isNotEmpty;
@@ -289,6 +296,45 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         ),
       );
     }
+  }
+
+  /// New listings only: reloads the profile from the server and checks the
+  /// seller has an email, a phone and a store location, naming the first one
+  /// missing with a link to Edit Profile. Verification is left to the backend
+  /// (the accountNotVerified branch in [_publish]).
+  Future<bool> _profileReadyForListing() async {
+    setState(() => _checkingProfile = true);
+    await ref
+        .read(profileNotifierProvider.notifier)
+        .refreshProfileData(force: true);
+    if (!mounted) return false;
+    setState(() => _checkingProfile = false);
+
+    final user = ref.read(profileNotifierProvider).profile?.user;
+    // Reload failed — don't block on it; the backend enforces the same rules.
+    if (user == null) return true;
+    final l10n = context.l10n;
+    final missing = user.email.trim().isEmpty
+        ? l10n.profileEmailMissing
+        : AppValidators.isMissingPhoneNumber(user.phoneNumber)
+            ? l10n.profilePhoneMissing
+            : user.latitude == null || user.longitude == null
+                ? l10n.listingErrorStoreLocationRequired
+                : null;
+    if (missing == null) return true;
+    AppSnackbar.show(
+      context,
+      message: missing,
+      backgroundColor: AppColors.error,
+      action: SnackBarAction(
+        label: l10n.addNow,
+        textColor: AppColors.white,
+        onPressed: () {
+          if (mounted) context.push(AppRoutes.profileEdit);
+        },
+      ),
+    );
+    return false;
   }
 
   Future<void> _saveDraft() async {
@@ -438,8 +484,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                           ? context.l10n.updateListing
                           : context.l10n.publishListing,
                       warm: true,
-                      isLoading: form.isSubmitting,
-                      onPressed: canSubmit && !form.isSubmitting
+                      isLoading: form.isSubmitting || _checkingProfile,
+                      onPressed: canSubmit && !_checkingProfile
                           ? _publish
                           : null,
                     ),

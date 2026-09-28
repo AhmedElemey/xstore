@@ -82,6 +82,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePhoneMissing => 'Your phone number is not set';
 
   @override
+  String get profileEmailMissing => 'Your email is not set';
+
+  @override
   String get verifyNow => 'Verify Now';
 
   @override

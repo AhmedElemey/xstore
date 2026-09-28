@@ -242,6 +242,12 @@ abstract class AppLocalizations {
   /// **'Your phone number is not set'**
   String get profilePhoneMissing;
 
+  /// No description provided for @profileEmailMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is not set'**
+  String get profileEmailMissing;
+
   /// No description provided for @verifyNow.
   ///
   /// In en, this message translates to:

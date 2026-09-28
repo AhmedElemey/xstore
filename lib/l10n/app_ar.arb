@@ -24,6 +24,7 @@
   "profileEmailNotVerified": "بريدك الإلكتروني غير موثّق",
   "profilePhoneNotVerified": "رقم هاتفك غير موثّق",
   "profilePhoneMissing": "رقم هاتفك غير موجود",
+  "profileEmailMissing": "بريدك الإلكتروني غير موجود",
   "verifyNow": "وثّق الآن",
   "addNow": "أضف الآن",
   "changeNumber": "غيّر الرقم",
