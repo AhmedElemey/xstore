@@ -328,10 +328,20 @@ void main() {
       await _settle(tester);
 
       expect(find.widgetWithText(TextFormField, 'Google User'), findsOneWidget);
-      expect(
-        find.widgetWithText(TextFormField, 'googler@gmail.com'),
-        findsOneWidget,
+      final emailField = find.widgetWithText(TextFormField, 'googler@gmail.com');
+      expect(emailField, findsOneWidget);
+      final emailInput = tester.widget<TextField>(
+        find.descendant(of: emailField, matching: find.byType(TextField)),
       );
+      expect(emailInput.readOnly, isTrue);
+      // Name stays editable.
+      final nameInput = tester.widget<TextField>(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Google User'),
+          matching: find.byType(TextField),
+        ),
+      );
+      expect(nameInput.readOnly, isFalse);
     },
   );
 }

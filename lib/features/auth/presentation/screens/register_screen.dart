@@ -54,6 +54,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _storeDesc = TextEditingController();
   final _whatsapp = TextEditingController();
 
+  /// Email came from a Google sign-in — it's the identity being registered,
+  /// so it can't be edited.
+  var _emailFromGoogle = false;
+
   @override
   void initState() {
     super.initState();
@@ -69,7 +73,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final name = r.displayName?.trim() ?? '';
     final email = r.email?.trim() ?? '';
     if (name.isNotEmpty) _fullName.text = name;
-    if (email.isNotEmpty) _email.text = email;
+    if (email.isNotEmpty) {
+      _email.text = email;
+      setState(() => _emailFromGoogle = true);
+    }
     ref.read(registerNotifierProvider.notifier).updateField(
           fullName: name.isEmpty ? null : name,
           email: email.isEmpty ? null : email,
@@ -320,6 +327,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           n: n,
           fullName: _fullName,
           email: _email,
+          emailReadOnly: _emailFromGoogle,
           phone: _phone,
           onPickDob: () => _pickDob(n, s),
         );
@@ -425,6 +433,7 @@ class _StepPersonal extends StatelessWidget {
     required this.n,
     required this.fullName,
     required this.email,
+    required this.emailReadOnly,
     required this.phone,
     required this.onPickDob,
   });
@@ -433,6 +442,7 @@ class _StepPersonal extends StatelessWidget {
   final RegisterNotifier n;
   final TextEditingController fullName;
   final TextEditingController email;
+  final bool emailReadOnly;
   final TextEditingController phone;
   final VoidCallback onPickDob;
 
@@ -475,12 +485,15 @@ class _StepPersonal extends StatelessWidget {
               label: context.l10n.emailAddressRequired,
               hint: context.l10n.enterEmailHint,
               controller: email,
+              readOnly: emailReadOnly,
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(LucideIcons.mail),
               errorText: s.stepErrors['email'],
-              suffixIcon: ok
-                  ? const Icon(Icons.check_circle, color: AppColors.success)
-                  : null,
+              suffixIcon: emailReadOnly
+                  ? Icon(LucideIcons.lock, color: context.textSecondary)
+                  : ok
+                      ? const Icon(Icons.check_circle, color: AppColors.success)
+                      : null,
               onChanged: (v) => n.updateField(email: v),
             );
           },
