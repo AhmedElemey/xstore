@@ -210,6 +210,8 @@ void main() {
 
       final social = container.read(socialAuthProvider);
       expect(social.needsRegistration, isTrue);
+      expect(social.googleRegistration?.email, 'noaccount@gmail.com');
+      expect(social.googleRegistration?.displayName, 'No Account Googler');
       expect(social.needsRoleSelection, isFalse);
       expect(social.pendingSocialResult, isNull);
     },

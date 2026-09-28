@@ -15,6 +15,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/domain/entities/social_auth_result.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
@@ -204,7 +205,13 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const RegisterScreen(),
+          // Extra is the Google profile to prefill (in-memory only; a cold
+          // deep link opens a blank form).
+          RegisterScreen(
+            googlePrefill: state.extra is SocialAuthResult
+                ? state.extra as SocialAuthResult
+                : null,
+          ),
         ),
       ),
       GoRoute(

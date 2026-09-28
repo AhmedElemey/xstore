@@ -164,7 +164,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get googleAccountNotFound =>
-      'لا يوجد حساب مرتبط بحساب جوجل ده. من فضلك سجّل حساب جديد.';
+      'مفيش حساب مرتبط بحساب جوجل ده لسه. كمّل التسجيل، ملينا بياناتك.';
 
   @override
   String get searchHint => 'ابحث عن منتجات...';

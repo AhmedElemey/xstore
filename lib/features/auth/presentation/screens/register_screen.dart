@@ -20,6 +20,7 @@ import '../../../../shared/widgets/birth_date_picker.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../store_categories/domain/entities/store_category_entity.dart';
 import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
+import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_states.dart';
@@ -33,7 +34,11 @@ import '../widgets/social_login_row.dart';
 import '../widgets/phone_input_field.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.googlePrefill});
+
+  /// Google profile of a sign-in that matched no account; its email and
+  /// name prefill step 2. The user still picks a role, phone and password.
+  final SocialAuthResult? googlePrefill;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -53,8 +58,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(registerNotifierProvider.notifier).reset();
+      final prefill = widget.googlePrefill;
+      if (prefill != null) _applyGooglePrefill(prefill);
     });
+  }
+
+  void _applyGooglePrefill(SocialAuthResult r) {
+    final name = r.displayName?.trim() ?? '';
+    final email = r.email?.trim() ?? '';
+    if (name.isNotEmpty) _fullName.text = name;
+    if (email.isNotEmpty) _email.text = email;
+    ref.read(registerNotifierProvider.notifier).updateField(
+          fullName: name.isEmpty ? null : name,
+          email: email.isEmpty ? null : email,
+        );
   }
 
   @override
@@ -168,12 +187,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         AppSnackbar.error(context, next.error!);
       }
     });
-    // Already on the register screen — just consume the flag (a Google
-    // sign-in with no matching account can fire this from here too, via the
-    // same SocialLoginRow), no navigation needed.
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next) {
+    // Already on the register screen (Google via the same SocialLoginRow
+    // matched no account) — prefill in place, no navigation needed.
+    ref.listen(socialAuthProvider.select((s) => s.googleRegistration), (prev, next) {
+      if (next != null && mounted) {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
+        _applyGooglePrefill(next);
       }
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {

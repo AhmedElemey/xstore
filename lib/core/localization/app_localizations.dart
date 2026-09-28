@@ -395,7 +395,7 @@ abstract class AppLocalizations {
   /// No description provided for @googleAccountNotFound.
   ///
   /// In en, this message translates to:
-  /// **'No account found for this Google account. Please register.'**
+  /// **'No account yet for this Google account. Finish signing up, we\'ve filled in your details.'**
   String get googleAccountNotFound;
 
   /// No description provided for @searchHint.
