@@ -430,28 +430,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             ),
                           ),
                         ),
-                        Center(
-                          child: TextButton(
-                            onPressed: () async {
-                              await ref
-                                  .read(guestModeProvider.notifier)
-                                  .enable();
-                              if (!context.mounted) return;
-                              ref
-                                  .read(analyticsServiceProvider)
-                                  .track(AnalyticsEvents.guestModeStarted);
-                              context.go(AppRoutes.home);
-                            },
-                            child: Text(
-                              context.l10n.guestContinue,
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: context.textSecondary,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Center(
+                        //   child: TextButton(
+                        //     onPressed: () async {
+                        //       await ref
+                        //           .read(guestModeProvider.notifier)
+                        //           .enable();
+                        //       if (!context.mounted) return;
+                        //       ref
+                        //           .read(analyticsServiceProvider)
+                        //           .track(AnalyticsEvents.guestModeStarted);
+                        //       context.go(AppRoutes.home);
+                        //     },
+                        //     child: Text(
+                        //       context.l10n.guestContinue,
+                        //       style: AppTypography.bodyMedium.copyWith(
+                        //         color: context.textSecondary,
+                        //         fontWeight: FontWeight.w600,
+                        //         decoration: TextDecoration.underline,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     ),
