@@ -8,8 +8,6 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/analytics/analytics_service.dart';
-import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
@@ -20,7 +18,6 @@ import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
-import '../providers/guest_mode_provider.dart';
 import '../providers/phone_auth_provider.dart';
 import '../providers/social_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
