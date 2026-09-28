@@ -82,17 +82,13 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   /// Google is a login-only shortcut, not a self-service account creator:
   /// ask the backend (read-only `checkGoogleUser`) whether this identity
   /// already has an account. If it does, log straight in with that existing
-  /// role via the role-specific endpoint (which also auto-creates, but is
-  /// never asked to here).
+  /// role via the role-specific endpoint (which also auto-creates, so it is
+  /// only called for registered users). Otherwise — or if the lookup
+  /// failed — go to the register flow prefilled with the Google profile.
   ///
-  /// `check-user` looks up a Google-linked identity, not an email/password
-  /// account that happens to share this Gmail. Firebase `isNewUser: false`
-  /// means this Google identity has signed in before, so when the lookup
-  /// misses we still log in as consumer rather than sending them to
-  /// register. A brand-new Google identity (`isNewUser: true` and no
-  /// backend match) goes to the normal register flow — Google never
-  /// collects a phone number or password, which the rest of the app
-  /// treats as required account fields.
+  /// Firebase `isNewUser` plays no part: Firebase remembers every Google
+  /// account that ever signed in to the project, so it says nothing about
+  /// whether a backend account exists.
   Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
     final idToken = result.idToken;
     if (idToken == null || idToken.isEmpty) {
@@ -117,8 +113,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     });
     if (kDebugMode) {
       debugPrint(
-        'google check-user parsed: exists=$exists role=$existingRole '
-        'isNewUser=${result.isNewUser}',
+        'google check-user parsed: exists=$exists role=$existingRole',
       );
     }
 
@@ -127,11 +122,9 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       return;
     }
 
-    // Lookup miss, unparseable role, or a failed check-user call: a
-    // returning Firebase identity still belongs to an existing account
-    // (often email/password with the same Gmail). Log in rather than
-    // sending them to register.
-    if (exists || !result.isNewUser) {
+    // Registered but the role didn't parse: log in, retrying the other
+    // role on a "different role" conflict.
+    if (exists) {
       await _loginWithGoogleRole(idToken, UserRole.consumer);
       return;
     }

@@ -5,12 +5,11 @@
 // chain (a hand-built real AuthRepositoryImpl, stubbing only the two
 // Firebase-touching constructor params).
 //
-// Google is now a login-only shortcut: `checkGoogleUser` plus Firebase
-// `isNewUser` decide whether to log in or send the user to register,
-// before the picker is ever considered. An identity that already has an
-// account (lookup hit, or `isNewUser: false` after a lookup miss) skips
-// straight to home. A brand-new identity (`isNewUser: true` and no
-// backend match) no longer auto-creates via this screen —
+// Google is now a login-only shortcut: only `checkGoogleUser` decides
+// whether to log in or send the user to register (Firebase `isNewUser` is
+// ignored), before the picker is ever considered. An identity that already
+// has an account skips straight to home. One with no backend match never
+// auto-creates via this screen —
 // `SocialAuthState.needsRegistration` is set instead, and it's the
 // login/register screens (not this one) that react to it by navigating
 // to Register (see login_screen_live_flow_test.dart for that half).
@@ -218,24 +217,17 @@ void main() {
   );
 
   test(
-    'a returning Firebase Google identity logs in as consumer when '
-    'check-user reports no Google-linked account',
+    'a returning Firebase Google identity with no backend account goes to '
+    'register instead of being logged in',
     skip: MockConfig.useMock,
     () async {
-      var consumerLoginCalls = 0;
+      // No Google login route scripted: an auto-creating login call would
+      // be rejected as unscripted and surface as an error.
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': false,
           'role': null,
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) {
-          consumerLoginCalls++;
-          return {
-            'token': 'access-token-email-account',
-            'refreshToken': 'refresh-token-email-account',
-          };
-        },
-        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
       });
 
       final container = ProviderContainer(
@@ -265,24 +257,21 @@ void main() {
       await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
       final social = container.read(socialAuthProvider);
-      expect(social.needsRegistration, isFalse);
-      expect(social.needsRoleSelection, isFalse);
+      expect(social.needsRegistration, isTrue);
+      expect(social.googleRegistration?.email, 'rehab.mhmd2@gmail.com');
       expect(social.error, isNull);
-      expect(consumerLoginCalls, 1);
-
-      await container.read(analyticsServiceProvider).ready;
     },
   );
 
   test(
-    'a returning Google identity retries vendor login when consumer returns '
-    'a different-role conflict',
+    'a registered Google identity with an unreadable role retries vendor '
+    'login when consumer returns a different-role conflict',
     skip: MockConfig.useMock,
     () async {
       var vendorLoginCalls = 0;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
-          'exists': false,
+          'exists': true,
           'role': null,
         },
         'POST ${ApiEndpoints.googleConsumerLogin}': (options) => DioException(
