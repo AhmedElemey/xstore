@@ -219,18 +219,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
-    // Validate before the phone gate so form problems show first; the
-    // highlighted field may be scrolled off-screen, hence the snackbar.
+    // The highlighted field may be scrolled off-screen, hence the snackbar.
     if (!notifier.validate(context.l10n)) {
       AppSnackbar.error(context, context.l10n.listingValidationFixFields);
       return;
     }
-
-    // Proactive check — the backend 403s "Account must be verified to
-    // create listings" for an unverified phone; check first instead of
-    // letting a guaranteed-failing request go out.
-    if (!await requirePhoneVerified(context, ref)) return;
-    if (!mounted) return;
 
     final formBeforeSubmit = ref.read(listingFormNotifierProvider);
     final isEditing = formBeforeSubmit.editingListingId.isNotEmpty;
@@ -273,7 +266,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         action: SnackBarAction(
           label: context.l10n.verifyNow,
           textColor: AppColors.white,
-          onPressed: () => _publish(),
+          // No up-front guard: the backend decides who must verify (the
+          // profile flags blocked sellers it would accept). Verify only
+          // after it says so, then retry.
+          onPressed: () async {
+            if (!await requirePhoneVerified(context, ref)) return;
+            if (mounted) await _publish();
+          },
         ),
       );
       return;
