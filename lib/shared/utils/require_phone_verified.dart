@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_colors.dart';
+import '../../core/router/app_routes.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 import '../../core/utils/validators.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/widgets/email_verification_sheet.dart';
 import '../../features/auth/presentation/widgets/phone_verification_sheet.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
+import '../widgets/app_snackbar.dart';
 
 /// Gate for account-gated actions the backend already rejects for an
 /// unverified account (creating a listing, placing an order) — checks
@@ -19,9 +24,18 @@ import '../../features/profile/presentation/providers/profile_provider.dart';
 /// Returns true when email and phone are already verified, or become
 /// verified after the user completes the OTP sheets; false if they
 /// cancel, OTP fails, email/phone is missing, or the widget is gone by
-/// the time verification finishes — the caller aborts either way.
+/// the time verification finishes — the caller aborts either way. A missing
+/// phone (e.g. a Google sign-up, which collects none) shows an "Add now"
+/// snackbar so the action never fails silently.
 Future<bool> requirePhoneVerified(BuildContext context, WidgetRef ref) async {
   var profile = ref.read(profileNotifierProvider).profile;
+  // Not loaded yet (the Profile tab was never opened) — fetch it instead of
+  // treating an unknown account as unverified and re-sending an email OTP.
+  if (profile == null) {
+    await ref.read(profileNotifierProvider.notifier).refreshProfileData();
+    if (!context.mounted) return false;
+    profile = ref.read(profileNotifierProvider).profile;
+  }
 
   if (!(profile?.isEmailVerified ?? false)) {
     final email = profile?.user.email ??
@@ -42,7 +56,21 @@ Future<bool> requirePhoneVerified(BuildContext context, WidgetRef ref) async {
   final phone = profile?.user.phoneNumber ??
       ref.read(authProvider).valueOrNull?.phoneNumber ??
       '';
-  if (AppValidators.isMissingPhoneNumber(phone)) return false;
+  if (AppValidators.isMissingPhoneNumber(phone)) {
+    AppSnackbar.show(
+      context,
+      message: context.l10n.profilePhoneMissing,
+      backgroundColor: AppColors.error,
+      action: SnackBarAction(
+        label: context.l10n.addNow,
+        textColor: AppColors.white,
+        onPressed: () {
+          if (context.mounted) context.push(AppRoutes.profileEdit);
+        },
+      ),
+    );
+    return false;
+  }
 
   final verified = await verifyPhoneNow(context, ref, phone);
   if (!verified || !context.mounted) return false;

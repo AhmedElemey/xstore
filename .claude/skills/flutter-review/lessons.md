@@ -1029,3 +1029,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-26 — Sized orbs must center their glyph
 - **Rule:** A fixed-size circle (`AnimatedContainer` / `Container` with width and height) pins its child to the top-start unless `alignment: Alignment.center` is set. The Orbit dock orb needs that alignment so the cart and Add Listing glyphs sit in the middle of the disc; the count badge stays on the icon via `NotificationIconBadge`.
 - **Where it applies:** `xstore_bottom_nav.dart` (`_DockOrb`), any sized icon disc.
+
+### 2026-09-28 — Action gates never fail silently
+- **Rule:** A pre-flight gate that returns `false` (verification, login, missing data) must show the user why and how to fix it (snackbar + action) — callers just `return`. Load a not-yet-fetched provider (e.g. `profileNotifierProvider` is null until the Profile tab opens) before judging from it. Google sign-ups have no phone, so the phone gate offers "Add now" → Edit Profile.
+- **Where it applies:** `require_phone_verified.dart`, Add Listing `_publish`, checkout `onPrimary`, any `require*` gate.
