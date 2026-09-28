@@ -59,8 +59,10 @@ class WishlistGridCard extends ConsumerWidget {
 
   Future<void> _addToCart(BuildContext context, WidgetRef ref) async {
     HapticFeedback.lightImpact();
-    await ref.read(wishlistProvider.notifier).moveListingToCart(item.listingId);
-    if (!context.mounted) return;
+    final added = await ref
+        .read(wishlistProvider.notifier)
+        .moveListingToCart(item.listingId);
+    if (!added || !context.mounted) return;
     AppSnackbar.show(
       context,
       message: context.l10n.wishlistSingleAddedToCart,

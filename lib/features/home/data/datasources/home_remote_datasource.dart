@@ -9,7 +9,7 @@ import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/json_list_unwrap.dart';
 import '../../../listing/data/models/listing_model.dart'
-    show isPublicLiveListingStatus;
+    show isListingSoldOut, isPublicLiveListingStatus;
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/deal_model.dart';
@@ -198,9 +198,12 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   }
 
   /// Maps a listing-shaped API object to a deal tile; null when the
-  /// listing carries no usable id/title, or isn't Active (`status == 2`).
+  /// listing carries no usable id/title, isn't Active (`status == 2`), or
+  /// is sold out.
   DealModel? _dealFromListing(Map<String, dynamic> json) {
-    if (!isPublicLiveListingStatus(json['status'])) return null;
+    if (!isPublicLiveListingStatus(json['status']) || isListingSoldOut(json)) {
+      return null;
+    }
     final id = (json['id'] ?? '').toString();
     final title =
         (json['title'] ?? json['titleEn'] ?? json['name'] ?? '').toString();

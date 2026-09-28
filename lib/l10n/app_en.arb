@@ -561,6 +561,8 @@
   "chatSellerSoon": "Chat with seller — coming soon",
   "addedToCart": "Added to cart!",
   "buyNow": "Buy now",
+  "outOfStock": "Out of stock",
+  "outOfStockAddError": "This item is out of stock",
   "visitStore": "Visit Store",
   "reportVendor": "Report Vendor",
   "reportVendorTitle": "Report {name}",

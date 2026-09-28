@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/failures.dart';
+import 'package:xstore/core/network/app_error_messages.dart';
 import 'package:xstore/features/cart/data/repositories/cart_repository_impl.dart';
 import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
@@ -175,6 +176,33 @@ void main() {
 
       expect(result.isLeft(), isTrue);
       expect(addCalled, isFalse);
+    });
+
+    test('refuses a sold-out listing with outOfStockErrorCode', () async {
+      var addCalled = false;
+      final repo = CartRepositoryImpl(
+        StubCartRemoteDataSource(
+          onBuildLineFromListing: (_, __) async =>
+              _item().copyWith(isAvailable: false),
+          onAddOrUpdateItem: ({required consumerId, required item}) async {
+            addCalled = true;
+            return _cart(consumerId);
+          },
+        ),
+        StubOrdersRepository(),
+      );
+
+      final result = await repo.addFromListing(
+        consumerId: 'consumer_1',
+        listingId: 'listing_9',
+        quantity: 1,
+      );
+
+      expect(addCalled, isFalse);
+      result.fold(
+        (f) => expect(f.toString(), outOfStockErrorCode),
+        (_) => fail('expected Left'),
+      );
     });
   });
 

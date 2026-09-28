@@ -1604,6 +1604,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buyNow => 'Buy now';
 
   @override
+  String get outOfStock => 'Out of stock';
+
+  @override
+  String get outOfStockAddError => 'This item is out of stock';
+
+  @override
   String get visitStore => 'Visit Store';
 
   @override

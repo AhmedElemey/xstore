@@ -11,7 +11,8 @@ const rateLimitErrorCode = 'rateLimitExceeded';
 const phoneNotVerifiedErrorCode = 'phoneNotVerified';
 
 /// Checkout's pre-order stock check found at least one line the listing
-/// can no longer fill (`GET /api/listings/{id}/stock`). No order was placed.
+/// can no longer fill (`GET /api/listings/{id}/stock`) — no order was
+/// placed — or a cart add hit a sold-out listing.
 const outOfStockErrorCode = 'outOfStock';
 
 /// CONFIRMED (live probe, 2026-08-14): `POST /api/listings` 403s with this
@@ -40,5 +41,6 @@ String resolveAppError(BuildContext context, String? error) {
   if (error == accountNotVerifiedErrorCode) {
     return context.l10n.listingErrorAccountNotVerified;
   }
+  if (error == outOfStockErrorCode) return context.l10n.outOfStockAddError;
   return error ?? context.l10n.errorGeneric;
 }

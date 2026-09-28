@@ -71,6 +71,7 @@ class _CatalogRow {
       viewCount: viewCount,
       saveCount: saveCount,
       inquiryCount: inquiryCount,
+      stockQuantity: 10,
     );
   }
 

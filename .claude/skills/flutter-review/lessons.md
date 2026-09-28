@@ -1049,3 +1049,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-28 — Vendor UI keys off role, not hasStore
 - **Rule:** Decide vendor-only UI with `user.isVendor` (role, or a store) — the same test the shell tabs use — never `hasStore` alone. A Google-created seller can have the vendor role with no store record yet (`hasStore` = `storeId != null`), and gating on the store hid the only place to create it (Edit Profile's store name/category/location).
 - **Where it applies:** `edit_profile_screen.dart`, `profile_screen.dart`, any screen branching on vendor vs consumer.
+
+### 2026-09-28 — Stock is checked at every buyer surface, not only at checkout
+- **Rule:** Buyer catalog tiles (Home, Explore, seller store) drop listings `isListingSoldOut` reports; it only hides on an explicit `stockQuantity <= 0`/`isAvailable: false`, since summary DTOs may omit stock. The product page disables Add to cart/Buy now at stock 0. `CartRepositoryImpl.addFromListing` refuses unavailable lines with `outOfStockErrorCode` — every add path (product, explore, wishlist, reorder) goes through it. Test fixtures for cart adds need `stockQuantity`.
+- **Where it applies:** `listing_model.dart`, `home_remote_datasource.dart`, `explore_remote_datasource.dart`, `profile_remote_datasource.dart`, `product_sticky_bar.dart`, `cart_repository_impl.dart`.

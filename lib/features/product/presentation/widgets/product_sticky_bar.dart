@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -30,6 +31,7 @@ class ProductStickyBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final soldOut = maxQuantity < 1;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.surfaceColor,
@@ -82,12 +84,16 @@ class ProductStickyBar extends StatelessWidget {
               const Gap(AppSpacing.md),
               Expanded(
                 child: XstoreButton(
-                  label: context.l10n.addToCart,
+                  label: soldOut
+                      ? context.l10n.outOfStock
+                      : context.l10n.addToCart,
                   isLoading: isAddingToCart,
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    onAddToCart();
-                  },
+                  onPressed: soldOut
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          onAddToCart();
+                        },
                 ),
               ),
             ],
@@ -139,17 +145,29 @@ class ProductActionsRow extends StatelessWidget {
 
   final VoidCallback onBuyNow;
 
-  /// Shows "Only N left" when stock is low (1–5).
+  /// Shows "Only N left" when stock is low (1–5), and "Out of stock" with
+  /// Buy now disabled at 0.
   final int stockLeft;
 
   @override
   Widget build(BuildContext context) {
-    final lowStock = stockLeft > 0 && stockLeft <= 5;
+    final soldOut = stockLeft < 1;
+    final lowStock = !soldOut && stockLeft <= 5;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (soldOut) ...[
+            Text(
+              context.l10n.outOfStock,
+              style: AppTypography.labelLarge.copyWith(
+                color: AppColors.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Gap(AppSpacing.md),
+          ],
           if (lowStock) ...[
             Text(
               '${context.l10n.onlyLeftPrefix}$stockLeft${context.l10n.onlyLeftSuffix}',
@@ -182,7 +200,7 @@ class ProductActionsRow extends StatelessWidget {
               // const Gap(AppSpacing.md),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: onBuyNow,
+                  onPressed: soldOut ? null : onBuyNow,
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                   ),

@@ -561,6 +561,8 @@
   "chatSellerSoon": "محادثة البائع — قريباً",
   "addedToCart": "تمت الإضافة للسلة!",
   "buyNow": "اشتري الآن",
+  "outOfStock": "نفدت الكمية",
+  "outOfStockAddError": "المنتج ده نفدت كميته",
   "visitStore": "زيارة المتجر",
   "reportVendor": "الإبلاغ عن البائع",
   "reportVendorTitle": "الإبلاغ عن {name}",

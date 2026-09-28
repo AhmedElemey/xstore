@@ -259,6 +259,7 @@ void main() {
             'id': '9001',
             'title': 'Wireless Earbuds',
             'price': 50000,
+            'stockQuantity': 5,
             'imageUrl': 'https://example.test/earbuds.jpg',
             'category': 'Electronics',
             'condition': 'New',

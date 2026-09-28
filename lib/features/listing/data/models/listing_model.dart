@@ -266,6 +266,17 @@ bool isPublicLiveListingStatus(Object? raw) {
   return _listingStatusFromDto(s) == ListingStatus.active;
 }
 
+/// Consumer catalog tiles hide listings the DTO reports as sold out.
+/// Summary DTOs may omit stock, so a missing field keeps the tile — the
+/// product page and cart add re-check against the listing detail.
+bool isListingSoldOut(Map<String, dynamic> json) {
+  if (json['isAvailable'] == false) return true;
+  final raw = json['stockQuantity'] ?? json['stock'] ?? json['quantity'];
+  if (raw == null) return false;
+  final stock = raw is num ? raw : num.tryParse(raw.toString());
+  return stock != null && stock <= 0;
+}
+
 extension ListingModelX on ListingModel {
   ListingEntity toEntity() => ListingEntity(
         id: id,

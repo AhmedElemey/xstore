@@ -10,7 +10,13 @@ import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/features/product/presentation/widgets/product_sticky_bar.dart';
 
 void main() {
-  Future<void> pumpBar(WidgetTester tester, {required Size size}) async {
+  Future<void> pumpBar(
+    WidgetTester tester, {
+    required Size size,
+    int stock = 3,
+    VoidCallback? onAddToCart,
+    VoidCallback? onBuyNow,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -31,14 +37,14 @@ void main() {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ProductActionsRow(
-                  onBuyNow: () {},
-                  stockLeft: 3,
+                  onBuyNow: onBuyNow ?? () {},
+                  stockLeft: stock,
                 ),
                 ProductStickyBar(
-                  onAddToCart: () {},
+                  onAddToCart: onAddToCart ?? () {},
                   isAddingToCart: false,
                   quantity: 1,
-                  maxQuantity: 3,
+                  maxQuantity: stock,
                   onDecrement: () {},
                   onIncrement: () {},
                 ),
@@ -62,4 +68,29 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('a sold-out listing disables Add to cart and Buy now', (
+    tester,
+  ) async {
+    var added = false;
+    var bought = false;
+    await pumpBar(
+      tester,
+      size: const Size(400, 800),
+      stock: 0,
+      onAddToCart: () => added = true,
+      onBuyNow: () => bought = true,
+    );
+
+    expect(find.text('Add to Cart'), findsNothing);
+    expect(find.text('Out of stock'), findsNWidgets(2));
+
+    await tester.tap(find.text('Buy now'), warnIfMissed: false);
+    // The last match is the Add to cart button's label.
+    await tester.tap(find.text('Out of stock').last, warnIfMissed: false);
+    await tester.pump();
+
+    expect(added, isFalse);
+    expect(bought, isFalse);
+  });
 }

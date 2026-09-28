@@ -723,6 +723,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     return [
       for (final item in raw)
         if (isPublicLiveListingStatus(item['status']) &&
+            !isListingSoldOut(item) &&
             (item['id'] ?? '').toString().isNotEmpty)
           item,
     ];

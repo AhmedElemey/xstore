@@ -1608,6 +1608,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get buyNow => 'اشتري الآن';
 
   @override
+  String get outOfStock => 'نفدت الكمية';
+
+  @override
+  String get outOfStockAddError => 'المنتج ده نفدت كميته';
+
+  @override
   String get visitStore => 'زيارة المتجر';
 
   @override

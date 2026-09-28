@@ -3212,6 +3212,18 @@ abstract class AppLocalizations {
   /// **'Buy now'**
   String get buyNow;
 
+  /// No description provided for @outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get outOfStock;
+
+  /// No description provided for @outOfStockAddError.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is out of stock'**
+  String get outOfStockAddError;
+
   /// No description provided for @visitStore.
   ///
   /// In en, this message translates to:

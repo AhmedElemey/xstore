@@ -264,19 +264,21 @@ class Wishlist extends _$Wishlist {
     } catch (_) {}
   }
 
-  Future<void> moveListingToCart(String listingId) async {
+  /// Returns whether the listing reached the cart; failures land in
+  /// `state.error`.
+  Future<bool> moveListingToCart(String listingId) async {
     final id = _consumerId;
-    if (id == null) return;
+    if (id == null) return false;
     if (!ref.read(isOnlineProvider)) {
       state = state.copyWith(error: kOfflineErrorCode);
-      return;
+      return false;
     }
     final epoch = _sessionEpoch;
     state = state.copyWith(isUpdating: true, error: null);
     final r = await ref
         .read(moveToCartUseCaseProvider)
         .call(consumerId: id, listingId: listingId);
-    if (epoch != _sessionEpoch) return;
+    if (epoch != _sessionEpoch) return false;
     state = state.copyWith(isUpdating: false);
     var ok = false;
     r.fold(
@@ -285,9 +287,10 @@ class Wishlist extends _$Wishlist {
     );
     if (ok) {
       await ref.read(cartProvider.notifier).fetchCart();
-      if (epoch != _sessionEpoch) return;
+      if (epoch != _sessionEpoch) return true;
       await fetchWishlist();
     }
+    return ok;
   }
 
   Future<void> moveAllToCart() async {

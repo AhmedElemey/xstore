@@ -6,7 +6,7 @@ import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/json_list_unwrap.dart';
 import '../../../listing/data/models/listing_model.dart'
-    show isPublicLiveListingStatus;
+    show isListingSoldOut, isPublicLiveListingStatus;
 import '../models/search_result_model.dart';
 
 abstract interface class ExploreRemoteDataSource {
@@ -176,6 +176,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
     return [
       for (final item in raw)
         if (isPublicLiveListingStatus(item['status']) &&
+            !isListingSoldOut(item) &&
             (item['id'] ?? '').toString().isNotEmpty)
           item,
     ];
