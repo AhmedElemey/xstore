@@ -226,10 +226,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       AppSnackbar.error(context, context.l10n.listingValidationFixFields);
       return;
     }
-    if (ref.read(listingFormNotifierProvider).editingListingId.isEmpty &&
-        !await _profileReadyForListing()) {
-      return;
-    }
+    if (!await _profileReadyForListing()) return;
     if (!mounted) return;
 
     final formBeforeSubmit = ref.read(listingFormNotifierProvider);
@@ -298,9 +295,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     }
   }
 
-  /// New listings only: reloads the profile from the server and checks the
-  /// seller has an email, a phone and a store location, naming the first one
-  /// missing with a link to Edit Profile. Verification is left to the backend
+  /// New listings and edits: reloads the profile from the server and checks
+  /// the seller has an email, a phone and a store location, naming the first
+  /// one missing with a link to Edit Profile. Verification is left to the backend
   /// (the accountNotVerified branch in [_publish]).
   Future<bool> _profileReadyForListing() async {
     setState(() => _checkingProfile = true);
@@ -315,9 +312,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     if (user == null) return true;
     final l10n = context.l10n;
     final missing = user.email.trim().isEmpty
-        ? l10n.profileEmailMissing
+        ? l10n.listingErrorEmailRequired
         : AppValidators.isMissingPhoneNumber(user.phoneNumber)
-            ? l10n.profilePhoneMissing
+            ? l10n.listingErrorPhoneRequired
             : user.latitude == null || user.longitude == null
                 ? l10n.listingErrorStoreLocationRequired
                 : null;

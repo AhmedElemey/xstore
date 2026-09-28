@@ -121,6 +121,8 @@ Map<String, dynamic> _profileJson() => {
     'email': 'vendor@test.com',
     'phoneNumber': '01012345678',
   },
+  // Publishing (new or edit) requires a saved store location (lat/lng).
+  'store': {'id': 1, 'lat': 30.0444, 'lng': 31.2357},
   'isEmailVerificationRequired': false,
   'isPhoneVerificationRequired': false,
   'isEmailVerified': true,

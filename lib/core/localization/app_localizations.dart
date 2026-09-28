@@ -242,12 +242,6 @@ abstract class AppLocalizations {
   /// **'Your phone number is not set'**
   String get profilePhoneMissing;
 
-  /// No description provided for @profileEmailMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'Your email is not set'**
-  String get profileEmailMissing;
-
   /// No description provided for @verifyNow.
   ///
   /// In en, this message translates to:
@@ -5215,6 +5209,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set your store\'s location before publishing a listing'**
   String get listingErrorStoreLocationRequired;
+
+  /// No description provided for @listingErrorEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an email to your profile before publishing a listing'**
+  String get listingErrorEmailRequired;
+
+  /// No description provided for @listingErrorPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a phone number to your profile before publishing a listing'**
+  String get listingErrorPhoneRequired;
 
   /// No description provided for @listingPublishedSuccess.
   ///

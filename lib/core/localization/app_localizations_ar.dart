@@ -83,9 +83,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profilePhoneMissing => 'رقم هاتفك غير موجود';
 
   @override
-  String get profileEmailMissing => 'بريدك الإلكتروني غير موجود';
-
-  @override
   String get verifyNow => 'وثّق الآن';
 
   @override
@@ -2703,6 +2700,14 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get listingErrorStoreLocationRequired =>
       'حدد موقع متجرك الأول عشان تقدر تنشر إعلان';
+
+  @override
+  String get listingErrorEmailRequired =>
+      'ضيف بريدك الإلكتروني في ملفك الشخصي قبل نشر إعلان';
+
+  @override
+  String get listingErrorPhoneRequired =>
+      'ضيف رقم هاتفك في ملفك الشخصي قبل نشر إعلان';
 
   @override
   String get listingPublishedSuccess => 'تم نشر الإعلان بنجاح';

@@ -1031,7 +1031,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `xstore_bottom_nav.dart` (`_DockOrb`), any sized icon disc.
 
 ### 2026-09-28 — Create Listing checks profile presence, not verification
-- **Rule:** On a new listing's Publish, force-refresh the profile (`refreshProfileData(force: true)`) and require an email, a phone and store lat/lng to be *present* — name the first missing one with "Add now" → Edit Profile. Don't gate on `isEmailVerified`/`isPhoneVerified` (they blocked sellers the backend accepts); on `accountNotVerifiedErrorCode` offer "Verify now" → `requirePhoneVerified` → retry. Edits skip the check.
+- **Rule:** On a new listing's Publish, force-refresh the profile (`refreshProfileData(force: true)`) and require an email, a phone and store lat/lng to be *present* — name the first missing one with "Add now" → Edit Profile. Don't gate on `isEmailVerified`/`isPhoneVerified` (they blocked sellers the backend accepts); on `accountNotVerifiedErrorCode` offer "Verify now" → `requirePhoneVerified` → retry. Edits run the same check.
 - **Where it applies:** `add_listing_screen.dart` `_profileReadyForListing`/`_publish`, `require_phone_verified.dart`.
 
 ### 2026-09-26 — Cart vendor names come from flat listing fields

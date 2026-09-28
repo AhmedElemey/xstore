@@ -82,9 +82,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePhoneMissing => 'Your phone number is not set';
 
   @override
-  String get profileEmailMissing => 'Your email is not set';
-
-  @override
   String get verifyNow => 'Verify Now';
 
   @override
@@ -2712,6 +2709,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get listingErrorStoreLocationRequired =>
       'Set your store\'s location before publishing a listing';
+
+  @override
+  String get listingErrorEmailRequired =>
+      'Add an email to your profile before publishing a listing';
+
+  @override
+  String get listingErrorPhoneRequired =>
+      'Add a phone number to your profile before publishing a listing';
 
   @override
   String get listingPublishedSuccess => 'Listing published successfully';
