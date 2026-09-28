@@ -1030,9 +1030,9 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** A fixed-size circle (`AnimatedContainer` / `Container` with width and height) pins its child to the top-start unless `alignment: Alignment.center` is set. The Orbit dock orb needs that alignment so the cart and Add Listing glyphs sit in the middle of the disc; the count badge stays on the icon via `NotificationIconBadge`.
 - **Where it applies:** `xstore_bottom_nav.dart` (`_DockOrb`), any sized icon disc.
 
-### 2026-09-28 — Actions never fail silently
-- **Rule:** Don't disable a submit button for invalid input — keep it tappable, validate on tap, highlight fields and show a snackbar (the bad field may be off-screen). Disable only while submitting or for a no-op (unchanged edit). A pre-flight gate that returns `false` must say why and how to fix it. Load a never-fetched provider (e.g. `profileNotifierProvider`) before judging from it. Google sign-ups have no phone → offer "Add now".
-- **Where it applies:** `add_listing_screen.dart` `_publish`, `listing_form_notifier.dart` `canSubmit`, `require_phone_verified.dart`, any `require*` gate or form submit.
+### 2026-09-28 — Pre-flight gates never fail silently
+- **Rule:** A gate that returns `false` (verification, login, missing data) must say why and how to fix it — callers just `return`. Load a never-fetched provider (e.g. `profileNotifierProvider`, null until the Profile tab opens) before judging from it. Google sign-ups have no phone → the phone gate offers "Add now" → Edit Profile. (Form buttons: see "A form's primary button must be able to show its own errors".)
+- **Where it applies:** `require_phone_verified.dart`, any `require*` gate.
 
 ### 2026-09-26 — Cart vendor names come from flat listing fields
 - **Rule:** `GET /api/listings/{id}` sends flat `userId`/`userName`/`storeName`/`userAvatar`, not a nested seller. Cart lines must read those (same as wishlist) or the store header is an empty string, which looks like missing text in both themes. Paint the name with `context.textPrimary`; `context.primaryColor` is the dot accent. A blank or `—` is not a label. Saved lines that predate the parser are re-read once on restore.
