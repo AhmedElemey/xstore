@@ -219,7 +219,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                    child: VendorStoreCard(profile: profile),
+                    // Store fields (logo, name, category, location) are
+                    // edited in the vendor section of Edit Profile.
+                    child: VendorStoreCard(
+                      profile: profile,
+                      onManageStore: () => context.push(AppRoutes.profileEdit),
+                    ),
                   ),
                 ),
               ],
