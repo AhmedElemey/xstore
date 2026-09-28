@@ -202,7 +202,7 @@ void main() {
         shippingAvailable: false,
         shippingCostInput: '',
       );
-      expect(Validators.listingFormHasErrors(input), isTrue);
+      expect(Validators.listingFormErrors(l10n, input).isNotEmpty, isTrue);
       expect(
         Validators.listingFormErrors(l10n, input)['photos'],
         l10n.listingValidationPhotosRequired,
@@ -223,7 +223,7 @@ void main() {
         shippingAvailable: true,
         shippingCostInput: '-1',
       );
-      expect(Validators.listingFormHasErrors(input), isTrue);
+      expect(Validators.listingFormErrors(l10n, input).isNotEmpty, isTrue);
     });
 
     test('minimal valid listing', () {
@@ -240,7 +240,7 @@ void main() {
         shippingAvailable: false,
         shippingCostInput: '',
       );
-      expect(Validators.listingFormHasErrors(input), isFalse);
+      expect(Validators.listingFormErrors(l10n, input).isNotEmpty, isFalse);
     });
 
     test('compare-at must be strictly greater than price', () {
@@ -260,10 +260,10 @@ void main() {
             shippingCostInput: '',
           );
 
-      expect(Validators.listingFormHasErrors(input(compareAt: '')), isFalse);
-      expect(Validators.listingFormHasErrors(input(compareAt: '11')), isFalse);
-      expect(Validators.listingFormHasErrors(input(compareAt: '10')), isTrue);
-      expect(Validators.listingFormHasErrors(input(compareAt: '9')), isTrue);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '')).isNotEmpty, isFalse);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '11')).isNotEmpty, isFalse);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '10')).isNotEmpty, isTrue);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '9')).isNotEmpty, isTrue);
       expect(
         Validators.listingFormErrors(l10n, input(compareAt: '10'))['compareAt'],
         l10n.listingCompareAtWarning,

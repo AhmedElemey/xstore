@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/orbit_widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -77,8 +79,8 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.lg),
+      color: glassFill(context),
+      borderRadius: BorderRadius.circular(22),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -103,8 +105,8 @@ class _CategoryCard extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      context.surfaceColor.withValues(alpha: 0),
-                      context.textPrimary.withValues(alpha: 0.85),
+                      AppColors.space.withValues(alpha: 0),
+                      AppColors.space.withValues(alpha: 0.85),
                     ],
                   ),
                 ),
@@ -118,7 +120,7 @@ class _CategoryCard extends StatelessWidget {
                     Text(
                       title,
                       style: AppTypography.titleMedium.copyWith(
-                        color: context.surfaceColor,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -126,8 +128,8 @@ class _CategoryCard extends StatelessWidget {
                     OutlinedButton(
                       onPressed: onTap,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: context.surfaceColor,
-                        side: BorderSide(color: context.surfaceColor),
+                        foregroundColor: AppColors.white,
+                        side: const BorderSide(color: AppColors.white),
                       ),
                       child: Text(context.l10n.shopNow),
                     ),

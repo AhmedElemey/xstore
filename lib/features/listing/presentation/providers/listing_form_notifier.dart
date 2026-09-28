@@ -505,12 +505,13 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     return compareAt;
   }
 
-  /// Whether all required fields satisfy validation (no errors written to state).
-  /// Drafts skip the dirty-check: submitting a valid draft *is* the
-  /// change (draft → pending), even if no field was edited.
+  /// Whether Publish/Update is tappable. Field validity is deliberately not
+  /// part of this — a disabled button gives no reason, so the tap runs
+  /// [validate] and shows the errors instead. Only an unchanged edit stays
+  /// blocked (it would still reset the listing to review). Drafts skip the
+  /// dirty-check: submitting a draft *is* the change (draft → pending).
   bool get canSubmit =>
       !state.isSubmitting &&
-      !Validators.listingFormHasErrors(_validationInput) &&
       (state.editingListingId.isEmpty ||
           hasEditChanges ||
           state.editingStatus == ListingStatus.draft);

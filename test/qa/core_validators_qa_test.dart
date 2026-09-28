@@ -256,9 +256,9 @@ void main() {
           existingPhotoCount: existing,
         );
 
-    test('valid form has no errors (both APIs agree)', () {
+    test('valid form has no errors', () {
       final i = input();
-      expect(Validators.listingFormHasErrors(i), isFalse);
+      expect(Validators.listingFormErrors(l10n, i).isNotEmpty, isFalse);
       expect(Validators.listingFormErrors(l10n, i), isEmpty);
     });
 
@@ -276,46 +276,46 @@ void main() {
         'shippingCost': input(ship: true, shipCost: ''),
       };
       cases.forEach((key, i) {
-        expect(Validators.listingFormHasErrors(i), isTrue, reason: key);
+        expect(Validators.listingFormErrors(l10n, i).isNotEmpty, isTrue, reason: key);
         expect(Validators.listingFormErrors(l10n, i), contains(key),
             reason: key);
       });
     });
 
     test('boundaries: name 100 ok / 101 fails, description 1000 / 1001', () {
-      expect(Validators.listingFormHasErrors(input(name: 'a' * 100)), isFalse);
-      expect(Validators.listingFormHasErrors(input(name: 'a' * 101)), isTrue);
-      expect(Validators.listingFormHasErrors(input(desc: 'a' * 1000)), isFalse);
-      expect(Validators.listingFormHasErrors(input(desc: 'a' * 1001)), isTrue);
+      expect(Validators.listingFormErrors(l10n, input(name: 'a' * 100)).isNotEmpty, isFalse);
+      expect(Validators.listingFormErrors(l10n, input(name: 'a' * 101)).isNotEmpty, isTrue);
+      expect(Validators.listingFormErrors(l10n, input(desc: 'a' * 1000)).isNotEmpty, isFalse);
+      expect(Validators.listingFormErrors(l10n, input(desc: 'a' * 1001)).isNotEmpty, isTrue);
     });
 
     test('existing remote photos satisfy the photo requirement', () {
       expect(
-        Validators.listingFormHasErrors(input(photos: const [], existing: 2)),
+        Validators.listingFormErrors(l10n, input(photos: const [], existing: 2)).isNotEmpty,
         isFalse,
       );
     });
 
     test('compare-at must be strictly greater than price', () {
-      expect(Validators.listingFormHasErrors(input(compareAt: '1000')), isTrue);
-      expect(Validators.listingFormHasErrors(input(compareAt: '999')), isTrue);
-      expect(Validators.listingFormHasErrors(input(compareAt: '1001')), isFalse);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '1000')).isNotEmpty, isTrue);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '999')).isNotEmpty, isTrue);
+      expect(Validators.listingFormErrors(l10n, input(compareAt: '1001')).isNotEmpty, isFalse);
     });
 
     test('negative price / negative shipping rejected, free shipping ok', () {
-      expect(Validators.listingFormHasErrors(input(price: '-5')), isTrue);
+      expect(Validators.listingFormErrors(l10n, input(price: '-5')).isNotEmpty, isTrue);
       expect(
-        Validators.listingFormHasErrors(input(ship: true, shipCost: '-1')),
+        Validators.listingFormErrors(l10n, input(ship: true, shipCost: '-1')).isNotEmpty,
         isTrue,
       );
       expect(
-        Validators.listingFormHasErrors(input(ship: true, shipCost: '0')),
+        Validators.listingFormErrors(l10n, input(ship: true, shipCost: '0')).isNotEmpty,
         isFalse,
       );
     });
 
     test('NaN price must not pass validation', () {
-      expect(Validators.listingFormHasErrors(input(price: 'NaN')), isTrue);
+      expect(Validators.listingFormErrors(l10n, input(price: 'NaN')).isNotEmpty, isTrue);
     });
   });
 
