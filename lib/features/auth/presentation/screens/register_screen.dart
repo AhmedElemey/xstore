@@ -127,7 +127,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ],
       ),
     );
-    if (leave == true && mounted) context.pop();
+    if (leave != true || !mounted) return;
+    // Google "no account" reaches register via `go`, leaving nothing to pop.
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.login);
+    }
   }
 
   void _onBack(RegisterState s, RegisterNotifier n) {

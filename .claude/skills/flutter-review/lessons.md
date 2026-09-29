@@ -643,8 +643,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `offline_banner.dart`, any app-wide banner.
 
 ### 2026-09-04 — Screens opened with go need an explicit back button
-- **Rule:** A screen reached by `GoRouter.go` (post-checkout, FCM, deep link) has no stack, so the implied back button disappears. Give it a `leading` that pops when `Navigator.canPop()` and otherwise `go`s to the role's list; use `GoRouter.maybeOf` so tests without a router work. Don't switch the confirmation CTA to `push` (checkout would stay underneath).
-- **Where it applies:** `order_detail_screen.dart`, screens opened with `go` after a flow.
+- **Rule:** A screen reached by `GoRouter.go` (post-checkout, FCM, deep link, Google "no account" → register) has no stack: the implied back button disappears and a bare `context.pop()` throws `GoError: There is nothing to pop`. Every explicit pop (leading, "Leave" confirm) checks `canPop()` and otherwise `go`s to a sensible parent (role's list, login); use `GoRouter.maybeOf` so tests without a router work. Don't switch the confirmation CTA to `push` (checkout would stay underneath).
+- **Where it applies:** `order_detail_screen.dart`, `register_screen.dart` `_confirmExit`, any screen that is sometimes opened with `go`.
 
 ### 2026-09-05 — POSTs to this backend need a JSON body
 - **Rule:** Dio only sets `Content-Type: application/json` when `data` is present, and the ASP.NET API returns 415 for a bodyless POST. Send the field the UI already has (e.g. `reason` on cancel).

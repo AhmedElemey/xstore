@@ -151,6 +151,10 @@ Widget _routedHarness(
         path: AppRoutes.home,
         builder: (_, __) => const Scaffold(body: Text('Home Screen')),
       ),
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (_, __) => const Scaffold(body: Text('Login Screen')),
+      ),
     ],
   );
   return ProviderScope(
@@ -342,6 +346,26 @@ void main() {
         ),
       );
       expect(nameInput.readOnly, isFalse);
+    },
+  );
+
+  testWidgets(
+    'leaving register opened with go (nothing to pop) lands on login',
+    (tester) async {
+      await tester.pumpWidget(
+        _routedHarness([dioProvider.overrideWithValue(_fakeDio({}))]),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byType(IconButton).first);
+      await _settle(tester);
+      expect(find.text('Leave registration?'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Leave'));
+      await _settle(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Login Screen'), findsOneWidget);
     },
   );
 }
