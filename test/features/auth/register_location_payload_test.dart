@@ -119,7 +119,7 @@ void main() {
     );
   });
 
-  test('consumer register omits idToken/clientId for a plain sign-up',
+  test('consumer register sends null idToken/clientId for a plain sign-up',
       () async {
     await datasource.registerConsumer(
       const ConsumerRegisterParams(
@@ -135,8 +135,43 @@ void main() {
     );
 
     final body = interceptor.captured!.data as Map<String, dynamic>;
-    expect(body.containsKey('idToken'), isFalse);
-    expect(body.containsKey('clientId'), isFalse);
+    expect(body.containsKey('idToken'), isTrue);
+    expect(body['idToken'], isNull);
+    expect(body.containsKey('clientId'), isTrue);
+    expect(body['clientId'], isNull);
+  });
+
+  test('vendor register sends empty idToken/clientId fields for a plain sign-up',
+      () async {
+    final tmp = await Directory.systemTemp.createTemp('vendor_reg_test');
+    addTearDown(() => tmp.delete(recursive: true));
+    final photo = File('${tmp.path}/store.jpg')
+      ..writeAsBytesSync(const [0, 1, 2, 3]);
+
+    await datasource.registerVendor(
+      VendorRegisterParams(
+        fullNameEn: 'Ahmed Ali',
+        fullNameAr: '',
+        email: 'ahmed@test.com',
+        phoneNumber: '01112345678',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+        storeName: 'Tech Store',
+        storeDescription: 'Best electronics',
+        storeCategoryId: 1,
+        storeCityId: 1,
+        storeGovernmentId: 16,
+        whatsappNumber: '01098765432',
+        profileImagePath: photo.path,
+      ),
+    );
+
+    final formData = interceptor.captured!.data as FormData;
+    String field(String key) =>
+        formData.fields.firstWhere((e) => e.key == key).value;
+    // Multipart has no null — the field is present and empty.
+    expect(field('idToken'), '');
+    expect(field('clientId'), '');
   });
 
   test('consumer register sends idToken and clientId for a Google sign-up',

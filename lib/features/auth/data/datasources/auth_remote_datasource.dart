@@ -171,14 +171,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   static String _dateOnlyIso(DateTime d) => d.toIso8601String().split('T').first;
 
   /// Social (Google) sign-up: same `idToken` + `clientId` pair as
-  /// [loginWithGoogle]. Omitted entirely for a plain registration.
-  static Map<String, String> _socialSignUpFields(String? idToken) =>
-      idToken == null || idToken.isEmpty
-          ? const {}
-          : {
-              'idToken': idToken,
-              'clientId': DefaultFirebaseOptions.googleWebClientId,
-            };
+  /// [loginWithGoogle]. A plain registration always sends both keys as
+  /// null (JSON `null`; multipart has no null, so Dio sends an empty field,
+  /// which ASP.NET binds as null).
+  static Map<String, String?> _socialSignUpFields(String? idToken) {
+    final isSocial = idToken != null && idToken.isNotEmpty;
+    return {
+      'idToken': isSocial ? idToken : null,
+      'clientId': isSocial ? DefaultFirebaseOptions.googleWebClientId : null,
+    };
+  }
 
   @override
   Future<UserModel> registerVendor(VendorRegisterParams params) async {
