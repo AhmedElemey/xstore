@@ -77,16 +77,6 @@ class WishlistRepositoryImpl implements WishlistRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> clearWishlist(String consumerId) async {
-    try {
-      await _remote.clearWishlist(consumerId);
-      return const Right(unit);
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
   Future<WishlistItemEntity> stubFromListingId(String listingId) {
     return _remote.buildFromListingId(listingId);
   }

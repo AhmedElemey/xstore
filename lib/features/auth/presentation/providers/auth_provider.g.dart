@@ -172,23 +172,6 @@ final verifyForgotPasswordOtpUseCaseProvider =
 
 typedef VerifyForgotPasswordOtpUseCaseRef
     = AutoDisposeProviderRef<VerifyForgotPasswordOtpUseCase>;
-String _$refreshTokenUseCaseHash() =>
-    r'c168419b5d4712e004270dc3a4c6db067941322e';
-
-/// See also [refreshTokenUseCase].
-@ProviderFor(refreshTokenUseCase)
-final refreshTokenUseCaseProvider =
-    AutoDisposeProvider<RefreshTokenUseCase>.internal(
-  refreshTokenUseCase,
-  name: r'refreshTokenUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$refreshTokenUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef RefreshTokenUseCaseRef = AutoDisposeProviderRef<RefreshTokenUseCase>;
 String _$sendEmailOtpUseCaseHash() =>
     r'372ac4cffefa408d1cf1b83399dd2de10727a422';
 
@@ -379,7 +362,7 @@ final googleLoginUseCaseProvider =
 
 typedef GoogleLoginUseCaseRef = AutoDisposeProviderRef<GoogleLoginUseCase>;
 String _$checkGoogleUserUseCaseHash() =>
-    r'0000000000000000000000000000000000000a';
+    r'5e39ed74e888a83a6c5febc7fd27c16088be0a2d';
 
 /// See also [checkGoogleUserUseCase].
 @ProviderFor(checkGoogleUserUseCase)
@@ -396,7 +379,7 @@ final checkGoogleUserUseCaseProvider =
 
 typedef CheckGoogleUserUseCaseRef
     = AutoDisposeProviderRef<CheckGoogleUserUseCase>;
-String _$authHash() => r'd22d2a8bab0138b678fa54a0e80edc2d6b030378';
+String _$authHash() => r'd946745531995c7f3a658dd0133e7d07fdacb740';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -426,7 +409,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'351a80401a4173ee148c3e24bfeb861a1f72a27b';
+String _$registerNotifierHash() => r'90eb8137723f74a56ed0429aa70c180138e51ed9';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

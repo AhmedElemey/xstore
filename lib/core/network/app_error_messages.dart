@@ -33,9 +33,7 @@ const emailRequiredBeforePhoneErrorCode = 'emailRequiredBeforePhone';
 /// Maps internal error codes (e.g. offline) to user-facing l10n strings.
 String resolveAppError(BuildContext context, String? error) {
   if (isOfflineError(error)) return context.l10n.noInternet;
-  if (error == rateLimitErrorCode) {
-    return 'Too many requests. Please wait a minute and try again.';
-  }
+  if (error == rateLimitErrorCode) return context.l10n.phoneTooManyRequests;
   if (error == emailRequiredBeforePhoneErrorCode) {
     return context.l10n.verifyEmailBeforePhone;
   }

@@ -58,24 +58,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, String>> updateAvatar({
-    required String userId,
-    required String filePath,
-  }) async {
-    try {
-      final url = await _remote.updateAvatar(
-        userId: userId,
-        filePath: filePath,
-      );
-      return Right(url);
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, Unit>> deleteAccount({
     required String password,
     required String confirmationText,

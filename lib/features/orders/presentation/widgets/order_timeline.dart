@@ -25,7 +25,7 @@ class OrderTimeline extends StatelessWidget {
     final o = order;
     final steps = _Step.values;
     final cancelled = o.status == OrderStatus.cancelled;
-    final timeFmt = DateFormat('MMM d, yyyy · HH:mm');
+    final timeFmt = DateFormat('MMM d, yyyy · HH:mm', context.l10n.localeName);
     final activeIdx = cancelled ? _idxBeforeCancel(o) : _progressIndex(o);
 
     return Column(

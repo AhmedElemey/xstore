@@ -38,6 +38,9 @@ class CheckoutScreen extends ConsumerWidget {
       // guaranteed-failing request and gets the OTP sheet up sooner.
       if (!await requirePhoneVerified(context, ref)) return;
       if (!context.mounted) return;
+      // A double tap: the first onPrimary is already placing — bail
+      // silently instead of surfacing the guard's null as a failure.
+      if (ref.read(checkoutProvider).isPlacingOrder) return;
       // Checkout places one real order per cart line (no batch endpoint
       // exists) — capture what was actually submitted so a partial
       // failure can be told apart from full success below.

@@ -296,7 +296,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final u = profile.user;
     final name = u.storeName ?? u.name;
     final joined = u.joinedAt;
-    final joinedLine = joined != null ? DateFormat('MMM y').format(joined) : '';
+    final joinedLine = joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
     final authUser = ref.watch(authProvider).valueOrNull;

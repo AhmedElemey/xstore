@@ -24,8 +24,6 @@ extension CartStateX on CartState {
 
   int get selectedCount => selectedItemIds.length;
 
-  bool get hasUnavailable => items.any((e) => !e.isAvailable);
-
   Iterable<CartItemEntity> get selectedAvailableItems => items.where(
         (e) => selectedItemIds.contains(e.id) && e.isAvailable,
       );

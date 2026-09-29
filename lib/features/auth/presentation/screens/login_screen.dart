@@ -8,8 +8,6 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/analytics/analytics_service.dart';
-import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
@@ -20,7 +18,6 @@ import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
-import '../providers/guest_mode_provider.dart';
 import '../providers/phone_auth_provider.dart';
 import '../providers/social_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
@@ -207,11 +204,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         _shakeController.forward(from: 0);
       }
     });
-    ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
-      if (next && mounted) {
+    ref.listen(socialAuthProvider.select((s) => s.googleRegistration), (prev, next) {
+      if (next != null && mounted) {
         ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
-        AppSnackbar.error(context, context.l10n.googleAccountNotFound);
-        context.go(AppRoutes.register);
+        AppSnackbar.info(context, context.l10n.googleAccountNotFound);
+        context.go(AppRoutes.register, extra: next);
       }
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
@@ -430,28 +427,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             ),
                           ),
                         ),
-                        Center(
-                          child: TextButton(
-                            onPressed: () async {
-                              await ref
-                                  .read(guestModeProvider.notifier)
-                                  .enable();
-                              if (!context.mounted) return;
-                              ref
-                                  .read(analyticsServiceProvider)
-                                  .track(AnalyticsEvents.guestModeStarted);
-                              context.go(AppRoutes.home);
-                            },
-                            child: Text(
-                              context.l10n.guestContinue,
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: context.textSecondary,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Center(
+                        //   child: TextButton(
+                        //     onPressed: () async {
+                        //       await ref
+                        //           .read(guestModeProvider.notifier)
+                        //           .enable();
+                        //       if (!context.mounted) return;
+                        //       ref
+                        //           .read(analyticsServiceProvider)
+                        //           .track(AnalyticsEvents.guestModeStarted);
+                        //       context.go(AppRoutes.home);
+                        //     },
+                        //     child: Text(
+                        //       context.l10n.guestContinue,
+                        //       style: AppTypography.bodyMedium.copyWith(
+                        //         color: context.textSecondary,
+                        //         fontWeight: FontWeight.w600,
+                        //         decoration: TextDecoration.underline,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                     ),

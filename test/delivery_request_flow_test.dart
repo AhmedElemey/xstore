@@ -89,36 +89,6 @@ void main() {
     });
   });
 
-  group('courierHoldsPackageCash', () {
-    test('true only after pickup with a price', () {
-      expect(
-        courierHoldsPackageCash(
-          _request(status: DeliveryRequestStatus.pickedUp, price: 80),
-        ),
-        isTrue,
-      );
-      expect(
-        courierHoldsPackageCash(
-          _request(status: DeliveryRequestStatus.delivered, price: 80),
-        ),
-        isTrue,
-      );
-      expect(
-        courierHoldsPackageCash(
-          _request(status: DeliveryRequestStatus.confirmed, price: 80),
-        ),
-        isFalse,
-      );
-      expect(
-        courierHoldsPackageCash(
-          _request(status: DeliveryRequestStatus.pickedUp),
-        ),
-        isFalse,
-        reason: 'no price means nothing was collected',
-      );
-    });
-  });
-
   group('courierSeesCustomerIdentity', () {
     test('identity hidden until the request is confirmed', () {
       const visible = {

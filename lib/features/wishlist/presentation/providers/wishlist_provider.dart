@@ -18,8 +18,6 @@ extension WishlistStateX on WishlistState {
 
   int get priceDropCount =>
       items.where((e) => e.effectiveDropPercent > 0).length;
-
-  int get availableCount => items.where((e) => e.isAvailable).length;
 }
 
 @Riverpod(keepAlive: true)

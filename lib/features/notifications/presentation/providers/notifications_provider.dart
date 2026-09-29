@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/network/paginated_result.dart';
 import '../../domain/entities/notification_entity.dart';
 import 'notifications_dependencies.dart';
@@ -130,7 +129,7 @@ class Notifications extends _$Notifications {
     if (todayL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupToday,
+          kind: NotificationGroupKind.today,
           notifications: todayL,
         ),
       );
@@ -138,7 +137,7 @@ class Notifications extends _$Notifications {
     if (yestL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupYesterday,
+          kind: NotificationGroupKind.yesterday,
           notifications: yestL,
         ),
       );
@@ -146,7 +145,7 @@ class Notifications extends _$Notifications {
     if (weekL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupThisWeek,
+          kind: NotificationGroupKind.thisWeek,
           notifications: weekL,
         ),
       );
@@ -154,7 +153,7 @@ class Notifications extends _$Notifications {
     if (earlierL.isNotEmpty) {
       out.add(
         NotificationGroup(
-          label: AppStrings.notificationsGroupEarlier,
+          kind: NotificationGroupKind.earlier,
           notifications: earlierL,
         ),
       );

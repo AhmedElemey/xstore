@@ -7,6 +7,7 @@ import '../../../../core/mock/mock_deals.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
+import '../../../../core/network/json_list_unwrap.dart';
 import '../../../listing/data/models/listing_model.dart'
     show isPublicLiveListingStatus;
 import '../models/banner_model.dart';
@@ -63,7 +64,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         options: ApiAuthHeaders.public(),
       );
       final banners =
-          _unwrapObjectList(response.data).map(_bannerFromApi).whereType<BannerModel>().toList();
+          unwrapJsonObjectList(response.data).map(_bannerFromApi).whereType<BannerModel>().toList();
       return banners.isNotEmpty ? banners : _staticBanners();
     } on DioException catch (e) {
       if (_isOffline(e)) return _staticBanners();
@@ -118,7 +119,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         queryParameters: {'page': 1, 'pageSize': 40},
         options: ApiAuthHeaders.public(),
       );
-      final deals = _unwrapObjectList(response.data)
+      final deals = unwrapJsonObjectList(response.data)
           .map(_dealFromListing)
           .whereType<DealModel>()
           .toList()
@@ -141,19 +142,19 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final data = response.data;
       if (data is! Map) return null;
       final map = Map<String, dynamic>.from(data);
-      final banners = _unwrapObjectList(map['banners'])
+      final banners = unwrapJsonObjectList(map['banners'])
           .map(_bannerFromApi)
           .whereType<BannerModel>()
           .toList();
-      final hotDeals = _unwrapObjectList(map['hotDeals'])
+      final hotDeals = unwrapJsonObjectList(map['hotDeals'])
           .map(_dealFromListing)
           .whereType<DealModel>()
           .toList();
-      final newArrivals = _unwrapObjectList(map['newArrivals'])
+      final newArrivals = unwrapJsonObjectList(map['newArrivals'])
           .map(_dealFromListing)
           .whereType<DealModel>()
           .toList();
-      final recommended = _unwrapObjectList(map['recommendedForYou'])
+      final recommended = unwrapJsonObjectList(map['recommendedForYou'])
           .map(_dealFromListing)
           .whereType<DealModel>()
           .toList();
@@ -187,7 +188,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         ApiEndpoints.catalogCategories,
         options: ApiAuthHeaders.public(),
       );
-      return _unwrapObjectList(response.data)
+      return unwrapJsonObjectList(response.data)
           .map(_categoryFromApi)
           .toList();
     } on DioException catch (e) {
@@ -204,8 +205,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     final title =
         (json['title'] ?? json['titleEn'] ?? json['name'] ?? '').toString();
     if (id.isEmpty || title.isEmpty) return null;
-    final price = _num(json['price']);
-    final compare = _num(json['compareAtPrice'] ?? json['compare_at_price']);
+    final price = jsonDouble(json['price']);
+    final compare = jsonDouble(json['compareAtPrice'] ?? json['compare_at_price']);
     final discount = compare > price && compare > 0
         ? ((compare - price) / compare) * 100
         : 0.0;
@@ -230,33 +231,10 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     );
   }
 
-  List<Map<String, dynamic>> _unwrapObjectList(dynamic data) {
-    if (data is List) {
-      return data
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
-    }
-    if (data is Map) {
-      final m = Map<String, dynamic>.from(data);
-      final items = m['items'] ?? m['data'] ?? m['results'] ?? m['listings'];
-      if (items is List) {
-        return items
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-      }
-    }
-    return const [];
-  }
-
   bool _isOffline(DioException e) {
     return e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout;
   }
-
-  double _num(Object? v) =>
-      v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0;
 
   List<BannerModel> _staticBanners() => [
         const BannerModel(

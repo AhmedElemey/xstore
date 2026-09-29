@@ -200,7 +200,10 @@ class NotificationTile extends StatelessWidget {
                               ),
                               SizedBox(width: AppSpacing.sm),
                               Text(
-                                Formatters.formatNotificationTime(entity.createdAt),
+                                Formatters.formatNotificationTime(
+                                  entity.createdAt,
+                                  context.l10n,
+                                ),
                                 style: AppTypography.labelSmall.copyWith(
                                   color: context.textSecondary,
                                 ),

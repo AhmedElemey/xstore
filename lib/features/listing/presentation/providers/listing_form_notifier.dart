@@ -475,12 +475,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     state = state.copyWith(attributes: next);
   }
 
-  void updateAttributeKey(int index, String key) =>
-      updateAttribute(index, key: key);
-
-  void updateAttributeValue(int index, String value) =>
-      updateAttribute(index, value: value);
-
   Map<String, String> _clearKey(Map<String, String> m, String k) {
     final n = Map<String, String>.from(m);
     n.remove(k);
@@ -680,26 +674,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
       );
       return false;
     }
-  }
-
-  /// Spec: `submit` as [AsyncValue] — use with `ref.listen` / UI that expects `AsyncValue<void>`.
-  Future<AsyncValue<void>> submitAsync(AppLocalizations l10n) async {
-    return AsyncValue.guard(() async {
-      final ok = await submit(l10n);
-      if (_disposed) return;
-      if (!ok) {
-        final msg = state.errors['submit'] ??
-            (state.errors.isNotEmpty ? state.errors.values.first : null) ??
-            l10n.listingValidationFixFields;
-        throw Exception(msg);
-      }
-    });
-  }
-
-  void clearSubmitError() {
-    state = state.copyWith(
-      errors: _clearKey(state.errors, 'submit'),
-    );
   }
 
   String _listingSubmitErrorMessage(Failure failure, AppLocalizations l10n) {

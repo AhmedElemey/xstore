@@ -17,6 +17,8 @@ import '../../../../shared/widgets/xstore_button.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/role_selector_card.dart';
 
+// TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
+// Only Apple/Facebook reach this screen (Google is login-only).
 class SocialRoleScreen extends ConsumerStatefulWidget {
   const SocialRoleScreen({super.key});
 

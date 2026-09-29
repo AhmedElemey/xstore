@@ -30,7 +30,7 @@ class VendorStoreCard extends ConsumerWidget {
     final joined = u.joinedAt;
 
     final joinedLine =
-        joined != null ? DateFormat('MMM y').format(joined) : '';
+        joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

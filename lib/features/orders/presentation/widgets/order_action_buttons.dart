@@ -352,7 +352,7 @@ class OrderActionButtons extends ConsumerWidget {
                 ListTile(
                   title: Text(context.l10n.ordersEstimatedDeliveryLabel),
                   subtitle: Text(
-                    eta != null ? DateFormat('MMM d, yyyy').format(eta!) : '—',
+                    eta != null ? DateFormat('MMM d, yyyy', context.l10n.localeName).format(eta!) : '—',
                   ),
                   onTap: () async {
                     final d = await showDatePicker(

@@ -99,7 +99,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _phone.text = s.editPhone;
     _location.text = s.editLocation;
     _dobText.text = s.editDateOfBirth != null
-        ? DateFormat.yMMMd().format(s.editDateOfBirth!)
+        ? DateFormat.yMMMd(context.l10n.localeName).format(s.editDateOfBirth!)
         : '';
     _storeName.text = s.editStoreName;
     _storeCategory.text = _storeCategoryLabel(s);
@@ -241,7 +241,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (dateOnly == null) return;
     setState(() {
       _dob = dateOnly;
-      _dobText.text = DateFormat.yMMMd().format(dateOnly);
+      _dobText.text = DateFormat.yMMMd(context.l10n.localeName).format(dateOnly);
     });
     ref
         .read(profileNotifierProvider.notifier)

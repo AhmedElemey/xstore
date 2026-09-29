@@ -1,11 +1,10 @@
 import 'dart:convert';
 
-/// Pulls a list of JSON objects from a live reference-data body.
+/// Pulls a list of JSON objects from a live list body.
 ///
-/// Confirmed 2026-08-23: `/api/governorates` and `/api/cities` return a
-/// **bare array**. Older seeds wrapped the same rows in
-/// `{items|data|results: [...]}`. Accept both so a wrapper flip doesn't
-/// empty the picker.
+/// Endpoints disagree on shape: `/api/governorates` and `/api/cities` return
+/// a **bare array**, others wrap rows in `{items|data|results|listings: [...]}`.
+/// Accept all of them so a wrapper flip doesn't empty the screen.
 List<Map<String, dynamic>> unwrapJsonObjectList(dynamic data) {
   if (data is String) {
     final trimmed = data.trim();
@@ -23,8 +22,18 @@ List<Map<String, dynamic>> unwrapJsonObjectList(dynamic data) {
     ];
   }
   if (data is Map) {
-    final nested = data['items'] ?? data['data'] ?? data['results'];
+    final nested = data['items'] ??
+        data['data'] ??
+        data['results'] ??
+        data['listings'];
     if (nested is List) return unwrapJsonObjectList(nested);
   }
   return const [];
+}
+
+/// Reads a JSON number (or numeric string) as a finite double; anything else,
+/// including `NaN`/`Infinity` (which `double.tryParse` accepts), reads as 0.
+double jsonDouble(Object? value) {
+  final d = value is num ? value.toDouble() : double.tryParse('${value ?? ''}');
+  return d != null && d.isFinite ? d : 0;
 }
