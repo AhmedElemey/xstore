@@ -187,6 +187,7 @@ void main() {
         cityId: 1,
         governorateId: 16,
         idToken: 'google-id-token',
+        clientId: DefaultFirebaseOptions.googleWebClientId,
       ),
     );
 
@@ -218,6 +219,7 @@ void main() {
         whatsappNumber: '01098765432',
         profileImagePath: photo.path,
         idToken: 'google-id-token',
+        clientId: DefaultFirebaseOptions.googleWebClientId,
       ),
     );
 

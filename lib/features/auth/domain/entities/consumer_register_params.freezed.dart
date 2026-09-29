@@ -27,8 +27,10 @@ mixin _$ConsumerRegisterParams {
   int get cityId => throw _privateConstructorUsedError;
   int get governorateId => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth =>
-      throw _privateConstructorUsedError; // Google ID token for a social sign-up; null for a plain registration.
+      throw _privateConstructorUsedError; // Google sign-up: ID token + OAuth Web client ID; both null for a plain
+// registration.
   String? get idToken => throw _privateConstructorUsedError;
+  String? get clientId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ConsumerRegisterParamsCopyWith<ConsumerRegisterParams> get copyWith =>
@@ -51,7 +53,8 @@ abstract class $ConsumerRegisterParamsCopyWith<$Res> {
       int cityId,
       int governorateId,
       DateTime? dateOfBirth,
-      String? idToken});
+      String? idToken,
+      String? clientId});
 }
 
 /// @nodoc
@@ -78,6 +81,7 @@ class _$ConsumerRegisterParamsCopyWithImpl<$Res,
     Object? governorateId = null,
     Object? dateOfBirth = freezed,
     Object? idToken = freezed,
+    Object? clientId = freezed,
   }) {
     return _then(_value.copyWith(
       fullNameEn: null == fullNameEn
@@ -120,6 +124,10 @@ class _$ConsumerRegisterParamsCopyWithImpl<$Res,
           ? _value.idToken
           : idToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      clientId: freezed == clientId
+          ? _value.clientId
+          : clientId // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -143,7 +151,8 @@ abstract class _$$ConsumerRegisterParamsImplCopyWith<$Res>
       int cityId,
       int governorateId,
       DateTime? dateOfBirth,
-      String? idToken});
+      String? idToken,
+      String? clientId});
 }
 
 /// @nodoc
@@ -169,6 +178,7 @@ class __$$ConsumerRegisterParamsImplCopyWithImpl<$Res>
     Object? governorateId = null,
     Object? dateOfBirth = freezed,
     Object? idToken = freezed,
+    Object? clientId = freezed,
   }) {
     return _then(_$ConsumerRegisterParamsImpl(
       fullNameEn: null == fullNameEn
@@ -211,6 +221,10 @@ class __$$ConsumerRegisterParamsImplCopyWithImpl<$Res>
           ? _value.idToken
           : idToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      clientId: freezed == clientId
+          ? _value.clientId
+          : clientId // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -228,7 +242,8 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
       required this.cityId,
       required this.governorateId,
       this.dateOfBirth,
-      this.idToken});
+      this.idToken,
+      this.clientId});
 
   @override
   final String fullNameEn;
@@ -250,13 +265,16 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
   final int governorateId;
   @override
   final DateTime? dateOfBirth;
-// Google ID token for a social sign-up; null for a plain registration.
+// Google sign-up: ID token + OAuth Web client ID; both null for a plain
+// registration.
   @override
   final String? idToken;
+  @override
+  final String? clientId;
 
   @override
   String toString() {
-    return 'ConsumerRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, cityId: $cityId, governorateId: $governorateId, dateOfBirth: $dateOfBirth, idToken: $idToken)';
+    return 'ConsumerRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, cityId: $cityId, governorateId: $governorateId, dateOfBirth: $dateOfBirth, idToken: $idToken, clientId: $clientId)';
   }
 
   @override
@@ -280,7 +298,9 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
                 other.governorateId == governorateId) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth) &&
-            (identical(other.idToken, idToken) || other.idToken == idToken));
+            (identical(other.idToken, idToken) || other.idToken == idToken) &&
+            (identical(other.clientId, clientId) ||
+                other.clientId == clientId));
   }
 
   @override
@@ -295,7 +315,8 @@ class _$ConsumerRegisterParamsImpl implements _ConsumerRegisterParams {
       cityId,
       governorateId,
       dateOfBirth,
-      idToken);
+      idToken,
+      clientId);
 
   @JsonKey(ignore: true)
   @override
@@ -316,7 +337,8 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
       required final int cityId,
       required final int governorateId,
       final DateTime? dateOfBirth,
-      final String? idToken}) = _$ConsumerRegisterParamsImpl;
+      final String? idToken,
+      final String? clientId}) = _$ConsumerRegisterParamsImpl;
 
   @override
   String get fullNameEn;
@@ -337,8 +359,11 @@ abstract class _ConsumerRegisterParams implements ConsumerRegisterParams {
   int get governorateId;
   @override
   DateTime? get dateOfBirth;
-  @override // Google ID token for a social sign-up; null for a plain registration.
+  @override // Google sign-up: ID token + OAuth Web client ID; both null for a plain
+// registration.
   String? get idToken;
+  @override
+  String? get clientId;
   @override
   @JsonKey(ignore: true)
   _$$ConsumerRegisterParamsImplCopyWith<_$ConsumerRegisterParamsImpl>

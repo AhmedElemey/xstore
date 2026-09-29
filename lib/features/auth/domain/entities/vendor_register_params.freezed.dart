@@ -32,8 +32,10 @@ mixin _$VendorRegisterParams {
       throw _privateConstructorUsedError; // Local file path of the store/profile image. The live vendor-register
 // endpoint is multipart and rejects the request without it.
   String get profileImagePath =>
-      throw _privateConstructorUsedError; // Google ID token for a social sign-up; null for a plain registration.
+      throw _privateConstructorUsedError; // Google sign-up: ID token + OAuth Web client ID; both null for a plain
+// registration.
   String? get idToken => throw _privateConstructorUsedError;
+  String? get clientId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $VendorRegisterParamsCopyWith<VendorRegisterParams> get copyWith =>
@@ -61,7 +63,8 @@ abstract class $VendorRegisterParamsCopyWith<$Res> {
       int storeGovernmentId,
       String whatsappNumber,
       String profileImagePath,
-      String? idToken});
+      String? idToken,
+      String? clientId});
 }
 
 /// @nodoc
@@ -93,6 +96,7 @@ class _$VendorRegisterParamsCopyWithImpl<$Res,
     Object? whatsappNumber = null,
     Object? profileImagePath = null,
     Object? idToken = freezed,
+    Object? clientId = freezed,
   }) {
     return _then(_value.copyWith(
       fullNameEn: null == fullNameEn
@@ -155,6 +159,10 @@ class _$VendorRegisterParamsCopyWithImpl<$Res,
           ? _value.idToken
           : idToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      clientId: freezed == clientId
+          ? _value.clientId
+          : clientId // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -182,7 +190,8 @@ abstract class _$$VendorRegisterParamsImplCopyWith<$Res>
       int storeGovernmentId,
       String whatsappNumber,
       String profileImagePath,
-      String? idToken});
+      String? idToken,
+      String? clientId});
 }
 
 /// @nodoc
@@ -211,6 +220,7 @@ class __$$VendorRegisterParamsImplCopyWithImpl<$Res>
     Object? whatsappNumber = null,
     Object? profileImagePath = null,
     Object? idToken = freezed,
+    Object? clientId = freezed,
   }) {
     return _then(_$VendorRegisterParamsImpl(
       fullNameEn: null == fullNameEn
@@ -273,6 +283,10 @@ class __$$VendorRegisterParamsImplCopyWithImpl<$Res>
           ? _value.idToken
           : idToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      clientId: freezed == clientId
+          ? _value.clientId
+          : clientId // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -295,7 +309,8 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
       required this.storeGovernmentId,
       required this.whatsappNumber,
       required this.profileImagePath,
-      this.idToken});
+      this.idToken,
+      this.clientId});
 
   @override
   final String fullNameEn;
@@ -327,13 +342,16 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
 // endpoint is multipart and rejects the request without it.
   @override
   final String profileImagePath;
-// Google ID token for a social sign-up; null for a plain registration.
+// Google sign-up: ID token + OAuth Web client ID; both null for a plain
+// registration.
   @override
   final String? idToken;
+  @override
+  final String? clientId;
 
   @override
   String toString() {
-    return 'VendorRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth, storeName: $storeName, storeDescription: $storeDescription, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, profileImagePath: $profileImagePath, idToken: $idToken)';
+    return 'VendorRegisterParams(fullNameEn: $fullNameEn, fullNameAr: $fullNameAr, email: $email, phoneNumber: $phoneNumber, password: $password, confirmPassword: $confirmPassword, dateOfBirth: $dateOfBirth, storeName: $storeName, storeDescription: $storeDescription, storeCategoryId: $storeCategoryId, storeCityId: $storeCityId, storeGovernmentId: $storeGovernmentId, whatsappNumber: $whatsappNumber, profileImagePath: $profileImagePath, idToken: $idToken, clientId: $clientId)';
   }
 
   @override
@@ -368,7 +386,9 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
                 other.whatsappNumber == whatsappNumber) &&
             (identical(other.profileImagePath, profileImagePath) ||
                 other.profileImagePath == profileImagePath) &&
-            (identical(other.idToken, idToken) || other.idToken == idToken));
+            (identical(other.idToken, idToken) || other.idToken == idToken) &&
+            (identical(other.clientId, clientId) ||
+                other.clientId == clientId));
   }
 
   @override
@@ -388,7 +408,8 @@ class _$VendorRegisterParamsImpl implements _VendorRegisterParams {
       storeGovernmentId,
       whatsappNumber,
       profileImagePath,
-      idToken);
+      idToken,
+      clientId);
 
   @JsonKey(ignore: true)
   @override
@@ -415,7 +436,8 @@ abstract class _VendorRegisterParams implements VendorRegisterParams {
       required final int storeGovernmentId,
       required final String whatsappNumber,
       required final String profileImagePath,
-      final String? idToken}) = _$VendorRegisterParamsImpl;
+      final String? idToken,
+      final String? clientId}) = _$VendorRegisterParamsImpl;
 
   @override
   String get fullNameEn;
@@ -446,8 +468,11 @@ abstract class _VendorRegisterParams implements VendorRegisterParams {
   @override // Local file path of the store/profile image. The live vendor-register
 // endpoint is multipart and rejects the request without it.
   String get profileImagePath;
-  @override // Google ID token for a social sign-up; null for a plain registration.
+  @override // Google sign-up: ID token + OAuth Web client ID; both null for a plain
+// registration.
   String? get idToken;
+  @override
+  String? get clientId;
   @override
   @JsonKey(ignore: true)
   _$$VendorRegisterParamsImplCopyWith<_$VendorRegisterParamsImpl>

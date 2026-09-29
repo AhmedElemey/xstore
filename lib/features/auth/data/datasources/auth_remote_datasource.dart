@@ -151,7 +151,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           // not a full ISO timestamp. Omit the key entirely when not provided.
           if (params.dateOfBirth != null)
             'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
-          ..._socialSignUpFields(params.idToken),
+          // Google sign-up; JSON null on a plain registration.
+          'idToken': params.idToken,
+          'clientId': params.clientId,
         },
         options: ApiAuthHeaders.public(),
       );
@@ -166,18 +168,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// A birth date is date-only on the wire (`YYYY-MM-DD`); a full ISO timestamp
   /// is rejected by the backend's date binding.
   static String _dateOnlyIso(DateTime d) => d.toIso8601String().split('T').first;
-
-  /// Social (Google) sign-up: same `idToken` + `clientId` pair as
-  /// [loginWithGoogle]. A plain registration always sends both keys as
-  /// null (JSON `null`; multipart has no null, so Dio sends an empty field,
-  /// which ASP.NET binds as null).
-  static Map<String, String?> _socialSignUpFields(String? idToken) {
-    final isSocial = idToken != null && idToken.isNotEmpty;
-    return {
-      'idToken': isSocial ? idToken : null,
-      'clientId': isSocial ? DefaultFirebaseOptions.googleWebClientId : null,
-    };
-  }
 
   @override
   Future<UserModel> registerVendor(VendorRegisterParams params) async {
@@ -213,7 +203,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'cityId': params.storeCityId,
         'governorateId': params.storeGovernmentId,
         'whatsappNumber': params.whatsappNumber,
-        ..._socialSignUpFields(params.idToken),
+        // Google sign-up; multipart has no null, so a plain registration
+        // sends empty fields (ASP.NET binds them as null).
+        'idToken': params.idToken,
+        'clientId': params.clientId,
         'profileImage': await MultipartFile.fromFile(
           params.profileImagePath,
           // image_picker returns POSIX-style paths on iOS/Android.

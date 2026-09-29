@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
+import '../../../../core/firebase/firebase_options.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/network/dio_provider.dart';
@@ -655,6 +656,10 @@ class RegisterNotifier extends _$RegisterNotifier {
     state = state.copyWith(isLoading: true, error: null, stepErrors: {});
     final role = state.selectedRole ?? UserRole.consumer;
     final fullNameEn = state.fullName.trim();
+    // Google sign-up only: the Web client ID the ID token was minted for.
+    final clientId = state.socialIdToken == null
+        ? null
+        : DefaultFirebaseOptions.googleWebClientId;
     final result = role == UserRole.vendor
         ? await ref
               .read(registerVendorUseCaseProvider)
@@ -675,6 +680,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                   whatsappNumber: state.whatsappNumber,
                   profileImagePath: state.storeLogoPath ?? '',
                   idToken: state.socialIdToken,
+                  clientId: clientId,
                 ),
               )
         : await ref
@@ -691,6 +697,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                   governorateId: state.storeGovernmentId!,
                   dateOfBirth: state.dateOfBirth,
                   idToken: state.socialIdToken,
+                  clientId: clientId,
                 ),
               );
     if (_disposed) return;
