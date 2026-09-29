@@ -380,6 +380,11 @@ class RegisterNotifier extends _$RegisterNotifier {
 
   void reset() => state = const RegisterState();
 
+  void setSocialIdToken(String? token) {
+    if (token == null) return;
+    state = state.copyWith(socialIdToken: token);
+  }
+
   void updateRole(UserRole role) {
     state = state.copyWith(
       selectedRole: role,
@@ -677,6 +682,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                   storeGovernmentId: state.storeGovernmentId!,
                   whatsappNumber: state.whatsappNumber,
                   profileImagePath: state.storeLogoPath ?? '',
+                  idToken: state.socialIdToken,
                 ),
               )
         : await ref
@@ -692,6 +698,7 @@ class RegisterNotifier extends _$RegisterNotifier {
                   cityId: state.storeCityId!,
                   governorateId: state.storeGovernmentId!,
                   dateOfBirth: state.dateOfBirth,
+                  idToken: state.socialIdToken,
                 ),
               );
     if (_disposed) return;

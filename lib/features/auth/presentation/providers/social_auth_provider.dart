@@ -16,6 +16,7 @@ class SocialAuthState {
     this.pendingSocialResult,
     this.needsRoleSelection = false,
     this.needsRegistration = false,
+    this.registrationIdToken,
   });
 
   final bool isGoogleLoading;
@@ -30,6 +31,11 @@ class SocialAuthState {
   /// flow and consume this by calling [SocialAuthNotifier.acknowledgeNeedsRegistration].
   final bool needsRegistration;
 
+  /// Google ID token of the new identity that set [needsRegistration]. The
+  /// register screen takes it via [SocialAuthNotifier.takeRegistrationIdToken]
+  /// so the register request carries `idToken` + `clientId`.
+  final String? registrationIdToken;
+
   bool get isAnyLoading => isGoogleLoading || isAppleLoading || isFacebookLoading;
 
   SocialAuthState copyWith({
@@ -42,6 +48,8 @@ class SocialAuthState {
     bool clearPending = false,
     bool? needsRoleSelection,
     bool? needsRegistration,
+    String? registrationIdToken,
+    bool clearRegistrationIdToken = false,
   }) {
     return SocialAuthState(
       isGoogleLoading: isGoogleLoading ?? this.isGoogleLoading,
@@ -51,6 +59,9 @@ class SocialAuthState {
       pendingSocialResult: clearPending ? null : (pendingSocialResult ?? this.pendingSocialResult),
       needsRoleSelection: needsRoleSelection ?? this.needsRoleSelection,
       needsRegistration: needsRegistration ?? this.needsRegistration,
+      registrationIdToken: clearRegistrationIdToken
+          ? null
+          : (registrationIdToken ?? this.registrationIdToken),
     );
   }
 }
@@ -67,6 +78,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       isAppleLoading: false,
       isFacebookLoading: false,
       clearError: true,
+      clearRegistrationIdToken: true,
     );
     final result = await ref.read(googleSignInUseCaseProvider).call();
     if (!mounted) return;
@@ -136,6 +148,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       isFacebookLoading: false,
       clearError: true,
       needsRegistration: true,
+      registrationIdToken: idToken,
     );
   }
 
@@ -196,6 +209,16 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   /// unrelated visit to that screen.
   void acknowledgeNeedsRegistration() {
     state = state.copyWith(needsRegistration: false);
+  }
+
+  /// Hands the pending Google ID token to the register flow exactly once, so
+  /// it can't leak into a later, unrelated registration.
+  String? takeRegistrationIdToken() {
+    final token = state.registrationIdToken;
+    if (token != null) {
+      state = state.copyWith(clearRegistrationIdToken: true);
+    }
+    return token;
   }
 
   Future<void> signInWithApple() async {

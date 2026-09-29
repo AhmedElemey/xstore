@@ -16,5 +16,7 @@ class ConsumerRegisterParams with _$ConsumerRegisterParams {
     required int cityId,
     required int governorateId,
     DateTime? dateOfBirth,
+    // Google ID token for a social sign-up; null for a plain registration.
+    String? idToken,
   }) = _ConsumerRegisterParams;
 }

@@ -54,7 +54,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(registerNotifierProvider.notifier).reset();
+      ref.read(registerNotifierProvider.notifier)
+        ..reset()
+        // Arrived from a Google sign-in with no matching account.
+        ..setSocialIdToken(
+          ref.read(socialAuthProvider.notifier).takeRegistrationIdToken(),
+        );
     });
   }
 
@@ -169,12 +174,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         AppSnackbar.error(context, next.error!);
       }
     });
-    // Already on the register screen — just consume the flag (a Google
-    // sign-in with no matching account can fire this from here too, via the
-    // same SocialLoginRow), no navigation needed.
+    // Already on the register screen — consume the flag and keep the Google
+    // token for the register request (a Google sign-in with no matching
+    // account can fire this from here too, via the same SocialLoginRow), no
+    // navigation needed.
     ref.listen(socialAuthProvider.select((s) => s.needsRegistration), (prev, next) {
       if (next) {
-        ref.read(socialAuthProvider.notifier).acknowledgeNeedsRegistration();
+        final social = ref.read(socialAuthProvider.notifier)
+          ..acknowledgeNeedsRegistration();
+        n.setSocialIdToken(social.takeRegistrationIdToken());
       }
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {

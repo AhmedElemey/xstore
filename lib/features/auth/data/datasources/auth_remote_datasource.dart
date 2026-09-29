@@ -156,6 +156,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           // not a full ISO timestamp. Omit the key entirely when not provided.
           if (params.dateOfBirth != null)
             'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
+          ..._socialSignUpFields(params.idToken),
         },
         options: ApiAuthHeaders.public(),
       );
@@ -170,6 +171,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// A birth date is date-only on the wire (`YYYY-MM-DD`); a full ISO timestamp
   /// is rejected by the backend's date binding.
   static String _dateOnlyIso(DateTime d) => d.toIso8601String().split('T').first;
+
+  /// Social (Google) sign-up: same `idToken` + `clientId` pair as
+  /// [loginWithGoogle]. Omitted entirely for a plain registration.
+  static Map<String, String> _socialSignUpFields(String? idToken) =>
+      idToken == null || idToken.isEmpty
+          ? const {}
+          : {
+              'idToken': idToken,
+              'clientId': DefaultFirebaseOptions.googleWebClientId,
+            };
 
   @override
   Future<UserModel> registerVendor(VendorRegisterParams params) async {
@@ -205,6 +216,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'cityId': params.storeCityId,
         'governorateId': params.storeGovernmentId,
         'whatsappNumber': params.whatsappNumber,
+        ..._socialSignUpFields(params.idToken),
         'profileImage': await MultipartFile.fromFile(
           params.profileImagePath,
           // image_picker returns POSIX-style paths on iOS/Android.

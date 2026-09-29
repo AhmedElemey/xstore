@@ -212,6 +212,12 @@ void main() {
       expect(social.needsRegistration, isTrue);
       expect(social.needsRoleSelection, isFalse);
       expect(social.pendingSocialResult, isNull);
+      expect(social.registrationIdToken, 'google-id-token-no-account');
+
+      // The register screen takes the token exactly once.
+      final notifier = container.read(socialAuthProvider.notifier);
+      expect(notifier.takeRegistrationIdToken(), 'google-id-token-no-account');
+      expect(notifier.takeRegistrationIdToken(), isNull);
     },
   );
 
