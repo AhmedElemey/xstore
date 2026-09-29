@@ -386,10 +386,7 @@ void main() {
         },
       });
 
-      final model = await datasource.loginWithGoogle(
-        idToken: 'tok',
-        asVendor: false,
-      );
+      final model = await datasource.loginWithGoogle(idToken: 'tok');
       expect(model.token, 'wrapped-access');
       expect(model.refreshToken, 'wrapped-refresh');
     });

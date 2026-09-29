@@ -51,6 +51,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/analytics/analytics_service.dart';
+import 'package:xstore/core/firebase/firebase_options.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
@@ -60,6 +61,7 @@ import 'package:xstore/core/router/router_notifier.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/providers/social_auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/social_role_screen.dart';
@@ -167,7 +169,7 @@ void main() {
     'a Google identity with no matching account sets needsRegistration and '
     'never calls the auto-create login endpoint',
     () async {
-      // Deliberately no googleConsumerLogin/googleVendorLogin route scripted
+      // Deliberately no googleLogin route scripted
       // — if the app still tried to auto-create an account here, the
       // interceptor would reject the unscripted request and this test would
       // fail with a clear signal rather than silently passing.
@@ -266,31 +268,20 @@ void main() {
   );
 
   test(
-    'a registered Google identity with an unreadable role retries vendor '
-    'login when consumer returns a different-role conflict',
+    'a registered Google identity with an unreadable role logs in once via '
+    'the single google/login endpoint and takes its role from the profile',
     skip: MockConfig.useMock,
     () async {
-      var vendorLoginCalls = 0;
+      var googleLoginCalls = 0;
+      Object? googleLoginBody;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': true,
           'role': null,
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (options) => DioException(
-          requestOptions: options,
-          type: DioExceptionType.badResponse,
-          response: Response(
-            requestOptions: options,
-            statusCode: 400,
-            data: {
-              'isSuccess': false,
-              'errorEn':
-                  'This email is already registered under a different role.',
-            },
-          ),
-        ),
-        'POST ${ApiEndpoints.googleVendorLogin}': (_) {
-          vendorLoginCalls++;
+        'POST ${ApiEndpoints.googleLogin}': (options) {
+          googleLoginCalls++;
+          googleLoginBody = options.data;
           return {
             'isSuccess': true,
             'data': {
@@ -343,7 +334,12 @@ void main() {
       final social = container.read(socialAuthProvider);
       expect(social.needsRegistration, isFalse);
       expect(social.error, isNull);
-      expect(vendorLoginCalls, 1);
+      expect(googleLoginCalls, 1);
+      expect(googleLoginBody, {
+        'idToken': 'google-id-token-vendor-email',
+        'clientId': DefaultFirebaseOptions.googleWebClientId,
+      });
+      expect(container.read(authProvider).valueOrNull?.role, UserRole.vendor);
 
       await container.read(analyticsServiceProvider).ready;
     },
@@ -361,7 +357,7 @@ void main() {
           'exists': true,
           'role': 'Consumer',
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
+        'POST ${ApiEndpoints.googleLogin}': (_) => {
           'token': 'access-token-456',
           'refreshToken': 'refresh-token-456',
         },

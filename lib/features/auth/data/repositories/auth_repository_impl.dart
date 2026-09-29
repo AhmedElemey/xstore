@@ -138,14 +138,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> loginWithGoogle({
     required String idToken,
-    required UserRole role,
   }) async {
     try {
       final model = await _resolveFullUser(
-        await _remote.loginWithGoogle(
-          idToken: idToken,
-          asVendor: role == UserRole.vendor,
-        ),
+        await _remote.loginWithGoogle(idToken: idToken),
       );
       await _persistUser(model);
       return Right(model.toEntity());

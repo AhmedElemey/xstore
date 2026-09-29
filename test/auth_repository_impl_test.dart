@@ -45,7 +45,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   String? lastSocialProvider;
   String? lastSocialIdToken;
   String? lastGoogleIdToken;
-  bool? lastGoogleAsVendor;
 
   ConsumerRegisterParams? lastConsumerRegisterParams;
   VendorRegisterParams? lastVendorRegisterParams;
@@ -152,13 +151,9 @@ class _RecordingRemote implements AuthRemoteDataSource {
       throw UnimplementedError();
 
   @override
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  }) async {
+  Future<UserModel> loginWithGoogle({required String idToken}) async {
     lastGoogleIdToken = idToken;
-    lastGoogleAsVendor = asVendor;
-    return asVendor ? mockVendorUserModel() : mockConsumerUserModel();
+    return mockVendorUserModel();
   }
 
   @override
@@ -227,14 +222,12 @@ void main() {
         expect(remote.lastGoogleIdToken, isNull);
         expect(await readStoredToken(), isNull);
 
-        // The role screen then calls loginWithGoogle with the chosen role.
+        // An existing account then logs in with the Google token.
         final login = await repository.loginWithGoogle(
           idToken: 'google-id-token',
-          role: UserRole.vendor,
         );
         expect(login.isRight(), isTrue);
         expect(remote.lastGoogleIdToken, 'google-id-token');
-        expect(remote.lastGoogleAsVendor, isTrue);
         expect(await readStoredToken(), 'mock-token-vendor');
       },
       skip: MockConfig.useMock ? 'Requires MOCK=false' : false,

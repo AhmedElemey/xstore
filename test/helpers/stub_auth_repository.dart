@@ -147,7 +147,6 @@ class StubAuthRepository implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> loginWithGoogle({
     required String idToken,
-    required UserRole role,
   }) async =>
       Left(Failure.socialAuth('stub'));
 

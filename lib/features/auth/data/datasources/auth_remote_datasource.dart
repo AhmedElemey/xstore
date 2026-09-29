@@ -62,17 +62,14 @@ abstract interface class AuthRemoteDataSource {
     required bool rememberMe,
   });
 
-  /// Google sign-in via the role-specific backend route. [idToken] is the
-  /// Google identity token; [asVendor] picks the vendor vs consumer endpoint.
-  /// Auto-creates the account if none exists. Returns a token-only model.
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  });
+  /// Google login for an existing account via `POST /api/auth/google/login`
+  /// (one endpoint for every role). [idToken] is the Google identity token.
+  /// Returns a token-only model.
+  Future<UserModel> loginWithGoogle({required String idToken});
 
   /// Read-only lookup — does NOT create an account. Lets the caller skip the
-  /// buyer/seller picker and go straight to [loginWithGoogle] with the
-  /// returned role when the identity already has one.
+  /// register flow and go straight to [loginWithGoogle] when the identity
+  /// already has an account.
   Future<({bool exists, UserRole? role})> checkGoogleUser({
     required String idToken,
   });
@@ -473,20 +470,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  }) async {
+  Future<UserModel> loginWithGoogle({required String idToken}) async {
     if (MockConfig.useMock) {
-      return MockConfig.simulate(
-        asVendor ? mockVendorUserModel() : mockConsumerUserModel(),
-      );
+      return MockConfig.simulate(mockConsumerUserModel());
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        asVendor
-            ? ApiEndpoints.googleVendorLogin
-            : ApiEndpoints.googleConsumerLogin,
+        ApiEndpoints.googleLogin,
         data: {
           'idToken': idToken,
           'clientId': DefaultFirebaseOptions.googleWebClientId,

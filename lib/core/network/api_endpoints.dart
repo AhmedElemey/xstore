@@ -79,15 +79,12 @@ abstract final class ApiEndpoints {
   static const String sendLoginOtp = '$_api/auth/send-login-otp';
   static const String loginWithOtp = '$_api/auth/login-with-otp';
 
-  /// Google sign-in, split by the role to create/sign in as. Body is
-  /// `{"idToken": "<google identity token>"}` (the Google ID token from
-  /// google_sign_in — NOT a Firebase token). Auto-creates the account if none
-  /// exists. CONFIRMED live (401 "Invalid Google identity token" on a bad token).
-  static const String googleConsumerLogin = '$_api/auth/google/consumer/login';
-  static const String googleVendorLogin = '$_api/auth/google/vendor/login';
+  /// Google login for an existing account (any role). Body is
+  /// `{"idToken", "clientId"}` — the Google ID token from google_sign_in,
+  /// NOT a Firebase token.
+  static const String googleLogin = '$_api/auth/google/login';
 
-  /// Read-only lookup — does NOT create an account, unlike the two routes
-  /// above. Body `{"idToken", "clientId"}`; response `{exists, role}`
+  /// Read-only lookup — does NOT create an account. Body `{"idToken", "clientId"}`; response `{exists, role}`
   /// (role is null when exists is false). Lets the app skip the buyer/seller
   /// picker for a Google identity that already has an account.
   static const String googleCheckUser = '$_api/auth/google/check-user';

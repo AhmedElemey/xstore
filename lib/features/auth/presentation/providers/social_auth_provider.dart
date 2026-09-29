@@ -81,10 +81,10 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
 
   /// Google is a login-only shortcut, not a self-service account creator:
   /// ask the backend (read-only `checkGoogleUser`) whether this identity
-  /// already has an account. If it does, log straight in with that existing
-  /// role via the role-specific endpoint (which also auto-creates, so it is
-  /// only called for registered users). Otherwise — or if the lookup
-  /// failed — go to the register flow prefilled with the Google profile.
+  /// already has an account. If it does, log straight in via the single
+  /// `/api/auth/google/login` endpoint (any role). Otherwise — or if the
+  /// lookup failed — go to the register flow prefilled with the Google
+  /// profile.
   ///
   /// Firebase `isNewUser` plays no part: Firebase remembers every Google
   /// account that ever signed in to the project, so it says nothing about
@@ -117,15 +117,10 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       );
     }
 
-    if (existingRole != null) {
-      await _loginWithGoogleRole(idToken, existingRole!);
-      return;
-    }
-
-    // Registered but the role didn't parse: log in, retrying the other
-    // role on a "different role" conflict.
-    if (exists) {
-      await _loginWithGoogleRole(idToken, UserRole.consumer);
+    // Existing account (any role): one login endpoint; the role comes back
+    // with the profile.
+    if (exists || existingRole != null) {
+      await _loginWithGoogle(idToken);
       return;
     }
 
@@ -138,33 +133,12 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     );
   }
 
-  Future<void> _loginWithGoogleRole(String idToken, UserRole preferred) async {
+  Future<void> _loginWithGoogle(String idToken) async {
     state = state.copyWith(isGoogleLoading: true, clearError: true);
-    final first = await ref
-        .read(googleLoginUseCaseProvider)
-        .call(idToken: idToken, role: preferred);
+    final result =
+        await ref.read(googleLoginUseCaseProvider).call(idToken: idToken);
     if (!mounted) return;
-    final firstUser = first.fold((_) => null, (user) => user);
-    if (firstUser != null) {
-      _adoptGoogleSession(firstUser);
-      return;
-    }
-    final firstFailure = first.fold((failure) => failure, (_) => null)!;
-    final other = preferred == UserRole.vendor
-        ? UserRole.consumer
-        : UserRole.vendor;
-    if (!_isDifferentRoleConflict(firstFailure)) {
-      state = state.copyWith(
-        isGoogleLoading: false,
-        error: firstFailure.toString(),
-      );
-      return;
-    }
-    final second = await ref
-        .read(googleLoginUseCaseProvider)
-        .call(idToken: idToken, role: other);
-    if (!mounted) return;
-    second.fold(
+    result.fold(
       (failure) {
         state = state.copyWith(isGoogleLoading: false, error: failure.toString());
       },
@@ -184,10 +158,6 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         AnalyticsProps.role: user.role.name,
       },
     );
-  }
-
-  bool _isDifferentRoleConflict(Object failure) {
-    return failure.toString().toLowerCase().contains('different role');
   }
 
   /// Consumes [SocialAuthState.needsRegistration] once the caller has
