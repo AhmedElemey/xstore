@@ -819,6 +819,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get walletGoodStanding => 'Your platform fees are up to date.';
 
   @override
+  String get walletPayFees => 'Pay platform fees';
+
+  @override
+  String get commissionPaymentMethodTitle => 'Choose payment method';
+
+  @override
+  String get commissionPaymentMethodSubtitle =>
+      'Send your platform fees using one of these methods, then upload the transfer receipt. Once our team approves it, the amount is deducted from what you owe.';
+
+  @override
+  String get commissionPaymentMethodInstaPay => 'InstaPay';
+
+  @override
+  String get commissionPaymentMethodVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get commissionPaymentMethodOrangeCash => 'Orange Cash';
+
+  @override
+  String get commissionPaymentMethodEtisalatCash => 'Etisalat Cash';
+
+  @override
+  String get commissionPaymentMethodBankHint => 'Instant bank transfer';
+
+  @override
+  String get commissionPaymentMethodWalletHint => 'Mobile wallet';
+
+  @override
+  String get commissionPaymentReceiptTitle => 'Upload receipt';
+
+  @override
+  String get commissionPaymentSendTo => 'Send the payment to';
+
+  @override
+  String commissionPaymentNoAccount(String method) {
+    return 'The $method account isn\'t set up yet. Contact xStore support before sending money.';
+  }
+
+  @override
+  String get commissionPaymentCopied => 'Copied';
+
+  @override
+  String get commissionPaymentAmountLabel => 'Amount you sent (LE)';
+
+  @override
+  String get commissionPaymentAmountInvalid => 'Enter the amount you sent';
+
+  @override
+  String get commissionPaymentReceiptLabel => 'Transfer receipt';
+
+  @override
+  String get commissionPaymentReceiptHint =>
+      'Add a screenshot or photo of the successful transfer';
+
+  @override
+  String get commissionPaymentReceiptRequired => 'Add the transfer receipt';
+
+  @override
+  String get commissionPaymentRemoveReceipt => 'Remove receipt';
+
+  @override
+  String get commissionPaymentSubmit => 'Submit for review';
+
+  @override
+  String get commissionPaymentSubmitted =>
+      'Payment sent for review. Your balance updates once it\'s approved.';
+
+  @override
   String get exploreSearchPlaceholder => 'Search listings…';
 
   @override

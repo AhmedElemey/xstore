@@ -290,6 +290,34 @@
   "navAddListing": "Add Listing",
   "navWallet": "Wallet",
   "walletGoodStanding": "Your platform fees are up to date.",
+  "walletPayFees": "Pay platform fees",
+  "commissionPaymentMethodTitle": "Choose payment method",
+  "commissionPaymentMethodSubtitle": "Send your platform fees using one of these methods, then upload the transfer receipt. Once our team approves it, the amount is deducted from what you owe.",
+  "commissionPaymentMethodInstaPay": "InstaPay",
+  "commissionPaymentMethodVodafoneCash": "Vodafone Cash",
+  "commissionPaymentMethodOrangeCash": "Orange Cash",
+  "commissionPaymentMethodEtisalatCash": "Etisalat Cash",
+  "commissionPaymentMethodBankHint": "Instant bank transfer",
+  "commissionPaymentMethodWalletHint": "Mobile wallet",
+  "commissionPaymentReceiptTitle": "Upload receipt",
+  "commissionPaymentSendTo": "Send the payment to",
+  "commissionPaymentNoAccount": "The {method} account isn't set up yet. Contact xStore support before sending money.",
+  "@commissionPaymentNoAccount": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "commissionPaymentCopied": "Copied",
+  "commissionPaymentAmountLabel": "Amount you sent (LE)",
+  "commissionPaymentAmountInvalid": "Enter the amount you sent",
+  "commissionPaymentReceiptLabel": "Transfer receipt",
+  "commissionPaymentReceiptHint": "Add a screenshot or photo of the successful transfer",
+  "commissionPaymentReceiptRequired": "Add the transfer receipt",
+  "commissionPaymentRemoveReceipt": "Remove receipt",
+  "commissionPaymentSubmit": "Submit for review",
+  "commissionPaymentSubmitted": "Payment sent for review. Your balance updates once it's approved.",
   "exploreSearchPlaceholder": "Search listings…",
   "clearAllFilters": "Clear All",
   "filters": "Filters",

@@ -31,6 +31,10 @@ abstract final class AppRoutes {
   static const orders = '/orders';
   static const vendorOrders = '/vendor-orders';
   static const vendorWallet = '/vendor-wallet';
+  // Pushed over the wallet tab (plain stack routes, not shell branches).
+  static const commissionPayment = '/commission-payment';
+  static String commissionPaymentReceiptPath(String methodWireName) =>
+      '$commissionPayment/$methodWireName';
   static const orderDetail = '/order';
   static String orderPath(String orderId) => '$orderDetail/$orderId';
   static const settings = '/settings';
@@ -84,6 +88,7 @@ bool isVendorRestrictedRoute(String location) {
       location.startsWith(AppRoutes.vendorOrders) ||
       location == AppRoutes.storeHours ||
       location == AppRoutes.vendorWallet ||
+      location.startsWith(AppRoutes.commissionPayment) ||
       location == AppRoutes.earnings ||
       location == AppRoutes.analytics;
 }
