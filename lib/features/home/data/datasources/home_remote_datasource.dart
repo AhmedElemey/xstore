@@ -227,8 +227,15 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     return CategoryModel(
       id: (json['id'] ?? '').toString(),
       name: (json['nameEn'] ?? json['name'] ?? json['nameAr'] ?? '').toString(),
-      iconUrl: json['iconUrl']?.toString(),
+      // Live `/api/categories` sends the admin-uploaded picture as `imageUrl`
+      // (confirmed by live probe); `iconUrl` is kept as a fallback.
+      iconUrl: _nonBlank(json['imageUrl']) ?? _nonBlank(json['iconUrl']),
     );
+  }
+
+  String? _nonBlank(Object? value) {
+    final s = value?.toString().trim();
+    return s == null || s.isEmpty ? null : s;
   }
 
   bool _isOffline(DioException e) {
