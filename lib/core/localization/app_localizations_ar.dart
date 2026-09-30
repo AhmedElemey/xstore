@@ -822,6 +822,74 @@ class AppLocalizationsAr extends AppLocalizations {
   String get walletGoodStanding => 'رسوم المنصة الخاصة بك محدثة.';
 
   @override
+  String get walletPayFees => 'ادفع رسوم المنصة';
+
+  @override
+  String get commissionPaymentMethodTitle => 'اختر طريقة الدفع';
+
+  @override
+  String get commissionPaymentMethodSubtitle =>
+      'أرسل رسوم المنصة بإحدى هذه الطرق، ثم ارفع إيصال التحويل. بعد موافقة فريقنا يُخصم المبلغ من المستحق عليك.';
+
+  @override
+  String get commissionPaymentMethodInstaPay => 'إنستاباي';
+
+  @override
+  String get commissionPaymentMethodVodafoneCash => 'فودافون كاش';
+
+  @override
+  String get commissionPaymentMethodOrangeCash => 'أورنج كاش';
+
+  @override
+  String get commissionPaymentMethodEtisalatCash => 'اتصالات كاش';
+
+  @override
+  String get commissionPaymentMethodBankHint => 'تحويل بنكي فوري';
+
+  @override
+  String get commissionPaymentMethodWalletHint => 'محفظة موبايل';
+
+  @override
+  String get commissionPaymentReceiptTitle => 'رفع الإيصال';
+
+  @override
+  String get commissionPaymentSendTo => 'أرسل المبلغ إلى';
+
+  @override
+  String commissionPaymentNoAccount(String method) {
+    return 'حساب $method غير مُعد بعد. تواصل مع دعم xStore قبل إرسال أي مبلغ.';
+  }
+
+  @override
+  String get commissionPaymentCopied => 'تم النسخ';
+
+  @override
+  String get commissionPaymentAmountLabel => 'المبلغ الذي أرسلته (ج.م)';
+
+  @override
+  String get commissionPaymentAmountInvalid => 'أدخل المبلغ الذي أرسلته';
+
+  @override
+  String get commissionPaymentReceiptLabel => 'إيصال التحويل';
+
+  @override
+  String get commissionPaymentReceiptHint =>
+      'أضف لقطة شاشة أو صورة للتحويل الناجح';
+
+  @override
+  String get commissionPaymentReceiptRequired => 'أضف إيصال التحويل';
+
+  @override
+  String get commissionPaymentRemoveReceipt => 'إزالة الإيصال';
+
+  @override
+  String get commissionPaymentSubmit => 'إرسال للمراجعة';
+
+  @override
+  String get commissionPaymentSubmitted =>
+      'تم إرسال الدفعة للمراجعة. يتحدّث رصيدك بعد الموافقة عليها.';
+
+  @override
   String get exploreSearchPlaceholder => 'ابحث في الإعلانات…';
 
   @override

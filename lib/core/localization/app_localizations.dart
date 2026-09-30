@@ -1670,6 +1670,132 @@ abstract class AppLocalizations {
   /// **'Your platform fees are up to date.'**
   String get walletGoodStanding;
 
+  /// No description provided for @walletPayFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay platform fees'**
+  String get walletPayFees;
+
+  /// No description provided for @commissionPaymentMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose payment method'**
+  String get commissionPaymentMethodTitle;
+
+  /// No description provided for @commissionPaymentMethodSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send your platform fees using one of these methods, then upload the transfer receipt. Once our team approves it, the amount is deducted from what you owe.'**
+  String get commissionPaymentMethodSubtitle;
+
+  /// No description provided for @commissionPaymentMethodInstaPay.
+  ///
+  /// In en, this message translates to:
+  /// **'InstaPay'**
+  String get commissionPaymentMethodInstaPay;
+
+  /// No description provided for @commissionPaymentMethodVodafoneCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Vodafone Cash'**
+  String get commissionPaymentMethodVodafoneCash;
+
+  /// No description provided for @commissionPaymentMethodOrangeCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange Cash'**
+  String get commissionPaymentMethodOrangeCash;
+
+  /// No description provided for @commissionPaymentMethodEtisalatCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Etisalat Cash'**
+  String get commissionPaymentMethodEtisalatCash;
+
+  /// No description provided for @commissionPaymentMethodBankHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant bank transfer'**
+  String get commissionPaymentMethodBankHint;
+
+  /// No description provided for @commissionPaymentMethodWalletHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile wallet'**
+  String get commissionPaymentMethodWalletHint;
+
+  /// No description provided for @commissionPaymentReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload receipt'**
+  String get commissionPaymentReceiptTitle;
+
+  /// No description provided for @commissionPaymentSendTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the payment to'**
+  String get commissionPaymentSendTo;
+
+  /// No description provided for @commissionPaymentNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'The {method} account isn\'t set up yet. Contact xStore support before sending money.'**
+  String commissionPaymentNoAccount(String method);
+
+  /// No description provided for @commissionPaymentCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get commissionPaymentCopied;
+
+  /// No description provided for @commissionPaymentAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount you sent (LE)'**
+  String get commissionPaymentAmountLabel;
+
+  /// No description provided for @commissionPaymentAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount you sent'**
+  String get commissionPaymentAmountInvalid;
+
+  /// No description provided for @commissionPaymentReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer receipt'**
+  String get commissionPaymentReceiptLabel;
+
+  /// No description provided for @commissionPaymentReceiptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a screenshot or photo of the successful transfer'**
+  String get commissionPaymentReceiptHint;
+
+  /// No description provided for @commissionPaymentReceiptRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the transfer receipt'**
+  String get commissionPaymentReceiptRequired;
+
+  /// No description provided for @commissionPaymentRemoveReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove receipt'**
+  String get commissionPaymentRemoveReceipt;
+
+  /// No description provided for @commissionPaymentSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for review'**
+  String get commissionPaymentSubmit;
+
+  /// No description provided for @commissionPaymentSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment sent for review. Your balance updates once it\'s approved.'**
+  String get commissionPaymentSubmitted;
+
   /// No description provided for @exploreSearchPlaceholder.
   ///
   /// In en, this message translates to:

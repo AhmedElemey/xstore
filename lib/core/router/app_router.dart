@@ -18,6 +18,9 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/domain/entities/social_auth_result.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/commission/domain/entities/commission_payment_method.dart';
+import '../../features/commission/presentation/screens/commission_payment_method_screen.dart';
+import '../../features/commission/presentation/screens/commission_payment_receipt_screen.dart';
 import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
@@ -328,6 +331,34 @@ GoRouter goRouter(GoRouterRef ref) {
           state,
           VendorOrderDetailScreen(
             orderId: state.pathParameters['orderId'] ?? '',
+          ),
+        ),
+      ),
+      // Vendor pays platform fees: pick a method, then upload the receipt.
+      // The method rides in the path (not `extra`) so a restart or deep
+      // link still has it; an unknown method goes back to the method list.
+      GoRoute(
+        path: AppRoutes.commissionPayment,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const CommissionPaymentMethodScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '${AppRoutes.commissionPayment}/:method',
+        redirect: (_, state) =>
+            CommissionPaymentMethod.fromWire(state.pathParameters['method']) ==
+                    null
+                ? AppRoutes.commissionPayment
+                : null,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          CommissionPaymentReceiptScreen(
+            method: CommissionPaymentMethod.fromWire(
+              state.pathParameters['method'],
+            )!,
           ),
         ),
       ),

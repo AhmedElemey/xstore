@@ -202,4 +202,17 @@ abstract final class ApiEndpoints {
   // Vendor reports. CONFIRMED (Postman collection + live 401-not-404
   // probe, 2026-09-24); body contract on VendorReportsRemoteDataSourceImpl.
   static const String vendorReports = '$_api/reports/vendor';
+
+  // ---------------------------------------------------------------------
+  // PROPOSED, not yet built — vendor platform-fee payments. Contract:
+  // docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
+  // Until the backend ships these, submitting a payment surfaces a real
+  // error and the pay-to accounts read as "not configured".
+  // ---------------------------------------------------------------------
+  static const String vendorCommissionPayments =
+      '$_api/vendor/commission-payments';
+
+  /// Public read of one General Settings value (the admin dashboard's
+  /// remote app config). Also PROPOSED.
+  static String appSetting(String key) => '$_api/app-settings/$key';
 }
