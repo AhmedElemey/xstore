@@ -175,6 +175,28 @@ void main() {
       expect(result.map((c) => c.name), ['Electronics', 'Fashion', 'منزل']);
     });
 
+    test('reads the category picture from imageUrl (live key), then iconUrl',
+        () async {
+      dio = buildDio({
+        ApiEndpoints.catalogCategories: (_) => [
+              {'id': 1, 'nameEn': 'Beauty', 'imageUrl': '/uploads/beauty.png'},
+              {'id': 2, 'nameEn': 'Toys', 'iconUrl': 'https://cdn.test/toys.png'},
+              {'id': 3, 'nameEn': 'Books', 'imageUrl': '  ', 'iconUrl': null},
+              {'id': 4, 'nameEn': 'Other'},
+            ],
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchCategories();
+
+      expect(result.map((c) => c.iconUrl), [
+        '/uploads/beauty.png',
+        'https://cdn.test/toys.png',
+        null,
+        null,
+      ]);
+    });
+
     test('falls back to the static set when offline', () async {
       dio = buildDio({
         ApiEndpoints.catalogCategories: (options) => _offline(options),

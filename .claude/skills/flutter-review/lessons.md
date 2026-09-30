@@ -299,8 +299,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `lib/features/commission/`, add-listing breakdown, vendor order breakdown, commission wallet.
 
 ### 2026-08-15 — Categories come as a tree
-- **Rule:** `GET /api/categories` returns top-level categories with nested `children` (which also carry `parentId`). Keep the tree on `CatalogCategoryEntity.children` and drive the subcategory picker from it — don't flatten and filter. The picker sheet watches `allCatalogCategoriesProvider` itself.
-- **Where it applies:** `catalog_category_remote_datasource.dart`, `catalog_category_model.dart`, `category_picker_sheet.dart`, add-listing category fields.
+- **Rule:** `GET /api/categories` returns top-level categories with nested `children` (which also carry `parentId`). Keep the tree on `CatalogCategoryEntity.children` and drive the subcategory picker from it — don't flatten and filter. The picker sheet watches `allCatalogCategoriesProvider` itself. The picture is `imageUrl` (not `iconUrl`); the seeded values are icon names glued onto the host (`…/sparkles`) that 404, so every category image needs a fallback. Home chips read it via `home_remote_datasource.dart` `_categoryFromApi` — a second parser of the same endpoint.
+- **Where it applies:** `catalog_category_remote_datasource.dart`, `catalog_category_model.dart`, `category_picker_sheet.dart`, add-listing category fields, `home_remote_datasource.dart`, `category_chip_row.dart`.
 
 ### 2026-08-15 — Moving a list to the API deletes the hardcoded copy
 - **Rule:** When reference data moves to a `GET /api/…` endpoint, delete the static options, slug→label maps and matching arb keys in the same change; names display from the API's bilingual fields. Keep only values the API doesn't own (e.g. listing condition tokens). Brand is free text.
