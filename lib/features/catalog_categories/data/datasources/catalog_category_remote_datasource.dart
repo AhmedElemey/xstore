@@ -37,6 +37,9 @@ class CatalogCategoryRemoteDataSourceImpl
       // row instead of failing the whole catalog.
       final parsed = <CatalogCategoryModel>[];
       for (final row in _unwrap(response.data)) {
+        // Admin-hidden categories come back with `isActive: false`
+        // (confirmed live); vendors must not list products under them.
+        if (row['isActive'] == false) continue;
         try {
           final model = CatalogCategoryModel.fromJson(row);
           if (model.id != 0) parsed.add(model);

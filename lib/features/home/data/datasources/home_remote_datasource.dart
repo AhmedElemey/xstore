@@ -188,7 +188,10 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         ApiEndpoints.catalogCategories,
         options: ApiAuthHeaders.public(),
       );
+      // The public endpoint also returns categories an admin hid
+      // (`isActive: false`, confirmed live) — buyers must not see them.
       return unwrapJsonObjectList(response.data)
+          .where((json) => json['isActive'] != false)
           .map(_categoryFromApi)
           .toList();
     } on DioException catch (e) {

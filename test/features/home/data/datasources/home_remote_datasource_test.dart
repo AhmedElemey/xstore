@@ -197,6 +197,21 @@ void main() {
       ]);
     });
 
+    test('hides categories an admin switched off (isActive: false)', () async {
+      dio = buildDio({
+        ApiEndpoints.catalogCategories: (_) => [
+              {'id': 7, 'nameEn': 'Automotive', 'isActive': false},
+              {'id': 4, 'nameEn': 'Beauty', 'isActive': true},
+              {'id': 9, 'nameEn': 'Books'},
+            ],
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchCategories();
+
+      expect(result.map((c) => c.name), ['Beauty', 'Books']);
+    });
+
     test('falls back to the static set when offline', () async {
       dio = buildDio({
         ApiEndpoints.catalogCategories: (options) => _offline(options),
