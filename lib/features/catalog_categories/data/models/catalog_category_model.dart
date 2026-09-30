@@ -15,6 +15,8 @@ class CatalogCategoryModel {
     final children = rawChildren is List
         ? rawChildren
             .whereType<Map>()
+            // Skip admin-hidden subcategories (`isActive: false`).
+            .where((e) => e['isActive'] != false)
             .map(
               (e) => CatalogCategoryModel.fromJson(
                 Map<String, dynamic>.from(e),
