@@ -92,12 +92,25 @@ void main() {
     test(
       'getPayToAccounts reads the commission_payment_accounts setting',
       () async {
+        // Shape of the live GET /api/general-settings?search=… page.
         final interceptor = _RecordingInterceptor({
-          'isSuccess': true,
-          'data': {
-            'key': 'commission_payment_accounts',
-            'value': '{"InstaPay":"xstore@instapay"}',
-          },
+          'items': [
+            {
+              'id': 4,
+              'key': 'commission_payment_accounts_old',
+              'value': '{"InstaPay":"old@instapay"}',
+            },
+            {
+              'id': 5,
+              'key': 'commission_payment_accounts',
+              'value': '{"InstaPay":"xstore@instapay"}',
+              'dataType': 'Json',
+            },
+          ],
+          'totalCount': 2,
+          'page': 1,
+          'pageSize': 20,
+          'totalPages': 1,
         });
         final dio = Dio()..interceptors.add(interceptor);
 
@@ -105,10 +118,11 @@ void main() {
           dio,
         ).getPayToAccounts();
 
-        expect(
-          interceptor.requests.single.path,
-          ApiEndpoints.appSetting('commission_payment_accounts'),
-        );
+        final request = interceptor.requests.single;
+        expect(request.path, ApiEndpoints.generalSettings);
+        expect(request.queryParameters, {
+          'search': 'commission_payment_accounts',
+        });
         expect(accounts, {CommissionPaymentMethod.instaPay: 'xstore@instapay'});
       },
       skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
@@ -140,11 +154,7 @@ void main() {
 
     test('drops blank values and unknown methods', () {
       expect(
-        parsePayToAccounts({
-          ...raw,
-          'OrangeCash': '  ',
-          'Fawry': '123',
-        }),
+        parsePayToAccounts({...raw, 'OrangeCash': '  ', 'Fawry': '123'}),
         expected,
       );
     });
@@ -153,6 +163,21 @@ void main() {
       expect(parsePayToAccounts('{not json'), isEmpty);
       expect(parsePayToAccounts(null), isEmpty);
       expect(parsePayToAccounts(['InstaPay']), isEmpty);
+    });
+
+    test('a search page without the exact key reads as not configured', () {
+      expect(
+        parsePayToAccounts({
+          'items': [
+            {
+              'key': 'commission_payment_accounts_v2',
+              'value': '{"InstaPay":"x"}',
+            },
+          ],
+        }),
+        isEmpty,
+      );
+      expect(parsePayToAccounts({'items': []}), isEmpty);
     });
   });
 
