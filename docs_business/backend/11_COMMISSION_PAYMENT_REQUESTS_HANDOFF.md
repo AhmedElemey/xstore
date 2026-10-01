@@ -115,9 +115,11 @@ dashboard's `BACKEND_HANDOFF.md` "General Settings"), so numbers change without 
 }
 ```
 
-The app reads it from the public `GET /api/app-settings/commission_payment_accounts` and accepts
+The app reads it from the public, already-live `GET /api/general-settings?search=commission_payment_accounts`
+and uses only the row whose `key` matches exactly (`search` is a substring match). It also accepts
 the value bare, inside the `{data: ...}` envelope, inside a `{key, value}` row, and as either a
-JSON string or an object. A method with no entry shows "account isn't set up yet — contact
+JSON string or an object. (An earlier draft named `GET /api/app-settings/{key}`; that route was
+never built.) A method with no entry shows "account isn't set up yet — contact
 support" instead of a number.
 
 ## Open questions for the backend

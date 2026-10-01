@@ -1009,3 +1009,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-29 — Google sign-up register carries idToken + clientId; existing Google users use one login endpoint
 - **Rule:** `_applyGooglePrefill` stores `r.idToken` in the autoDispose `RegisterState.socialIdToken` (screen-scoped so it can't leak into a later plain registration). `_executeRegister` puts `idToken` and `clientId` (`DefaultFirebaseOptions.googleWebClientId` only when a token exists) on `Consumer/VendorRegisterParams`; the datasource always sends both keys — JSON `null` on plain consumer register, empty multipart fields on plain vendor register (Dio has no multipart null; ASP.NET binds empty as null). Existing Google accounts of any role log in via `POST /api/auth/google/login` (`idToken` + `clientId`); the role comes from the profile, not the endpoint — no consumer/vendor Google routes or role retry.
 - **Where it applies:** `register_screen.dart` `_applyGooglePrefill`, `auth_provider.dart` `_executeRegister`, `*_register_params.dart`, `auth_remote_datasource.dart` register + `loginWithGoogle`, `social_auth_provider.dart` `_loginWithGoogle`, `api_endpoints.dart` `googleLogin`.
+
+### 2026-10-01 — Never `firstWhere(orElse: () => null)` on decoded JSON lists
+- **Rule:** A decoded list can be reified as `List<Map<String, Object>>` (tests, interceptors), so `orElse: () => null` throws a TypeError at runtime even though it analyzes clean. Use `list.whereType<Map>().where(...).firstOrNull`.
+- **Where it applies:** Any parser picking one row out of a JSON list (`parsePayToAccounts`, datasource `_fromApi` helpers).
+
+### 2026-10-01 — General Settings live at /api/general-settings, with no read-by-key route
+- **Rule:** App config is read from the public `GET /api/general-settings?search=<key>` → `{items: [{key, value, dataType}], ...}`; `search` is a substring match, so pick the row whose `key` is exactly the one wanted. `/api/app-settings/{key}` was a proposal and 404s. Probe a route before wiring it, even one named in our own handoff doc.
+- **Where it applies:** `ApiEndpoints.generalSettings`, `commission_payment_remote_datasource.dart`, any remote-config read.

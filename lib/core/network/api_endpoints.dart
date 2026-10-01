@@ -212,7 +212,8 @@ abstract final class ApiEndpoints {
   static const String vendorCommissionPayments =
       '$_api/vendor/commission-payments';
 
-  /// Public read of one General Settings value (the admin dashboard's
-  /// remote app config). Also PROPOSED.
-  static String appSetting(String key) => '$_api/app-settings/$key';
+  /// General Settings (the admin dashboard's remote app config). The list is
+  /// public (no login) and filters with `?search=`; there is no read-by-key
+  /// route, so callers pick the row whose `key` matches exactly.
+  static const String generalSettings = '$_api/general-settings';
 }

@@ -23,8 +23,10 @@ const kCommissionPaymentAccountsSettingKey = 'commission_payment_accounts';
 ///     receiptImage file
 ///   → 201 { id, status: "Pending", ... }
 ///
-///   GET /api/app-settings/commission_payment_accounts
-///   → the setting's JSON value, keyed by method wire name.
+/// Live: the pay-to accounts are a General Setting, read from
+///
+///   GET /api/general-settings?search=commission_payment_accounts
+///   → { items: [{ key, value: "<JSON keyed by method wire name>", ... }] }
 class CommissionPaymentRemoteDataSource {
   CommissionPaymentRemoteDataSource(this._dio);
 
@@ -34,7 +36,8 @@ class CommissionPaymentRemoteDataSource {
     if (MockConfig.useMock) return MockConfig.simulate(const {});
     try {
       final response = await _dio.get<dynamic>(
-        ApiEndpoints.appSetting(kCommissionPaymentAccountsSettingKey),
+        ApiEndpoints.generalSettings,
+        queryParameters: {'search': kCommissionPaymentAccountsSettingKey},
       );
       return parsePayToAccounts(response.data);
     } on DioException catch (e) {
@@ -72,13 +75,22 @@ class CommissionPaymentRemoteDataSource {
   }
 }
 
-/// Reads the `commission_payment_accounts` setting tolerantly: the value may
-/// arrive bare, inside the `{data: ...}` Result envelope, as a
-/// `{key, value}` setting row, and as a JSON string or an object. Blank
-/// entries and unknown methods are dropped.
+/// Reads the `commission_payment_accounts` setting tolerantly: the body may
+/// be the settings search page (`{items: [...]}` or a bare list, where only the
+/// row with exactly this key counts — `search` also matches other keys), a
+/// single `{key, value}` row, or the value itself, optionally inside the
+/// `{data: ...}` Result envelope; the value may be a JSON string or an object.
+/// Blank entries and unknown methods are dropped.
 Map<CommissionPaymentMethod, String> parsePayToAccounts(dynamic body) {
   dynamic value = body;
   if (value is Map && value.containsKey('data')) value = value['data'];
+  if (value is Map && value['items'] is List) value = value['items'];
+  if (value is List) {
+    value = value
+        .whereType<Map>()
+        .where((row) => row['key'] == kCommissionPaymentAccountsSettingKey)
+        .firstOrNull;
+  }
   if (value is Map && value.containsKey('value')) value = value['value'];
   if (value is String) {
     try {
