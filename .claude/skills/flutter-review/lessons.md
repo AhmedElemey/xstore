@@ -527,7 +527,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `app_location_cache.dart`, `location_service.dart`, `dio_provider.dart`, Simulator runs.
 
 ### 2026-09-01 — Forms split between notifier state and local controllers
-- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
+- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. The same listener jumps the form's own `ScrollController` to the top — the shell branch keeps the State, so the old scroll offset (at the Publish button) otherwise survives into the next listing. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
 - **Where it applies:** `listing_form_notifier.dart`, `add_listing_screen.dart`, other shell-tab forms with local controllers.
 
 ### 2026-09-01 — Money defaults of 0 need more than ??
