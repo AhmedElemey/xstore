@@ -56,8 +56,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     // that served static placeholder tiles unconditionally. The read
     // response has no example in the collection (only the multipart
     // create body — nameEn/nameAr/image — is documented), so this is
-    // parsed tolerantly; fall back to the static set on any error or an
-    // empty/malformed response so the home screen never shows nothing.
+    // parsed tolerantly. No admin banners (or offline) means no carousel —
+    // never placeholder banners (HeroBannerCarousel hides on empty).
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.banners,
@@ -65,9 +65,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       );
       final banners =
           unwrapJsonObjectList(response.data).map(_bannerFromApi).whereType<BannerModel>().toList();
-      return banners.isNotEmpty ? banners : _staticBanners();
+      return banners;
     } on DioException catch (e) {
-      if (_isOffline(e)) return _staticBanners();
+      if (_isOffline(e)) return const [];
       throw mapDioException(e);
     }
   }
@@ -246,19 +246,6 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     return e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout;
   }
-
-  List<BannerModel> _staticBanners() => [
-        const BannerModel(
-          id: 'b1',
-          title: 'New season',
-          imageUrl: 'https://picsum.photos/seed/xstore1/800/360',
-        ),
-        const BannerModel(
-          id: 'b2',
-          title: 'Hot deals',
-          imageUrl: 'https://picsum.photos/seed/xstore2/800/360',
-        ),
-      ];
 
   List<DealModel> _fallbackDeals() => [
         const DealModel(

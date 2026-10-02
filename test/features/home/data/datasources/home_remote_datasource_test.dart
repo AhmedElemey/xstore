@@ -122,17 +122,17 @@ void main() {
       expect(result.single.id, 'b2');
     });
 
-    test('falls back to the static set on an empty response', () async {
+    test('returns no banners (no placeholders) on an empty response',
+        () async {
       dio = buildDio({ApiEndpoints.banners: (_) => <dynamic>[]});
       datasource = HomeRemoteDataSourceImpl(dio);
 
       final result = await datasource.fetchBanners();
 
-      expect(result, hasLength(2));
-      expect(result.map((b) => b.id), ['b1', 'b2']);
+      expect(result, isEmpty);
     });
 
-    test('falls back to the static set when offline instead of throwing',
+    test('returns no banners when offline instead of throwing',
         () async {
       dio = buildDio({
         ApiEndpoints.banners: (options) => _offline(options),
@@ -141,7 +141,7 @@ void main() {
 
       final result = await datasource.fetchBanners();
 
-      expect(result, hasLength(2));
+      expect(result, isEmpty);
     });
 
     test('throws (does not fall back) on a non-offline server error',
