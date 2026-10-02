@@ -9,7 +9,7 @@ import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/network/json_list_unwrap.dart';
 import '../../../listing/data/models/listing_model.dart'
-    show isPublicLiveListingStatus;
+    show isPublicLiveListingStatus, isSoldOutListingJson;
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/deal_model.dart';
@@ -223,6 +223,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       price: price,
       imageUrl: imageUrl,
       discountPercent: discount,
+      isSoldOut: isSoldOutListingJson(json),
     );
   }
 

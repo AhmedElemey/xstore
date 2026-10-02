@@ -283,6 +283,30 @@ void main() {
       expect(result!.hotDeals.map((d) => d.id), ['live']);
     });
 
+    test('flags stockQuantity 0 as sold out; a missing count is not',
+        () async {
+      dio = buildDio({
+        ApiEndpoints.home: (_) => {
+              'banners': <dynamic>[],
+              'hotDeals': [
+                {..._activeListing(id: 'empty'), 'stockQuantity': 0},
+                {..._activeListing(id: 'stocked'), 'stockQuantity': 4},
+                _activeListing(id: 'unknown'),
+              ],
+              'newArrivals': <dynamic>[],
+              'recommendedForYou': <dynamic>[],
+            },
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchHomeAggregate();
+
+      expect(
+        {for (final d in result!.hotDeals) d.id: d.isSoldOut},
+        {'empty': true, 'stocked': false, 'unknown': false},
+      );
+    });
+
     test('returns null when every section is empty', () async {
       dio = buildDio({
         ApiEndpoints.home: (_) => {

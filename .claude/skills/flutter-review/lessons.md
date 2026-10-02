@@ -1017,3 +1017,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-01 — General Settings live at /api/general-settings, with no read-by-key route
 - **Rule:** App config is read from the public `GET /api/general-settings?search=<key>` → `{items: [{key, value, dataType}], ...}`; `search` is a substring match, so pick the row whose `key` is exactly the one wanted. `/api/app-settings/{key}` was a proposal and 404s. Probe a route before wiring it, even one named in our own handoff doc.
 - **Where it applies:** `ApiEndpoints.generalSettings`, `commission_payment_remote_datasource.dart`, any remote-config read.
+
+### 2026-10-02 — Sold-out listings stay Active; flag them from stockQuantity
+- **Rule:** The backend keeps a listing `Active` at `stockQuantity: 0`, so a status filter alone lets sold-out items into Home/Explore. Catalog tiles use `isSoldOutListingJson` (sold out only when a count is present and ≤ 0; a missing key isn't), and the shared `SoldOutOverlay` greys them out. Cart add refuses `!isAvailable` lines with `soldOutErrorCode`, so test fixtures for `GET /api/listings/{id}` must include `stockQuantity` or the add fails. Running build_runner rewrites unrelated, already-stale `.g`/`.freezed` files; revert them and commit only the outputs for the models you changed.
+- **Where it applies:** `home_remote_datasource.dart`, `search_result_model.dart`, `product_card.dart`, explore cards, `product_sticky_bar.dart`, `cart_repository_impl.dart`, listing-detail fixtures in live-flow tests.

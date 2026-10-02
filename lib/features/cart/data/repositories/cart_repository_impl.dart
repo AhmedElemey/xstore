@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/domain/repositories/orders_repository.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -35,6 +36,7 @@ class CartRepositoryImpl implements CartRepository {
   }) async {
     try {
       final line = await _remote.buildLineFromListing(listingId, quantity);
+      if (!line.isAvailable) return const Left(Failure.server(soldOutErrorCode));
       return Right(
         await _remote.addOrUpdateItem(consumerId: consumerId, item: line),
       );

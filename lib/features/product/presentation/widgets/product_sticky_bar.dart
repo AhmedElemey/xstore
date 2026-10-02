@@ -15,6 +15,7 @@ class ProductStickyBar extends StatelessWidget {
     required this.onBuyNow,
     required this.isAddingToCart,
     this.showAddToCart = true,
+    this.isSoldOut = false,
   });
 
   final VoidCallback onChat;
@@ -22,6 +23,9 @@ class ProductStickyBar extends StatelessWidget {
   final VoidCallback onBuyNow;
   final bool isAddingToCart;
   final bool showAddToCart;
+
+  /// Listing has no stock: both purchase buttons are disabled.
+  final bool isSoldOut;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +61,7 @@ class ProductStickyBar extends StatelessWidget {
               if (showAddToCart) ...[
                 Expanded(
                   child: FilledButton(
-                    onPressed: isAddingToCart
+                    onPressed: isAddingToCart || isSoldOut
                         ? null
                         : () {
                             HapticFeedback.lightImpact();
@@ -79,7 +83,12 @@ class ProductStickyBar extends StatelessWidget {
                               children: [
                                 const Icon(LucideIcons.shoppingCart, size: 20),
                                 const Gap(AppSpacing.sm),
-                                Text(context.l10n.addToCart, maxLines: 1),
+                                Text(
+                                  isSoldOut
+                                      ? context.l10n.soldOut
+                                      : context.l10n.addToCart,
+                                  maxLines: 1,
+                                ),
                               ],
                             ),
                           ),
@@ -89,7 +98,7 @@ class ProductStickyBar extends StatelessWidget {
               ],
               Expanded(
                 child: FilledButton(
-                  onPressed: onBuyNow,
+                  onPressed: isSoldOut ? null : onBuyNow,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     foregroundColor: context.surfaceColor,

@@ -363,6 +363,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
             child: ProductStickyBar(
               showAddToCart: !isVendor,
+              isSoldOut: data.stockQuantity < 1,
               isAddingToCart: data.isAddingToCart,
               onChat: () => _messageSeller(
                 listingId: listing.id,

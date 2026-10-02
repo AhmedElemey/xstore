@@ -69,7 +69,8 @@ class HomeRepositoryImpl implements HomeRepository {
       title: d.title,
       description: d.title,
       price: d.price,
-      status: ListingStatus.active,
+      // Backend keeps sold-out listings Active; `sold` greys the tile.
+      status: d.isSoldOut ? ListingStatus.sold : ListingStatus.active,
       imageUrls: imgs,
       categoryLabel: '',
       conditionLabel: 'New',

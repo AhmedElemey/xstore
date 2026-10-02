@@ -637,6 +637,8 @@
   "active": "Active",
   "paused": "Paused",
   "sold": "Sold",
+  "soldOut": "Sold out",
+  "addToCartSoldOut": "This item is sold out and can't be added to your cart.",
   "pending": "Pending",
   "rejected": "Rejected",
   "resubmitListing": "Resubmit",

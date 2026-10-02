@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/sold_out_overlay.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -45,24 +46,27 @@ class ProductGridCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Positioned.fill(
-                      child: item.imageUrl != null
-                          ? Semantics(
-                              image: true,
-                              label:
-                                  '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
-                              child: AppCachedNetworkImage(
-                                imageUrl: item.imageUrl!,
-                                fit: BoxFit.cover,
-                                memCacheWidth: 600,
-                                placeholder: (_, __) => ColoredBox(
-                                  color: context.textDisabled,
+                      child: SoldOutOverlay(
+                        soldOut: item.isSoldOut,
+                        child: item.imageUrl != null
+                            ? Semantics(
+                                image: true,
+                                label:
+                                    '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
+                                child: AppCachedNetworkImage(
+                                  imageUrl: item.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  memCacheWidth: 600,
+                                  placeholder: (_, __) => ColoredBox(
+                                    color: context.textDisabled,
+                                  ),
+                                  errorWidget: (_, __, ___) => ColoredBox(
+                                    color: context.textDisabled,
+                                  ),
                                 ),
-                                errorWidget: (_, __, ___) => ColoredBox(
-                                  color: context.textDisabled,
-                                ),
-                              ),
-                            )
-                          : ColoredBox(color: context.textDisabled),
+                              )
+                            : ColoredBox(color: context.textDisabled),
+                      ),
                     ),
                     Positioned(
                       right: AppSpacing.sm,
@@ -165,11 +169,17 @@ class ProductGridCard extends StatelessWidget {
                           const Gap(AppSpacing.sm),
                           Expanded(
                             child: FilledButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                onAddToCart();
-                              },
-                              child: Text(context.l10n.addToCart),
+                              onPressed: item.isSoldOut
+                                  ? null
+                                  : () {
+                                      HapticFeedback.lightImpact();
+                                      onAddToCart();
+                                    },
+                              child: Text(
+                                item.isSoldOut
+                                    ? context.l10n.soldOut
+                                    : context.l10n.addToCart,
+                              ),
                             ),
                           ),
                         ],
