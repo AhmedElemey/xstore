@@ -247,6 +247,8 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return false;
   }
 
+  // Kept for when the WhatsApp button returns (hidden in build).
+  // ignore: unused_element
   Future<void> _openStoreWhatsApp(String? phone, String storeName) async {
     final text = context.l10n.whatsappStorePrefill(storeName);
     final opened = await launchWhatsApp(
@@ -299,9 +301,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joinedLine = joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
-    final authUser = ref.watch(authProvider).valueOrNull;
-    final isOwnStore = _isOwnStore(authUser);
-    final whatsapp = (u.whatsappNumber ?? '').trim();
+    // Only fed the hidden WhatsApp button below.
+    // final authUser = ref.watch(authProvider).valueOrNull;
+    // final isOwnStore = _isOwnStore(authUser);
+    // final whatsapp = (u.whatsappNumber ?? '').trim(); // WhatsApp hidden
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -422,37 +425,38 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                             ),
                           ],
                         ),
-                        if (!isOwnStore && whatsapp.isNotEmpty) ...[
-                          const Gap(AppSpacing.lg),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () =>
-                                  _openStoreWhatsApp(u.whatsappNumber, name),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.success,
-                                side: BorderSide(
-                                  color: AppColors.success.withValues(alpha: 0.5),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: AppSpacing.md,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(AppSpacing.md),
-                                ),
-                              ),
-                              icon: const Icon(
-                                LucideIcons.messageCircle,
-                                size: 18,
-                              ),
-                              label: Text(
-                                context.l10n.ordersWhatsapp,
-                                style: AppTypography.labelLarge,
-                              ),
-                            ),
-                          ),
-                        ],
+                        // Hidden by product request: no WhatsApp entry points for now.
+                        // if (!isOwnStore && whatsapp.isNotEmpty) ...[
+                        //   const Gap(AppSpacing.lg),
+                        //   SizedBox(
+                        //     width: double.infinity,
+                        //     child: OutlinedButton.icon(
+                        //       onPressed: () =>
+                        //           _openStoreWhatsApp(u.whatsappNumber, name),
+                        //       style: OutlinedButton.styleFrom(
+                        //         foregroundColor: AppColors.success,
+                        //         side: BorderSide(
+                        //           color: AppColors.success.withValues(alpha: 0.5),
+                        //         ),
+                        //         padding: const EdgeInsets.symmetric(
+                        //           vertical: AppSpacing.md,
+                        //         ),
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius:
+                        //               BorderRadius.circular(AppSpacing.md),
+                        //         ),
+                        //       ),
+                        //       icon: const Icon(
+                        //         LucideIcons.messageCircle,
+                        //         size: 18,
+                        //       ),
+                        //       label: Text(
+                        //         context.l10n.ordersWhatsapp,
+                        //         style: AppTypography.labelLarge,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ],
                         const Gap(AppSpacing.lg),
                         Divider(height: 1, color: context.dividerColor),
                         const Gap(AppSpacing.lg),

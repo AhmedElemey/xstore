@@ -9,9 +9,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/utils/whatsapp.dart';
+// import '../../../../shared/utils/whatsapp.dart'; // WhatsApp hidden
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../../shared/widgets/app_snackbar.dart';
+// import '../../../../shared/widgets/app_snackbar.dart'; // WhatsApp hidden
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_order_detail_provider.dart';
 import '../widgets/delivery_method_sheet.dart';
@@ -215,21 +215,22 @@ class _BuyerInfoCard extends StatelessWidget {
               ),
             ],
           ),
-          if (phone.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () async {
-                final opened = await launchWhatsApp(phone: phone);
-                if (!opened && context.mounted) {
-                  AppSnackbar.info(
-                    context,
-                    context.l10n.whatsappSellerUnavailable,
-                  );
-                }
-              },
-              child: Text(context.l10n.ordersWhatsapp),
-            ),
-          ],
+          // Hidden by product request: no WhatsApp entry points for now.
+          // if (phone.isNotEmpty) ...[
+          //   const SizedBox(height: AppSpacing.md),
+          //   OutlinedButton(
+          //     onPressed: () async {
+          //       final opened = await launchWhatsApp(phone: phone);
+          //       if (!opened && context.mounted) {
+          //         AppSnackbar.info(
+          //           context,
+          //           context.l10n.whatsappSellerUnavailable,
+          //         );
+          //       }
+          //     },
+          //     child: Text(context.l10n.ordersWhatsapp),
+          //   ),
+          // ],
         ],
       ),
     );

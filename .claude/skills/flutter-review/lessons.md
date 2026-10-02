@@ -715,7 +715,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `product_detail_screen.dart`.
 
 ### 2026-09-08 — Hidden UI stays in source, commented out
-- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store.
+- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store, every WhatsApp button (product sticky-bar chat icon, vendor store, buyer and vendor order detail — `launchWhatsApp` and the `_openStoreWhatsApp`/`_messageSeller` handlers kept; register/edit-profile WhatsApp number fields stay).
 - **Where it applies:** Cart, wishlist and profile UI.
 
 ### 2026-09-08 — Wishlist and cart card hierarchy
