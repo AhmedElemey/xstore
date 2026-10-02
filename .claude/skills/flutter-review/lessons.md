@@ -1025,3 +1025,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-02 — A 2xx `{isSuccess: false}` envelope is a failure
 - **Rule:** The backend can answer a rejected action (e.g. delete account with a wrong password) with HTTP 2xx and `{isSuccess: false, errorEn, errorAr}`. Destructive or auth-sensitive calls must read the body and throw `envelopeFailure(response.data)` — never treat "no DioException" as success. Test both the 2xx-envelope and the 4xx path.
 - **Where it applies:** `dio_error_mapper.dart` `envelopeFailure`, `profile_remote_datasource.dart` `deleteAccount`, any mutation datasource that ignores its response.
+
+### 2026-10-02 — Order `total` includes shipping; the breakdown must add up
+- **Rule:** Live order payloads send an order-level `total` with the listing's shipping already added, but no shipping field. Read `shippingCost`/`shippingFee`/`deliveryFee`, else show shipping as `total − subtotal + discount` (clamped ≥ 0). A flat single-listing line's total is `price × quantity`, never the order `total`. Any price breakdown must satisfy subtotal + shipping − discount = total.
+- **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromFlatOrder`, `order_price_breakdown.dart`.

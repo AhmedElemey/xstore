@@ -1067,6 +1067,17 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
             OrderStatus.pending;
 
     final computedTotal = items.fold<double>(0, (a, b) => a + b.total);
+    final subtotal = _envelopeDouble(data, 'subtotal') ?? computedTotal;
+    final discount = _envelopeDouble(data, 'discount') ?? 0;
+    final total = _envelopeDouble(data, 'total') ?? computedTotal;
+    // Live orders send `total` with the listing's shipping already added
+    // (500 item + 20 shipping = 520) but no shipping field, so the
+    // breakdown read 0 and didn't add up. Without an explicit fee, the
+    // gap between total and subtotal − discount is the shipping charge.
+    final shippingCost = _envelopeDouble(data, 'shippingCost') ??
+        _envelopeDouble(data, 'shippingFee') ??
+        _envelopeDouble(data, 'deliveryFee') ??
+        (total - subtotal + discount).clamp(0, double.infinity).toDouble();
 
     final vendorRatingRaw = _envelopeDouble(data, 'vendorRating') ??
         _envelopeDouble(vendorNode ?? const {}, 'rating') ??
@@ -1159,10 +1170,10 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       paymentMethod: fallbackPayment ?? PaymentMethod.cashOnDelivery,
       isPaid: _envelopeBool(data, 'isPaid'),
       deliveryAddress: deliveryAddress,
-      subtotal: _envelopeDouble(data, 'subtotal') ?? computedTotal,
-      shippingCost: _envelopeDouble(data, 'shippingCost') ?? 0,
-      discount: _envelopeDouble(data, 'discount') ?? 0,
-      total: _envelopeDouble(data, 'total') ?? computedTotal,
+      subtotal: subtotal,
+      shippingCost: shippingCost,
+      discount: discount,
+      total: total,
       trackingNumber: _optString(data, 'trackingNumber'),
       deliveryMethod:
           switch ((_optString(data, 'deliveryMethod') ?? '').toLowerCase()) {
@@ -1303,7 +1314,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         condition: condition.isNotEmpty ? condition : fallback?.condition ?? '',
         price: price,
         quantity: quantity,
-        total: _envelopeDouble(data, 'total') ?? price * quantity,
+        // The order-level `total` includes shipping — it is not this
+        // line's total once the price is known.
+        total: price > 0
+            ? price * quantity
+            : _envelopeDouble(data, 'total') ?? 0,
       ),
     ];
   }
