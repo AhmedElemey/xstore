@@ -545,12 +545,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
     try {
       // CONFIRMED (Postman collection): DELETE /api/auth/delete-account,
-      // JSON body {password, confirmationText}.
-      await _dio.delete<void>(
+      // JSON body {password, confirmationText}. A wrong password can come
+      // back as a 2xx `{isSuccess: false}` envelope — that must not count
+      // as deleted (the UI would log out while the account still exists).
+      final response = await _dio.delete<dynamic>(
         ApiEndpoints.deleteAccount,
         data: {'password': password, 'confirmationText': confirmationText},
         options: ApiAuthHeaders.authenticated(),
       );
+      final failure = envelopeFailure(response.data);
+      if (failure != null) throw failure;
     } on DioException catch (e) {
       throw mapDioException(e);
     }

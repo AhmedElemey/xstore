@@ -1021,3 +1021,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-02 — Sold-out listings stay Active; flag them from stockQuantity
 - **Rule:** The backend keeps a listing `Active` at `stockQuantity: 0`, so a status filter alone lets sold-out items into Home/Explore. Catalog tiles use `isSoldOutListingJson` (sold out only when a count is present and ≤ 0; a missing key isn't), and the shared `SoldOutOverlay` greys them out. Cart add refuses `!isAvailable` lines with `soldOutErrorCode`, so test fixtures for `GET /api/listings/{id}` must include `stockQuantity` or the add fails. Running build_runner rewrites unrelated, already-stale `.g`/`.freezed` files; revert them and commit only the outputs for the models you changed.
 - **Where it applies:** `home_remote_datasource.dart`, `search_result_model.dart`, `product_card.dart`, explore cards, `product_sticky_bar.dart`, `cart_repository_impl.dart`, listing-detail fixtures in live-flow tests.
+
+### 2026-10-02 — A 2xx `{isSuccess: false}` envelope is a failure
+- **Rule:** The backend can answer a rejected action (e.g. delete account with a wrong password) with HTTP 2xx and `{isSuccess: false, errorEn, errorAr}`. Destructive or auth-sensitive calls must read the body and throw `envelopeFailure(response.data)` — never treat "no DioException" as success. Test both the 2xx-envelope and the 4xx path.
+- **Where it applies:** `dio_error_mapper.dart` `envelopeFailure`, `profile_remote_datasource.dart` `deleteAccount`, any mutation datasource that ignores its response.

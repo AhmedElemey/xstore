@@ -134,6 +134,56 @@ void main() {
     );
 
     test(
+      'treats a 200 {isSuccess: false} wrong-password envelope as a failure',
+      skip: MockConfig.useMock
+          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
+          : false,
+      () async {
+        dio = buildDio(
+          (_) => {
+            'isSuccess': false,
+            'data': null,
+            'errorEn': 'Incorrect password.',
+          },
+        );
+        datasource = ProfileRemoteDataSourceImpl(dio);
+
+        expect(
+          () => datasource.deleteAccount(
+            password: 'wrong',
+            confirmationText: 'DELETE',
+          ),
+          throwsA(
+            isA<ServerException>().having(
+              (e) => e.message,
+              'message',
+              'Incorrect password.',
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'succeeds on a 200 {isSuccess: true} envelope',
+      skip: MockConfig.useMock
+          ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
+          : false,
+      () async {
+        dio = buildDio((_) => {'isSuccess': true, 'data': true});
+        datasource = ProfileRemoteDataSourceImpl(dio);
+
+        await expectLater(
+          datasource.deleteAccount(
+            password: 'Secret1!',
+            confirmationText: 'DELETE',
+          ),
+          completes,
+        );
+      },
+    );
+
+    test(
       'maps an already-deleted 400 to a ServerException',
       skip: MockConfig.useMock
           ? 'Requires MOCK=false — MOCK=true short-circuits before Dio'
