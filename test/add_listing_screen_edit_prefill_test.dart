@@ -13,6 +13,7 @@ import 'package:xstore/features/commission/domain/entities/vendor_commission_wal
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
+import 'package:xstore/features/listing/presentation/providers/listing_form_notifier.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
@@ -126,6 +127,28 @@ void main() {
 
       expect(find.text('199.50'), findsOneWidget);
       expect(find.text('Update Listing'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a reset form (e.g. after publishing) scrolls back to the top',
+    (tester) async {
+      await tester.pumpWidget(_app(home: const AddListingScreen()));
+      await tester.pumpAndSettle();
+
+      final scrollable = find.byType(Scrollable).first;
+      await tester.drag(scrollable, const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      final position = tester.state<ScrollableState>(scrollable).position;
+      expect(position.pixels, greaterThan(0));
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AddListingScreen)),
+      );
+      container.read(listingFormNotifierProvider.notifier).reset();
+      await tester.pumpAndSettle();
+
+      expect(position.pixels, 0);
     },
   );
 }

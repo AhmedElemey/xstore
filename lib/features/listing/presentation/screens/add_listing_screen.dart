@@ -56,6 +56,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _shippingCost = TextEditingController();
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
+  // The shell branch keeps this State (and its scroll offset) alive, so a
+  // fresh form must scroll back to the top itself — see the draftRevision
+  // listener in build.
+  final _scroll = ScrollController();
 
   // `/listing/add` is a StatefulShellRoute branch — go_router keeps its
   // Page/State alive across navigations to the same path, so tapping
@@ -118,6 +122,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _brand.dispose();
     _location.dispose();
     _shippingCost.dispose();
+    _scroll.dispose();
     for (final c in _attrKeys) {
       c.dispose();
     }
@@ -296,6 +301,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     ref.listen<ListingFormState>(listingFormNotifierProvider, (prev, next) {
       if (prev?.draftRevision != next.draftRevision) {
         _applyStateToControllers(next);
+        // New/reset/loaded form: start at the top, not where the last
+        // submit (the Publish button at the bottom) left off.
+        if (_scroll.hasClients) _scroll.jumpTo(0);
       }
       // Brand lives on a local controller (same as name/price). Category /
       // subcategory changes clear it in notifier state without bumping
@@ -372,6 +380,7 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
+              controller: _scroll,
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
                 AppSpacing.md,

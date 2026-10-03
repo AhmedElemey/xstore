@@ -527,7 +527,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `app_location_cache.dart`, `location_service.dart`, `dio_provider.dart`, Simulator runs.
 
 ### 2026-09-01 — Forms split between notifier state and local controllers
-- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
+- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. The same listener jumps the form's own `ScrollController` to the top — the shell branch keeps the State, so the old scroll offset (at the Publish button) otherwise survives into the next listing. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
 - **Where it applies:** `listing_form_notifier.dart`, `add_listing_screen.dart`, other shell-tab forms with local controllers.
 
 ### 2026-09-01 — Money defaults of 0 need more than ??
@@ -715,7 +715,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `product_detail_screen.dart`.
 
 ### 2026-09-08 — Hidden UI stays in source, commented out
-- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store.
+- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store, every WhatsApp button (product sticky-bar chat icon, vendor store, buyer and vendor order detail — `launchWhatsApp` and the `_openStoreWhatsApp`/`_messageSeller` handlers kept; register/edit-profile WhatsApp number fields stay).
 - **Where it applies:** Cart, wishlist and profile UI.
 
 ### 2026-09-08 — Wishlist and cart card hierarchy
@@ -1025,3 +1025,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-02 — A 2xx `{isSuccess: false}` envelope is a failure
 - **Rule:** The backend can answer a rejected action (e.g. delete account with a wrong password) with HTTP 2xx and `{isSuccess: false, errorEn, errorAr}`. Destructive or auth-sensitive calls must read the body and throw `envelopeFailure(response.data)` — never treat "no DioException" as success. Test both the 2xx-envelope and the 4xx path.
 - **Where it applies:** `dio_error_mapper.dart` `envelopeFailure`, `profile_remote_datasource.dart` `deleteAccount`, any mutation datasource that ignores its response.
+
+### 2026-10-02 — Order `total` includes shipping; the breakdown must add up
+- **Rule:** Live order payloads send an order-level `total` with the listing's shipping already added, but no shipping field. Read `shippingCost`/`shippingFee`/`deliveryFee`, else show shipping as `total − subtotal + discount` (clamped ≥ 0). A flat single-listing line's total is `price × quantity`, never the order `total`. Any price breakdown must satisfy subtotal + shipping − discount = total.
+- **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromFlatOrder`, `order_price_breakdown.dart`.
