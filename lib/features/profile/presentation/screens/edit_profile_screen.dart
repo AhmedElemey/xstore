@@ -5,9 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:xstore/features/store_categories/domain/entities/store_category_entity.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -871,7 +871,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             controller: _instagram,
             decoration: InputDecoration(
               labelText: context.l10n.instagramLabel,
-              prefixIcon: const Icon(LucideIcons.instagram),
+              prefixIcon: const FaIcon(FontAwesomeIcons.instagram),
               prefixText: '@',
               border: const OutlineInputBorder(),
             ),
@@ -884,7 +884,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             controller: _facebook,
             decoration: InputDecoration(
               labelText: context.l10n.facebookLabel,
-              prefixIcon: const Icon(LucideIcons.facebook),
+              prefixIcon: const FaIcon(FontAwesomeIcons.facebook),
               prefixText: 'fb.com/',
               border: const OutlineInputBorder(),
             ),
