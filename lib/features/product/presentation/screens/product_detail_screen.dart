@@ -31,7 +31,6 @@ import '../widgets/product_image_gallery.dart';
 import '../widgets/product_specifications.dart';
 import '../widgets/product_sticky_bar.dart';
 import '../widgets/quantity_selector.dart';
-import '../widgets/quick_actions_row.dart';
 import '../widgets/reviews_summary.dart';
 import '../widgets/seller_card.dart';
 import '../widgets/similar_products_section.dart';
@@ -266,12 +265,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       delay: const Duration(milliseconds: 150),
                     ),
                   ),
-                  // const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
-                  // SliverToBoxAdapter(
-                  //   child: const QuickActionsRow().fadeSlideIn(
-                  //     delay: const Duration(milliseconds: 180),
-                  //   ),
-                  // ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   if (data.seller != null)
                     SliverToBoxAdapter(

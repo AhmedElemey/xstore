@@ -1041,3 +1041,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-04 — A new provider watch on a screen means new test overrides
 - **Rule:** When a screen starts watching another data provider, directly or through a shared widget (e.g. `LocationCascadeField` watches `allGovernmentsProvider`/`allCitiesProvider`), grep every test that renders that screen and override the provider. An unoverridden watch hits the real Dio and fails a test that never touches the field with "A Timer is still pending". Run the full suite, not just the screen's own tests.
 - **Where it applies:** Any screen gaining a shared widget or provider watch; tests rendering `AddListingScreen`, register, edit profile, checkout.
+
+### 2026-10-04 — Remove hidden UI, don't comment it out
+- **Rule:** When a feature's UI is dropped, delete the code instead of commenting it out. Commented-out widgets leave unused imports and private methods behind, and `flutter analyze` warnings fail CI. Also delete widgets left with no callers, and remove or rewrite tests that drive the removed UI. Git history keeps the old code.
+- **Where it applies:** Any screen where UI is hidden or removed (cart coupon row, product quick actions, address map pin).
