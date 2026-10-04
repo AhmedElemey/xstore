@@ -231,7 +231,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Bug reports against datasources/repositories, especially `auth_remote_datasource.dart`.
 
 ### 2026-08-04 — tempurl.com trial host and key rotate
-- **Rule:** The hosted backend is a free-trial `tempurl.com` instance whose host and Basic license key expire and are replaced (current host: `xstoreegy002-001-site1.etempurl.com`). When hosts/keys conflict or "no data" might be a stale host, ask the user which is current — don't pick the majority. Update every occurrence together: `api_endpoints.dart`, `api_auth_headers.dart`, `Taskfile.yml`, `.github/workflows/build-and-release-apk.yml`, `scripts/probe_*.py`.
+- **Rule:** The hosted backend is a free-trial `tempurl.com` instance whose host and Basic license key expire and are replaced (current host: `xstoreegy002001-001-site1.etempurl.com`). When hosts/keys conflict or "no data" might be a stale host, ask the user which is current — don't pick the majority. Update every occurrence together: `api_endpoints.dart`, `api_auth_headers.dart`, `Taskfile.yml`, `.github/workflows/build-and-release-apk.yml`, `scripts/probe_*.py`.
 - **Where it applies:** Any hardcoded API origin or license key.
 
 ### 2026-08-05 — Home carousels share one fetch
