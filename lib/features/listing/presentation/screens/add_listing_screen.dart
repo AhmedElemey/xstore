@@ -34,6 +34,9 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../cities/presentation/providers/city_dependencies.dart';
+import '../../../governments/presentation/providers/government_dependencies.dart';
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key, this.editingListing});
@@ -52,7 +55,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   final _compare = TextEditingController();
   final _description = TextEditingController();
   final _brand = TextEditingController();
-  final _location = TextEditingController();
   final _shippingCost = TextEditingController();
   final _attrKeys = <TextEditingController>[];
   final _attrVals = <TextEditingController>[];
@@ -60,6 +62,13 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   // fresh form must scroll back to the top itself — see the draftRevision
   // listener in build.
   final _scroll = ScrollController();
+
+  // Picker selection for the Location field. The listing itself only stores
+  // the "Governorate - City" label (the API takes a free-text `location`),
+  // so these ids just drive the picker's highlight and are cleared whenever
+  // the form is reloaded — the saved label then shows as the field's hint.
+  int? _cityId;
+  int? _governorateId;
 
   // `/listing/add` is a StatefulShellRoute branch — go_router keeps its
   // Page/State alive across navigations to the same path, so tapping
@@ -120,7 +129,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _compare.dispose();
     _description.dispose();
     _brand.dispose();
-    _location.dispose();
     _shippingCost.dispose();
     _scroll.dispose();
     for (final c in _attrKeys) {
@@ -138,7 +146,8 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     _compare.text = s.compareAtPriceInput;
     _description.text = s.description;
     _brand.text = s.brand;
-    _location.text = s.location;
+    _cityId = null;
+    _governorateId = null;
     _shippingCost.text = s.shippingCostInput;
     _syncAttributeControllers(s.attributes);
   }
@@ -211,11 +220,41 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     );
   }
 
+  void _onLocationChanged(int? cityId, int? governorateId) {
+    setState(() {
+      _cityId = cityId;
+      _governorateId = governorateId;
+    });
+    // Both lists are already loaded — the picker sheets just showed them.
+    final isArabic = ref.read(appIsArabicProvider);
+    final city = cityId == null
+        ? null
+        : ref
+            .read(allCitiesProvider)
+            .valueOrNull
+            ?.where((c) => c.id == cityId)
+            .firstOrNull;
+    final governorate = ref
+        .read(allGovernmentsProvider)
+        .valueOrNull
+        ?.where((g) => g.id == governorateId)
+        .firstOrNull;
+    // A governorate without a city leaves the field empty, so validation
+    // still asks for a city.
+    ref.read(listingFormNotifierProvider.notifier).updateField(
+          'location',
+          city == null || governorate == null
+              ? ''
+              : '${governorate.name.resolve(isArabic)} - '
+                  '${city.name.resolve(isArabic)}',
+        );
+  }
+
   Future<void> _publish() async {
-    // Drop focus from the last-edited field (usually Location, near the
-    // bottom). Otherwise it stays focused in the kept-alive shell branch and
-    // EditableText scrolls it back into view when the keyboard reappears,
-    // undoing the reset's jump to the top.
+    // Drop focus from the last-edited field (often shipping cost or an
+    // attribute, near the bottom). Otherwise it stays focused in the
+    // kept-alive shell branch and EditableText scrolls it back into view
+    // when the keyboard reappears, undoing the reset's jump to the top.
     FocusScope.of(context).unfocus();
     // Proactive check — the backend 403s "Account must be verified to
     // create listings" for an unverified phone; check first instead of
@@ -229,7 +268,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
     notifier.updateField('compareAtPriceInput', _compare.text);
     notifier.updateField('description', _description.text);
     notifier.updateField('brand', _brand.text);
-    notifier.updateField('location', _location.text);
     notifier.updateField('shippingCostInput', _shippingCost.text);
 
     final formBeforeSubmit = ref.read(listingFormNotifierProvider);
@@ -362,7 +400,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                       notifier.updateField('compareAtPriceInput', _compare.text);
                       notifier.updateField('description', _description.text);
                       notifier.updateField('brand', _brand.text);
-                      notifier.updateField('location', _location.text);
                       notifier.updateField(
                         'shippingCostInput',
                         _shippingCost.text,
@@ -426,7 +463,9 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
                     form: form,
                     notifier: notifier,
                     errors: err,
-                    locationController: _location,
+                    cityId: _cityId,
+                    governorateId: _governorateId,
+                    onLocationChanged: _onLocationChanged,
                     shippingCostController: _shippingCost,
                     attrKeyControllers: _attrKeys,
                     attrValueControllers: _attrVals,
@@ -704,7 +743,9 @@ class _ListingShippingAttributesSection extends StatelessWidget {
     required this.form,
     required this.notifier,
     required this.errors,
-    required this.locationController,
+    required this.cityId,
+    required this.governorateId,
+    required this.onLocationChanged,
     required this.shippingCostController,
     required this.attrKeyControllers,
     required this.attrValueControllers,
@@ -713,7 +754,9 @@ class _ListingShippingAttributesSection extends StatelessWidget {
   final ListingFormState form;
   final ListingFormNotifier notifier;
   final Map<String, String?> errors;
-  final TextEditingController locationController;
+  final int? cityId;
+  final int? governorateId;
+  final void Function(int? cityId, int? governorateId) onLocationChanged;
   final TextEditingController shippingCostController;
   final List<TextEditingController> attrKeyControllers;
   final List<TextEditingController> attrValueControllers;
@@ -732,13 +775,12 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           onChanged: (q) => notifier.updateField('quantity', q),
         ),
         const Gap(AppSpacing.lg),
-        ListingFormField(
-          label: context.l10n.listingFormLocationLabel,
-          controller: locationController,
-          hint: context.l10n.listingFormLocationHint,
-          prefix: const Icon(LucideIcons.mapPin, size: 22),
+        LocationCascadeField(
+          cityId: cityId,
+          governorateId: governorateId,
+          hint: form.location,
           errorText: errors['location'],
-          onChanged: (v) => notifier.updateField('location', v),
+          onChanged: onLocationChanged,
         ),
         const Gap(AppSpacing.lg),
         SwitchListTile.adaptive(
