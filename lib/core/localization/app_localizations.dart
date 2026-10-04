@@ -1052,18 +1052,6 @@ abstract class AppLocalizations {
   /// **'Stock & Shipping'**
   String get listingSectionStockShipping;
 
-  /// No description provided for @listingFormLocationLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location *'**
-  String get listingFormLocationLabel;
-
-  /// No description provided for @listingFormLocationHint.
-  ///
-  /// In en, this message translates to:
-  /// **'City, Region'**
-  String get listingFormLocationHint;
-
   /// No description provided for @listingShippingAvailable.
   ///
   /// In en, this message translates to:

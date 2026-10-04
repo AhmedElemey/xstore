@@ -76,7 +76,9 @@ abstract interface class ListingRemoteDataSource {
   /// (Postman collection) to exist as a plain PUT with no body — used
   /// instead of the generic multipart update so pausing never sends an
   /// empty `imageFiles` set (see `_listingFormData`'s image-wipe risk).
-  Future<ListingModel> deactivateListing(String id);
+  /// The response body is not a listing DTO, so it's ignored — callers
+  /// already know the resulting status.
+  Future<void> deactivateListing(String id);
 
   /// Drops the offline-scaffold cache. Must be called on logout — the
   /// datasource is a keepAlive singleton, so without this a second account
@@ -479,37 +481,28 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
   }
 
   @override
-  Future<ListingModel> deactivateListing(String id) async {
+  Future<void> deactivateListing(String id) async {
     try {
-      final response = await _dio.put<Map<String, dynamic>>(
+      await _dio.put<void>(
         ApiEndpoints.apiListingDeactivate(id),
         options: ApiAuthHeaders.authenticated(),
       );
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty response');
-      }
-      final model = ListingModel.fromJson(data);
-      final idx = _localMine.indexWhere((e) => e.id == id);
-      if (idx != -1) {
-        _localMine[idx] = model;
-      }
-      return model;
+      _markCachedPaused(id);
     } on DioException catch (e) {
-      if (_isOffline(e)) {
-        // Same caveat as resubmitListing above: only meaningful if the
-        // listing is already in the local cache.
-        final idx = _localMine.indexWhere((e) => e.id == id);
-        if (idx != -1) {
-          final updated = _localMine[idx].copyWith(
-            status: listingStatusToWire(ListingStatus.paused).toString(),
-          );
-          _localMine[idx] = updated;
-          return updated;
-        }
-      }
+      // Same caveat as resubmitListing above: the offline fallback only
+      // applies when the listing is already in the local cache.
+      if (_isOffline(e) && _markCachedPaused(id)) return;
       throw mapDioException(e);
     }
+  }
+
+  bool _markCachedPaused(String id) {
+    final idx = _localMine.indexWhere((e) => e.id == id);
+    if (idx == -1) return false;
+    _localMine[idx] = _localMine[idx].copyWith(
+      status: listingStatusToWire(ListingStatus.paused).toString(),
+    );
+    return true;
   }
 
   bool _isOffline(DioException e) {

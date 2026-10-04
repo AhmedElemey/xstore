@@ -13,7 +13,7 @@
 #   API_BASE_URL_PROD=https://api.example.com task build:prod
 #
 # MOCK=false: builds run against the live hosted backend
-# (xstoreegy002-001-site1.etempurl.com, verified serving /api/* over HTTPS).
+# (xstoreegy002001-001-site1.etempurl.com, verified serving /api/* over HTTPS).
 # Pass MOCK=true manually if you ever need a mock-data build.
 #
 # Release APK builds require android/key.properties and a release keystore locally.
@@ -27,9 +27,9 @@ version: 3
 
 vars:
   API_BASE_URL_DEV:
-    sh: echo ${API_BASE_URL_DEV:-https://xstoreegy002-001-site1.etempurl.com}
+    sh: echo ${API_BASE_URL_DEV:-https://xstoreegy002001-001-site1.etempurl.com}
   API_BASE_URL_PROD:
-    sh: echo ${API_BASE_URL_PROD:-https://xstoreegy002-001-site1.etempurl.com}
+    sh: echo ${API_BASE_URL_PROD:-https://xstoreegy002001-001-site1.etempurl.com}
   AMPLITUDE_API_KEY_DEV:
     sh: echo ${AMPLITUDE_API_KEY_DEV:-997771c9a79e1c8d7448c4c8359c3025}
   AMPLITUDE_API_KEY_PROD:

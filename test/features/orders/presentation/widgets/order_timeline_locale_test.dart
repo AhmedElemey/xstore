@@ -31,7 +31,11 @@ OrderEntity _order() => OrderEntity(
       updatedAt: DateTime(2026, 8, 1, 10, 30),
     );
 
-Future<void> _pump(WidgetTester tester, Locale locale) async {
+Future<void> _pump(
+  WidgetTester tester,
+  Locale locale, [
+  OrderEntity? order,
+]) async {
   await tester.pumpWidget(
     MaterialApp(
       locale: locale,
@@ -43,7 +47,7 @@ Future<void> _pump(WidgetTester tester, Locale locale) async {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: SingleChildScrollView(child: OrderTimeline(order: _order())),
+        body: SingleChildScrollView(child: OrderTimeline(order: order ?? _order())),
       ),
     ),
   );
@@ -61,5 +65,46 @@ void main() {
   testWidgets('order dates stay English in English', (tester) async {
     await _pump(tester, const Locale('en'));
     expect(find.textContaining('Aug 1, 2026'), findsWidgets);
+  });
+
+  testWidgets('earlier steps keep their times after the status advances',
+      (tester) async {
+    final order = _order().copyWith(
+      status: OrderStatus.shipped,
+      confirmedAt: DateTime(2026, 8, 1, 11, 0),
+      processingAt: DateTime(2026, 8, 1, 12, 0),
+      shippedAt: DateTime(2026, 8, 1, 13, 0),
+      updatedAt: DateTime(2026, 8, 1, 13, 0),
+    );
+    await _pump(tester, const Locale('en'), order);
+    expect(find.text('Aug 1, 2026 · 11:00'), findsOneWidget);
+    expect(find.text('Aug 1, 2026 · 12:00'), findsOneWidget);
+    expect(find.text('Aug 1, 2026 · 13:00'), findsOneWidget);
+    // Only Delivered is still pending.
+    expect(find.text('Pending'), findsOneWidget);
+  });
+
+  testWidgets('a reached step with no known time is not shown as Pending',
+      (tester) async {
+    final order = _order().copyWith(
+      status: OrderStatus.processing,
+      updatedAt: DateTime(2026, 8, 1, 17, 2),
+    );
+    await _pump(tester, const Locale('en'), order);
+    expect(find.text('Aug 1, 2026 · 17:02'), findsOneWidget);
+    // Confirmed has no timestamp but is done; Shipped + Delivered pending.
+    expect(find.text('Pending'), findsNWidgets(2));
+  });
+
+  test('refetched orders keep locally stamped step times', () {
+    final stamped = _order().copyWith(
+      confirmedAt: DateTime(2026, 8, 1, 11),
+      processingAt: DateTime(2026, 8, 1, 12),
+    );
+    final refetched = _order().copyWith(status: OrderStatus.processing);
+    final merged = refetched.keepingStepTimesFrom(stamped);
+    expect(merged.status, OrderStatus.processing);
+    expect(merged.confirmedAt, DateTime(2026, 8, 1, 11));
+    expect(merged.processingAt, DateTime(2026, 8, 1, 12));
   });
 }

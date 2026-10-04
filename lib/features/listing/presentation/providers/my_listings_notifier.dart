@@ -207,7 +207,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
   Future<void> _applyOptimisticStatusMutation({
     required ListingEntity listing,
     required ListingStatus nextStatus,
-    required Future<Either<Failure, ListingEntity>> Function() runMutation,
+    required Future<Either<Failure, Object>> Function() runMutation,
   }) async {
     final beforeMutation = state;
     final optimistic = listing.copyWith(status: nextStatus);

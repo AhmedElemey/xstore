@@ -9,9 +9,11 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
 import 'package:xstore/features/catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
 import 'package:xstore/features/listing/presentation/widgets/category_picker_sheet.dart';
 
@@ -308,6 +310,9 @@ void main() {
             // vendorCommissionSnapshotProvider read hitting the real,
             // unmocked dioProvider — see the 2026-08-29 flutter-review lesson.
             vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+            // The Location picker watches these; keep them off the real Dio.
+            allGovernmentsProvider.overrideWith((ref) async => const []),
+            allCitiesProvider.overrideWith((ref) async => const []),
           ],
           home: const AddListingScreen(),
         ),
