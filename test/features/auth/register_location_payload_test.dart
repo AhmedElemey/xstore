@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xstore/core/firebase/firebase_options.dart';
 import 'package:xstore/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:xstore/features/auth/domain/entities/consumer_register_params.dart';
 import 'package:xstore/features/auth/domain/entities/vendor_register_params.dart';
@@ -116,5 +117,116 @@ void main() {
       formData.fields.any((e) => e.key == 'governmentId'),
       isFalse,
     );
+  });
+
+  test('consumer register sends null idToken/clientId for a plain sign-up',
+      () async {
+    await datasource.registerConsumer(
+      const ConsumerRegisterParams(
+        fullNameEn: 'Jane Doe',
+        fullNameAr: '',
+        email: 'jane@test.com',
+        phoneNumber: '01012345678',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+        cityId: 1,
+        governorateId: 16,
+      ),
+    );
+
+    final body = interceptor.captured!.data as Map<String, dynamic>;
+    expect(body.containsKey('idToken'), isTrue);
+    expect(body['idToken'], isNull);
+    expect(body.containsKey('clientId'), isTrue);
+    expect(body['clientId'], isNull);
+  });
+
+  test('vendor register sends empty idToken/clientId fields for a plain sign-up',
+      () async {
+    final tmp = await Directory.systemTemp.createTemp('vendor_reg_test');
+    addTearDown(() => tmp.delete(recursive: true));
+    final photo = File('${tmp.path}/store.jpg')
+      ..writeAsBytesSync(const [0, 1, 2, 3]);
+
+    await datasource.registerVendor(
+      VendorRegisterParams(
+        fullNameEn: 'Ahmed Ali',
+        fullNameAr: '',
+        email: 'ahmed@test.com',
+        phoneNumber: '01112345678',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+        storeName: 'Tech Store',
+        storeDescription: 'Best electronics',
+        storeCategoryId: 1,
+        storeCityId: 1,
+        storeGovernmentId: 16,
+        whatsappNumber: '01098765432',
+        profileImagePath: photo.path,
+      ),
+    );
+
+    final formData = interceptor.captured!.data as FormData;
+    String field(String key) =>
+        formData.fields.firstWhere((e) => e.key == key).value;
+    // Multipart has no null — the field is present and empty.
+    expect(field('idToken'), '');
+    expect(field('clientId'), '');
+  });
+
+  test('consumer register sends idToken and clientId for a Google sign-up',
+      () async {
+    await datasource.registerConsumer(
+      const ConsumerRegisterParams(
+        fullNameEn: 'Jane Doe',
+        fullNameAr: '',
+        email: 'jane@test.com',
+        phoneNumber: '01012345678',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+        cityId: 1,
+        governorateId: 16,
+        idToken: 'google-id-token',
+        clientId: DefaultFirebaseOptions.googleWebClientId,
+      ),
+    );
+
+    final body = interceptor.captured!.data as Map<String, dynamic>;
+    expect(body['idToken'], 'google-id-token');
+    expect(body['clientId'], DefaultFirebaseOptions.googleWebClientId);
+  });
+
+  test('vendor register sends idToken and clientId for a Google sign-up',
+      () async {
+    final tmp = await Directory.systemTemp.createTemp('vendor_reg_test');
+    addTearDown(() => tmp.delete(recursive: true));
+    final photo = File('${tmp.path}/store.jpg')
+      ..writeAsBytesSync(const [0, 1, 2, 3]);
+
+    await datasource.registerVendor(
+      VendorRegisterParams(
+        fullNameEn: 'Ahmed Ali',
+        fullNameAr: '',
+        email: 'ahmed@test.com',
+        phoneNumber: '01112345678',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+        storeName: 'Tech Store',
+        storeDescription: 'Best electronics',
+        storeCategoryId: 1,
+        storeCityId: 1,
+        storeGovernmentId: 16,
+        whatsappNumber: '01098765432',
+        profileImagePath: photo.path,
+        idToken: 'google-id-token',
+        clientId: DefaultFirebaseOptions.googleWebClientId,
+      ),
+    );
+
+    final formData = interceptor.captured!.data as FormData;
+    String field(String key) =>
+        formData.fields.firstWhere((e) => e.key == key).value;
+    expect(field('idToken'), 'google-id-token');
+    expect(field('clientId'), DefaultFirebaseOptions.googleWebClientId);
   });
 }

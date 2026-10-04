@@ -52,6 +52,7 @@ class HotDealsSection extends StatelessWidget {
                         imageUrl: d.imageUrl,
                         discountPercent: d.discountPercent,
                         listingId: d.id,
+                        isSoldOut: d.isSoldOut,
                         onTap: () => onOpenProduct?.call(d),
                       )
                           .fadeSlideIn(delay: delay, offsetY: 0)

@@ -122,17 +122,17 @@ void main() {
       expect(result.single.id, 'b2');
     });
 
-    test('falls back to the static set on an empty response', () async {
+    test('returns no banners (no placeholders) on an empty response',
+        () async {
       dio = buildDio({ApiEndpoints.banners: (_) => <dynamic>[]});
       datasource = HomeRemoteDataSourceImpl(dio);
 
       final result = await datasource.fetchBanners();
 
-      expect(result, hasLength(2));
-      expect(result.map((b) => b.id), ['b1', 'b2']);
+      expect(result, isEmpty);
     });
 
-    test('falls back to the static set when offline instead of throwing',
+    test('returns no banners when offline instead of throwing',
         () async {
       dio = buildDio({
         ApiEndpoints.banners: (options) => _offline(options),
@@ -141,7 +141,7 @@ void main() {
 
       final result = await datasource.fetchBanners();
 
-      expect(result, hasLength(2));
+      expect(result, isEmpty);
     });
 
     test('throws (does not fall back) on a non-offline server error',
@@ -173,6 +173,43 @@ void main() {
       final result = await datasource.fetchCategories();
 
       expect(result.map((c) => c.name), ['Electronics', 'Fashion', 'منزل']);
+    });
+
+    test('reads the category picture from imageUrl (live key), then iconUrl',
+        () async {
+      dio = buildDio({
+        ApiEndpoints.catalogCategories: (_) => [
+              {'id': 1, 'nameEn': 'Beauty', 'imageUrl': '/uploads/beauty.png'},
+              {'id': 2, 'nameEn': 'Toys', 'iconUrl': 'https://cdn.test/toys.png'},
+              {'id': 3, 'nameEn': 'Books', 'imageUrl': '  ', 'iconUrl': null},
+              {'id': 4, 'nameEn': 'Other'},
+            ],
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchCategories();
+
+      expect(result.map((c) => c.iconUrl), [
+        '/uploads/beauty.png',
+        'https://cdn.test/toys.png',
+        null,
+        null,
+      ]);
+    });
+
+    test('hides categories an admin switched off (isActive: false)', () async {
+      dio = buildDio({
+        ApiEndpoints.catalogCategories: (_) => [
+              {'id': 7, 'nameEn': 'Automotive', 'isActive': false},
+              {'id': 4, 'nameEn': 'Beauty', 'isActive': true},
+              {'id': 9, 'nameEn': 'Books'},
+            ],
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchCategories();
+
+      expect(result.map((c) => c.name), ['Beauty', 'Books']);
     });
 
     test('falls back to the static set when offline', () async {
@@ -244,6 +281,30 @@ void main() {
       final result = await datasource.fetchHomeAggregate();
 
       expect(result!.hotDeals.map((d) => d.id), ['live']);
+    });
+
+    test('flags stockQuantity 0 as sold out; a missing count is not',
+        () async {
+      dio = buildDio({
+        ApiEndpoints.home: (_) => {
+              'banners': <dynamic>[],
+              'hotDeals': [
+                {..._activeListing(id: 'empty'), 'stockQuantity': 0},
+                {..._activeListing(id: 'stocked'), 'stockQuantity': 4},
+                _activeListing(id: 'unknown'),
+              ],
+              'newArrivals': <dynamic>[],
+              'recommendedForYou': <dynamic>[],
+            },
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchHomeAggregate();
+
+      expect(
+        {for (final d in result!.hotDeals) d.id: d.isSoldOut},
+        {'empty': true, 'stocked': false, 'unknown': false},
+      );
     });
 
     test('returns null when every section is empty', () async {

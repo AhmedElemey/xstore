@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/category_queries.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -46,11 +47,11 @@ class ExploreEmptyState extends StatelessWidget {
               children: [
                 ActionChip(
                   label: Text(context.l10n.mensFashion),
-                  onPressed: () => onPickCategory(context.l10n.categoryQueryMens),
+                  onPressed: () => onPickCategory(kCategoryQueryMens),
                 ),
                 ActionChip(
                   label: Text(context.l10n.womensFashion),
-                  onPressed: () => onPickCategory(context.l10n.categoryQueryWomens),
+                  onPressed: () => onPickCategory(kCategoryQueryWomens),
                 ),
               ],
             ),

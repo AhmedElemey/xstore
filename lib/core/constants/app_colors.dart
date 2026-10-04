@@ -91,4 +91,10 @@ abstract final class AppColors {
   static const notificationIconTintRed = Color(0xFFFEE2E2);
   static const notificationIconTintOrange = Color(0xFFFFEDD5);
   static const notificationIconTintAmber = Color(0xFFFEF3C7);
+
+  /// Brand accents for the platform-fee payment methods.
+  static const paymentInstaPay = Color(0xFF5B2C83);
+  static const paymentVodafoneCash = Color(0xFFE60000);
+  static const paymentOrangeCash = Color(0xFFFF7900);
+  static const paymentEtisalatCash = Color(0xFF6E9E1E);
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/category_queries.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -33,7 +34,7 @@ class FeaturedCategoriesBanner extends StatelessWidget {
               Uri(
                 path: AppRoutes.explore,
                 queryParameters: {
-                  'category': context.l10n.categoryQueryMens,
+                  'category': kCategoryQueryMens,
                 },
               ).toString(),
             ),
@@ -49,7 +50,7 @@ class FeaturedCategoriesBanner extends StatelessWidget {
               Uri(
                 path: AppRoutes.explore,
                 queryParameters: {
-                  'category': context.l10n.categoryQueryWomens,
+                  'category': kCategoryQueryWomens,
                 },
               ).toString(),
             ),

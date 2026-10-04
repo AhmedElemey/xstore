@@ -10,6 +10,7 @@ import '../../../../core/mock/mock_listings.dart';
 import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/app_error_messages.dart';
+import '../../../../core/network/json_list_unwrap.dart';
 import '../../../../core/network/legacy_route_options.dart';
 import '../../../../core/utils/app_location_cache.dart';
 import '../../../orders/data/datasources/orders_remote_datasource.dart';
@@ -354,7 +355,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final id = cartItemId ?? 'cart_item_${DateTime.now().microsecondsSinceEpoch}';
     final listingId = (root['id'] ?? '').toString();
 
-    final price = _num(root['price']);
+    final price = jsonDouble(root['price']);
 
     final sellerRaw = root['seller'] ?? root['vendor'] ?? json['seller'] ?? json['vendor'];
     final seller = sellerRaw is Map ? Map<String, dynamic>.from(sellerRaw) : <String, dynamic>{};
@@ -373,7 +374,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     final sellerRatingRaw = seller['rating'] ?? seller['averageRating'];
     // Missing/zero rating means "no reviews yet" — never fabricate a score.
     final sellerRating =
-        sellerRatingRaw == null ? null : _num(sellerRatingRaw);
+        sellerRatingRaw == null ? null : jsonDouble(sellerRatingRaw);
     final verified = seller['verified'] == true || seller['isVerified'] == true;
 
     final imgs = root['imageUrls'];
@@ -382,7 +383,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         : (root['imageUrl'] ?? '').toString();
 
     final compareRaw = root['compareAtPrice'] ?? root['compare_at_price'];
-    final compare = compareRaw == null ? null : _num(compareRaw);
+    final compare = compareRaw == null ? null : jsonDouble(compareRaw);
 
     final catRaw = root['categoryLabel'] ?? root['category'];
     final cat = catRaw is String
@@ -405,7 +406,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         (root['shippingAvailable'] ?? json['shippingAvailable']) == true;
     final shippingCost = cartLineShippingCost(
       shippingAvailable: shipAvail,
-      listingShippingCost: _num(root['shippingCost'] ?? json['shippingCost']),
+      listingShippingCost: jsonDouble(root['shippingCost'] ?? json['shippingCost']),
     );
 
     return CartItemEntity(
@@ -791,10 +792,5 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to load listing');
     }
-  }
-
-  double _num(Object? value) {
-    if (value is num) return value.toDouble();
-    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 }

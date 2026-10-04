@@ -46,7 +46,6 @@ dependencies:
 
   # UI Utilities
   flutter_svg: ^2.0.10+1
-  lucide_icons: ^0.257.0
   intl: ^0.20.2
   shimmer: ^3.0.0
   gap: ^3.0.1
@@ -70,6 +69,8 @@ dependencies:
   google_maps_flutter: ^2.14.2
   amplitude_flutter: ^4.7.2
   firebase_analytics: ^11.6.0
+  lucide_icons_flutter: ^3.1.21
+  font_awesome_flutter: ^11.0.0
 
 dev_dependencies:
   flutter_test:

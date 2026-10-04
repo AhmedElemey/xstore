@@ -9,7 +9,6 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mock/mock_config.dart';
-import '../../domain/entities/auth_token_pair.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/social_auth_result.dart';
@@ -139,14 +138,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> loginWithGoogle({
     required String idToken,
-    required UserRole role,
   }) async {
     try {
       final model = await _resolveFullUser(
-        await _remote.loginWithGoogle(
-          idToken: idToken,
-          asVendor: role == UserRole.vendor,
-        ),
+        await _remote.loginWithGoogle(idToken: idToken),
       );
       await _persistUser(model);
       return Right(model.toEntity());
@@ -274,31 +269,6 @@ class AuthRepositoryImpl implements AuthRepository {
         confirmNewPassword: confirmNewPassword,
       );
       return const Right(unit);
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthTokenPair>> refreshToken(String token) async {
-    try {
-      final result = await _remote.refreshToken(token);
-      final pair = AuthTokenPair(
-        token: result.token,
-        refreshToken: result.refreshToken,
-      );
-      await _secureStorage.write(key: _tokenKey, value: pair.token);
-      await _secureStorage.write(
-        key: PrefsKeys.authRefreshToken,
-        value: pair.refreshToken,
-      );
-      return Right(pair);
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
     } on ServerException catch (e) {

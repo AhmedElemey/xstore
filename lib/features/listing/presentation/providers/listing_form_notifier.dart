@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show listEquals;
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,6 +13,7 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/utils/compress_picked_image.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import '../../data/models/listing_model.dart'
     show listingConditionFromToken, listingConditionLabel;
@@ -292,30 +292,10 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     state = state.copyWith(photoPaths: list);
   }
 
-  /// Compresses a picked photo before it enters form state. Falls back to
-  /// the original path on any compression failure (unsupported format,
-  /// codec issue on a specific device) — a listing photo should never be
-  /// blocked by compression, only shrunk when possible.
-  Future<String> _compressPhoto(String sourcePath) async {
-    try {
-      final targetPath = '$sourcePath-compressed.jpg';
-      final compressed = await FlutterImageCompress.compressAndGetFile(
-        sourcePath,
-        targetPath,
-        quality: 80,
-        minWidth: 1600,
-        minHeight: 1600,
-      );
-      return compressed?.path ?? sourcePath;
-    } catch (_) {
-      return sourcePath;
-    }
-  }
-
   Future<void> pickFromCamera() async {
     final file = await _picker.pickImage(source: ImageSource.camera);
     if (_disposed || file == null) return;
-    final path = await _compressPhoto(file.path);
+    final path = await compressPickedImage(file.path);
     if (_disposed) return;
     addPhotoPath(path);
   }
@@ -337,7 +317,7 @@ class ListingFormNotifier extends _$ListingFormNotifier {
 
     final compressed = <String>[];
     for (final file in files.take(remaining)) {
-      final path = await _compressPhoto(file.path);
+      final path = await compressPickedImage(file.path);
       if (_disposed) return;
       compressed.add(path);
     }
@@ -474,12 +454,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
     next[index] = row;
     state = state.copyWith(attributes: next);
   }
-
-  void updateAttributeKey(int index, String key) =>
-      updateAttribute(index, key: key);
-
-  void updateAttributeValue(int index, String value) =>
-      updateAttribute(index, value: value);
 
   Map<String, String> _clearKey(Map<String, String> m, String k) {
     final n = Map<String, String>.from(m);
@@ -680,26 +654,6 @@ class ListingFormNotifier extends _$ListingFormNotifier {
       );
       return false;
     }
-  }
-
-  /// Spec: `submit` as [AsyncValue] — use with `ref.listen` / UI that expects `AsyncValue<void>`.
-  Future<AsyncValue<void>> submitAsync(AppLocalizations l10n) async {
-    return AsyncValue.guard(() async {
-      final ok = await submit(l10n);
-      if (_disposed) return;
-      if (!ok) {
-        final msg = state.errors['submit'] ??
-            (state.errors.isNotEmpty ? state.errors.values.first : null) ??
-            l10n.listingValidationFixFields;
-        throw Exception(msg);
-      }
-    });
-  }
-
-  void clearSubmitError() {
-    state = state.copyWith(
-      errors: _clearKey(state.errors, 'submit'),
-    );
   }
 
   String _listingSubmitErrorMessage(Failure failure, AppLocalizations l10n) {

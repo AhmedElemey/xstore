@@ -41,8 +41,6 @@ abstract interface class AuthRemoteDataSource {
     required String newPassword,
     required String confirmNewPassword,
   });
-  Future<({String token, String refreshToken})> refreshToken(String token);
-
   /// See [forgotPassword] doc — same debug-OTP-echo behavior.
   Future<String?> sendEmailOtp(String email);
   Future<void> verifyEmailOtp({required String email, required String otpToken});
@@ -64,17 +62,14 @@ abstract interface class AuthRemoteDataSource {
     required bool rememberMe,
   });
 
-  /// Google sign-in via the role-specific backend route. [idToken] is the
-  /// Google identity token; [asVendor] picks the vendor vs consumer endpoint.
-  /// Auto-creates the account if none exists. Returns a token-only model.
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  });
+  /// Google login for an existing account via `POST /api/auth/google/login`
+  /// (one endpoint for every role). [idToken] is the Google identity token.
+  /// Returns a token-only model.
+  Future<UserModel> loginWithGoogle({required String idToken});
 
   /// Read-only lookup — does NOT create an account. Lets the caller skip the
-  /// buyer/seller picker and go straight to [loginWithGoogle] with the
-  /// returned role when the identity already has one.
+  /// register flow and go straight to [loginWithGoogle] when the identity
+  /// already has an account.
   Future<({bool exists, UserRole? role})> checkGoogleUser({
     required String idToken,
   });
@@ -156,6 +151,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           // not a full ISO timestamp. Omit the key entirely when not provided.
           if (params.dateOfBirth != null)
             'dateOfBirth': _dateOnlyIso(params.dateOfBirth!),
+          // Google sign-up; JSON null on a plain registration.
+          'idToken': params.idToken,
+          'clientId': params.clientId,
         },
         options: ApiAuthHeaders.public(),
       );
@@ -205,6 +203,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'cityId': params.storeCityId,
         'governorateId': params.storeGovernmentId,
         'whatsappNumber': params.whatsappNumber,
+        // Google sign-up; multipart has no null, so a plain registration
+        // sends empty fields (ASP.NET binds them as null).
+        'idToken': params.idToken,
+        'clientId': params.clientId,
         'profileImage': await MultipartFile.fromFile(
           params.profileImagePath,
           // image_picker returns POSIX-style paths on iOS/Android.
@@ -338,27 +340,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<({String token, String refreshToken})> refreshToken(
-    String token,
-  ) async {
-    try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.refreshToken,
-        data: {'token': token},
-        options: ApiAuthHeaders.public(),
-      );
-      final data = response.data;
-      if (data == null) throw const ServerException('Empty response');
-      return (
-        token: data['token'] as String,
-        refreshToken: data['refreshToken'] as String? ?? '',
-      );
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
-
-  @override
   Future<String?> sendEmailOtp(String email) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
@@ -482,20 +463,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  }) async {
+  Future<UserModel> loginWithGoogle({required String idToken}) async {
     if (MockConfig.useMock) {
-      return MockConfig.simulate(
-        asVendor ? mockVendorUserModel() : mockConsumerUserModel(),
-      );
+      return MockConfig.simulate(mockConsumerUserModel());
     }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        asVendor
-            ? ApiEndpoints.googleVendorLogin
-            : ApiEndpoints.googleConsumerLogin,
+        ApiEndpoints.googleLogin,
         data: {
           'idToken': idToken,
           'clientId': DefaultFirebaseOptions.googleWebClientId,

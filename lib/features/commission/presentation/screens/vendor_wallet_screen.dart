@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -8,6 +9,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../domain/entities/vendor_commission_wallet.dart';
 import '../providers/commission_config_provider.dart';
 import '../providers/vendor_commission_wallet_provider.dart';
@@ -75,6 +77,11 @@ class VendorWalletScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            XstoreButton(
+              label: context.l10n.walletPayFees,
+              onPressed: () => context.push(AppRoutes.commissionPayment),
             ),
           ],
         ),

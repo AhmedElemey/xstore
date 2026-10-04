@@ -118,6 +118,39 @@ void main() {
   );
 
   test(
+    'drops admin-hidden categories and subcategories (isActive: false)',
+    skip: skipMock,
+    () async {
+      const body = '''
+[
+  {"id": 7, "nameEn": "Automotive", "isActive": false, "children": [
+    {"id": 32, "nameEn": "Parts", "isActive": true, "parentId": 7}
+  ]},
+  {"id": 4, "nameEn": "Beauty", "isActive": true, "children": [
+    {"id": 23, "nameEn": "Skincare", "isActive": true, "parentId": 4},
+    {"id": 24, "nameEn": "Makeup", "isActive": false, "parentId": 4},
+    {"id": 25, "nameEn": "Hair care", "parentId": 4}
+  ]},
+  {"id": 9, "nameEn": "Books"}
+]
+''';
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
+        ..httpClientAdapter = _Adapter(body);
+      final ds = CatalogCategoryRemoteDataSourceImpl(dio);
+
+      final models = await ds.getCategories();
+
+      // A hidden parent takes its subcategories with it; a missing flag
+      // counts as visible.
+      expect(models.map((e) => e.nameEn), ['Beauty', 'Books']);
+      expect(
+        models.first.children.map((e) => e.nameEn),
+        ['Skincare', 'Hair care'],
+      );
+    },
+  );
+
+  test(
     'unwraps a JSON string body when content-type is not json',
     skip: skipMock,
     () async {

@@ -10,5 +10,6 @@ class DealEntity with _$DealEntity {
     required double price,
     String? imageUrl,
     @Default(0.0) double discountPercent,
+    @Default(false) bool isSoldOut,
   }) = _DealEntity;
 }

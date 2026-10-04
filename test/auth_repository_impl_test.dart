@@ -45,13 +45,11 @@ class _RecordingRemote implements AuthRemoteDataSource {
   String? lastSocialProvider;
   String? lastSocialIdToken;
   String? lastGoogleIdToken;
-  bool? lastGoogleAsVendor;
 
   ConsumerRegisterParams? lastConsumerRegisterParams;
   VendorRegisterParams? lastVendorRegisterParams;
   String? lastChangePasswordCurrent;
   String? lastForgotPasswordEmail;
-  String? lastRefreshTokenInput;
 
   final UserModel socialResponse = mockConsumerUserModel(
     email: 'social@xstore.com',
@@ -107,14 +105,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
       throw UnimplementedError();
 
   @override
-  Future<({String token, String refreshToken})> refreshToken(
-    String token,
-  ) async {
-    lastRefreshTokenInput = token;
-    return (token: 'refreshed-token', refreshToken: 'new-refresh-token');
-  }
-
-  @override
   Future<String?> sendEmailOtp(String email) => throw UnimplementedError();
 
   @override
@@ -161,13 +151,9 @@ class _RecordingRemote implements AuthRemoteDataSource {
       throw UnimplementedError();
 
   @override
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  }) async {
+  Future<UserModel> loginWithGoogle({required String idToken}) async {
     lastGoogleIdToken = idToken;
-    lastGoogleAsVendor = asVendor;
-    return asVendor ? mockVendorUserModel() : mockConsumerUserModel();
+    return mockVendorUserModel();
   }
 
   @override
@@ -236,14 +222,12 @@ void main() {
         expect(remote.lastGoogleIdToken, isNull);
         expect(await readStoredToken(), isNull);
 
-        // The role screen then calls loginWithGoogle with the chosen role.
+        // An existing account then logs in with the Google token.
         final login = await repository.loginWithGoogle(
           idToken: 'google-id-token',
-          role: UserRole.vendor,
         );
         expect(login.isRight(), isTrue);
         expect(remote.lastGoogleIdToken, 'google-id-token');
-        expect(remote.lastGoogleAsVendor, isTrue);
         expect(await readStoredToken(), 'mock-token-vendor');
       },
       skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
@@ -384,22 +368,6 @@ void main() {
       expect(remote.lastForgotPasswordEmail, 'jane@test.com');
       result.fold((_) => fail('expected right'), (otp) {
         expect(otp, '654321');
-      });
-    });
-
-    test('refreshToken persists the new token pair', () async {
-      final result = await repository.refreshToken('stale-token');
-
-      expect(result.isRight(), isTrue);
-      expect(remote.lastRefreshTokenInput, 'stale-token');
-      expect(await readStoredToken(), 'refreshed-token');
-      expect(
-        await storage.read(key: PrefsKeys.authRefreshToken),
-        'new-refresh-token',
-      );
-      result.fold((_) => fail('expected right'), (pair) {
-        expect(pair.token, 'refreshed-token');
-        expect(pair.refreshToken, 'new-refresh-token');
       });
     });
   });

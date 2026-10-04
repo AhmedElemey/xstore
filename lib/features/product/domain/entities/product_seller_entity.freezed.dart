@@ -171,7 +171,7 @@ class __$$ProductSellerEntityImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ProductSellerEntityImpl extends _ProductSellerEntity {
+class _$ProductSellerEntityImpl implements _ProductSellerEntity {
   const _$ProductSellerEntityImpl(
       {required this.id,
       required this.name,
@@ -179,8 +179,7 @@ class _$ProductSellerEntityImpl extends _ProductSellerEntity {
       this.rating,
       this.salesCount,
       this.verified = false,
-      this.whatsappNumber})
-      : super._();
+      this.whatsappNumber});
 
   @override
   final String id;
@@ -233,7 +232,7 @@ class _$ProductSellerEntityImpl extends _ProductSellerEntity {
           this, _$identity);
 }
 
-abstract class _ProductSellerEntity extends ProductSellerEntity {
+abstract class _ProductSellerEntity implements ProductSellerEntity {
   const factory _ProductSellerEntity(
       {required final String id,
       required final String name,
@@ -242,7 +241,6 @@ abstract class _ProductSellerEntity extends ProductSellerEntity {
       final int? salesCount,
       final bool verified,
       final String? whatsappNumber}) = _$ProductSellerEntityImpl;
-  const _ProductSellerEntity._() : super._();
 
   @override
   String get id;

@@ -354,9 +354,6 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     });
   }
 
-  int statusCount(OrderStatus status) =>
-      state.orders.where((o) => o.status == status).length;
-
   void clearError() {
     state = state.copyWith(error: null);
   }

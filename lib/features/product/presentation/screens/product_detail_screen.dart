@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 
@@ -363,6 +363,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
             child: ProductStickyBar(
               showAddToCart: !isVendor,
+              isSoldOut: data.stockQuantity < 1,
               isAddingToCart: data.isAddingToCart,
               onChat: () => _messageSeller(
                 listingId: listing.id,

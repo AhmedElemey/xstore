@@ -8,7 +8,6 @@ import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dar
 import 'package:xstore/features/auth/data/models/user_model.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
-import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 
 class _FakeRemote extends Fake implements AuthRemoteDataSource {
   UserModel? socialResponse;
@@ -21,10 +20,7 @@ class _FakeRemote extends Fake implements AuthRemoteDataSource {
       socialResponse;
 
   @override
-  Future<UserModel> loginWithGoogle({
-    required String idToken,
-    required bool asVendor,
-  }) async =>
+  Future<UserModel> loginWithGoogle({required String idToken}) async =>
       googleResponse!;
 }
 
@@ -133,7 +129,6 @@ void main() {
 
       final either = await repo.loginWithGoogle(
         idToken: 'google-id-token',
-        role: UserRole.consumer,
       );
 
       final result = either.getOrElse((f) => fail('expected Right, got $f'));

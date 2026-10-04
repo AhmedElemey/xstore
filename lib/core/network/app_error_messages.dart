@@ -14,6 +14,10 @@ const phoneNotVerifiedErrorCode = 'phoneNotVerified';
 /// can no longer fill (`GET /api/listings/{id}/stock`). No order was placed.
 const outOfStockErrorCode = 'outOfStock';
 
+/// Adding to cart refused: the listing reports no stock (it stays Active on
+/// the backend at `stockQuantity: 0`).
+const soldOutErrorCode = 'soldOut';
+
 /// CONFIRMED (live probe, 2026-08-14): `POST /api/listings` 403s with this
 /// case when the vendor's store has no saved lat/lng — register only
 /// collects city/governorate dropdowns, so every vendor hits this on their
@@ -37,6 +41,7 @@ String resolveAppError(BuildContext context, String? error) {
   if (error == emailRequiredBeforePhoneErrorCode) {
     return context.l10n.verifyEmailBeforePhone;
   }
+  if (error == soldOutErrorCode) return context.l10n.addToCartSoldOut;
   if (error == accountNotVerifiedErrorCode) {
     return context.l10n.listingErrorAccountNotVerified;
   }

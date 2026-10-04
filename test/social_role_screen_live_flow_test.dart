@@ -5,12 +5,11 @@
 // chain (a hand-built real AuthRepositoryImpl, stubbing only the two
 // Firebase-touching constructor params).
 //
-// Google is now a login-only shortcut: `checkGoogleUser` plus Firebase
-// `isNewUser` decide whether to log in or send the user to register,
-// before the picker is ever considered. An identity that already has an
-// account (lookup hit, or `isNewUser: false` after a lookup miss) skips
-// straight to home. A brand-new identity (`isNewUser: true` and no
-// backend match) no longer auto-creates via this screen —
+// Google is now a login-only shortcut: only `checkGoogleUser` decides
+// whether to log in or send the user to register (Firebase `isNewUser` is
+// ignored), before the picker is ever considered. An identity that already
+// has an account skips straight to home. One with no backend match never
+// auto-creates via this screen —
 // `SocialAuthState.needsRegistration` is set instead, and it's the
 // login/register screens (not this one) that react to it by navigating
 // to Register (see login_screen_live_flow_test.dart for that half).
@@ -52,6 +51,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/analytics/analytics_service.dart';
+import 'package:xstore/core/firebase/firebase_options.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
@@ -61,6 +61,7 @@ import 'package:xstore/core/router/router_notifier.dart';
 import 'package:xstore/features/auth/data/datasources/social_auth_datasource.dart';
 import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
+import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/providers/social_auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/social_role_screen.dart';
@@ -168,7 +169,7 @@ void main() {
     'a Google identity with no matching account sets needsRegistration and '
     'never calls the auto-create login endpoint',
     () async {
-      // Deliberately no googleConsumerLogin/googleVendorLogin route scripted
+      // Deliberately no googleLogin route scripted
       // — if the app still tried to auto-create an account here, the
       // interceptor would reject the unscripted request and this test would
       // fail with a clear signal rather than silently passing.
@@ -210,30 +211,27 @@ void main() {
 
       final social = container.read(socialAuthProvider);
       expect(social.needsRegistration, isTrue);
+      expect(social.googleRegistration?.email, 'noaccount@gmail.com');
+      expect(social.googleRegistration?.displayName, 'No Account Googler');
       expect(social.needsRoleSelection, isFalse);
       expect(social.pendingSocialResult, isNull);
+      // Carried to the register request as `idToken`.
+      expect(social.googleRegistration?.idToken, 'google-id-token-no-account');
     },
   );
 
   test(
-    'a returning Firebase Google identity logs in as consumer when '
-    'check-user reports no Google-linked account',
+    'a returning Firebase Google identity with no backend account goes to '
+    'register instead of being logged in',
     skip: MockConfig.useMock,
     () async {
-      var consumerLoginCalls = 0;
+      // No Google login route scripted: an auto-creating login call would
+      // be rejected as unscripted and surface as an error.
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
           'exists': false,
           'role': null,
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) {
-          consumerLoginCalls++;
-          return {
-            'token': 'access-token-email-account',
-            'refreshToken': 'refresh-token-email-account',
-          };
-        },
-        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
       });
 
       final container = ProviderContainer(
@@ -263,41 +261,27 @@ void main() {
       await container.read(socialAuthProvider.notifier).signInWithGoogle();
 
       final social = container.read(socialAuthProvider);
-      expect(social.needsRegistration, isFalse);
-      expect(social.needsRoleSelection, isFalse);
+      expect(social.needsRegistration, isTrue);
+      expect(social.googleRegistration?.email, 'rehab.mhmd2@gmail.com');
       expect(social.error, isNull);
-      expect(consumerLoginCalls, 1);
-
-      await container.read(analyticsServiceProvider).ready;
     },
   );
 
   test(
-    'a returning Google identity retries vendor login when consumer returns '
-    'a different-role conflict',
+    'a registered Google identity with an unreadable role logs in once via '
+    'the single google/login endpoint and takes its role from the profile',
     skip: MockConfig.useMock,
     () async {
-      var vendorLoginCalls = 0;
+      var googleLoginCalls = 0;
+      Object? googleLoginBody;
       final dio = _fakeDio({
         'POST ${ApiEndpoints.googleCheckUser}': (_) => {
-          'exists': false,
+          'exists': true,
           'role': null,
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (options) => DioException(
-          requestOptions: options,
-          type: DioExceptionType.badResponse,
-          response: Response(
-            requestOptions: options,
-            statusCode: 400,
-            data: {
-              'isSuccess': false,
-              'errorEn':
-                  'This email is already registered under a different role.',
-            },
-          ),
-        ),
-        'POST ${ApiEndpoints.googleVendorLogin}': (_) {
-          vendorLoginCalls++;
+        'POST ${ApiEndpoints.googleLogin}': (options) {
+          googleLoginCalls++;
+          googleLoginBody = options.data;
           return {
             'isSuccess': true,
             'data': {
@@ -350,7 +334,12 @@ void main() {
       final social = container.read(socialAuthProvider);
       expect(social.needsRegistration, isFalse);
       expect(social.error, isNull);
-      expect(vendorLoginCalls, 1);
+      expect(googleLoginCalls, 1);
+      expect(googleLoginBody, {
+        'idToken': 'google-id-token-vendor-email',
+        'clientId': DefaultFirebaseOptions.googleWebClientId,
+      });
+      expect(container.read(authProvider).valueOrNull?.role, UserRole.vendor);
 
       await container.read(analyticsServiceProvider).ready;
     },
@@ -368,7 +357,7 @@ void main() {
           'exists': true,
           'role': 'Consumer',
         },
-        'POST ${ApiEndpoints.googleConsumerLogin}': (_) => {
+        'POST ${ApiEndpoints.googleLogin}': (_) => {
           'token': 'access-token-456',
           'refreshToken': 'refresh-token-456',
         },

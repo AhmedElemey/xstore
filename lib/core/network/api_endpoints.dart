@@ -22,7 +22,7 @@ abstract final class ApiEndpoints {
       !kReleaseMode,
       'API_BASE_URL resolved empty in release; use --dart-define=API_BASE_URL=...',
     );
-    return 'https://xstoreegy002-001-site1.etempurl.com';
+    return 'https://xstoreegy002001-001-site1.etempurl.com';
   }
 
   // ---------------------------------------------------------------------
@@ -32,6 +32,7 @@ abstract final class ApiEndpoints {
   // the real backend and are kept only until the backend adds routes.
   // ---------------------------------------------------------------------
 
+  // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
   // TODO(backend): no social token-exchange route exists yet.
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';
@@ -78,15 +79,12 @@ abstract final class ApiEndpoints {
   static const String sendLoginOtp = '$_api/auth/send-login-otp';
   static const String loginWithOtp = '$_api/auth/login-with-otp';
 
-  /// Google sign-in, split by the role to create/sign in as. Body is
-  /// `{"idToken": "<google identity token>"}` (the Google ID token from
-  /// google_sign_in — NOT a Firebase token). Auto-creates the account if none
-  /// exists. CONFIRMED live (401 "Invalid Google identity token" on a bad token).
-  static const String googleConsumerLogin = '$_api/auth/google/consumer/login';
-  static const String googleVendorLogin = '$_api/auth/google/vendor/login';
+  /// Google login for an existing account (any role). Body is
+  /// `{"idToken", "clientId"}` — the Google ID token from google_sign_in,
+  /// NOT a Firebase token.
+  static const String googleLogin = '$_api/auth/google/login';
 
-  /// Read-only lookup — does NOT create an account, unlike the two routes
-  /// above. Body `{"idToken", "clientId"}`; response `{exists, role}`
+  /// Read-only lookup — does NOT create an account. Body `{"idToken", "clientId"}`; response `{exists, role}`
   /// (role is null when exists is false). Lets the app skip the buyer/seller
   /// picker for a Google identity that already has an account.
   static const String googleCheckUser = '$_api/auth/google/check-user';
@@ -99,12 +97,6 @@ abstract final class ApiEndpoints {
   static const String storeCategories = '$_api/storecategories';
   static const String catalogCategories = '$_api/categories';
   static const String banners = '$_api/banners';
-
-  /// Generic upload endpoint. CONFIRMED (Postman collection): multipart
-  /// POST, file field key `file`, entityType path segment is one of
-  /// `listing`/`avatar`/`banner`. Replaces the old `/api/auth/avatar`
-  /// guess, which was never confirmed against the backend.
-  static String apiUpload(String entityType) => '$_api/uploads/$entityType';
 
   // Wishlist (all authenticated / user-scoped)
   static const String wishlist = '$_api/wishlist';
@@ -210,4 +202,18 @@ abstract final class ApiEndpoints {
   // Vendor reports. CONFIRMED (Postman collection + live 401-not-404
   // probe, 2026-09-24); body contract on VendorReportsRemoteDataSourceImpl.
   static const String vendorReports = '$_api/reports/vendor';
+
+  // ---------------------------------------------------------------------
+  // PROPOSED, not yet built — vendor platform-fee payments. Contract:
+  // docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
+  // Until the backend ships these, submitting a payment surfaces a real
+  // error and the pay-to accounts read as "not configured".
+  // ---------------------------------------------------------------------
+  static const String vendorCommissionPayments =
+      '$_api/vendor/commission-payments';
+
+  /// General Settings (the admin dashboard's remote app config). The list is
+  /// public (no login) and filters with `?search=`; there is no read-by-key
+  /// route, so callers pick the row whose `key` matches exactly.
+  static const String generalSettings = '$_api/general-settings';
 }

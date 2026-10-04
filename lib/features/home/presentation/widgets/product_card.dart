@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/sold_out_overlay.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -18,6 +19,7 @@ class ProductCard extends StatelessWidget {
     this.discountPercent = 0,
     this.listingId,
     this.onTap,
+    this.isSoldOut = false,
   });
 
   final String title;
@@ -26,6 +28,7 @@ class ProductCard extends StatelessWidget {
   final double discountPercent;
   final String? listingId;
   final VoidCallback? onTap;
+  final bool isSoldOut;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +52,7 @@ class ProductCard extends StatelessWidget {
                       theme: theme,
                       imageUrl: imageUrl,
                       listingId: listingId,
+                      isSoldOut: isSoldOut,
                     ),
                   ),
                   _Footer(
@@ -70,6 +74,7 @@ class ProductCard extends StatelessWidget {
                     theme: theme,
                     imageUrl: imageUrl,
                     listingId: listingId,
+                    isSoldOut: isSoldOut,
                   ),
                 ),
                 _Footer(
@@ -88,9 +93,15 @@ class ProductCard extends StatelessWidget {
 }
 
 class _ProductImage extends StatelessWidget {
-  const _ProductImage({required this.theme, this.imageUrl, this.listingId});
+  const _ProductImage({
+    required this.theme,
+    required this.isSoldOut,
+    this.imageUrl,
+    this.listingId,
+  });
 
   final ThemeData theme;
+  final bool isSoldOut;
   final String? imageUrl;
   final String? listingId;
 
@@ -121,6 +132,8 @@ class _ProductImage extends StatelessWidget {
         child: const Center(child: Icon(LucideIcons.image)),
       );
     }
+
+    image = SoldOutOverlay(soldOut: isSoldOut, child: image);
 
     if (listingId == null) {
       return image;

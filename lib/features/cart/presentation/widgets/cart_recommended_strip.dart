@@ -11,6 +11,7 @@ import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
 import '../../../home/presentation/providers/recommended_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
+import '../../../listing/domain/entities/listing_entity.dart';
 
 class CartRecommendedStrip extends ConsumerWidget {
   const CartRecommendedStrip({super.key});
@@ -50,6 +51,7 @@ class CartRecommendedStrip extends ConsumerWidget {
                           : null,
                       discountPercent: 0,
                       listingId: listing.id,
+                      isSoldOut: listing.status == ListingStatus.sold,
                       onTap: () => context.push(
                         '${AppRoutes.product}/${listing.id}',
                       ),

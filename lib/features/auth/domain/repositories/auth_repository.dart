@@ -1,7 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
-import '../entities/auth_token_pair.dart';
 import '../entities/consumer_register_params.dart';
 import '../entities/login_params.dart';
 import '../entities/social_auth_result.dart';
@@ -34,7 +33,6 @@ abstract interface class AuthRepository {
     required String newPassword,
     required String confirmNewPassword,
   });
-  Future<Either<Failure, AuthTokenPair>> refreshToken(String token);
 
   /// Backend-driven email OTP (`/api/auth/send-email-otp` /
   /// `verify-email`) — not wired into any screen yet. Right payload is the
@@ -67,12 +65,11 @@ abstract interface class AuthRepository {
 
   Future<Either<Failure, SocialAuthResult>> signInWithGoogle();
 
-  /// Exchanges a Google identity token for a backend session via the
-  /// role-specific endpoint (auto-creates the account if none exists), then
-  /// resolves the full profile and persists the session.
+  /// Exchanges a Google identity token for a backend session of an existing
+  /// account (`/api/auth/google/login`, any role), then resolves the full
+  /// profile — which carries the role — and persists the session.
   Future<Either<Failure, UserEntity>> loginWithGoogle({
     required String idToken,
-    required UserRole role,
   });
 
   /// Read-only lookup — does NOT create an account. Lets the caller skip the

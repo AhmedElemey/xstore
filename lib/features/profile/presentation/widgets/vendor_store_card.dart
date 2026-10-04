@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -30,7 +30,7 @@ class VendorStoreCard extends ConsumerWidget {
     final joined = u.joinedAt;
 
     final joinedLine =
-        joined != null ? DateFormat('MMM y').format(joined) : '';
+        joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

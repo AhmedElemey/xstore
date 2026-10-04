@@ -15,7 +15,7 @@ class SocialAuthState {
     this.error,
     this.pendingSocialResult,
     this.needsRoleSelection = false,
-    this.needsRegistration = false,
+    this.googleRegistration,
   });
 
   final bool isGoogleLoading;
@@ -26,9 +26,12 @@ class SocialAuthState {
   final bool needsRoleSelection;
 
   /// A Google sign-in found no existing account for this identity — the
-  /// caller (login/register screen) should navigate to the full register
-  /// flow and consume this by calling [SocialAuthNotifier.acknowledgeNeedsRegistration].
-  final bool needsRegistration;
+  /// caller (login/register screen) should open the full register flow
+  /// prefilled with this Google profile (email, name) and consume it by
+  /// calling [SocialAuthNotifier.acknowledgeNeedsRegistration].
+  final SocialAuthResult? googleRegistration;
+
+  bool get needsRegistration => googleRegistration != null;
 
   bool get isAnyLoading => isGoogleLoading || isAppleLoading || isFacebookLoading;
 
@@ -41,7 +44,8 @@ class SocialAuthState {
     SocialAuthResult? pendingSocialResult,
     bool clearPending = false,
     bool? needsRoleSelection,
-    bool? needsRegistration,
+    SocialAuthResult? googleRegistration,
+    bool clearGoogleRegistration = false,
   }) {
     return SocialAuthState(
       isGoogleLoading: isGoogleLoading ?? this.isGoogleLoading,
@@ -50,7 +54,9 @@ class SocialAuthState {
       error: clearError ? null : (error ?? this.error),
       pendingSocialResult: clearPending ? null : (pendingSocialResult ?? this.pendingSocialResult),
       needsRoleSelection: needsRoleSelection ?? this.needsRoleSelection,
-      needsRegistration: needsRegistration ?? this.needsRegistration,
+      googleRegistration: clearGoogleRegistration
+          ? null
+          : (googleRegistration ?? this.googleRegistration),
     );
   }
 }
@@ -75,18 +81,14 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
 
   /// Google is a login-only shortcut, not a self-service account creator:
   /// ask the backend (read-only `checkGoogleUser`) whether this identity
-  /// already has an account. If it does, log straight in with that existing
-  /// role via the role-specific endpoint (which also auto-creates, but is
-  /// never asked to here).
+  /// already has an account. If it does, log straight in via the single
+  /// `/api/auth/google/login` endpoint (any role). Otherwise — or if the
+  /// lookup failed — go to the register flow prefilled with the Google
+  /// profile.
   ///
-  /// `check-user` looks up a Google-linked identity, not an email/password
-  /// account that happens to share this Gmail. Firebase `isNewUser: false`
-  /// means this Google identity has signed in before, so when the lookup
-  /// misses we still log in as consumer rather than sending them to
-  /// register. A brand-new Google identity (`isNewUser: true` and no
-  /// backend match) goes to the normal register flow — Google never
-  /// collects a phone number or password, which the rest of the app
-  /// treats as required account fields.
+  /// Firebase `isNewUser` plays no part: Firebase remembers every Google
+  /// account that ever signed in to the project, so it says nothing about
+  /// whether a backend account exists.
   Future<void> _handleGoogleSuccess(SocialAuthResult result) async {
     final idToken = result.idToken;
     if (idToken == null || idToken.isEmpty) {
@@ -111,22 +113,14 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     });
     if (kDebugMode) {
       debugPrint(
-        'google check-user parsed: exists=$exists role=$existingRole '
-        'isNewUser=${result.isNewUser}',
+        'google check-user parsed: exists=$exists role=$existingRole',
       );
     }
 
-    if (existingRole != null) {
-      await _loginWithGoogleRole(idToken, existingRole!);
-      return;
-    }
-
-    // Lookup miss, unparseable role, or a failed check-user call: a
-    // returning Firebase identity still belongs to an existing account
-    // (often email/password with the same Gmail). Log in rather than
-    // sending them to register.
-    if (exists || !result.isNewUser) {
-      await _loginWithGoogleRole(idToken, UserRole.consumer);
+    // Existing account (any role): one login endpoint; the role comes back
+    // with the profile.
+    if (exists || existingRole != null) {
+      await _loginWithGoogle(idToken);
       return;
     }
 
@@ -135,37 +129,16 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
       isAppleLoading: false,
       isFacebookLoading: false,
       clearError: true,
-      needsRegistration: true,
+      googleRegistration: result,
     );
   }
 
-  Future<void> _loginWithGoogleRole(String idToken, UserRole preferred) async {
+  Future<void> _loginWithGoogle(String idToken) async {
     state = state.copyWith(isGoogleLoading: true, clearError: true);
-    final first = await ref
-        .read(googleLoginUseCaseProvider)
-        .call(idToken: idToken, role: preferred);
+    final result =
+        await ref.read(googleLoginUseCaseProvider).call(idToken: idToken);
     if (!mounted) return;
-    final firstUser = first.fold((_) => null, (user) => user);
-    if (firstUser != null) {
-      _adoptGoogleSession(firstUser);
-      return;
-    }
-    final firstFailure = first.fold((failure) => failure, (_) => null)!;
-    final other = preferred == UserRole.vendor
-        ? UserRole.consumer
-        : UserRole.vendor;
-    if (!_isDifferentRoleConflict(firstFailure)) {
-      state = state.copyWith(
-        isGoogleLoading: false,
-        error: firstFailure.toString(),
-      );
-      return;
-    }
-    final second = await ref
-        .read(googleLoginUseCaseProvider)
-        .call(idToken: idToken, role: other);
-    if (!mounted) return;
-    second.fold(
+    result.fold(
       (failure) {
         state = state.copyWith(isGoogleLoading: false, error: failure.toString());
       },
@@ -187,17 +160,14 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     );
   }
 
-  bool _isDifferentRoleConflict(Object failure) {
-    return failure.toString().toLowerCase().contains('different role');
-  }
-
   /// Consumes [SocialAuthState.needsRegistration] once the caller has
   /// navigated to the register screen, so it doesn't fire again on a later,
   /// unrelated visit to that screen.
   void acknowledgeNeedsRegistration() {
-    state = state.copyWith(needsRegistration: false);
+    state = state.copyWith(clearGoogleRegistration: true);
   }
 
+  // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
   Future<void> signInWithApple() async {
     if (state.isAnyLoading) return;
     state = state.copyWith(

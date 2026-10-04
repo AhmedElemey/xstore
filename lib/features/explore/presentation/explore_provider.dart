@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/analytics/event_names.dart';
-import '../../../core/constants/app_strings.dart';
+import '../../../core/constants/category_queries.dart';
 import '../../../core/constants/prefs_keys.dart';
 import '../../../shared/providers/shared_providers.dart';
 import '../../home/presentation/providers/categories_provider.dart';
@@ -42,8 +42,8 @@ class Explore extends _$Explore {
     // display name and is used directly as the search query.
     final query = switch (categoryKey) {
       null => '',
-      AppStrings.categoryQueryMens => 'men ',
-      AppStrings.categoryQueryWomens => 'women ',
+      kCategoryQueryMens => 'men ',
+      kCategoryQueryWomens => 'women ',
       final key => key,
     };
     if (query.isNotEmpty) {

@@ -15,8 +15,12 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/domain/entities/social_auth_result.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
+import '../../features/commission/domain/entities/commission_payment_method.dart';
+import '../../features/commission/presentation/screens/commission_payment_method_screen.dart';
+import '../../features/commission/presentation/screens/commission_payment_receipt_screen.dart';
 import '../../features/commission/presentation/screens/vendor_wallet_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
@@ -204,7 +208,13 @@ GoRouter goRouter(GoRouterRef ref) {
         pageBuilder: (context, state) => slideRightTransition(
           context,
           state,
-          const RegisterScreen(),
+          // Extra is the Google profile to prefill (in-memory only; a cold
+          // deep link opens a blank form).
+          RegisterScreen(
+            googlePrefill: state.extra is SocialAuthResult
+                ? state.extra as SocialAuthResult
+                : null,
+          ),
         ),
       ),
       GoRoute(
@@ -215,6 +225,7 @@ GoRouter goRouter(GoRouterRef ref) {
           const CourierLoginScreen(),
         ),
       ),
+      // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
       GoRoute(
         path: AppRoutes.socialRoleSelect,
         pageBuilder: (context, state) => slideRightTransition(
@@ -320,6 +331,34 @@ GoRouter goRouter(GoRouterRef ref) {
           state,
           VendorOrderDetailScreen(
             orderId: state.pathParameters['orderId'] ?? '',
+          ),
+        ),
+      ),
+      // Vendor pays platform fees: pick a method, then upload the receipt.
+      // The method rides in the path (not `extra`) so a restart or deep
+      // link still has it; an unknown method goes back to the method list.
+      GoRoute(
+        path: AppRoutes.commissionPayment,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          const CommissionPaymentMethodScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '${AppRoutes.commissionPayment}/:method',
+        redirect: (_, state) =>
+            CommissionPaymentMethod.fromWire(state.pathParameters['method']) ==
+                    null
+                ? AppRoutes.commissionPayment
+                : null,
+        pageBuilder: (context, state) => slideRightTransition(
+          context,
+          state,
+          CommissionPaymentReceiptScreen(
+            method: CommissionPaymentMethod.fromWire(
+              state.pathParameters['method'],
+            )!,
           ),
         ),
       ),

@@ -138,12 +138,11 @@ void main() {
       expect(st.selectedAvailableItems.map((e) => e.id), ['a']);
     });
 
-    test('hasUnavailable / itemCount / selectedCount', () {
+    test('itemCount / selectedCount', () {
       final st = CartState(
         items: [item('a'), item('b', available: false)],
         selectedItemIds: {'a'},
       );
-      expect(st.hasUnavailable, isTrue);
       expect(st.itemCount, 2);
       expect(st.selectedCount, 1);
     });

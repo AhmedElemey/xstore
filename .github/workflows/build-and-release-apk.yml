@@ -24,7 +24,7 @@
 # releases and upload assets.
 #
 # API base URLs are workflow env defaults pointing at the live hosted backend
-# (xstoreegy002-001-site1.etempurl.com). Override below if the host changes.
+# (xstoreegy002001-001-site1.etempurl.com). Override below if the host changes.
 #
 # MOCK=false: release APKs run against the live backend. Flip back to
 # MOCK=true here (and in Taskfile.yml) only for mock-data demo builds.
@@ -81,8 +81,8 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.35.6"
-  API_BASE_URL_DEV: "https://xstoreegy002-001-site1.etempurl.com"
-  API_BASE_URL_PROD: "https://xstoreegy002-001-site1.etempurl.com"
+  API_BASE_URL_DEV: "https://xstoreegy002001-001-site1.etempurl.com"
+  API_BASE_URL_PROD: "https://xstoreegy002001-001-site1.etempurl.com"
   # Amplitude project ingestion keys — like a Firebase/Maps API key, meant to ship
   # inside the client, not treated as a secret. See
   # docs_business/backend/08_AMPLITUDE_INTEGRATION.md.

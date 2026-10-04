@@ -190,12 +190,12 @@ class OrderCard extends ConsumerWidget {
                       Divider(height: AppSpacing.lg),
                       if (!isVendor)
                         Text(
-                          '📦 ${order.vendorStoreName} · ${_shortDate(order.createdAt)}',
+                          '📦 ${order.vendorStoreName} · ${_shortDate(context, order.createdAt)}',
                           style: AppTypography.bodySmall,
                         )
                       else
                         Text(
-                          '💳 ${paymentShort(context, order)} · ${_shortDate(order.createdAt)}',
+                          '💳 ${paymentShort(context, order)} · ${_shortDate(context, order.createdAt)}',
                           style: AppTypography.bodySmall,
                         ),
                       if (!isVendor &&
@@ -204,7 +204,7 @@ class OrderCard extends ConsumerWidget {
                           order.estimatedDelivery != null) ...[
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          '${context.l10n.ordersEstimatedDelivery}: ${_eta(order.estimatedDelivery!)}',
+                          '${context.l10n.ordersEstimatedDelivery}: ${_eta(context, order.estimatedDelivery!)}',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
@@ -367,9 +367,11 @@ class OrderCard extends ConsumerWidget {
         PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
       };
 
-  String _shortDate(DateTime d) => DateFormat('MMM d, yyyy').format(d);
+  String _shortDate(BuildContext context, DateTime d) =>
+      DateFormat('MMM d, yyyy', context.l10n.localeName).format(d);
 
-  String _eta(DateTime d) => DateFormat('EEEE, MMM d').format(d);
+  String _eta(BuildContext context, DateTime d) =>
+      DateFormat('EEEE, MMM d', context.l10n.localeName).format(d);
 
   Future<void> _cancelConsumer(
     BuildContext context,
@@ -473,7 +475,7 @@ class OrderCard extends ConsumerWidget {
                   ListTile(
                     title: Text(context.l10n.ordersEstimatedDeliveryLabel),
                     subtitle: Text(
-                      eta != null ? _shortDate(eta!) : '—',
+                      eta != null ? _shortDate(context, eta!) : '—',
                     ),
                     trailing: const Icon(Icons.calendar_today_outlined),
                     onTap: () async {
