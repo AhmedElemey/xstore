@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -34,6 +35,16 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+
+/// Money fields (price, compare-at, shipping): fold Arabic-Indic digits, then
+/// keep only digits, `.` and `,` — so typed or pasted letters never show in
+/// the field while the notifier silently strips them from state.
+final List<TextInputFormatter> _moneyInputFormatters = [
+  TextInputFormatter.withFunction(
+    (_, v) => v.copyWith(text: AppValidators.foldDigits(v.text)),
+  ),
+  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+];
 
 class AddListingScreen extends ConsumerStatefulWidget {
   const AddListingScreen({super.key, this.editingListing});
@@ -546,6 +557,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           controller: priceController,
           hint: '0.00',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: _moneyInputFormatters,
           prefixText: '${notifier.currencyCode} ',
           errorText: errors['price'],
           onChanged: (v) => notifier.updateField('priceInput', v),
@@ -572,6 +584,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
           hint: '0.00',
           prefixText: '${notifier.currencyCode} ',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: _moneyInputFormatters,
           errorText: errors['compareAt'],
           onChanged: (v) => notifier.updateField('compareAtPriceInput', v),
         ),
@@ -754,6 +767,7 @@ class _ListingShippingAttributesSection extends StatelessWidget {
             controller: shippingCostController,
             hint: '0.00',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: _moneyInputFormatters,
             prefixText: '${notifier.currencyCode} ',
             errorText: errors['shippingCost'],
             onChanged: (v) => notifier.updateField('shippingCostInput', v),

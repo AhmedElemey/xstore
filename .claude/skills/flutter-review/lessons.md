@@ -55,7 +55,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Every paginated GET.
 
 ### 2026-07-11 — Parse formatted money with Validators.parseMoneyInput
-- **Rule:** Listing price fields are comma-formatted; read `priceInput`/`compareAtPriceInput`/`shippingCostInput` with `Validators.parseMoneyInput`, never raw `double.tryParse`.
+- **Rule:** Listing price fields are comma-formatted; read `priceInput`/`compareAtPriceInput`/`shippingCostInput` with `Validators.parseMoneyInput`, never raw `double.tryParse`. Restrict what the field accepts with `inputFormatters` (`_moneyInputFormatters`: fold Arabic digits, allow `[0-9.,]`) — sanitizing only in the notifier leaves pasted letters visible in the controller while state holds a different number.
 - **Where it applies:** `add_listing_screen.dart` and anything derived from formatted money fields.
 
 ### 2026-07-11 — Reach StatefulShellRoute branches with go, once

@@ -151,4 +151,26 @@ void main() {
       expect(position.pixels, 0);
     },
   );
+
+  testWidgets(
+    'money fields reject letters (typed or pasted) and fold Arabic digits',
+    (tester) async {
+      await tester.pumpWidget(_app(home: const AddListingScreen()));
+      await tester.pumpAndSettle();
+
+      final priceField = find.widgetWithText(TextField, '0.00').first;
+      await tester.enterText(priceField, '1m2');
+      await tester.pump();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AddListingScreen)),
+      );
+      expect(tester.widget<TextField>(priceField).controller!.text, '12');
+      expect(container.read(listingFormNotifierProvider).priceInput, '12');
+
+      await tester.enterText(priceField, '١٬٢٣٤.٥abc');
+      await tester.pump();
+      expect(tester.widget<TextField>(priceField).controller!.text, '1234.5');
+    },
+  );
 }
