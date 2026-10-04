@@ -13,7 +13,6 @@ import '../../../governments/presentation/providers/government_dependencies.dart
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
-import '../../../../shared/widgets/map_address_picker.dart';
 
 /// Opens the add/edit address sheet, shared by checkout's address step and
 /// the Profile "My Addresses" screen — the two only places a saved address
@@ -92,9 +91,9 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
   // rest of the app instead of a second, disagreeing location system.
   int? _cityId;
   int? _governorateId;
-  // Set by the map picker (showMapAddressPicker) — carried on the saved
-  // OrderAddress so checkout can use the exact pinned spot instead of the
-  // device's last-known GPS fix when placing the order.
+  // An address pinned on the map before the picker was hidden keeps its
+  // spot on save, so checkout still sends those coordinates instead of the
+  // device's last-known GPS fix.
   double? _pickedLat;
   double? _pickedLng;
   late bool _isDefault;
@@ -137,24 +136,6 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
     _streetCtrl.dispose();
     _postalCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickOnMap() async {
-    final result = await showMapAddressPicker(
-      context,
-      initialLatitude: _pickedLat,
-      initialLongitude: _pickedLng,
-    );
-    if (result == null || !mounted) return;
-    setState(() {
-      _pickedLat = result.latitude;
-      _pickedLng = result.longitude;
-      // A dropped pin's reverse-geocoded label is a reasonable street-line
-      // starting point, but never overwrites text the user already typed.
-      if (_streetCtrl.text.trim().isEmpty && result.addressLine != null) {
-        _streetCtrl.text = result.addressLine!;
-      }
-    });
   }
 
   void _save() {
@@ -300,18 +281,6 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
                 labelText: l10n.checkoutStreet,
                 border: const OutlineInputBorder(),
                 errorText: _fieldErrors['street'],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton.icon(
-              onPressed: _pickOnMap,
-              icon: Icon(
-                _pickedLat == null ? Icons.location_on_outlined : Icons.check,
-              ),
-              label: Text(
-                _pickedLat == null
-                    ? l10n.checkoutPickOnMap
-                    : l10n.checkoutLocationPinned,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

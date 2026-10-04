@@ -173,8 +173,6 @@
   "listingBrandOptional": "الماركة (اختياري)",
   "listingBrandHint": "اسم الماركة",
   "listingSectionStockShipping": "المخزون والشحن",
-  "listingFormLocationLabel": "الموقع *",
-  "listingFormLocationHint": "المدينة، المنطقة",
   "listingShippingAvailable": "الشحن متاح؟",
   "listingShippingCostLabel": "تكلفة الشحن *",
   "listingSectionProductAttributes": "مواصفات المنتج",
