@@ -58,9 +58,11 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
 import 'package:xstore/features/catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
@@ -265,6 +267,9 @@ void main() {
         // Never let the real (mock-datasource) order-stats path run under
         // flutter_test — see the 2026-07-19 lesson in flutter-review/SKILL.md.
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        // The Location picker watches these; keep them off the scripted Dio.
+        allGovernmentsProvider.overrideWith((ref) async => const []),
+        allCitiesProvider.overrideWith((ref) async => const []),
       ]);
       await _settle(tester);
 
@@ -307,6 +312,9 @@ void main() {
         allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
         vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        // The Location picker watches these; keep them off the scripted Dio.
+        allGovernmentsProvider.overrideWith((ref) async => const []),
+        allCitiesProvider.overrideWith((ref) async => const []),
       ]);
       await _settle(tester);
 
@@ -356,6 +364,9 @@ void main() {
         allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
         vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        // The Location picker watches these; keep them off the scripted Dio.
+        allGovernmentsProvider.overrideWith((ref) async => const []),
+        allCitiesProvider.overrideWith((ref) async => const []),
       ]);
       await _settle(tester);
 

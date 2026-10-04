@@ -8,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/expandable_text.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/product_review_entity.dart';
 import '../../domain/entities/review_entity.dart';
@@ -236,24 +237,17 @@ class _ReviewTile extends StatelessWidget {
             ],
           ),
           const Gap(AppSpacing.sm),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topLeft,
-            child: Text(
-              review.text,
-              maxLines: expanded ? null : 2,
-              overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
+          ExpandableText(
+            text: review.text,
+            maxLines: 2,
+            expanded: expanded,
+            style: theme.textTheme.bodyMedium,
+            toggle: TextButton(
               onPressed: onToggle,
               child: Text(expanded ? context.l10n.readLess : context.l10n.readMore),
             ),
           ),
+          const Gap(AppSpacing.sm),
           Text(
             '${context.l10n.helpfulPrompt}${review.helpfulCount}',
             style: theme.textTheme.labelMedium?.copyWith(

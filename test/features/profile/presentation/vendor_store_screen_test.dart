@@ -388,6 +388,6 @@ class _StubListingRepo implements ListingRepository {
   }) => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, ListingEntity>> deactivateListing(String id) =>
+  Future<Either<Failure, Unit>> deactivateListing(String id) =>
       throw UnimplementedError();
 }

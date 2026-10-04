@@ -174,10 +174,10 @@ class ListingRepositoryImpl implements ListingRepository {
   }
 
   @override
-  Future<Either<Failure, ListingEntity>> deactivateListing(String id) async {
+  Future<Either<Failure, Unit>> deactivateListing(String id) async {
     try {
-      final model = await _remote.deactivateListing(id);
-      return Right(model.toEntity());
+      await _remote.deactivateListing(id);
+      return const Right(unit);
     } on NetworkException catch (e) {
       return Left(Failure.network(e.message));
     } on ServerException catch (e) {

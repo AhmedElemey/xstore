@@ -42,12 +42,17 @@ class ProfileStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (role == UserRole.vendor) {
+      // The API doesn't send these yet; show "—" instead of a fake zero.
+      final dash = context.l10n.newSellerEmDash;
+      final s = sales;
+      final r = rating;
+      final pct = responsePercent;
       return _Card(
         child: Row(
           children: [
             Expanded(
               child: _StatCell(
-                value: '${sales ?? 0}',
+                value: s != null && s > 0 ? '$s' : dash,
                 label: context.l10n.statSales,
                 onTap: onSalesTap,
               ),
@@ -55,7 +60,7 @@ class ProfileStatsRow extends StatelessWidget {
             const _VertDivider(),
             Expanded(
               child: _StatCell(
-                value: '${rating?.toStringAsFixed(1) ?? '0.0'} ★',
+                value: r != null && r > 0 ? '${r.toStringAsFixed(1)} ★' : dash,
                 label: context.l10n.statRating,
                 onTap: onRatingTap,
               ),
@@ -63,7 +68,7 @@ class ProfileStatsRow extends StatelessWidget {
             const _VertDivider(),
             Expanded(
               child: _StatCell(
-                value: '${responsePercent ?? 0}%',
+                value: pct != null && pct > 0 ? '$pct%' : dash,
                 label: context.l10n.statResponse,
                 onTap: onResponseTap,
               ),

@@ -55,11 +55,13 @@ class OrderTimeline extends StatelessWidget {
             isCancelNode: isCancelNode,
             isLast: i == steps.length - 1,
             label: isCancelNode ? context.l10n.ordersFilterCancelled : s.label(context),
+            // A reached step without a known time (older orders, or one
+            // confirmed before this session) shows no subtitle, not "Pending".
             subtitle: isCancelNode
                 ? (o.cancelReason ?? context.l10n.statusSubtitleCancelled)
-                : (date != null
+                : date != null
                     ? timeFmt.format(date)
-                    : context.l10n.ordersTimelinePending),
+                    : (filled ? null : context.l10n.ordersTimelinePending),
             cancelReason: isCancelNode ? o.cancelReason : null,
           );
         }),
@@ -90,7 +92,8 @@ class OrderTimeline extends StatelessWidget {
       case _Step.confirmed:
         return o.confirmedAt;
       case _Step.processing:
-        return o.status == OrderStatus.processing ? o.updatedAt : null;
+        return o.processingAt ??
+            (o.status == OrderStatus.processing ? o.updatedAt : null);
       case _Step.shipped:
         return o.shippedAt;
       case _Step.delivered:
@@ -123,7 +126,7 @@ class _TimelineRow extends StatelessWidget {
     required this.isCancelNode,
     required this.isLast,
     required this.label,
-    required this.subtitle,
+    this.subtitle,
     this.cancelReason,
   });
 
@@ -133,7 +136,7 @@ class _TimelineRow extends StatelessWidget {
   final bool isCancelNode;
   final bool isLast;
   final String label;
-  final String subtitle;
+  final String? subtitle;
   final String? cancelReason;
 
   @override
@@ -220,10 +223,11 @@ class _TimelineRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
-                    subtitle,
-                    style: AppTypography.bodySmall,
-                  ),
+                  if (subtitle case final subtitle?)
+                    Text(
+                      subtitle,
+                      style: AppTypography.bodySmall,
+                    ),
                   if (isCancelNode && cancelReason != null) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(

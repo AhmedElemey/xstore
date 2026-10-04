@@ -501,12 +501,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingSectionStockShipping => 'Stock & Shipping';
 
   @override
-  String get listingFormLocationLabel => 'Location *';
-
-  @override
-  String get listingFormLocationHint => 'City, Region';
-
-  @override
   String get listingShippingAvailable => 'Shipping available?';
 
   @override
