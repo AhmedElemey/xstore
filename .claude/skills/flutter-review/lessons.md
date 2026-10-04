@@ -287,7 +287,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Checkout, profile menu, `app_router.dart` redirects, `lib/shared/utils/whatsapp.dart`.
 
 ### 2026-08-15 — Never fabricate marketplace data
-- **Rule:** When the API omits rating/sales, show "New seller" — no invented numbers. Missing stock is 0. A "stop fabricating X" fix must grep the field (`vendorRating`, `rating`, `salesCount`, …) across all of `lib/`: the same fake default (`@Default(4.8)`, `?? 4.8`, `x == 0 ? fallback : x`) is copied into product, cart, order and profile entities and datasources. When replacing a fake default with the real field, check mock/seed data populates it too. Don't publish templated `{{PLACEHOLDER}}` legal text; Terms/Privacy describe what the app actually does.
+- **Rule:** When the API omits rating/sales/response rate, show "New seller" or `newSellerEmDash` ("—") — no invented numbers, and no `?? 0` rendered as "0", "0.0 ★" or "0%" (live get-profile and /api/listings send none of these store stats yet). Missing stock is 0. A "stop fabricating X" fix must grep the field (`vendorRating`, `rating`, `salesCount`, …) across all of `lib/`: the same fake default (`@Default(4.8)`, `?? 4.8`, `x == 0 ? fallback : x`) is copied into product, cart, order and profile entities and datasources. When replacing a fake default with the real field, check mock/seed data populates it too. Don't publish templated `{{PLACEHOLDER}}` legal text; Terms/Privacy describe what the app actually does.
 - **Where it applies:** Seller/product/cart/order entities and datasources, `mock_listings.dart`, `profile_stats_row.dart`, Terms/Privacy screens.
 
 ### 2026-08-15 — Release builds can't use mock or dev hosts

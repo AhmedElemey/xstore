@@ -689,7 +689,9 @@ class _VendorStoreStatsRow extends StatelessWidget {
       ),
       (
         LucideIcons.messageCircle,
-        '${profile.responseRatePercent}%',
+        profile.responseRatePercent > 0
+            ? '${profile.responseRatePercent}%'
+            : context.l10n.newSellerEmDash,
         context.l10n.vendorStoreStatResponse,
       ),
       (
