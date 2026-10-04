@@ -1049,3 +1049,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-04 — "Read more" toggles only when the text actually overflows
 - **Rule:** Never show a Read more/less toggle unconditionally or behind a character-count guess (`length > 120`). Use `shared/widgets/expandable_text.dart` `ExpandableText`, which measures with `TextPainter.didExceedMaxLines` at the laid-out width and renders the toggle only on overflow.
 - **Where it applies:** product description, review tiles, vendor store description, any clamped `maxLines` text with an expand toggle.
+
+### 2026-10-04 — Required-field submit buttons are disabled, never silent no-ops
+- **Rule:** When a form can't submit (e.g. the comment is required), pass `onPressed: null` until it can, instead of an enabled button that returns early. Rebuild only the button: `setS` in a `StatefulBuilder` sheet with no controller, or `ValueListenableBuilder` on an owned controller. Grep for `if (….isEmpty) return;` at the top of `onPressed` handlers.
+- **Where it applies:** Review sheets in `order_card.dart` and `order_action_buttons.dart`, `product_reviews_screen.dart`, any submit button.
