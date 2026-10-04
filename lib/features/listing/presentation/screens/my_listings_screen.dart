@@ -112,9 +112,16 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         clipBehavior: Clip.antiAlias,
         child: ResubmitListingSheet(
           listing: listing,
-          onSubmit: (newPrice) => ref
-              .read(myListingsNotifierProvider.notifier)
-              .resubmitListing(listing.id, newPrice),
+          onSubmit: (newPrice) async {
+            final ok = await ref
+                .read(myListingsNotifierProvider.notifier)
+                .resubmitListing(listing.id, newPrice);
+            if (ok) return null;
+            if (!mounted) return '';
+            // The notifier stores the server's localized reason (errorEn/
+            // errorAr) on state.error — show that, not a generic message.
+            return ref.read(myListingsNotifierProvider).error ?? '';
+          },
         ),
       ),
     );
