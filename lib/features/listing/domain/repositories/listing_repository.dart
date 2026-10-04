@@ -58,5 +58,5 @@ abstract interface class ListingRepository {
     required double newPrice,
   });
 
-  Future<Either<Failure, ListingEntity>> deactivateListing(String id);
+  Future<Either<Failure, Unit>> deactivateListing(String id);
 }
