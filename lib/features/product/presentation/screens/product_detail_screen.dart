@@ -266,12 +266,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       delay: const Duration(milliseconds: 150),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
-                  SliverToBoxAdapter(
-                    child: const QuickActionsRow().fadeSlideIn(
-                      delay: const Duration(milliseconds: 180),
-                    ),
-                  ),
+                  // const SliverToBoxAdapter(child: Gap(AppSpacing.lg)),
+                  // SliverToBoxAdapter(
+                  //   child: const QuickActionsRow().fadeSlideIn(
+                  //     delay: const Duration(milliseconds: 180),
+                  //   ),
+                  // ),
                   const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
                   if (data.seller != null)
                     SliverToBoxAdapter(

@@ -99,8 +99,8 @@ class CartConsumerBody extends ConsumerWidget {
                         }
                         final tail = index - groups.length;
                         switch (tail) {
-                          case 0:
-                            return const CouponInputRow();
+                          // case 0:
+                          //   return const CouponInputRow();
                           case 1:
                             return const Gap(AppSpacing.lg);
                           case 2:
