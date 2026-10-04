@@ -231,7 +231,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Bug reports against datasources/repositories, especially `auth_remote_datasource.dart`.
 
 ### 2026-08-04 — tempurl.com trial host and key rotate
-- **Rule:** The hosted backend is a free-trial `tempurl.com` instance whose host and Basic license key expire and are replaced (current host: `xstoreegy002-001-site1.etempurl.com`). When hosts/keys conflict or "no data" might be a stale host, ask the user which is current — don't pick the majority. Update every occurrence together: `api_endpoints.dart`, `api_auth_headers.dart`, `Taskfile.yml`, `.github/workflows/build-and-release-apk.yml`, `scripts/probe_*.py`.
+- **Rule:** The hosted backend is a free-trial `tempurl.com` instance whose host and Basic license key expire and are replaced (current host: `xstoreegy002001-001-site1.etempurl.com`). When hosts/keys conflict or "no data" might be a stale host, ask the user which is current — don't pick the majority. Update every occurrence together: `api_endpoints.dart`, `api_auth_headers.dart`, `Taskfile.yml`, `.github/workflows/build-and-release-apk.yml`, `scripts/probe_*.py`.
 - **Where it applies:** Any hardcoded API origin or license key.
 
 ### 2026-08-05 — Home carousels share one fetch
@@ -527,7 +527,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `app_location_cache.dart`, `location_service.dart`, `dio_provider.dart`, Simulator runs.
 
 ### 2026-09-01 — Forms split between notifier state and local controllers
-- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
+- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. The same listener jumps the form's own `ScrollController` to the top — the shell branch keeps the State, so the old scroll offset (at the Publish button) otherwise survives into the next listing. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
 - **Where it applies:** `listing_form_notifier.dart`, `add_listing_screen.dart`, other shell-tab forms with local controllers.
 
 ### 2026-09-01 — Money defaults of 0 need more than ??
@@ -715,7 +715,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `product_detail_screen.dart`.
 
 ### 2026-09-08 — Hidden UI stays in source, commented out
-- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store.
+- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store, every WhatsApp button (product sticky-bar chat icon, vendor store, buyer and vendor order detail — `launchWhatsApp` and the `_openStoreWhatsApp`/`_messageSeller` handlers kept; register/edit-profile WhatsApp number fields stay).
 - **Where it applies:** Cart, wishlist and profile UI.
 
 ### 2026-09-08 — Wishlist and cart card hierarchy
@@ -979,7 +979,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `analytics_service.dart` (`_toFirebase`, `_logToFirebase`), analytics tests.
 
 ### 2026-09-24 — Reconciling against a new Postman collection
-- **Rule:** Diff all of `api_endpoints.dart` against the collection's full folder list, not just the routes the task touches, and treat routes commented "assumption"/"not confirmed" as open items. Compare write bodies key by key — a misnamed multipart key (`storeGovernmentId` vs `storeGovernorateId`) silently drops data — and list documented query params the app never sends. A collection can be ahead of the server: an unauthenticated request returns 401/403 for a deployed route and a bare 404 for a missing one (compare with a made-up sibling path). Never guess seeded passwords — register a throwaway account or ask for a test account. Confirmed: `/api/governorates`; uploads `POST /api/uploads/{entityType}` (field `file`); `GET /api/banners` (tolerant parsing, static fallback); `GET /api/home`; report routes and admin vendor block/unblock are deployed; `POST /api/users/{id}/block|unblock` are not.
+- **Rule:** Diff all of `api_endpoints.dart` against the collection's full folder list, not just the routes the task touches, and treat routes commented "assumption"/"not confirmed" as open items. Compare write bodies key by key — a misnamed multipart key (`storeGovernmentId` vs `storeGovernorateId`) silently drops data — and list documented query params the app never sends. A collection can be ahead of the server: an unauthenticated request returns 401/403 for a deployed route and a bare 404 for a missing one (compare with a made-up sibling path). Never guess seeded passwords — register a throwaway account or ask for a test account. Confirmed: `/api/governorates`; uploads `POST /api/uploads/{entityType}` (field `file`); `GET /api/banners` (tolerant parsing; empty or offline means no carousel, never placeholder banners); `GET /api/home`; report routes and admin vendor block/unblock are deployed; `POST /api/users/{id}/block|unblock` are not.
 - **Where it applies:** `api_endpoints.dart` and its datasources.
 
 ### 2026-09-24 — Check stock for every line before ordering
@@ -1017,3 +1017,15 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-01 — General Settings live at /api/general-settings, with no read-by-key route
 - **Rule:** App config is read from the public `GET /api/general-settings?search=<key>` → `{items: [{key, value, dataType}], ...}`; `search` is a substring match, so pick the row whose `key` is exactly the one wanted. `/api/app-settings/{key}` was a proposal and 404s. Probe a route before wiring it, even one named in our own handoff doc.
 - **Where it applies:** `ApiEndpoints.generalSettings`, `commission_payment_remote_datasource.dart`, any remote-config read.
+
+### 2026-10-02 — Sold-out listings stay Active; flag them from stockQuantity
+- **Rule:** The backend keeps a listing `Active` at `stockQuantity: 0`, so a status filter alone lets sold-out items into Home/Explore. Catalog tiles use `isSoldOutListingJson` (sold out only when a count is present and ≤ 0; a missing key isn't), and the shared `SoldOutOverlay` greys them out. Cart add refuses `!isAvailable` lines with `soldOutErrorCode`, so test fixtures for `GET /api/listings/{id}` must include `stockQuantity` or the add fails. Running build_runner rewrites unrelated, already-stale `.g`/`.freezed` files; revert them and commit only the outputs for the models you changed.
+- **Where it applies:** `home_remote_datasource.dart`, `search_result_model.dart`, `product_card.dart`, explore cards, `product_sticky_bar.dart`, `cart_repository_impl.dart`, listing-detail fixtures in live-flow tests.
+
+### 2026-10-02 — A 2xx `{isSuccess: false}` envelope is a failure
+- **Rule:** The backend can answer a rejected action (e.g. delete account with a wrong password) with HTTP 2xx and `{isSuccess: false, errorEn, errorAr}`. Destructive or auth-sensitive calls must read the body and throw `envelopeFailure(response.data)` — never treat "no DioException" as success. Test both the 2xx-envelope and the 4xx path.
+- **Where it applies:** `dio_error_mapper.dart` `envelopeFailure`, `profile_remote_datasource.dart` `deleteAccount`, any mutation datasource that ignores its response.
+
+### 2026-10-02 — Order `total` includes shipping; the breakdown must add up
+- **Rule:** Live order payloads send an order-level `total` with the listing's shipping already added, but no shipping field. Read `shippingCost`/`shippingFee`/`deliveryFee`, else show shipping as `total − subtotal + discount` (clamped ≥ 0). A flat single-listing line's total is `price × quantity`, never the order `total`. Any price breakdown must satisfy subtotal + shipping − discount = total.
+- **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromFlatOrder`, `order_price_breakdown.dart`.

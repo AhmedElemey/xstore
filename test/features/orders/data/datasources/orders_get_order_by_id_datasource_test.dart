@@ -131,6 +131,69 @@ void main() {
     );
 
     test(
+      'shows shipping as total minus subtotal when the API sends no fee',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('should not hydrate when the order already has snapshots');
+          }
+          return {
+            'id': 3,
+            'status': 'pending',
+            'quantity': 1,
+            'total': 520,
+            'listing': {
+              'id': 9,
+              'titleEn': 'Lamp',
+              'price': 500,
+              'imageUrls': ['https://cdn.example/lamp.jpg'],
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('3');
+
+        expect(order?.items.single.total, 500);
+        expect(order?.subtotal, 500);
+        expect(order?.shippingCost, 20);
+        expect(order?.discount, 0);
+        expect(order?.total, 520);
+      },
+      skip: skipMock,
+    );
+
+    test(
+      'prefers an explicit shippingCost over the derived gap',
+      () async {
+        final ds = datasourceFor((options) {
+          if (options.path.contains('/listings/')) {
+            fail('should not hydrate when the order already has snapshots');
+          }
+          return {
+            'id': 4,
+            'status': 'pending',
+            'quantity': 1,
+            'subtotal': 500,
+            'shippingCost': 15,
+            'total': 515,
+            'listing': {
+              'id': 9,
+              'titleEn': 'Lamp',
+              'price': 500,
+              'imageUrls': ['https://cdn.example/lamp.jpg'],
+            },
+          };
+        });
+
+        final order = await ds.getOrderById('4');
+
+        expect(order?.shippingCost, 15);
+        expect(order?.total, 515);
+      },
+      skip: skipMock,
+    );
+
+    test(
       'reads nested buyer for consumerName without using listing userName',
       () async {
         final ds = datasourceFor((options) {

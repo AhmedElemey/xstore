@@ -1847,6 +1847,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sold => 'مباع';
 
   @override
+  String get soldOut => 'نفدت الكمية';
+
+  @override
+  String get addToCartSoldOut => 'المنتج ده نفدت كميته ومينفعش يتضاف للسلة.';
+
+  @override
   String get pending => 'قيد الانتظار';
 
   @override

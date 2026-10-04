@@ -1844,6 +1844,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sold => 'Sold';
 
   @override
+  String get soldOut => 'Sold out';
+
+  @override
+  String get addToCartSoldOut =>
+      'This item is sold out and can\'t be added to your cart.';
+
+  @override
   String get pending => 'Pending';
 
   @override

@@ -25,6 +25,7 @@ mixin _$DealModel {
   double get price => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
   double get discountPercent => throw _privateConstructorUsedError;
+  bool get isSoldOut => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -42,7 +43,8 @@ abstract class $DealModelCopyWith<$Res> {
       String title,
       double price,
       String? imageUrl,
-      double discountPercent});
+      double discountPercent,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -63,6 +65,7 @@ class _$DealModelCopyWithImpl<$Res, $Val extends DealModel>
     Object? price = null,
     Object? imageUrl = freezed,
     Object? discountPercent = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -85,6 +88,10 @@ class _$DealModelCopyWithImpl<$Res, $Val extends DealModel>
           ? _value.discountPercent
           : discountPercent // ignore: cast_nullable_to_non_nullable
               as double,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -102,7 +109,8 @@ abstract class _$$DealModelImplCopyWith<$Res>
       String title,
       double price,
       String? imageUrl,
-      double discountPercent});
+      double discountPercent,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -121,6 +129,7 @@ class __$$DealModelImplCopyWithImpl<$Res>
     Object? price = null,
     Object? imageUrl = freezed,
     Object? discountPercent = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_$DealModelImpl(
       id: null == id
@@ -143,6 +152,10 @@ class __$$DealModelImplCopyWithImpl<$Res>
           ? _value.discountPercent
           : discountPercent // ignore: cast_nullable_to_non_nullable
               as double,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -155,7 +168,8 @@ class _$DealModelImpl implements _DealModel {
       required this.title,
       required this.price,
       this.imageUrl,
-      this.discountPercent = 0.0});
+      this.discountPercent = 0.0,
+      this.isSoldOut = false});
 
   factory _$DealModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$DealModelImplFromJson(json);
@@ -171,10 +185,13 @@ class _$DealModelImpl implements _DealModel {
   @override
   @JsonKey()
   final double discountPercent;
+  @override
+  @JsonKey()
+  final bool isSoldOut;
 
   @override
   String toString() {
-    return 'DealModel(id: $id, title: $title, price: $price, imageUrl: $imageUrl, discountPercent: $discountPercent)';
+    return 'DealModel(id: $id, title: $title, price: $price, imageUrl: $imageUrl, discountPercent: $discountPercent, isSoldOut: $isSoldOut)';
   }
 
   @override
@@ -188,13 +205,15 @@ class _$DealModelImpl implements _DealModel {
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
             (identical(other.discountPercent, discountPercent) ||
-                other.discountPercent == discountPercent));
+                other.discountPercent == discountPercent) &&
+            (identical(other.isSoldOut, isSoldOut) ||
+                other.isSoldOut == isSoldOut));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, title, price, imageUrl, discountPercent);
+  int get hashCode => Object.hash(
+      runtimeType, id, title, price, imageUrl, discountPercent, isSoldOut);
 
   @JsonKey(ignore: true)
   @override
@@ -216,7 +235,8 @@ abstract class _DealModel implements DealModel {
       required final String title,
       required final double price,
       final String? imageUrl,
-      final double discountPercent}) = _$DealModelImpl;
+      final double discountPercent,
+      final bool isSoldOut}) = _$DealModelImpl;
 
   factory _DealModel.fromJson(Map<String, dynamic> json) =
       _$DealModelImpl.fromJson;
@@ -231,6 +251,8 @@ abstract class _DealModel implements DealModel {
   String? get imageUrl;
   @override
   double get discountPercent;
+  @override
+  bool get isSoldOut;
   @override
   @JsonKey(ignore: true)
   _$$DealModelImplCopyWith<_$DealModelImpl> get copyWith =>

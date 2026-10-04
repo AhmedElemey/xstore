@@ -21,6 +21,7 @@ mixin _$DealEntity {
   double get price => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
   double get discountPercent => throw _privateConstructorUsedError;
+  bool get isSoldOut => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $DealEntityCopyWith<DealEntity> get copyWith =>
@@ -38,7 +39,8 @@ abstract class $DealEntityCopyWith<$Res> {
       String title,
       double price,
       String? imageUrl,
-      double discountPercent});
+      double discountPercent,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -59,6 +61,7 @@ class _$DealEntityCopyWithImpl<$Res, $Val extends DealEntity>
     Object? price = null,
     Object? imageUrl = freezed,
     Object? discountPercent = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -81,6 +84,10 @@ class _$DealEntityCopyWithImpl<$Res, $Val extends DealEntity>
           ? _value.discountPercent
           : discountPercent // ignore: cast_nullable_to_non_nullable
               as double,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -98,7 +105,8 @@ abstract class _$$DealEntityImplCopyWith<$Res>
       String title,
       double price,
       String? imageUrl,
-      double discountPercent});
+      double discountPercent,
+      bool isSoldOut});
 }
 
 /// @nodoc
@@ -117,6 +125,7 @@ class __$$DealEntityImplCopyWithImpl<$Res>
     Object? price = null,
     Object? imageUrl = freezed,
     Object? discountPercent = null,
+    Object? isSoldOut = null,
   }) {
     return _then(_$DealEntityImpl(
       id: null == id
@@ -139,6 +148,10 @@ class __$$DealEntityImplCopyWithImpl<$Res>
           ? _value.discountPercent
           : discountPercent // ignore: cast_nullable_to_non_nullable
               as double,
+      isSoldOut: null == isSoldOut
+          ? _value.isSoldOut
+          : isSoldOut // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -151,7 +164,8 @@ class _$DealEntityImpl implements _DealEntity {
       required this.title,
       required this.price,
       this.imageUrl,
-      this.discountPercent = 0.0});
+      this.discountPercent = 0.0,
+      this.isSoldOut = false});
 
   @override
   final String id;
@@ -164,10 +178,13 @@ class _$DealEntityImpl implements _DealEntity {
   @override
   @JsonKey()
   final double discountPercent;
+  @override
+  @JsonKey()
+  final bool isSoldOut;
 
   @override
   String toString() {
-    return 'DealEntity(id: $id, title: $title, price: $price, imageUrl: $imageUrl, discountPercent: $discountPercent)';
+    return 'DealEntity(id: $id, title: $title, price: $price, imageUrl: $imageUrl, discountPercent: $discountPercent, isSoldOut: $isSoldOut)';
   }
 
   @override
@@ -181,12 +198,14 @@ class _$DealEntityImpl implements _DealEntity {
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
             (identical(other.discountPercent, discountPercent) ||
-                other.discountPercent == discountPercent));
+                other.discountPercent == discountPercent) &&
+            (identical(other.isSoldOut, isSoldOut) ||
+                other.isSoldOut == isSoldOut));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, title, price, imageUrl, discountPercent);
+  int get hashCode => Object.hash(
+      runtimeType, id, title, price, imageUrl, discountPercent, isSoldOut);
 
   @JsonKey(ignore: true)
   @override
@@ -201,7 +220,8 @@ abstract class _DealEntity implements DealEntity {
       required final String title,
       required final double price,
       final String? imageUrl,
-      final double discountPercent}) = _$DealEntityImpl;
+      final double discountPercent,
+      final bool isSoldOut}) = _$DealEntityImpl;
 
   @override
   String get id;
@@ -213,6 +233,8 @@ abstract class _DealEntity implements DealEntity {
   String? get imageUrl;
   @override
   double get discountPercent;
+  @override
+  bool get isSoldOut;
   @override
   @JsonKey(ignore: true)
   _$$DealEntityImplCopyWith<_$DealEntityImpl> get copyWith =>

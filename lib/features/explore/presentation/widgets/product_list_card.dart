@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/sold_out_overlay.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../domain/entities/search_result_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -73,25 +74,28 @@ class ProductListCard extends StatelessWidget {
                           child: SizedBox(
                             width: AppSpacing.x4l * 2 + AppSpacing.lg,
                             height: AppSpacing.x4l * 2 + AppSpacing.lg,
-                            child: item.imageUrl != null
-                                ? Semantics(
-                                    image: true,
-                                    label:
-                                        '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
-                                    child: AppCachedNetworkImage(
-                                      imageUrl: item.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      memCacheWidth: 336,
-                                      memCacheHeight: 336,
-                                      placeholder: (_, __) => ColoredBox(
-                                        color: context.textDisabled,
+                            child: SoldOutOverlay(
+                              soldOut: item.isSoldOut,
+                              child: item.imageUrl != null
+                                  ? Semantics(
+                                      image: true,
+                                      label:
+                                          '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
+                                      child: AppCachedNetworkImage(
+                                        imageUrl: item.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        memCacheWidth: 336,
+                                        memCacheHeight: 336,
+                                        placeholder: (_, __) => ColoredBox(
+                                          color: context.textDisabled,
+                                        ),
+                                        errorWidget: (_, __, ___) => ColoredBox(
+                                          color: context.textDisabled,
+                                        ),
                                       ),
-                                      errorWidget: (_, __, ___) => ColoredBox(
-                                        color: context.textDisabled,
-                                      ),
-                                    ),
-                                  )
-                                : ColoredBox(color: context.textDisabled),
+                                    )
+                                  : ColoredBox(color: context.textDisabled),
+                            ),
                           ),
                         ),
                         const Gap(AppSpacing.md),
@@ -199,11 +203,17 @@ class ProductListCard extends StatelessWidget {
                                     const Gap(AppSpacing.sm),
                                     Expanded(
                                       child: FilledButton(
-                                        onPressed: () {
-                                          HapticFeedback.lightImpact();
-                                          onAddToCart();
-                                        },
-                                        child: Text(context.l10n.addToCart),
+                                        onPressed: item.isSoldOut
+                                            ? null
+                                            : () {
+                                                HapticFeedback.lightImpact();
+                                                onAddToCart();
+                                              },
+                                        child: Text(
+                                          item.isSoldOut
+                                              ? context.l10n.soldOut
+                                              : context.l10n.addToCart,
+                                        ),
                                       ),
                                     ),
                                   ],

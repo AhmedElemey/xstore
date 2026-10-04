@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
@@ -12,7 +12,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../shared/utils/whatsapp.dart';
+// import '../../../../shared/utils/whatsapp.dart'; // WhatsApp hidden
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -517,23 +517,24 @@ class _BuyerSection extends StatelessWidget {
                 ),
               ],
             ),
-            if (order.consumerPhone.trim().isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
-                onPressed: () async {
-                  final opened = await launchWhatsApp(
-                    phone: order.consumerPhone,
-                  );
-                  if (!opened && context.mounted) {
-                    AppSnackbar.info(
-                      context,
-                      context.l10n.whatsappSellerUnavailable,
-                    );
-                  }
-                },
-                child: Text(context.l10n.ordersWhatsapp),
-              ),
-            ],
+            // Hidden by product request: no WhatsApp entry points for now.
+            // if (order.consumerPhone.trim().isNotEmpty) ...[
+            //   const SizedBox(height: AppSpacing.md),
+            //   OutlinedButton(
+            //     onPressed: () async {
+            //       final opened = await launchWhatsApp(
+            //         phone: order.consumerPhone,
+            //       );
+            //       if (!opened && context.mounted) {
+            //         AppSnackbar.info(
+            //           context,
+            //           context.l10n.whatsappSellerUnavailable,
+            //         );
+            //       }
+            //     },
+            //     child: Text(context.l10n.ordersWhatsapp),
+            //   ),
+            // ],
           ],
         ),
       ),

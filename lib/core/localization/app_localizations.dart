@@ -3668,6 +3668,18 @@ abstract class AppLocalizations {
   /// **'Sold'**
   String get sold;
 
+  /// No description provided for @soldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold out'**
+  String get soldOut;
+
+  /// No description provided for @addToCartSoldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is sold out and can\'t be added to your cart.'**
+  String get addToCartSoldOut;
+
   /// No description provided for @pending.
   ///
   /// In en, this message translates to:

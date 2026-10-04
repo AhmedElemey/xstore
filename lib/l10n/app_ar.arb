@@ -630,6 +630,8 @@
   "active": "نشط",
   "paused": "موقوف",
   "sold": "مباع",
+  "soldOut": "نفدت الكمية",
+  "addToCartSoldOut": "المنتج ده نفدت كميته ومينفعش يتضاف للسلة.",
   "pending": "قيد الانتظار",
   "rejected": "مرفوض",
   "resubmitListing": "إعادة الإرسال",

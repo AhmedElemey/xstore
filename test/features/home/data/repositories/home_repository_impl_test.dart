@@ -4,6 +4,7 @@ import 'package:xstore/features/home/data/models/banner_model.dart';
 import 'package:xstore/features/home/data/models/category_model.dart';
 import 'package:xstore/features/home/data/models/deal_model.dart';
 import 'package:xstore/features/home/data/repositories/home_repository_impl.dart';
+import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 
 import '../../../../helpers/stub_home_remote_datasource.dart';
 
@@ -106,6 +107,32 @@ void main() {
         (list) => expect(list.single.id, 'n1'),
       );
       expect(hotDealsFallbackCalled, isFalse);
+    });
+
+    test('maps a sold-out deal to ListingStatus.sold', () async {
+      final repo = HomeRepositoryImpl(
+        StubHomeRemoteDataSource(
+          onFetchHomeAggregate: () async => (
+            banners: <BannerModel>[],
+            hotDeals: <DealModel>[],
+            newArrivals: const [
+              DealModel(id: 'n1', title: 'Gone', price: 50, isSoldOut: true),
+              DealModel(id: 'n2', title: 'Here', price: 50),
+            ],
+            recommendedForYou: <DealModel>[],
+          ),
+        ),
+      );
+
+      final result = await repo.getNewArrivals();
+
+      result.fold(
+        (_) => fail('expected Right'),
+        (list) => expect(
+          list.map((l) => l.status),
+          [ListingStatus.sold, ListingStatus.active],
+        ),
+      );
     });
 
     test('falls back to hot-deals-derived listings when the aggregate has none',

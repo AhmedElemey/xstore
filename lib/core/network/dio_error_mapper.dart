@@ -91,6 +91,15 @@ AppException mapDioException(DioException e) {
   }
 }
 
+/// A `Result` envelope with `isSuccess: false` is a failure even when the
+/// HTTP status is 2xx. Returns the exception to throw, or null otherwise.
+ServerException? envelopeFailure(Object? data) {
+  if (data is! Map || data['isSuccess'] != false) return null;
+  return ServerException(
+    _arabicServerMessage(data) ?? _serverErrorMessage(data),
+  );
+}
+
 /// Reads a human-readable message from common xStore API error bodies:
 /// `{"error": "..."}`, `{"message": "..."}`, `{"error": {"message": "..."}}`,
 /// or the CONFIRMED (live probe, 2026-08-14) envelope
