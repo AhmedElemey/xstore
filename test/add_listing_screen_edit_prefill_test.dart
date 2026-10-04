@@ -9,9 +9,13 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
 import 'package:xstore/features/catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import 'package:xstore/features/cities/domain/entities/city_entity.dart';
+import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import 'package:xstore/features/governments/domain/entities/government_entity.dart';
+import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/providers/listing_form_notifier.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
@@ -28,6 +32,16 @@ const _automotive = CatalogCategoryEntity(
       parentId: 7,
     ),
   ],
+);
+
+const _gizaGov = GovernmentEntity(
+  id: 21,
+  name: LocalizedText(en: 'Giza', ar: 'الجيزة'),
+);
+const _dokkiCity = CityEntity(
+  id: 5,
+  name: LocalizedText(en: 'Dokki', ar: 'الدقي'),
+  governorateId: 21,
 );
 
 const _emptyWallet = VendorCommissionWallet(
@@ -71,6 +85,8 @@ Widget _app({required Widget home}) {
             ),
           )),
       vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+      allGovernmentsProvider.overrideWith((ref) async => const [_gizaGov]),
+      allCitiesProvider.overrideWith((ref) async => const [_dokkiCity]),
       // Never let the real (mock-datasource) order-stats path run under
       // flutter_test — it schedules a simulated-latency Timer via
       // MockConfig.simulate that the test binding flags as still pending
@@ -120,10 +136,15 @@ void main() {
       );
       expect(brandField.controller!.text, 'Logitech');
 
-      final locationField = tester.widget<TextField>(
-        find.widgetWithText(TextField, 'Cairo'),
+      // The saved location shows on the governorate/city picker until a
+      // new pair is picked.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('locationCascadeField')),
+          matching: find.text('Cairo'),
+        ),
+        findsOneWidget,
       );
-      expect(locationField.controller!.text, 'Cairo');
 
       expect(find.text('199.50'), findsOneWidget);
       expect(find.text('Update Listing'), findsOneWidget);
@@ -149,6 +170,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(position.pixels, 0);
+    },
+  );
+
+  testWidgets(
+    'Location is picked from governorate then city and saved as their names',
+    (tester) async {
+      await tester.pumpWidget(
+        _app(home: const AddListingScreen(editingListing: _existingListing)),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AddListingScreen)),
+      );
+
+      final field = find.byKey(const ValueKey('locationCascadeField'));
+      await tester.ensureVisible(field);
+      await tester.pumpAndSettle();
+      await tester.tap(field);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Giza'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Dokki'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(listingFormNotifierProvider).location, 'Giza - Dokki');
+      expect(find.text('Giza - Dokki'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a governorate without a city leaves Location empty so validation asks for it',
+    (tester) async {
+      await tester.pumpWidget(
+        _app(home: const AddListingScreen(editingListing: _existingListing)),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AddListingScreen)),
+      );
+
+      final field = find.byKey(const ValueKey('locationCascadeField'));
+      await tester.ensureVisible(field);
+      await tester.pumpAndSettle();
+      await tester.tap(field);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Giza'));
+      await tester.pumpAndSettle();
+      // Dismiss the auto-opened city sheet without picking a city.
+      await tester.tapAt(const Offset(20, 20));
+      await tester.pumpAndSettle();
+
+      expect(container.read(listingFormNotifierProvider).location, isEmpty);
     },
   );
 }

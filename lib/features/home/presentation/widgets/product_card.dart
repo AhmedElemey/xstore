@@ -146,7 +146,7 @@ class _ProductImage extends StatelessWidget {
         Positioned(
           top: AppSpacing.sm,
           right: AppSpacing.sm,
-          child: WishHeartButton(listingId: listingId!, size: AppSpacing.x2l),
+          child: WishHeartButton(listingId: listingId!, size: AppSpacing.xl),
         ),
       ],
     );

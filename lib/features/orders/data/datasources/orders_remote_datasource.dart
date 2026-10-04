@@ -903,6 +903,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       final now = DateTime.now();
       final next = row.copyWith(
         status: OrderStatus.processing,
+        processingAt: now,
         updatedAt: now,
       );
       _replace(next);
@@ -1194,6 +1195,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       updatedAt:
           DateTime.tryParse(_optString(data, 'updatedAt') ?? '') ?? DateTime.now(),
       confirmedAt: DateTime.tryParse(_optString(data, 'confirmedAt') ?? ''),
+      processingAt: DateTime.tryParse(_optString(data, 'processingAt') ?? ''),
       shippedAt: DateTime.tryParse(_optString(data, 'shippedAt') ?? ''),
       deliveredAt: DateTime.tryParse(_optString(data, 'deliveredAt') ?? ''),
       cancelledAt: DateTime.tryParse(_optString(data, 'cancelledAt') ?? ''),
