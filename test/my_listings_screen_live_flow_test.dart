@@ -163,7 +163,9 @@ void main() {
         'GET ${ApiEndpoints.apiMyListings}': (_) => [_listingJson()],
         'PUT ${ApiEndpoints.apiListingDeactivate('9001')}': (options) {
           putRequest = options;
-          return _listingJson(status: 3);
+          // The live endpoint replies with a message, not a listing DTO —
+          // parsing it as a listing threw "Null is not a subtype of num".
+          return {'message': 'Listing deactivated successfully.'};
         },
       });
 
@@ -184,6 +186,11 @@ void main() {
       await _settle(tester);
 
       expect(putRequest, isNotNull);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(
+        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
+        ListingStatus.paused,
+      );
     },
   );
 

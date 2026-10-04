@@ -503,12 +503,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingSectionStockShipping => 'المخزون والشحن';
 
   @override
-  String get listingFormLocationLabel => 'الموقع *';
-
-  @override
-  String get listingFormLocationHint => 'المدينة، المنطقة';
-
-  @override
   String get listingShippingAvailable => 'الشحن متاح؟';
 
   @override

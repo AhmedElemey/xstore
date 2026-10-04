@@ -173,8 +173,6 @@
   "listingBrandOptional": "Brand (optional)",
   "listingBrandHint": "Brand name",
   "listingSectionStockShipping": "Stock & Shipping",
-  "listingFormLocationLabel": "Location *",
-  "listingFormLocationHint": "City, Region",
   "listingShippingAvailable": "Shipping available?",
   "listingShippingCostLabel": "Shipping cost *",
   "listingSectionProductAttributes": "Product Attributes",
