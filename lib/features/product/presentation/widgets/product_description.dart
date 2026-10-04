@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/expandable_text.dart';
 
 class ProductDescription extends StatelessWidget {
   const ProductDescription({
@@ -31,31 +32,28 @@ class ProductDescription extends StatelessWidget {
             ),
           ),
           const Gap(AppSpacing.md),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topLeft,
-            child: Text(
-              text,
-              maxLines: expanded ? null : 4,
-              overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.45,
-                fontWeight: FontWeight.w400,
-              ),
+          ExpandableText(
+            text: text,
+            maxLines: 4,
+            expanded: expanded,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.45,
+              fontWeight: FontWeight.w400,
             ),
-          ),
-          const Gap(AppSpacing.sm),
-          GestureDetector(
-            onTap: onToggle,
-            child: Text(
-              expanded
-                  ? '${context.l10n.readLess} ${context.arrowBack}'
-                  : '${context.l10n.readMore} ${context.arrowForward}',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
+            toggle: Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: GestureDetector(
+                onTap: onToggle,
+                child: Text(
+                  expanded
+                      ? '${context.l10n.readLess} ${context.arrowBack}'
+                      : '${context.l10n.readMore} ${context.arrowForward}',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ),
