@@ -63,7 +63,14 @@ class VendorOrderDetailNotifier extends StateNotifier<VendorOrderDetailState> {
       ),
       (order) {
         final prev = state.order;
-        var next = order;
+        // The list copy holds the step times stamped by this session's
+        // status actions; the detail copy holds ones from earlier refetches.
+        final listed = ref
+            .read(vendorOrdersProvider)
+            .orders
+            .where((o) => o.id == orderId)
+            .firstOrNull;
+        var next = order.keepingStepTimesFrom(listed).keepingStepTimesFrom(prev);
         if (prev != null &&
             (next.trackingNumber == null ||
                 next.trackingNumber!.trim().isEmpty) &&

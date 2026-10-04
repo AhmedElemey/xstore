@@ -1029,3 +1029,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-02 — Order `total` includes shipping; the breakdown must add up
 - **Rule:** Live order payloads send an order-level `total` with the listing's shipping already added, but no shipping field. Read `shippingCost`/`shippingFee`/`deliveryFee`, else show shipping as `total − subtotal + discount` (clamped ≥ 0). A flat single-listing line's total is `price × quantity`, never the order `total`. Any price breakdown must satisfy subtotal + shipping − discount = total.
 - **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromFlatOrder`, `order_price_breakdown.dart`.
+
+### 2026-10-04 — Order step times must survive refetches
+- **Rule:** Live order rows carry no per-step timestamps (`confirmedAt`/`processingAt`/…), so vendor status actions stamp them locally and every refetch/merge goes through `keepingStepTimesFrom(old)`. The timeline shows a time only from a real step field (processing falls back to `updatedAt` only while current) and never labels a reached step "Pending" — no time means no subtitle.
+- **Where it applies:** `order_timeline.dart`, `vendor_orders_provider.dart` (`fetchOrders`, `_mergeOrder`, `_optimisticStatus`), `vendor_order_detail_provider.dart` `fetchOrder`, `order_entity.dart`.
