@@ -151,9 +151,12 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
         error: failure.toString(),
       ),
       (orders) {
+        final previous = {for (final o in state.orders) o.id: o};
         state = state.copyWith(
           isLoading: false,
-          orders: orders,
+          orders: [
+            for (final o in orders) o.keepingStepTimesFrom(previous[o.id]),
+          ],
           hasMore: orders.length >= _vendorPageSize,
           page: 1,
         );
@@ -376,6 +379,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
                     cancelledAt: cancelledAt ?? o.cancelledAt,
                     deliveryMethod: deliveryMethod ?? o.deliveryMethod,
                     confirmedAt: status == OrderStatus.confirmed ? now : o.confirmedAt,
+                    processingAt:
+                        status == OrderStatus.processing ? now : o.processingAt,
                     updatedAt: now,
                   )
                 : o,
@@ -390,7 +395,8 @@ class VendorOrdersNotifier extends StateNotifier<VendorOrdersState> {
     if (idx < 0) {
       state = state.copyWith(orders: [order, ...state.orders]);
     } else {
-      final next = [...state.orders]..[idx] = order;
+      final next = [...state.orders]
+        ..[idx] = order.keepingStepTimesFrom(state.orders[idx]);
       state = state.copyWith(orders: next);
     }
     _recompute();
