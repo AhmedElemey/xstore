@@ -527,7 +527,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `app_location_cache.dart`, `location_service.dart`, `dio_provider.dart`, Simulator runs.
 
 ### 2026-09-01 — Forms split between notifier state and local controllers
-- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. The same listener jumps the form's own `ScrollController` to the top — the shell branch keeps the State, so the old scroll offset (at the Publish button) otherwise survives into the next listing. When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
+- **Rule:** Add Listing's controllers re-sync only when `draftRevision` changes, so every reset (including publish success, done synchronously before awaiting draft deletion) must bump it. The same listener jumps the form's own `ScrollController` to the top — the shell branch keeps the State, so the old scroll offset (at the Publish button) otherwise survives into the next listing. Also unfocus on submit: a field left focused in the kept-alive branch scrolls itself back into view when the keyboard reappears, undoing the jump (widget tests don't catch this). When a parent picker change invalidates a child text field (category → brand), clear it in the same `copyWith` and sync its controller (bump the revision or `ref.listen` the field).
 - **Where it applies:** `listing_form_notifier.dart`, `add_listing_screen.dart`, other shell-tab forms with local controllers.
 
 ### 2026-09-01 — Money defaults of 0 need more than ??
@@ -1029,3 +1029,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-02 — Order `total` includes shipping; the breakdown must add up
 - **Rule:** Live order payloads send an order-level `total` with the listing's shipping already added, but no shipping field. Read `shippingCost`/`shippingFee`/`deliveryFee`, else show shipping as `total − subtotal + discount` (clamped ≥ 0). A flat single-listing line's total is `price × quantity`, never the order `total`. Any price breakdown must satisfy subtotal + shipping − discount = total.
 - **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromFlatOrder`, `order_price_breakdown.dart`.
+
+### 2026-10-04 — image_picker camera has no rear-lens hint on Android
+- **Rule:** `ImageSource.camera` on Android only adds a lens hint for `CameraDevice.front`; for rear it adds nothing, so the camera app opens on its last-used lens (often the selfie camera). `MainActivity.startActivityForResult` adds rear hints to `ACTION_IMAGE_CAPTURE` intents that don't ask for the front camera. Keep that override, and don't re-add per-call workarounds. These hints are best-effort, and some OEM camera apps ignore them.
+- **Where it applies:** any `pickImage(source: ImageSource.camera)` call, `android/app/.../MainActivity.kt`

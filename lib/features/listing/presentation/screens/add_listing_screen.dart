@@ -212,6 +212,11 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   }
 
   Future<void> _publish() async {
+    // Drop focus from the last-edited field (usually Location, near the
+    // bottom). Otherwise it stays focused in the kept-alive shell branch and
+    // EditableText scrolls it back into view when the keyboard reappears,
+    // undoing the reset's jump to the top.
+    FocusScope.of(context).unfocus();
     // Proactive check — the backend 403s "Account must be verified to
     // create listings" for an unverified phone; check first instead of
     // letting a guaranteed-failing request go out.
