@@ -1029,3 +1029,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-02 — Order `total` includes shipping; the breakdown must add up
 - **Rule:** Live order payloads send an order-level `total` with the listing's shipping already added, but no shipping field. Read `shippingCost`/`shippingFee`/`deliveryFee`, else show shipping as `total − subtotal + discount` (clamped ≥ 0). A flat single-listing line's total is `price × quantity`, never the order `total`. Any price breakdown must satisfy subtotal + shipping − discount = total.
 - **Where it applies:** `orders_remote_datasource.dart` `_orderFromApiMap`/`_itemFromFlatOrder`, `order_price_breakdown.dart`.
+
+### 2026-10-04 — image_picker camera has no rear-lens hint on Android
+- **Rule:** `ImageSource.camera` on Android only adds a lens hint for `CameraDevice.front`; for rear it adds nothing, so the camera app opens on its last-used lens (often the selfie camera). `MainActivity.startActivityForResult` adds rear hints to `ACTION_IMAGE_CAPTURE` intents that don't ask for the front camera. Keep that override, and don't re-add per-call workarounds. These hints are best-effort, and some OEM camera apps ignore them.
+- **Where it applies:** any `pickImage(source: ImageSource.camera)` call, `android/app/.../MainActivity.kt`
