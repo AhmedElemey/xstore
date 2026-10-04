@@ -303,18 +303,18 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            OutlinedButton.icon(
-              onPressed: _pickOnMap,
-              icon: Icon(
-                _pickedLat == null ? Icons.location_on_outlined : Icons.check,
-              ),
-              label: Text(
-                _pickedLat == null
-                    ? l10n.checkoutPickOnMap
-                    : l10n.checkoutLocationPinned,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
+            // OutlinedButton.icon(
+            //   onPressed: _pickOnMap,
+            //   icon: Icon(
+            //     _pickedLat == null ? Icons.location_on_outlined : Icons.check,
+            //   ),
+            //   label: Text(
+            //     _pickedLat == null
+            //         ? l10n.checkoutPickOnMap
+            //         : l10n.checkoutLocationPinned,
+            //   ),
+            // ),
+            // const SizedBox(height: AppSpacing.sm),
             LocationCascadeField(
               cityId: _cityId,
               governorateId: _governorateId,

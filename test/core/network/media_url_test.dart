@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/network/media_url.dart';
 
 void main() {
-  const current = 'https://xstoreegy002-001-site1.etempurl.com';
+  const current = 'https://xstoreegy002001-001-site1.etempurl.com';
 
   test('rewrites a stale jtempurl avatar onto the current API origin', () {
     const stale =
