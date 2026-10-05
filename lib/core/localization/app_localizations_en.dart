@@ -567,9 +567,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuMyOrders => 'My Orders';
 
   @override
-  String get menuEarnings => 'Earnings';
-
-  @override
   String get menuWishlist => 'Wishlist';
 
   @override
@@ -859,9 +856,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add a screenshot or photo of the successful transfer';
 
   @override
-  String get commissionPaymentReceiptRequired => 'Add the transfer receipt';
-
-  @override
   String get commissionPaymentRemoveReceipt => 'Remove receipt';
 
   @override
@@ -1074,12 +1068,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersBuyerInfo => 'Buyer Info';
-
-  @override
-  String get ordersMessageSeller => '💬 Message Seller';
-
-  @override
-  String get ordersMessageSellerSoon => 'Messaging — coming soon';
 
   @override
   String get ordersWhatsapp => '💬 WhatsApp';
@@ -1649,12 +1637,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stockQuantityRequired => 'Stock quantity *';
-
-  @override
-  String get chatSeller => 'Chat';
-
-  @override
-  String get chatSellerSoon => 'Chat with seller — coming soon';
 
   @override
   String get addedToCart => 'Added to cart!';
@@ -2602,9 +2584,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidHoursError => 'Closing time must be after opening time';
-
-  @override
-  String get discardChanges => 'Discard Changes';
 
   @override
   String applyPresetConfirm(String preset) {

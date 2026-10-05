@@ -570,9 +570,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get menuMyOrders => 'طلباتي';
 
   @override
-  String get menuEarnings => 'الأرباح';
-
-  @override
   String get menuWishlist => 'المفضلة';
 
   @override
@@ -862,9 +859,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'أضف لقطة شاشة أو صورة للتحويل الناجح';
 
   @override
-  String get commissionPaymentReceiptRequired => 'أضف إيصال التحويل';
-
-  @override
   String get commissionPaymentRemoveReceipt => 'إزالة الإيصال';
 
   @override
@@ -1077,12 +1071,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ordersBuyerInfo => 'بيانات المشتري';
-
-  @override
-  String get ordersMessageSeller => '💬 راسل البائع';
-
-  @override
-  String get ordersMessageSellerSoon => 'الرسائل — جاية قريباً';
 
   @override
   String get ordersWhatsapp => '💬 واتساب';
@@ -1653,12 +1641,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stockQuantityRequired => 'الكمية المتاحة *';
-
-  @override
-  String get chatSeller => 'محادثة';
-
-  @override
-  String get chatSellerSoon => 'محادثة البائع — قريباً';
 
   @override
   String get addedToCart => 'تمت الإضافة للسلة!';
@@ -2594,9 +2576,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invalidHoursError => 'وقت الإغلاق لازم يكون بعد وقت الفتح';
-
-  @override
-  String get discardChanges => 'تجاهل التغييرات';
 
   @override
   String applyPresetConfirm(String preset) {

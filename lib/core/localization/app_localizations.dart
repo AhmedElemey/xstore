@@ -1184,12 +1184,6 @@ abstract class AppLocalizations {
   /// **'My Orders'**
   String get menuMyOrders;
 
-  /// No description provided for @menuEarnings.
-  ///
-  /// In en, this message translates to:
-  /// **'Earnings'**
-  String get menuEarnings;
-
   /// No description provided for @menuWishlist.
   ///
   /// In en, this message translates to:
@@ -1742,12 +1736,6 @@ abstract class AppLocalizations {
   /// **'Add a screenshot or photo of the successful transfer'**
   String get commissionPaymentReceiptHint;
 
-  /// No description provided for @commissionPaymentReceiptRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Add the transfer receipt'**
-  String get commissionPaymentReceiptRequired;
-
   /// No description provided for @commissionPaymentRemoveReceipt.
   ///
   /// In en, this message translates to:
@@ -2173,18 +2161,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Buyer Info'**
   String get ordersBuyerInfo;
-
-  /// No description provided for @ordersMessageSeller.
-  ///
-  /// In en, this message translates to:
-  /// **'💬 Message Seller'**
-  String get ordersMessageSeller;
-
-  /// No description provided for @ordersMessageSellerSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Messaging — coming soon'**
-  String get ordersMessageSellerSoon;
 
   /// No description provided for @ordersWhatsapp.
   ///
@@ -3295,18 +3271,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stock quantity *'**
   String get stockQuantityRequired;
-
-  /// No description provided for @chatSeller.
-  ///
-  /// In en, this message translates to:
-  /// **'Chat'**
-  String get chatSeller;
-
-  /// No description provided for @chatSellerSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Chat with seller — coming soon'**
-  String get chatSellerSoon;
 
   /// No description provided for @addedToCart.
   ///
@@ -5011,12 +4975,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Closing time must be after opening time'**
   String get invalidHoursError;
-
-  /// No description provided for @discardChanges.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard Changes'**
-  String get discardChanges;
 
   /// No description provided for @applyPresetConfirm.
   ///
