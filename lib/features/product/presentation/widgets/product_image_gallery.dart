@@ -4,7 +4,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ProductImageGallery extends StatefulWidget {
@@ -14,7 +13,6 @@ class ProductImageGallery extends StatefulWidget {
     required this.imageUrls,
     required this.selectedIndex,
     required this.onPageChanged,
-    required this.listingId,
     this.bottomInset = 0,
   });
 
@@ -24,7 +22,6 @@ class ProductImageGallery extends StatefulWidget {
   final List<String> imageUrls;
   final int selectedIndex;
   final ValueChanged<int> onPageChanged;
-  final String listingId;
   final double bottomInset;
 
   @override
@@ -73,14 +70,11 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
   Widget build(BuildContext context) {
     final urls = widget.imageUrls;
     if (urls.isEmpty) {
-      return ColoredBox(
-        color: context.textDisabled,
-        child: Center(
-          child: Icon(
-            LucideIcons.imageOff,
-            size: AppSpacing.x4l,
-            color: context.textSecondary,
-          ),
+      return Center(
+        child: Icon(
+          LucideIcons.imageOff,
+          size: AppSpacing.x4l,
+          color: context.labelColor,
         ),
       );
     }
@@ -109,29 +103,19 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   // above plain screen resolution so zoomed-in detail stays
                   // sharp instead of upscaling a screen-sized decode.
                   memCacheWidth: 1600,
-                  placeholder: (_, __) => const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-                  errorWidget: (_, __, ___) => ColoredBox(
-                    color: context.textDisabled,
+                  placeholder: (_, __) =>
+                      const Center(child: CircularProgressIndicator.adaptive()),
+                  errorWidget: (_, __, ___) => Center(
                     child: Icon(
                       LucideIcons.imageOff,
-                      color: context.textSecondary,
+                      size: AppSpacing.x4l,
+                      color: context.labelColor,
                     ),
                   ),
                 ),
               ),
             );
           },
-        ),
-        Positioned(
-          top: MediaQuery.paddingOf(context).top + AppSpacing.sm,
-          right: AppSpacing.x3l + AppSpacing.x2l,
-          child: WishHeartButton(
-            listingId: widget.listingId,
-            size: 22,
-            onDarkBackground: true,
-          ),
         ),
         Positioned(
           left: 0,
@@ -146,14 +130,14 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                   final active = i == widget.selectedIndex;
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                    width: active ? AppSpacing.xl : AppSpacing.sm,
-                    height: AppSpacing.sm,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: active ? 22 : 6,
+                    height: 6,
                     decoration: BoxDecoration(
                       color: active
-                          ? context.surfaceColor
-                          : context.surfaceColor.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(AppSpacing.xs),
+                          ? context.linkColor
+                          : context.textPrimary.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   );
                 }),
@@ -163,7 +147,9 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                 height: AppSpacing.x4l + AppSpacing.xs,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   itemCount: urls.length,
                   separatorBuilder: (_, __) => const Gap(AppSpacing.sm),
                   itemBuilder: (context, i) {
@@ -178,14 +164,13 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
                           width: AppSpacing.x4l,
                           height: AppSpacing.x4l,
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.sm),
+                            color: context.glassColor,
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: sel
-                                  ? context.surfaceColor
-                                  : context.surfaceColor.withValues(alpha: 0.35),
-                              width:
-                                  sel ? AppSpacing.xs / 2 : AppSpacing.xs / 4,
+                                  ? context.linkColor
+                                  : context.borderColor,
+                              width: sel ? 2 : 1,
                             ),
                           ),
                           clipBehavior: Clip.antiAlias,

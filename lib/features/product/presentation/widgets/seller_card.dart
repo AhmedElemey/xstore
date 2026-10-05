@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -11,7 +10,7 @@ import '../../domain/entities/product_seller_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/public_seller_stats.dart';
 
-class SellerCard extends ConsumerWidget {
+class SellerCard extends StatelessWidget {
   const SellerCard({
     super.key,
     required this.seller,
@@ -24,96 +23,115 @@ class SellerCard extends ConsumerWidget {
   final VoidCallback onCardTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context) {
+    final successColor = context.isDark
+        ? AppColors.successLight
+        : AppColors.success;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Material(
-        elevation: 3,
-        shadowColor: context.textPrimary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        color: context.surfaceColor,
+        color: context.glassColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.lg),
+          side: BorderSide(color: context.borderColor),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onCardTap,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.md,
+              10,
+              AppSpacing.sm,
+              10,
+            ),
+            child: Row(
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: AppSpacing.x2l,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                      backgroundImage: seller.avatarUrl.isNotEmpty
-                          ? AppNetworkImage.cached(seller.avatarUrl)
-                          : null,
-                      child: seller.avatarUrl.isEmpty
-                          ? const Icon(LucideIcons.store)
-                          : null,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: context.brandGradient,
                     ),
-                    const Gap(AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            seller.name,
-                            style: AppTypography.titleSmall.copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                    image: seller.avatarUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: AppNetworkImage.cached(
+                              seller.avatarUrl,
+                              cacheSize: 120,
                             ),
-                          ),
-                          const Gap(AppSpacing.xs),
-                          Text(
-                            publicSellerStatsLabel(
-                              context.l10n,
-                              rating: seller.rating,
-                              sales: seller.salesCount,
-                            ),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Gap(AppSpacing.sm),
-                   
-                  ],
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: seller.avatarUrl.isEmpty
+                      ? Icon(
+                          LucideIcons.store,
+                          size: 18,
+                          color: context.onBrandColor,
+                        )
+                      : null,
                 ),
-                 const Gap(AppSpacing.md),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const Gap(AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                   OutlinedButton(
-                      onPressed: onVisitStore,
-                      child: Text(context.l10n.visitStore),
-                    ), 
-                   
-                      if (seller.verified) ...[
-                  
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    ),
-                    child: Text(
-                      context.l10n.verifiedSeller,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.w600,
+                      Text(
+                        seller.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: context.textPrimary,
+                        ),
                       ),
+                      const Gap(2),
+                      Text(
+                        publicSellerStatsLabel(
+                          context.l10n,
+                          rating: seller.rating,
+                          sales: seller.salesCount,
+                        ),
+                        style: AppTypography.body12.copyWith(
+                          color: context.labelColor,
+                        ),
+                      ),
+                      if (seller.verified) ...[
+                        const Gap(2),
+                        Text(
+                          context.l10n.verifiedSeller,
+                          style: AppTypography.body12.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: successColor,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: onVisitStore,
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.linkColor,
+                    textStyle: AppTypography.labelMedium.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
                     ),
                   ),
-                ],
-                  ],),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.l10n.visitStore),
+                      Icon(context.chevronForward, size: 18),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

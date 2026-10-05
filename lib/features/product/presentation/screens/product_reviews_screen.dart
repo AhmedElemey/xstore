@@ -5,11 +5,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/utils/require_login.dart';
-import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -19,6 +21,8 @@ import '../../domain/entities/review_entity.dart';
 import '../../domain/entities/review_write_params.dart';
 import '../providers/product_reviews_notifier.dart';
 import '../widgets/already_reviewed_sheet.dart';
+import '../widgets/review_avatar.dart';
+import '../widgets/review_stars.dart';
 
 /// Full reviews list for a listing — paginated, with write/edit/delete.
 class ProductReviewsScreen extends ConsumerStatefulWidget {
@@ -44,7 +48,9 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     if (!_scroll.hasClients) return;
     final p = _scroll.position;
     if (p.pixels > p.maxScrollExtent - 120) {
-      ref.read(productReviewsNotifierProvider(widget.listingId).notifier).loadMore();
+      ref
+          .read(productReviewsNotifierProvider(widget.listingId).notifier)
+          .loadMore();
     }
   }
 
@@ -56,7 +62,11 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
   }
 
   Future<void> _openWriteReviewSheet({ReviewEntity? editing}) async {
-    if (!requireLogin(context, ref, message: context.l10n.signInToWriteReview)) {
+    if (!requireLogin(
+      context,
+      ref,
+      message: context.l10n.signInToWriteReview,
+    )) {
       return;
     }
     // Editing an existing review needs no re-check — the reviewer already
@@ -64,9 +74,10 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     if (editing == null) {
       final viewer = ref.read(authProvider).valueOrNull;
       ReviewEntity? myExistingReview;
-      for (final r in ref
-          .read(productReviewsNotifierProvider(widget.listingId))
-          .reviews) {
+      for (final r
+          in ref
+              .read(productReviewsNotifierProvider(widget.listingId))
+              .reviews) {
         if (isOwnReview(r, userId: viewer?.id, email: viewer?.email)) {
           myExistingReview = r;
           break;
@@ -94,10 +105,8 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _WriteReviewSheet(
-        listingId: widget.listingId,
-        editing: editing,
-      ),
+      builder: (_) =>
+          _WriteReviewSheet(listingId: widget.listingId, editing: editing),
     );
     if (!mounted) return;
     if (result == 'added') {
@@ -154,46 +163,108 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     final viewerName = viewer?.displayName(context.isArabic);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.reviewsTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.pencil),
-            onPressed: () => _openWriteReviewSheet(),
-          ),
-        ],
-      ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.reviews.isEmpty
-              ? Center(child: Text(context.l10n.noReviewsYet))
-              : ListView.builder(
-                  controller: _scroll,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: state.reviews.length + (state.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= state.reviews.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    final review = state.reviews[index];
-                    return _ReviewCard(
-                      review: review,
-                      authorName: reviewAuthorLabel(
-                        wireName: review.userName,
-                        reviewUserId: review.userId,
-                        viewerId: viewer?.id,
-                        viewerEmail: viewer?.email,
-                        viewerDisplayName: viewerName,
-                      ),
-                      isMine: review.userId == myId,
-                      onEdit: () => _openWriteReviewSheet(editing: review),
-                      onDelete: () => _confirmDelete(review.id),
-                    );
-                  },
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  18,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
                 ),
+                child: Row(
+                  children: [
+                    const AuthBackButton(),
+                    const Gap(AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        context.l10n.reviewsTitle,
+                        style: AppTypography.headlineSmall.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Material(
+                      color: context.glassColor,
+                      shape: CircleBorder(
+                        side: BorderSide(color: context.borderColor),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: IconButton(
+                        constraints: const BoxConstraints.tightFor(
+                          width: 44,
+                          height: 44,
+                        ),
+                        icon: Icon(
+                          LucideIcons.pencil,
+                          size: 20,
+                          color: context.textPrimary,
+                        ),
+                        onPressed: () => _openWriteReviewSheet(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: state.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : state.reviews.isEmpty
+                    ? Center(
+                        child: Text(
+                          context.l10n.noReviewsYet,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: context.labelColor,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scroll,
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                          AppSpacing.xl,
+                          0,
+                          AppSpacing.xl,
+                          AppSpacing.xl + MediaQuery.paddingOf(context).bottom,
+                        ),
+                        itemCount:
+                            state.reviews.length +
+                            (state.isLoadingMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= state.reviews.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: AppSpacing.lg,
+                              ),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          final review = state.reviews[index];
+                          return _ReviewCard(
+                            review: review,
+                            authorName: reviewAuthorLabel(
+                              wireName: review.userName,
+                              reviewUserId: review.userId,
+                              viewerId: viewer?.id,
+                              viewerEmail: viewer?.email,
+                              viewerDisplayName: viewerName,
+                            ),
+                            isMine: review.userId == myId,
+                            onEdit: () =>
+                                _openWriteReviewSheet(editing: review),
+                            onDelete: () => _confirmDelete(review.id),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -215,60 +286,47 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.borderColor),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundImage:
-                    review.userAvatar != null && review.userAvatar!.isNotEmpty
-                        ? AppNetworkImage.cached(review.userAvatar!)
-                        : null,
-                child: review.userAvatar == null || review.userAvatar!.isEmpty
-                    ? Text(
-                        authorName.isNotEmpty
-                            ? authorName[0].toUpperCase()
-                            : '?',
-                      )
-                    : null,
-              ),
-              const Gap(AppSpacing.md),
+              ReviewAvatar(name: authorName, imageUrl: review.userAvatar),
+              const Gap(AppSpacing.md - 2),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       authorName,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
+                      ),
                     ),
                     Text(
                       Formatters.shortDate(review.createdAt),
-                      style: theme.textTheme.labelSmall
-                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: AppTypography.body12.copyWith(
+                        color: context.labelColor,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Row(
-                children: List.generate(
-                  5,
-                  (i) => Icon(
-                    i < review.rating.round()
-                        ? LucideIcons.star
-                        : LucideIcons.starOff,
-                    size: AppSpacing.xl,
-                    color: AppColors.warning,
-                  ),
-                ),
-              ),
+              ReviewStars(rating: review.rating),
               if (isMine)
                 PopupMenuButton<String>(
+                  iconColor: context.labelColor,
                   onSelected: (v) => v == 'edit' ? onEdit() : onDelete(),
                   itemBuilder: (context) => [
                     PopupMenuItem(
@@ -284,8 +342,13 @@ class _ReviewCard extends StatelessWidget {
             ],
           ),
           const Gap(AppSpacing.sm),
-          Text(review.comment, style: theme.textTheme.bodyMedium),
-          Divider(height: AppSpacing.x2l),
+          Text(
+            review.comment,
+            style: AppTypography.bodyMedium.copyWith(
+              height: 1.55,
+              color: context.textPrimary.withValues(alpha: 0.85),
+            ),
+          ),
         ],
       ),
     );
@@ -304,7 +367,9 @@ class _WriteReviewSheet extends ConsumerStatefulWidget {
 
 class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
   late double _rating = widget.editing?.rating ?? 5;
-  late final _comment = TextEditingController(text: widget.editing?.comment ?? '');
+  late final _comment = TextEditingController(
+    text: widget.editing?.comment ?? '',
+  );
   bool _isSubmitting = false;
 
   @override
@@ -331,8 +396,9 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
       Navigator.of(context).pop(widget.editing == null ? 'added' : 'updated');
       return;
     }
-    final error =
-        ref.read(productReviewsNotifierProvider(widget.listingId)).error;
+    final error = ref
+        .read(productReviewsNotifierProvider(widget.listingId))
+        .error;
     if (error != null && error.toLowerCase().contains('already')) {
       _comment.clear();
       Navigator.of(context).pop('already');
@@ -370,7 +436,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                 onPressed: () => setState(() => _rating = starValue),
                 icon: Icon(
                   starValue <= _rating ? LucideIcons.star : LucideIcons.starOff,
-                  color: AppColors.warning,
+                  color: context.amberColor,
                 ),
               );
             }),
@@ -379,7 +445,9 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
           TextField(
             controller: _comment,
             maxLines: 4,
-            decoration: InputDecoration(hintText: context.l10n.reviewCommentHint),
+            decoration: InputDecoration(
+              hintText: context.l10n.reviewCommentHint,
+            ),
           ),
           const Gap(AppSpacing.lg),
           // A comment is required, so the button stays disabled until one is

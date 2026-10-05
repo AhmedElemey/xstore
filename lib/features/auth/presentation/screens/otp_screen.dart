@@ -19,7 +19,7 @@ import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../providers/auth_provider.dart';
 import '../providers/phone_auth_provider.dart';
-import '../widgets/auth_header.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../widgets/otp_input_field.dart';
 import '../widgets/otp_resend_row.dart';
 import '../../../../shared/widgets/xstore_button.dart';

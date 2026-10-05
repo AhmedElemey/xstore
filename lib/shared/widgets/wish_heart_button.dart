@@ -19,11 +19,16 @@ class WishHeartButton extends ConsumerWidget {
     required this.listingId,
     this.size = 24,
     this.onDarkBackground = false,
+    this.glass = false,
   });
 
   final String listingId;
   final double size;
   final bool onDarkBackground;
+
+  /// Orbit frosted circle (glass fill + hairline border), as the product
+  /// screen's other top-bar buttons.
+  final bool glass;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,10 +50,14 @@ class WishHeartButton extends ConsumerWidget {
         : context.textSecondary;
 
     return Material(
-      color: onDarkBackground
+      color: glass
+          ? context.glassColor
+          : onDarkBackground
           ? context.textPrimary.withValues(alpha: 0.38)
           : context.surfaceColor.withValues(alpha: 0.92),
-      shape: const CircleBorder(),
+      shape: glass
+          ? CircleBorder(side: BorderSide(color: context.borderColor))
+          : const CircleBorder(),
       clipBehavior: Clip.antiAlias,
 
       child: SizedBox(
@@ -71,7 +80,11 @@ class WishHeartButton extends ConsumerWidget {
               isWishlisted
                   ? Icons.favorite_rounded
                   : Icons.favorite_border_rounded,
-              color: isWishlisted ? AppColors.error : outlineColor,
+              color: isWishlisted
+                  ? AppColors.error
+                  : glass
+                  ? context.textPrimary
+                  : outlineColor,
             ),
           ),
         ),

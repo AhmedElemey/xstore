@@ -56,7 +56,7 @@ import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/register_screen.dart';
-import 'package:xstore/features/auth/presentation/widgets/auth_header.dart';
+import 'package:xstore/shared/widgets/auth_back_button.dart';
 import 'package:xstore/features/cities/domain/entities/city_entity.dart';
 import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/governments/domain/entities/government_entity.dart';

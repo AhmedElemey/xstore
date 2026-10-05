@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -28,144 +27,177 @@ class ProductHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final price = listing.price;
     final hasCompare =
         compareAtPrice != null && compareAtPrice! > price + 0.009;
     final discount = hasCompare
         ? ((compareAtPrice! - price) / compareAtPrice! * 100).round()
         : 0;
+    final hasRating = ratingLabel != null && reviewCountLabel != null;
+    final captionStyle = AppTypography.body12.copyWith(
+      fontSize: 13,
+      color: context.labelColor,
+    );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.x2l,
+        AppSpacing.xl,
         AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.md,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            listing.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.titleSmall.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.end,
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.xs,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                context.formatCurrency(price),
-                style: AppTypography.titleSmall.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.primary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (listing.categoryLabel.isNotEmpty) ...[
+                      Text(listing.categoryLabel, style: captionStyle),
+                      const Gap(6),
+                    ],
+                    Text(
+                      listing.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.headlineSmall.copyWith(
+                        fontSize: 22,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (hasCompare) ...[
-                Text(
-                  context.formatCurrency(compareAtPrice!),
-                  style: AppTypography.titleSmall.copyWith(
-                    decoration: TextDecoration.lineThrough,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppSpacing.xl),
-                  ),
-                  child: Text(
-                    '-$discount%',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: AppColors.accent,
-                      fontWeight: FontWeight.w600,
-                      
+              const Gap(AppSpacing.md),
+              // Amounts the customer pays: amber, mono digits.
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    context.formatCurrency(price),
+                    style: AppTypography.mono.copyWith(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: context.amberColor,
                     ),
                   ),
-                ),
-              ],
+                  if (hasCompare) ...[
+                    const Gap(AppSpacing.xs),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.amberColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(AppSpacing.md),
+                          ),
+                          child: Text(
+                            '-$discount%',
+                            style: AppTypography.mono.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: context.amberColor,
+                            ),
+                          ),
+                        ),
+                        const Gap(AppSpacing.sm),
+                        Text(
+                          context.formatCurrency(compareAtPrice!),
+                          style: AppTypography.mono.copyWith(
+                            fontSize: 13,
+                            decoration: TextDecoration.lineThrough,
+                            color: context.labelColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
-          const Gap(AppSpacing.md),
+          if (listing.conditionLabel.isNotEmpty || locationLine.isNotEmpty) ...[
+            const Gap(AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (listing.conditionLabel.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.glassColor,
+                      borderRadius: BorderRadius.circular(AppSpacing.lg),
+                      border: Border.all(color: context.borderColor),
+                    ),
+                    child: Text(
+                      listing.conditionLabel,
+                      style: AppTypography.labelMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ),
+                if (locationLine.isNotEmpty)
+                  Text(locationLine, style: captionStyle),
+              ],
+            ),
+          ],
+          const Gap(AppSpacing.sm),
           Material(
             color: AppColors.transparent,
             child: InkWell(
               onTap: onTapReviews,
               borderRadius: BorderRadius.circular(AppSpacing.sm),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 44),
                 child: Row(
                   children: [
                     Icon(
-                      LucideIcons.star,
-                      color: ratingLabel != null
-                          ? AppColors.warning
-                          : theme.colorScheme.onSurfaceVariant,
-                      size: AppSpacing.xl + AppSpacing.xs,
+                      hasRating
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      color: hasRating
+                          ? context.amberColor
+                          : context.labelColor,
+                      size: 20,
                     ),
-                    const Gap(AppSpacing.xs),
-                    Text(
-                      ratingLabel != null && reviewCountLabel != null
-                          ? '$ratingLabel${context.l10n.reviewsDotSeparator}$reviewCountLabel${context.l10n.reviewsSuffix}'
-                          : context.l10n.noReviewsYet,
-                      style: AppTypography.titleSmall.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: ratingLabel != null
-                            ? null
-                            : theme.colorScheme.onSurfaceVariant,
+                    const Gap(AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        hasRating
+                            ? '$ratingLabel${context.l10n.reviewsDotSeparator}$reviewCountLabel${context.l10n.reviewsSuffix}'
+                            : context.l10n.noReviewsYet,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: hasRating
+                              ? context.textPrimary
+                              : context.labelColor,
+                        ),
                       ),
                     ),
                     Icon(
-                      LucideIcons.chevronRight,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      context.chevronForward,
+                      size: 20,
+                      color: context.linkColor,
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          const Gap(AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              if (listing.conditionLabel.isNotEmpty)
-                Chip(
-                  label: Text(listing.conditionLabel),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              if (listing.categoryLabel.isNotEmpty)
-                Chip(
-                  label: Text(listing.categoryLabel),
-                  visualDensity: VisualDensity.compact,
-                  backgroundColor:
-                      theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.6,
-                  ),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-            ],
-          ),
-          if (locationLine.isNotEmpty) ...[
-            const Gap(AppSpacing.md),
-            Text(
-              locationLine,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
         ],
       ),
     );
