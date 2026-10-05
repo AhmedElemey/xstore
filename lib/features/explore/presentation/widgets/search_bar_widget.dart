@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -33,10 +32,8 @@ class SearchBarWidget extends StatelessWidget {
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: context.l10n.exploreSearchPlaceholder,
-            hintStyle: AppTypography.bodyMedium.copyWith(
-              color: context.textHint,
-            ),
-            prefixIcon: Icon(LucideIcons.search, color: context.textSecondary),
+            hintStyle: AppTypography.body15.copyWith(color: context.labelColor),
+            prefixIcon: Icon(LucideIcons.search, color: context.linkColor),
             suffixIcon: v.text.isEmpty
                 ? null
                 : IconButton(
@@ -44,20 +41,11 @@ class SearchBarWidget extends StatelessWidget {
                     icon: Icon(LucideIcons.x, color: context.textSecondary),
                   ),
             filled: true,
-            fillColor: context.surfaceColor,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              borderSide: BorderSide(color: context.textDisabled),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              borderSide: BorderSide(color: context.textDisabled),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            contentPadding: EdgeInsets.symmetric(
+            fillColor: context.glassColor,
+            border: _border(context.borderColor),
+            enabledBorder: _border(context.borderColor),
+            focusedBorder: _border(context.linkColor, width: 1.5),
+            contentPadding: EdgeInsetsDirectional.symmetric(
               horizontal: context.scaledPx(AppSpacing.lg),
               vertical: context.scaledPx(AppSpacing.md),
             ),
@@ -66,4 +54,10 @@ class SearchBarWidget extends StatelessWidget {
       },
     );
   }
+
+  static OutlineInputBorder _border(Color color, {double width = 1}) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.x2l + AppSpacing.xs),
+        borderSide: BorderSide(color: color, width: width),
+      );
 }

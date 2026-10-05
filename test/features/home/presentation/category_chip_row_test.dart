@@ -14,7 +14,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   }
 
-  testWidgets('a category with a picture shows it as the chip avatar', (tester) async {
+  testWidgets('a category with a picture shows it inside the orb', (tester) async {
     await pumpRow(tester, const [
       CategoryEntity(id: '4', name: 'Beauty', iconUrl: '/uploads/beauty.png'),
     ]);
@@ -22,12 +22,12 @@ void main() {
     expect(tester.takeException(), isNull);
     final image = tester.widget<AppCachedNetworkImage>(find.byType(AppCachedNetworkImage));
     expect(image.imageUrl, '/uploads/beauty.png');
-    // Decoded at chip size, not the upload's full resolution.
+    // Decoded at orb size (58px), not the upload's full resolution.
     expect(image.memCacheWidth, isNotNull);
-    expect(image.memCacheWidth! <= 24 * 3, isTrue);
+    expect(image.memCacheWidth! <= 58 * 3, isTrue);
   });
 
-  testWidgets('while loading (or on a 404) the avatar shows the first letter', (tester) async {
+  testWidgets('while loading (or on a 404) the orb shows the first letter', (tester) async {
     await pumpRow(tester, const [
       CategoryEntity(id: '4', name: 'Beauty', iconUrl: 'https://example.test/missing'),
     ]);
@@ -35,10 +35,11 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('a category without a picture stays a plain text chip', (tester) async {
+  testWidgets('a category without a picture shows a lettered orb, no image', (tester) async {
     await pumpRow(tester, const [CategoryEntity(id: '9', name: 'Books')]);
 
     expect(find.byType(AppCachedNetworkImage), findsNothing);
     expect(find.text('Books'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
   });
 }

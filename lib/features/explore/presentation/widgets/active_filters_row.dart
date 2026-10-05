@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -25,40 +24,28 @@ class ActiveFiltersRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final chips = <Widget>[];
     for (final c in filters.categories) {
-      chips.add(_FilterChip(
-        label: c,
-        onRemove: () => onRemoveCategory(c),
-      ));
+      chips.add(_FilterChip(label: c, onRemove: () => onRemoveCategory(c)));
     }
     for (final c in filters.conditions) {
-      chips.add(_FilterChip(
-        label: c,
-        onRemove: () => onRemoveCondition(c),
-      ));
+      chips.add(_FilterChip(label: c, onRemove: () => onRemoveCondition(c)));
     }
     if (filters.minPrice != null || filters.maxPrice != null) {
-      chips.add(_FilterChip(
-        label: context.l10n.priceRange,
-        onRemove: onClearAll,
-      ));
+      chips.add(
+        _FilterChip(label: context.l10n.priceRange, onRemove: onClearAll),
+      );
     }
     if (filters.minRating != null) {
-      chips.add(_FilterChip(
-        label: '${filters.minRating}+ ★',
-        onRemove: onClearAll,
-      ));
+      chips.add(
+        _FilterChip(label: '${filters.minRating}+ ★', onRemove: onClearAll),
+      );
     }
     if (filters.location != null && filters.location!.isNotEmpty) {
-      chips.add(_FilterChip(
-        label: filters.location!,
-        onRemove: onClearAll,
-      ));
+      chips.add(_FilterChip(label: filters.location!, onRemove: onClearAll));
     }
     if (filters.shippingOnly) {
-      chips.add(_FilterChip(
-        label: context.l10n.shippingOnly,
-        onRemove: onClearAll,
-      ));
+      chips.add(
+        _FilterChip(label: context.l10n.shippingOnly, onRemove: onClearAll),
+      );
     }
 
     if (chips.isEmpty) {
@@ -74,18 +61,18 @@ class ActiveFiltersRow extends StatelessWidget {
             icon: Icon(
               LucideIcons.x,
               size: AppSpacing.lg,
-              color: AppColors.primary,
+              color: context.linkColor,
             ),
             label: Text(
               context.l10n.clearAllFilters,
               style: AppTypography.labelLarge.copyWith(
-                color: AppColors.primary,
+                color: context.linkColor,
               ),
             ),
           ),
           ...chips.map(
             (w) => Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
               child: w,
             ),
           ),
@@ -103,9 +90,19 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Active filters use the Orbit "on" chip: accent fill, inverted text.
+    final fg = context.onBrandColor;
     return Chip(
-      label: Text(label, style: AppTypography.bodySmall),
-      deleteIcon: Icon(LucideIcons.x, size: AppSpacing.lg),
+      label: Text(
+        label,
+        style: AppTypography.labelMedium.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      backgroundColor: context.linkColor,
+      side: BorderSide(color: context.linkColor),
+      deleteIcon: Icon(LucideIcons.x, size: AppSpacing.lg, color: fg),
       onDeleted: onRemove,
     );
   }

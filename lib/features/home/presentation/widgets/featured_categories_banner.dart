@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/category_queries.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -33,9 +34,7 @@ class FeaturedCategoriesBanner extends StatelessWidget {
             onTap: () => context.go(
               Uri(
                 path: AppRoutes.explore,
-                queryParameters: {
-                  'category': kCategoryQueryMens,
-                },
+                queryParameters: {'category': kCategoryQueryMens},
               ).toString(),
             ),
           ),
@@ -49,9 +48,7 @@ class FeaturedCategoriesBanner extends StatelessWidget {
             onTap: () => context.go(
               Uri(
                 path: AppRoutes.explore,
-                queryParameters: {
-                  'category': kCategoryQueryWomens,
-                },
+                queryParameters: {'category': kCategoryQueryWomens},
               ).toString(),
             ),
           ),
@@ -77,8 +74,11 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.lg),
+      color: context.glassColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: context.borderColor),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -91,21 +91,18 @@ class _CategoryCard extends StatelessWidget {
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
                 memCacheHeight: (height * 3).round(),
-                placeholder: (_, __) => ColoredBox(color: context.textDisabled),
+                placeholder: (_, __) => ColoredBox(color: context.glassColor),
                 errorWidget: (_, __, ___) => ColoredBox(
-                  color: context.textDisabled,
+                  color: context.glassColor,
                   child: Icon(LucideIcons.imageOff, color: context.textPrimary),
                 ),
               ),
-              DecoratedBox(
+              const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      context.surfaceColor.withValues(alpha: 0),
-                      context.textPrimary.withValues(alpha: 0.85),
-                    ],
+                    colors: [Color(0x00060818), Color(0xD9060818)],
                   ),
                 ),
               ),
@@ -117,17 +114,18 @@ class _CategoryCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTypography.titleMedium.copyWith(
-                        color: context.surfaceColor,
-                        fontWeight: FontWeight.w800,
+                      style: AppTypography.headlineSmall.copyWith(
+                        fontSize: 16,
+                        color: AppColors.white,
                       ),
                     ),
                     const Gap(AppSpacing.md),
                     OutlinedButton(
                       onPressed: onTap,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: context.surfaceColor,
-                        side: BorderSide(color: context.surfaceColor),
+                        foregroundColor: AppColors.white,
+                        shape: const StadiumBorder(),
+                        side: const BorderSide(color: AppColors.white),
                       ),
                       child: Text(context.l10n.shopNow),
                     ),

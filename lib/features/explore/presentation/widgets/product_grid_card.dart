@@ -29,8 +29,11 @@ class ProductGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.md),
+      color: context.glassColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: context.borderColor),
+      ),
       clipBehavior: Clip.antiAlias,
       child: Semantics(
         button: true,
@@ -42,60 +45,76 @@ class ProductGridCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Positioned.fill(
-                      child: SoldOutOverlay(
-                        soldOut: item.isSoldOut,
-                        child: item.imageUrl != null
-                            ? Semantics(
-                                image: true,
-                                label:
-                                    '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
-                                child: AppCachedNetworkImage(
-                                  imageUrl: item.imageUrl!,
-                                  fit: BoxFit.cover,
-                                  memCacheWidth: 600,
-                                  placeholder: (_, __) => ColoredBox(
-                                    color: context.textDisabled,
-                                  ),
-                                  errorWidget: (_, __, ___) => ColoredBox(
-                                    color: context.textDisabled,
-                                  ),
-                                ),
-                              )
-                            : ColoredBox(color: context.textDisabled),
-                      ),
-                    ),
-                    Positioned(
-                      right: AppSpacing.sm,
-                      top: AppSpacing.sm,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.isDark
-                              ? AppColors.primary.withValues(alpha: 0.2)
-                              : AppColors.indigoTint50,
-                          borderRadius: BorderRadius.circular(AppSpacing.xs),
-                        ),
-                        child: Text(
-                          item.condition,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.spacing10,
+                    AppSpacing.spacing10,
+                    AppSpacing.spacing10,
+                    0,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSpacing.lg),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Positioned.fill(
+                          child: SoldOutOverlay(
+                            soldOut: item.isSoldOut,
+                            child: item.imageUrl != null
+                                ? Semantics(
+                                    image: true,
+                                    label:
+                                        '${item.name} · ${context.l10n.listingPhotoSectionTitle}',
+                                    child: AppCachedNetworkImage(
+                                      imageUrl: item.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      memCacheWidth: 600,
+                                      placeholder: (_, __) => ColoredBox(
+                                        color: context.textDisabled,
+                                      ),
+                                      errorWidget: (_, __, ___) => ColoredBox(
+                                        color: context.textDisabled,
+                                      ),
+                                    ),
+                                  )
+                                : ColoredBox(color: context.textDisabled),
                           ),
                         ),
-                      ),
+                        PositionedDirectional(
+                          end: AppSpacing.sm,
+                          top: AppSpacing.sm,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: context.glassColor,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.sm,
+                              ),
+                            ),
+                            child: Text(
+                              item.condition,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: context.linkColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.spacing10,
+                  AppSpacing.spacing10,
+                  AppSpacing.spacing10,
+                  AppSpacing.spacing10,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -104,7 +123,7 @@ class ProductGridCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const Gap(AppSpacing.xs),
@@ -112,8 +131,10 @@ class ProductGridCard extends StatelessWidget {
                       children: [
                         Text(
                           context.formatCurrency(item.price),
-                          style: AppTypography.labelLarge.copyWith(
-                            color: AppColors.primary,
+                          style: AppTypography.mono.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: context.amberColor,
                           ),
                         ),
                         if (item.compareAtPrice != null) ...[
@@ -143,7 +164,7 @@ class ProductGridCard extends StatelessWidget {
                           Icon(
                             LucideIcons.badgeCheck,
                             size: AppSpacing.lg,
-                            color: AppColors.primary,
+                            color: context.linkColor,
                           ),
                         ],
                         const Gap(AppSpacing.sm),

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/notification_bell_button.dart';
@@ -27,10 +26,10 @@ class HomeHeader extends ConsumerWidget {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.xl,
+          AppSpacing.spacing18,
+          AppSpacing.xl,
           AppSpacing.md,
         ),
         child: Column(
@@ -39,64 +38,78 @@ class HomeHeader extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Text(
-                  context.l10n.appName,
-                  style: AppTypography.titleLarge.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w800,
+                Expanded(
+                  child: ShaderMask(
+                    blendMode: BlendMode.srcIn,
+                    shaderCallback: (rect) => LinearGradient(
+                      colors: context.brandGradient,
+                    ).createShader(rect),
+                    child: Text(
+                      context.l10n.appName,
+                      style: AppTypography.headlineSmall.copyWith(fontSize: 24),
+                    ),
                   ),
                 ),
-                const Spacer(),
-                if (onCartTap != null)
-                  IconButton(
-                    onPressed: onCartTap,
-                    icon: NotificationIconBadge(
-                      count: cartItemCount,
-                      child: Icon(
-                        LucideIcons.shoppingCart,
-                        color: context.textPrimary,
+                if (onCartTap != null) ...[
+                  _GlassCircle(
+                    child: IconButton(
+                      tooltip: context.l10n.cartTitle,
+                      onPressed: onCartTap,
+                      icon: NotificationIconBadge(
+                        count: cartItemCount,
+                        child: Icon(
+                          LucideIcons.shoppingCart,
+                          size: 21,
+                          color: context.textPrimary,
+                        ),
                       ),
                     ),
                   ),
-                NotificationBellButton(
-                  icon: LucideIcons.bellDot,
-                  tooltip: context.l10n.notifications,
+                  const Gap(AppSpacing.spacing10),
+                ],
+                _GlassCircle(
+                  child: NotificationBellButton(
+                    icon: LucideIcons.bell,
+                    tooltip: context.l10n.notifications,
+                  ),
                 ),
               ],
             ),
-            const Gap(AppSpacing.md),
+            const Gap(AppSpacing.spacing18),
             Material(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(AppSpacing.md),
+              color: context.glassColor,
+              shape: StadiumBorder(
+                side: BorderSide(color: context.borderColor),
+              ),
+              clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: onSearchTap,
-                borderRadius: BorderRadius.circular(AppSpacing.md),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppSpacing.md),
-                    border: Border.all(color: context.textDisabled),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.search,
-                        color: context.textSecondary,
-                        size: AppSpacing.x2l,
-                      ),
-                      const Gap(AppSpacing.md),
-                      Expanded(
-                        child: Text(
-                          context.l10n.searchHint,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: context.textSecondary,
+                child: SizedBox(
+                  height: 52,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.spacing18,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          LucideIcons.search,
+                          color: context.linkColor,
+                          size: AppSpacing.xl,
+                        ),
+                        const Gap(AppSpacing.spacing10),
+                        Expanded(
+                          child: Text(
+                            context.l10n.searchHint,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.body15.copyWith(
+                              color: context.labelColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -106,23 +119,39 @@ class HomeHeader extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _TrustChip(
-                    label: context.l10n.freeShippingBadge,
-                  ),
+                  _TrustChip(label: context.l10n.freeShippingBadge),
                   const Gap(AppSpacing.sm),
-                  _TrustChip(
-                    label: context.l10n.securePayBadge,
-                  ),
+                  _TrustChip(label: context.l10n.securePayBadge),
                   const Gap(AppSpacing.sm),
-                  _TrustChip(
-                    label: context.l10n.easyReturnsBadge,
-                  ),
+                  _TrustChip(label: context.l10n.easyReturnsBadge),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 44px frosted circle behind a header action.
+class _GlassCircle extends StatelessWidget {
+  const _GlassCircle({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: context.borderColor),
+      ),
+      child: child,
     );
   }
 }
@@ -135,18 +164,19 @@ class _TrustChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.x3l),
-        border: Border.all(color: context.textDisabled),
+      height: 32,
+      alignment: Alignment.center,
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.md),
+      decoration: ShapeDecoration(
+        color: context.glassColor,
+        shape: StadiumBorder(side: BorderSide(color: context.borderColor)),
       ),
       child: Text(
         label,
-        style: AppTypography.labelSmall.copyWith(color: context.textSecondary),
+        style: AppTypography.labelSmall.copyWith(
+          color: context.textSecondary,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

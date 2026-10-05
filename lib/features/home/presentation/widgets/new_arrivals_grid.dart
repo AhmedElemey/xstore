@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
 import 'product_card.dart';
@@ -25,7 +26,10 @@ class NewArrivalsGrid extends StatelessWidget {
       children: [
         Text(
           context.l10n.newArrivals,
-          style: Theme.of(context).textTheme.titleMedium,
+          style: AppTypography.headlineSmall.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const Gap(AppSpacing.md),
         LayoutBuilder(
@@ -36,32 +40,28 @@ class NewArrivalsGrid extends StatelessWidget {
             return Wrap(
               spacing: spacing,
               runSpacing: spacing,
-              children: display.asMap().entries.map(
-                (entry) {
-                  final i = entry.key;
-                  final listing = entry.value;
-                  return SizedBox(
-                    key: ValueKey<String>(listing.id),
-                    width: tileWidth,
-                    child: RepaintBoundary(
-                      child: ProductCard(
-                        key: ValueKey<String>('new-arrival-${listing.id}'),
-                        title: listing.title,
-                        price: listing.price,
-                        imageUrl: listing.imageUrls.isNotEmpty
-                            ? listing.imageUrls.first
-                            : null,
-                        discountPercent: 0,
-                        listingId: listing.id,
-                        isSoldOut: listing.status == ListingStatus.sold,
-                        onTap: () => onOpenProduct?.call(listing),
-                      ).fadeSlideIn(
-                        delay: AppAnimations.staggerDelayCapped(i),
-                      ),
-                    ),
-                  );
-                },
-              ).toList(),
+              children: display.asMap().entries.map((entry) {
+                final i = entry.key;
+                final listing = entry.value;
+                return SizedBox(
+                  key: ValueKey<String>(listing.id),
+                  width: tileWidth,
+                  child: RepaintBoundary(
+                    child: ProductCard(
+                      key: ValueKey<String>('new-arrival-${listing.id}'),
+                      title: listing.title,
+                      price: listing.price,
+                      imageUrl: listing.imageUrls.isNotEmpty
+                          ? listing.imageUrls.first
+                          : null,
+                      discountPercent: 0,
+                      listingId: listing.id,
+                      isSoldOut: listing.status == ListingStatus.sold,
+                      onTap: () => onOpenProduct?.call(listing),
+                    ).fadeSlideIn(delay: AppAnimations.staggerDelayCapped(i)),
+                  ),
+                );
+              }).toList(),
             );
           },
         ),

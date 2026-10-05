@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/widgets/pulsing_dot.dart';
 import '../../domain/entities/banner_entity.dart';
 
 class HeroBannerCarousel extends StatefulWidget {
@@ -93,46 +94,64 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
             itemBuilder: (context, index) {
               final b = widget.banners[index];
               final actionUrl = b.actionUrl?.trim();
-              final tappable =
-                  actionUrl != null && actionUrl.isNotEmpty;
-              final card = ClipRRect(
-                borderRadius: BorderRadius.circular(AppSpacing.lg),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    AppCachedNetworkImage(
-                      imageUrl: b.imageUrl,
-                      fit: BoxFit.cover,
-                      memCacheHeight: (bannerHeight * 3).round(),
-                      placeholder: (_, __) =>
-                          ColoredBox(color: context.textDisabled),
-                      errorWidget: (_, __, ___) => ColoredBox(
-                        color: context.textDisabled,
-                        child: Icon(
-                          LucideIcons.imageOff,
-                          color: context.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: AppSpacing.lg,
-                      bottom: AppSpacing.lg,
-                      child: Text(
-                        b.title,
-                        style: Theme.of(context).textTheme.titleLarge
-                            ?.copyWith(
-                              shadows: [
-                                Shadow(
-                                  blurRadius: AppSpacing.sm,
-                                  color: context.textPrimary.withValues(
-                                    alpha: 0.45,
-                                  ),
-                                ),
-                              ],
-                            ),
-                      ),
+              final tappable = actionUrl != null && actionUrl.isNotEmpty;
+              final card = DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: context.borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.linkColor.withValues(alpha: 0.18),
+                      blurRadius: 24,
                     ),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      AppCachedNetworkImage(
+                        imageUrl: b.imageUrl,
+                        fit: BoxFit.cover,
+                        memCacheHeight: (bannerHeight * 3).round(),
+                        placeholder: (_, __) =>
+                            ColoredBox(color: context.glassColor),
+                        errorWidget: (_, __, ___) => ColoredBox(
+                          color: context.glassColor,
+                          child: Icon(
+                            LucideIcons.imageOff,
+                            color: context.textPrimary,
+                          ),
+                        ),
+                      ),
+                      // Scrim so the title stays legible on any picture.
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0x00060818), Color(0xCC060818)],
+                            stops: [0.45, 1],
+                          ),
+                        ),
+                      ),
+                      PositionedDirectional(
+                        start: AppSpacing.lg,
+                        end: AppSpacing.lg,
+                        bottom: AppSpacing.lg,
+                        child: Text(
+                          b.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.headlineSmall.copyWith(
+                            fontSize: 18,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
               return AnimatedBuilder(
@@ -174,27 +193,22 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(widget.banners.length, (index) {
                   final isActive = index == activeIndex;
-                  final activeColor = Theme.of(context).colorScheme.primary;
-                  final inactiveColor = context.textDisabled;
                   return Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
+                      horizontal: AppSpacing.xs / 2,
                     ),
-                    child: isActive
-                        ? PulsingDot(
-                            key: ValueKey<String>(widget.banners[index].id),
-                            size: AppSpacing.sm + 2,
-                            color: activeColor,
-                          )
-                        : Container(
-                            key: ValueKey<String>(widget.banners[index].id),
-                            width: AppSpacing.sm + 2,
-                            height: AppSpacing.sm + 2,
-                            decoration: BoxDecoration(
-                              color: inactiveColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
+                    child: AnimatedContainer(
+                      key: ValueKey<String>(widget.banners[index].id),
+                      duration: const Duration(milliseconds: 220),
+                      width: isActive ? 20 : AppSpacing.sm,
+                      height: AppSpacing.sm,
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? context.linkColor
+                            : context.labelColor.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(AppSpacing.xs),
+                      ),
+                    ),
                   );
                 }),
               );

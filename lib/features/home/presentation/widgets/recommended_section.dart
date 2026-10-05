@@ -5,7 +5,6 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
@@ -32,7 +31,10 @@ class RecommendedSection extends ConsumerWidget {
             Expanded(
               child: Text(
                 context.l10n.recommended,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ).fadeSlideIn(),
             ),
             TextButton(
@@ -40,13 +42,17 @@ class RecommendedSection extends ConsumerWidget {
               child: Text(
                 context.l10n.seeAll,
                 style: AppTypography.labelLarge.copyWith(
-                  color: AppColors.primary,
+                  color: context.linkColor,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ],
         ),
-        Text(context.l10n.recommendedSubtitle, style: AppTypography.bodySmall),
+        Text(
+          context.l10n.recommendedSubtitle,
+          style: AppTypography.bodySmall.copyWith(color: context.labelColor),
+        ),
         const Gap(AppSpacing.md),
         async.when(
           data: (items) => _RecommendedList(items: items),
@@ -95,26 +101,28 @@ class _RecommendedList extends StatelessWidget {
             key: ValueKey<String>(listing.id),
             width: AppSpacing.x4l * 3 + AppSpacing.lg,
             child: RepaintBoundary(
-              child: ProductCard(
-                key: ValueKey<String>('recommended-${listing.id}'),
-                title: listing.title,
-                price: listing.price,
-                imageUrl: listing.imageUrls.isNotEmpty
-                    ? listing.imageUrls.first
-                    : null,
-                discountPercent: 0,
-                listingId: listing.id,
-                isSoldOut: listing.status == ListingStatus.sold,
-                onTap: () => context.push('${AppRoutes.product}/${listing.id}'),
-              )
-                  .fadeSlideIn(delay: delay, offsetY: 0)
-                  .animate(delay: delay)
-                  .slideX(
-                    begin: 0.05,
-                    end: 0,
-                    duration: AppAnimations.normal,
-                    curve: AppAnimations.enter,
-                  ),
+              child:
+                  ProductCard(
+                        key: ValueKey<String>('recommended-${listing.id}'),
+                        title: listing.title,
+                        price: listing.price,
+                        imageUrl: listing.imageUrls.isNotEmpty
+                            ? listing.imageUrls.first
+                            : null,
+                        discountPercent: 0,
+                        listingId: listing.id,
+                        isSoldOut: listing.status == ListingStatus.sold,
+                        onTap: () =>
+                            context.push('${AppRoutes.product}/${listing.id}'),
+                      )
+                      .fadeSlideIn(delay: delay, offsetY: 0)
+                      .animate(delay: delay)
+                      .slideX(
+                        begin: 0.05,
+                        end: 0,
+                        duration: AppAnimations.normal,
+                        curve: AppAnimations.enter,
+                      ),
             ),
           );
         },
