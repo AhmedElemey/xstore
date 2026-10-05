@@ -235,8 +235,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Any hardcoded API origin or license key.
 
 ### 2026-08-05 — Home carousels share one fetch
-- **Rule:** `getNewArrivals()` and `getRecommended()` re-sort the same `getHotDeals()` result (`GET /api/listings?page=1&pageSize=40`); overlapping carousels are a backend ask (dedicated endpoints or sort params), not a client fix.
-- **Where it applies:** `home_repository_impl.dart`.
+- **Rule:** Hot deals, new arrivals and recommended come from one `GET /api/home` via `homeFeedProvider` → `HomeRepository.getHomeFeed()`; the three section providers only read their slice. Refresh and section retries invalidate `homeFeedProvider`, never a section provider (that re-reads the cached feed). Fallbacks are per section inside `getHomeFeed`: empty `hotDeals` → `fetchHotDeals()` (`/api/listings`), empty new arrivals/recommended → derived from hot deals. Never call `fetchHomeAggregate` from another datasource method.
+- **Where it applies:** `home_repository_impl.dart`, `home_remote_datasource.dart`, `home_dependencies.dart`, `home_screen.dart`, `cart_recommended_strip.dart`.
 
 ### 2026-08-06 — A second backend gets its own Dio and a session bridge
 - **Rule:** The delivery backend (separate host, Bearer JWT) uses its own keepAlive Dio (`delivery_dio_provider.dart`) and token key (`PrefsKeys.deliveryAuthToken`). `delivery_backend_session.dart` silently exchanges the main session for a delivery token (consumer/vendor only), is re-run from the Dio's 401 interceptor as the refresh, must never block main auth, is wired into `Auth.build()` restore, `setUser` and `adoptSession`, and is cleared in `logout()`.

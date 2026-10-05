@@ -6,9 +6,11 @@ part of 'new_arrivals_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$newArrivalsHash() => r'c0a885b81f11bdb16a84b654a1c3800f5aa563d0';
+String _$newArrivalsHash() => r'd6037669a57281b9fd0a7285ad15a3a466c15439';
 
-/// See also [NewArrivals].
+/// Reads its section of the shared [homeFeedProvider].
+///
+/// Copied from [NewArrivals].
 @ProviderFor(NewArrivals)
 final newArrivalsProvider =
     AutoDisposeAsyncNotifierProvider<NewArrivals, List<ListingEntity>>.internal(

@@ -6,13 +6,12 @@ import '../../data/repositories/home_repository_impl.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../../domain/usecases/get_banners_usecase.dart';
 import '../../domain/usecases/get_categories_usecase.dart';
-import '../../domain/usecases/get_hot_deals_usecase.dart';
-import '../../domain/usecases/get_new_arrivals_usecase.dart';
-import '../../domain/usecases/get_recommended_usecase.dart';
+import '../../domain/usecases/get_home_feed_usecase.dart';
 
 part 'home_dependencies.g.dart';
 
-// Shared HomeRepository / use-case wiring for banners, hot_deals, categories.
+// Shared HomeRepository / use-case wiring for banners, categories and the
+// home feed.
 
 @Riverpod(keepAlive: true)
 HomeRemoteDataSource homeRemoteDataSource(HomeRemoteDataSourceRef ref) {
@@ -30,21 +29,20 @@ GetBannersUseCase getBannersUseCase(GetBannersUseCaseRef ref) {
 }
 
 @riverpod
-GetHotDealsUseCase getHotDealsUseCase(GetHotDealsUseCaseRef ref) {
-  return GetHotDealsUseCase(ref.watch(homeRepositoryProvider));
-}
-
-@riverpod
 GetCategoriesUseCase getCategoriesUseCase(GetCategoriesUseCaseRef ref) {
   return GetCategoriesUseCase(ref.watch(homeRepositoryProvider));
 }
 
 @riverpod
-GetNewArrivalsUseCase getNewArrivalsUseCase(GetNewArrivalsUseCaseRef ref) {
-  return GetNewArrivalsUseCase(ref.watch(homeRepositoryProvider));
+GetHomeFeedUseCase getHomeFeedUseCase(GetHomeFeedUseCaseRef ref) {
+  return GetHomeFeedUseCase(ref.watch(homeRepositoryProvider));
 }
 
+/// One `GET /api/home` shared by the hot deals, new arrivals and
+/// recommended providers. Invalidate this (not a section provider) to
+/// refetch — the sections rebuild from it.
 @riverpod
-GetRecommendedUseCase getRecommendedUseCase(GetRecommendedUseCaseRef ref) {
-  return GetRecommendedUseCase(ref.watch(homeRepositoryProvider));
+Future<HomeFeed> homeFeed(HomeFeedRef ref) async {
+  final result = await ref.watch(getHomeFeedUseCaseProvider).call();
+  return result.fold((failure) => throw failure, (feed) => feed);
 }

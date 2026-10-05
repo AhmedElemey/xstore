@@ -9,6 +9,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
+import '../../../home/presentation/providers/home_dependencies.dart';
 import '../../../home/presentation/providers/recommended_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
@@ -75,7 +76,7 @@ class CartRecommendedStrip extends ConsumerWidget {
           ),
           error: (e, _) => ErrorStateWidget(
             message: e.toString(),
-            onRetry: () => ref.invalidate(recommendedProvider),
+            onRetry: () => ref.invalidate(homeFeedProvider),
           ),
         ),
       ],

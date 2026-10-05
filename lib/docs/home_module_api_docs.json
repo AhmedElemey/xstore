@@ -96,8 +96,8 @@
         ]
       },
       "notes": [
-        "Also used by HomeRepositoryImpl.getNewArrivals() and getRecommended() — no separate API",
-        "New arrivals/recommended are derived client-side from hot deals data"
+        "Called by HomeRepositoryImpl.getHomeFeed() only when GET /api/home has no hotDeals",
+        "New arrivals/recommended fall back to the hot-deals list when GET /api/home leaves them empty"
       ]
     },
     {

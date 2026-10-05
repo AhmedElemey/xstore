@@ -7,9 +7,8 @@ import 'package:xstore/features/home/data/datasources/home_remote_datasource.dar
 
 /// Resolves (or rejects) every request with a scripted value keyed by
 /// path — same scripted-Dio approach as the wishlist/cart datasource
-/// tests, extended to route by path since fetchHotDeals internally calls
-/// fetchHomeAggregate (GET /api/home) before falling back to GET
-/// /api/listings.
+/// tests, extended to route by path. An unscripted path throws, so a test
+/// scripting only one route also proves no other endpoint was called.
 class _RoutedInterceptor extends Interceptor {
   _RoutedInterceptor(this._routes);
 
@@ -307,6 +306,21 @@ void main() {
       );
     });
 
+    test('caps hot deals at the carousel size', () async {
+      dio = buildDio({
+        ApiEndpoints.home: (_) => {
+              'hotDeals': [
+                for (var i = 0; i < 12; i++) _activeListing(id: 'd$i'),
+              ],
+            },
+      });
+      datasource = HomeRemoteDataSourceImpl(dio);
+
+      final result = await datasource.fetchHomeAggregate();
+
+      expect(result!.hotDeals, hasLength(10));
+    });
+
     test('returns null when every section is empty', () async {
       dio = buildDio({
         ApiEndpoints.home: (_) => {
@@ -332,44 +346,9 @@ void main() {
   }, skip: skipMock);
 
   group('fetchHotDeals', () {
-    test('uses the aggregate\'s hotDeals when present, without calling /api/listings',
-        () async {
-      var listingsCalled = false;
-      final interceptor = _RoutedInterceptor({
-        ApiEndpoints.home: (_) => {
-              'banners': <dynamic>[],
-              'hotDeals': [_activeListing(id: 'from_aggregate')],
-              'newArrivals': <dynamic>[],
-              'recommendedForYou': <dynamic>[],
-            },
-        ApiEndpoints.apiListings: (_) {
-          listingsCalled = true;
-          return <dynamic>[];
-        },
-      });
-      dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
-        ..interceptors.add(interceptor);
-      datasource = HomeRemoteDataSourceImpl(dio);
-
-      final result = await datasource.fetchHotDeals();
-
-      expect(result.single.id, 'from_aggregate');
-      expect(
-        listingsCalled,
-        isFalse,
-        reason: 'should not derive from /api/listings when the aggregate has data',
-      );
-    });
-
-    test('derives from /api/listings sorted by discount when the aggregate is empty',
+    test('derives from /api/listings sorted by discount, without GET /api/home',
         () async {
       dio = buildDio({
-        ApiEndpoints.home: (_) => {
-              'banners': <dynamic>[],
-              'hotDeals': <dynamic>[],
-              'newArrivals': <dynamic>[],
-              'recommendedForYou': <dynamic>[],
-            },
         ApiEndpoints.apiListings: (_) => [
               _activeListing(id: 'small_discount', price: 90, compareAtPrice: 100),
               _activeListing(id: 'big_discount', price: 50, compareAtPrice: 100),
@@ -386,7 +365,6 @@ void main() {
     test('falls back to static deals when offline on the /api/listings derivation',
         () async {
       dio = buildDio({
-        ApiEndpoints.home: (options) => _offline(options),
         ApiEndpoints.apiListings: (options) => _offline(options),
       });
       datasource = HomeRemoteDataSourceImpl(dio);

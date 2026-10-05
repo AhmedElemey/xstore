@@ -5,14 +5,10 @@ import 'home_dependencies.dart';
 
 part 'new_arrivals_provider.g.dart';
 
+/// Reads its section of the shared [homeFeedProvider].
 @riverpod
 class NewArrivals extends _$NewArrivals {
   @override
-  Future<List<ListingEntity>> build() async {
-    final result = await ref.watch(getNewArrivalsUseCaseProvider).call();
-    return result.fold(
-      (failure) => throw failure,
-      (data) => data,
-    );
-  }
+  Future<List<ListingEntity>> build() async =>
+      (await ref.watch(homeFeedProvider.future)).newArrivals;
 }

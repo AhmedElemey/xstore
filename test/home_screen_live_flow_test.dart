@@ -109,8 +109,7 @@ Map<String, dynamic> _dealListingJson({
 };
 
 /// GET /api/home — CONFIRMED aggregate shape feeding HotDeals, NewArrivals,
-/// and Recommended all at once (each provider calls `fetchHomeAggregate()`
-/// independently, so this single scripted route serves all three fetches).
+/// and Recommended from one shared fetch (`homeFeedProvider`).
 Map<String, dynamic> _homeAggregateJson() => {
   'banners': <dynamic>[],
   'hotDeals': [
@@ -233,6 +232,45 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Bluetooth Speaker'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Home fetches GET /api/home once, and once more per pull-to-refresh',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var homeCalls = 0;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.banners}': (_) => [_bannerJson()],
+        'GET ${ApiEndpoints.catalogCategories}': (_) => [_categoryJson()],
+        'GET ${ApiEndpoints.home}': (_) {
+          homeCalls++;
+          return _homeAggregateJson();
+        },
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+      // Bring Recommended on screen so all three sections are watched.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+      await _settle(tester);
+      expect(homeCalls, 1);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 2000));
+      await _settle(tester);
+      await tester.fling(
+        find.byType(CustomScrollView),
+        const Offset(0, 400),
+        1000,
+      );
+      await _settle(tester, times: 30);
+
+      expect(homeCalls, 2);
     },
   );
 
