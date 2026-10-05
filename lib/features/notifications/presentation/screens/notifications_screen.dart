@@ -10,7 +10,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
-import '../widgets/notification_filter_tabs.dart';
+import '../widgets/notification_unread_summary_banner.dart';
 import '../widgets/notifications_feed_slivers.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -27,7 +27,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    // Filter tabs hidden while backend only returns role=ALL — keep inbox on All.
+    // The backend only returns role=ALL, so the inbox always shows All.
     // Fetch on every open: notificationsProvider is keepAlive, so a previous
     // session's list would otherwise sit stale until the user pulled to refresh.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -91,11 +91,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               onPressed: n.markAllRead,
               child: Text(context.l10n.notificationsMarkAllRead, style: AppTypography.labelLarge.copyWith(color: AppColors.primary)),
             ),
-          // IconButton(
-          //   icon: const Icon(LucideIcons.settings),
-          //   onPressed: () => context.push(AppRoutes.notificationSettings),
-          //   tooltip: context.l10n.notificationSettingsTitle,
-          // ),
         ],
       ),
       body: RefreshIndicator(
@@ -106,10 +101,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           cacheExtent: 800,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Commented out — backend only supports role=ALL currently (see
-            // notifications_remote_datasource.dart _roleParam). Re-enable once
-            // backend implements per-role filtering.
-            // const SliverToBoxAdapter(child: NotificationFilterTabs()),
             const SliverToBoxAdapter(child: NotificationUnreadSummaryBanner()),
             ...NotificationsFeedSlivers.build(context: context, ref: ref, onDelete: _delete),
           ],

@@ -334,10 +334,4 @@ class Notifications extends _$Notifications {
     await Future<void>.delayed(const Duration(milliseconds: 550));
     await fetchNotifications();
   }
-
-  int unreadInFilter(NotificationFilter filter) {
-    return state.notifications
-        .where((e) => _matchesFilter(e, filter) && !e.isRead)
-        .length;
-  }
 }
