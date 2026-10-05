@@ -1061,3 +1061,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — Glows under frosted Orbit surfaces tint the fill
 - **Rule:** A `BoxShadow` on a translucent fill (`glassColor`, a brand tint at 8%) paints under the fill and shows through it, roughly tripling the tint; `BlurStyle.outer` doesn't prevent it in our renderer. Put the glow on an opaque child (orb, node, button) and give the translucent card only its border/tint, or keep its shadow alpha ≤0.18. Check selected states in dark screenshots.
 - **Where it applies:** `role_selector_card.dart`, onboarding badge, any glass card or chip with a glow.
+
+### 2026-10-05 — No null-aware collection elements (`?x`) until build_runner parses them
+- **Rule:** `flutter analyze` (Dart 3.9) accepts `[a, ?b]`, but our build_runner/analyzer dev-dependency fails the whole build with "Expected an identifier", which breaks codegen for everyone. Write `if (b != null) b` instead. After touching Dart in a codegen'd feature, run `dart run build_runner build` once, then revert regenerated files whose source didn't change.
+- **Where it applies:** Every Dart file; especially widget `children:` lists.
