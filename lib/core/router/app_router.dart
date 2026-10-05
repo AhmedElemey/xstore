@@ -466,6 +466,7 @@ GoRouter goRouter(GoRouterRef ref) {
         path: AppRoutes.notificationSettings,
         redirect: (_, __) => AppRoutes.profile,
       ),
+      // No chat screen; an FCM `actionRoute` can still send /chat/{id}.
       GoRoute(
         path: '/chat/:threadId',
         redirect: (_, __) => AppRoutes.notifications,

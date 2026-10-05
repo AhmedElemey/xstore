@@ -76,8 +76,6 @@ abstract final class AppRoutes {
   /// Consumer package delivery ("send anything" pilot).
   static const sendPackage = '/send-package';
   static const myPackages = '/my-packages';
-
-  static String chatThread(String threadId) => '/chat/$threadId';
 }
 
 /// Vendor-only areas: listing management, incoming orders, wallet, store
