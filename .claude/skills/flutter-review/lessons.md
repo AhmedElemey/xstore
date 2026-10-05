@@ -799,8 +799,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `social_auth_provider.dart`, `login_screen.dart`, `register_screen.dart`, `router_notifier.dart`, auth test doubles.
 
 ### 2026-09-12 — Order coordinates come from the chosen address
-- **Rule:** `OrderAddress`/`OrderAddressModel` carry optional `latitude`/`longitude` from `showMapAddressPicker` (persisted by `checkout_provider.dart`'s `_addressToJson`/`_addressFromJson`). `placeOrder` uses the selected address's pin when it's inside Egypt and falls back to `AppLocationCache` only when there's none.
-- **Where it applies:** `order_entity.dart`, `order_model.dart`, `checkout_provider.dart`, `cart_remote_datasource.dart`, `address_form_sheet.dart`, `map_address_picker.dart`.
+- **Rule:** `OrderAddress`/`OrderAddressModel` carry optional `latitude`/`longitude` (only older saved addresses have a pin now that the map picker and `google_maps_flutter` are gone; persisted by `checkout_provider.dart`'s `_addressToJson`/`_addressFromJson`). `placeOrder` uses the selected address's pin when it's inside Egypt and falls back to `AppLocationCache` only when there's none.
+- **Where it applies:** `order_entity.dart`, `order_model.dart`, `checkout_provider.dart`, `cart_remote_datasource.dart`, `address_form_sheet.dart`.
 
 ### 2026-09-12 — Action failures toast where the user is
 - **Rule:** Don't route a one-shot action failure (delete account, save) through a `state.error` that drives a load-retry banner at the top of a long screen. Return the error to the caller and show `AppSnackbar.error`.
@@ -835,7 +835,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `order_entity.dart`, `product_reviews_screen.dart`, `already_reviewed_sheet.dart`, order leave-review sheets.
 
 ### 2026-09-13 — iOS minimum version bumps touch three places
-- **Rule:** When CocoaPods says a plugin needs a higher deployment target, raise `platform :ios` in `ios/Podfile` (uncommented — otherwise CocoaPods assumes 13.0), `IPHONEOS_DEPLOYMENT_TARGET` in `project.pbxproj`, and `MinimumOSVersion` in `ios/Flutter/AppFrameworkInfo.plist` together (`google_maps_flutter_ios` needs 14).
+- **Rule:** When CocoaPods says a plugin needs a higher deployment target, raise `platform :ios` in `ios/Podfile` (uncommented — otherwise CocoaPods assumes 13.0), `IPHONEOS_DEPLOYMENT_TARGET` in `project.pbxproj`, and `MinimumOSVersion` in `ios/Flutter/AppFrameworkInfo.plist` together.
 - **Where it applies:** iOS build config.
 
 ### 2026-09-13 — Delivered is a vendor transition from Shipped
@@ -925,10 +925,6 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-09-21 — Phone fields showing +20 edit the 10-digit national number
 - **Rule:** With a `+20` prefix on screen, the field holds `1XXXXXXXXX`; convert to the 11-digit `01…` only for the API (`normalizeEgyptLocal`). Never prepend `0` in the widget.
 - **Where it applies:** `phone_input_field.dart`, `AppValidators.egyptNationalSignificantNumber`.
-
-### 2026-09-22 — A map starting point is not a user pick
-- **Rule:** The map picker's initial camera position (`AppLocationCache` or Cairo) isn't a selection: camera-start callbacks fire at creation, so `_hasPicked` stays false until the camera moves meaningfully from the start (`mapCameraMovedFromStart`) or the user taps Use my location; no reverse-geocoding or Confirm before that. Reopening with `initialLatitude`/`initialLongitude` starts as picked. `GoogleMap` can't run under `flutter_test` — unit-test the helper.
-- **Where it applies:** `map_address_picker.dart`.
 
 ### 2026-09-22 — Currency display has several code paths
 - **Rule:** `context.formatCurrency()` shows the amount then "LE" in English (Arabic already trails `ج.م`). Other paths show currency separately: `commission_breakdown_card.dart` and the Add Listing price fields' `prefixText: '${notifier.currencyCode} '`. Grep currency literals across `lib/` and scope the edit to what was asked.
