@@ -277,81 +277,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsTimeYesterday => 'Yesterday';
 
   @override
-  String get notificationSettingsTitle => 'Notification settings';
-
-  @override
-  String get notificationSettingsSave => 'Save Preferences';
-
-  @override
-  String get notificationSettingsSaved => 'Preferences saved';
-
-  @override
-  String get notificationSettingsSectionOrders => 'Order updates';
-
-  @override
-  String get notificationSettingsSectionDeals => 'Deals & offers';
-
-  @override
-  String get notificationSettingsSectionStore => 'Store updates';
-
-  @override
-  String get notificationSettingsSectionMessages => 'Messages';
-
-  @override
-  String get notificationSettingsSectionDelivery => 'Delivery';
-
-  @override
-  String get notificationSettingsOrderConfirmed => 'Order confirmed';
-
-  @override
-  String get notificationSettingsOrderShipped => 'Order shipped';
-
-  @override
-  String get notificationSettingsOrderDelivered => 'Order delivered';
-
-  @override
-  String get notificationSettingsOrderCancelled => 'Order cancelled';
-
-  @override
-  String get notificationSettingsFlashSales => 'Flash sales';
-
-  @override
-  String get notificationSettingsPriceDrops => 'Price drops';
-
-  @override
-  String get notificationSettingsBackInStock => 'Back in stock';
-
-  @override
-  String get notificationSettingsPromotional => 'Promotional offers';
-
-  @override
-  String get notificationSettingsNewOrders => 'New orders';
-
-  @override
-  String get notificationSettingsListingApproved => 'Listing approved';
-
-  @override
-  String get notificationSettingsListingRejected => 'Listing rejected';
-
-  @override
-  String get notificationSettingsLowStock => 'Low stock alerts';
-
-  @override
-  String get notificationSettingsPaymentReceived => 'Payment received';
-
-  @override
-  String get notificationSettingsNewMessages => 'New messages';
-
-  @override
-  String get notificationSettingsPush => 'Push notifications';
-
-  @override
-  String get notificationSettingsEmail => 'Email notifications';
-
-  @override
-  String get notificationSettingsSms => 'SMS notifications';
-
-  @override
   String get addListing => 'Add Listing';
 
   @override
@@ -579,16 +504,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuChangePassword => 'Change Password';
 
   @override
-  String get menuNotificationsSettings => 'Notifications';
-
-  @override
-  String get menuPaymentMethods => 'Payment Methods';
-
-  @override
   String get menuAddresses => 'My Addresses';
-
-  @override
-  String get menuHelpCenter => 'Help Center';
 
   @override
   String get menuTerms => 'Terms of Service';
@@ -601,9 +517,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuShareApp => 'Share xStore';
-
-  @override
-  String get manageStore => 'Manage Store';
 
   @override
   String get statSales => 'Sales';
@@ -631,19 +544,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storeCategoryLabel => 'Store Category';
-
-  @override
-  String whatsappProductPrefill(String title) {
-    return 'Hi, I\'m interested in $title';
-  }
-
-  @override
-  String whatsappStorePrefill(String name) {
-    return 'Hi, I saw your store $name on xStore';
-  }
-
-  @override
-  String get whatsappSellerUnavailable => 'Couldn\'t open WhatsApp.';
 
   @override
   String get instagramLabel => 'Instagram handle';
@@ -738,10 +638,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newSellerEmDash => '—';
-
-  @override
-  String get notificationSettingsDeviceOnly =>
-      'These apply on this device only until preferences sync to your account.';
 
   @override
   String get iosAppStoreUrl => 'https://apps.apple.com';
@@ -935,9 +831,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingStars2Plus => '⭐ 2+';
 
   @override
-  String get starChar => '★';
-
-  @override
   String get ordersEmptyTitle => 'No orders yet';
 
   @override
@@ -969,24 +862,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersFilterCancelled => 'Cancelled';
-
-  @override
-  String get ordersSortHighestValue => 'Highest Value';
-
-  @override
-  String get ordersSortNeedsAction => 'Needs Action';
-
-  @override
-  String get ordersStatPendingLabel => 'Pending';
-
-  @override
-  String get ordersStatActiveLabelTitle => 'Active';
-
-  @override
-  String get ordersStatMonthLabel => 'Month';
-
-  @override
-  String get ordersStatTotalLabel => 'Total';
 
   @override
   String get ordersQtyTotalLinePrefix => 'Qty';
@@ -1047,9 +922,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ordersBuyerInfo => 'Buyer Info';
-
-  @override
-  String get ordersWhatsapp => '💬 WhatsApp';
 
   @override
   String get ordersDeliveryAddressTitle => 'Delivery Address';
@@ -1208,9 +1080,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSubtitleCancelled => 'This order was cancelled';
 
   @override
-  String get ordersFiltersMoreSoon => 'More filters — coming soon';
-
-  @override
   String get orderHashPrefix => 'Order #';
 
   @override
@@ -1221,15 +1090,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wishlistExploreAsBuyer => 'Explore as Buyer';
-
-  @override
-  String get wishlistSelect => 'Select';
-
-  @override
-  String get wishlistCancelSelect => 'Cancel';
-
-  @override
-  String get wishlistSort => 'Sort';
 
   @override
   String get wishlistSortPriceLow => 'Price: Low to High';
@@ -1310,12 +1170,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wishlistSingleAddedToCart => 'Added to cart';
 
   @override
-  String get wishlistSelectAll => 'Select All';
-
-  @override
-  String get wishlistDeselectAll => 'Deselect All';
-
-  @override
   String get cartForBuyersTitle => 'Cart is for Buyers';
 
   @override
@@ -1326,9 +1180,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartClearConfirm => 'Clear Cart';
-
-  @override
-  String get cartTotalLabel => 'Total';
 
   @override
   String get cartEmptyTitle => 'Your cart is empty';
@@ -1358,9 +1209,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartPickupOnly => '🚫 Pickup Only';
 
   @override
-  String get cartApply => 'Apply';
-
-  @override
   String get cartOrderSummary => 'Order Summary';
 
   @override
@@ -1368,12 +1216,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cartTotalLine => 'Total';
-
-  @override
-  String get cartCashOnDeliveryNote => '💳 Cash on Delivery available';
-
-  @override
-  String get cartSecureCheckout => '🔒 Secure checkout guaranteed';
 
   @override
   String get cartProceedCheckout => 'Proceed to Checkout';
@@ -1478,12 +1320,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkoutTermsBefore => 'By placing this order you agree to our';
-
-  @override
-  String get checkoutTermsAnd => 'and';
-
-  @override
-  String get checkoutReturnPolicy => 'Return Policy';
 
   @override
   String get checkoutErrorNoAddress => 'Please select or add an address';
@@ -2008,11 +1844,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String wishlistSelectedCount(int n) {
-    return '$n selected';
-  }
-
-  @override
   String wishlistPriceDropBanner(int n) {
     return '🎉 Price drop on $n items in your wishlist!';
   }
@@ -2033,16 +1864,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String wishlistAddToCartSelected(int n) {
-    return 'Add to Cart ($n)';
-  }
-
-  @override
-  String wishlistRemoveSelectedCount(int n) {
-    return 'Remove Selected ($n)';
-  }
-
-  @override
   String wishlistAddedToCartCount(int n) {
     return '$n items added to cart';
   }
@@ -2055,11 +1876,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String cartClearBody(int n) {
     return 'This will remove all $n items from your cart.';
-  }
-
-  @override
-  String cartSelectAllCount(int n) {
-    return 'Select All ($n items)';
   }
 
   @override
@@ -2404,12 +2220,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get pushNotifications => 'Push Notifications';
-
-  @override
-  String get emailUpdates => 'Email Updates';
-
-  @override
   String get wishlistEmptySubtitle =>
       'Save items you love by tapping the heart icon on any product';
 
@@ -2439,135 +2249,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeHours => 'Store Hours';
 
   @override
-  String get storeStatusOpen => 'Your store is currently OPEN';
-
-  @override
-  String get storeStatusClosed => 'Your store is currently CLOSED';
-
-  @override
-  String get storeOpenDesc => 'Customers can place orders now';
-
-  @override
-  String get storeClosedDesc => 'Customers cannot place orders now';
-
-  @override
-  String get closeStoreNow => 'Close Store Now';
-
-  @override
-  String get openStoreNow => 'Open Store Now';
-
-  @override
-  String get closedMessage => 'Add a message for customers (optional)';
-
-  @override
-  String get closedMessageTitle => 'Closed message';
-
-  @override
-  String get closedMessageHint => 'e.g. Back in 1 hour, Closed for holiday';
-
-  @override
-  String get weeklySchedule => 'Weekly Schedule';
-
-  @override
-  String get weeklyScheduleSubtitle => 'Set your working hours for each day';
-
-  @override
-  String get copyHoursToAll => 'Copy hours to all days';
-
-  @override
-  String get quickPresets => 'Quick Presets';
-
-  @override
-  String get quickPresetsSubtitle => 'Apply a schedule template instantly';
-
-  @override
-  String get presetStandard => 'Standard (9AM–6PM)';
-
-  @override
-  String get presetExtended => 'Extended (9AM–11PM)';
-
-  @override
-  String get presetMorning => 'Morning Only (8AM–2PM)';
-
-  @override
-  String get presetFullWeek => 'Full Week';
-
-  @override
-  String get presetWeekdays => 'Weekdays Only (Sat–Thu)';
-
-  @override
-  String get presetWithoutFriday => 'Without Friday';
-
-  @override
-  String get saveWorkingHours => 'Save Working Hours';
-
-  @override
-  String get workingHoursSaved => 'Working hours saved! ✅';
-
-  @override
-  String get storeNowOpen => 'Store is now Open 🟢';
-
-  @override
-  String get storeNowClosed => 'Store is now Closed 🔴';
-
-  @override
-  String get open24Hours => 'Open 24 Hours';
-
-  @override
   String get from => 'From';
 
   @override
   String get to => 'To';
-
-  @override
-  String get copyFrom => 'Copy from:';
-
-  @override
-  String get applyToSelectedDays => 'Apply to Selected Days';
-
-  @override
-  String get selectAllDays => 'Select All';
-
-  @override
-  String get deselectAllDays => 'Deselect All';
-
-  @override
-  String get openLabel => 'Open';
-
-  @override
-  String get closedLabel => 'Closed';
-
-  @override
-  String get storeHoursTitle => 'Store Hours';
-
-  @override
-  String get daySaturday => 'Saturday';
-
-  @override
-  String get daySunday => 'Sunday';
-
-  @override
-  String get dayMonday => 'Monday';
-
-  @override
-  String get dayTuesday => 'Tuesday';
-
-  @override
-  String get dayWednesday => 'Wednesday';
-
-  @override
-  String get dayThursday => 'Thursday';
-
-  @override
-  String get dayFriday => 'Friday';
-
-  @override
-  String get invalidHoursError => 'Closing time must be after opening time';
-
-  @override
-  String applyPresetConfirm(String preset) {
-    return 'Apply $preset hours to all days?';
-  }
 
   @override
   String get storeLocation => 'Store Location';
@@ -3114,9 +2799,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get packageStatusCancelled => 'Cancelled';
 
   @override
-  String get menuMyPackages => 'My packages';
-
-  @override
   String get deliveryMethodSheetTitle => 'How will this order be delivered?';
 
   @override
@@ -3132,16 +2814,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deliveryMethodPlatformSubtitle =>
       'A courier picks up and delivers — the shipping fee is collected on your behalf.';
-
-  @override
-  String get requestCustomDeliveryTitle => 'Request custom delivery';
-
-  @override
-  String get requestCustomDeliverySubtitle =>
-      'Need a different pickup or drop-off point for this order? Request it and we\'ll price it for you.';
-
-  @override
-  String get requestCustomDeliveryAction => 'Request custom delivery';
 
   @override
   String get packageRejectReasonHint => 'Reason (optional)';

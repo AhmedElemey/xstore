@@ -87,31 +87,6 @@
   "notificationsGroupEarlier": "قبل كده",
   "notificationsTimeJustNow": "دلوقتي",
   "notificationsTimeYesterday": "أمس",
-  "notificationSettingsTitle": "إعدادات الإشعارات",
-  "notificationSettingsSave": "حفظ التفضيلات",
-  "notificationSettingsSaved": "تم حفظ التفضيلات",
-  "notificationSettingsSectionOrders": "تحديثات الطلبات",
-  "notificationSettingsSectionDeals": "العروض والخصومات",
-  "notificationSettingsSectionStore": "تحديثات المتجر",
-  "notificationSettingsSectionMessages": "الرسائل",
-  "notificationSettingsSectionDelivery": "التوصيل",
-  "notificationSettingsOrderConfirmed": "تأكيد الطلب",
-  "notificationSettingsOrderShipped": "شحن الطلب",
-  "notificationSettingsOrderDelivered": "تسليم الطلب",
-  "notificationSettingsOrderCancelled": "إلغاء الطلب",
-  "notificationSettingsFlashSales": "فلاش سيل",
-  "notificationSettingsPriceDrops": "تخفيضات الأسعار",
-  "notificationSettingsBackInStock": "عاد للمخزون",
-  "notificationSettingsPromotional": "العروض الترويجية",
-  "notificationSettingsNewOrders": "طلبات جديدة",
-  "notificationSettingsListingApproved": "موافقة على الإعلان",
-  "notificationSettingsListingRejected": "رفض الإعلان",
-  "notificationSettingsLowStock": "تنبيهات المخزون المنخفض",
-  "notificationSettingsPaymentReceived": "استلام الدفع",
-  "notificationSettingsNewMessages": "رسائل جديدة",
-  "notificationSettingsPush": "إشعارات الموبايل",
-  "notificationSettingsEmail": "إشعارات الإيميل",
-  "notificationSettingsSms": "إشعارات SMS",
   "addListing": "إضافة إعلان",
   "myListings": "إعلاناتي",
   "publishListing": "🚀 نشر الإعلان",
@@ -199,15 +174,11 @@
   "menuPersonalInfo": "البيانات الشخصية",
   "socialLinks": "روابط التواصل",
   "menuChangePassword": "تغيير كلمة المرور",
-  "menuNotificationsSettings": "الإشعارات",
-  "menuPaymentMethods": "طرق الدفع",
   "menuAddresses": "عناويني",
-  "menuHelpCenter": "مركز المساعدة",
   "menuTerms": "شروط الخدمة",
   "menuPrivacy": "سياسة الخصوصية",
   "menuRateApp": "قيّم xStore",
   "menuShareApp": "شارك xStore",
-  "manageStore": "إدارة المتجر",
   "statSales": "المبيعات",
   "statSalesShort": "مبيعات",
   "statRating": "التقييم",
@@ -217,23 +188,6 @@
   "statTotalSaved": "إجمالي التوفير",
   "storeInformation": "بيانات المتجر",
   "storeCategoryLabel": "فئة المتجر",
-  "whatsappProductPrefill": "مرحباً، مهتم بالإعلان {title}",
-  "@whatsappProductPrefill": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
-  "whatsappStorePrefill": "مرحباً، شفت متجر {name} على xStore",
-  "@whatsappStorePrefill": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "whatsappSellerUnavailable": "مش قادرين نفتح واتساب.",
   "instagramLabel": "حساب إنستجرام",
   "facebookLabel": "صفحة فيسبوك",
   "logoutConfirmTitle": "تسجيل الخروج من xStore؟",
@@ -265,7 +219,6 @@
   "legalDraftNotice": "مسودة تشغيلية لطريقة شغل xStore دلوقتي. بيانات الشركة ومدة الإرجاع والنص القانوني العربي المعتمد هتتضاف قبل النشر على المتاجر. ده مش بديل لاستشارة قانونية.",
   "newSeller": "بائع جديد",
   "newSellerEmDash": "—",
-  "notificationSettingsDeviceOnly": "الإعدادات دي على الجهاز ده بس لحد ما تتتزامن مع حسابك.",
   "iosAppStoreUrl": "https://apps.apple.com",
   "androidPlayStoreUrl": "https://play.google.com/store",
   "verified": "موثق",
@@ -328,7 +281,6 @@
   "ratingStars4Plus": "⭐ 4+",
   "ratingStars3Plus": "⭐ 3+",
   "ratingStars2Plus": "⭐ 2+",
-  "starChar": "★",
   "ordersEmptyTitle": "مفيش طلبات لسه",
   "ordersIncomingTitle": "الطلبات الواردة",
   "ordersMyTitle": "طلباتي",
@@ -340,12 +292,6 @@
   "ordersFilterShipped": "تم الشحن",
   "ordersFilterDelivered": "تم التسليم",
   "ordersFilterCancelled": "ملغي",
-  "ordersSortHighestValue": "الأعلى قيمة",
-  "ordersSortNeedsAction": "يحتاج إجراء",
-  "ordersStatPendingLabel": "في الانتظار",
-  "ordersStatActiveLabelTitle": "نشط",
-  "ordersStatMonthLabel": "الشهر",
-  "ordersStatTotalLabel": "الإجمالي",
   "ordersQtyTotalLinePrefix": "الكمية",
   "ordersEstimatedDelivery": "🚚 متوقع",
   "ordersTrackOrder": "تتبع الطلب",
@@ -366,7 +312,6 @@
   "ordersShareSummary": "مشاركة الطلب",
   "ordersSoldBy": "البائع",
   "ordersBuyerInfo": "بيانات المشتري",
-  "ordersWhatsapp": "💬 واتساب",
   "ordersDeliveryAddressTitle": "عنوان التوصيل",
   "ordersTrackingSectionTitle": "معلومات التتبع",
   "ordersPaymentSectionTitle": "تفاصيل الدفع",
@@ -419,14 +364,10 @@
   "statusSubtitleShipped": "طلبك في الطريق!",
   "statusSubtitleDelivered": "تم تسليم الطلب بنجاح",
   "statusSubtitleCancelled": "الطلب ده اتلغى",
-  "ordersFiltersMoreSoon": "فلاتر أكتر — قريباً",
   "orderHashPrefix": "طلب #",
   "wishlistEmptyTitle": "قائمة المفضلة فاضية",
   "wishlistForBuyersTitle": "المفضلة للمشترين فقط",
   "wishlistExploreAsBuyer": "استكشف كمشتري",
-  "wishlistSelect": "تحديد",
-  "wishlistCancelSelect": "إلغاء",
-  "wishlistSort": "ترتيب",
   "wishlistSortPriceLow": "السعر: من الأقل للأعلى",
   "wishlistSortPriceHigh": "السعر: من الأعلى للأقل",
   "wishlistSortNameAz": "الاسم أ-ي",
@@ -453,13 +394,10 @@
   "wishlistNoPriceDroppedItems": "لا توجد منتجات انخفض سعرها",
   "wishlistNoInCartItems": "لا توجد منتجات في السلة",
   "wishlistSingleAddedToCart": "تمت الإضافة للسلة",
-  "wishlistSelectAll": "تحديد الكل",
-  "wishlistDeselectAll": "إلغاء تحديد الكل",
   "cartForBuyersTitle": "السلة للمشترين فقط",
   "cartExploreAsBuyer": "استكشف كمشتري",
   "cartClearTitle": "مسح كل محتويات السلة؟",
   "cartClearConfirm": "مسح السلة",
-  "cartTotalLabel": "الإجمالي",
   "cartEmptyTitle": "سلتك فاضية",
   "cartStartShopping": "ابدأ التسوق",
   "cartOrWishlist": "أو شوف المفضلة ←",
@@ -469,12 +407,9 @@
   "cartUndo": "تراجع",
   "cartShippingFree": "🚚 شحن مجاني",
   "cartPickupOnly": "🚫 استلام فقط",
-  "cartApply": "تطبيق",
   "cartOrderSummary": "ملخص الطلب",
   "cartShippingLine": "الشحن",
   "cartTotalLine": "الإجمالي",
-  "cartCashOnDeliveryNote": "💳 الدفع عند الاستلام متاح",
-  "cartSecureCheckout": "🔒 إتمام شراء آمن",
   "cartProceedCheckout": "إتمام الشراء",
   "cartYouMayAlsoLike": "ممكن يعجبك كمان",
   "checkoutTitle": "إتمام الشراء",
@@ -509,8 +444,6 @@
   "checkoutReviewTitle": "راجع طلبك",
   "checkoutEstimatedDelivery": "🚚 المتوقع: 3–5 أيام عمل",
   "checkoutTermsBefore": "بتأكيد الطلب إنت موافق على",
-  "checkoutTermsAnd": "و",
-  "checkoutReturnPolicy": "سياسة الإرجاع",
   "checkoutErrorNoAddress": "اختار أو أضف عنوان توصيل",
   "checkoutErrorNoPayment": "اختار طريقة الدفع",
   "checkoutErrorNoItems": "مفيش منتجات محددة للدفع",
@@ -678,17 +611,13 @@
   "ordersCountLine": "{n} طلبات",
   "ordersMoreItems": "+ {n} عناصر إضافية",
   "ordersItemsSectionCount": "المنتجات المطلوبة ({n})",
-  "wishlistSelectedCount": "{n} محدد",
   "wishlistPriceDropBanner": "🎉 السعر نزل على {n} منتجات في مفضلتك!",
   "wishlistPriceDropPercent": "↓ {p}% انخفاض",
   "wishlistShareText": "شوف مفضلتي على xStore! 🛍️\n{link}",
   "wishlistItemsAvailableLine": "{total} عناصر · {avail} متاح",
-  "wishlistAddToCartSelected": "أضف للسلة ({n})",
-  "wishlistRemoveSelectedCount": "حذف المحدد ({n})",
   "wishlistAddedToCartCount": "تمت إضافة {n} عناصر للسلة",
   "cartAppBarTitle": "سلتي ({n} عناصر)",
   "cartClearBody": "ده هيحذف كل {n} عناصر من سلتك.",
-  "cartSelectAllCount": "تحديد الكل ({n} عناصر)",
   "cartRemovedSnack": "تم حذف {name} من السلة",
   "cartShippingPaid": "🚚 +{amount} ج.م شحن",
   "cartSubtotalLine": "الإجمالي الفرعي ({n} عناصر)",
@@ -768,13 +697,6 @@
       }
     }
   },
-  "@wishlistSelectedCount": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "@wishlistPriceDropBanner": {
     "placeholders": {
       "n": {
@@ -802,20 +724,6 @@
         "type": "int"
       },
       "avail": {
-        "type": "int"
-      }
-    }
-  },
-  "@wishlistAddToCartSelected": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "@wishlistRemoveSelectedCount": {
-    "placeholders": {
-      "n": {
         "type": "int"
       }
     }
@@ -859,13 +767,6 @@
     "placeholders": {
       "slug": {
         "type": "String"
-      }
-    }
-  },
-  "@cartSelectAllCount": {
-    "placeholders": {
-      "n": {
-        "type": "int"
       }
     }
   },
@@ -1058,8 +959,6 @@
       }
     }
   },
-  "pushNotifications": "إشعارات الموبايل",
-  "emailUpdates": "تحديثات الإيميل",
   "wishlistEmptySubtitle": "احفظ المنتجات اللي بتحبها بالضغط على علامة القلب على أي منتج",
   "shareXStoreMessage": "تسوق وبيع على xStore — السوق الحديث في مصر.",
   "cartTitle": "السلة",
@@ -1068,49 +967,8 @@
   "wishlistPriceDropBannerSubtitle": "الأسعار نزلت من وقت ما حفظتهم",
   "wishlistForBuyersSubtitle": "أنشئ حساب مشتري عشان تحفظ وتتابع منتجاتك المفضلة",
   "storeHours": "ساعات العمل",
-  "storeStatusOpen": "المتجر مفتوح دلوقتي",
-  "storeStatusClosed": "المتجر مغلق دلوقتي",
-  "storeOpenDesc": "العملاء يقدروا يطلبوا دلوقتي",
-  "storeClosedDesc": "العملاء مش قادرين يطلبوا دلوقتي",
-  "closeStoreNow": "إغلاق المتجر دلوقتي",
-  "openStoreNow": "فتح المتجر دلوقتي",
-  "closedMessage": "أضف رسالة للعملاء (اختياري)",
-  "closedMessageTitle": "رسالة الإغلاق",
-  "closedMessageHint": "مثلاً: هرجع في ساعة، إجازة العيد",
-  "weeklySchedule": "جدول الأسبوع",
-  "weeklyScheduleSubtitle": "حدد ساعات عملك لكل يوم",
-  "copyHoursToAll": "نسخ الأوقات لكل الأيام",
-  "quickPresets": "قوالب جاهزة",
-  "quickPresetsSubtitle": "طبق جدول جاهز فوراً",
-  "presetStandard": "عادي (9ص–6م)",
-  "presetExtended": "موسع (9ص–11م)",
-  "presetMorning": "صباحي بس (8ص–2م)",
-  "presetFullWeek": "طول الأسبوع",
-  "presetWeekdays": "أيام العمل (سبت–خميس)",
-  "presetWithoutFriday": "بدون جمعة",
-  "saveWorkingHours": "حفظ ساعات العمل",
-  "workingHoursSaved": "تم حفظ ساعات العمل! ✅",
-  "storeNowOpen": "المتجر مفتوح دلوقتي 🟢",
-  "storeNowClosed": "المتجر مغلق دلوقتي 🔴",
-  "open24Hours": "مفتوح 24 ساعة",
   "from": "من",
   "to": "إلى",
-  "copyFrom": "نسخ من:",
-  "applyToSelectedDays": "تطبيق على الأيام المحددة",
-  "selectAllDays": "تحديد الكل",
-  "deselectAllDays": "إلغاء تحديد الكل",
-  "openLabel": "مفتوح",
-  "closedLabel": "مغلق",
-  "storeHoursTitle": "ساعات العمل",
-  "daySaturday": "السبت",
-  "daySunday": "الأحد",
-  "dayMonday": "الاثنين",
-  "dayTuesday": "الثلاثاء",
-  "dayWednesday": "الأربعاء",
-  "dayThursday": "الخميس",
-  "dayFriday": "الجمعة",
-  "invalidHoursError": "وقت الإغلاق لازم يكون بعد وقت الفتح",
-  "applyPresetConfirm": "تطبيق أوقات {preset} على كل الأيام؟",
   "storeLocation": "موقع المتجر",
   "storeLocationSubtitle": "خلي المشترين يلاقوا متجرك بسهولة",
   "detectMyLocation": "تحديد موقعي الحالي",
@@ -1186,13 +1044,6 @@
   "locationPermissionRationaleBody": "يستخدم xStore موقعك لملء عنوانك تلقائيًا. يمكنك تغيير ذلك في أي وقت من ملفك الشخصي.",
   "locationPermissionAllow": "سماح",
   "locationPermissionNotNow": "ليس الآن",
-  "@applyPresetConfirm": {
-    "placeholders": {
-      "preset": {
-        "type": "String"
-      }
-    }
-  },
   "navDeliveries": "التوصيلات",
   "navCash": "النقدية",
   "courierDeliveriesTitle": "توصيلاتي",
@@ -1339,15 +1190,11 @@
   "packageStatusPickedUp": "تم الاستلام",
   "packageStatusDelivered": "تم التسليم",
   "packageStatusCancelled": "ملغي",
-  "menuMyPackages": "طرودي",
   "deliveryMethodSheetTitle": "كيف سيتم توصيل هذا الطلب؟",
   "deliveryMethodSelfTitle": "التوصيل بنفسي",
   "deliveryMethodSelfSubtitle": "تتولى التوصيل بنفسك وتحصّل المبلغ كاملاً.",
   "deliveryMethodPlatformTitle": "استخدام توصيل xStore",
   "deliveryMethodPlatformSubtitle": "سيقوم مندوب بالاستلام والتوصيل — يتم تحصيل رسوم الشحن نيابة عنك.",
-  "requestCustomDeliveryTitle": "طلب توصيل مخصص",
-  "requestCustomDeliverySubtitle": "تحتاج نقطة استلام أو تسليم مختلفة لهذا الطلب؟ اطلبها وسنقوم بتسعيرها لك.",
-  "requestCustomDeliveryAction": "طلب توصيل مخصص",
   "packageRejectReasonHint": "السبب (اختياري)",
   "packageRequestAgainAction": "إعادة الطلب",
   "packageOrderLinkedLabel": "مرتبط بطلب"
