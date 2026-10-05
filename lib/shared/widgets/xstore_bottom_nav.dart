@@ -4,9 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/animations/animated_widgets.dart';
-import '../../core/animations/app_animations.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/utils/extensions/context_extensions.dart';
 import '../../features/auth/domain/entities/user_entity.dart';
@@ -97,122 +95,150 @@ class XstoreBottomNav extends ConsumerWidget {
         ],
     };
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
+    // Orbit dock: a floating frosted pill. The middle tab of the 5-tab
+    // shopper and seller docks (Wishlist / Add listing) is a raised orb.
+    final hasOrb = labels.length == 5;
+    final isDark = context.isDark;
+    return ColoredBox(
+      color: context.backgroundColor,
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: SizedBox(
-            height: 56,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: List.generate(labels.length, (index) {
-                final selected = shell.currentIndex == index;
-                // Add Listing sits in the middle of the 5-tab vendor bar.
-                final accentMid = isVendor && index == 2;
-                final inactiveColor = accentMid && !selected
-                    ? AppColors.accent
-                    : context.textSecondary;
-                final activeColor =
-                    accentMid ? AppColors.accent : context.primaryColor;
-                // Same filled+red heart as product cards when the list
-                // isn't empty. Color stays error even on the selected tab
-                // so "you have saved items" isn't lost in the primary tint.
-                final wishlistFilled =
-                    role == UserRole.consumer && index == 2 && hasWishlistItems;
-
-                return Expanded(
-                  child: AnimatedTap(
-                    onTap: () => _onTap(context, ref, index),
-                    child: TweenAnimationBuilder<double>(
-                      duration: AppAnimations.fast,
-                      curve: AppAnimations.enter,
-                      tween: Tween<double>(end: selected ? 1.0 : 0.0),
-                      builder: (context, t, _) {
-                        final blended =
-                            Color.lerp(inactiveColor, activeColor, t)!;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 2,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              NotificationIconBadge(
-                                // Cart has no bottom-nav tab of its own (it's
-                                // opened from the cart icon in Home's app
-                                // bar) — echo the count on Home, not on a
-                                // tab (Explore) that has nothing to do with
-                                // the cart.
-                                count: role == UserRole.consumer && index == 0
-                                    ? cartCount
-                                    : 0,
-                                child: Transform.scale(
-                                  scale: 1.0 + (t * 0.12),
-                                  child: Icon(
-                                    wishlistFilled
-                                        ? Icons.favorite_rounded
-                                        : icons[index],
-                                    color: wishlistFilled
-                                        ? AppColors.error
-                                        : blended,
-                                    size: 22,
-                                  ),
+            height: 92,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xE00E1230)
+                        : const Color(0xE0FFFFFF),
+                    borderRadius: BorderRadius.circular(35),
+                    border: Border.all(color: context.borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark
+                            ? const Color(0x8C000000)
+                            : const Color(0x2B3C288C),
+                        blurRadius: 40,
+                        offset: const Offset(0, 14),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned.fill(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: List.generate(labels.length, (index) {
+                      final selected = shell.currentIndex == index;
+                      // Same filled+red heart as product cards when the list
+                      // isn't empty, so "you have saved items" isn't lost.
+                      final wishlistFilled = role == UserRole.consumer &&
+                          index == 2 &&
+                          hasWishlistItems;
+                      if (hasOrb && index == 2) {
+                        return Expanded(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Semantics(
+                              button: true,
+                              selected: selected,
+                              label: labels[index],
+                              child: AnimatedTap(
+                                onTap: () => _onTap(context, ref, index),
+                                child: _DockOrb(
+                                  icon: wishlistFilled
+                                      ? Icons.favorite_rounded
+                                      : icons[index],
+                                  vendor: isVendor,
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              SizedBox(
-                                height: 4,
-                                child: Center(
-                                  child: AnimatedContainer(
-                                    duration: AppAnimations.normal,
-                                    curve: AppAnimations.enter,
-                                    width: selected ? 18 : 0,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                      color: activeColor,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                labels[index],
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: blended,
-                                  fontSize: AppTypography.rem(0.625),
-                                  fontWeight: selected
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         );
-                      },
-                    ),
+                      }
+                      final accent = isVendor
+                          ? context.amberColor
+                          : context.linkColor;
+                      final color =
+                          selected ? accent : context.textHint;
+                      return Expanded(
+                        child: AnimatedTap(
+                          onTap: () => _onTap(context, ref, index),
+                          child: SizedBox(
+                            height: 70,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                NotificationIconBadge(
+                                  // Cart has no dock tab of its own (it's
+                                  // opened from Home's app bar) — echo the
+                                  // count on Home.
+                                  count: role == UserRole.consumer && index == 0
+                                      ? cartCount
+                                      : 0,
+                                  child: Icon(icons[index], color: color, size: 22),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  labels[index],
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: color,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                   ),
-                );
-              }),
+                ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The raised center orb: cyan plasma for shoppers, solar amber for sellers.
+class _DockOrb extends StatelessWidget {
+  const _DockOrb({required this.icon, required this.vendor});
+
+  final IconData icon;
+  final bool vendor;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = vendor
+        ? const [Color(0xFFFFF4DE), Color(0xFFFFC069), Color(0xFFB069FF)]
+        : const [Color(0xFFE9FDFF), Color(0xFF7CF0FF), Color(0xFF8A6BFF)];
+    final glow = vendor
+        ? const Color(0x8CFFC069)
+        : (context.isDark ? const Color(0x997CF0FF) : const Color(0x997B5CFF));
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.4),
+          colors: colors,
+          stops: vendor ? const [0, 0.38, 0.9] : const [0, 0.35, 0.85],
+        ),
+        border: Border.all(color: context.backgroundColor, width: 6),
+        boxShadow: [BoxShadow(color: glow, blurRadius: 36)],
+      ),
+      child: Icon(icon, color: AppColors.darkOnBrand, size: 26),
     );
   }
 }
