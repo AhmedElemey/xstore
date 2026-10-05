@@ -28,11 +28,12 @@ class OrdersState with _$OrdersState {
     @Default(true) bool hasMore,
     @Default(1) int page,
     String? error,
-    OrderStatsEntity? stats,
     @Default(false) bool isSearching,
   }) = _OrdersState;
 }
 
+/// The consumer's My Orders list. Vendors never reach /orders (they use
+/// VendorOrdersScreen and `vendorOrdersProvider`).
 @Riverpod(keepAlive: true)
 class OrdersNotifier extends _$OrdersNotifier {
   @override
@@ -54,30 +55,6 @@ class OrdersNotifier extends _$OrdersNotifier {
 
   UserEntity? get _user => ref.read(authProvider).valueOrNull;
 
-  bool get _isVendor => _user?.role == UserRole.vendor;
-
-  String? get _consumerId => _isVendor ? null : _user?.id;
-
-  String? get _vendorId => _isVendor ? _user?.id : null;
-
-  List<OrderStatus> get _consumerFilters => const [
-        OrderStatus.pending,
-        OrderStatus.confirmed,
-        OrderStatus.processing,
-        OrderStatus.shipped,
-        OrderStatus.delivered,
-        OrderStatus.cancelled,
-      ];
-
-  List<OrderStatus> get _vendorFilters => const [
-        OrderStatus.pending,
-        OrderStatus.confirmed,
-        OrderStatus.processing,
-        OrderStatus.shipped,
-        OrderStatus.delivered,
-        OrderStatus.cancelled,
-      ];
-
   var _fetchEpoch = 0;
 
   Future<void> fetchOrders() async {
@@ -90,32 +67,18 @@ class OrdersNotifier extends _$OrdersNotifier {
       page: 1,
       hasMore: true,
     );
-    if (_user == null) {
+    final consumerId = _user?.id;
+    if (consumerId == null) {
       if (epoch != _fetchEpoch) return;
       state = state.copyWith(isLoading: false);
       return;
     }
 
-    OrderStatsEntity? stats;
-    if (_isVendor) {
-      final statsResult = await ref
-          .read(getVendorOrderStatsUseCaseProvider)
-          .call(_vendorId!);
-      if (epoch != _fetchEpoch) return;
-      stats = statsResult.fold((_) => null, (s) => s);
-    }
-
-    final result = _isVendor
-        ? await ref.read(getVendorOrdersUseCaseProvider).call(
-              vendorId: _vendorId!,
-              page: 1,
-              pageSize: _pageSize,
-            )
-        : await ref.read(getConsumerOrdersUseCaseProvider).call(
-              consumerId: _consumerId!,
-              page: 1,
-              pageSize: _pageSize,
-            );
+    final result = await ref.read(getConsumerOrdersUseCaseProvider).call(
+          consumerId: consumerId,
+          page: 1,
+          pageSize: _pageSize,
+        );
 
     if (epoch != _fetchEpoch) return;
     result.fold(
@@ -129,7 +92,6 @@ class OrdersNotifier extends _$OrdersNotifier {
           orders: list,
           page: 1,
           hasMore: list.length >= _pageSize,
-          stats: stats ?? state.stats,
         );
         _recomputeDerived();
       },
@@ -137,21 +99,16 @@ class OrdersNotifier extends _$OrdersNotifier {
   }
 
   Future<void> loadMore() async {
-    if (!state.hasMore || state.isLoadingMore || _user == null) return;
+    final consumerId = _user?.id;
+    if (!state.hasMore || state.isLoadingMore || consumerId == null) return;
     final epoch = _fetchEpoch;
     state = state.copyWith(isLoadingMore: true, error: null);
     final next = state.page + 1;
-    final result = _isVendor
-        ? await ref.read(getVendorOrdersUseCaseProvider).call(
-              vendorId: _vendorId!,
-              page: next,
-              pageSize: _pageSize,
-            )
-        : await ref.read(getConsumerOrdersUseCaseProvider).call(
-              consumerId: _consumerId!,
-              page: next,
-              pageSize: _pageSize,
-            );
+    final result = await ref.read(getConsumerOrdersUseCaseProvider).call(
+          consumerId: consumerId,
+          page: next,
+          pageSize: _pageSize,
+        );
 
     if (epoch != _fetchEpoch) return;
     result.fold(
@@ -243,15 +200,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     return copy;
   }
 
-  List<OrderStatus> filtersForRole(bool vendor) =>
-      vendor ? _vendorFilters : _consumerFilters;
-
-  void _trackOrderStatus(
-    String orderId,
-    OrderStatus status, {
-    required String role,
-    DeliveryMethod? deliveryMethod,
-  }) {
+  void _trackOrderStatus(String orderId, OrderStatus status) {
     // No cancel/reject `reason`: it is localized or free text typed by the
     // user — the order API already stores it, joinable by order_id.
     ref.read(analyticsServiceProvider).track(
@@ -259,8 +208,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       properties: {
         AnalyticsProps.orderId: orderId,
         AnalyticsProps.status: status.name,
-        AnalyticsProps.role: role,
-        if (deliveryMethod != null) AnalyticsProps.method: deliveryMethod.name,
+        AnalyticsProps.role: 'consumer',
       },
     );
   }
@@ -286,7 +234,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     final result = await ref.read(cancelOrderUseCaseProvider).call(
           orderId: orderId,
           reason: reason,
-          isVendorSession: _isVendor,
+          isVendorSession: false,
         );
     if (epoch != _fetchEpoch) return;
     result.fold(
@@ -296,11 +244,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       },
       (o) {
         _mergeOrder(o);
-        _trackOrderStatus(
-          orderId,
-          OrderStatus.cancelled,
-          role: _isVendor ? 'vendor' : 'consumer',
-        );
+        _trackOrderStatus(orderId, OrderStatus.cancelled);
       },
     );
   }
@@ -324,123 +268,6 @@ class OrdersNotifier extends _$OrdersNotifier {
     await ref.read(cartProvider.notifier).reorderFromOrderItems(order.items);
   }
 
-  Future<void> confirmOrderVendor(String orderId, DeliveryMethod method) async {
-    final original = _orderById(orderId);
-    if (original == null) return;
-    _optimisticStatus(orderId, OrderStatus.confirmed,
-        confirmedAt: DateTime.now(), deliveryMethod: method,);
-    final epoch = _fetchEpoch;
-    final result = await ref
-        .read(confirmOrderUseCaseProvider)
-        .call(orderId: orderId, method: method, vendorId: _vendorId);
-    if (epoch != _fetchEpoch) return;
-    result.fold(
-      (failure) {
-        _restoreOrder(original);
-        state = state.copyWith(error: failure.toString());
-      },
-      (o) {
-        _mergeOrder(o);
-        _trackOrderStatus(
-          orderId,
-          OrderStatus.confirmed,
-          role: 'vendor',
-          deliveryMethod: method,
-        );
-      },
-    );
-  }
-
-  Future<void> rejectOrder(String orderId, String reason) async {
-    final original = _orderById(orderId);
-    if (original == null) return;
-    _optimisticStatus(orderId, OrderStatus.cancelled,
-        cancelReason: reason,
-        cancelledAt: DateTime.now(),);
-    final epoch = _fetchEpoch;
-    final result = await ref.read(rejectOrderUseCaseProvider).call(
-          orderId: orderId,
-          reason: reason,
-          vendorId: _vendorId,
-        );
-    if (epoch != _fetchEpoch) return;
-    result.fold(
-      (failure) {
-        _restoreOrder(original);
-        state = state.copyWith(error: failure.toString());
-      },
-      (o) {
-        _mergeOrder(o);
-        _trackOrderStatus(orderId, OrderStatus.cancelled, role: 'vendor');
-      },
-    );
-  }
-
-  Future<void> markProcessing(String orderId) async {
-    final original = _orderById(orderId);
-    if (original == null) return;
-    _optimisticStatus(orderId, OrderStatus.processing);
-    final epoch = _fetchEpoch;
-    final result = await ref
-        .read(markProcessingUseCaseProvider)
-        .call(orderId, vendorId: _vendorId);
-    if (epoch != _fetchEpoch) return;
-    result.fold(
-      (failure) {
-        _restoreOrder(original);
-        state = state.copyWith(error: failure.toString());
-      },
-      (o) {
-        _mergeOrder(o);
-        _trackOrderStatus(orderId, OrderStatus.processing, role: 'vendor');
-      },
-    );
-  }
-
-  Future<void> markShipped(String orderId, ShippingInfo info) async {
-    final original = _orderById(orderId);
-    if (original == null) return;
-    final now = DateTime.now();
-    final tn = info.trackingNumber?.trim().isNotEmpty == true
-        ? info.trackingNumber
-        : 'XS-TRACK-$orderId';
-    state = state.copyWith(
-      orders: state.orders
-          .map(
-            (o) => o.id == orderId
-                ? o.copyWith(
-                    status: OrderStatus.shipped,
-                    trackingNumber: tn,
-                    courierName: info.courierName ?? o.courierName,
-                    estimatedDelivery:
-                        info.estimatedDelivery ?? o.estimatedDelivery,
-                    shippedAt: now,
-                    updatedAt: now,
-                  )
-                : o,
-          )
-          .toList(),
-    );
-    _recomputeDerived();
-    final epoch = _fetchEpoch;
-    final result = await ref.read(markShippedUseCaseProvider).call(
-          orderId: orderId,
-          shippingInfo: info,
-          vendorId: _vendorId,
-        );
-    if (epoch != _fetchEpoch) return;
-    result.fold(
-      (failure) {
-        _restoreOrder(original);
-        state = state.copyWith(error: failure.toString());
-      },
-      (o) {
-        _mergeOrder(o);
-        _trackOrderStatus(orderId, OrderStatus.shipped, role: 'vendor');
-      },
-    );
-  }
-
   Future<void> markDelivered(String orderId) async {
     final original = _orderById(orderId);
     if (original == null) return;
@@ -461,10 +288,7 @@ class OrdersNotifier extends _$OrdersNotifier {
     _recomputeDerived();
     final epoch = _fetchEpoch;
     final result =
-        await ref.read(markDeliveredUseCaseProvider).call(
-              orderId,
-              vendorId: _isVendor ? _vendorId : null,
-            );
+        await ref.read(markDeliveredUseCaseProvider).call(orderId);
     if (epoch != _fetchEpoch) return;
     result.fold(
       (failure) {
@@ -473,11 +297,7 @@ class OrdersNotifier extends _$OrdersNotifier {
       },
       (o) {
         _mergeOrder(o);
-        _trackOrderStatus(
-          orderId,
-          OrderStatus.delivered,
-          role: _isVendor ? 'vendor' : 'consumer',
-        );
+        _trackOrderStatus(orderId, OrderStatus.delivered);
       },
     );
   }
@@ -504,34 +324,6 @@ class OrdersNotifier extends _$OrdersNotifier {
     _recomputeDerived();
   }
 
-  void _optimisticStatus(
-    String orderId,
-    OrderStatus status, {
-    DateTime? confirmedAt,
-    DateTime? cancelledAt,
-    String? cancelReason,
-    DeliveryMethod? deliveryMethod,
-  }) {
-    final now = DateTime.now();
-    state = state.copyWith(
-      orders: state.orders
-          .map(
-            (o) => o.id == orderId
-                ? o.copyWith(
-                    status: status,
-                    updatedAt: now,
-                    confirmedAt: confirmedAt ?? o.confirmedAt,
-                    cancelledAt: cancelledAt ?? o.cancelledAt,
-                    cancelReason: cancelReason ?? o.cancelReason,
-                    deliveryMethod: deliveryMethod ?? o.deliveryMethod,
-                  )
-                : o,
-          )
-          .toList(),
-    );
-    _recomputeDerived();
-  }
-
   void _mergeOrder(OrderEntity o) {
     if (o.id.isEmpty) return;
     final idx = state.orders.indexWhere((e) => e.id == o.id);
@@ -543,16 +335,6 @@ class OrdersNotifier extends _$OrdersNotifier {
       state = state.copyWith(orders: next);
     }
     _recomputeDerived();
-    if (_isVendor) {
-      final statsEpoch = _fetchEpoch;
-      ref
-          .read(getVendorOrderStatsUseCaseProvider)
-          .call(_vendorId!)
-          .then((r) => r.fold((_) => null, (s) {
-                if (statsEpoch != _fetchEpoch) return;
-                state = state.copyWith(stats: s);
-              }),);
-    }
   }
 
   void clearError() {

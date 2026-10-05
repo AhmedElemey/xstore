@@ -12,6 +12,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/product_skeleton_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
+import '../providers/home_dependencies.dart';
 import '../providers/recommended_provider.dart';
 import 'product_card.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -63,7 +64,7 @@ class RecommendedSection extends ConsumerWidget {
           ),
           error: (e, _) => ErrorStateWidget(
             message: e.toString(),
-            onRetry: () => ref.invalidate(recommendedProvider),
+            onRetry: () => ref.invalidate(homeFeedProvider),
           ),
         ),
       ],

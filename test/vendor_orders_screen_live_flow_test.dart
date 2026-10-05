@@ -6,15 +6,10 @@
 // scripted.
 //
 // VendorOrdersScreen (routed at AppRoutes.vendorOrders, the vendor shell's
-// own tab) is a COMPLETELY SEPARATE implementation from OrdersScreen's
-// VendorOrdersView — its own `VendorOrdersNotifier`
-// (vendor_orders_provider.dart, a plain StateNotifier, not @riverpod) and
-// its own `VendorOrderCard`/`RejectOrderSheet` widgets — even though both
-// ultimately call the same confirm/reject/markProcessing use cases and
-// therefore hit the same PUT /api/vendor/orders/status wire contract
-// orders_screen_live_flow_test.dart already confirmed. Testing this
-// screen is NOT redundant with that file: it's genuinely different code
-// that happened to be completely uncovered.
+// own tab) is the only vendor orders list: `VendorOrdersNotifier`
+// (vendor_orders_provider.dart, a plain StateNotifier, not @riverpod) with
+// its own `VendorOrderCard`/`RejectOrderSheet` widgets, hitting
+// PUT /api/vendor/orders/status. OrdersScreen is consumer-only.
 //
 // Run with: flutter test test/vendor_orders_screen_live_flow_test.dart
 import 'dart:async';

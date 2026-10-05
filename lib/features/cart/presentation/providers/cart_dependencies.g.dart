@@ -136,40 +136,6 @@ final clearCartUseCaseProvider = AutoDisposeProvider<ClearCartUseCase>.internal(
 );
 
 typedef ClearCartUseCaseRef = AutoDisposeProviderRef<ClearCartUseCase>;
-String _$applyCouponUseCaseHash() =>
-    r'b88a7298d4922e8b8b2315c8fd6795d997ad5414';
-
-/// See also [applyCouponUseCase].
-@ProviderFor(applyCouponUseCase)
-final applyCouponUseCaseProvider =
-    AutoDisposeProvider<ApplyCouponUseCase>.internal(
-  applyCouponUseCase,
-  name: r'applyCouponUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$applyCouponUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef ApplyCouponUseCaseRef = AutoDisposeProviderRef<ApplyCouponUseCase>;
-String _$removeCouponUseCaseHash() =>
-    r'614f93ce4b1e8cc753371094a7a1e0967359c745';
-
-/// See also [removeCouponUseCase].
-@ProviderFor(removeCouponUseCase)
-final removeCouponUseCaseProvider =
-    AutoDisposeProvider<RemoveCouponUseCase>.internal(
-  removeCouponUseCase,
-  name: r'removeCouponUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$removeCouponUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef RemoveCouponUseCaseRef = AutoDisposeProviderRef<RemoveCouponUseCase>;
 String _$placeOrderUseCaseHash() => r'18f472dbc8dc38bfbc59c2c9387848b5a28947bc';
 
 /// See also [placeOrderUseCase].

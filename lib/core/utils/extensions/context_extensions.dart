@@ -147,4 +147,28 @@ extension LocalizationContext on BuildContext {
       isArabic ? 'ar' : 'en',
     ).format(date);
   }
+
+  /// "Mar 5, 2026" in both locales (fixed field order).
+  String formatMediumDate(DateTime date) =>
+      DateFormat('MMM d, yyyy', isArabic ? 'ar' : 'en').format(date);
+
+  /// The locale's own medium date order (Arabic puts the day first).
+  String formatLocaleMediumDate(DateTime date) =>
+      DateFormat.yMMMd(isArabic ? 'ar' : 'en').format(date);
+
+  /// "Thursday, Mar 5".
+  String formatWeekdayDate(DateTime date) =>
+      DateFormat('EEEE, MMM d', isArabic ? 'ar' : 'en').format(date);
+
+  /// "Thursday, Mar 5, 2026".
+  String formatLongDate(DateTime date) =>
+      DateFormat('EEEE, MMM d, yyyy', isArabic ? 'ar' : 'en').format(date);
+
+  /// "Mar 2026".
+  String formatMonthYear(DateTime date) =>
+      DateFormat('MMM y', isArabic ? 'ar' : 'en').format(date);
+
+  /// 24-hour "14:05".
+  String formatTime(DateTime date) =>
+      DateFormat('HH:mm', isArabic ? 'ar' : 'en').format(date);
 }

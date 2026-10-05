@@ -13,7 +13,6 @@ CartEntity _stubEmpty(String consumerId) => CartEntity(
       selectedItemIds: const {},
       subtotal: 0,
       shippingTotal: 0,
-      discount: 0,
       total: 0,
     );
 
@@ -84,18 +83,6 @@ class StubCartRepository implements CartRepository {
 
   @override
   Future<Either<Failure, CartEntity>> clearCart(String consumerId) async =>
-      Right(_stubEmpty(consumerId));
-
-  @override
-  Future<Either<Failure, CouponEntity>> applyCoupon({
-    required String consumerId,
-    required String code,
-    required double eligibleSubtotal,
-  }) async =>
-      Left(Failure.validation('stub'));
-
-  @override
-  Future<Either<Failure, CartEntity>> removeCoupon(String consumerId) async =>
       Right(_stubEmpty(consumerId));
 
   @override

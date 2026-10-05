@@ -4,7 +4,6 @@ import 'package:gap/gap.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:xstore/features/store_categories/domain/entities/store_category_entity.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -99,7 +98,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _phone.text = s.editPhone;
     _location.text = s.editLocation;
     _dobText.text = s.editDateOfBirth != null
-        ? DateFormat.yMMMd(context.l10n.localeName).format(s.editDateOfBirth!)
+        ? context.formatLocaleMediumDate(s.editDateOfBirth!)
         : '';
     _storeName.text = s.editStoreName;
     _storeCategory.text = _storeCategoryLabel(s);
@@ -241,7 +240,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (dateOnly == null) return;
     setState(() {
       _dob = dateOnly;
-      _dobText.text = DateFormat.yMMMd(context.l10n.localeName).format(dateOnly);
+      _dobText.text = context.formatLocaleMediumDate(dateOnly);
     });
     ref
         .read(profileNotifierProvider.notifier)

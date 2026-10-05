@@ -100,35 +100,6 @@ class CartRepositoryImpl implements CartRepository {
   }
 
   @override
-  Future<Either<Failure, CouponEntity>> applyCoupon({
-    required String consumerId,
-    required String code,
-    required double eligibleSubtotal,
-  }) async {
-    try {
-      return Right(
-        await _remote.applyCoupon(
-          code: code,
-          eligibleSubtotal: eligibleSubtotal,
-        ),
-      );
-    } on CouponException catch (e) {
-      return Left(Failure.validation(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, CartEntity>> removeCoupon(String consumerId) async {
-    try {
-      return Right(await _remote.removeCoupon(consumerId));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, OrderEntity>> placeOrder(PlaceOrderParams params) async {
     try {
       final order = await _remote.placeOrder(params);

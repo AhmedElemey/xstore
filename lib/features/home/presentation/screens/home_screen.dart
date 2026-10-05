@@ -22,9 +22,9 @@ import '../../../../shared/widgets/skeletons/home_skeleton.dart';
 import '../../domain/entities/deal_entity.dart';
 import '../providers/banners_provider.dart';
 import '../providers/categories_provider.dart';
+import '../providers/home_dependencies.dart';
 import '../providers/hot_deals_provider.dart';
 import '../providers/new_arrivals_provider.dart';
-import '../providers/recommended_provider.dart';
 import '../widgets/category_chip_row.dart';
 import '../widgets/featured_categories_banner.dart';
 import '../widgets/hero_banner_carousel.dart';
@@ -71,26 +71,22 @@ class HomeScreen extends ConsumerWidget {
       isTarget: (location) => location == AppRoutes.home,
       onReentry: (ref) {
         ref.invalidate(bannersProvider);
-        ref.invalidate(hotDealsProvider);
         ref.invalidate(categoriesProvider);
-        ref.invalidate(newArrivalsProvider);
-        ref.invalidate(recommendedProvider);
+        ref.invalidate(homeFeedProvider);
       },
       child: Scaffold(
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
           ref.invalidate(bannersProvider);
-          ref.invalidate(hotDealsProvider);
           ref.invalidate(categoriesProvider);
-          ref.invalidate(newArrivalsProvider);
-          ref.invalidate(recommendedProvider);
+          // Hot deals, new arrivals and recommended rebuild from this one
+          // fetch.
+          ref.invalidate(homeFeedProvider);
           await Future.wait([
             ref.read(bannersProvider.future),
-            ref.read(hotDealsProvider.future),
             ref.read(categoriesProvider.future),
-            ref.read(newArrivalsProvider.future),
-            ref.read(recommendedProvider.future),
+            ref.read(homeFeedProvider.future),
           ]);
         },
         child: CustomScrollView(
@@ -173,7 +169,7 @@ class HomeScreen extends ConsumerWidget {
                     loading: () => const _DealsSkeleton(),
                     errorBuilder: (e) => ErrorStateWidget(
                       message: e.toString(),
-                      onRetry: () => ref.invalidate(hotDealsProvider),
+                      onRetry: () => ref.invalidate(homeFeedProvider),
                     ),
                   ),
                   const Gap(AppSpacing.lg),
@@ -196,7 +192,7 @@ class HomeScreen extends ConsumerWidget {
                     loading: () => const _DealsSkeleton(),
                     errorBuilder: (e) => ErrorStateWidget(
                       message: e.toString(),
-                      onRetry: () => ref.invalidate(newArrivalsProvider),
+                      onRetry: () => ref.invalidate(homeFeedProvider),
                     ),
                   ),
                   const Gap(AppSpacing.lg),

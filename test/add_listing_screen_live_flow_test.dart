@@ -29,7 +29,7 @@
 // escalates to the email-OTP sheet, which touches Firebase the same way
 // documented in profile_verification_screen_live_flow_test.dart. This
 // screen's overall flow is therefore not mode-agnostic (unlike
-// Notifications/MyListings/StoreHours), so this test carries the usual
+// Notifications/MyListings), so this test carries the usual
 // `skip: MockConfig.useMock`. A successful update also `context.go`es to
 // AppRoutes.listingMy, so this needs a real GoRouter harness (like
 // explore_screen_live_flow_test.dart) with a placeholder destination

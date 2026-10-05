@@ -53,23 +53,6 @@ final getBannersUseCaseProvider =
 );
 
 typedef GetBannersUseCaseRef = AutoDisposeProviderRef<GetBannersUseCase>;
-String _$getHotDealsUseCaseHash() =>
-    r'0d855d39f65b6a7c6895c257f079aa625452525d';
-
-/// See also [getHotDealsUseCase].
-@ProviderFor(getHotDealsUseCase)
-final getHotDealsUseCaseProvider =
-    AutoDisposeProvider<GetHotDealsUseCase>.internal(
-  getHotDealsUseCase,
-  name: r'getHotDealsUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$getHotDealsUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef GetHotDealsUseCaseRef = AutoDisposeProviderRef<GetHotDealsUseCase>;
 String _$getCategoriesUseCaseHash() =>
     r'7cd644e8fc528d03b39a699cdd034986d88ef7f6';
 
@@ -87,41 +70,40 @@ final getCategoriesUseCaseProvider =
 );
 
 typedef GetCategoriesUseCaseRef = AutoDisposeProviderRef<GetCategoriesUseCase>;
-String _$getNewArrivalsUseCaseHash() =>
-    r'a4d0c85ccab931bc12787ffb4b2b93f02019f227';
+String _$getHomeFeedUseCaseHash() =>
+    r'b40b73805d851d48ba32b25cf98fccdc8f85a2d0';
 
-/// See also [getNewArrivalsUseCase].
-@ProviderFor(getNewArrivalsUseCase)
-final getNewArrivalsUseCaseProvider =
-    AutoDisposeProvider<GetNewArrivalsUseCase>.internal(
-  getNewArrivalsUseCase,
-  name: r'getNewArrivalsUseCaseProvider',
+/// See also [getHomeFeedUseCase].
+@ProviderFor(getHomeFeedUseCase)
+final getHomeFeedUseCaseProvider =
+    AutoDisposeProvider<GetHomeFeedUseCase>.internal(
+  getHomeFeedUseCase,
+  name: r'getHomeFeedUseCaseProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$getNewArrivalsUseCaseHash,
+      : _$getHomeFeedUseCaseHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef GetNewArrivalsUseCaseRef
-    = AutoDisposeProviderRef<GetNewArrivalsUseCase>;
-String _$getRecommendedUseCaseHash() =>
-    r'ab4df9ccddd0db956ec3992cd590002f4a58dcfc';
+typedef GetHomeFeedUseCaseRef = AutoDisposeProviderRef<GetHomeFeedUseCase>;
+String _$homeFeedHash() => r'dc7bd891b2002c046740cecc3353891818357b2d';
 
-/// See also [getRecommendedUseCase].
-@ProviderFor(getRecommendedUseCase)
-final getRecommendedUseCaseProvider =
-    AutoDisposeProvider<GetRecommendedUseCase>.internal(
-  getRecommendedUseCase,
-  name: r'getRecommendedUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$getRecommendedUseCaseHash,
+/// One `GET /api/home` shared by the hot deals, new arrivals and
+/// recommended providers. Invalidate this (not a section provider) to
+/// refetch — the sections rebuild from it.
+///
+/// Copied from [homeFeed].
+@ProviderFor(homeFeed)
+final homeFeedProvider = AutoDisposeFutureProvider<HomeFeed>.internal(
+  homeFeed,
+  name: r'homeFeedProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$homeFeedHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef GetRecommendedUseCaseRef
-    = AutoDisposeProviderRef<GetRecommendedUseCase>;
+typedef HomeFeedRef = AutoDisposeFutureProviderRef<HomeFeed>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

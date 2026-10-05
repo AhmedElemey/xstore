@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -14,15 +12,11 @@ class ProfileHeader extends StatelessWidget {
   const ProfileHeader({
     super.key,
     required this.user,
-    this.avatarFile,
     this.onEditProfile,
-    this.onAvatarTap,
   });
 
   final UserEntity user;
-  final File? avatarFile;
   final VoidCallback? onEditProfile;
-  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -49,15 +43,6 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Transform.translate(
-          //   offset: const Offset(0, -AppSpacing.x4l - AppSpacing.sm),
-          //   child: ProfileAvatarPicker(
-          //     name: user.name,
-          //     imageUrl: user.avatarUrl,
-          //     imageFile: avatarFile,
-          //     onTap: onAvatarTap,
-          //   ),
-          // ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,

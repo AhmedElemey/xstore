@@ -25,11 +25,6 @@ class StubCartRemoteDataSource implements CartRemoteDataSource {
       required int quantity,
     })? onUpdateQuantity,
     Future<CartEntity> Function(String consumerId)? onClearCart,
-    Future<CouponEntity> Function({
-      required String code,
-      required double eligibleSubtotal,
-    })? onApplyCoupon,
-    Future<CartEntity> Function(String consumerId)? onRemoveCoupon,
     Future<OrderEntity> Function(PlaceOrderParams params)? onPlaceOrder,
     Future<CartItemEntity> Function(String listingId, int quantity)?
         onBuildLineFromListing,
@@ -38,8 +33,6 @@ class StubCartRemoteDataSource implements CartRemoteDataSource {
         _onRemoveItem = onRemoveItem,
         _onUpdateQuantity = onUpdateQuantity,
         _onClearCart = onClearCart,
-        _onApplyCoupon = onApplyCoupon,
-        _onRemoveCoupon = onRemoveCoupon,
         _onPlaceOrder = onPlaceOrder,
         _onBuildLineFromListing = onBuildLineFromListing;
 
@@ -58,11 +51,6 @@ class StubCartRemoteDataSource implements CartRemoteDataSource {
     required int quantity,
   })? _onUpdateQuantity;
   final Future<CartEntity> Function(String consumerId)? _onClearCart;
-  final Future<CouponEntity> Function({
-    required String code,
-    required double eligibleSubtotal,
-  })? _onApplyCoupon;
-  final Future<CartEntity> Function(String consumerId)? _onRemoveCoupon;
   final Future<OrderEntity> Function(PlaceOrderParams params)? _onPlaceOrder;
   final Future<CartItemEntity> Function(String listingId, int quantity)?
       _onBuildLineFromListing;
@@ -109,23 +97,6 @@ class StubCartRemoteDataSource implements CartRemoteDataSource {
   Future<CartEntity> clearCart(String consumerId) {
     final cb = _onClearCart;
     if (cb == null) throw UnimplementedError('clearCart not stubbed');
-    return cb(consumerId);
-  }
-
-  @override
-  Future<CouponEntity> applyCoupon({
-    required String code,
-    required double eligibleSubtotal,
-  }) {
-    final cb = _onApplyCoupon;
-    if (cb == null) throw UnimplementedError('applyCoupon not stubbed');
-    return cb(code: code, eligibleSubtotal: eligibleSubtotal);
-  }
-
-  @override
-  Future<CartEntity> removeCoupon(String consumerId) {
-    final cb = _onRemoveCoupon;
-    if (cb == null) throw UnimplementedError('removeCoupon not stubbed');
     return cb(consumerId);
   }
 

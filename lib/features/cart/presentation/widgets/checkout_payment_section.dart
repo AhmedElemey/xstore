@@ -5,7 +5,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/checkout_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -101,13 +100,3 @@ class _CheckoutPaymentSectionState
     );
   }
 }
-
-/// Review-step label. Historical non-COD values still parse from old orders.
-String checkoutPaymentLabel(BuildContext context, PaymentMethod m) =>
-    switch (m) {
-      PaymentMethod.cashOnDelivery =>
-        context.l10n.ordersPaymentCashOnDelivery,
-      PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
-      PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
-      PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
-    };

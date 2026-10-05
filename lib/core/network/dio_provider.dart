@@ -9,7 +9,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/listing/presentation/providers/listing_dependencies.dart';
 import '../../features/profile/presentation/providers/profile_provider.dart';
-import '../../features/store/presentation/providers/store_hours_provider.dart';
 import '../constants/prefs_keys.dart';
 import '../utils/app_location_cache.dart';
 import 'api_auth_headers.dart';
@@ -34,7 +33,6 @@ Future<void> _clearInvalidSession(
   await secureStorage.delete(key: PrefsKeys.authUser);
   resetProfileData(ref);
   resetListingLocalCache(ref);
-  resetStoreHoursData(ref);
   ref.invalidate(authProvider);
 }
 

@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/core/utils/jwt_payload.dart';
 import 'package:xstore/core/utils/validators.dart';
-import 'package:xstore/shared/utils/whatsapp.dart';
 
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
@@ -83,15 +82,6 @@ void main() {
       expect(AppValidators.isMissingPhoneNumber(''), isTrue);
       expect(AppValidators.isMissingPhoneNumber('00000000000'), isTrue);
       expect(AppValidators.isMissingPhoneNumber('01012345678'), isFalse);
-    });
-
-    test('WhatsApp digits', () {
-      expect(whatsAppDigits('01012345678'), '201012345678');
-      expect(whatsAppDigits('+201012345678'), '201012345678');
-      expect(whatsAppDigits(null), isNull);
-      expect(whatsAppDigits('  '), isNull);
-      // A 3-digit garbage number must not produce a wa.me link.
-      expect(whatsAppDigits('123'), isNull);
     });
   });
 

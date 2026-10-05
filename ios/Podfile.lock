@@ -15,17 +15,6 @@ PODS:
     - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
-  - Google-Maps-iOS-Utils (5.0.0):
-    - GoogleMaps (~> 8.0)
-  - google_maps_flutter_ios (0.0.1):
-    - Flutter
-    - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
-    - GoogleMaps (< 11.0, >= 8.4)
-  - GoogleMaps (8.4.0):
-    - GoogleMaps/Maps (= 8.4.0)
-  - GoogleMaps/Base (8.4.0)
-  - GoogleMaps/Maps (8.4.0):
-    - GoogleMaps/Base
   - sign_in_with_apple (0.0.1):
     - Flutter
 
@@ -34,7 +23,6 @@ DEPENDENCIES:
   - flutter_facebook_auth (from `.symlinks/plugins/flutter_facebook_auth/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
 
 SPEC REPOS:
@@ -43,8 +31,6 @@ SPEC REPOS:
     - FBSDKCoreKit
     - FBSDKCoreKit_Basics
     - FBSDKLoginKit
-    - Google-Maps-iOS-Utils
-    - GoogleMaps
 
 EXTERNAL SOURCES:
   Flutter:
@@ -55,8 +41,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  google_maps_flutter_ios:
-    :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
   sign_in_with_apple:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
 
@@ -69,11 +53,8 @@ SPEC CHECKSUMS:
   flutter_facebook_auth: 08ab1a6be157d7fce8348b881787e7608f763267
   flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
-  Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
-  google_maps_flutter_ios: 11687ec5d93f8e025e12daab0a5636fa9f71d53e
-  GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
 
-PODFILE CHECKSUM: ca55c4805124c8fb78a792b7867e757139a1c721
+PODFILE CHECKSUM: 425203adeb97d3563115f84cc62c67cb2ef906da
 
 COCOAPODS: 1.16.2

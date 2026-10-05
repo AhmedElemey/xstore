@@ -201,7 +201,6 @@ class Checkout extends _$Checkout {
           : state.deliveryNote.trim(),
       subtotal: cart.subtotal,
       shippingTotal: cart.shippingTotal,
-      discount: cart.discount,
       total: cart.total,
     );
     final order = await cartNotifier.placeOrder(params);

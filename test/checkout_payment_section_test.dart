@@ -8,6 +8,7 @@ import 'package:xstore/features/cart/presentation/providers/checkout_provider.da
 import 'package:xstore/features/cart/presentation/providers/checkout_state.dart';
 import 'package:xstore/features/cart/presentation/widgets/checkout_payment_section.dart';
 import 'package:xstore/features/orders/domain/entities/order_entity.dart';
+import 'package:xstore/features/orders/presentation/widgets/order_price_breakdown.dart';
 
 class _SilentCheckout extends Checkout {
   _SilentCheckout({this.note = ''});
@@ -55,11 +56,11 @@ void main() {
 
     final ctx = tester.element(find.byType(CheckoutPaymentSection));
     expect(
-      checkoutPaymentLabel(ctx, PaymentMethod.cashOnDelivery),
+      paymentMethodLabel(ctx, PaymentMethod.cashOnDelivery),
       l10n.ordersPaymentCashOnDelivery,
     );
     expect(
-      checkoutPaymentLabel(ctx, PaymentMethod.cibCard),
+      paymentMethodLabel(ctx, PaymentMethod.cibCard),
       l10n.ordersPaymentCib,
     );
   });

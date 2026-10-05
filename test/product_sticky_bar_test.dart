@@ -30,7 +30,6 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ProductStickyBar(
-              onChat: () {},
               onAddToCart: () {},
               onBuyNow: () {},
               isAddingToCart: false,

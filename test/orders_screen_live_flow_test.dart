@@ -1,5 +1,7 @@
-// Screen-level, LIVE-mode (MOCK=false) test of the real OrdersScreen for
-// BOTH roles — a real user tapping through the app, not fixture data.
+// Screen-level, LIVE-mode (MOCK=false) test of the real OrdersScreen (the
+// consumer's My Orders; vendors use VendorOrdersScreen, covered by
+// vendor_orders_screen_live_flow_test.dart) — a real user tapping through
+// the app, not fixture data.
 //
 // Unlike test/order_lifecycle_full_app_test.dart (which drives the
 // notifier/use-case layer directly against a hand-rolled fake
@@ -42,8 +44,7 @@ import 'package:xstore/features/orders/presentation/screens/orders_screen.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as home_remote_datasource_test.dart's `_RoutedInterceptor`,
-/// extended with the HTTP method since this screen's vendor flow both GETs
-/// and PUTs the same order resource under different verbs.
+/// extended with the HTTP method.
 class _RoutedInterceptor extends Interceptor {
   _RoutedInterceptor(this._routes);
 
@@ -119,14 +120,6 @@ UserEntity _consumer() => const UserEntity(
   phoneNumber: '01012345678',
 );
 
-UserEntity _vendor() => const UserEntity(
-  id: 'vendor_1',
-  name: 'Test Vendor',
-  email: 'vendor@test.com',
-  phoneNumber: '01099999999',
-  role: UserRole.vendor,
-);
-
 Widget _harness(List<Override> overrides) => ProviderScope(
   overrides: overrides,
   child: const MaterialApp(
@@ -137,12 +130,10 @@ Widget _harness(List<Override> overrides) => ProviderScope(
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
-    // OrdersScreen (and the ConsumerOrdersView/VendorOrdersView it
-    // dispatches to) is designed to live inside an existing shell Scaffold
+    // OrdersScreen is designed to live inside an existing shell Scaffold
     // (the bottom-nav StatefulShellRoute in the real app) — it renders no
     // Scaffold/Material of its own, so a bare `home:` throws "No Material
-    // widget found" the moment VendorOrdersView's sort DropdownButton (or
-    // any other Material widget) builds.
+    // widget found" the moment any Material widget builds.
     home: Scaffold(body: OrdersScreen()),
   ),
 );
@@ -184,7 +175,7 @@ Widget _routedHarness(List<Override> overrides) {
 }
 
 /// Pumps the screen, then explicitly (re-)fetches orders once `authProvider`
-/// has actually resolved. `ConsumerOrdersView`/`VendorOrdersView` fire their
+/// has actually resolved. `ConsumerOrdersView` fires its
 /// one-shot `fetchOrders()` from an `initState` postFrameCallback — a
 /// single call that bails out silently if `authProvider` is still
 /// `AsyncLoading` at that instant (see `OrdersNotifier.fetchOrders`'s `if
@@ -269,27 +260,6 @@ Map<String, dynamic> _consumerOrderJson({
   'updatedAt': '2026-08-01T00:00:00.000Z',
 };
 
-Map<String, dynamic> _vendorOrderJson({
-  String id = '900',
-  String status = 'confirmed',
-}) => {
-  'id': id,
-  'consumerId': 'consumer_2',
-  'consumerName': 'Nadia Mansouri',
-  'consumerPhone': '01022223333',
-  'vendorId': 'vendor_1',
-  'vendorName': 'Test Vendor',
-  'vendorStoreName': 'Test Store',
-  'status': status,
-  'listingId': '9002',
-  'listingName': 'Bluetooth Speaker',
-  'quantity': 1,
-  'price': 30000,
-  'total': 30000,
-  'createdAt': '2026-08-05T00:00:00.000Z',
-  'updatedAt': '2026-08-05T00:00:00.000Z',
-};
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -345,299 +315,6 @@ void main() {
         find.text('View Details'),
         findsOneWidget,
         reason: 'cancelled orders fall back to a View Details action',
-      );
-
-      await _awaitAnalyticsReady(container);
-    },
-  );
-
-  testWidgets(
-    'vendor marks a shipped order delivered via PUT /vendor/orders/status',
-    skip: MockConfig.useMock,
-    (tester) async {
-      RequestOptions? putRequest;
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson(id: '904', status: 'shipped')],
-          'totalCount': 1,
-          'pendingCount': 0,
-          'confirmedCount': 1,
-          'totalRevenue': 0,
-        },
-        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
-          putRequest = options;
-          return _vendorOrderJson(id: '904', status: 'delivered');
-        },
-      });
-
-      final container = await _pumpReady(tester, [
-        authProvider.overrideWith(() => _FakeAuth(_vendor())),
-        dioProvider.overrideWithValue(dio),
-      ]);
-      await _settle(tester);
-
-      expect(find.text('Incoming Orders'), findsOneWidget);
-      expect(find.text('Mark as Delivered'), findsOneWidget);
-
-      await tester.tap(find.text('Mark as Delivered'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(putRequest!.data, {
-        'orderIds': [904],
-        'status': 'Delivered',
-      });
-      expect(
-        find.text('Mark as Delivered'),
-        findsNothing,
-        reason: 'a delivered order no longer offers Mark as Delivered',
-      );
-      expect(find.text('View Details'), findsOneWidget);
-
-      await _awaitAnalyticsReady(container);
-    },
-  );
-
-  testWidgets(
-    'vendor taps Mark as Processing on OrdersScreen and the live status wire call updates the card',
-    skip: MockConfig.useMock,
-    (tester) async {
-      // Captured and asserted on AFTER the pump loop rather than inside the
-      // interceptor callback itself — an `expect()` failure thrown from
-      // inside a Dio interceptor (invoked outside the test's own call
-      // stack) doesn't surface as a normal TestFailure; it hangs the
-      // pump loop instead of failing fast.
-      RequestOptions? putRequest;
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson()],
-          'totalCount': 1,
-          'pendingCount': 0,
-          'confirmedCount': 1,
-          'totalRevenue': 0,
-        },
-        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
-          putRequest = options;
-          return _vendorOrderJson(status: 'processing');
-        },
-      });
-
-      final container = await _pumpReady(tester, [
-        authProvider.overrideWith(() => _FakeAuth(_vendor())),
-        dioProvider.overrideWithValue(dio),
-      ]);
-      await _settle(tester);
-
-      expect(find.text('Incoming Orders'), findsOneWidget);
-      expect(find.text('Mark as Processing'), findsOneWidget);
-
-      await tester.tap(find.text('Mark as Processing'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(putRequest!.data, {
-        'orderIds': [900],
-        'status': 'Processing',
-      });
-
-      expect(
-        find.text('Mark as Processing'),
-        findsNothing,
-        reason: 'a processing order no longer offers Mark as Processing',
-      );
-      expect(
-        find.text('Mark as Shipped'),
-        findsOneWidget,
-        reason: 'a processing order moves on to Mark as Shipped',
-      );
-
-      await _awaitAnalyticsReady(container);
-    },
-  );
-
-  testWidgets(
-    'vendor confirms a pending order after choosing a delivery method',
-    skip: MockConfig.useMock,
-    (tester) async {
-      // Captured and asserted on AFTER the pump loop — see the note on the
-      // "Mark as Processing" test above about expect() inside a Dio
-      // interceptor hanging the test instead of failing it.
-      RequestOptions? putRequest;
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson(id: '901', status: 'pending')],
-          'totalCount': 1,
-          'pendingCount': 1,
-          'confirmedCount': 0,
-          'totalRevenue': 0,
-        },
-        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
-          putRequest = options;
-          return _vendorOrderJson(id: '901', status: 'confirmed');
-        },
-      });
-
-      final container = await _pumpReady(tester, [
-        authProvider.overrideWith(() => _FakeAuth(_vendor())),
-        dioProvider.overrideWithValue(dio),
-      ]);
-      await _settle(tester);
-
-      expect(find.text('Incoming Orders'), findsOneWidget);
-      // The button label carries a leading checkmark glyph ("✓ Confirm
-      // Order") — match on the stable substring rather than the exact
-      // string, same as create_listing_test.dart's `textContaining` use.
-      expect(find.textContaining('Confirm Order'), findsOneWidget);
-
-      await tester.tap(find.textContaining('Confirm Order'));
-      await _settle(tester);
-
-      // Accepting a pending order first asks the vendor how it'll be
-      // delivered — a real user picking "self" here.
-      expect(find.text('How will this order be delivered?'), findsOneWidget);
-      await tester.tap(find.text('Deliver it myself'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(putRequest!.data, {
-        'orderIds': [901],
-        'status': 'Confirmed',
-      });
-
-      expect(
-        find.textContaining('Confirm Order'),
-        findsNothing,
-        reason: 'a confirmed order no longer offers Confirm Order',
-      );
-      expect(
-        find.text('Mark as Processing'),
-        findsOneWidget,
-        reason: 'a confirmed order moves on to Mark as Processing',
-      );
-
-      await _awaitAnalyticsReady(container);
-    },
-  );
-
-  testWidgets(
-    'vendor rejects a pending order with a reason',
-    skip: MockConfig.useMock,
-    (tester) async {
-      // Captured and asserted on AFTER the pump loop — see the note on the
-      // "Mark as Processing" test above about expect() inside a Dio
-      // interceptor hanging the test instead of failing it.
-      RequestOptions? putRequest;
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson(id: '902', status: 'pending')],
-          'totalCount': 1,
-          'pendingCount': 1,
-          'confirmedCount': 0,
-          'totalRevenue': 0,
-        },
-        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
-          putRequest = options;
-          return _vendorOrderJson(id: '902', status: 'cancelled');
-        },
-      });
-
-      final container = await _pumpReady(tester, [
-        authProvider.overrideWith(() => _FakeAuth(_vendor())),
-        dioProvider.overrideWithValue(dio),
-      ]);
-      await _settle(tester);
-
-      expect(find.text('Incoming Orders'), findsOneWidget);
-      expect(find.text('Reject'), findsOneWidget);
-
-      await tester.tap(find.text('Reject'));
-      await _settle(tester);
-
-      expect(find.text('Reject order'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), 'Out of stock');
-      await tester.tap(find.text('Confirm'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(putRequest!.data, {
-        'orderIds': [902],
-        'status': 'Cancelled',
-      });
-
-      expect(
-        find.text('Reject'),
-        findsNothing,
-        reason: 'a rejected (cancelled) order no longer offers Reject',
-      );
-      expect(
-        find.text('View Details'),
-        findsOneWidget,
-        reason: 'cancelled orders fall back to a View Details action',
-      );
-
-      await _awaitAnalyticsReady(container);
-    },
-  );
-
-  testWidgets(
-    'vendor ships a processing order with tracking info',
-    skip: MockConfig.useMock,
-    (tester) async {
-      // Captured and asserted on AFTER the pump loop — see the note on the
-      // "Mark as Processing" test above about expect() inside a Dio
-      // interceptor hanging the test instead of failing it.
-      RequestOptions? putRequest;
-      final dio = _fakeDio({
-        'GET ${ApiEndpoints.vendorOrders}': (_) => {
-          'orders': [_vendorOrderJson(id: '903', status: 'processing')],
-          'totalCount': 1,
-          'pendingCount': 0,
-          'confirmedCount': 1,
-          'totalRevenue': 0,
-        },
-        'PUT ${ApiEndpoints.vendorOrdersStatus}': (options) {
-          putRequest = options;
-          return _vendorOrderJson(id: '903', status: 'shipped');
-        },
-      });
-
-      final container = await _pumpReady(tester, [
-        authProvider.overrideWith(() => _FakeAuth(_vendor())),
-        dioProvider.overrideWithValue(dio),
-      ]);
-      await _settle(tester);
-
-      expect(find.text('Incoming Orders'), findsOneWidget);
-      expect(find.text('Mark as Shipped'), findsOneWidget);
-
-      await tester.tap(find.text('Mark as Shipped'));
-      await _settle(tester);
-
-      // The "Add Tracking Info" sheet — a real user filling in the
-      // tracking number and courier before confirming the shipment.
-      expect(find.text('Add Tracking Info'), findsOneWidget);
-      final textFields = find.byType(TextField);
-      expect(textFields, findsNWidgets(2));
-      await tester.enterText(textFields.at(0), 'XS-TRACK-903');
-      await tester.enterText(textFields.at(1), 'xStore Logistics');
-      await tester.tap(find.text('Confirm Shipment'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(putRequest!.data, {
-        'orderIds': [903],
-        'status': 'Shipped',
-      });
-
-      expect(
-        find.text('Mark as Shipped'),
-        findsNothing,
-        reason: 'a shipped order no longer offers Mark as Shipped',
-      );
-      expect(
-        find.text('Mark as Delivered'),
-        findsOneWidget,
-        reason: 'a shipped order moves on to Mark as Delivered',
       );
 
       await _awaitAnalyticsReady(container);

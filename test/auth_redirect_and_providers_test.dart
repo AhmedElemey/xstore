@@ -15,6 +15,7 @@ import 'package:xstore/features/orders/domain/entities/order_entity.dart';
 import 'package:xstore/features/orders/domain/entities/order_item_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
+import 'package:xstore/features/orders/presentation/providers/vendor_orders_provider.dart';
 import 'helpers/fake_async_auth_notifier.dart';
 import 'helpers/stub_auth_repository.dart';
 import 'helpers/stub_cart_repository.dart';
@@ -94,7 +95,6 @@ PlaceOrderParams _dummyCheckout(String consumerId) => PlaceOrderParams(
   paymentMethod: PaymentMethod.cashOnDelivery,
   subtotal: 0,
   shippingTotal: 0,
-  discount: 0,
   total: 0,
 );
 
@@ -556,18 +556,16 @@ void main() {
 
       await container.read(authProvider.future);
 
-      // confirmOrderVendor's optimistic-update guard needs the order
-      // already in state.orders (it snapshots the original for rollback on
-      // failure) — a bare id with no matching order is a silent no-op, not
-      // a call to the repository.
-      await container.read(ordersNotifierProvider.notifier).fetchOrders();
+      // Vendors use the vendor-only stack; load the order first so the
+      // confirm has something to roll back on failure.
+      await container.read(vendorOrdersProvider.notifier).fetchOrders();
 
       await container
-          .read(ordersNotifierProvider.notifier)
-          .confirmOrderVendor('order_x', DeliveryMethod.platform);
+          .read(vendorOrdersProvider.notifier)
+          .confirmOrder('order_x', DeliveryMethod.platform);
 
       expect(
-        container.read(ordersNotifierProvider).error,
+        container.read(vendorOrdersProvider).error,
         Failure.server('confirm failed').toString(),
       );
     });

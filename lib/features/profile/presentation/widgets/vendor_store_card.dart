@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -16,11 +15,9 @@ class VendorStoreCard extends ConsumerWidget {
   const VendorStoreCard({
     super.key,
     required this.profile,
-    this.onManageStore,
   });
 
   final ProfileEntity profile;
-  final VoidCallback? onManageStore;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +27,7 @@ class VendorStoreCard extends ConsumerWidget {
     final joined = u.joinedAt;
 
     final joinedLine =
-        joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
+        joined != null ? context.formatMonthYear(joined) : '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -78,22 +75,6 @@ class VendorStoreCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              // Hidden for now — own-storefront from Profile is deferred.
-              // OutlinedButton(
-              //   onPressed: onManageStore,
-              //   style: OutlinedButton.styleFrom(
-              //     foregroundColor: AppColors.primary,
-              //     side: const BorderSide(color: AppColors.primary),
-              //     padding: const EdgeInsets.symmetric(
-              //       horizontal: AppSpacing.sm,
-              //       vertical: AppSpacing.xs,
-              //     ),
-              //   ),
-              //   child: Text(
-              //     context.l10n.manageStore,
-              //     style: AppTypography.labelSmall,
-              //   ),
-              // ),
             ],
           ),
           const Gap(AppSpacing.md),

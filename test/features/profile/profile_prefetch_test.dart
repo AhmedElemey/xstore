@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xstore/core/analytics/analytics_service.dart';
 import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
@@ -88,11 +89,13 @@ void main() {
       addTearDown(container.dispose);
 
       container.read(authProvider.notifier).adoptSession(_user);
-      await Future<void>.delayed(Duration.zero);
-
+      // Read before yielding: mock get-profile resolves after a single
+      // zero-length delay, so awaiting anything here races the response.
       final profileState = container.read(profileNotifierProvider);
       expect(profileState.isLoading, isTrue);
       expect(profileState.profile, isNull);
+      // Let AnalyticsService finish init before the container is disposed.
+      await container.read(analyticsServiceProvider).ready;
     },
     skip: MockConfig.useMock ? false : skipReason,
   );

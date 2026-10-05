@@ -75,8 +75,6 @@ abstract final class AppRoutes {
   /// Consumer package delivery ("send anything" pilot).
   static const sendPackage = '/send-package';
   static const myPackages = '/my-packages';
-
-  static String chatThread(String threadId) => '/chat/$threadId';
 }
 
 /// Vendor-only areas: listing management, incoming orders, wallet, store
@@ -97,8 +95,8 @@ bool isVendorRestrictedRoute(String location) {
 /// landing here via deep link or stale navigation is sent back to Incoming
 /// Orders.
 ///
-/// `/order/:id` is deliberately NOT here — vendors open it too, via
-/// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
+/// `/order/:id` is deliberately NOT here — a vendor can still land on it,
+/// e.g. from a notification's `actionRoute`.
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||

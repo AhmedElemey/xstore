@@ -6,9 +6,11 @@ part of 'recommended_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$recommendedHash() => r'ea1e82f09246ad34213b627f61eb393d4ac35095';
+String _$recommendedHash() => r'339a884aab7fcf78dd9f244fa90acf6cb1dedf61';
 
-/// See also [Recommended].
+/// Reads its section of the shared [homeFeedProvider].
+///
+/// Copied from [Recommended].
 @ProviderFor(Recommended)
 final recommendedProvider =
     AutoDisposeAsyncNotifierProvider<Recommended, List<ListingEntity>>.internal(

@@ -6,9 +6,11 @@ part of 'hot_deals_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$hotDealsHash() => r'08329b19223493f6ffa428f79c92ec37aac8599f';
+String _$hotDealsHash() => r'3812c023e1f4578ecd4364de00d854d47d506c4a';
 
-/// See also [HotDeals].
+/// Reads its section of the shared [homeFeedProvider].
+///
+/// Copied from [HotDeals].
 @ProviderFor(HotDeals)
 final hotDealsProvider =
     AutoDisposeAsyncNotifierProvider<HotDeals, List<DealEntity>>.internal(

@@ -28,13 +28,15 @@ typedef HomeAggregate = ({
 abstract interface class HomeRemoteDataSource {
   Future<List<BannerModel>> fetchBanners();
 
+  /// Hot deals derived from `GET /api/listings` — the fallback when the
+  /// aggregate's `hotDeals` is empty.
   Future<List<DealModel>> fetchHotDeals();
 
   Future<List<CategoryModel>> fetchCategories();
 
-  /// Fetches all four home sections in one call. Returns null on error or
-  /// when every section comes back empty, so callers can fall back to the
-  /// per-section derivation that already exists.
+  /// Fetches all four home sections in one call (hot deals capped at the
+  /// carousel size). Returns null on error or when every section comes back
+  /// empty, so callers fall back per section.
   Future<HomeAggregate?> fetchHomeAggregate();
 }
 
@@ -106,13 +108,8 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (MockConfig.useMock) {
       return MockConfig.simulate(List<DealModel>.from(mockHotDealModels));
     }
-    final aggregate = await fetchHomeAggregate();
-    if (aggregate != null && aggregate.hotDeals.isNotEmpty) {
-      return aggregate.hotDeals.take(_hotDealsCount).toList();
-    }
-    // Fallback: no dedicated hot-deals data from /api/home — derive from
-    // GET /api/listings instead (any listing with compareAtPrice > price
-    // is discounted; biggest discounts first).
+    // Derived from GET /api/listings: any listing with compareAtPrice >
+    // price is discounted; biggest discounts first.
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListings,
@@ -149,6 +146,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       final hotDeals = unwrapJsonObjectList(map['hotDeals'])
           .map(_dealFromListing)
           .whereType<DealModel>()
+          .take(_hotDealsCount)
           .toList();
       final newArrivals = unwrapJsonObjectList(map['newArrivals'])
           .map(_dealFromListing)

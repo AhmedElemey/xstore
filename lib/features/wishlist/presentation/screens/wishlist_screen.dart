@@ -41,26 +41,13 @@ class WishlistScreen extends ConsumerWidget {
       );
     }
 
-    final selection = ref.watch(
-      wishlistProvider.select(
-        (s) => (
-          isSelectionMode: s.isSelectionMode,
-          selectedCount: s.selectedItemIds.length,
-        ),
-      ),
-    );
-
     return RouteReentryRefresh(
       isTarget: (location) => location == AppRoutes.wishlist,
       onReentry: (ref) => ref.read(wishlistProvider.notifier).fetchWishlist(),
       child: Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: AppBar(
-          title: Text(
-            selection.isSelectionMode
-                ? context.l10n.wishlistSelectedCount(selection.selectedCount)
-                : context.l10n.navWishlist,
-          ),
+          title: Text(context.l10n.navWishlist),
           backgroundColor: context.backgroundColor,
           surfaceTintColor: AppColors.transparent,
           elevation: 0,

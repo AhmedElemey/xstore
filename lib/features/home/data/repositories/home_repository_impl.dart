@@ -32,20 +32,6 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<DealEntity>>> getHotDeals() async {
-    try {
-      final models = await _remote.fetchHotDeals();
-      return Right(models.map((m) => m.toEntity()).toList());
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.server(e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, List<CategoryEntity>>> getCategories() async {
     try {
       final models = await _remote.fetchCategories();
@@ -79,12 +65,24 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<ListingEntity>>> getNewArrivals() async {
+  Future<Either<Failure, HomeFeed>> getHomeFeed() async {
     try {
+      // One GET /api/home serves all three carousels. Only a section it
+      // leaves empty falls back: hot deals to GET /api/listings, the other
+      // two to the hot-deals list.
       final aggregate = await _remote.fetchHomeAggregate();
-      if (aggregate != null && aggregate.newArrivals.isNotEmpty) {
-        final now = DateTime.now();
-        final list = aggregate.newArrivals
+      final aggregateDeals = aggregate?.hotDeals ?? const <DealModel>[];
+      final hotDeals = (aggregateDeals.isNotEmpty
+              ? aggregateDeals
+              : await _remote.fetchHotDeals())
+          .map((m) => m.toEntity())
+          .toList();
+      final now = DateTime.now();
+
+      final aggregateArrivals = aggregate?.newArrivals ?? const <DealModel>[];
+      final List<ListingEntity> newArrivals;
+      if (aggregateArrivals.isNotEmpty) {
+        newArrivals = aggregateArrivals
             .asMap()
             .entries
             .map(
@@ -94,53 +92,41 @@ class HomeRepositoryImpl implements HomeRepository {
               ),
             )
             .toList();
-        return Right(list);
-      }
-    } catch (_) {
-      // Falls through to the hot-deals-derived approach below.
-    }
-    // Fallback (no dedicated data from /api/home): reuse hot deals, same
-    // as before the aggregate endpoint existed.
-    final dealsResult = await getHotDeals();
-    return dealsResult.fold(Left.new, (deals) {
-      final now = DateTime.now();
-      final sorted = List<DealEntity>.from(deals)
-        ..sort((a, b) => a.id.compareTo(b.id));
-      final list = sorted
-          .asMap()
-          .entries
-          .map(
-            (e) => _listingFromDeal(
-              e.value,
-              now.subtract(Duration(hours: e.key)),
-            ),
-          )
-          .toList()
-          .reversed
-          .toList();
-      return Right(list);
-    });
-  }
-
-  @override
-  Future<Either<Failure, List<ListingEntity>>> getRecommended() async {
-    try {
-      final aggregate = await _remote.fetchHomeAggregate();
-      if (aggregate != null && aggregate.recommendedForYou.isNotEmpty) {
-        final now = DateTime.now();
-        final list = aggregate.recommendedForYou
-            .map((d) => _listingFromDeal(d.toEntity(), now))
+      } else {
+        final sorted = List<DealEntity>.from(hotDeals)
+          ..sort((a, b) => a.id.compareTo(b.id));
+        newArrivals = sorted
+            .asMap()
+            .entries
+            .map(
+              (e) => _listingFromDeal(
+                e.value,
+                now.subtract(Duration(hours: e.key)),
+              ),
+            )
+            .toList()
+            .reversed
             .toList();
-        return Right(list);
       }
-    } catch (_) {
-      // Falls through to the hot-deals-derived approach below.
+
+      final aggregatePicks = aggregate?.recommendedForYou ?? const <DealModel>[];
+      final recommended = aggregatePicks.isNotEmpty
+          ? aggregatePicks
+              .map((d) => _listingFromDeal(d.toEntity(), now))
+              .toList()
+          : hotDeals.map((d) => _listingFromDeal(d, now)).toList();
+
+      return Right((
+        hotDeals: hotDeals,
+        newArrivals: newArrivals,
+        recommended: recommended,
+      ));
+    } on NetworkException catch (e) {
+      return Left(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
     }
-    final dealsResult = await getHotDeals();
-    return dealsResult.fold(Left.new, (deals) {
-      final list =
-          deals.map((d) => _listingFromDeal(d, DateTime.now())).toList();
-      return Right(list);
-    });
   }
 }

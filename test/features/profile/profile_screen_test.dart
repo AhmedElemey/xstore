@@ -11,7 +11,6 @@ import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_state.dart';
 import 'package:xstore/features/profile/presentation/screens/profile_screen.dart';
-import 'package:xstore/features/store/presentation/providers/store_hours_provider.dart';
 import 'package:xstore/features/wishlist/presentation/providers/wishlist_dependencies.dart';
 import 'package:xstore/shared/widgets/error_state_widget.dart';
 
@@ -83,14 +82,6 @@ class _EmptyIdentityAuth extends Auth {
       );
 }
 
-class _NoOpStoreHours extends StoreHoursNotifier {
-  @override
-  StoreHoursState build() => const StoreHoursState(original: null, current: null);
-
-  @override
-  Future<void> fetchStoreHours() async {}
-}
-
 /// The app bar's bell reads this keepAlive notifier, which fetches on first
 /// read for a signed-in user — not what these tests cover.
 class _NoOpNotifications extends Notifications {
@@ -107,7 +98,6 @@ Widget _harness({
       authProvider.overrideWith(() => authOverride),
       if (profileOverride != null)
         profileNotifierProvider.overrideWith(profileOverride),
-      storeHoursNotifierProvider.overrideWith(_NoOpStoreHours.new),
       notificationsProvider.overrideWith(_NoOpNotifications.new),
       // The wishlist-count tile's first read fetches for a signed-in
       // consumer; keep that off the real Dio (its token-read timeout Timer

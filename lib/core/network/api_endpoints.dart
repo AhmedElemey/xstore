@@ -37,14 +37,6 @@ abstract final class ApiEndpoints {
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';
 
-  /// Legacy store-hours module — not on the confirmed `/api` contract; hosted
-  /// backend returns 404 until deployed. See `store_hours_datasource.dart`.
-  static String vendorStoreHours(String vendorId) =>
-      '/vendors/$vendorId/store-hours';
-  static String vendorStoreStatus(String vendorId) =>
-      '/vendors/$vendorId/store-status';
-
-
   // ---------------------------------------------------------------------
   // Confirmed backend (xStoreEcommerce API, /api prefix).
   // ---------------------------------------------------------------------
@@ -121,8 +113,7 @@ abstract final class ApiEndpoints {
   static String apiListingReview(String listingId, String reviewId) =>
       '$apiListings/$listingId/reviews/$reviewId';
 
-  // Listings (new /api-prefixed contract). Legacy listings/myListings/
-  // listingDetail/listingsSimilar above stay untouched.
+  // Listings (/api-prefixed contract).
   static const String apiListings = '$_api/listings';
   static const String apiMyListings = '$apiListings/my-listings';
   static String apiListingDetail(String id) => '$apiListings/$id';

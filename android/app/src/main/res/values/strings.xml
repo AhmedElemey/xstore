@@ -1,12 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TODO: Replace google_maps_api_key below with a real Maps SDK for Android
-     key from the Google Cloud console (restricted to this app's package name
-     + release/debug signing certs). Also update
-     ios/Runner/AppDelegate.swift's GMSServices.provideAPIKey(...) call.
-     Without a real key the map picker (lib/shared/widgets/map_address_picker.dart)
-     renders a blank/grey map — pin dropping and coordinate capture still
-     work, only tile rendering needs the key. -->
 <resources>
     <string name="app_name">xStore</string>
-    <string name="google_maps_api_key">REPLACE_WITH_GOOGLE_MAPS_API_KEY</string>
 </resources>

@@ -211,7 +211,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Fire-and-forget work started from widgets (`splash_screen.dart` and similar).
 
 ### 2026-08-04 — Session-scoped state: never render another entity's data, always reset on logout
-- **Rule:** A provider holding "the signed-in user's own X" (not keyed by id) must not render someone else's X — check `authUser.id == shownEntityId` or use a `.family` provider keyed by the entity (e.g. `storeHoursNotifierProvider` for own hours vs `sellerStoreHoursProvider` for a seller). Every session-scoped keepAlive provider or datasource cache (static or instance fields, and each sibling in a consumer/vendor pair) is reset at the central choke points — `Auth.logout()` and `TokenRefreshInterceptor.onRefreshFailed` — alongside `resetProfileData`, `resetStoreHoursData`, `resetListingLocalCache`; otherwise the next account on the device sees the previous user's data. A `ref.listen(authProvider)` inside a notifier that may never be built is not enough. Grep every keepAlive provider in the feature when adding one reset.
+- **Rule:** A provider holding "the signed-in user's own X" (not keyed by id) must not render someone else's X — check `authUser.id == shownEntityId` or use a `.family` provider keyed by the entity (e.g. own profile vs a seller's storefront). Every session-scoped keepAlive provider or datasource cache (static or instance fields, and each sibling in a consumer/vendor pair) is reset at the central choke points — `Auth.logout()` and `TokenRefreshInterceptor.onRefreshFailed` — alongside `resetProfileData`, `resetListingLocalCache`; otherwise the next account on the device sees the previous user's data. A `ref.listen(authProvider)` inside a notifier that may never be built is not enough. Grep every keepAlive provider in the feature when adding one reset.
 - **Where it applies:** `store_hours_provider.dart`, `seller_card.dart`, `orders_remote_datasource.dart`, `cart_remote_datasource.dart`, `vendor_orders_provider.dart`, `listing_remote_datasource.dart`, `auth_provider.dart`, `dio_provider.dart`.
 
 ### 2026-08-04 — Re-read the whole file after Stateful↔Stateless conversions
@@ -235,8 +235,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Any hardcoded API origin or license key.
 
 ### 2026-08-05 — Home carousels share one fetch
-- **Rule:** `getNewArrivals()` and `getRecommended()` re-sort the same `getHotDeals()` result (`GET /api/listings?page=1&pageSize=40`); overlapping carousels are a backend ask (dedicated endpoints or sort params), not a client fix.
-- **Where it applies:** `home_repository_impl.dart`.
+- **Rule:** Hot deals, new arrivals and recommended come from one `GET /api/home` via `homeFeedProvider` → `HomeRepository.getHomeFeed()`; the three section providers only read their slice. Refresh and section retries invalidate `homeFeedProvider`, never a section provider (that re-reads the cached feed). Fallbacks are per section inside `getHomeFeed`: empty `hotDeals` → `fetchHotDeals()` (`/api/listings`), empty new arrivals/recommended → derived from hot deals. Never call `fetchHomeAggregate` from another datasource method.
+- **Where it applies:** `home_repository_impl.dart`, `home_remote_datasource.dart`, `home_dependencies.dart`, `home_screen.dart`, `cart_recommended_strip.dart`.
 
 ### 2026-08-06 — A second backend gets its own Dio and a session bridge
 - **Rule:** The delivery backend (separate host, Bearer JWT) uses its own keepAlive Dio (`delivery_dio_provider.dart`) and token key (`PrefsKeys.deliveryAuthToken`). `delivery_backend_session.dart` silently exchanges the main session for a delivery token (consumer/vendor only), is re-run from the Dio's 401 interceptor as the refresh, must never block main auth, is wired into `Auth.build()` restore, `setUser` and `adoptSession`, and is cleared in `logout()`.
@@ -283,8 +283,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `order_detail_provider.dart`, `orders_remote_datasource.dart`, anything using `LocationService`.
 
 ### 2026-08-15 — COD-only launch; no dead-end routes; WhatsApp numbers
-- **Rule:** Never collect card PAN/CVV; keep old `PaymentMethod` members only to parse old orders. Hide or redirect unfinished routes instead of leaving Coming Soon stubs tappable — and when redirecting a route, grep the constant everywhere it's a target (notification `actionRoute`, deep links, push routing), not just `onTap` sites. Open WhatsApp via `whatsAppDigits`/`launchWhatsApp` (`01…` → `20…`); E.164 digits without `+` are exactly 12 (local form is 11) — check with `==`, never `<`.
-- **Where it applies:** Checkout, profile menu, `app_router.dart` redirects, `lib/shared/utils/whatsapp.dart`.
+- **Rule:** Never collect card PAN/CVV; keep old `PaymentMethod` members only to parse old orders. Hide or redirect unfinished routes instead of leaving Coming Soon stubs tappable — and when redirecting a route, grep the constant everywhere it's a target (notification `actionRoute`, deep links, push routing), not just `onTap` sites. There are no WhatsApp entry points (the buttons and `lib/shared/utils/whatsapp.dart` were deleted); if one returns, `wa.me` digits are `01…` → `20…`, exactly 12 digits (check with `==`, never `<`).
+- **Where it applies:** Checkout, profile menu, `app_router.dart` redirects.
 
 ### 2026-08-15 — Never fabricate marketplace data
 - **Rule:** When the API omits rating/sales/response rate, show "New seller" or `newSellerEmDash` ("—") — no invented numbers, and no `?? 0` rendered as "0", "0.0 ★" or "0%" (live get-profile and /api/listings send none of these store stats yet). Missing stock is 0. A "stop fabricating X" fix must grep the field (`vendorRating`, `rating`, `salesCount`, …) across all of `lib/`: the same fake default (`@Default(4.8)`, `?? 4.8`, `x == 0 ? fallback : x`) is copied into product, cart, order and profile entities and datasources. When replacing a fake default with the real field, check mock/seed data populates it too. Don't publish templated `{{PLACEHOLDER}}` legal text; Terms/Privacy describe what the app actually does.
@@ -475,12 +475,12 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `listing_remote_datasource.dart` `_listingFormData`, `test/listing_create_multipart_test.dart`.
 
 ### 2026-08-29 — Hide unfinished features completely
-- **Rule:** Don't ship profile tiles or preference switches for features that aren't live: comment them with `TODO(phase-2)` and drop their `ref.watch`. Keep route constants but redirect them to profile; `rg` every other entry into the path (app-bar gear, aliases, inbox icons) and remove guest-accessible entries plus their tests in the same change. Currently deferred: payment methods, saved addresses menu, store hours, packages, push/email prefs, help center, notification settings.
+- **Rule:** Don't ship profile tiles or preference switches for features that aren't live: delete them (see "Remove hidden UI, don't comment it out"). Keep route constants but redirect them to profile; `rg` every other entry into the path (app-bar gear, aliases, inbox icons) and remove guest-accessible entries plus their tests in the same change. Redirect-only today: payment methods, saved addresses menu, store hours, packages, help center, notification settings.
 - **Where it applies:** `profile_menu_blocks.dart`, `profile_sliver_app_bar.dart`, `app_router.dart`, `app_routes.dart`.
 
 ### 2026-08-29 — There is no cart API
-- **Rule:** The hosted API has no `/cart` resource: the live cart is client-side, persisted per user in SharedPreferences (`cart_items_v1_<userId>`), and checkout posts `POST /api/orders` per line. Never call `/cart` or apply client-side coupon discounts (they aren't sent with the order). Screens show error/retry when `items.isEmpty && error != null`, never the empty state.
-- **Where it applies:** `cart_remote_datasource.dart`, `cart_consumer_body.dart`, `coupon_input_row.dart`, any list screen that maps empty+error to its empty state.
+- **Rule:** The hosted API has no `/cart` resource: the live cart is client-side, persisted per user in SharedPreferences (`cart_items_v1_<userId>`), and checkout posts `POST /api/orders` per line. Never call `/cart`. The cart has no discounts: total = subtotal + shipping (the client-only coupon stack was deleted; coupons need a backend contract first). Screens show error/retry when `items.isEmpty && error != null`, never the empty state.
+- **Where it applies:** `cart_remote_datasource.dart`, `cart_provider.dart`, `cart_consumer_body.dart`, any list screen that maps empty+error to its empty state.
 
 ### 2026-08-29 — Banners are tappable only with a real actionUrl
 - **Rule:** Wire `onTap` only when `actionUrl` is non-empty after trimming; live banners without one stay inert — no invented destination.
@@ -535,7 +535,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `commission_config_provider.dart`, `orders_remote_datasource.dart` `getVendorOrderStats`.
 
 ### 2026-09-02 — Storefronts and undeployed legacy routes
-- **Rule:** Auxiliary legacy modules the hosted backend doesn't serve (e.g. `/vendors/*/store-hours`) use `LegacyRouteOptions.allowNotFound()`: reads return defaults, writes persist in the session cache, and vendor-only fetches are skipped for non-vendors. Other sellers' storefronts come from the catalog (`GET /api/listings`, home fallback) filtered by listing `userId` — never the undeployed `/users/{id}/store` or `/users/{id}/listings`; a seller missing from the catalog is an empty store, not an error. Store head and grid share one fetch, invalidated at the start of `getVendorStoreProfile` so pull-to-refresh refetches; skip unparseable rows and never null a loaded profile because listings failed. The vendor's own store waits for auth before deciding it's theirs, then uses `GET /api/listings/my-listings`.
+- **Rule:** Auxiliary legacy modules the hosted backend doesn't serve use `LegacyRouteOptions.allowNotFound()`: reads return defaults, writes persist in the session cache, and vendor-only fetches are skipped for non-vendors. Other sellers' storefronts come from the catalog (`GET /api/listings`, home fallback) filtered by listing `userId` — never the undeployed `/users/{id}/store` or `/users/{id}/listings`; a seller missing from the catalog is an empty store, not an error. Store head and grid share one fetch, invalidated at the start of `getVendorStoreProfile` so pull-to-refresh refetches; skip unparseable rows and never null a loaded profile because listings failed. The vendor's own store waits for auth before deciding it's theirs, then uses `GET /api/listings/my-listings`.
 - **Where it applies:** `legacy_route_options.dart`, `store_hours_datasource.dart`, `profile_remote_datasource.dart`, `vendor_store_screen.dart`, Visit Store call sites.
 
 ### 2026-09-02 — Text fields in dialogs and sheets
@@ -555,8 +555,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Screen-level `skip: MockConfig.useMock` widget tests.
 
 ### 2026-09-02 — Reuse another feature's use case instead of duplicating it
-- **Rule:** Order reviews call the product feature's `createReviewUseCaseProvider` with `ReviewWriteParams` for the order's listing (`POST /api/listings/{listingId}/reviews`); reviews belong to listings. Importing another feature's domain entity and dependency provider is fine; a parallel use case duplicates the wire contract. Order actions (confirm/reject/ship/review) exist in both `order_card.dart` and `order_action_buttons.dart` — fix both copies together.
-- **Where it applies:** `order_card.dart`, `order_action_buttons.dart`, cross-feature capabilities.
+- **Rule:** Order reviews call the product feature's `createReviewUseCaseProvider` with `ReviewWriteParams` for the order's listing (`POST /api/listings/{listingId}/reviews`); reviews belong to listings. Importing another feature's domain entity and dependency provider is fine; a parallel use case duplicates the wire contract. The reject, ship, cancel-reason and review flows live once in `order_flow_sheets.dart`; `order_card.dart` and `order_action_buttons.dart` only make their own notifier calls and snackbars, so don't re-inline a flow in either.
+- **Where it applies:** `order_flow_sheets.dart`, `order_card.dart`, `order_action_buttons.dart`, cross-feature capabilities.
 
 ### 2026-09-02 — Consumer order detail
 - **Rule:** On `/me`-scoped routes, reject only a present owner id that mismatches — never a missing one. If `GET /orders/me/{id}` 404s or throws, fall back to the order from `GET /orders/me`. Unwrap `{data|Data}` and read camelCase/PascalCase. Orders echo the create body (`listingId`, `quantity`, `latitude`, `longitude`) or `items: []` plus nested `listing`/`deliveryAddress`/`seller`: parse display fields from the nested objects with listing keys (`titleEn`, `imageUrls`, `userId`/`userName`/`userAvatar`, `storeName`), falling back to the flat `listingId` line; fetch `GET /api/listings/{id}` only for a line missing name, image or price, with `allowNotFound()` and a cached miss (sold listings 404). Never map listing `userId` onto `consumerId`. Disable Visit Store when `order.vendorId` is empty. A 202 from the analytics endpoint is success, not the error.
@@ -583,7 +583,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** New screen tests.
 
 ### 2026-09-02 — VendorOrdersScreen is its own implementation; layout rules found there
-- **Rule:** `VendorOrdersScreen` (vendor shell tab, `VendorOrdersNotifier`, `VendorOrderCard`, `RejectOrderSheet`) is separate from `OrdersScreen`'s `VendorOrdersView` — confirm which class a route builds before assuming test coverage. A `Row` with `CrossAxisAlignment.stretch` inside a list item needs `IntrinsicHeight` (unbounded height otherwise throws). Center empty states with `LayoutBuilder` + `SingleChildScrollView` + `ConstrainedBox(minHeight: maxHeight)`, not a fixed fraction of screen height. When a test fails with an unrelated-looking framework error, override `FlutterError.onError` in a throwaway script (calling the original) to see the first layout error.
+- **Rule:** Vendors' orders live only in `VendorOrdersScreen` (vendor shell tab, `VendorOrdersNotifier`, `VendorOrderCard`, `RejectOrderSheet`); `OrdersScreen`/`OrdersNotifier` are consumer-only — confirm which class a route builds before assuming test coverage. A `Row` with `CrossAxisAlignment.stretch` inside a list item needs `IntrinsicHeight` (unbounded height otherwise throws). Center empty states with `LayoutBuilder` + `SingleChildScrollView` + `ConstrainedBox(minHeight: maxHeight)`, not a fixed fraction of screen height. When a test fails with an unrelated-looking framework error, override `FlutterError.onError` in a throwaway script (calling the original) to see the first layout error.
 - **Where it applies:** `vendor_order_card.dart`, `vendor_orders_screen.dart`, list items and empty states.
 
 ### 2026-09-02 — Don't dart format whole files after targeted edits
@@ -603,7 +603,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Live-flow tests for add-listing, delivery and courier screens, and anything behind `requirePhoneVerified`/`requireLogin`.
 
 ### 2026-09-03 — Test fixtures for fixed-enum screens and legacy routes
-- **Rule:** Screens doing `.firstWhere` over a fixed list with no `orElse` (store hours over all 7 `egyptWeekOrder` days) need every value in the fixture. `LegacyRouteOptions.allowNotFound()` routes need no special handling when the scripted interceptor answers 200. The routed interceptor matches method + path only, so one route serves callers that differ only in query params.
+- **Rule:** Screens doing `.firstWhere` over a fixed list with no `orElse` (e.g. every day of a weekly schedule) need every value in the fixture. `LegacyRouteOptions.allowNotFound()` routes need no special handling when the scripted interceptor answers 200. The routed interceptor matches method + path only, so one route serves callers that differ only in query params.
 - **Where it applies:** `test/store_hours_screen_live_flow_test.dart`, scripted-Dio tests.
 
 ### 2026-09-03 — Indexing form fields in tests
@@ -739,11 +739,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `product_header.dart`, `product_detail_screen.dart`, display widgets.
 
 ### 2026-09-10 — Guard every state write after an await
-- **Rule:** In autoDispose `@riverpod` notifiers use a `_disposed` flag reset in `build()` + `ref.onDispose`; in `StateNotifier` use its `mounted` getter (it exists in state_notifier 1.0.0). keepAlive notifiers that can be reset (by an auth listener or an external `ref.invalidate`) need a generation counter instead, because riverpod 2.x reuses the instance: bump it at every reset point (in the listener's reset branch, or at the top of `build()` for invalidate-reset providers), capture it at method entry, and compare after every `await` before any `state =` or `ref.invalidate` — every mutator in the file (grep each `await ref.read(...UseCaseProvider)` and `.fold(`), including multi-step flows like `saveProfile`. Applied in cart, orders, notifications, profile (`_sessionEpoch`), wishlist and store hours; do it in every new notifier from day one and add a mid-reset race test.
+- **Rule:** In autoDispose `@riverpod` notifiers use a `_disposed` flag reset in `build()` + `ref.onDispose`; in `StateNotifier` use its `mounted` getter (it exists in state_notifier 1.0.0). keepAlive notifiers that can be reset (by an auth listener or an external `ref.invalidate`) need a generation counter instead, because riverpod 2.x reuses the instance: bump it at every reset point (in the listener's reset branch, or at the top of `build()` for invalidate-reset providers), capture it at method entry, and compare after every `await` before any `state =` or `ref.invalidate` — every mutator in the file (grep each `await ref.read(...UseCaseProvider)` and `.fold(`), including multi-step flows like `saveProfile`. Applied in cart, orders, notifications, profile (`_sessionEpoch`) and wishlist; do it in every new notifier from day one and add a mid-reset race test.
 - **Where it applies:** Every async notifier method that writes `state` after an await.
 
 ### 2026-09-10 — Fixes to duplicated features must cover every copy
-- **Rule:** When a fix lands in one implementation of a concept, grep for siblings before closing it. Order actions exist in the vendor-only stack (`vendor_orders_provider.dart`, `vendor_order_detail_provider.dart`) and behind role-shared widgets (`OrderCard` → `orders_provider.dart`, `OrderActionButtons` → `order_detail_provider.dart`); `rg` the method across `lib/` and fix every `flutter analyze` error. Other pairs: role pickers (`register_screen.dart` / `social_role_screen.dart`), trust badges (`home_header.dart` / `quick_actions_row.dart`), password toggles (courier login reuses `loginNotifierProvider`). When migrating callers off a shared helper or constants file, delete it once no callers remain. A no-op `onTap: () {}` on link-styled text is a bug — check for an existing target (Terms/Privacy open the website via `launchLegalUrl`). Don't link to content that doesn't exist (the checkout "Return Policy" link is commented out `TODO(phase-2)`).
+- **Rule:** When a fix lands in one implementation of a concept, grep for siblings before closing it. Order actions exist in the vendor-only stack (`vendor_orders_provider.dart`, `vendor_order_detail_provider.dart`), the consumer list (`OrderCard` → `orders_provider.dart`) and the role-shared detail footer (`OrderActionButtons` → `order_detail_provider.dart`); `rg` the method across `lib/` and fix every `flutter analyze` error. Other pairs: role pickers (`register_screen.dart` / `social_role_screen.dart`), trust badges (`home_header.dart` / `quick_actions_row.dart`), password toggles (courier login reuses `loginNotifierProvider`). When migrating callers off a shared helper or constants file, delete it once no callers remain. A no-op `onTap: () {}` on link-styled text is a bug — check for an existing target (Terms/Privacy open the website via `launchLegalUrl`). Don't link to content that doesn't exist (there is no return-policy page, so checkout has no Return Policy link).
 - **Where it applies:** Audits and bug fixes across features.
 
 ### 2026-09-10 — Time out platform-channel calls on blocking paths
@@ -799,8 +799,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `social_auth_provider.dart`, `login_screen.dart`, `register_screen.dart`, `router_notifier.dart`, auth test doubles.
 
 ### 2026-09-12 — Order coordinates come from the chosen address
-- **Rule:** `OrderAddress`/`OrderAddressModel` carry optional `latitude`/`longitude` from `showMapAddressPicker` (persisted by `checkout_provider.dart`'s `_addressToJson`/`_addressFromJson`). `placeOrder` uses the selected address's pin when it's inside Egypt and falls back to `AppLocationCache` only when there's none.
-- **Where it applies:** `order_entity.dart`, `order_model.dart`, `checkout_provider.dart`, `cart_remote_datasource.dart`, `address_form_sheet.dart`, `map_address_picker.dart`.
+- **Rule:** `OrderAddress`/`OrderAddressModel` carry optional `latitude`/`longitude` (only older saved addresses have a pin now that the map picker and `google_maps_flutter` are gone; persisted by `checkout_provider.dart`'s `_addressToJson`/`_addressFromJson`). `placeOrder` uses the selected address's pin when it's inside Egypt and falls back to `AppLocationCache` only when there's none.
+- **Where it applies:** `order_entity.dart`, `order_model.dart`, `checkout_provider.dart`, `cart_remote_datasource.dart`, `address_form_sheet.dart`.
 
 ### 2026-09-12 — Action failures toast where the user is
 - **Rule:** Don't route a one-shot action failure (delete account, save) through a `state.error` that drives a load-retry banner at the top of a long screen. Return the error to the caller and show `AppSnackbar.error`.
@@ -835,7 +835,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `order_entity.dart`, `product_reviews_screen.dart`, `already_reviewed_sheet.dart`, order leave-review sheets.
 
 ### 2026-09-13 — iOS minimum version bumps touch three places
-- **Rule:** When CocoaPods says a plugin needs a higher deployment target, raise `platform :ios` in `ios/Podfile` (uncommented — otherwise CocoaPods assumes 13.0), `IPHONEOS_DEPLOYMENT_TARGET` in `project.pbxproj`, and `MinimumOSVersion` in `ios/Flutter/AppFrameworkInfo.plist` together (`google_maps_flutter_ios` needs 14).
+- **Rule:** When CocoaPods says a plugin needs a higher deployment target, raise `platform :ios` in `ios/Podfile` (uncommented — otherwise CocoaPods assumes 13.0), `IPHONEOS_DEPLOYMENT_TARGET` in `project.pbxproj`, and `MinimumOSVersion` in `ios/Flutter/AppFrameworkInfo.plist` together.
 - **Where it applies:** iOS build config.
 
 ### 2026-09-13 — Delivered is a vendor transition from Shipped
@@ -871,7 +871,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `lib/features/reports/`, `api_endpoints.dart`, `order_detail_scroll_content.dart`, `report_vendor_sheet.dart`.
 
 ### 2026-09-15 — Read use cases before opening a sheet
-- **Rule:** Read a use case (a plain callable) with `ref.read` before `showModalBottomSheet` and close over it in `onSubmit`, rather than reading `ref` inside the async callback. `order_card.dart`'s `_reviewSheet` still reads inside — hoist it next time that file is touched.
+- **Rule:** Read a use case (a plain callable) with `ref.read` before `showModalBottomSheet` and close over it in `onSubmit`, rather than reading `ref` inside the async callback.
 - **Where it applies:** Sheets with async submit callbacks.
 
 ### 2026-09-15 — Legal links open the website
@@ -926,10 +926,6 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** With a `+20` prefix on screen, the field holds `1XXXXXXXXX`; convert to the 11-digit `01…` only for the API (`normalizeEgyptLocal`). Never prepend `0` in the widget.
 - **Where it applies:** `phone_input_field.dart`, `AppValidators.egyptNationalSignificantNumber`.
 
-### 2026-09-22 — A map starting point is not a user pick
-- **Rule:** The map picker's initial camera position (`AppLocationCache` or Cairo) isn't a selection: camera-start callbacks fire at creation, so `_hasPicked` stays false until the camera moves meaningfully from the start (`mapCameraMovedFromStart`) or the user taps Use my location; no reverse-geocoding or Confirm before that. Reopening with `initialLatitude`/`initialLongitude` starts as picked. `GoogleMap` can't run under `flutter_test` — unit-test the helper.
-- **Where it applies:** `map_address_picker.dart`.
-
 ### 2026-09-22 — Currency display has several code paths
 - **Rule:** `context.formatCurrency()` shows the amount then "LE" in English (Arabic already trails `ج.م`). Other paths show currency separately: `commission_breakdown_card.dart` and the Add Listing price fields' `prefixText: '${notifier.currencyCode} '`. Grep currency literals across `lib/` and scope the edit to what was asked.
 - **Where it applies:** `context_extensions.dart` and the files above.
@@ -955,7 +951,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Every session that needs Flutter or live probes.
 
 ### 2026-09-23 — Dead-code deletions
-- **Rule:** An audit is a snapshot: re-verify each finding against current HEAD right before deleting, and re-run the justifying grep before merging. Grep `test/` as well as `lib/` (live-flow tests construct screens directly — `NotificationSettingsScreen` stays), and grep for comparisons like `location == AppRoutes.foo`. Check each dead symbol's twin (consumer/vendor, en/ar). Never delete code marked for a later phase, "hidden for now" or "keep for restore", including its commented restore point — grep `phase-2`, `deferred`, `coming soon`, `hidden for now`, `keep for restore` first. The product owner decided to keep `cart_select_all_row.dart`, `wishlist_header_bar.dart`, `AppRoutes.earnings` and `AppRoutes.chatThread()`, and to park Apple/Facebook sign-in as phase-2 (notifier methods, repository/datasource, `SocialRoleScreen`, `/api/auth/social`, both SDKs, and their l10n keys); don't re-flag them. The next audit starts by checking the previous deletions left no dangling reference. Collapse leftover blank lines by hand.
+- **Rule:** An audit is a snapshot: re-verify each finding against current HEAD right before deleting, and re-run the justifying grep before merging. Grep `test/` as well as `lib/` (live-flow tests construct screens directly), and grep for comparisons like `location == AppRoutes.foo`. Check each dead symbol's twin (consumer/vendor, en/ar), and follow the cascade: a deleted widget can orphan notifier methods, state fields, prefs keys, analytics events and l10n keys. Outside auth, hidden UI is deleted rather than kept for restore (2026-10 cleanup). Keep redirect routes that guard deep links or FCM `actionRoute` (`/chat/:threadId`, `/store-hours`, notification settings). The product owner decided to keep `AppRoutes.earnings`, and to park Apple/Facebook sign-in as phase-2 (notifier methods, repository/datasource, `SocialRoleScreen`, `/api/auth/social`, both SDKs, and their l10n keys); don't re-flag them. The next audit starts by checking the previous deletions left no dangling reference. Collapse leftover blank lines by hand.
 - **Where it applies:** Dead-code audits and cleanups.
 
 ### 2026-09-23 — Amplitude
@@ -1039,7 +1035,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Any screen gaining a shared widget or provider watch; tests rendering `AddListingScreen`, register, edit profile, checkout.
 
 ### 2026-10-04 — Remove hidden UI, don't comment it out
-- **Rule:** When a feature's UI is dropped, delete the code instead of commenting it out (this replaces the old "hidden UI stays commented out" rule). Also delete what it leaves orphaned: widgets with no callers, their tests, and l10n keys only they used (diff the unused-key list against the base). Tests driving the removed UI go too. Older hides still commented out (cart Select All row and vendor header, Wishlist header bar, Profile Manage Store, WhatsApp buttons) get deleted or restored when next touched.
+- **Rule:** When a feature's UI is dropped, delete the code instead of commenting it out (this replaces the old "hidden UI stays commented out" rule). Also delete what it leaves orphaned: widgets with no callers, their tests, and l10n keys only they used (diff the unused-key list against the base). Tests driving the removed UI go too. Only the parked Apple/Facebook sign-in under `lib/features/auth/` is still kept for restore.
 - **Where it applies:** Any screen where UI is hidden or removed; `lib/l10n/*.arb`.
 
 ### 2026-10-04 — "Read more" toggles only when the text actually overflows
@@ -1048,7 +1044,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 
 ### 2026-10-04 — Required-field submit buttons are disabled, never silent no-ops
 - **Rule:** When a form can't submit (e.g. the comment is required), pass `onPressed: null` until it can, instead of an enabled button that returns early. Rebuild only the button: `setS` in a `StatefulBuilder` sheet with no controller, or `ValueListenableBuilder` on an owned controller. Grep for `if (….isEmpty) return;` at the top of `onPressed` handlers.
-- **Where it applies:** Review sheets in `order_card.dart` and `order_action_buttons.dart`, `product_reviews_screen.dart`, any submit button.
+- **Where it applies:** `order_flow_sheets.dart` review sheet, `product_reviews_screen.dart`, any submit button.
 
 ### 2026-10-05 — Pump between enterText and tapping a validity-gated button
 - **Rule:** A button enabled by typed input (`setS`/`ValueListenableBuilder`) only rebuilds on the next frame, so a test doing `enterText` then `tap` hits the still-disabled button and silently does nothing. Add `await tester.pump()` before the tap. When making a button disabled-until-valid, grep tests that type then tap it and run them.
@@ -1065,3 +1061,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — No null-aware collection elements (`?x`) until build_runner parses them
 - **Rule:** `flutter analyze` (Dart 3.9) accepts `[a, ?b]`, but our build_runner/analyzer dev-dependency fails the whole build with "Expected an identifier", which breaks codegen for everyone. Write `if (b != null) b` instead. After touching Dart in a codegen'd feature, run `dart run build_runner build` once, then revert regenerated files whose source didn't change.
 - **Where it applies:** Every Dart file; especially widget `children:` lists.
+
+### 2026-10-05 — Dates and order labels go through the shared helpers
+- **Rule:** Format dates with the `context.format*Date`/`formatTime`/`formatMonthYear` helpers, never an ad-hoc `DateFormat`. Most keep a fixed field order in both locales; `formatLocaleMediumDate` (`yMMMd`) follows the locale's order, so swapping one for another changes Arabic output. Need a new pattern? Add a helper and pin it in `context_date_helpers_test.dart`. Payment and status labels are `paymentMethodLabel` and `orderStatusLabel`; don't re-switch on the enum.
+- **Where it applies:** `context_extensions.dart`, orders/checkout/profile widgets.
+
+### 2026-10-05 — Deleting an await shifts test timing
+- **Rule:** Removing an `await` (even a now-useless prefs read) from a notifier method moves every later step earlier, so tests asserting an intermediate state after `Future.delayed(Duration.zero)` start racing mock responses that also resolve after `Duration.zero`. Assert intermediate Loading states synchronously right after the trigger, and run the full suite in both modes after such deletions.
+- **Where it applies:** Notifier refactors and cleanups; `profile_prefetch_test.dart`-style plain `ProviderContainer` tests.

@@ -5,7 +5,7 @@
 // chain (and, for "add to cart", the real CartRepositoryImpl it delegates
 // to), only the Dio HTTP transport is scripted.
 //
-// Unlike OrdersScreen's ConsumerOrdersView/VendorOrdersView, WishlistScreen
+// Unlike OrdersScreen's ConsumerOrdersView, WishlistScreen
 // itself has no initState fetch — WishlistConsumerBody posts one on first
 // mount, and WishlistNotifier also fetches via `ref.listen(authProvider,
 // fireImmediately: true)` so a first watch after session restore still
@@ -221,9 +221,7 @@ void main() {
       ]);
       await _settle(tester);
 
-      // WishlistHeaderBar's "My Wishlist (n)" title was intentionally
-      // hidden (kept in source, not shown) by the wishlist UI polish pass —
-      // the AppBar now shows a plain, count-less title instead.
+      // The AppBar shows a plain, count-less title.
       expect(find.text('Wishlist'), findsOneWidget);
       expect(find.text('Wireless Earbuds'), findsOneWidget);
 

@@ -89,29 +89,10 @@ class _ProfileSliverAppBarState extends State<ProfileSliverAppBar> {
           fit: StackFit.expand,
           children: [
             _buildBackgroundImage(),
-            // const DecoratedBox(
-            //   decoration: BoxDecoration(
-            //     gradient: LinearGradient(
-            //       begin: Alignment.topCenter,
-            //       end: Alignment.bottomCenter,
-            //       colors: [
-            //         Color(0x2D000000),
-            //         Color(0x8F000000),
-            //       ],
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),
       actions: [
-        // TODO(phase-2): Settings gear opened notification prefs — hide
-        // until that screen ships for real.
-        // IconButton(
-        //   icon: Icon(LucideIcons.settings, color: AppColors.white),
-        //   onPressed: () => context.push(AppRoutes.notificationSettings),
-        //   tooltip: context.l10n.settings,
-        // ),
         NotificationBellButton(
           icon: LucideIcons.bell,
           color: AppColors.white,

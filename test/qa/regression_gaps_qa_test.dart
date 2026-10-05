@@ -123,7 +123,7 @@ class _FakeCartRepo implements CartRepository {
       deliveryAddress: params.deliveryAddress,
       subtotal: params.subtotal,
       shippingCost: params.shippingTotal,
-      discount: params.discount,
+      discount: 0,
       total: params.total,
       createdAt: now,
       updatedAt: now,
@@ -159,7 +159,7 @@ void main() {
   group('M02 — the REAL cart total includes shipping', () {
     // The previous cart_totals_test re-implemented the total formula inside
     // the test file, so breaking Cart._recomputeTotals could not fail it.
-    test('fetchCart totals = subtotal + shipping - discount', () async {
+    test('fetchCart totals = subtotal + shipping', () async {
       repo.next = [
         _item('a', listingId: '1', price: 100, qty: 2, shipping: 5),
         _item('b', listingId: '2', price: 50, shipping: 3),
@@ -169,6 +169,20 @@ void main() {
       expect(cart.subtotal, 250);
       expect(cart.shippingTotal, 8);
       expect(cart.total, 258);
+    });
+
+    test('first load selects every available line, whatever its id', () async {
+      // 'cart_item_001' was once a hard-coded "preferred" mock id that
+      // stole the default selection from the other lines.
+      repo.next = [
+        _item('cart_item_001', listingId: '1', price: 100),
+        _item('real_line', listingId: '2', price: 50),
+        _item('sold_out', listingId: '3').copyWith(isAvailable: false),
+      ];
+      await container.read(cartProvider.notifier).fetchCart();
+      final cart = container.read(cartProvider);
+      expect(cart.selectedItemIds, {'cart_item_001', 'real_line'});
+      expect(cart.subtotal, 150);
     });
   });
 
@@ -265,7 +279,6 @@ void main() {
         paymentMethod: PaymentMethod.cashOnDelivery,
         subtotal: 200,
         shippingTotal: 0,
-        discount: 0,
         total: 200,
       ));
 

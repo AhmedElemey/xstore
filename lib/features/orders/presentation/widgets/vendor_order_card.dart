@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -9,6 +8,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../domain/entities/order_entity.dart';
 import 'order_status_badge.dart';
+import 'order_price_breakdown.dart';
 
 class VendorOrderCard extends StatelessWidget {
   const VendorOrderCard({
@@ -84,10 +84,7 @@ class VendorOrderCard extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  DateFormat(
-                                    'HH:mm',
-                                    context.l10n.localeName,
-                                  ).format(order.createdAt.toLocal()),
+                                  context.formatTime(order.createdAt.toLocal()),
                                   style: AppTypography.bodySmall.copyWith(
                                     color: context.textSecondary,
                                   ),
@@ -176,7 +173,7 @@ class VendorOrderCard extends StatelessWidget {
                       ],
                       const SizedBox(height: AppSpacing.md),
                       Text(
-                        '${_paymentMethodLabel(context, order.paymentMethod)} · ${context.formatCurrency(order.total)}',
+                        '${paymentMethodLabel(context, order.paymentMethod)} · ${context.formatCurrency(order.total)}',
                         style: AppTypography.bodySmall.copyWith(
                           color: context.textSecondary,
                         ),
@@ -289,13 +286,4 @@ class VendorOrderCard extends StatelessWidget {
     }
     return null;
   }
-
-  String _paymentMethodLabel(BuildContext context, PaymentMethod method) =>
-      switch (method) {
-        PaymentMethod.cashOnDelivery =>
-          context.l10n.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
-        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
-        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
-      };
 }

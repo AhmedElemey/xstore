@@ -257,13 +257,6 @@ class Wishlist extends _$Wishlist {
     });
   }
 
-  Future<void> removeByItemId(String wishItemId) async {
-    try {
-      final item = state.items.firstWhere((e) => e.id == wishItemId);
-      await removeFromWishlistByListingId(item.listingId);
-    } catch (_) {}
-  }
-
   Future<void> moveListingToCart(String listingId) async {
     final id = _consumerId;
     if (id == null) return;
@@ -337,13 +330,6 @@ class Wishlist extends _$Wishlist {
     _applyFilterSort();
   }
 
-  void toggleViewMode() {
-    final next = state.viewMode == WishlistViewMode.list
-        ? WishlistViewMode.grid
-        : WishlistViewMode.list;
-    state = state.copyWith(viewMode: next);
-  }
-
   void dismissPriceDropBanner() {
     state = state.copyWith(isPriceDropBannerVisible: false);
   }
@@ -351,69 +337,6 @@ class Wishlist extends _$Wishlist {
   void showPriceDropsFilter() {
     state = state.copyWith(selectedFilter: WishlistFilter.priceDropped);
     _applyFilterSort();
-  }
-
-  void toggleSelectionMode() {
-    final on = !state.isSelectionMode;
-    state = state.copyWith(
-      isSelectionMode: on,
-      selectedItemIds: on ? state.selectedItemIds : {},
-    );
-  }
-
-  void toggleItemSelection(String itemId) {
-    final next = Set<String>.from(state.selectedItemIds);
-    if (next.contains(itemId)) {
-      next.remove(itemId);
-    } else {
-      next.add(itemId);
-    }
-    state = state.copyWith(selectedItemIds: next);
-  }
-
-  void selectAllVisible() {
-    state = state.copyWith(
-      selectedItemIds: state.filteredItems.map((e) => e.id).toSet(),
-    );
-  }
-
-  void deselectAll() {
-    state = state.copyWith(selectedItemIds: {});
-  }
-
-  Future<void> removeSelected() async {
-    final epoch = _sessionEpoch;
-    final ids = List<String>.from(state.selectedItemIds);
-    for (final id in ids) {
-      await removeByItemId(id);
-      if (epoch != _sessionEpoch) return;
-    }
-    state = state.copyWith(isSelectionMode: false, selectedItemIds: {});
-  }
-
-  Future<void> addSelectedToCart() async {
-    final id = _consumerId;
-    if (id == null) return;
-    final epoch = _sessionEpoch;
-    final selected = state.filteredItems
-        .where((e) => state.selectedItemIds.contains(e.id))
-        .where((e) => e.isAvailable)
-        .toList();
-    state = state.copyWith(isUpdating: true);
-    for (final e in selected) {
-      await ref
-          .read(moveToCartUseCaseProvider)
-          .call(consumerId: id, listingId: e.listingId);
-      if (epoch != _sessionEpoch) return;
-    }
-    state = state.copyWith(
-      isUpdating: false,
-      isSelectionMode: false,
-      selectedItemIds: {},
-    );
-    await ref.read(cartProvider.notifier).fetchCart();
-    if (epoch != _sessionEpoch) return;
-    await fetchWishlist();
   }
 
   void clearError() {

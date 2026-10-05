@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -81,7 +80,7 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
               },
               child: Text(
                 '${context.l10n.ordersEstimatedDeliveryLabel}: '
-                '${DateFormat('EEEE, MMM d, yyyy', context.l10n.localeName).format(_date)}',
+                '${context.formatLongDate(_date)}',
               ),
             ),
             const SizedBox(height: AppSpacing.md),
