@@ -6,8 +6,18 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
-import 'wishlist_sort_sheet.dart' show wishlistSortLabel;
 import '../../../../core/utils/extensions/context_extensions.dart';
+
+String _sortLabel(BuildContext context, WishlistSortOption o) {
+  switch (o) {
+    case WishlistSortOption.priceLowToHigh:
+      return context.l10n.wishlistSortPriceLow;
+    case WishlistSortOption.priceHighToLow:
+      return context.l10n.wishlistSortPriceHigh;
+    case WishlistSortOption.nameAZ:
+      return context.l10n.wishlistSortNameAz;
+  }
+}
 
 /// The filter chips (All/Available/Price Dropped/In Cart) and the sort
 /// options (previously a separate "Price Drop ▾" dropdown opening a bottom
@@ -60,7 +70,7 @@ class WishlistSortRow extends ConsumerWidget {
               ),
               for (final o in WishlistSortOption.values)
                 _FilterChip(
-                  label: wishlistSortLabel(context, o),
+                  label: _sortLabel(context, o),
                   selected: sortOption == o,
                   onTap: () => notifier.applySort(o),
                 ),

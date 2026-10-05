@@ -17,8 +17,6 @@ import '../providers/profile_provider.dart';
 import 'delete_account_dialog.dart';
 import 'profile_menu_section.dart';
 import 'profile_menu_tile.dart';
-// TODO(phase-2): Re-enable once push/email preference sync ships.
-// import 'profile_switch_tile.dart';
 import 'theme_toggle_tile.dart';
 import 'language_toggle_tile.dart';
 import '../../../../core/animations/app_dialogs.dart';
@@ -82,9 +80,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO(phase-2): Push/email preference toggles deferred to next phase.
-    // final push = ref.watch(profileNotifierProvider).pushNotificationsEnabled;
-    // final email = ref.watch(profileNotifierProvider).emailUpdatesEnabled;
     final pendingVendorOrders = ref.watch(
       vendorOrdersProvider.select((s) => s.pendingCount),
     );
@@ -111,13 +106,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     trailingBadgeCount: pendingVendorOrders,
                     onTap: () => context.go(AppRoutes.vendorOrders),
                   ),
-                  // Package delivery deferred to phase 2.
-                  // ProfileMenuTile(
-                  //   icon: LucideIcons.package,
-                  //   iconBackground: AppColors.warning,
-                  //   label: context.l10n.menuMyPackages,
-                  //   onTap: () => context.push(AppRoutes.myPackages),
-                  // ),
                 ]
               : isCourier
                   ? [
@@ -144,13 +132,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
                     // Shell-branch tab — go, never push.
                     onTap: () => context.go(AppRoutes.orders),
                   ),
-                  // Package delivery deferred to phase 2.
-                  // ProfileMenuTile(
-                  //   icon: LucideIcons.package,
-                  //   iconBackground: AppColors.warning,
-                  //   label: context.l10n.menuMyPackages,
-                  //   onTap: () => context.push(AppRoutes.myPackages),
-                  // ),
                   ProfileMenuTile(
                     icon: LucideIcons.heart,
                     iconBackground: AppColors.accent,
@@ -186,23 +167,6 @@ class ProfileMenuBlocks extends ConsumerWidget {
               label: context.l10n.menuChangePassword,
               onTap: () => context.push(AppRoutes.changePassword),
             ),
-            // Notification preference screen deferred to phase 2
-            // (local SharedPreferences only; no backend sync).
-            // ProfileMenuTile(
-            //   icon: LucideIcons.bell,
-            //   iconBackground: AppColors.accent,
-            //   label: context.l10n.menuNotificationsSettings,
-            //   onTap: () => context.push(AppRoutes.notificationSettings),
-            // ),
-            // Payment methods deferred to phase 2 (checkout still collects
-            // a one-off address for COD; only the payment method itself —
-            // cards/wallets — is unbuilt).
-            // ProfileMenuTile(
-            //   icon: LucideIcons.creditCard,
-            //   iconBackground: AppColors.success,
-            //   label: context.l10n.menuPaymentMethods,
-            //   onTap: () => context.push(AppRoutes.paymentMethods),
-            // ),
           ],
         ),
         const SizedBox(height: AppSpacing.x2l),
@@ -211,35 +175,12 @@ class ProfileMenuBlocks extends ConsumerWidget {
           children: [
             const ThemeToggleTile(),
             const LanguageToggleTile(),
-            // Push and email preference toggles deferred to phase 2
-            // (no backend sync yet; local-only switches would lie).
-            // ProfileSwitchTile(
-            //   icon: LucideIcons.bellOff,
-            //   iconBackground: context.textSecondary,
-            //   label: context.l10n.pushNotifications,
-            //   value: push,
-            //   onChanged: ref.read(profileNotifierProvider.notifier).togglePushNotifications,
-            // ),
-            // ProfileSwitchTile(
-            //   icon: LucideIcons.mail,
-            //   iconBackground: AppColors.primary,
-            //   label: context.l10n.emailUpdates,
-            //   value: email,
-            //   onChanged: ref.read(profileNotifierProvider.notifier).toggleEmailUpdates,
-            // ),
           ],
         ),
         const SizedBox(height: AppSpacing.x2l),
         ProfileMenuSection(
           title: context.l10n.sectionSupport,
           children: [
-            // Help center deferred to phase 2.
-            // ProfileMenuTile(
-            //   icon: LucideIcons.messageCircle,
-            //   iconBackground: AppColors.primary,
-            //   label: context.l10n.menuHelpCenter,
-            //   onTap: () => context.push(AppRoutes.help),
-            // ),
             ProfileMenuTile(
               icon: LucideIcons.fileText,
               iconBackground: context.textSecondary,

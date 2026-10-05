@@ -60,19 +60,6 @@ class CartSummaryCard extends ConsumerWidget {
               emphasize: true,
             ),
             const SizedBox(height: AppSpacing.md),
-            // Text(
-            //   context.l10n.cartCashOnDeliveryNote,
-            //   style: AppTypography.bodySmall.copyWith(
-            //     color: context.textSecondary,
-            //   ),
-            // ),
-            // const SizedBox(height: AppSpacing.xs),
-            // Text(
-            //   context.l10n.cartSecureCheckout,
-            //   style: AppTypography.bodySmall.copyWith(
-            //     color: context.textSecondary,
-            //   ),
-            // ),
           ],
         ),
       ),

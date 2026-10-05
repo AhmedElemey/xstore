@@ -20,15 +20,9 @@ class WishlistItemCard extends ConsumerWidget {
   const WishlistItemCard({
     super.key,
     required this.item,
-    required this.selectionMode,
-    required this.selected,
-    required this.onToggleSelect,
   });
 
   final WishlistItemEntity item;
-  final bool selectionMode;
-  final bool selected;
-  final VoidCallback onToggleSelect;
 
   void _undoSnack(BuildContext context, WidgetRef ref) {
     AppSnackbar.show(
@@ -87,9 +81,7 @@ class WishlistItemCard extends ConsumerWidget {
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: selectionMode
-              ? onToggleSelect
-              : () => context.push('${AppRoutes.product}/${item.listingId}'),
+          onTap: () => context.push('${AppRoutes.product}/${item.listingId}'),
           child: Ink(
             decoration: BoxDecoration(
               border: Border.all(color: accent.withValues(alpha: 0.45)),
@@ -105,18 +97,6 @@ class WishlistItemCard extends ConsumerWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (selectionMode) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: AppSpacing.sm,
-                              ),
-                              child: Checkbox(
-                                value: selected,
-                                onChanged: (_) => onToggleSelect(),
-                                activeColor: AppColors.primary,
-                              ),
-                            ),
-                          ],
                           Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -346,75 +326,73 @@ class WishlistItemCard extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      if (!selectionMode) ...[
-                        const Gap(AppSpacing.md),
-                        Divider(
-                          height: 1,
-                          color: context.textDisabled.withValues(alpha: 0.5),
-                        ),
-                        const Gap(AppSpacing.sm),
-                        Row(
-                          children: [
-                            TextButton(
-                              onPressed: () async {
-                                await ref
-                                    .read(wishlistProvider.notifier)
-                                    .removeFromWishlistByListingId(
-                                      item.listingId,
-                                      showUndo: true,
-                                    );
-                                if (context.mounted) {
-                                  _undoSnack(context, ref);
-                                }
-                              },
-                              child: Text(
-                                context.l10n.wishlistRemove,
-                                style: AppTypography.labelLarge.copyWith(
-                                  color: AppColors.error,
-                                ),
+                      const Gap(AppSpacing.md),
+                      Divider(
+                        height: 1,
+                        color: context.textDisabled.withValues(alpha: 0.5),
+                      ),
+                      const Gap(AppSpacing.sm),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(wishlistProvider.notifier)
+                                  .removeFromWishlistByListingId(
+                                    item.listingId,
+                                    showUndo: true,
+                                  );
+                              if (context.mounted) {
+                                _undoSnack(context, ref);
+                              }
+                            },
+                            child: Text(
+                              context.l10n.wishlistRemove,
+                              style: AppTypography.labelLarge.copyWith(
+                                color: AppColors.error,
                               ),
                             ),
-                            const Spacer(),
-                            if (item.isInCart)
-                              FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: AppColors.success,
-                                  visualDensity: VisualDensity.compact,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.md,
-                                  ),
-                                ),
-                                onPressed: () => context.push(AppRoutes.cart),
-                                child: Text(context.l10n.wishlistInCartCta),
-                              )
-                            else
-                              FilledButton(
-                                style: FilledButton.styleFrom(
-                                  visualDensity: VisualDensity.compact,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.md,
-                                  ),
-                                ),
-                                onPressed: item.isAvailable
-                                    ? () async {
-                                        HapticFeedback.lightImpact();
-                                        await ref
-                                            .read(wishlistProvider.notifier)
-                                            .moveListingToCart(item.listingId);
-                                        if (context.mounted) {
-                                          _addedToCartSnack(context);
-                                        }
-                                      }
-                                    : null,
-                                child: Text(
-                                  item.isAvailable
-                                      ? context.l10n.wishlistAddToCart
-                                      : context.l10n.wishlistOutOfStock,
+                          ),
+                          const Spacer(),
+                          if (item.isInCart)
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md,
                                 ),
                               ),
-                          ],
-                        ),
-                      ],
+                              onPressed: () => context.push(AppRoutes.cart),
+                              child: Text(context.l10n.wishlistInCartCta),
+                            )
+                          else
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md,
+                                ),
+                              ),
+                              onPressed: item.isAvailable
+                                  ? () async {
+                                      HapticFeedback.lightImpact();
+                                      await ref
+                                          .read(wishlistProvider.notifier)
+                                          .moveListingToCart(item.listingId);
+                                      if (context.mounted) {
+                                        _addedToCartSnack(context);
+                                      }
+                                    }
+                                  : null,
+                              child: Text(
+                                item.isAvailable
+                                    ? context.l10n.wishlistAddToCart
+                                    : context.l10n.wishlistOutOfStock,
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -431,10 +409,6 @@ class WishlistItemCard extends ConsumerWidget {
         ),
       ),
     );
-
-    if (selectionMode) {
-      return card;
-    }
 
     return Dismissible(
       key: ValueKey<String>('wishlist-list-${item.id}'),

@@ -15,11 +15,9 @@ class VendorStoreCard extends ConsumerWidget {
   const VendorStoreCard({
     super.key,
     required this.profile,
-    this.onManageStore,
   });
 
   final ProfileEntity profile;
-  final VoidCallback? onManageStore;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,22 +75,6 @@ class VendorStoreCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              // Hidden for now — own-storefront from Profile is deferred.
-              // OutlinedButton(
-              //   onPressed: onManageStore,
-              //   style: OutlinedButton.styleFrom(
-              //     foregroundColor: AppColors.primary,
-              //     side: const BorderSide(color: AppColors.primary),
-              //     padding: const EdgeInsets.symmetric(
-              //       horizontal: AppSpacing.sm,
-              //       vertical: AppSpacing.xs,
-              //     ),
-              //   ),
-              //   child: Text(
-              //     context.l10n.manageStore,
-              //     style: AppTypography.labelSmall,
-              //   ),
-              // ),
             ],
           ),
           const Gap(AppSpacing.md),

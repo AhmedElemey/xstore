@@ -52,8 +52,6 @@ mixin _$ProfileState {
   String get editInstagram => throw _privateConstructorUsedError;
   String get editFacebook => throw _privateConstructorUsedError; // Preferences
   bool get isDarkMode => throw _privateConstructorUsedError;
-  bool get pushNotificationsEnabled => throw _privateConstructorUsedError;
-  bool get emailUpdatesEnabled => throw _privateConstructorUsedError;
   bool get hasChanges => throw _privateConstructorUsedError;
   Map<String, String> get fieldErrors => throw _privateConstructorUsedError;
 
@@ -103,8 +101,6 @@ abstract class $ProfileStateCopyWith<$Res> {
       String editInstagram,
       String editFacebook,
       bool isDarkMode,
-      bool pushNotificationsEnabled,
-      bool emailUpdatesEnabled,
       bool hasChanges,
       Map<String, String> fieldErrors});
 
@@ -158,8 +154,6 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? editInstagram = null,
     Object? editFacebook = null,
     Object? isDarkMode = null,
-    Object? pushNotificationsEnabled = null,
-    Object? emailUpdatesEnabled = null,
     Object? hasChanges = null,
     Object? fieldErrors = null,
   }) {
@@ -300,14 +294,6 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
           ? _value.isDarkMode
           : isDarkMode // ignore: cast_nullable_to_non_nullable
               as bool,
-      pushNotificationsEnabled: null == pushNotificationsEnabled
-          ? _value.pushNotificationsEnabled
-          : pushNotificationsEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      emailUpdatesEnabled: null == emailUpdatesEnabled
-          ? _value.emailUpdatesEnabled
-          : emailUpdatesEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
       hasChanges: null == hasChanges
           ? _value.hasChanges
           : hasChanges // ignore: cast_nullable_to_non_nullable
@@ -375,8 +361,6 @@ abstract class _$$ProfileStateImplCopyWith<$Res>
       String editInstagram,
       String editFacebook,
       bool isDarkMode,
-      bool pushNotificationsEnabled,
-      bool emailUpdatesEnabled,
       bool hasChanges,
       Map<String, String> fieldErrors});
 
@@ -429,8 +413,6 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? editInstagram = null,
     Object? editFacebook = null,
     Object? isDarkMode = null,
-    Object? pushNotificationsEnabled = null,
-    Object? emailUpdatesEnabled = null,
     Object? hasChanges = null,
     Object? fieldErrors = null,
   }) {
@@ -571,14 +553,6 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
           ? _value.isDarkMode
           : isDarkMode // ignore: cast_nullable_to_non_nullable
               as bool,
-      pushNotificationsEnabled: null == pushNotificationsEnabled
-          ? _value.pushNotificationsEnabled
-          : pushNotificationsEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      emailUpdatesEnabled: null == emailUpdatesEnabled
-          ? _value.emailUpdatesEnabled
-          : emailUpdatesEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
       hasChanges: null == hasChanges
           ? _value.hasChanges
           : hasChanges // ignore: cast_nullable_to_non_nullable
@@ -629,8 +603,6 @@ class _$ProfileStateImpl implements _ProfileState {
       this.editInstagram = '',
       this.editFacebook = '',
       this.isDarkMode = false,
-      this.pushNotificationsEnabled = true,
-      this.emailUpdatesEnabled = true,
       this.hasChanges = false,
       final Map<String, String> fieldErrors = const <String, String>{}})
       : _fieldErrors = fieldErrors;
@@ -733,12 +705,6 @@ class _$ProfileStateImpl implements _ProfileState {
   final bool isDarkMode;
   @override
   @JsonKey()
-  final bool pushNotificationsEnabled;
-  @override
-  @JsonKey()
-  final bool emailUpdatesEnabled;
-  @override
-  @JsonKey()
   final bool hasChanges;
   final Map<String, String> _fieldErrors;
   @override
@@ -751,7 +717,7 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   String toString() {
-    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreCategory: $editStoreCategory, editStoreCategoryId: $editStoreCategoryId, editStoreDescription: $editStoreDescription, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editStoreCityId: $editStoreCityId, editStoreGovernmentId: $editStoreGovernmentId, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, pushNotificationsEnabled: $pushNotificationsEnabled, emailUpdatesEnabled: $emailUpdatesEnabled, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
+    return 'ProfileState(profile: $profile, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, editName: $editName, editFullNameAr: $editFullNameAr, editEmail: $editEmail, editPhone: $editPhone, editLocation: $editLocation, editAvatarFile: $editAvatarFile, avatarRemoved: $avatarRemoved, editStoreLogoFile: $editStoreLogoFile, storeLogoRemoved: $storeLogoRemoved, editStoreName: $editStoreName, editStoreCategory: $editStoreCategory, editStoreCategoryId: $editStoreCategoryId, editStoreDescription: $editStoreDescription, editStoreCity: $editStoreCity, editStoreWilaya: $editStoreWilaya, editStoreCityId: $editStoreCityId, editStoreGovernmentId: $editStoreGovernmentId, editWhatsapp: $editWhatsapp, editLatitude: $editLatitude, editLongitude: $editLongitude, editGovernorate: $editGovernorate, editTown: $editTown, editDetailAddress: $editDetailAddress, isDetectingLocation: $isDetectingLocation, locationError: $locationError, locationAction: $locationAction, editDateOfBirth: $editDateOfBirth, editInstagram: $editInstagram, editFacebook: $editFacebook, isDarkMode: $isDarkMode, hasChanges: $hasChanges, fieldErrors: $fieldErrors)';
   }
 
   @override
@@ -825,11 +791,6 @@ class _$ProfileStateImpl implements _ProfileState {
                 other.editFacebook == editFacebook) &&
             (identical(other.isDarkMode, isDarkMode) ||
                 other.isDarkMode == isDarkMode) &&
-            (identical(
-                    other.pushNotificationsEnabled, pushNotificationsEnabled) ||
-                other.pushNotificationsEnabled == pushNotificationsEnabled) &&
-            (identical(other.emailUpdatesEnabled, emailUpdatesEnabled) ||
-                other.emailUpdatesEnabled == emailUpdatesEnabled) &&
             (identical(other.hasChanges, hasChanges) ||
                 other.hasChanges == hasChanges) &&
             const DeepCollectionEquality()
@@ -873,8 +834,6 @@ class _$ProfileStateImpl implements _ProfileState {
         editInstagram,
         editFacebook,
         isDarkMode,
-        pushNotificationsEnabled,
-        emailUpdatesEnabled,
         hasChanges,
         const DeepCollectionEquality().hash(_fieldErrors)
       ]);
@@ -922,8 +881,6 @@ abstract class _ProfileState implements ProfileState {
       final String editInstagram,
       final String editFacebook,
       final bool isDarkMode,
-      final bool pushNotificationsEnabled,
-      final bool emailUpdatesEnabled,
       final bool hasChanges,
       final Map<String, String> fieldErrors}) = _$ProfileStateImpl;
 
@@ -996,10 +953,6 @@ abstract class _ProfileState implements ProfileState {
   String get editFacebook;
   @override // Preferences
   bool get isDarkMode;
-  @override
-  bool get pushNotificationsEnabled;
-  @override
-  bool get emailUpdatesEnabled;
   @override
   bool get hasChanges;
   @override

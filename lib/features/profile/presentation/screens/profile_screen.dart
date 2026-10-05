@@ -21,8 +21,6 @@ import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/profile_verification_banner.dart';
 import '../widgets/vendor_store_card.dart';
-// TODO(phase-2): Re-enable once store/active hours ships.
-// import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/profile_skeleton.dart';
@@ -43,8 +41,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _scroll = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureProfileLoaded();
-      // TODO(phase-2): Store/active hours deferred to next phase.
-      // ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
     });
   }
 
@@ -94,7 +90,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final u = profile?.user ?? user;
     final isVendor = u.hasStore;
     final phoneMissing = AppValidators.isMissingPhoneNumber(u.phoneNumber);
-    // final sellerId = u.id.isNotEmpty ? u.id : user.id;
 
     return RouteReentryRefresh(
       isTarget: (location) => location == AppRoutes.profile,
@@ -163,12 +158,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     padding: const EdgeInsets.only(top: AppSpacing.sm),
                     child: ProfileHeader(
                       user: u,
-                      avatarFile: profileState.editAvatarFile,
                       onEditProfile: () => context.push(AppRoutes.profileEdit),
-                      onAvatarTap: () => showProfileAvatarPickerSheet(
-                        context: context,
-                        ref: ref,
-                      ),
                     ),
                   ),
                 ),
@@ -243,10 +233,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: VendorStoreCard(
                       profile: profile,
-                      // Hidden on the card; keep the route wired for restore.
-                      // onManageStore: sellerId.isEmpty
-                      //     ? null
-                      //     : () => context.push(AppRoutes.sellerPath(sellerId)),
                     ),
                   ),
                 ),

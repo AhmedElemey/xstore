@@ -6,8 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/analytics/analytics_service.dart';
-import '../../../../core/analytics/event_names.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -24,9 +22,7 @@ import '../providers/profile_dependencies.dart';
 import '../providers/profile_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/public_seller_stats.dart';
-import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/expandable_text.dart';
 
@@ -247,30 +243,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return false;
   }
 
-  // Kept for when the WhatsApp button returns (hidden in build).
-  // ignore: unused_element
-  Future<void> _openStoreWhatsApp(String? phone, String storeName) async {
-    final text = context.l10n.whatsappStorePrefill(storeName);
-    final opened = await launchWhatsApp(
-      phone: phone ?? '',
-      prefilledText: text,
-    );
-    if (!mounted) return;
-    if (!opened) {
-      AppSnackbar.info(context, context.l10n.whatsappSellerUnavailable);
-      return;
-    }
-    ref
-        .read(analyticsServiceProvider)
-        .track(
-          AnalyticsEvents.whatsappSellerTap,
-          properties: {
-            AnalyticsProps.source: 'store',
-            AnalyticsProps.sellerId: widget.sellerId,
-          },
-        );
-  }
-
   Set<String> get _categories {
     final set = <String>{};
     for (final e in _listings) {
@@ -301,10 +273,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joinedLine = joined != null ? context.formatMonthYear(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
-    // Only fed the hidden WhatsApp button below.
-    // final authUser = ref.watch(authProvider).valueOrNull;
-    // final isOwnStore = _isOwnStore(authUser);
-    // final whatsapp = (u.whatsappNumber ?? '').trim(); // WhatsApp hidden
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -425,38 +393,6 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                             ),
                           ],
                         ),
-                        // Hidden by product request: no WhatsApp entry points for now.
-                        // if (!isOwnStore && whatsapp.isNotEmpty) ...[
-                        //   const Gap(AppSpacing.lg),
-                        //   SizedBox(
-                        //     width: double.infinity,
-                        //     child: OutlinedButton.icon(
-                        //       onPressed: () =>
-                        //           _openStoreWhatsApp(u.whatsappNumber, name),
-                        //       style: OutlinedButton.styleFrom(
-                        //         foregroundColor: AppColors.success,
-                        //         side: BorderSide(
-                        //           color: AppColors.success.withValues(alpha: 0.5),
-                        //         ),
-                        //         padding: const EdgeInsets.symmetric(
-                        //           vertical: AppSpacing.md,
-                        //         ),
-                        //         shape: RoundedRectangleBorder(
-                        //           borderRadius:
-                        //               BorderRadius.circular(AppSpacing.md),
-                        //         ),
-                        //       ),
-                        //       icon: const Icon(
-                        //         LucideIcons.messageCircle,
-                        //         size: 18,
-                        //       ),
-                        //       label: Text(
-                        //         context.l10n.ordersWhatsapp,
-                        //         style: AppTypography.labelLarge,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ],
                         const Gap(AppSpacing.lg),
                         Divider(height: 1, color: context.dividerColor),
                         const Gap(AppSpacing.lg),

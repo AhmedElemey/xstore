@@ -12,12 +12,8 @@ import '../providers/wishlist_provider.dart';
 import '../providers/wishlist_state.dart';
 import 'move_all_to_cart_bar.dart';
 import 'wishlist_empty_state.dart';
-// Select + list/grid + sort toolbar lives in wishlist_header_bar.dart —
-// uncomment the WishlistHeaderBar line below (and this import) to restore.
-// import 'wishlist_header_bar.dart';
 import 'wishlist_item_card.dart';
 import 'wishlist_price_drop_banner.dart';
-import 'wishlist_selection_bar.dart';
 import 'wishlist_sort_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
@@ -66,8 +62,6 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
           items: s.items,
           filteredItems: s.filteredItems,
           isLoading: s.isLoading,
-          isSelectionMode: s.isSelectionMode,
-          selectedItemIds: s.selectedItemIds,
           selectedFilter: s.selectedFilter,
           error: s.error,
         ),
@@ -92,8 +86,6 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       children: [
         const WishlistPriceDropBanner(),
         const WishlistSortRow(),
-        // Select + list/grid + sort toolbar — kept in code, hidden for now.
-        // const WishlistHeaderBar(),
         Expanded(
           child: loading
               ? const WishlistSkeleton()
@@ -103,10 +95,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
                   child: _buildScrollable(context, state, notifier),
                 ),
         ),
-        if (state.isSelectionMode && items.isNotEmpty)
-          const WishlistSelectionBar()
-        else if (!state.isSelectionMode && items.isNotEmpty)
-          const MoveAllToCartBar(),
+        if (items.isNotEmpty) const MoveAllToCartBar(),
       ],
     );
   }
@@ -117,8 +106,6 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       List<WishlistItemEntity> items,
       List<WishlistItemEntity> filteredItems,
       bool isLoading,
-      bool isSelectionMode,
-      Set<String> selectedItemIds,
       WishlistFilter selectedFilter,
       String? error,
     }) state,
@@ -155,9 +142,6 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
           child: WishlistItemCard(
             key: ValueKey<String>('wishlist-list-item-${item.id}'),
             item: item,
-            selectionMode: state.isSelectionMode,
-            selected: state.selectedItemIds.contains(item.id),
-            onToggleSelect: () => notifier.toggleItemSelection(item.id),
           ),
         );
       },

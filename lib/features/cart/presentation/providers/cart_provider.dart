@@ -335,29 +335,6 @@ class Cart extends _$Cart {
     _recomputeTotals();
   }
 
-  void selectAll() {
-    final next = state.items.map((e) => e.id).toSet();
-    state = state.copyWith(selectedItemIds: next);
-    _recomputeTotals();
-  }
-
-  void deselectAll() {
-    state = state.copyWith(selectedItemIds: {});
-    _recomputeTotals();
-  }
-
-  bool get allSelected =>
-      state.items.isNotEmpty &&
-      state.selectedItemIds.length == state.items.length;
-
-  void toggleSelectAll() {
-    if (allSelected) {
-      deselectAll();
-    } else {
-      selectAll();
-    }
-  }
-
   Future<void> saveForLater(String itemId) async {
     final idx = state.items.indexWhere((e) => e.id == itemId);
     if (idx < 0) return;

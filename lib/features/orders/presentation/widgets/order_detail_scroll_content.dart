@@ -11,7 +11,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-// import '../../../../shared/utils/whatsapp.dart'; // WhatsApp hidden
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -516,24 +515,6 @@ class _BuyerSection extends StatelessWidget {
                 ),
               ],
             ),
-            // Hidden by product request: no WhatsApp entry points for now.
-            // if (order.consumerPhone.trim().isNotEmpty) ...[
-            //   const SizedBox(height: AppSpacing.md),
-            //   OutlinedButton(
-            //     onPressed: () async {
-            //       final opened = await launchWhatsApp(
-            //         phone: order.consumerPhone,
-            //       );
-            //       if (!opened && context.mounted) {
-            //         AppSnackbar.info(
-            //           context,
-            //           context.l10n.whatsappSellerUnavailable,
-            //         );
-            //       }
-            //     },
-            //     child: Text(context.l10n.ordersWhatsapp),
-            //   ),
-            // ],
           ],
         ),
       ),

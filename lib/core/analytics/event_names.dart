@@ -43,7 +43,6 @@ abstract final class AnalyticsEvents {
   // Secondary engagement.
   static const String wishlistAdd = 'wishlist_add';
   static const String wishlistRemove = 'wishlist_remove';
-  static const String whatsappSellerTap = 'whatsapp_seller_tap';
 
   // Vendor funnel (listing live -> order fulfilled) — the other half of
   // the marketplace loop, see docs_business/launch_todos/03_funnel_metrics.md

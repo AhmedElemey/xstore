@@ -22,9 +22,6 @@ mixin _$WishlistState {
   Set<String> get wishlistedListingIds => throw _privateConstructorUsedError;
   WishlistFilter get selectedFilter => throw _privateConstructorUsedError;
   WishlistSortOption get sortOption => throw _privateConstructorUsedError;
-  WishlistViewMode get viewMode => throw _privateConstructorUsedError;
-  Set<String> get selectedItemIds => throw _privateConstructorUsedError;
-  bool get isSelectionMode => throw _privateConstructorUsedError;
   bool get isPriceDropBannerVisible => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   bool get isUpdating => throw _privateConstructorUsedError;
@@ -48,9 +45,6 @@ abstract class $WishlistStateCopyWith<$Res> {
       Set<String> wishlistedListingIds,
       WishlistFilter selectedFilter,
       WishlistSortOption sortOption,
-      WishlistViewMode viewMode,
-      Set<String> selectedItemIds,
-      bool isSelectionMode,
       bool isPriceDropBannerVisible,
       bool isLoading,
       bool isUpdating,
@@ -78,9 +72,6 @@ class _$WishlistStateCopyWithImpl<$Res, $Val extends WishlistState>
     Object? wishlistedListingIds = null,
     Object? selectedFilter = null,
     Object? sortOption = null,
-    Object? viewMode = null,
-    Object? selectedItemIds = null,
-    Object? isSelectionMode = null,
     Object? isPriceDropBannerVisible = null,
     Object? isLoading = null,
     Object? isUpdating = null,
@@ -108,18 +99,6 @@ class _$WishlistStateCopyWithImpl<$Res, $Val extends WishlistState>
           ? _value.sortOption
           : sortOption // ignore: cast_nullable_to_non_nullable
               as WishlistSortOption,
-      viewMode: null == viewMode
-          ? _value.viewMode
-          : viewMode // ignore: cast_nullable_to_non_nullable
-              as WishlistViewMode,
-      selectedItemIds: null == selectedItemIds
-          ? _value.selectedItemIds
-          : selectedItemIds // ignore: cast_nullable_to_non_nullable
-              as Set<String>,
-      isSelectionMode: null == isSelectionMode
-          ? _value.isSelectionMode
-          : isSelectionMode // ignore: cast_nullable_to_non_nullable
-              as bool,
       isPriceDropBannerVisible: null == isPriceDropBannerVisible
           ? _value.isPriceDropBannerVisible
           : isPriceDropBannerVisible // ignore: cast_nullable_to_non_nullable
@@ -170,9 +149,6 @@ abstract class _$$WishlistStateImplCopyWith<$Res>
       Set<String> wishlistedListingIds,
       WishlistFilter selectedFilter,
       WishlistSortOption sortOption,
-      WishlistViewMode viewMode,
-      Set<String> selectedItemIds,
-      bool isSelectionMode,
       bool isPriceDropBannerVisible,
       bool isLoading,
       bool isUpdating,
@@ -199,9 +175,6 @@ class __$$WishlistStateImplCopyWithImpl<$Res>
     Object? wishlistedListingIds = null,
     Object? selectedFilter = null,
     Object? sortOption = null,
-    Object? viewMode = null,
-    Object? selectedItemIds = null,
-    Object? isSelectionMode = null,
     Object? isPriceDropBannerVisible = null,
     Object? isLoading = null,
     Object? isUpdating = null,
@@ -229,18 +202,6 @@ class __$$WishlistStateImplCopyWithImpl<$Res>
           ? _value.sortOption
           : sortOption // ignore: cast_nullable_to_non_nullable
               as WishlistSortOption,
-      viewMode: null == viewMode
-          ? _value.viewMode
-          : viewMode // ignore: cast_nullable_to_non_nullable
-              as WishlistViewMode,
-      selectedItemIds: null == selectedItemIds
-          ? _value._selectedItemIds
-          : selectedItemIds // ignore: cast_nullable_to_non_nullable
-              as Set<String>,
-      isSelectionMode: null == isSelectionMode
-          ? _value.isSelectionMode
-          : isSelectionMode // ignore: cast_nullable_to_non_nullable
-              as bool,
       isPriceDropBannerVisible: null == isPriceDropBannerVisible
           ? _value.isPriceDropBannerVisible
           : isPriceDropBannerVisible // ignore: cast_nullable_to_non_nullable
@@ -274,9 +235,6 @@ class _$WishlistStateImpl implements _WishlistState {
       final Set<String> wishlistedListingIds = const <String>{},
       this.selectedFilter = WishlistFilter.all,
       this.sortOption = WishlistSortOption.priceLowToHigh,
-      this.viewMode = WishlistViewMode.list,
-      final Set<String> selectedItemIds = const <String>{},
-      this.isSelectionMode = false,
       this.isPriceDropBannerVisible = true,
       this.isLoading = false,
       this.isUpdating = false,
@@ -284,8 +242,7 @@ class _$WishlistStateImpl implements _WishlistState {
       this.lastRemoved})
       : _items = items,
         _filteredItems = filteredItems,
-        _wishlistedListingIds = wishlistedListingIds,
-        _selectedItemIds = selectedItemIds;
+        _wishlistedListingIds = wishlistedListingIds;
 
   final List<WishlistItemEntity> _items;
   @override
@@ -323,21 +280,6 @@ class _$WishlistStateImpl implements _WishlistState {
   final WishlistSortOption sortOption;
   @override
   @JsonKey()
-  final WishlistViewMode viewMode;
-  final Set<String> _selectedItemIds;
-  @override
-  @JsonKey()
-  Set<String> get selectedItemIds {
-    if (_selectedItemIds is EqualUnmodifiableSetView) return _selectedItemIds;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableSetView(_selectedItemIds);
-  }
-
-  @override
-  @JsonKey()
-  final bool isSelectionMode;
-  @override
-  @JsonKey()
   final bool isPriceDropBannerVisible;
   @override
   @JsonKey()
@@ -352,7 +294,7 @@ class _$WishlistStateImpl implements _WishlistState {
 
   @override
   String toString() {
-    return 'WishlistState(items: $items, filteredItems: $filteredItems, wishlistedListingIds: $wishlistedListingIds, selectedFilter: $selectedFilter, sortOption: $sortOption, viewMode: $viewMode, selectedItemIds: $selectedItemIds, isSelectionMode: $isSelectionMode, isPriceDropBannerVisible: $isPriceDropBannerVisible, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, lastRemoved: $lastRemoved)';
+    return 'WishlistState(items: $items, filteredItems: $filteredItems, wishlistedListingIds: $wishlistedListingIds, selectedFilter: $selectedFilter, sortOption: $sortOption, isPriceDropBannerVisible: $isPriceDropBannerVisible, isLoading: $isLoading, isUpdating: $isUpdating, error: $error, lastRemoved: $lastRemoved)';
   }
 
   @override
@@ -369,12 +311,6 @@ class _$WishlistStateImpl implements _WishlistState {
                 other.selectedFilter == selectedFilter) &&
             (identical(other.sortOption, sortOption) ||
                 other.sortOption == sortOption) &&
-            (identical(other.viewMode, viewMode) ||
-                other.viewMode == viewMode) &&
-            const DeepCollectionEquality()
-                .equals(other._selectedItemIds, _selectedItemIds) &&
-            (identical(other.isSelectionMode, isSelectionMode) ||
-                other.isSelectionMode == isSelectionMode) &&
             (identical(
                     other.isPriceDropBannerVisible, isPriceDropBannerVisible) ||
                 other.isPriceDropBannerVisible == isPriceDropBannerVisible) &&
@@ -395,9 +331,6 @@ class _$WishlistStateImpl implements _WishlistState {
       const DeepCollectionEquality().hash(_wishlistedListingIds),
       selectedFilter,
       sortOption,
-      viewMode,
-      const DeepCollectionEquality().hash(_selectedItemIds),
-      isSelectionMode,
       isPriceDropBannerVisible,
       isLoading,
       isUpdating,
@@ -418,9 +351,6 @@ abstract class _WishlistState implements WishlistState {
       final Set<String> wishlistedListingIds,
       final WishlistFilter selectedFilter,
       final WishlistSortOption sortOption,
-      final WishlistViewMode viewMode,
-      final Set<String> selectedItemIds,
-      final bool isSelectionMode,
       final bool isPriceDropBannerVisible,
       final bool isLoading,
       final bool isUpdating,
@@ -437,12 +367,6 @@ abstract class _WishlistState implements WishlistState {
   WishlistFilter get selectedFilter;
   @override
   WishlistSortOption get sortOption;
-  @override
-  WishlistViewMode get viewMode;
-  @override
-  Set<String> get selectedItemIds;
-  @override
-  bool get isSelectionMode;
   @override
   bool get isPriceDropBannerVisible;
   @override

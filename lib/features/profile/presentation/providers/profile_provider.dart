@@ -10,7 +10,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/network/app_error_messages.dart';
@@ -228,10 +227,6 @@ class ProfileNotifier extends _$ProfileNotifier {
     final epoch = _sessionEpoch;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final prefs = await ref.read(sharedPreferencesProvider.future);
-      if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
-      final push = prefs.getBool(PrefsKeys.profilePushNotifications) ?? true;
-      final email = prefs.getBool(PrefsKeys.profileEmailUpdates) ?? true;
       final themeMode = ref.read(appThemeModeProvider);
 
       // sessionUser was just returned by a live get-profile call (login/
@@ -289,8 +284,6 @@ class ProfileNotifier extends _$ProfileNotifier {
               .applyFromProfile(
                 profile,
                 isDarkMode: _isDarkTheme(themeMode),
-                pushNotificationsEnabled: push,
-                emailUpdatesEnabled: email,
               )
               .copyWith(isLoading: false);
         },
@@ -709,22 +702,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         .setTheme(enabled ? ThemeMode.dark : ThemeMode.light);
     if (epoch != _sessionEpoch) return;
     state = state.copyWith(isDarkMode: enabled);
-  }
-
-  Future<void> togglePushNotifications(bool enabled) async {
-    final epoch = _sessionEpoch;
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setBool(PrefsKeys.profilePushNotifications, enabled);
-    if (epoch != _sessionEpoch) return;
-    state = state.copyWith(pushNotificationsEnabled: enabled);
-  }
-
-  Future<void> toggleEmailUpdates(bool enabled) async {
-    final epoch = _sessionEpoch;
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setBool(PrefsKeys.profileEmailUpdates, enabled);
-    if (epoch != _sessionEpoch) return;
-    state = state.copyWith(emailUpdatesEnabled: enabled);
   }
 
   // Returns `deleted: true` when the backend deleted the account. Session

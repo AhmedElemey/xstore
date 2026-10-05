@@ -49,8 +49,6 @@ class ProfileState with _$ProfileState {
     @Default('') String editFacebook,
     // Preferences
     @Default(false) bool isDarkMode,
-    @Default(true) bool pushNotificationsEnabled,
-    @Default(true) bool emailUpdatesEnabled,
     @Default(false) bool hasChanges,
     @Default(<String, String>{}) Map<String, String> fieldErrors,
   }) = _ProfileState;
@@ -62,8 +60,6 @@ extension ProfileStateX on ProfileState {
   ProfileState applyFromProfile(
     ProfileEntity p, {
     required bool isDarkMode,
-    required bool pushNotificationsEnabled,
-    required bool emailUpdatesEnabled,
   }) {
     final u = p.user;
     return copyWith(
@@ -99,8 +95,6 @@ extension ProfileStateX on ProfileState {
       editStoreLogoFile: null,
       storeLogoRemoved: false,
       isDarkMode: isDarkMode,
-      pushNotificationsEnabled: pushNotificationsEnabled,
-      emailUpdatesEnabled: emailUpdatesEnabled,
       hasChanges: false,
       fieldErrors: {},
     );

@@ -9,7 +9,6 @@ import '../providers/cart_provider.dart';
 import 'cart_checkout_bar.dart';
 import 'cart_empty_state.dart';
 import 'cart_recommended_strip.dart';
-// import 'cart_select_all_row.dart';
 import 'cart_summary_card.dart';
 import 'cart_vendor_group.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -40,10 +39,6 @@ class CartConsumerBody extends ConsumerWidget {
       }
       return const CartEmptyState();
     }
-    // Select-all header stays in source (`cart_select_all_row.dart`) but is
-    // hidden for now — uncomment the import + index-0 branch below to restore.
-    // When restoring, set childCount back to `groups.length + 6` and shift
-    // vendor indices to `index - 1` / `groups.length + 1` again.
     final childCount = groups.length + 5;
 
     return ColoredBox(
@@ -80,7 +75,6 @@ class CartConsumerBody extends ConsumerWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        // if (index == 0) return const CartSelectAllRow();
                         if (index < groups.length) {
                           final group = groups[index];
                           return Padding(
