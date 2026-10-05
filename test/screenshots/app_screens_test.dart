@@ -15,6 +15,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/constants/prefs_keys.dart';
@@ -23,7 +24,10 @@ import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/router/app_router.dart';
 import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/core/theme/app_theme.dart';
+import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
+import 'package:xstore/features/auth/domain/repositories/auth_repository.dart';
+import 'package:xstore/features/auth/domain/usecases/send_email_otp_usecase.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/cart/presentation/providers/cart_provider.dart';
 import 'package:xstore/features/explore/data/datasources/explore_remote_datasource.dart';
@@ -33,6 +37,7 @@ import 'package:xstore/core/network/paginated_result.dart';
 import 'package:xstore/features/notifications/data/datasources/notifications_remote_datasource.dart';
 import 'package:xstore/features/notifications/domain/entities/notification_entity.dart';
 import 'package:xstore/features/notifications/presentation/providers/notifications_dependencies.dart';
+import 'package:xstore/features/profile/presentation/providers/profile_verification_provider.dart';
 import 'package:xstore/features/wishlist/data/datasources/wishlist_remote_datasource.dart';
 import 'package:xstore/features/wishlist/domain/entities/wishlist_item_entity.dart';
 import 'package:xstore/features/wishlist/presentation/providers/wishlist_dependencies.dart';
@@ -83,6 +88,10 @@ final _screens = <(String, UserRole, String)>[
   ('order_detail', UserRole.consumer, AppRoutes.orderPath('order_001')),
   ('wishlist', UserRole.consumer, AppRoutes.wishlist),
   ('notifications', UserRole.consumer, AppRoutes.notifications),
+  ('profile', UserRole.consumer, AppRoutes.profile),
+  ('edit_profile', UserRole.consumer, AppRoutes.profileEdit),
+  ('verification', UserRole.consumer, AppRoutes.profileVerification),
+  ('addresses', UserRole.consumer, AppRoutes.addresses),
   ('vendor_orders', UserRole.vendor, AppRoutes.vendorOrders),
   ('courier_deliveries', UserRole.courier, AppRoutes.deliveries),
 ];
@@ -220,6 +229,17 @@ class _SampleNotifications implements NotificationsRemoteDataSource {
   }
 }
 
+/// Verification sends a code on open; the real repository needs Firebase.
+class _SentOtpRepository implements AuthRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #sendEmailOtp) {
+      return Future.value(const Right<Failure, String?>(null));
+    }
+    return super.noSuchMethod(invocation);
+  }
+}
+
 Future<void> _loadFonts() async {
   final manifest =
       json.decode(await rootBundle.loadString('FontManifest.json'))
@@ -308,6 +328,9 @@ void main() {
                 exploreRemoteDataSourceProvider.overrideWithValue(
                   _SampleExplore(),
                 ),
+                sendEmailOtpUseCaseProvider.overrideWithValue(
+                  SendEmailOtpUseCase(_SentOtpRepository()),
+                ),
                 wishlistRemoteDataSourceProvider.overrideWithValue(
                   _SampleWishlist(),
                 ),
@@ -348,7 +371,18 @@ void main() {
             () => container.read(cartProvider.notifier).fetchCart(),
           );
         }
-        container.read(goRouterProvider).go(location);
+        container
+            .read(goRouterProvider)
+            .go(
+              location,
+              // Verification bounces back without its args.
+              extra: location == AppRoutes.profileVerification
+                  ? const ProfileVerificationArgs(
+                      target: ProfileVerificationTarget.email,
+                      contactValue: 'salma@example.com',
+                    )
+                  : null,
+            );
         // Mock datasources resolve after short simulated delays.
         for (var i = 0; i < 30; i++) {
           await tester.runAsync(
