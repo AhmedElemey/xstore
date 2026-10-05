@@ -3,18 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/social_auth_provider.dart';
 import '../../../../shared/widgets/xstore_button.dart';
-import '../widgets/auth_header.dart';
 import '../widgets/role_selector_card.dart';
 
 // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
@@ -38,92 +40,124 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
     });
     final social = ref.watch(socialAuthProvider);
     final pending = social.pendingSocialResult;
+    final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: Column(
-        children: [
-          Expanded(
-            flex: 42,
-            child: AuthHeader(
-              title: context.l10n.chooseYourRole,
-              subtitle: context.l10n.socialRoleSubtitle,
-            ),
-          ),
-          Expanded(
-            flex: 58,
-            child: Transform.translate(
-              offset: const Offset(0, -18),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                decoration: BoxDecoration(
-                  color: context.surfaceColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                ),
+      body: OrbitBackground(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
                 child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                   children: [
-                    Center(
-                      child: Transform.translate(
-                        offset: const Offset(0, -8),
-                        child: _SocialWelcomeAvatar(
-                          displayName: pending?.displayName,
-                          photoUrl: pending?.photoUrl,
-                          provider: pending?.provider,
-                        ),
+                    // Who is signing up: avatar, greeting, last-step note.
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.glassColor,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: context.borderColor),
+                      ),
+                      child: Row(
+                        children: [
+                          _SocialWelcomeAvatar(
+                            displayName: pending?.displayName,
+                            photoUrl: pending?.photoUrl,
+                            provider: pending?.provider,
+                          ),
+                          const Gap(AppSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.socialWelcomeGreeting(
+                                    pending?.displayName ??
+                                        l10n.socialWelcomeFallbackName,
+                                  ),
+                                  style: AppTypography.labelLarge.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: context.textPrimary,
+                                  ),
+                                ),
+                                const Gap(2),
+                                Text(
+                                  l10n.socialRoleLastStep,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: context.labelColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Gap(AppSpacing.x2l),
+                    Text(
+                      l10n.chooseYourRole,
+                      style: AppTypography.headlineSmall.copyWith(
+                        color: context.textPrimary,
                       ),
                     ),
                     const Gap(AppSpacing.spacing10),
                     Text(
-                      context.l10n.socialWelcomeGreeting(
-                        pending?.displayName ??
-                            context.l10n.socialWelcomeFallbackName,
+                      l10n.socialRoleSubtitle,
+                      style: AppTypography.body15.copyWith(
+                        color: context.textSecondary,
                       ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const Gap(AppSpacing.xs),
-                    Text(
-                      context.l10n.socialRoleLastStep,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: context.textSecondary),
-                    ),
-                    const Gap(AppSpacing.spacing18),
+                    const Gap(AppSpacing.xl),
                     RoleSelectorCard(
-                      title: context.l10n.iAmBuyer,
-                      subtitle: context.l10n.buyerSubtitle,
-                      icon: Icons.shopping_bag_outlined,
-                      accentColor: AppColors.primary,
-                      selectionBorderColor: AppColors.primary,
+                      title: l10n.iAmBuyer,
+                      subtitle: l10n.buyerSubtitle,
+                      icon: LucideIcons.shoppingBag,
+                      orbColors: const [
+                        AppColors.white,
+                        AppColors.primaryLight,
+                        AppColors.primary,
+                      ],
                       isSelected: _selectedRole == UserRole.consumer,
-                      onTap: () => setState(() => _selectedRole = UserRole.consumer),
-                      features: [
-                        context.l10n.buyerFeature1,
-                        context.l10n.buyerFeature2,
-                      ],
+                      onTap: () =>
+                          setState(() => _selectedRole = UserRole.consumer),
+                      features: [l10n.buyerFeature1, l10n.buyerFeature2],
                     ),
                     RoleSelectorCard(
-                      title: context.l10n.iAmSeller,
-                      subtitle: context.l10n.sellerSubtitle,
-                      icon: Icons.storefront_outlined,
-                      accentColor: AppColors.accent,
-                      selectionBorderColor: AppColors.accent,
-                      isSelected: _selectedRole == UserRole.vendor,
-                      onTap: () => setState(() => _selectedRole = UserRole.vendor),
-                      features: [
-                        context.l10n.sellerFeature1,
-                        context.l10n.sellerFeature2,
+                      title: l10n.iAmSeller,
+                      subtitle: l10n.sellerSubtitle,
+                      icon: LucideIcons.store,
+                      orbColors: const [
+                        AppColors.white,
+                        AppColors.accentLight,
+                        AppColors.darkSecondary,
                       ],
+                      isSelected: _selectedRole == UserRole.vendor,
+                      onTap: () =>
+                          setState(() => _selectedRole = UserRole.vendor),
+                      features: [l10n.sellerFeature1, l10n.sellerFeature2],
                     ),
-                    const Gap(AppSpacing.md),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, AppSpacing.md, 24, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     XstoreButton(
-                      label: context.l10n.continueLabel,
+                      label: l10n.continueLabel,
                       isLoading: social.isAnyLoading,
                       onPressed: _selectedRole == null || social.isAnyLoading
                           ? null
                           : () => ref
-                              .read(socialAuthProvider.notifier)
-                              .completeSocialRegistration(_selectedRole!),
+                                .read(socialAuthProvider.notifier)
+                                .completeSocialRegistration(_selectedRole!),
                     ),
-                    const Gap(AppSpacing.sm),
+                    const Gap(AppSpacing.xs),
                     Center(
                       child: TextButton(
                         onPressed: social.isAnyLoading
@@ -134,15 +168,21 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
                                     .cancelSocialRegistration();
                                 context.go(AppRoutes.login);
                               },
-                        child: Text(context.l10n.cancel),
+                        child: Text(
+                          l10n.cancel,
+                          style: AppTypography.labelLarge.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: context.linkColor,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -155,8 +195,8 @@ class _SocialWelcomeAvatar extends StatelessWidget {
     required this.provider,
   });
 
-  static const _diameter = 96.0;
-  static const _ringWidth = 3.0;
+  static const _diameter = 40.0;
+  static const _ringWidth = 2.0;
 
   final String? displayName;
   final String? photoUrl;
@@ -174,71 +214,47 @@ class _SocialWelcomeAvatar extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.profileHeaderGradientEnd],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.28),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            gradient: LinearGradient(colors: context.brandGradient),
           ),
           padding: const EdgeInsets.all(_ringWidth),
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: context.surfaceColor,
-            ),
-            padding: const EdgeInsets.all(_ringWidth),
-            child: ClipOval(
-              child: SizedBox(
-                width: _diameter,
-                height: _diameter,
-                child: hasPhoto
-                    ? AppCachedNetworkImage(
-                        imageUrl: photoUrl!,
-                        width: _diameter,
-                        height: _diameter,
-                        fit: BoxFit.cover,
-                        memCacheWidth: cacheSize,
-                        memCacheHeight: cacheSize,
-                        placeholder: (_, __) => _InitialsFallback(
-                          displayName: displayName,
-                          diameter: _diameter,
-                        ),
-                        errorWidget: (_, __, ___) => _InitialsFallback(
-                          displayName: displayName,
-                          diameter: _diameter,
-                        ),
-                      )
-                    : _InitialsFallback(
+          child: ClipOval(
+            child: SizedBox(
+              width: _diameter,
+              height: _diameter,
+              child: hasPhoto
+                  ? AppCachedNetworkImage(
+                      imageUrl: photoUrl!,
+                      width: _diameter,
+                      height: _diameter,
+                      fit: BoxFit.cover,
+                      memCacheWidth: cacheSize,
+                      memCacheHeight: cacheSize,
+                      placeholder: (_, __) => _InitialsFallback(
                         displayName: displayName,
                         diameter: _diameter,
                       ),
-              ),
+                      errorWidget: (_, __, ___) => _InitialsFallback(
+                        displayName: displayName,
+                        diameter: _diameter,
+                      ),
+                    )
+                  : _InitialsFallback(
+                      displayName: displayName,
+                      diameter: _diameter,
+                    ),
             ),
           ),
         ),
         if (provider != null)
-          Positioned(
-            right: 2,
-            bottom: 2,
+          PositionedDirectional(
+            end: -4,
+            bottom: -4,
             child: Container(
-              padding: const EdgeInsets.all(AppSpacing.xs),
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: context.surfaceColor,
+                color: context.elevatedSurfaceColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(color: context.borderColor),
               ),
               child: _SocialProviderBadge(provider: provider!),
             ),
@@ -249,18 +265,17 @@ class _SocialWelcomeAvatar extends StatelessWidget {
 }
 
 class _InitialsFallback extends StatelessWidget {
-  const _InitialsFallback({
-    required this.displayName,
-    required this.diameter,
-  });
+  const _InitialsFallback({required this.displayName, required this.diameter});
 
   final String? displayName;
   final double diameter;
 
   @override
   Widget build(BuildContext context) {
-    final parts =
-        (displayName ?? '').trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty);
+    final parts = (displayName ?? '')
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty);
     final initials = parts
         .take(2)
         .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
@@ -271,19 +286,22 @@ class _InitialsFallback extends StatelessWidget {
       width: diameter,
       height: diameter,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primaryLight, AppColors.primary],
+        gradient: RadialGradient(
+          center: Alignment(-0.3, -0.4),
+          colors: [
+            AppColors.white,
+            AppColors.accentLight,
+            AppColors.darkSecondary,
+          ],
         ),
       ),
       alignment: Alignment.center,
       child: Text(
         label,
-        style: TextStyle(
-          color: AppColors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: diameter * 0.32,
+        style: AppTypography.labelLarge.copyWith(
+          color: AppColors.darkBackground,
+          fontWeight: FontWeight.w800,
+          fontSize: diameter * 0.4,
         ),
       ),
     );
@@ -299,20 +317,20 @@ class _SocialProviderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (provider) {
       SocialProvider.google => SvgPicture.asset(
-          'assets/icons/google_logo.svg',
-          width: 20,
-          height: 20,
-        ),
+        'assets/icons/google_logo.svg',
+        width: 12,
+        height: 12,
+      ),
       SocialProvider.facebook => SvgPicture.asset(
-          'assets/icons/facebook_logo.svg',
-          width: 20,
-          height: 20,
-        ),
+        'assets/icons/facebook_logo.svg',
+        width: 12,
+        height: 12,
+      ),
       SocialProvider.apple => Icon(
-          Icons.apple,
-          size: 22,
-          color: context.isDark ? AppColors.white : AppColors.black,
-        ),
+        Icons.apple,
+        size: 14,
+        color: context.isDark ? AppColors.white : AppColors.black,
+      ),
     };
   }
 }

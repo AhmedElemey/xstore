@@ -1057,3 +1057,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — Bottom-pinned actions: pad inside SliverFillRemaining
 - **Rule:** For a screen whose button sits at the bottom (Spacer) but must still scroll, use `CustomScrollView` + `SliverFillRemaining(hasScrollBody: false, child: Padding(child: Column(...Spacer())))`. Don't wrap it in `SliverPadding`: its bottom padding is ignored and the last row is clipped. Widget tests run at 800x600, so `ensureVisible` the pinned button before tapping it.
 - **Where it applies:** Orbit auth screens (OTP, forgot/reset/change password, courier login) and any full-height form; their live-flow tests.
+
+### 2026-10-05 — Glows under frosted Orbit surfaces tint the fill
+- **Rule:** A `BoxShadow` on a translucent fill (`glassColor`, a brand tint at 8%) paints under the fill and shows through it, roughly tripling the tint; `BlurStyle.outer` doesn't prevent it in our renderer. Put the glow on an opaque child (orb, node, button) and give the translucent card only its border/tint, or keep its shadow alpha ≤0.18. Check selected states in dark screenshots.
+- **Where it applies:** `role_selector_card.dart`, onboarding badge, any glass card or chip with a glow.

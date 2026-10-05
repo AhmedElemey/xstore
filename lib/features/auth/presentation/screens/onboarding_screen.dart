@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -12,6 +14,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -32,21 +35,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     LucideIcons.shieldCheck,
   ];
 
-  static const _slideColors = [
-    [AppColors.primaryLight, AppColors.primary],
-    [AppColors.accentLight, AppColors.accent],
-    [AppColors.successLight, AppColors.success],
-  ];
-
   Future<void> _finish({required bool skipped}) async {
     final prefs = await ref.read(sharedPreferencesProvider.future);
     await prefs.setBool(PrefsKeys.onboardingComplete, true);
     if (!mounted) return;
-    ref.read(analyticsServiceProvider).track(
-      skipped
-          ? AnalyticsEvents.onboardingSkipped
-          : AnalyticsEvents.onboardingCompleted,
-    );
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          skipped
+              ? AnalyticsEvents.onboardingSkipped
+              : AnalyticsEvents.onboardingCompleted,
+        );
     context.go(AppRoutes.login);
   }
 
@@ -58,182 +57,238 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final l10n = context.l10n;
+    final count = _slideIcons.length;
+    final isLast = _page == count - 1;
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: Column(
-        children: [
-          Expanded(
-            flex: 55,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _slideIcons.length,
-              onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder: (context, i) {
-                return _IllustrationArea(
-                  icon: _slideIcons[i],
-                  gradientColors: _slideColors[i],
-                );
-              },
-            ),
-          ),
-          Expanded(
-            flex: 45,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: context.surfaceColor,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                boxShadow: [
-                  BoxShadow(
-                    color: context.cardShadowColor,
-                    blurRadius: 24,
-                    offset: Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 28, 24, 24 + bottomInset),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
+      body: OrbitBackground(
+        child: SafeArea(
+          child: Padding(
+            // The illustration pager runs full-bleed so the orbit ring isn't
+            // clipped; text rows get the 28px side padding.
+            padding: const EdgeInsets.only(top: 24, bottom: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  height: 44,
+                  padding: _sidePadding,
+                  child: Row(
+                    children: [
+                      Text(
+                        '${_pad2(_page + 1)} / ${_pad2(count)}',
+                        style: AppTypography.mono.copyWith(
+                          fontSize: AppTypography.rem(0.75),
+                          color: context.labelColor,
+                        ),
+                      ),
+                      const Spacer(),
+                      TextButton(
                         onPressed: () => _finish(skipped: true),
                         child: Text(
-                          context.l10n.skip,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: context.textSecondary,
+                          l10n.skip,
+                          style: AppTypography.body15.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: context.linkColor,
                           ),
                         ),
                       ),
-                    ),
-                    const Gap(AppSpacing.xs),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(_slideIcons.length, (i) {
-                        final active = i == _page;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeOutCubic,
-                          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                          height: 8,
-                          width: active ? 28 : 8,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            color: active
-                                ? AppColors.primary
-                                : context.textDisabled,
-                          ),
-                        );
-                      }),
-                    ),
-                    const Gap(AppSpacing.xl),
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 320),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        child: SingleChildScrollView(
-                          key: ValueKey(_page),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                [
-                                  context.l10n.onboardingTitle1,
-                                  context.l10n.onboardingTitle2,
-                                  context.l10n.onboardingTitle3,
-                                ][_page],
-                                style: AppTypography.titleLarge.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: context.textPrimary,
-                                ),
-                              ),
-                              const Gap(AppSpacing.md),
-                              Text(
-                                [
-                                  context.l10n.onboardingSubtitle1,
-                                  context.l10n.onboardingSubtitle2,
-                                  context.l10n.onboardingSubtitle3,
-                                ][_page],
-                                maxLines: 3,
-                                style: AppTypography.body15.copyWith(
-                                  height: 1.45,
-                                  color: context.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    XstoreButton(
-                      label: _page == _slideIcons.length - 1
-                          ? context.l10n.getStarted
-                          : context.l10n.next,
-                      onPressed: () {
-                        if (_page < _slideIcons.length - 1) {
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 380),
-                            curve: Curves.easeOutCubic,
-                          );
-                        } else {
-                          _finish(skipped: false);
-                        }
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  flex: 11,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: count,
+                    onPageChanged: (i) => setState(() => _page = i),
+                    itemBuilder: (context, i) => _OrbitIllustration(
+                      icon: _slideIcons[i],
+                      accent: _slideAccent(context, i),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Padding(
+                    padding: _sidePadding,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 320),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      layoutBuilder: (current, previous) => Stack(
+                        alignment: AlignmentDirectional.bottomStart,
+                        children: [...previous, ?current],
+                      ),
+                      child: SingleChildScrollView(
+                        key: ValueKey(_page),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              [
+                                l10n.onboardingTitle1,
+                                l10n.onboardingTitle2,
+                                l10n.onboardingTitle3,
+                              ][_page],
+                              style: AppTypography.headline.copyWith(
+                                height: 1.15,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                            const Gap(AppSpacing.spacing18),
+                            Text(
+                              [
+                                l10n.onboardingSubtitle1,
+                                l10n.onboardingSubtitle2,
+                                l10n.onboardingSubtitle3,
+                              ][_page],
+                              maxLines: 3,
+                              style: AppTypography.bodyLarge.copyWith(
+                                height: 1.55,
+                                color: context.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const Gap(AppSpacing.spacing18),
+                Padding(
+                  padding: _sidePadding,
+                  child: Row(
+                    children: [
+                      for (var i = 0; i < count; i++)
+                        _PageDot(active: i == _page),
+                      const Spacer(),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minWidth: 150),
+                        child: XstoreButton(
+                          label: isLast ? l10n.getStarted : l10n.next,
+                          onPressed: () {
+                            if (!isLast) {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 380),
+                                curve: Curves.easeOutCubic,
+                              );
+                            } else {
+                              _finish(skipped: false);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  static const _sidePadding = EdgeInsets.symmetric(horizontal: 28);
+
+  /// Slide counter number, zero-padded to two places ("01 / 03").
+  static String _pad2(int n) => n.toString().padLeft(2, '0');
+
+  /// Per-slide accent: brand for shopping, amber for stores, green for trust.
+  static Color _slideAccent(BuildContext context, int i) => switch (i) {
+    0 => context.linkColor,
+    1 => context.amberColor,
+    _ => context.isDark ? AppColors.successLight : AppColors.success,
+  };
+}
+
+class _PageDot extends StatelessWidget {
+  const _PageDot({required this.active});
+
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = context.isDark ? AppColors.primaryLight : AppColors.primary;
+    final off = context.isDark
+        ? AppColors.white.withValues(alpha: 0.22)
+        : AppColors.primary.withValues(alpha: 0.26);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      margin: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+      height: 8,
+      width: active ? 28 : 8,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: active ? on : off,
+        boxShadow: active ? [BoxShadow(color: on, blurRadius: 10)] : null,
       ),
     );
   }
 }
 
-class _IllustrationArea extends StatelessWidget {
-  const _IllustrationArea({
-    required this.icon,
-    required this.gradientColors,
-  });
+/// Planet on a tilted orbit ring, with a frosted badge carrying the slide's
+/// icon.
+class _OrbitIllustration extends StatelessWidget {
+  const _OrbitIllustration({required this.icon, required this.accent});
 
   final IconData icon;
-  final List<Color> gradientColors;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: context.backgroundColor,
-      child: Center(
-        child: Container(
-          width: 200,
-          height: 200,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: gradientColors,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: gradientColors.last.withValues(alpha: 0.35),
-                blurRadius: 40,
-                offset: const Offset(0, 16),
+    final ring = context.isDark ? AppColors.primaryLight : AppColors.primary;
+    return Center(
+      child: SizedBox(
+        height: 300,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            const OrbitPlanet(size: 210),
+            // Keeps the ring 380px wide even on narrower phones.
+            OverflowBox(
+              maxWidth: 380,
+              child: Transform.rotate(
+                angle: -12 * math.pi / 180,
+                child: Container(
+                  width: 380,
+                  height: 80,
+                  decoration: ShapeDecoration(
+                    shape: OvalBorder(
+                      side: BorderSide(
+                        color: ring.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ],
-          ),
-          child: Icon(
-            icon,
-            size: 88,
-            color: AppColors.white.withValues(alpha: 0.95),
-          ),
+            ),
+            PositionedDirectional(
+              end: 28,
+              bottom: 8,
+              child: Container(
+                width: 76,
+                height: 76,
+                decoration: ShapeDecoration(
+                  color: context.glassColor,
+                  shape: CircleBorder(
+                    side: BorderSide(color: context.borderColor),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.18),
+                      blurRadius: 24,
+                    ),
+                  ],
+                ),
+                child: Icon(icon, size: 34, color: accent),
+              ),
+            ),
+          ],
         ),
       ),
     );
