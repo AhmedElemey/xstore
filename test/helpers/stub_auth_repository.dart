@@ -118,13 +118,7 @@ class StubAuthRepository implements AuthRepository {
   Future<Either<Failure, Unit>> persistSessionUser(UserEntity user) async =>
       const Right(unit);
 
-  @override
-  Future<Either<Failure, SocialAuthResult>> signInWithApple() async =>
-      Left(Failure.socialAuth('stub'));
 
-  @override
-  Future<Either<Failure, SocialAuthResult>> signInWithFacebook() async =>
-      Left(Failure.socialAuth('stub'));
 
   @override
   Future<Either<Failure, SocialAuthResult>> signInWithGoogle() async =>

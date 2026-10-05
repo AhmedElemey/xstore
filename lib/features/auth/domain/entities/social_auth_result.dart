@@ -1,14 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'user_entity.dart';
-
 part 'social_auth_result.freezed.dart';
 
-enum SocialProvider {
-  google,
-  apple,
-  facebook,
-}
+enum SocialProvider { google }
 
 @freezed
 class SocialAuthResult with _$SocialAuthResult {
@@ -22,19 +16,4 @@ class SocialAuthResult with _$SocialAuthResult {
     String? idToken,
     @Default(false) bool isNewUser,
   }) = _SocialAuthResult;
-}
-
-extension SocialAuthResultX on SocialAuthResult {
-  UserEntity toUserEntity(UserRole role) => UserEntity(
-        id: uid,
-        name: (displayName == null || displayName!.trim().isEmpty)
-            ? 'User'
-            : displayName!.trim(),
-        email: email ?? '',
-        phoneNumber: '',
-        avatarUrl: photoUrl,
-        role: role,
-        isVerified: false,
-        joinedAt: DateTime.now(),
-      );
 }

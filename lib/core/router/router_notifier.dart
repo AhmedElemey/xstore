@@ -6,7 +6,6 @@ import '../../features/auth/domain/entities/user_entity.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../../features/auth/presentation/providers/phone_auth_provider.dart';
-import '../../features/auth/presentation/providers/social_auth_provider.dart';
 import '../network/server_error_provider.dart';
 import 'app_routes.dart';
 
@@ -37,7 +36,6 @@ RouterNotifier routerNotifier(RouterNotifierRef ref) {
 /// else routes to login.
 String? computeXStoreAuthRedirect({
   required AsyncValue<UserEntity?> auth,
-  required bool needsRoleSelection,
   required String matchedLocation,
   bool holdRegisterForVendorSuccess = false,
   bool isGuest = false,
@@ -47,7 +45,6 @@ String? computeXStoreAuthRedirect({
       loc == AppRoutes.onboarding ||
       loc == AppRoutes.login ||
       loc == AppRoutes.register ||
-      loc == AppRoutes.socialRoleSelect ||
       loc == AppRoutes.otp ||
       loc == AppRoutes.courierLogin ||
       loc == AppRoutes.forgotPassword ||
@@ -57,13 +54,6 @@ String? computeXStoreAuthRedirect({
   return auth.when(
     data: (user) {
       final loggedIn = user != null;
-      // Apple/Facebook new-user sign-in sets this before a local session
-      // exists (the role picks what kind of account to create), so route to
-      // the role screen logged-in or not. Google no longer uses this path —
-      // see SocialAuthState.needsRegistration instead.
-      if (needsRoleSelection && loc != AppRoutes.socialRoleSelect) {
-        return AppRoutes.socialRoleSelect;
-      }
       if (!loggedIn) {
         if (isGuest && isGuestAccessibleRoute(loc)) return null;
         // Guests may still open auth screens to sign in for real; splash
@@ -116,7 +106,6 @@ final class RouterNotifier extends Listenable {
       // AsyncData when redirect evaluates — fixes release timing
       WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
     });
-    _ref.listen(socialAuthProvider.select((s) => s.needsRoleSelection), (_, __) => _notify());
     _ref.listen(guestModeProvider, (_, __) => _notify());
     _ref.listen(serverErrorProvider, (_, __) => _notify());
     _ref.listen(
@@ -140,7 +129,6 @@ final class RouterNotifier extends Listenable {
     }
     return computeXStoreAuthRedirect(
       auth: _ref.read(authProvider),
-      needsRoleSelection: _ref.read(socialAuthProvider).needsRoleSelection,
       matchedLocation: matchedLocation,
       holdRegisterForVendorSuccess:
           _ref.read(registerNotifierProvider).showVendorSuccessOverlay,

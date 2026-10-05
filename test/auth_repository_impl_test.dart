@@ -42,8 +42,6 @@ class _FakeFirebaseAuth implements FirebaseAuth {
 }
 
 class _RecordingRemote implements AuthRemoteDataSource {
-  String? lastSocialProvider;
-  String? lastSocialIdToken;
   String? lastGoogleIdToken;
 
   ConsumerRegisterParams? lastConsumerRegisterParams;
@@ -51,9 +49,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   String? lastChangePasswordCurrent;
   String? lastForgotPasswordEmail;
 
-  final UserModel socialResponse = mockConsumerUserModel(
-    email: 'social@xstore.com',
-  );
   final UserModel consumerRegisterResponse = mockConsumerUserModel(
     email: 'new-consumer@xstore.com',
   );
@@ -129,16 +124,6 @@ class _RecordingRemote implements AuthRemoteDataSource {
   Future<void> logout() async {}
 
   @override
-  Future<UserModel> loginWithSocialToken({
-    required String provider,
-    required String idToken,
-  }) async {
-    lastSocialProvider = provider;
-    lastSocialIdToken = idToken;
-    return socialResponse;
-  }
-
-  @override
   Future<String?> sendLoginOtp(String phoneNumber) =>
       throw UnimplementedError();
 
@@ -168,11 +153,7 @@ class _FakeSocial implements SocialAuthDatasource {
 
   final SocialAuthResult result;
 
-  @override
-  Future<SocialAuthResult> signInWithApple() => Future.value(result);
 
-  @override
-  Future<SocialAuthResult> signInWithFacebook() => Future.value(result);
 
   @override
   Future<SocialAuthResult> signInWithGoogle() => Future.value(result);
@@ -229,62 +210,6 @@ void main() {
         expect(login.isRight(), isTrue);
         expect(remote.lastGoogleIdToken, 'google-id-token');
         expect(await readStoredToken(), 'mock-token-vendor');
-      },
-      skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
-    );
-
-    test(
-      'signInWithApple exchanges Firebase ID token and persists backend token',
-      () async {
-        repository = AuthRepositoryImpl(
-          remote: remote,
-          social: _FakeSocial(
-            const SocialAuthResult(
-              provider: SocialProvider.apple,
-              uid: 'apple-uid',
-              email: 'user@icloud.com',
-              isNewUser: true,
-            ),
-          ),
-          secureStorage: storage,
-          firebaseAuth: _FakeFirebaseAuth(_FakeUser()),
-        );
-
-        final result = await repository.signInWithApple();
-
-        expect(result.isRight(), isTrue);
-        expect(remote.lastSocialProvider, 'apple');
-        expect(remote.lastSocialIdToken, 'firebase-id-token-test');
-        expect(await readStoredToken(), 'mock-token-consumer');
-        result.fold((_) => fail('expected right'), (social) {
-          expect(social.isNewUser, isFalse);
-        });
-      },
-      skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
-    );
-
-    test(
-      'signInWithFacebook exchanges Firebase ID token and persists backend token',
-      () async {
-        repository = AuthRepositoryImpl(
-          remote: remote,
-          social: _FakeSocial(
-            const SocialAuthResult(
-              provider: SocialProvider.facebook,
-              uid: 'facebook-uid',
-              email: 'user@facebook.com',
-              isNewUser: false,
-            ),
-          ),
-          secureStorage: storage,
-          firebaseAuth: _FakeFirebaseAuth(_FakeUser()),
-        );
-
-        final result = await repository.signInWithFacebook();
-
-        expect(result.isRight(), isTrue);
-        expect(remote.lastSocialProvider, 'facebook');
-        expect(await readStoredToken(), 'mock-token-consumer');
       },
       skip: MockConfig.useMock ? 'Requires MOCK=false' : false,
     );
@@ -399,7 +324,6 @@ void main() {
 
         expect(result.isRight(), isTrue);
         expect(remote.lastGoogleIdToken, isNull);
-        expect(remote.lastSocialIdToken, isNull);
         result.fold((_) => fail('expected Right'), (social) {
           expect(social.idToken, 'mock-google-id-token');
         });

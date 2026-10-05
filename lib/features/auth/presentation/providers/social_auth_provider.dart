@@ -10,20 +10,12 @@ import 'auth_provider.dart';
 class SocialAuthState {
   const SocialAuthState({
     this.isGoogleLoading = false,
-    this.isAppleLoading = false,
-    this.isFacebookLoading = false,
     this.error,
-    this.pendingSocialResult,
-    this.needsRoleSelection = false,
     this.googleRegistration,
   });
 
   final bool isGoogleLoading;
-  final bool isAppleLoading;
-  final bool isFacebookLoading;
   final String? error;
-  final SocialAuthResult? pendingSocialResult;
-  final bool needsRoleSelection;
 
   /// A Google sign-in found no existing account for this identity — the
   /// caller (login/register screen) should open the full register flow
@@ -33,27 +25,18 @@ class SocialAuthState {
 
   bool get needsRegistration => googleRegistration != null;
 
-  bool get isAnyLoading => isGoogleLoading || isAppleLoading || isFacebookLoading;
+  bool get isAnyLoading => isGoogleLoading;
 
   SocialAuthState copyWith({
     bool? isGoogleLoading,
-    bool? isAppleLoading,
-    bool? isFacebookLoading,
     String? error,
     bool clearError = false,
-    SocialAuthResult? pendingSocialResult,
-    bool clearPending = false,
-    bool? needsRoleSelection,
     SocialAuthResult? googleRegistration,
     bool clearGoogleRegistration = false,
   }) {
     return SocialAuthState(
       isGoogleLoading: isGoogleLoading ?? this.isGoogleLoading,
-      isAppleLoading: isAppleLoading ?? this.isAppleLoading,
-      isFacebookLoading: isFacebookLoading ?? this.isFacebookLoading,
       error: clearError ? null : (error ?? this.error),
-      pendingSocialResult: clearPending ? null : (pendingSocialResult ?? this.pendingSocialResult),
-      needsRoleSelection: needsRoleSelection ?? this.needsRoleSelection,
       googleRegistration: clearGoogleRegistration
           ? null
           : (googleRegistration ?? this.googleRegistration),
@@ -70,8 +53,6 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     if (state.isAnyLoading) return;
     state = state.copyWith(
       isGoogleLoading: true,
-      isAppleLoading: false,
-      isFacebookLoading: false,
       clearError: true,
     );
     final result = await ref.read(googleSignInUseCaseProvider).call();
@@ -94,8 +75,6 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     if (idToken == null || idToken.isEmpty) {
       state = state.copyWith(
         isGoogleLoading: false,
-        isAppleLoading: false,
-        isFacebookLoading: false,
         error: 'Google sign-in failed — no identity token. Please try again.',
       );
       return;
@@ -126,8 +105,6 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
 
     state = state.copyWith(
       isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: false,
       clearError: true,
       googleRegistration: result,
     );
@@ -167,79 +144,8 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     state = state.copyWith(clearGoogleRegistration: true);
   }
 
-  // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
-  Future<void> signInWithApple() async {
-    if (state.isAnyLoading) return;
-    state = state.copyWith(
-      isGoogleLoading: false,
-      isAppleLoading: true,
-      isFacebookLoading: false,
-      clearError: true,
-    );
-    final result = await ref.read(appleSignInUseCaseProvider).call();
-    if (!mounted) return;
-    await result.fold(_handleFailure, _handleSuccess);
-  }
-
-  Future<void> signInWithFacebook() async {
-    if (state.isAnyLoading) return;
-    state = state.copyWith(
-      isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: true,
-      clearError: true,
-    );
-    final result = await ref.read(facebookSignInUseCaseProvider).call();
-    if (!mounted) return;
-    await result.fold(_handleFailure, _handleSuccess);
-  }
-
-  /// Only reachable for Apple/Facebook new users now — a new Google identity
-  /// never sets [SocialAuthState.pendingSocialResult] (see
-  /// [_handleGoogleSuccess]), so `pending.provider` here is never
-  /// [SocialProvider.google]. Apple/Facebook new users still use a local
-  /// session until the generic social backend route ships.
-  Future<void> completeSocialRegistration(UserRole role) async {
-    final pending = state.pendingSocialResult;
-    if (pending == null) return;
-
-    await ref.read(authProvider.notifier).setUser(
-          pending.toUserEntity(role),
-        );
-    if (!mounted) return;
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.loginSuccess,
-      properties: {
-        AnalyticsProps.method: pending.provider.name,
-        AnalyticsProps.role: role.name,
-      },
-    );
-    state = state.copyWith(
-      isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: false,
-      clearError: true,
-      clearPending: true,
-      needsRoleSelection: false,
-    );
-  }
-
   void clearError() {
     state = state.copyWith(clearError: true);
-  }
-
-  /// Abandons a pending Apple/Facebook sign-in (user backed out of role
-  /// selection) before any local session was created, so the router stops
-  /// forcing the role screen. The caller navigates back to login.
-  void cancelSocialRegistration() {
-    state = state.copyWith(
-      clearPending: true,
-      needsRoleSelection: false,
-      clearError: true,
-      isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: false,
-    );
   }
 
   Future<void> _handleFailure(failure) async {
@@ -247,43 +153,10 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     final cancelled = message.toLowerCase().contains('cancelled');
     state = state.copyWith(
       isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: false,
       error: cancelled ? null : message,
     );
   }
 
-  Future<void> _handleSuccess(SocialAuthResult result) async {
-    if (result.isNewUser) {
-      state = state.copyWith(
-        isGoogleLoading: false,
-        isAppleLoading: false,
-        isFacebookLoading: false,
-        pendingSocialResult: result,
-        needsRoleSelection: true,
-      );
-      return;
-    }
-    await ref.read(authProvider.notifier).setUser(
-          result.toUserEntity(UserRole.consumer),
-        );
-    if (!mounted) return;
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.loginSuccess,
-      properties: {
-        AnalyticsProps.method: result.provider.name,
-        AnalyticsProps.role: UserRole.consumer.name,
-      },
-    );
-    state = state.copyWith(
-      isGoogleLoading: false,
-      isAppleLoading: false,
-      isFacebookLoading: false,
-      clearError: true,
-      clearPending: true,
-      needsRoleSelection: false,
-    );
-  }
 }
 
 final socialAuthProvider =

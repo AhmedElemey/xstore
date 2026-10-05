@@ -12,7 +12,6 @@ import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/courier_login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/auth/presentation/screens/social_role_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/domain/entities/social_auth_result.dart';
@@ -223,15 +222,6 @@ GoRouter goRouter(GoRouterRef ref) {
           context,
           state,
           const CourierLoginScreen(),
-        ),
-      ),
-      // TODO(phase-2): Apple and Facebook sign-in are parked (no buttons render); keep for restore.
-      GoRoute(
-        path: AppRoutes.socialRoleSelect,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const SocialRoleScreen(),
         ),
       ),
       GoRoute(

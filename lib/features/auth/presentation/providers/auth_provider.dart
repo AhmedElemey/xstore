@@ -29,8 +29,6 @@ import '../../domain/usecases/send_email_otp_usecase.dart';
 import '../../domain/usecases/verify_email_otp_usecase.dart';
 import '../../domain/usecases/send_phone_otp_backend_usecase.dart';
 import '../../domain/usecases/verify_phone_otp_backend_usecase.dart';
-import '../../domain/usecases/apple_sign_in_usecase.dart';
-import '../../domain/usecases/facebook_sign_in_usecase.dart';
 import '../../domain/usecases/google_sign_in_usecase.dart';
 import '../../domain/usecases/send_login_otp_usecase.dart';
 import '../../domain/usecases/login_with_otp_usecase.dart';
@@ -139,16 +137,6 @@ GoogleSignInUseCase googleSignInUseCase(GoogleSignInUseCaseRef ref) {
 }
 
 @riverpod
-AppleSignInUseCase appleSignInUseCase(AppleSignInUseCaseRef ref) {
-  return AppleSignInUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
-FacebookSignInUseCase facebookSignInUseCase(FacebookSignInUseCaseRef ref) {
-  return FacebookSignInUseCase(ref.watch(authRepositoryProvider));
-}
-
-@riverpod
 SendLoginOtpUseCase sendLoginOtpUseCase(SendLoginOtpUseCaseRef ref) {
   return SendLoginOtpUseCase(ref.watch(authRepositoryProvider));
 }
@@ -224,19 +212,6 @@ class Auth extends _$Auth {
     ref.invalidateSelf();
   }
 
-  Future<void> setUser(UserEntity user) async {
-    state = const AsyncLoading();
-    final result = await ref
-        .read(authRepositoryProvider)
-        .persistSessionUser(user);
-    ref.read(guestModeProvider.notifier).disable();
-    state = result.fold((_) => AsyncData(user), (_) => AsyncData(user));
-    syncFcmDeviceTokenWithBackend(ref, user: user);
-    prefetchProfileData(ref, user: user);
-    syncDeliveryBackendSession(ref, user: user);
-    _bindAnalyticsSession(user);
-  }
-
   /// Session already persisted (e.g. login/register API) — update auth without
   /// reloading from storage, which would recreate [GoRouter] mid-navigation.
   /// Login/register event tracking (with the caller's actual method — google,
@@ -248,9 +223,7 @@ class Auth extends _$Auth {
     syncFcmDeviceTokenWithBackend(ref, user: user);
     // Every adoptSession caller (password login, register, phone OTP,
     // Google) reaches here via a repository method that already called
-    // _resolveFullUser — user is fresh off a live get-profile. Unlike
-    // setUser, whose two callers (Apple/Facebook local-only sessions) never
-    // touched the backend, so must NOT claim freshness here.
+    // _resolveFullUser — user is fresh off a live get-profile.
     prefetchProfileData(ref, user: user, alreadyFresh: true);
     syncDeliveryBackendSession(ref, user: user);
     _bindAnalyticsSession(user);

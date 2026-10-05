@@ -146,23 +146,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeBack => 'أهلاً بيك';
 
   @override
-  String get chooseYourRole => 'هتستخدم xStore إزاي؟';
-
-  @override
-  String get socialRoleSubtitle => 'خطوة أخيرة — اختار نوع حسابك';
-
-  @override
-  String socialWelcomeGreeting(String name) {
-    return 'أهلاً بيك، $name! 👋';
-  }
-
-  @override
-  String get socialRoleLastStep => 'خطوة أخيرة — هتستخدم xStore إزاي؟';
-
-  @override
-  String get socialWelcomeFallbackName => 'يا صاحبي';
-
-  @override
   String get googleAccountNotFound =>
       'مفيش حساب مرتبط بحساب جوجل ده لسه. كمّل التسجيل، ملينا بياناتك.';
 

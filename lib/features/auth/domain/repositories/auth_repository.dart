@@ -79,8 +79,6 @@ abstract interface class AuthRepository {
     required String idToken,
   });
 
-  Future<Either<Failure, SocialAuthResult>> signInWithApple();
-  Future<Either<Failure, SocialAuthResult>> signInWithFacebook();
   Future<Either<Failure, Unit>> signOutSocial();
 
   Future<Either<Failure, Unit>> logout();

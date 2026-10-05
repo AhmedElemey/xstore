@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TODO: Replace Facebook values below with real App ID and Client Token from Meta
-     developer console. Also update ios/Runner/Info.plist (FacebookAppID,
-     FacebookClientToken, CFBundleURLSchemes) and AndroidManifest.xml meta-data
-     com.facebook.sdk.ApplicationId / com.facebook.sdk.ClientToken.
-
-     TODO: Replace google_maps_api_key below with a real Maps SDK for Android
+<!-- TODO: Replace google_maps_api_key below with a real Maps SDK for Android
      key from the Google Cloud console (restricted to this app's package name
      + release/debug signing certs). Also update
      ios/Runner/AppDelegate.swift's GMSServices.provideAPIKey(...) call.
@@ -13,8 +8,5 @@
      work, only tile rendering needs the key. -->
 <resources>
     <string name="app_name">xStore</string>
-    <string name="facebook_app_id">REPLACE_WITH_FACEBOOK_APP_ID</string>
-    <string name="facebook_client_token">REPLACE_WITH_FACEBOOK_CLIENT_TOKEN</string>
-    <string name="fb_login_protocol_scheme">fbREPLACE_WITH_FACEBOOK_APP_ID</string>
     <string name="google_maps_api_key">REPLACE_WITH_GOOGLE_MAPS_API_KEY</string>
 </resources>

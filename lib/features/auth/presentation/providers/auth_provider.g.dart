@@ -275,41 +275,6 @@ final googleSignInUseCaseProvider =
 );
 
 typedef GoogleSignInUseCaseRef = AutoDisposeProviderRef<GoogleSignInUseCase>;
-String _$appleSignInUseCaseHash() =>
-    r'a866a853ac9ccfe703cb99160e204e6dd5531ac1';
-
-/// See also [appleSignInUseCase].
-@ProviderFor(appleSignInUseCase)
-final appleSignInUseCaseProvider =
-    AutoDisposeProvider<AppleSignInUseCase>.internal(
-  appleSignInUseCase,
-  name: r'appleSignInUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appleSignInUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef AppleSignInUseCaseRef = AutoDisposeProviderRef<AppleSignInUseCase>;
-String _$facebookSignInUseCaseHash() =>
-    r'a3685af1393801b5431bc7144460a52a0511e904';
-
-/// See also [facebookSignInUseCase].
-@ProviderFor(facebookSignInUseCase)
-final facebookSignInUseCaseProvider =
-    AutoDisposeProvider<FacebookSignInUseCase>.internal(
-  facebookSignInUseCase,
-  name: r'facebookSignInUseCaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$facebookSignInUseCaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef FacebookSignInUseCaseRef
-    = AutoDisposeProviderRef<FacebookSignInUseCase>;
 String _$sendLoginOtpUseCaseHash() =>
     r'e6025345e5b49a993511ca6ee2a7999008faed15';
 
@@ -379,7 +344,7 @@ final checkGoogleUserUseCaseProvider =
 
 typedef CheckGoogleUserUseCaseRef
     = AutoDisposeProviderRef<CheckGoogleUserUseCase>;
-String _$authHash() => r'd946745531995c7f3a658dd0133e7d07fdacb740';
+String _$authHash() => r'3b5def3be6e133efcd18ee76eec8b01156a229cc';
 
 /// See also [Auth].
 @ProviderFor(Auth)
@@ -409,7 +374,7 @@ final loginNotifierProvider =
 );
 
 typedef _$LoginNotifier = AutoDisposeNotifier<LoginState>;
-String _$registerNotifierHash() => r'90eb8137723f74a56ed0429aa70c180138e51ed9';
+String _$registerNotifierHash() => r'8afee8aa6b27b56b5c34d44b27605ff2e157c2d8';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)

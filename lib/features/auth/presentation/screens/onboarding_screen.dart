@@ -118,7 +118,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       switchOutCurve: Curves.easeIn,
                       layoutBuilder: (current, previous) => Stack(
                         alignment: AlignmentDirectional.bottomStart,
-                        children: [...previous, ?current],
+                        children: [...previous, if (current != null) current],
                       ),
                       child: SingleChildScrollView(
                         key: ValueKey(_page),

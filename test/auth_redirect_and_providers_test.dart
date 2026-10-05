@@ -111,7 +111,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           isNull,
@@ -129,7 +128,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           isNull,
@@ -147,7 +145,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.login,
@@ -160,7 +157,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: const AsyncValue.data(null),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.home,
         ),
         AppRoutes.login,
@@ -171,7 +167,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: AsyncValue.data(_consumer()),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.login,
         ),
         AppRoutes.home,
@@ -182,7 +177,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: const AsyncValue.loading(),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.home,
         ),
         isNull,
@@ -193,7 +187,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: AsyncValue.error('401', StackTrace.empty),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.wishlist,
         ),
         AppRoutes.login,
@@ -214,7 +207,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_consumer()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.home,
@@ -233,7 +225,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_vendor()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           // Vendors have no /home tab — their shell lands on Incoming Orders.
@@ -250,7 +241,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_vendor()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.vendorOrders,
@@ -271,7 +261,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
             isGuest: true,
           ),
@@ -295,7 +284,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
-            needsRoleSelection: false,
             matchedLocation: loc,
             isGuest: true,
           ),
@@ -309,7 +297,6 @@ void main() {
       expect(
         computeXStoreAuthRedirect(
           auth: const AsyncValue.data(null),
-          needsRoleSelection: false,
           matchedLocation: AppRoutes.home,
           isGuest: false,
         ),
@@ -333,7 +320,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(user),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           isNull,
@@ -349,7 +335,6 @@ void main() {
           expect(
             computeXStoreAuthRedirect(
               auth: AsyncValue.data(user),
-              needsRoleSelection: false,
               matchedLocation: loc,
             ),
             isNull,
@@ -359,7 +344,6 @@ void main() {
         expect(
           computeXStoreAuthRedirect(
             auth: AsyncValue.data(_courier()),
-            needsRoleSelection: false,
             matchedLocation: loc,
           ),
           AppRoutes.deliveries,

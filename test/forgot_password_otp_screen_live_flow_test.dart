@@ -78,12 +78,6 @@ class _FakeSocialAuth implements SocialAuthDatasource {
   Future<SocialAuthResult> signInWithGoogle() =>
       throw UnimplementedError('not exercised by this screen');
   @override
-  Future<SocialAuthResult> signInWithApple() =>
-      throw UnimplementedError('not exercised by this screen');
-  @override
-  Future<SocialAuthResult> signInWithFacebook() =>
-      throw UnimplementedError('not exercised by this screen');
-  @override
   Future<void> signOutSocial() async {}
 }
 

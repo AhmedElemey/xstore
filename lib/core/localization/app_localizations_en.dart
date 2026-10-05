@@ -145,23 +145,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome back';
 
   @override
-  String get chooseYourRole => 'How will you use xStore?';
-
-  @override
-  String get socialRoleSubtitle => 'One last step — choose your account type';
-
-  @override
-  String socialWelcomeGreeting(String name) {
-    return 'Welcome, $name! 👋';
-  }
-
-  @override
-  String get socialRoleLastStep => 'One last step — how will you use xStore?';
-
-  @override
-  String get socialWelcomeFallbackName => 'there';
-
-  @override
   String get googleAccountNotFound =>
       'No account yet for this Google account. Finish signing up, we\'ve filled in your details.';
 

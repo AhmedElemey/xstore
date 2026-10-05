@@ -44,11 +44,6 @@
   "continueWithFacebook": "كمل بـ Facebook",
   "socialLoginDivider": "أو كمل بـ",
   "welcomeBack": "أهلاً بيك",
-  "chooseYourRole": "هتستخدم xStore إزاي؟",
-  "socialRoleSubtitle": "خطوة أخيرة — اختار نوع حسابك",
-  "socialWelcomeGreeting": "أهلاً بيك، {name}! 👋",
-  "socialRoleLastStep": "خطوة أخيرة — هتستخدم xStore إزاي؟",
-  "socialWelcomeFallbackName": "يا صاحبي",
   "googleAccountNotFound": "مفيش حساب مرتبط بحساب جوجل ده لسه. كمّل التسجيل، ملينا بياناتك.",
   "searchHint": "ابحث عن منتجات...",
   "hotDeals": "🔥 أحسن العروض",
@@ -857,13 +852,6 @@
   "@myListingsDeleteBody": {
     "placeholders": {
       "title": {
-        "type": "String"
-      }
-    }
-  },
-  "@socialWelcomeGreeting": {
-    "placeholders": {
-      "name": {
         "type": "String"
       }
     }

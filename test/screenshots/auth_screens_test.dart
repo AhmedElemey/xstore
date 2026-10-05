@@ -34,7 +34,6 @@ import 'package:xstore/features/auth/presentation/screens/onboarding_screen.dart
 import 'package:xstore/features/auth/presentation/screens/otp_screen.dart';
 import 'package:xstore/features/auth/presentation/screens/register_screen.dart';
 import 'package:xstore/features/auth/presentation/screens/reset_password_screen.dart';
-import 'package:xstore/features/auth/presentation/screens/social_role_screen.dart';
 import 'package:xstore/features/auth/presentation/screens/splash_screen.dart';
 
 const _size = Size(390, 844);
@@ -113,10 +112,6 @@ GoRouter _router(String location, Object? extra) {
             ResetPasswordScreen(args: s.extra! as ResetPasswordArgs),
       ),
       GoRoute(
-        path: AppRoutes.socialRoleSelect,
-        builder: (_, __) => const SocialRoleScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.courierLogin,
         builder: (_, __) => const CourierLoginScreen(),
       ),
@@ -142,9 +137,8 @@ final _screens = <(String, String, Object?)>[
     AppRoutes.resetPassword,
     const ResetPasswordArgs(email: 'salma@example.com', otpToken: 't'),
   ),
-  ('09_social_role', AppRoutes.socialRoleSelect, null),
-  ('10_courier_login', AppRoutes.courierLogin, null),
-  ('11_change_password', AppRoutes.changePassword, null),
+  ('09_courier_login', AppRoutes.courierLogin, null),
+  ('10_change_password', AppRoutes.changePassword, null),
 ];
 
 void main() {

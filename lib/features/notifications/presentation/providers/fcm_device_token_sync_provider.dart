@@ -16,7 +16,7 @@ part 'fcm_device_token_sync_provider.g.dart';
 
 /// Fire-and-forget: fetch/persist the FCM token and register it with the
 /// backend when a session exists. Mirrors [prefetchProfileData] — always
-/// pass [user] when calling from within `Auth` itself (build/setUser/
+/// pass [user] when calling from within `Auth` itself (build/
 /// adoptSession): reading `authProvider` via `Auth`'s own `ref` trips
 /// Riverpod's self-dependency assert regardless of sync/async timing, so
 /// deferring the read does not avoid it.

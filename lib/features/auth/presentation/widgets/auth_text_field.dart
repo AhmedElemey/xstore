@@ -61,7 +61,7 @@ class AuthTextField extends StatelessWidget {
                 ),
               ),
             ),
-            ?labelTrailing,
+            if (labelTrailing != null) labelTrailing!,
           ],
         ),
         SizedBox(height: context.scaledPx(8)),

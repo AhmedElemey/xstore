@@ -398,58 +398,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, SocialAuthResult>> signInWithApple() async {
-    try {
-      final result = await _social.signInWithApple();
-      await _persistSocialCredentials(result);
-      final model = await _exchangeSocialToken(result);
-      if (model == null) return Right(result);
-      await _persistUser(model);
-      return Right(result.copyWith(isNewUser: model.isNewUser));
-    } on SocialAuthCancelledException catch (e) {
-      return Left(Failure.socialAuthCancelled(e.message));
-    } on SocialAuthException catch (e) {
-      return Left(Failure.socialAuth(e.message));
-    } on AuthException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, SocialAuthResult>> signInWithFacebook() async {
-    try {
-      final result = await _social.signInWithFacebook();
-      await _persistSocialCredentials(result);
-      final model = await _exchangeSocialToken(result);
-      if (model == null) return Right(result);
-      await _persistUser(model);
-      return Right(result.copyWith(isNewUser: model.isNewUser));
-    } on SocialAuthCancelledException catch (e) {
-      return Left(Failure.socialAuthCancelled(e.message));
-    } on SocialAuthException catch (e) {
-      return Left(Failure.socialAuth(e.message));
-    } on AuthException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on NetworkException catch (e) {
-      return Left(Failure.network(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(Failure.unauthorized(e.message));
-    } on ServerException catch (e) {
-      return Left(Failure.server(e.message));
-    } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, Unit>> signOutSocial() async {
     try {
       await _social.signOutSocial();
@@ -588,26 +536,5 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       if (kDebugMode) debugPrint('Failed to save social credentials: $e');
     }
-  }
-
-  /// Null while the backend social route is not deployed (404) — the social
-  /// sign-in then proceeds as a local-only session: the notifier persists the
-  /// Firebase-derived user via authProvider.setUser, and Firebase's own
-  /// isNewUser flag drives role selection.
-  Future<UserModel?> _exchangeSocialToken(SocialAuthResult result) async {
-    final firebaseIdToken = await _requireFirebaseIdToken();
-    return _remote.loginWithSocialToken(
-      provider: result.provider.name,
-      idToken: firebaseIdToken,
-    );
-  }
-
-  Future<String> _requireFirebaseIdToken() async {
-    if (MockConfig.useMock) return 'mock-firebase-id-token';
-    final token = await _firebaseAuth.currentUser?.getIdToken();
-    if (token == null || token.isEmpty) {
-      throw const AuthException('Firebase session missing after sign-in');
-    }
-    return token;
   }
 }

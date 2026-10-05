@@ -10,15 +10,7 @@ import 'package:xstore/features/auth/data/repositories/auth_repository_impl.dart
 import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 
 class _FakeRemote extends Fake implements AuthRemoteDataSource {
-  UserModel? socialResponse;
   UserModel? googleResponse;
-  @override
-  Future<UserModel?> loginWithSocialToken({
-    required String provider,
-    required String idToken,
-  }) async =>
-      socialResponse;
-
   @override
   Future<UserModel> loginWithGoogle({required String idToken}) async =>
       googleResponse!;
@@ -32,7 +24,7 @@ class _FakeSocial extends Fake implements SocialAuthDatasource {
   @override
   Future<void> signOutSocial() async {
     if (throwOnSignOut) {
-      throw Exception('Facebook SDK not initialized');
+      throw Exception('Google SDK not initialized');
     }
   }
 }

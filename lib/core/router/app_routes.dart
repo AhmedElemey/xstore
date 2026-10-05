@@ -4,7 +4,6 @@ abstract final class AppRoutes {
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const register = '/register';
-  static const socialRoleSelect = '/social-role-select';
   /// Dedicated sign-in for platform couriers (phone + password / OTP).
   static const courierLogin = '/courier-login';
   static const forgotPassword = '/forgot-password';

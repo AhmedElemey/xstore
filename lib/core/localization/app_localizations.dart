@@ -362,36 +362,6 @@ abstract class AppLocalizations {
   /// **'Welcome back'**
   String get welcomeBack;
 
-  /// No description provided for @chooseYourRole.
-  ///
-  /// In en, this message translates to:
-  /// **'How will you use xStore?'**
-  String get chooseYourRole;
-
-  /// No description provided for @socialRoleSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'One last step — choose your account type'**
-  String get socialRoleSubtitle;
-
-  /// No description provided for @socialWelcomeGreeting.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome, {name}! 👋'**
-  String socialWelcomeGreeting(String name);
-
-  /// No description provided for @socialRoleLastStep.
-  ///
-  /// In en, this message translates to:
-  /// **'One last step — how will you use xStore?'**
-  String get socialRoleLastStep;
-
-  /// No description provided for @socialWelcomeFallbackName.
-  ///
-  /// In en, this message translates to:
-  /// **'there'**
-  String get socialWelcomeFallbackName;
-
   /// No description provided for @googleAccountNotFound.
   ///
   /// In en, this message translates to:

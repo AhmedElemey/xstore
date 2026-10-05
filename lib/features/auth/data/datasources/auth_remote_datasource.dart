@@ -7,7 +7,6 @@ import '../../../../core/mock/mock_users.dart';
 import '../../../../core/network/api_auth_headers.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_error_mapper.dart';
-import '../../../../core/network/legacy_route_options.dart';
 import '../../domain/entities/consumer_register_params.dart';
 import '../../domain/entities/login_params.dart';
 import '../../domain/entities/user_entity.dart';
@@ -71,14 +70,6 @@ abstract interface class AuthRemoteDataSource {
   /// register flow and go straight to [loginWithGoogle] when the identity
   /// already has an account.
   Future<({bool exists, UserRole? role})> checkGoogleUser({
-    required String idToken,
-  });
-
-  /// Exchanges a Firebase ID token (verified server-side) for a backend session.
-  /// Returns null while the backend route is not deployed yet (404) — callers
-  /// fall back to a local-only session.
-  Future<UserModel?> loginWithSocialToken({
-    required String provider,
     required String idToken,
   });
 }
@@ -564,38 +555,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final nested = m['data'] ?? m['Data'];
     if (nested is Map) return Map<String, dynamic>.from(nested);
     return m;
-  }
-
-  @override
-  Future<UserModel?> loginWithSocialToken({
-    required String provider,
-    required String idToken,
-  }) async {
-    if (MockConfig.useMock) {
-      final model = mockConsumerUserModel(email: 'social-$provider@xstore.com');
-      return MockConfig.simulate(model);
-    }
-
-    try {
-      // TODO(backend): confirm payload keys (`provider`, `idToken`) and response shape.
-      final response = await _dio.post<Map<String, dynamic>>(
-        ApiEndpoints.socialLogin,
-        data: {
-          'provider': provider,
-          'idToken': idToken,
-        },
-        options: LegacyRouteOptions.allowNotFound(),
-      );
-      // Route not deployed yet — signal the caller to use a local session.
-      if (LegacyRouteOptions.isNotFound(response)) return null;
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException('Empty response');
-      }
-      return UserModel.fromJson(data);
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
   }
 
   /// Live send-email-otp / send-phone-otp / forgot-password no longer

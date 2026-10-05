@@ -44,11 +44,6 @@
   "continueWithFacebook": "Continue with Facebook",
   "socialLoginDivider": "or continue with",
   "welcomeBack": "Welcome back",
-  "chooseYourRole": "How will you use xStore?",
-  "socialRoleSubtitle": "One last step — choose your account type",
-  "socialWelcomeGreeting": "Welcome, {name}! 👋",
-  "socialRoleLastStep": "One last step — how will you use xStore?",
-  "socialWelcomeFallbackName": "there",
   "googleAccountNotFound": "No account yet for this Google account. Finish signing up, we've filled in your details.",
   "searchHint": "Search products...",
   "hotDeals": "🔥 Hot Deals",
@@ -871,13 +866,6 @@
   "@myListingsDeleteBody": {
     "placeholders": {
       "title": {
-        "type": "String"
-      }
-    }
-  },
-  "@socialWelcomeGreeting": {
-    "placeholders": {
-      "name": {
         "type": "String"
       }
     }
