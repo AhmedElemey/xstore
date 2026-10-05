@@ -61,7 +61,7 @@ class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
     final viewer = ref.watch(authProvider).valueOrNull;
     final viewerName = viewer?.displayName(context.isArabic);
     final barGradient = LinearGradient(
-      colors: [context.amberColor, const Color(0xFFFF8A5B)],
+      colors: [context.amberColor, AppColors.courierGradient.last],
     );
 
     return Padding(
