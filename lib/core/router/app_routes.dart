@@ -96,8 +96,8 @@ bool isVendorRestrictedRoute(String location) {
 /// landing here via deep link or stale navigation is sent back to Incoming
 /// Orders.
 ///
-/// `/order/:id` is deliberately NOT here — vendors open it too, via
-/// `/incoming-orders` → [OrdersScreen] → `OrderCard`.
+/// `/order/:id` is deliberately NOT here — a vendor can still land on it,
+/// e.g. from a notification's `actionRoute`.
 bool isConsumerRestrictedRoute(String location) {
   return location == AppRoutes.cart ||
       location == AppRoutes.checkout ||

@@ -130,7 +130,7 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                             ],
                           ),
                   ),
-                  const OrderFilterTabs(isVendor: false),
+                  const OrderFilterTabs(),
                 ],
               ),
             ),
@@ -178,7 +178,6 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                             child: OrderCard(
                               key: ValueKey(list[i].id),
                               order: list[i],
-                              isVendor: false,
                             ).fadeSlideIn(
                               delay: AppAnimations.staggerDelayCapped(i),
                             ),

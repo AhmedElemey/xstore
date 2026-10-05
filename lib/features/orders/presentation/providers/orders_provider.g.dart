@@ -6,9 +6,12 @@ part of 'orders_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$ordersNotifierHash() => r'89f8febbdcc674e9e919f0698a80d30c8b3d9a92';
+String _$ordersNotifierHash() => r'41eb16134b5eac21305605904d937ca358de7ce6';
 
-/// See also [OrdersNotifier].
+/// The consumer's My Orders list. Vendors never reach /orders (they use
+/// VendorOrdersScreen and `vendorOrdersProvider`).
+///
+/// Copied from [OrdersNotifier].
 @ProviderFor(OrdersNotifier)
 final ordersNotifierProvider =
     NotifierProvider<OrdersNotifier, OrdersState>.internal(

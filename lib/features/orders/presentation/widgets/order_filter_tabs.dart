@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,12 +8,9 @@ import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/widgets/pulsing_animation_builder.dart';
 
 class OrderFilterTabs extends ConsumerWidget {
-  const OrderFilterTabs({super.key, required this.isVendor});
-
-  final bool isVendor;
+  const OrderFilterTabs({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,7 +27,6 @@ class OrderFilterTabs extends ConsumerWidget {
       }),
     );
     final notifier = ref.read(ordersNotifierProvider.notifier);
-    final filters = notifier.filtersForRole(isVendor);
 
     return SizedBox(
       height: 44,
@@ -46,13 +40,8 @@ class OrderFilterTabs extends ConsumerWidget {
             count: counts.all,
             selected: selected == null,
             onTap: () => notifier.applyFilter(null),
-            showPulse: false,
           ),
-          ...filters.map((f) {
-            final pendingPulse =
-                isVendor &&
-                f == OrderStatus.pending &&
-                (counts.byStatus[f] ?? 0) > 0;
+          ...OrderStatus.values.map((f) {
             return Padding(
               padding: const EdgeInsets.only(left: AppSpacing.sm),
               child: _chip(
@@ -61,7 +50,6 @@ class OrderFilterTabs extends ConsumerWidget {
                 count: counts.byStatus[f] ?? 0,
                 selected: selected == f,
                 onTap: () => notifier.applyFilter(f),
-                showPulse: pendingPulse,
               ),
             );
           }),
@@ -76,9 +64,8 @@ class OrderFilterTabs extends ConsumerWidget {
     required int count,
     required bool selected,
     required VoidCallback onTap,
-    required bool showPulse,
   }) {
-    final child = Material(
+    return Material(
       color: selected ? AppColors.primary : context.surfaceColor,
       borderRadius: BorderRadius.circular(AppSpacing.x4l),
       child: InkWell(
@@ -89,82 +76,13 @@ class OrderFilterTabs extends ConsumerWidget {
             horizontal: AppSpacing.md,
             vertical: AppSpacing.sm,
           ),
-          child: RowTight(
-            showPulse: showPulse,
-            child: Text(
-              '$label ($count)',
-              style: AppTypography.labelLarge.copyWith(
-                color: selected ? AppColors.white : context.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+          child: Text(
+            '$label ($count)',
+            style: AppTypography.labelLarge.copyWith(
+              color: selected ? AppColors.white : context.textPrimary,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ),
-      ),
-    );
-    if (showPulse) {
-      return _Pulse(child: child);
-    }
-    return child;
-  }
-}
-
-class RowTight extends StatelessWidget {
-  const RowTight({super.key, required this.child, required this.showPulse});
-
-  final Widget child;
-  final bool showPulse;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (showPulse) ...[
-          const _PulsingDot(),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        child,
-      ],
-    );
-  }
-}
-
-class _Pulse extends StatelessWidget {
-  const _Pulse({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return PulsingAnimationBuilder(
-      duration: const Duration(milliseconds: 1200),
-      builder: (context, animation, child) => Transform.scale(
-        scale: 1 + 0.02 * math.sin(animation.value * math.pi),
-        child: child,
-      ),
-      child: child,
-    );
-  }
-}
-
-class _PulsingDot extends StatelessWidget {
-  const _PulsingDot();
-
-  @override
-  Widget build(BuildContext context) {
-    return PulsingAnimationBuilder(
-      duration: const Duration(milliseconds: 900),
-      builder: (context, animation, child) => FadeTransition(
-        opacity: Tween(begin: 0.45, end: 1.0).animate(animation),
-        child: child,
-      ),
-      child: Container(
-        width: AppSpacing.sm,
-        height: AppSpacing.sm,
-        decoration: BoxDecoration(
-          color: AppColors.accent,
-          shape: BoxShape.circle,
         ),
       ),
     );

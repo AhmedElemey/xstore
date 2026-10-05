@@ -8,9 +8,7 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
-import 'delivery_method_sheet.dart';
 import 'order_flow_sheets.dart';
-import 'order_price_breakdown.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
@@ -20,11 +18,9 @@ class OrderCard extends ConsumerWidget {
   const OrderCard({
     super.key,
     required this.order,
-    required this.isVendor,
   });
 
   final OrderEntity order;
-  final bool isVendor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -80,52 +76,6 @@ class OrderCard extends ConsumerWidget {
                       ),
                       Divider(height: AppSpacing.lg),
                       if (first != null) ...[
-                        if (isVendor) ...[
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: order.consumerAvatar.isNotEmpty
-                                    ? AppNetworkImage.network(
-                                        order.consumerAvatar,
-                                        cacheSize: 120,
-                                      )
-                                    : null,
-                                child: order.consumerAvatar.isEmpty
-                                    ? Text(
-                                        order.consumerName.isNotEmpty
-                                            ? order.consumerName[0]
-                                                .toUpperCase()
-                                            : '?',
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      order.consumerName,
-                                      style: AppTypography.bodyLarge.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      '📞 ${order.consumerPhone}',
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                    Text(
-                                      '📍 ${order.deliveryAddress.city}, ${order.deliveryAddress.wilaya}',
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Divider(height: AppSpacing.lg),
-                        ],
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -183,18 +133,11 @@ class OrderCard extends ConsumerWidget {
                         ),
                       ],
                       Divider(height: AppSpacing.lg),
-                      if (!isVendor)
-                        Text(
-                          '📦 ${order.vendorStoreName} · ${context.formatMediumDate(order.createdAt)}',
-                          style: AppTypography.bodySmall,
-                        )
-                      else
-                        Text(
-                          '💳 ${paymentMethodLabel(context, order.paymentMethod)} · ${context.formatMediumDate(order.createdAt)}',
-                          style: AppTypography.bodySmall,
-                        ),
-                      if (!isVendor &&
-                          (order.status == OrderStatus.shipped ||
+                      Text(
+                        '📦 ${order.vendorStoreName} · ${context.formatMediumDate(order.createdAt)}',
+                        style: AppTypography.bodySmall,
+                      ),
+                      if ((order.status == OrderStatus.shipped ||
                               order.status == OrderStatus.confirmed) &&
                           order.estimatedDelivery != null) ...[
                         const SizedBox(height: AppSpacing.xs),
@@ -231,70 +174,6 @@ class OrderCard extends ConsumerWidget {
     WidgetRef ref,
     OrdersNotifier notifier,
   ) {
-    if (isVendor) {
-      switch (order.status) {
-        case OrderStatus.pending:
-          return Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => _rejectFlow(context, ref, notifier),
-                  child: Text(context.l10n.ordersRejectOrder),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () async {
-                    final method = await showModalBottomSheet<DeliveryMethod>(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (_) => const DeliveryMethodSheet(),
-                    );
-                    if (method == null) return;
-                    await notifier.confirmOrderVendor(order.id, method);
-                  },
-                  child: Text(context.l10n.ordersConfirmOrderCta),
-                ),
-              ),
-            ],
-          );
-        case OrderStatus.confirmed:
-          return SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => notifier.markProcessing(order.id),
-              child: Text(context.l10n.ordersMarkProcessing),
-            ),
-          );
-        case OrderStatus.processing:
-          return SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _shipSheet(context, ref, notifier),
-              child: Text(context.l10n.ordersMarkShipped),
-            ),
-          );
-        case OrderStatus.shipped:
-          return SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => notifier.markDelivered(order.id),
-              child: Text(context.l10n.ordersMarkDelivered),
-            ),
-          );
-        case OrderStatus.delivered:
-        case OrderStatus.cancelled:
-          return SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () => context.push(AppRoutes.orderPath(order.id)),
-              child: Text(context.l10n.ordersViewDetails),
-            ),
-          );
-      }
-    }
-
     switch (order.status) {
       case OrderStatus.pending:
       case OrderStatus.confirmed:
@@ -363,30 +242,6 @@ class OrderCard extends ConsumerWidget {
     final reason = await showCancelReasonDialog(context);
     if (reason == null || !context.mounted) return;
     await notifier.cancelOrder(order.id, reason);
-    if (!context.mounted) return;
-    _errSnack(context, ref);
-  }
-
-  Future<void> _rejectFlow(
-    BuildContext context,
-    WidgetRef ref,
-    OrdersNotifier notifier,
-  ) async {
-    final reason = await showRejectReasonDialog(context);
-    if (reason == null || !context.mounted) return;
-    await notifier.rejectOrder(order.id, reason);
-    if (!context.mounted) return;
-    _errSnack(context, ref);
-  }
-
-  Future<void> _shipSheet(
-    BuildContext context,
-    WidgetRef ref,
-    OrdersNotifier notifier,
-  ) async {
-    final info = await showShipOrderSheet(context);
-    if (info == null || !context.mounted) return;
-    await notifier.markShipped(order.id, info);
     if (!context.mounted) return;
     _errSnack(context, ref);
   }

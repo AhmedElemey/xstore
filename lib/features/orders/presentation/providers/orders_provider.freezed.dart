@@ -26,7 +26,6 @@ mixin _$OrdersState {
   bool get hasMore => throw _privateConstructorUsedError;
   int get page => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
-  OrderStatsEntity? get stats => throw _privateConstructorUsedError;
   bool get isSearching => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -51,10 +50,7 @@ abstract class $OrdersStateCopyWith<$Res> {
       bool hasMore,
       int page,
       String? error,
-      OrderStatsEntity? stats,
       bool isSearching});
-
-  $OrderStatsEntityCopyWith<$Res>? get stats;
 }
 
 /// @nodoc
@@ -80,7 +76,6 @@ class _$OrdersStateCopyWithImpl<$Res, $Val extends OrdersState>
     Object? hasMore = null,
     Object? page = null,
     Object? error = freezed,
-    Object? stats = freezed,
     Object? isSearching = null,
   }) {
     return _then(_value.copyWith(
@@ -124,27 +119,11 @@ class _$OrdersStateCopyWithImpl<$Res, $Val extends OrdersState>
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as String?,
-      stats: freezed == stats
-          ? _value.stats
-          : stats // ignore: cast_nullable_to_non_nullable
-              as OrderStatsEntity?,
       isSearching: null == isSearching
           ? _value.isSearching
           : isSearching // ignore: cast_nullable_to_non_nullable
               as bool,
     ) as $Val);
-  }
-
-  @override
-  @pragma('vm:prefer-inline')
-  $OrderStatsEntityCopyWith<$Res>? get stats {
-    if (_value.stats == null) {
-      return null;
-    }
-
-    return $OrderStatsEntityCopyWith<$Res>(_value.stats!, (value) {
-      return _then(_value.copyWith(stats: value) as $Val);
-    });
   }
 }
 
@@ -167,11 +146,7 @@ abstract class _$$OrdersStateImplCopyWith<$Res>
       bool hasMore,
       int page,
       String? error,
-      OrderStatsEntity? stats,
       bool isSearching});
-
-  @override
-  $OrderStatsEntityCopyWith<$Res>? get stats;
 }
 
 /// @nodoc
@@ -195,7 +170,6 @@ class __$$OrdersStateImplCopyWithImpl<$Res>
     Object? hasMore = null,
     Object? page = null,
     Object? error = freezed,
-    Object? stats = freezed,
     Object? isSearching = null,
   }) {
     return _then(_$OrdersStateImpl(
@@ -239,10 +213,6 @@ class __$$OrdersStateImplCopyWithImpl<$Res>
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as String?,
-      stats: freezed == stats
-          ? _value.stats
-          : stats // ignore: cast_nullable_to_non_nullable
-              as OrderStatsEntity?,
       isSearching: null == isSearching
           ? _value.isSearching
           : isSearching // ignore: cast_nullable_to_non_nullable
@@ -265,7 +235,6 @@ class _$OrdersStateImpl implements _OrdersState {
       this.hasMore = true,
       this.page = 1,
       this.error,
-      this.stats,
       this.isSearching = false})
       : _orders = orders,
         _filteredOrders = filteredOrders;
@@ -311,14 +280,12 @@ class _$OrdersStateImpl implements _OrdersState {
   @override
   final String? error;
   @override
-  final OrderStatsEntity? stats;
-  @override
   @JsonKey()
   final bool isSearching;
 
   @override
   String toString() {
-    return 'OrdersState(orders: $orders, filteredOrders: $filteredOrders, selectedFilter: $selectedFilter, sortOption: $sortOption, searchQuery: $searchQuery, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, error: $error, stats: $stats, isSearching: $isSearching)';
+    return 'OrdersState(orders: $orders, filteredOrders: $filteredOrders, selectedFilter: $selectedFilter, sortOption: $sortOption, searchQuery: $searchQuery, isLoading: $isLoading, isLoadingMore: $isLoadingMore, hasMore: $hasMore, page: $page, error: $error, isSearching: $isSearching)';
   }
 
   @override
@@ -342,7 +309,6 @@ class _$OrdersStateImpl implements _OrdersState {
             (identical(other.hasMore, hasMore) || other.hasMore == hasMore) &&
             (identical(other.page, page) || other.page == page) &&
             (identical(other.error, error) || other.error == error) &&
-            (identical(other.stats, stats) || other.stats == stats) &&
             (identical(other.isSearching, isSearching) ||
                 other.isSearching == isSearching));
   }
@@ -360,7 +326,6 @@ class _$OrdersStateImpl implements _OrdersState {
       hasMore,
       page,
       error,
-      stats,
       isSearching);
 
   @JsonKey(ignore: true)
@@ -382,7 +347,6 @@ abstract class _OrdersState implements OrdersState {
       final bool hasMore,
       final int page,
       final String? error,
-      final OrderStatsEntity? stats,
       final bool isSearching}) = _$OrdersStateImpl;
 
   @override
@@ -405,8 +369,6 @@ abstract class _OrdersState implements OrdersState {
   int get page;
   @override
   String? get error;
-  @override
-  OrderStatsEntity? get stats;
   @override
   bool get isSearching;
   @override
