@@ -13,10 +13,11 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
   await showModalBottomSheet<void>(
     context: context,
     backgroundColor: context.surfaceColor,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.lg),
+    shape: RoundedRectangleBorder(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(28),
       ),
+      side: BorderSide(color: context.borderColor),
     ),
     builder: (ctx) => Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -26,8 +27,9 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
         children: [
           Text(
             context.l10n.cartClearTitle,
-            style: AppTypography.titleMedium.copyWith(
-              fontWeight: FontWeight.w700,
+            style: AppTypography.headlineSmall.copyWith(
+              fontSize: 18,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

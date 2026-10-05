@@ -26,8 +26,9 @@ class CartRecommendedStrip extends ConsumerWidget {
       children: [
         Text(
           context.l10n.cartYouMayAlsoLike,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
+          style: AppTypography.headlineSmall.copyWith(
+            fontSize: 18,
+            color: context.textPrimary,
           ),
         ),
         const Gap(AppSpacing.md),

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
@@ -24,39 +28,97 @@ class CartScreen extends ConsumerWidget {
 
     if (role == UserRole.vendor) {
       return Scaffold(
-        backgroundColor: context.backgroundColor,
-        appBar: AppBar(
-          title: Text(context.l10n.cartTitle),
-          backgroundColor: context.surfaceColor,
-          surfaceTintColor: AppColors.transparent,
-          elevation: 0,
+        body: OrbitBackground(
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                _Header(title: context.l10n.cartTitle),
+                const Expanded(child: CartVendorBuyersOnly()),
+              ],
+            ),
+          ),
         ),
-        body: const CartVendorBuyersOnly(),
       );
     }
 
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.cartAppBarTitle(itemCount)),
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).maybePop(),
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _Header(
+                title: context.l10n.cartAppBarTitle(itemCount),
+                action: hasItems
+                    ? Material(
+                        color: context.glassColor,
+                        shape: CircleBorder(
+                          side: BorderSide(color: context.borderColor),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: IconButton(
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).deleteButtonTooltip,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 44,
+                            height: 44,
+                          ),
+                          icon: Icon(
+                            LucideIcons.trash2,
+                            size: 20,
+                            color: context.textPrimary,
+                          ),
+                          onPressed: () =>
+                              showCartClearConfirmSheet(context, ref),
+                        ),
+                      )
+                    : null,
+              ),
+              const Expanded(child: CartConsumerBody()),
+            ],
+          ),
         ),
-        actions: [
-          if (hasItems)
-            IconButton(
-              tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
-              icon: const Icon(LucideIcons.trash2),
-              onPressed: () => showCartClearConfirmSheet(context, ref),
+      ),
+    );
+  }
+}
+
+/// Orbit screen header: frosted back button, Unbounded title, optional action.
+class _Header extends StatelessWidget {
+  const _Header({required this.title, this.action});
+
+  final String title;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.spacing18,
+        AppSpacing.xl,
+        AppSpacing.lg,
+      ),
+      child: Row(
+        children: [
+          const AuthBackButton(),
+          const Gap(AppSpacing.md),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.headlineSmall.copyWith(
+                fontSize: 20,
+                color: context.textPrimary,
+              ),
             ),
+          ),
+          if (action != null) action!,
         ],
       ),
-      body: const CartConsumerBody(),
     );
   }
 }

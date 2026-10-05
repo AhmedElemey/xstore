@@ -1,102 +1,71 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Orbit stepper: three step labels joined by lines. Reached steps (and their
+/// lines) take the brand accent; the current step sits in a glowing pill.
 class CheckoutProgress extends StatelessWidget {
-  const CheckoutProgress({
-    super.key,
-    required this.step,
-  });
+  const CheckoutProgress({super.key, required this.step});
 
   final int step;
 
   @override
   Widget build(BuildContext context) {
+    final accent = context.brandGradient.first;
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
+        horizontal: AppSpacing.xl,
         vertical: AppSpacing.md,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _stepColumn(context, 1, context.l10n.checkoutStepAddress),
-          Expanded(child: _line(context, step > 1)),
-          Icon(context.arrowForwardIcon, size: 16, color: context.textSecondary),
-          const SizedBox(width: AppSpacing.xs),
-          _stepColumn(context, 2, context.l10n.checkoutStepPayment),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(child: _line(context, step > 2)),
-          Icon(context.arrowForwardIcon, size: 16, color: context.textSecondary),
-          const SizedBox(width: AppSpacing.xs),
-          _stepColumn(context, 3, context.l10n.checkoutStepConfirm),
+          _label(context, 1, context.l10n.checkoutStepAddress, accent),
+          Expanded(child: _line(context, step > 1, accent)),
+          _label(context, 2, context.l10n.checkoutStepPayment, accent),
+          Expanded(child: _line(context, step > 2, accent)),
+          _label(context, 3, context.l10n.checkoutStepConfirm, accent),
         ],
       ),
     );
   }
 
-  Widget _line(BuildContext context, bool done) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg),
-      child: Container(
-        height: 2,
-        color: done
-            ? AppColors.success
-            : context.textDisabled.withValues(alpha: 0.35),
-      ),
+  Widget _line(BuildContext context, bool done, Color accent) {
+    return Container(
+      height: 2,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      color: done ? accent : context.borderColor,
     );
   }
 
-  Widget _stepColumn(BuildContext context, int n, String label) {
-    final done = step > n;
-    final active = step == n;
-    return Column(
-      children: [
-        Container(
-          width: AppSpacing.x2l + AppSpacing.sm,
-          height: AppSpacing.x2l + AppSpacing.sm,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: done
-                ? AppColors.success
-                : (active ? AppColors.primary : context.backgroundColor),
-            border: Border.all(
-              color: active || done
-                  ? AppColors.transparent
-                  : context.textDisabled,
-              width: 2,
-            ),
-          ),
-          child: Center(
-            child: done
-                ? const Icon(Icons.check, color: AppColors.white, size: 18)
-                : Text(
-                    '$n',
-                    style: AppTypography.labelLarge.copyWith(
-                      color: active ? AppColors.white : context.textSecondary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-          ),
+  Widget _label(BuildContext context, int n, String text, Color accent) {
+    final reached = step >= n;
+    final current = step == n;
+    return Container(
+      padding: current
+          ? const EdgeInsets.symmetric(horizontal: 10, vertical: AppSpacing.xs)
+          : null,
+      decoration: current
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: accent),
+              boxShadow: [
+                BoxShadow(color: accent.withValues(alpha: 0.2), blurRadius: 12),
+              ],
+            )
+          : null,
+      child: Text(
+        text,
+        maxLines: 1,
+        style: AppTypography.labelSmall.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: current
+              ? context.textPrimary
+              : (reached ? context.linkColor : context.textSecondary),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        SizedBox(
-          width: AppSpacing.x4l,
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.labelSmall.copyWith(
-              color: active ? AppColors.primary : context.textSecondary,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

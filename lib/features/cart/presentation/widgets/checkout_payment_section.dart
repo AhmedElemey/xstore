@@ -40,27 +40,63 @@ class _CheckoutPaymentSectionState
     final notifier = ref.read(checkoutProvider.notifier);
     final l10n = context.l10n;
 
+    final amber = context.amberColor;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           l10n.checkoutPaymentTitle,
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.w700,
+          style: AppTypography.headlineSmall.copyWith(
+            fontSize: 18,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
+        // Cash on delivery is the hero payment: an amber card.
         Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: BorderRadius.circular(AppSpacing.md),
-            border: Border.all(color: AppColors.primary, width: 2),
+            gradient: LinearGradient(
+              colors: [
+                amber.withValues(alpha: 0.16),
+                amber.withValues(alpha: 0.06),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: amber, width: 1.5),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(LucideIcons.banknote, color: AppColors.primary),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    center: const Alignment(-0.3, -0.4),
+                    colors: [
+                      Color.lerp(amber, AppColors.white, 0.7)!,
+                      amber,
+                      Color.lerp(amber, AppColors.black, 0.55)!,
+                    ],
+                    stops: const [0, 0.45, 1],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: amber.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
+                child: const SizedBox.square(
+                  dimension: 44,
+                  child: Icon(
+                    LucideIcons.banknote,
+                    size: 22,
+                    color: AppColors.darkBackground,
+                  ),
+                ),
+              ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -69,13 +105,16 @@ class _CheckoutPaymentSectionState
                     Text(
                       l10n.checkoutPayCodTitle,
                       style: AppTypography.titleMedium.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       l10n.checkoutPayCodSubtitle,
-                      style: AppTypography.bodySmall.copyWith(
+                      style: AppTypography.bodyMedium.copyWith(
                         color: context.textSecondary,
+                        height: 1.45,
                       ),
                     ),
                   ],
@@ -84,7 +123,7 @@ class _CheckoutPaymentSectionState
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.xl),
         TextField(
           controller: _note,
           maxLines: 3,
@@ -92,7 +131,6 @@ class _CheckoutPaymentSectionState
           decoration: InputDecoration(
             labelText: l10n.checkoutDeliveryNoteLabel,
             hintText: l10n.checkoutDeliveryNoteLabel,
-            border: const OutlineInputBorder(),
           ),
           onChanged: notifier.updateDeliveryNote,
         ),

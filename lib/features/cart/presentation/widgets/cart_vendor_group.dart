@@ -15,10 +15,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class CartVendorGroupBlock extends ConsumerWidget {
-  const CartVendorGroupBlock({
-    super.key,
-    required this.group,
-  });
+  const CartVendorGroupBlock({super.key, required this.group});
 
   final CartVendorGroup group;
 
@@ -28,91 +25,139 @@ class CartVendorGroupBlock extends ConsumerWidget {
     final selectedIds = ref.watch(
       cartProvider.select((c) => c.selectedItemIds),
     );
+    final store = group.vendorStoreName.trim().isNotEmpty
+        ? group.vendorStoreName.trim()
+        : group.vendorName.trim();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Plain Column, not a nested shrinkWrap ListView: this feature's
-        // parent scrollable already handles the whole cart's scrolling via
-        // slivers, and a vendor's item count is small/bounded (never an
-        // independently long list), so a second Scrollable here would be
-        // pure overhead for no scroll behavior anyone needs.
-        Column(
-          children: group.items.map((item) {
-            final selected = selectedIds.contains(item.id);
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: RepaintBoundary(
-                child: Dismissible(
-                  key: ValueKey<String>('dismiss_${item.id}'),
-                  direction: item.isAvailable
-                      ? DismissDirection.endToStart
-                      : DismissDirection.none,
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: AppColors.error,
-                      borderRadius: BorderRadius.circular(AppSpacing.lg),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md + 2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (store.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.labelColor,
+                      ),
+                      child: const SizedBox.square(dimension: 8),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.delete_outline, color: AppColors.white),
-                        Text(
-                          context.l10n.cartSwipeRemove,
-                          style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.white,
-                          ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        store,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.labelLarge.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: context.linkColor,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  confirmDismiss: (_) async {
-                    ref.read(cartProvider.notifier).removeItem(item.id);
-                    if (context.mounted) {
-                      _showUndoSnack(context, ref, item.listingName);
-                    }
-                    return true;
-                  },
-                  child: CartItemCard(
-                    key: ValueKey<String>('cart-item-${item.id}'),
-                    item: item,
-                    selected: selected,
-                    onToggleSelect: () => notifier.toggleItemSelection(item.id),
-                    onDecrement: () {
-                      if (item.quantity <= 1) {
-                        notifier.removeItem(item.id);
-                        if (context.mounted) {
-                          _showUndoSnack(context, ref, item.listingName);
-                        }
-                      } else {
-                        notifier.updateQuantity(item.id, item.quantity - 1);
-                      }
-                    },
-                    onIncrement: () {
-                      if (item.quantity < item.maxQuantity) {
-                        notifier.updateQuantity(item.id, item.quantity + 1);
-                      }
-                    },
-                    onEditQuantity: () => _promptQty(context, ref, item),
-                    onRemove: () {
-                      notifier.removeItem(item.id);
-                      if (context.mounted) {
-                        _showUndoSnack(context, ref, item.listingName);
-                      }
-                    },
-                    onSaveForLater: () => notifier.saveForLater(item.id),
-                    onOpenProduct: () => context.push(
-                      '${AppRoutes.product}/${item.listingId}',
-                    ),
+                  ],
+                ),
+              ),
+            // Plain Column, not a nested shrinkWrap ListView: the parent
+            // scrollable already handles scrolling via slivers, and a
+            // vendor's item count is small/bounded.
+            for (var i = 0; i < group.items.length; i++)
+              Padding(
+                padding: EdgeInsets.only(top: i == 0 ? 0 : AppSpacing.lg),
+                child: RepaintBoundary(
+                  child: _row(
+                    context,
+                    ref,
+                    notifier,
+                    group.items[i],
+                    selectedIds,
                   ),
                 ),
               ),
-            );
-          }).toList(),
+          ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _row(
+    BuildContext context,
+    WidgetRef ref,
+    Cart notifier,
+    CartItemEntity item,
+    Set<String> selectedIds,
+  ) {
+    return Dismissible(
+      key: ValueKey<String>('dismiss_${item.id}'),
+      direction: item.isAvailable
+          ? DismissDirection.endToStart
+          : DismissDirection.none,
+      background: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.error,
+          borderRadius: BorderRadius.circular(AppSpacing.lg),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.delete_outline, color: AppColors.white),
+            Text(
+              context.l10n.cartSwipeRemove,
+              style: AppTypography.labelSmall.copyWith(color: AppColors.white),
+            ),
+          ],
+        ),
+      ),
+      confirmDismiss: (_) async {
+        ref.read(cartProvider.notifier).removeItem(item.id);
+        if (context.mounted) {
+          _showUndoSnack(context, ref, item.listingName);
+        }
+        return true;
+      },
+      child: CartItemCard(
+        key: ValueKey<String>('cart-item-${item.id}'),
+        item: item,
+        selected: selectedIds.contains(item.id),
+        onToggleSelect: () => notifier.toggleItemSelection(item.id),
+        onDecrement: () {
+          if (item.quantity <= 1) {
+            notifier.removeItem(item.id);
+            if (context.mounted) {
+              _showUndoSnack(context, ref, item.listingName);
+            }
+          } else {
+            notifier.updateQuantity(item.id, item.quantity - 1);
+          }
+        },
+        onIncrement: () {
+          if (item.quantity < item.maxQuantity) {
+            notifier.updateQuantity(item.id, item.quantity + 1);
+          }
+        },
+        onEditQuantity: () => _promptQty(context, ref, item),
+        onRemove: () {
+          notifier.removeItem(item.id);
+          if (context.mounted) {
+            _showUndoSnack(context, ref, item.listingName);
+          }
+        },
+        onSaveForLater: () => notifier.saveForLater(item.id),
+        onOpenProduct: () =>
+            context.push('${AppRoutes.product}/${item.listingId}'),
+      ),
     );
   }
 

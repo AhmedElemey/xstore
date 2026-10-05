@@ -30,7 +30,9 @@ class QuantityControl extends StatelessWidget {
     final atMin = quantity <= 1;
     final atMax = quantity >= maxQuantity;
     final lowStock = maxQuantity <= 3 && enabled;
-    final border = enabled ? AppColors.primary : context.textDisabled;
+    final border = enabled
+        ? context.textSecondary.withValues(alpha: 0.4)
+        : context.borderColor;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +40,6 @@ class QuantityControl extends StatelessWidget {
       children: [
         DecoratedBox(
           decoration: BoxDecoration(
-            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(AppSpacing.x3l),
             border: Border.all(color: border),
           ),
@@ -72,7 +73,8 @@ class QuantityControl extends StatelessWidget {
                     ),
                     child: Text(
                       '$quantity',
-                      style: AppTypography.labelLarge.copyWith(
+                      style: AppTypography.mono.copyWith(
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: enabled
                             ? context.textPrimary
@@ -100,7 +102,7 @@ class QuantityControl extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
-            style: AppTypography.labelSmall.copyWith(color: AppColors.warning),
+            style: AppTypography.labelSmall.copyWith(color: context.amberColor),
           ),
         ],
       ],

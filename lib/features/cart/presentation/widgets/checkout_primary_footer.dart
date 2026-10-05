@@ -19,33 +19,32 @@ class CheckoutPrimaryFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.md + MediaQuery.paddingOf(context).bottom,
-      ),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.08),
-            blurRadius: AppSpacing.md,
-            offset: const Offset(0, -AppSpacing.xs),
-          ),
-        ],
+        color: context.surfaceColor.withValues(alpha: 0.96),
+        border: Border(top: BorderSide(color: context.borderColor)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: XstoreButton(
-        label: label,
-        isLoading: busy,
-        onPressed: busy || onPressed == null
-            ? null
-            : () {
-                HapticFeedback.lightImpact();
-                onPressed!();
-              },
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.lg + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: XstoreButton(
+            label: label,
+            isLoading: busy,
+            onPressed: busy || onPressed == null
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    onPressed!();
+                  },
+          ),
+        ),
       ),
     );
   }

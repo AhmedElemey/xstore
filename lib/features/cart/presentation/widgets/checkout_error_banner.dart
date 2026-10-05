@@ -6,16 +6,16 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 String checkoutErrorMessage(BuildContext context, String? k) => switch (k) {
-      'noAddress' => context.l10n.checkoutErrorNoAddress,
-      'noPayment' => context.l10n.checkoutErrorNoPayment,
-      'noItems' => context.l10n.checkoutErrorNoItems,
-      'failed' => context.l10n.checkoutErrorGeneric,
-      'offline' => context.l10n.noInternet,
-      'noConsumer' => context.l10n.signInPrompt,
-      phoneNotVerifiedErrorCode => context.l10n.checkoutErrorPhoneNotVerified,
-      outOfStockErrorCode => context.l10n.checkoutErrorOutOfStock,
-      _ => context.l10n.checkoutErrorGeneric,
-    };
+  'noAddress' => context.l10n.checkoutErrorNoAddress,
+  'noPayment' => context.l10n.checkoutErrorNoPayment,
+  'noItems' => context.l10n.checkoutErrorNoItems,
+  'failed' => context.l10n.checkoutErrorGeneric,
+  'offline' => context.l10n.noInternet,
+  'noConsumer' => context.l10n.signInPrompt,
+  phoneNotVerifiedErrorCode => context.l10n.checkoutErrorPhoneNotVerified,
+  outOfStockErrorCode => context.l10n.checkoutErrorOutOfStock,
+  _ => context.l10n.checkoutErrorGeneric,
+};
 
 class CheckoutErrorBanner extends StatelessWidget {
   const CheckoutErrorBanner({super.key, required this.messageKey});
@@ -25,8 +25,18 @@ class CheckoutErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (messageKey == null) return const SizedBox.shrink();
-    return Material(
-      color: AppColors.error.withValues(alpha: 0.1),
+    return Container(
+      margin: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.sm,
+        AppSpacing.xl,
+        0,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.error.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.lg),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
+      ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         title: Text(
