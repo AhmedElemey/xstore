@@ -38,7 +38,6 @@ import '../../domain/usecases/google_login_usecase.dart';
 import '../../domain/usecases/check_google_user_usecase.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../listing/presentation/providers/listing_dependencies.dart';
-import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../delivery/data/delivery_backend_session.dart';
 import '../../../notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'auth_states.dart';
@@ -218,7 +217,6 @@ class Auth extends _$Auth {
     await ref.read(logoutUseCaseProvider).call();
     resetProfileData(ref);
     resetListingLocalCache(ref);
-    resetStoreHoursData(ref);
     await clearDeliveryBackendSession();
     analytics.bindSession(null);
     ref.invalidateSelf();

@@ -44,8 +44,6 @@ import '../../features/profile/presentation/screens/profile_verification_screen.
 import '../../features/profile/presentation/providers/profile_verification_provider.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
-// TODO(phase-2): Re-enable once store/active hours ships.
-// import '../../features/store/presentation/screens/store_hours_screen.dart';
 import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
@@ -461,7 +459,7 @@ GoRouter goRouter(GoRouterRef ref) {
           const NotificationsScreen(),
         ),
       ),
-      // TODO(phase-2): Notification settings deferred (local-only prefs).
+      // No notification settings screen; keep old deep links off a dead end.
       GoRoute(
         path: AppRoutes.notificationSettings,
         redirect: (_, __) => AppRoutes.profile,
@@ -485,8 +483,7 @@ GoRouter goRouter(GoRouterRef ref) {
           const AddressesScreen(),
         ),
       ),
-      // TODO(phase-2): Store/active hours screen deferred to next phase.
-      // Route redirects to profile in the meantime instead of dead-ending.
+      // No store-hours screen; keep old deep links off a dead end.
       GoRoute(
         path: AppRoutes.storeHours,
         redirect: (_, __) => AppRoutes.profile,
