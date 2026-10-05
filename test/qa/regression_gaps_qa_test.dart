@@ -170,6 +170,20 @@ void main() {
       expect(cart.shippingTotal, 8);
       expect(cart.total, 258);
     });
+
+    test('first load selects every available line, whatever its id', () async {
+      // 'cart_item_001' was once a hard-coded "preferred" mock id that
+      // stole the default selection from the other lines.
+      repo.next = [
+        _item('cart_item_001', listingId: '1', price: 100),
+        _item('real_line', listingId: '2', price: 50),
+        _item('sold_out', listingId: '3').copyWith(isAvailable: false),
+      ];
+      await container.read(cartProvider.notifier).fetchCart();
+      final cart = container.read(cartProvider);
+      expect(cart.selectedItemIds, {'cart_item_001', 'real_line'});
+      expect(cart.subtotal, 150);
+    });
   });
 
   group('M03 — logout clears the cart on screen', () {

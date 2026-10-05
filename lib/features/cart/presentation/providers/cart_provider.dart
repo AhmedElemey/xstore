@@ -92,16 +92,11 @@ class Cart extends _$Cart {
   String? get _consumerId => ref.read(authProvider).valueOrNull?.id;
 
   void _setFromEntity(CartEntity e, {bool resetSelection = false}) {
-    final preferred = {'cart_item_001', 'cart_item_002'};
-    final ids = e.items.map((x) => x.id).toSet();
     var sel = state.selectedItemIds;
     if (resetSelection || sel.isEmpty) {
-      final pick = preferred.intersection(ids);
-      sel = pick.isEmpty
-          ? e.items.where((x) => x.isAvailable).map((x) => x.id).toSet()
-          : pick;
+      sel = e.items.where((x) => x.isAvailable).map((x) => x.id).toSet();
     } else {
-      sel = sel.intersection(ids);
+      sel = sel.intersection(e.items.map((x) => x.id).toSet());
     }
     state = state.copyWith(
       items: e.items,
