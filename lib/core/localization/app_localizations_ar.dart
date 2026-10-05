@@ -1588,7 +1588,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ratingsWord => 'تقييمات';
 
   @override
-  String get reviewsDotSeparator => '[AR]  · ';
+  String get reviewsDotSeparator => '  · ';
 
   @override
   String get reviewsSuffix => ' تقييمات';
@@ -1825,7 +1825,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resubmitSuccess => 'تمت إعادة إرسال الإعلان للمراجعة';
 
   @override
-  String get retry => '[AR] Retry';
+  String get retry => 'حاول تاني';
 
   @override
   String get errorGeneric => 'حصل خطأ';
@@ -1949,7 +1949,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorTypeReasonHint => 'اكتب السبب';
 
   @override
-  String get vendorTrackingHint => '[AR] XS-TRACK-2024-001';
+  String get vendorTrackingHint => 'XS-TRACK-2024-001';
 
   @override
   String get vendorOrderRejectedSnack => 'تم رفض الطلب. تم إبلاغ المشتري.';
@@ -2161,10 +2161,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signInToContinueShopping => 'سجل الدخول عشان تكمل التسوق';
 
   @override
-  String get enterEmailHint => '[AR] you@email.com';
+  String get enterEmailHint => 'you@email.com';
 
   @override
-  String get passwordMask => '[AR] ********';
+  String get passwordMask => '********';
 
   @override
   String get minSixChars => '6 أحرف على الأقل';
@@ -2285,16 +2285,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get buyerSubtitle => 'اكتشف واشتري منتجات من بائعين موثوقين';
 
   @override
-  String get buyerFeature1 => '[AR] Browse thousands of products';
+  String get buyerFeature1 => 'تصفح آلاف المنتجات';
 
   @override
-  String get buyerFeature2 => '[AR] Secure checkout & payments';
+  String get buyerFeature2 => 'طلب ودفع آمن';
 
   @override
-  String get buyerFeature3 => '[AR] Track your orders in real time';
+  String get buyerFeature3 => 'تابع طلباتك لحظة بلحظة';
 
   @override
-  String get buyerFeature4 => '[AR] Save favorites to wishlist';
+  String get buyerFeature4 => 'احفظ اللي عجبك في المفضلة';
 
   @override
   String get iAmSeller => 'أنا بائع';
@@ -2303,16 +2303,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sellerSubtitle => 'اعرض منتجاتك وابدأ تربح اليوم';
 
   @override
-  String get sellerFeature1 => '[AR] List unlimited products';
+  String get sellerFeature1 => 'اعرض منتجات بلا حدود';
 
   @override
-  String get sellerFeature2 => '[AR] Manage orders & inventory';
+  String get sellerFeature2 => 'إدارة الطلبات والمخزون';
 
   @override
-  String get sellerFeature3 => '[AR] Analytics & sales insights';
+  String get sellerFeature3 => 'إحصائيات وتحليلات المبيعات';
 
   @override
-  String get sellerFeature4 => '[AR] Direct chat with buyers';
+  String get sellerFeature4 => 'تواصل مباشر مع المشترين';
 
   @override
   String get dateOfBirthOptional => 'تاريخ الميلاد (اختياري)';
@@ -2390,7 +2390,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get storeNameRequired => 'اسم المتجر *';
 
   @override
-  String get storeNameHint => '[AR] e.g. Ahmed\'s Electronics';
+  String get storeNameHint => 'مثلاً: إلكترونيات أحمد';
 
   @override
   String storeUrlPreview(String slug) {
