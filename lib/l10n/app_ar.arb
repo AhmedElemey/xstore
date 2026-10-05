@@ -616,7 +616,6 @@
   "cartRemovedSnack": "تم حذف {name} من السلة",
   "cartShippingPaid": "🚚 +{amount} ج.م شحن",
   "cartSubtotalLine": "الإجمالي الفرعي ({n} عناصر)",
-  "cartProceedCheckoutTotal": "إتمام الشراء ({total})",
   "checkoutItemsFromSellers": "{items} عناصر من {sellers} بائعين",
   "checkoutPlaceOrderTotal": "🛒 تأكيد الطلب · {total}",
   "orderPlacedNumber": "طلب #{id}",
@@ -776,13 +775,6 @@
     "placeholders": {
       "n": {
         "type": "int"
-      }
-    }
-  },
-  "@cartProceedCheckoutTotal": {
-    "placeholders": {
-      "total": {
-        "type": "String"
       }
     }
   },

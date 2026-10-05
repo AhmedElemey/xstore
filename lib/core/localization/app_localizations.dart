@@ -3668,12 +3668,6 @@ abstract class AppLocalizations {
   /// **'Subtotal ({n} items)'**
   String cartSubtotalLine(int n);
 
-  /// No description provided for @cartProceedCheckoutTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Proceed to Checkout ({total})'**
-  String cartProceedCheckoutTotal(String total);
-
   /// No description provided for @checkoutItemsFromSellers.
   ///
   /// In en, this message translates to:

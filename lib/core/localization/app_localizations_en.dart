@@ -1877,11 +1877,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartProceedCheckoutTotal(String total) {
-    return 'Proceed to Checkout ($total)';
-  }
-
-  @override
   String checkoutItemsFromSellers(int items, int sellers) {
     return '$items items from $sellers sellers';
   }

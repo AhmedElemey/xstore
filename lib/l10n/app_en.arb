@@ -623,7 +623,6 @@
   "cartRemovedSnack": "{name} removed from cart",
   "cartShippingPaid": "🚚 +{amount} EGP shipping",
   "cartSubtotalLine": "Subtotal ({n} items)",
-  "cartProceedCheckoutTotal": "Proceed to Checkout ({total})",
   "checkoutItemsFromSellers": "{items} items from {sellers} sellers",
   "checkoutPlaceOrderTotal": "🛒 Place Order · {total}",
   "orderPlacedNumber": "Order #{id}",
@@ -790,13 +789,6 @@
     "placeholders": {
       "n": {
         "type": "int"
-      }
-    }
-  },
-  "@cartProceedCheckoutTotal": {
-    "placeholders": {
-      "total": {
-        "type": "String"
       }
     }
   },

@@ -25,6 +25,7 @@ import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/core/theme/app_theme.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/cart/presentation/providers/cart_provider.dart';
 import 'package:xstore/features/explore/data/datasources/explore_remote_datasource.dart';
 import 'package:xstore/features/explore/data/models/search_result_model.dart';
 import 'package:xstore/features/explore/presentation/explore_dependencies.dart';
@@ -258,6 +259,24 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({
       PrefsKeys.locationPermissionRationaleShown: true,
+      // Saved checkout addresses (AddressBook's local store).
+      'checkout_addresses_v1_consumer_001': jsonEncode([
+        {
+          'fullName': 'Salma Hassan',
+          'phone': '01012345678',
+          'street': '14 Road 9, Maadi',
+          'city': 'Maadi',
+          'wilaya': 'Cairo',
+          'isDefault': true,
+        },
+        {
+          'fullName': 'Salma Hassan',
+          'phone': '01012345678',
+          'street': '3 Gameat El Dowal St, Mohandessin',
+          'city': 'Giza',
+          'wilaya': 'Giza',
+        },
+      ]),
     });
     FlutterSecureStorage.setMockInitialValues({});
     // flutter_cache_manager (product images) asks path_provider for dirs.
@@ -322,6 +341,13 @@ void main() {
         );
         await tester.runAsync(() => container.read(authProvider.future));
         await tester.pump();
+        // The cart only fetches on an auth change, which the pre-signed-in
+        // fake user never emits; load the (seeded) mock cart directly.
+        if (location == AppRoutes.cart || location == AppRoutes.checkout) {
+          await tester.runAsync(
+            () => container.read(cartProvider.notifier).fetchCart(),
+          );
+        }
         container.read(goRouterProvider).go(location);
         // Mock datasources resolve after short simulated delays.
         for (var i = 0; i < 30; i++) {
