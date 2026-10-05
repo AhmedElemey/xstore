@@ -200,7 +200,12 @@ void main() {
       await tester.enterText(fields.at(1), 'Password123');
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(XstoreButton, 'Login'));
+      // The Orbit layout pins the button to the bottom of a scroll view,
+      // below the fold of the 800x600 test viewport.
+      final login = find.widgetWithText(XstoreButton, 'Login');
+      await tester.ensureVisible(login);
+      await tester.pump();
+      await tester.tap(login);
       await _settle(tester);
 
       expect(find.text('Home Screen'), findsOneWidget);

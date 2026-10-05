@@ -9,9 +9,11 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -109,95 +111,116 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       profileNotifierProvider.select((s) => s.profile?.hasPassword ?? true),
     );
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.menuChangePassword),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.x2l),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                context.l10n.strongPasswordHint,
-                style: AppTypography.body15.copyWith(
-                  height: 1.4,
-                  color: context.textSecondary,
-                ),
-              ),
-              const Gap(AppSpacing.x2l),
-              if (hasPassword) ...[
-                AuthTextField(
-                  label: context.l10n.currentPasswordRequired,
-                  controller: _current,
-                  obscureText: !_currentVisible,
-                  prefixIcon: const Icon(LucideIcons.lock),
-                  suffixIcon: IconButton(
-                    onPressed: () =>
-                        setState(() => _currentVisible = !_currentVisible),
-                    icon: Icon(
-                      _currentVisible ? LucideIcons.eyeOff : LucideIcons.eye,
-                      color: context.iconSecondary,
-                    ),
+      body: OrbitBackground(
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          const AuthBackButton(),
+                          const Gap(AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              context.l10n.menuChangePassword,
+                              style: AppTypography.headlineSmall.copyWith(
+                                fontSize: AppTypography.rem(1.25),
+                                fontWeight: FontWeight.w600,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(AppSpacing.xl),
+                      Text(
+                        context.l10n.strongPasswordHint,
+                        style: AppTypography.body15.copyWith(
+                          height: 1.5,
+                          color: context.textSecondary,
+                        ),
+                      ),
+                      const Gap(AppSpacing.xl),
+                      if (hasPassword) ...[
+                        AuthTextField(
+                          label: context.l10n.currentPasswordRequired,
+                          controller: _current,
+                          obscureText: !_currentVisible,
+                          suffixIcon: IconButton(
+                            onPressed: () =>
+                                setState(() => _currentVisible = !_currentVisible),
+                            icon: Icon(
+                              _currentVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                              color: context.iconSecondary,
+                            ),
+                          ),
+                          errorText: _currentError,
+                          onChanged: (_) {
+                            if (_currentError != null) {
+                              setState(() => _currentError = null);
+                            }
+                          },
+                        ),
+                        const Gap(AppSpacing.lg),
+                      ],
+                      AuthTextField(
+                        label: context.l10n.newPasswordRequired,
+                        controller: _next,
+                        obscureText: !_nextVisible,
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(() => _nextVisible = !_nextVisible),
+                          icon: Icon(
+                            _nextVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                            color: context.iconSecondary,
+                          ),
+                        ),
+                        errorText: _nextError,
+                        onChanged: (_) {
+                          if (_nextError != null) {
+                            setState(() => _nextError = null);
+                          }
+                        },
+                      ),
+                      const Gap(AppSpacing.lg),
+                      AuthTextField(
+                        label: context.l10n.confirmPasswordRequired,
+                        controller: _confirm,
+                        obscureText: !_confirmVisible,
+                        suffixIcon: IconButton(
+                          onPressed: () =>
+                              setState(() => _confirmVisible = !_confirmVisible),
+                          icon: Icon(
+                            _confirmVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                            color: context.iconSecondary,
+                          ),
+                        ),
+                        errorText: _confirmError,
+                        onChanged: (_) {
+                          if (_confirmError != null) {
+                            setState(() => _confirmError = null);
+                          }
+                        },
+                      ),
+                      const Spacer(),
+                      const Gap(AppSpacing.x2l),
+                      ListenableBuilder(
+                        listenable: _fields,
+                        builder: (context, _) => XstoreButton(
+                          label: context.l10n.menuChangePassword,
+                          isLoading: _isLoading,
+                          onPressed: _isLoading || !_canSubmit(hasPassword)
+                              ? null
+                              : _submit,
+                        ),
+                      ),
+                    ],
                   ),
-                  errorText: _currentError,
-                  onChanged: (_) {
-                    if (_currentError != null) {
-                      setState(() => _currentError = null);
-                    }
-                  },
-                ),
-                const Gap(AppSpacing.lg),
-              ],
-              AuthTextField(
-                label: context.l10n.newPasswordRequired,
-                controller: _next,
-                obscureText: !_nextVisible,
-                prefixIcon: const Icon(LucideIcons.lock),
-                suffixIcon: IconButton(
-                  onPressed: () => setState(() => _nextVisible = !_nextVisible),
-                  icon: Icon(
-                    _nextVisible ? LucideIcons.eyeOff : LucideIcons.eye,
-                    color: context.iconSecondary,
-                  ),
-                ),
-                errorText: _nextError,
-                onChanged: (_) {
-                  if (_nextError != null) {
-                    setState(() => _nextError = null);
-                  }
-                },
-              ),
-              const Gap(AppSpacing.lg),
-              AuthTextField(
-                label: context.l10n.confirmPasswordRequired,
-                controller: _confirm,
-                obscureText: !_confirmVisible,
-                prefixIcon: const Icon(LucideIcons.shieldCheck),
-                suffixIcon: IconButton(
-                  onPressed: () =>
-                      setState(() => _confirmVisible = !_confirmVisible),
-                  icon: Icon(
-                    _confirmVisible ? LucideIcons.eyeOff : LucideIcons.eye,
-                    color: context.iconSecondary,
-                  ),
-                ),
-                errorText: _confirmError,
-                onChanged: (_) {
-                  if (_confirmError != null) {
-                    setState(() => _confirmError = null);
-                  }
-                },
-              ),
-              const Gap(AppSpacing.x2l),
-              ListenableBuilder(
-                listenable: _fields,
-                builder: (context, _) => XstoreButton(
-                  label: context.l10n.menuChangePassword,
-                  isLoading: _isLoading,
-                  onPressed:
-                      _isLoading || !_canSubmit(hasPassword) ? null : _submit,
                 ),
               ),
             ],
