@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -189,7 +188,7 @@ class _StatusBanner extends StatelessWidget {
                   order.status == OrderStatus.confirmed)) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d', context.l10n.localeName).format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${context.formatWeekdayDate(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.white,
                 fontWeight: FontWeight.w600,
@@ -587,7 +586,7 @@ class _TrackingCard extends StatelessWidget {
           ),
           if (order.estimatedDelivery != null)
             Text(
-              '${context.l10n.ordersExpectedPrefix} ${DateFormat('EEEE, MMM d', context.l10n.localeName).format(order.estimatedDelivery!.toLocal())}',
+              '${context.l10n.ordersExpectedPrefix} ${context.formatWeekdayDate(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodySmall,
             ),
           const SizedBox(height: AppSpacing.md),

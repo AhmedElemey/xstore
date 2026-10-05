@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
@@ -151,10 +150,7 @@ Future<ShippingInfo?> showShipOrderSheet(BuildContext context) {
                 ListTile(
                   title: Text(context.l10n.ordersEstimatedDeliveryLabel),
                   subtitle: Text(
-                    eta != null
-                        ? DateFormat('MMM d, yyyy', context.l10n.localeName)
-                            .format(eta!)
-                        : '—',
+                    eta != null ? context.formatMediumDate(eta!) : '—',
                   ),
                   trailing: const Icon(Icons.calendar_today_outlined),
                   onTap: () async {

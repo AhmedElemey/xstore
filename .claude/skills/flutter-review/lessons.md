@@ -1049,3 +1049,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — Pump between enterText and tapping a validity-gated button
 - **Rule:** A button enabled by typed input (`setS`/`ValueListenableBuilder`) only rebuilds on the next frame, so a test doing `enterText` then `tap` hits the still-disabled button and silently does nothing. Add `await tester.pump()` before the tap. When making a button disabled-until-valid, grep tests that type then tap it and run them.
 - **Where it applies:** Review sheets, resubmit and any form with a disabled-until-valid submit; their widget tests.
+
+### 2026-10-05 — Dates and order labels go through the shared helpers
+- **Rule:** Format dates with the `context.format*Date`/`formatTime`/`formatMonthYear` helpers, never an ad-hoc `DateFormat`. Most keep a fixed field order in both locales; `formatLocaleMediumDate` (`yMMMd`) follows the locale's order, so swapping one for another changes Arabic output. Need a new pattern? Add a helper and pin it in `context_date_helpers_test.dart`. Payment and status labels are `paymentMethodLabel` and `orderStatusLabel`; don't re-switch on the enum.
+- **Where it applies:** `context_extensions.dart`, orders/checkout/profile widgets.

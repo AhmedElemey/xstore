@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -11,6 +10,7 @@ import '../../domain/entities/order_entity.dart';
 import '../providers/orders_provider.dart';
 import 'delivery_method_sheet.dart';
 import 'order_flow_sheets.dart';
+import 'order_price_breakdown.dart';
 import 'order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
@@ -185,12 +185,12 @@ class OrderCard extends ConsumerWidget {
                       Divider(height: AppSpacing.lg),
                       if (!isVendor)
                         Text(
-                          '📦 ${order.vendorStoreName} · ${_shortDate(context, order.createdAt)}',
+                          '📦 ${order.vendorStoreName} · ${context.formatMediumDate(order.createdAt)}',
                           style: AppTypography.bodySmall,
                         )
                       else
                         Text(
-                          '💳 ${paymentShort(context, order)} · ${_shortDate(context, order.createdAt)}',
+                          '💳 ${paymentMethodLabel(context, order.paymentMethod)} · ${context.formatMediumDate(order.createdAt)}',
                           style: AppTypography.bodySmall,
                         ),
                       if (!isVendor &&
@@ -199,7 +199,7 @@ class OrderCard extends ConsumerWidget {
                           order.estimatedDelivery != null) ...[
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          '${context.l10n.ordersEstimatedDelivery}: ${_eta(context, order.estimatedDelivery!)}',
+                          '${context.l10n.ordersEstimatedDelivery}: ${context.formatWeekdayDate(order.estimatedDelivery!)}',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
@@ -354,19 +354,6 @@ class OrderCard extends ConsumerWidget {
         );
     }
   }
-
-  String paymentShort(BuildContext context, OrderEntity o) => switch (o.paymentMethod) {
-        PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
-        PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
-        PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
-        PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
-      };
-
-  String _shortDate(BuildContext context, DateTime d) =>
-      DateFormat('MMM d, yyyy', context.l10n.localeName).format(d);
-
-  String _eta(BuildContext context, DateTime d) =>
-      DateFormat('EEEE, MMM d', context.l10n.localeName).format(d);
 
   Future<void> _cancelConsumer(
     BuildContext context,

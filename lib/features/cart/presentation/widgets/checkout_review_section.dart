@@ -7,18 +7,14 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/utils/legal_links.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
-import '../../../orders/domain/entities/order_entity.dart';
+import '../../../orders/presentation/widgets/order_price_breakdown.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import 'cart_summary_card.dart';
-import 'checkout_payment_section.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class CheckoutReviewSection extends ConsumerWidget {
   const CheckoutReviewSection({super.key});
-
-  static String _payLabel(BuildContext context, PaymentMethod m) =>
-      checkoutPaymentLabel(context, m);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -104,7 +100,7 @@ class CheckoutReviewSection extends ConsumerWidget {
                 ],
                 if (pay != null)
                   Text(
-                    '💳 ${_payLabel(context, pay)}',
+                    '💳 ${paymentMethodLabel(context, pay)}',
                     style: AppTypography.bodySmall,
                   ),
                 const SizedBox(height: AppSpacing.sm),

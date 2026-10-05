@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -349,8 +348,7 @@ class _ShippingInfoCard extends StatelessWidget {
               ),
             ),
             Text(
-              DateFormat('EEEE, MMM d, yyyy', context.l10n.localeName)
-                  .format(eta.toLocal()),
+              context.formatLongDate(eta.toLocal()),
               style: AppTypography.bodyMedium,
             ),
           ],

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -299,7 +298,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final u = profile.user;
     final name = u.storeName ?? u.name;
     final joined = u.joinedAt;
-    final joinedLine = joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
+    final joinedLine = joined != null ? context.formatMonthYear(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
     // Only fed the hidden WhatsApp button below.

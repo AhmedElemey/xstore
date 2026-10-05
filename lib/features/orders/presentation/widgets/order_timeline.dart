@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -25,7 +24,6 @@ class OrderTimeline extends StatelessWidget {
     final o = order;
     final steps = _Step.values;
     final cancelled = o.status == OrderStatus.cancelled;
-    final timeFmt = DateFormat('MMM d, yyyy · HH:mm', context.l10n.localeName);
     final activeIdx = cancelled ? _idxBeforeCancel(o) : _progressIndex(o);
 
     return Column(
@@ -60,7 +58,7 @@ class OrderTimeline extends StatelessWidget {
             subtitle: isCancelNode
                 ? (o.cancelReason ?? context.l10n.statusSubtitleCancelled)
                 : date != null
-                    ? timeFmt.format(date)
+                    ? '${context.formatMediumDate(date)} · ${context.formatTime(date)}'
                     : (filled ? null : context.l10n.ordersTimelinePending),
             cancelReason: isCancelNode ? o.cancelReason : null,
           );
