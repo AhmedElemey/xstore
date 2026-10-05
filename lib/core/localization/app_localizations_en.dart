@@ -202,15 +202,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get easyReturnsBadge => '↩️ Easy Returns';
 
   @override
-  String get productTrustFastShipping => 'Fast Shipping';
-
-  @override
-  String get productTrustSecurePayment => 'Secure Payment';
-
-  @override
-  String get productTrustEasyReturns => 'Easy Returns';
-
-  @override
   String get shopNow => 'Shop Now';
 
   @override
@@ -1400,25 +1391,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cartPickupOnly => '🚫 Pickup Only';
 
   @override
-  String get cartPromoHeading => '🏷️ Have a promo code?';
-
-  @override
-  String get cartCouponHint => 'Enter coupon code…';
-
-  @override
   String get cartApply => 'Apply';
-
-  @override
-  String get cartCouponRemove => 'Remove';
-
-  @override
-  String get cartCouponInvalid => 'Invalid coupon code';
-
-  @override
-  String get cartCouponUnavailable => 'Coupons aren\'t available yet';
-
-  @override
-  String get cartCouponMinOrder => 'Minimum order 5,000 EGP required';
 
   @override
   String get cartOrderSummary => 'Order Summary';
@@ -1519,22 +1492,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutErrorAddressCity => 'Enter a city';
 
   @override
-  String get checkoutPickOnMap => 'Pick on Map';
-
-  @override
-  String get checkoutConfirmLocation => 'Confirm Location';
-
-  @override
-  String get checkoutMapPinDropped =>
-      'Drag the map to move the pin to your delivery spot';
-
-  @override
-  String get checkoutMapOutsideEgypt => 'Delivery pin must be within Egypt';
-
-  @override
-  String get checkoutLocationPinned => 'Location pinned';
-
-  @override
   String get checkoutPaymentTitle => 'Payment Method';
 
   @override
@@ -1607,15 +1564,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderContinueShopping => 'Continue Shopping';
-
-  @override
-  String get couponDetailSave10 => '10% discount applied!';
-
-  @override
-  String get couponDetailFree500 => '500 EGP discount applied!';
-
-  @override
-  String get couponDetailWelcome => '15% discount applied!';
 
   @override
   String get youMayAlsoLike => 'You May Also Like';
@@ -2161,11 +2109,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String cartShippingPaid(int amount) {
     return '🚚 +$amount EGP shipping';
-  }
-
-  @override
-  String cartCouponApplied(String code, String detail) {
-    return '✅ \"$code\" — $detail';
   }
 
   @override

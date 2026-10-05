@@ -387,6 +387,8 @@ void main() {
       expect(find.widgetWithText(XstoreButton, 'Submit'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'Great, arrived on time!');
+      // Rebuild so the Submit button enables for the typed comment.
+      await tester.pump();
       await tester.tap(find.widgetWithText(XstoreButton, 'Submit'));
       await _settle(tester);
 

@@ -306,4 +306,45 @@ void main() {
       expect(find.text('Blue vase'), findsNothing);
     },
   );
+
+  testWidgets(
+    'a failed resubmit shows the server reason once, inline in the sheet',
+    (tester) async {
+      const reason = 'Only cancelled listings can be resubmitted.';
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (_) => [_listingJson(status: 5)],
+        'PUT ${ApiEndpoints.apiListingResubmit('9001')}': (options) =>
+            DioException(
+              requestOptions: options,
+              type: DioExceptionType.badResponse,
+              response: Response(
+                requestOptions: options,
+                statusCode: 400,
+                data: {'isSuccess': false, 'errorEn': reason},
+              ),
+            ),
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      await tester.tap(find.byIcon(LucideIcons.moreVertical));
+      await _settle(tester);
+      await tester.tap(find.text('Resubmit'));
+      await _settle(tester);
+      await tester.tap(find.text('Resubmit for review'));
+      await _settle(tester);
+
+      // The sheet stays open with the reason; the screen's error listener
+      // must not toast the same reason again behind it.
+      expect(find.text('Resubmit for review'), findsOneWidget);
+      expect(find.text(reason), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+    },
+  );
 }

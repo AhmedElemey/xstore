@@ -112,25 +112,14 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         clipBehavior: Clip.antiAlias,
         child: ResubmitListingSheet(
           listing: listing,
-          onSubmit: (newPrice) async {
-            final ok = await ref
-                .read(myListingsNotifierProvider.notifier)
-                .resubmitListing(listing.id, newPrice);
-            if (ok) return null;
-            if (!mounted) return '';
-            // The notifier stores the server's localized reason (errorEn/
-            // errorAr) on state.error — show that, not a generic message.
-            return ref.read(myListingsNotifierProvider).error ?? '';
-          },
+          onSubmit: (newPrice) => ref
+              .read(myListingsNotifierProvider.notifier)
+              .resubmitListing(listing.id, newPrice),
         ),
       ),
     );
-    if (!mounted || ok != true) {
-      // Failure already surfaces via the screen's existing ref.listen on
-      // state.error (same pattern pause/resume relies on) — no need to
-      // toast it again here.
-      return;
-    }
+    // A failure stays in the sheet, shown inline — nothing to toast here.
+    if (!mounted || ok != true) return;
     AppSnackbar.success(context, context.l10n.resubmitSuccess);
   }
 

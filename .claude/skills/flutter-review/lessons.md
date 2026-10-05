@@ -714,10 +714,6 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** Compare the session user id to `listing.vendorId` (fallback `seller.id`) — not `isVendor` — to hide quantity, Chat, Add to cart and Buy Now.
 - **Where it applies:** `product_detail_screen.dart`.
 
-### 2026-09-08 — Hidden UI stays in source, commented out
-- **Rule:** When product asks to hide a piece of UI, comment out its usage (and import) and leave the widget and logic in place, adjusting indexes/counts around it; then run analyze for orphaned variables. Currently hidden this way: cart Select All row (`cart_consumer_body.dart`), cart vendor header (`cart_vendor_group.dart`), Wishlist toolbar `WishlistHeaderBar` including Select (`wishlist_consumer_body.dart`; Wishlist is a title-only `AppBar`, list-only, sort via the Recently Added chip), Profile Manage Store, every WhatsApp button (product sticky-bar chat icon, vendor store, buyer and vendor order detail — `launchWhatsApp` and the `_openStoreWhatsApp`/`_messageSeller` handlers kept; register/edit-profile WhatsApp number fields stay).
-- **Where it applies:** Cart, wishlist and profile UI.
-
 ### 2026-09-08 — Wishlist and cart card hierarchy
 - **Rule:** Wishlist list cards: title → price (+ strikethrough / `-N%`) → store name (+ verified) → `★ rating (count)` with shipping on the same row; actions below a divider; no `condition · category` line or redundant price-drop text. Cart item cards use only real cart fields (title, `vendorStoreName`, price + compare-at on one row, shipping, availability, condition/category, qty, remove, save for later) — no invented social proof or promo badges; checkbox on the image; `QuantityControl` is one bordered pill (trash/minus · qty · plus).
 - **Where it applies:** `wishlist_item_card.dart`, `cart_item_card.dart`, `quantity_control.dart`.
@@ -795,7 +791,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Any codegen or `pub` run.
 
 ### 2026-09-12 — Notifier errors are shown exactly once
-- **Rule:** When a notifier writes `error` on failure, something must display it: screens `ref.listen(provider, (prev, next) { if (next.error != null && next.error != prev?.error && mounted) AppSnackbar.error(context, next.error!); })` (as `register_screen.dart` and `SocialRoleScreen` do), and a caller that only checks a `bool` result must still show the stored error. Before adding a toast at a call site, check for such a listener so errors aren't shown twice — then toast only success locally.
+- **Rule:** When a notifier writes `error` on failure, something must display it: screens `ref.listen(provider, (prev, next) { if (next.error != null && next.error != prev?.error && mounted) AppSnackbar.error(context, next.error!); })` (as `register_screen.dart` and `SocialRoleScreen` do), and a caller that only checks a `bool` result must still show the stored error. Before adding a toast at a call site, check for such a listener so errors aren't shown twice — then toast only success locally. A mutation whose failure shows inline in a sheet returns its error instead of writing `state.error` (`resubmitListing` returns `String?`), or the listener toasts it again behind the sheet.
 - **Where it applies:** Screens driven by notifiers with an error field (`product_reviews_screen.dart`, `my_listings_screen.dart`, auth screens).
 
 ### 2026-09-12 — Google sign-in is login-only
@@ -1043,8 +1039,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Any screen gaining a shared widget or provider watch; tests rendering `AddListingScreen`, register, edit profile, checkout.
 
 ### 2026-10-04 — Remove hidden UI, don't comment it out
-- **Rule:** When a feature's UI is dropped, delete the code instead of commenting it out. Commented-out widgets leave unused imports and private methods behind, and `flutter analyze` warnings fail CI. Also delete widgets left with no callers, and remove or rewrite tests that drive the removed UI. Git history keeps the old code.
-- **Where it applies:** Any screen where UI is hidden or removed (cart coupon row, product quick actions, address map pin).
+- **Rule:** When a feature's UI is dropped, delete the code instead of commenting it out (this replaces the old "hidden UI stays commented out" rule). Also delete what it leaves orphaned: widgets with no callers, their tests, and l10n keys only they used (diff the unused-key list against the base). Tests driving the removed UI go too. Older hides still commented out (cart Select All row and vendor header, Wishlist header bar, Profile Manage Store, WhatsApp buttons) get deleted or restored when next touched.
+- **Where it applies:** Any screen where UI is hidden or removed; `lib/l10n/*.arb`.
 
 ### 2026-10-04 — "Read more" toggles only when the text actually overflows
 - **Rule:** Never show a Read more/less toggle unconditionally or behind a character-count guess (`length > 120`). Use `shared/widgets/expandable_text.dart` `ExpandableText`, which measures with `TextPainter.didExceedMaxLines` at the laid-out width and renders the toggle only on overflow.
@@ -1053,3 +1049,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-04 — Required-field submit buttons are disabled, never silent no-ops
 - **Rule:** When a form can't submit (e.g. the comment is required), pass `onPressed: null` until it can, instead of an enabled button that returns early. Rebuild only the button: `setS` in a `StatefulBuilder` sheet with no controller, or `ValueListenableBuilder` on an owned controller. Grep for `if (….isEmpty) return;` at the top of `onPressed` handlers.
 - **Where it applies:** Review sheets in `order_card.dart` and `order_action_buttons.dart`, `product_reviews_screen.dart`, any submit button.
+
+### 2026-10-05 — Pump between enterText and tapping a validity-gated button
+- **Rule:** A button enabled by typed input (`setS`/`ValueListenableBuilder`) only rebuilds on the next frame, so a test doing `enterText` then `tap` hits the still-disabled button and silently does nothing. Add `await tester.pump()` before the tap. When making a button disabled-until-valid, grep tests that type then tap it and run them.
+- **Where it applies:** Review sheets, resubmit and any form with a disabled-until-valid submit; their widget tests.

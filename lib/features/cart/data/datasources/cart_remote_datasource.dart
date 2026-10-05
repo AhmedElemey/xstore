@@ -656,7 +656,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       throw const ServerException(outOfStockErrorCode);
     }
     final fallbackAddress = OrderAddressModelX.fromEntity(params.deliveryAddress);
-    // A map-pinned delivery address (see showMapAddressPicker) carries its
+    // A map-pinned delivery address (the picker is gone, but older saved
+    // addresses keep their pin) carries its
     // own coordinates — prefer those over the device's last-known GPS fix,
     // since the two can legitimately differ (ordering for a different
     // address than the one the phone is currently at). Addresses saved

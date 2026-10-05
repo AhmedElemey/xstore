@@ -62,9 +62,6 @@
   "freeShippingBadge": "🚚 Free Shipping",
   "securePayBadge": "🔒 Secure Pay",
   "easyReturnsBadge": "↩️ Easy Returns",
-  "productTrustFastShipping": "Fast Shipping",
-  "productTrustSecurePayment": "Secure Payment",
-  "productTrustEasyReturns": "Easy Returns",
   "shopNow": "Shop Now",
   "notifications": "Notifications",
   "notificationsMarkAllRead": "Mark all read",
@@ -489,13 +486,7 @@
   "cartUndo": "Undo",
   "cartShippingFree": "🚚 Free Shipping",
   "cartPickupOnly": "🚫 Pickup Only",
-  "cartPromoHeading": "🏷️ Have a promo code?",
-  "cartCouponHint": "Enter coupon code…",
   "cartApply": "Apply",
-  "cartCouponRemove": "Remove",
-  "cartCouponInvalid": "Invalid coupon code",
-  "cartCouponUnavailable": "Coupons aren't available yet",
-  "cartCouponMinOrder": "Minimum order 5,000 EGP required",
   "cartOrderSummary": "Order Summary",
   "cartShippingLine": "Shipping",
   "cartTotalLine": "Total",
@@ -528,11 +519,6 @@
   "checkoutErrorAddressName": "Enter the recipient's name",
   "checkoutErrorAddressStreet": "Enter a street address",
   "checkoutErrorAddressCity": "Enter a city",
-  "checkoutPickOnMap": "Pick on Map",
-  "checkoutConfirmLocation": "Confirm Location",
-  "checkoutMapPinDropped": "Drag the map to move the pin to your delivery spot",
-  "checkoutMapOutsideEgypt": "Delivery pin must be within Egypt",
-  "checkoutLocationPinned": "Location pinned",
   "checkoutPaymentTitle": "Payment Method",
   "checkoutPayCodTitle": "💵 Cash on Delivery",
   "checkoutPayCodSubtitle": "Pay when your order arrives",
@@ -561,9 +547,6 @@
   "orderPlacedTitle": "Order Placed! 🎉",
   "orderTrackCta": "Track My Order",
   "orderContinueShopping": "Continue Shopping",
-  "couponDetailSave10": "10% discount applied!",
-  "couponDetailFree500": "500 EGP discount applied!",
-  "couponDetailWelcome": "15% discount applied!",
   "youMayAlsoLike": "You May Also Like",
   "productNotFound": "Product not found",
   "productScreenTitle": "Product",
@@ -727,7 +710,6 @@
   "cartSelectAllCount": "Select All ({n} items)",
   "cartRemovedSnack": "{name} removed from cart",
   "cartShippingPaid": "🚚 +{amount} EGP shipping",
-  "cartCouponApplied": "✅ \"{code}\" — {detail}",
   "cartSubtotalLine": "Subtotal ({n} items)",
   "cartCouponLine": "Coupon ({code})",
   "cartProceedCheckoutTotal": "Proceed to Checkout ({total})",
@@ -925,16 +907,6 @@
     "placeholders": {
       "amount": {
         "type": "int"
-      }
-    }
-  },
-  "@cartCouponApplied": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      },
-      "detail": {
-        "type": "String"
       }
     }
   },

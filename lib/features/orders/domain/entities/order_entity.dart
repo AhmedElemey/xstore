@@ -86,9 +86,9 @@ class OrderAddress with _$OrderAddress {
     required String wilaya,
     String? postalCode,
     @Default(false) bool isDefault,
-    /// Set when this address was pinned on the map picker (see
-    /// `showMapAddressPicker`). Null for addresses saved before the picker
-    /// existed, or typed without dropping a pin — `placeOrder` falls back
+    /// Set when this address was pinned on the (since removed) map
+    /// picker. Null for addresses saved before or after the picker, or
+    /// typed without dropping a pin — `placeOrder` falls back
     /// to [AppLocationCache] in that case, same as before this field
     /// existed.
     double? latitude,

@@ -24,9 +24,9 @@ mixin _$OrderAddress {
   String? get postalCode => throw _privateConstructorUsedError;
   bool get isDefault => throw _privateConstructorUsedError;
 
-  /// Set when this address was pinned on the map picker (see
-  /// `showMapAddressPicker`). Null for addresses saved before the picker
-  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// Set when this address was pinned on the (since removed) map
+  /// picker. Null for addresses saved before or after the picker, or
+  /// typed without dropping a pin — `placeOrder` falls back
   /// to [AppLocationCache] in that case, same as before this field
   /// existed.
   double? get latitude => throw _privateConstructorUsedError;
@@ -267,9 +267,9 @@ class _$OrderAddressImpl implements _OrderAddress {
   @JsonKey()
   final bool isDefault;
 
-  /// Set when this address was pinned on the map picker (see
-  /// `showMapAddressPicker`). Null for addresses saved before the picker
-  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// Set when this address was pinned on the (since removed) map
+  /// picker. Null for addresses saved before or after the picker, or
+  /// typed without dropping a pin — `placeOrder` falls back
   /// to [AppLocationCache] in that case, same as before this field
   /// existed.
   @override
@@ -370,9 +370,9 @@ abstract class _OrderAddress implements OrderAddress {
   bool get isDefault;
   @override
 
-  /// Set when this address was pinned on the map picker (see
-  /// `showMapAddressPicker`). Null for addresses saved before the picker
-  /// existed, or typed without dropping a pin — `placeOrder` falls back
+  /// Set when this address was pinned on the (since removed) map
+  /// picker. Null for addresses saved before or after the picker, or
+  /// typed without dropping a pin — `placeOrder` falls back
   /// to [AppLocationCache] in that case, same as before this field
   /// existed.
   double? get latitude;
