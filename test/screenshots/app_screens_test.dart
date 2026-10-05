@@ -28,6 +28,13 @@ import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/explore/data/datasources/explore_remote_datasource.dart';
 import 'package:xstore/features/explore/data/models/search_result_model.dart';
 import 'package:xstore/features/explore/presentation/explore_dependencies.dart';
+import 'package:xstore/core/network/paginated_result.dart';
+import 'package:xstore/features/notifications/data/datasources/notifications_remote_datasource.dart';
+import 'package:xstore/features/notifications/domain/entities/notification_entity.dart';
+import 'package:xstore/features/notifications/presentation/providers/notifications_dependencies.dart';
+import 'package:xstore/features/wishlist/data/datasources/wishlist_remote_datasource.dart';
+import 'package:xstore/features/wishlist/domain/entities/wishlist_item_entity.dart';
+import 'package:xstore/features/wishlist/presentation/providers/wishlist_dependencies.dart';
 import 'package:xstore/features/notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'package:xstore/features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 
@@ -109,10 +116,113 @@ class _SampleExplore implements ExploreRemoteDataSource {
   }
 }
 
+/// Wishlist has no MOCK branch either; a fixed sample list.
+class _SampleWishlist implements WishlistRemoteDataSource {
+  static final _now = DateTime.now();
+  static final _items = [
+    for (final (id, name, store, price, prev, stock) in [
+      ('w1', 'Cloud runner sneakers', 'Stride Store', 1690.0, 1890.0, 4),
+      ('w2', 'Suede court low', 'Maadi Kicks', 1250.0, null, 2),
+      ('w3', 'Trail hiker mid', 'Outdoor Base', 2300.0, null, 0),
+    ])
+      WishlistItemEntity(
+        id: id,
+        listingId: 'listing_$id',
+        listingName: name,
+        listingImages: const [],
+        vendorId: 'v_$id',
+        vendorName: store,
+        vendorStoreName: store,
+        price: price,
+        previousPrice: prev,
+        category: 'Shoes',
+        condition: 'new',
+        rating: 4.6,
+        reviewCount: 12,
+        stockQuantity: stock,
+        isAvailable: stock > 0,
+        shippingCost: 45,
+        addedAt: _now,
+        lastPriceCheckAt: _now,
+      ),
+  ];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #getWishlist) return Future.value(_items);
+    return super.noSuchMethod(invocation);
+  }
+}
+
+/// Notifications have no MOCK branch; a fixed page spanning two groups.
+class _SampleNotifications implements NotificationsRemoteDataSource {
+  static final _now = DateTime.now();
+  static final _items = [
+    for (final (id, type, title, body, read, hoursAgo) in [
+      (
+        'n1',
+        NotificationType.orderShipped,
+        'Order shipped',
+        'Order #10234 is on its way to you.',
+        false,
+        1,
+      ),
+      (
+        'n2',
+        NotificationType.priceDrop,
+        'Price drop',
+        'Cloud runner sneakers dropped to EGP 1,690.',
+        false,
+        3,
+      ),
+      (
+        'n3',
+        NotificationType.orderDelivered,
+        'Order delivered',
+        'Order #10198 was delivered. Rate your purchase.',
+        true,
+        26,
+      ),
+      (
+        'n4',
+        NotificationType.reviewReply,
+        'Seller replied',
+        'Stride Store replied to your review.',
+        true,
+        30,
+      ),
+    ])
+      NotificationEntity(
+        id: id,
+        type: type,
+        title: title,
+        body: body,
+        isRead: read,
+        createdAt: _now.subtract(Duration(hours: hoursAgo)),
+      ),
+  ];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #fetchPage) {
+      return Future.value(
+        PaginatedResult<NotificationEntity>(
+          items: _items,
+          page: 1,
+          pageSize: 20,
+          totalCount: _items.length,
+        ),
+      );
+    }
+    if (invocation.memberName == #unreadCount) return Future.value(2);
+    return Future<void>.value();
+  }
+}
+
 Future<void> _loadFonts() async {
-  final manifest = json.decode(
-    await rootBundle.loadString('FontManifest.json'),
-  ) as List<dynamic>;
+  final manifest =
+      json.decode(await rootBundle.loadString('FontManifest.json'))
+          as List<dynamic>;
   for (final family in manifest.cast<Map<String, dynamic>>()) {
     final loader = FontLoader(family['family'] as String);
     for (final font in (family['fonts'] as List).cast<Map<String, dynamic>>()) {
@@ -120,14 +230,17 @@ Future<void> _loadFonts() async {
     }
     await loader.load();
   }
-  final flutterRoot = Platform.environment['FLUTTER_ROOT'] ??
+  final flutterRoot =
+      Platform.environment['FLUTTER_ROOT'] ??
       File(Platform.resolvedExecutable).parent.parent.parent.parent.parent.path;
   final materialIcons = File(
     '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
   );
   if (materialIcons.existsSync()) {
     final loader = FontLoader('MaterialIcons')
-      ..addFont(Future.value(ByteData.sublistView(materialIcons.readAsBytesSync())));
+      ..addFont(
+        Future.value(ByteData.sublistView(materialIcons.readAsBytesSync())),
+      );
     await loader.load();
   }
 }
@@ -147,6 +260,12 @@ void main() {
       PrefsKeys.locationPermissionRationaleShown: true,
     });
     FlutterSecureStorage.setMockInitialValues({});
+    // flutter_cache_manager (product images) asks path_provider for dirs.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (_) async => Directory.systemTemp.path,
+        );
   });
 
   for (final (name, role, location) in _screens) {
@@ -169,6 +288,12 @@ void main() {
                 fcmPushHandlingProvider.overrideWith((ref) {}),
                 exploreRemoteDataSourceProvider.overrideWithValue(
                   _SampleExplore(),
+                ),
+                wishlistRemoteDataSourceProvider.overrideWithValue(
+                  _SampleWishlist(),
+                ),
+                notificationsRemoteDataSourceProvider.overrideWithValue(
+                  _SampleNotifications(),
                 ),
               ],
               child: Consumer(
@@ -207,14 +332,16 @@ void main() {
         }
 
         await tester.runAsync(() async {
-          final render = boundary.currentContext!.findRenderObject()!
-              as RenderRepaintBoundary;
+          final render =
+              boundary.currentContext!.findRenderObject()!
+                  as RenderRepaintBoundary;
           final image = await render.toImage(pixelRatio: _pixelRatio);
           final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
           final dir = Directory('build/screenshots/app/${locale.languageCode}')
             ..createSync(recursive: true);
-          File('${dir.path}/${name}_$mode.png')
-              .writeAsBytesSync(bytes!.buffer.asUint8List());
+          File(
+            '${dir.path}/${name}_$mode.png',
+          ).writeAsBytesSync(bytes!.buffer.asUint8List());
         });
 
         await tester.pumpWidget(const SizedBox());

@@ -114,10 +114,17 @@ class WishlistItemCard extends ConsumerWidget {
                               ),
                             ),
                             if (drop > 0)
-                              Positioned(
-                                left: AppSpacing.xs,
+                              // Keep the badge inside the 90px thumbnail —
+                              // the label is wider than it in en and ar.
+                              PositionedDirectional(
+                                start: AppSpacing.xs,
+                                end: AppSpacing.xs,
                                 top: AppSpacing.xs,
-                                child: PriceDropBadge(percent: drop),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: PriceDropBadge(percent: drop),
+                                ),
                               ),
                             if (!item.isAvailable)
                               Positioned.fill(
