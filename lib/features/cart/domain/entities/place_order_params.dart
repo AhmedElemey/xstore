@@ -15,7 +15,6 @@ class PlaceOrderParams with _$PlaceOrderParams {
     String? deliveryNote,
     required double subtotal,
     required double shippingTotal,
-    required double discount,
     required double total,
   }) = _PlaceOrderParams;
 }

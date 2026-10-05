@@ -12,7 +12,7 @@
 // added — the same wire contract test/checkout_order_flow_test.dart's
 // reorder-style tests already exercise. So this test seeds the cart via
 // that real `addFromListing` call (as a real "add to cart" action would),
-// then drives the screen's own remove/coupon actions purely against
+// then drives the screen's own remove actions purely against
 // in-memory state.
 //
 // Run with: flutter test test/cart_screen_live_flow_test.dart

@@ -2,7 +2,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/network/connectivity_provider.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -59,19 +58,6 @@ extension CartStateX on CartState {
   }
 }
 
-double cartDiscountOnSubtotal(double sub, CouponEntity c) {
-  if (!c.isValid) return 0;
-  if (c.minOrderAmount != null && sub < c.minOrderAmount!) return 0;
-  double d;
-  if (c.discountType == DiscountType.percentage) {
-    d = sub * (c.discountValue / 100);
-    if (c.maxDiscount != null && d > c.maxDiscount!) d = c.maxDiscount!;
-  } else {
-    d = c.discountValue;
-  }
-  return d > sub ? sub : d;
-}
-
 @Riverpod(keepAlive: true)
 class Cart extends _$Cart {
   // Bumped whenever the auth-listener below resets state on logout. This
@@ -119,8 +105,6 @@ class Cart extends _$Cart {
     }
     state = state.copyWith(
       items: e.items,
-      coupon: e.coupon,
-      couponErrorKey: null,
       selectedItemIds: sel,
     );
     _recomputeTotals();
@@ -133,13 +117,10 @@ class Cart extends _$Cart {
       sub += it.price * it.quantity;
       ship += it.shippingCost;
     }
-    final c = state.coupon;
-    final disc = c != null ? cartDiscountOnSubtotal(sub, c) : 0.0;
     state = state.copyWith(
       subtotal: sub,
       shippingTotal: ship,
-      discount: disc,
-      total: sub + ship - disc,
+      total: sub + ship,
     );
   }
 
@@ -341,8 +322,6 @@ class Cart extends _$Cart {
       (e) {
         state = state.copyWith(
           isUpdating: false,
-          coupon: null,
-          couponInput: '',
           selectedItemIds: {},
         );
         _setFromEntity(e, resetSelection: true);
@@ -384,67 +363,6 @@ class Cart extends _$Cart {
     }
   }
 
-  void setCouponInput(String v) {
-    state = state.copyWith(couponInput: v, couponErrorKey: null);
-  }
-
-  Future<void> applyCoupon() async {
-    final id = _consumerId;
-    if (id == null) return;
-    final code = state.couponInput.trim();
-    if (code.isEmpty) return;
-    var sub = 0.0;
-    for (final it in state.selectedAvailableItems) {
-      sub += it.price * it.quantity;
-    }
-    final epoch = _epoch;
-    state = state.copyWith(isCouponLoading: true, couponErrorKey: null);
-    final result = await ref.read(applyCouponUseCaseProvider).call(
-          consumerId: id,
-          code: code,
-          eligibleSubtotal: sub,
-        );
-    if (_epoch != epoch) return;
-    var applied = false;
-    result.fold(
-      (f) {
-        final key = switch (f) {
-          ValidationFailure(:final message) when message == 'minOrder' =>
-            'minOrder',
-          ValidationFailure(:final message) when message == 'unavailable' =>
-            'unavailable',
-          ValidationFailure() => 'invalid',
-          _ => 'invalid',
-        };
-        state = state.copyWith(isCouponLoading: false, couponErrorKey: key);
-      },
-      (_) => applied = true,
-    );
-    if (applied) {
-      await fetchCart();
-      if (_epoch != epoch) return;
-      state = state.copyWith(isCouponLoading: false);
-    }
-  }
-
-  Future<void> removeCoupon() async {
-    final id = _consumerId;
-    if (id == null) return;
-    final epoch = _epoch;
-    state = state.copyWith(isCouponLoading: true);
-    final result = await ref.read(removeCouponUseCaseProvider).call(id);
-    if (_epoch != epoch) return;
-    var ok = false;
-    result.fold(
-      (f) => state = state.copyWith(isCouponLoading: false, error: f.toString()),
-      (_) => ok = true,
-    );
-    if (ok) {
-      state = state.copyWith(isCouponLoading: false, couponInput: '');
-      await fetchCart();
-    }
-  }
-
   Future<void> saveForLater(String itemId) async {
     final idx = state.items.indexWhere((e) => e.id == itemId);
     if (idx < 0) return;
@@ -471,7 +389,6 @@ class Cart extends _$Cart {
         state = state.copyWith(
           isUpdating: false,
           selectedItemIds: {},
-          couponInput: '',
           lastRemovedItem: null,
           lastRemovedIndex: null,
         );

@@ -44,13 +44,6 @@ abstract interface class CartRemoteDataSource {
 
   Future<CartEntity> clearCart(String consumerId);
 
-  Future<CouponEntity> applyCoupon({
-    required String code,
-    required double eligibleSubtotal,
-  });
-
-  Future<CartEntity> removeCoupon(String consumerId);
-
   Future<OrderEntity> placeOrder(PlaceOrderParams params);
 
   Future<CartItemEntity> buildLineFromListing(String listingId, int quantity);
@@ -63,8 +56,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   final OrdersRemoteDataSource _orders;
 
   static final List<CartItemEntity> _items = [];
-  static CouponEntity? _coupon;
-  static String? _couponCodeInput;
 
   /// Consumer whose saved cart has been restored into [_items] this session.
   static String? _restoredFor;
@@ -77,8 +68,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   /// id, and is restored only when that same user signs back in.
   static void clearSessionCache() {
     _items.clear();
-    _coupon = null;
-    _couponCodeInput = null;
     _restoredFor = null;
   }
 
@@ -295,11 +284,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       consumerId: consumerId,
       items: List<CartItemEntity>.from(_items),
       selectedItemIds: {},
-      couponCode: _couponCodeInput,
-      coupon: _coupon,
       subtotal: sub,
       shippingTotal: ship,
-      discount: 0,
       total: sub + ship,
       itemCount: _items.length,
     );
@@ -508,70 +494,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   Future<CartEntity> clearCart(String consumerId) async {
     await _restoreSavedCart(consumerId);
     _items.clear();
-    _coupon = null;
-    _couponCodeInput = null;
     await _saveCart(consumerId);
-    return _localCart(consumerId);
-  }
-
-  @override
-  Future<CouponEntity> applyCoupon({
-    required String code,
-    required double eligibleSubtotal,
-  }) async {
-    if (!MockConfig.useMock) {
-      throw CouponException('unavailable');
-    }
-    await MockConfig.simulate(null);
-    final upper = code.trim().toUpperCase();
-    if (upper == 'SAVE10') {
-      if (eligibleSubtotal < 5000) {
-        throw CouponException('minOrder');
-      }
-      final c = CouponEntity(
-        code: upper,
-        discountType: DiscountType.percentage,
-        discountValue: 10,
-        maxDiscount: 5000,
-        isValid: true,
-        message: '',
-      );
-      _coupon = c;
-      _couponCodeInput = upper;
-      return c;
-    }
-    if (upper == 'FREE500') {
-      final c = CouponEntity(
-        code: upper,
-        discountType: DiscountType.fixed,
-        discountValue: 500,
-        isValid: true,
-        message: 'FREE500',
-      );
-      _coupon = c;
-      _couponCodeInput = upper;
-      return c;
-    }
-    if (upper == 'WELCOME') {
-      final c = CouponEntity(
-        code: upper,
-        discountType: DiscountType.percentage,
-        discountValue: 15,
-        maxDiscount: 3000,
-        isValid: true,
-        message: 'WELCOME',
-      );
-      _coupon = c;
-      _couponCodeInput = upper;
-      return c;
-    }
-    throw CouponException('invalid');
-  }
-
-  @override
-  Future<CartEntity> removeCoupon(String consumerId) {
-    _coupon = null;
-    _couponCodeInput = null;
     return _localCart(consumerId);
   }
 
@@ -620,15 +543,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         deliveryAddress: params.deliveryAddress,
         subtotal: params.subtotal,
         shippingCost: params.shippingTotal,
-        discount: params.discount,
+        discount: 0,
         total: params.total,
         notes: params.deliveryNote,
         createdAt: now,
         updatedAt: now,
       );
       _items.clear();
-      _coupon = null;
-      _couponCodeInput = null;
       return order;
     }
     // CONFIRMED (Postman + live probe, 2026-08-14): the backend has no
@@ -724,13 +645,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     // successes — the caller compares this against what was submitted to
     // tell the customer which line(s) didn't go through.
     final first = createdOrders.first.toEntity();
-    _coupon = null;
-    _couponCodeInput = null;
     return first.copyWith(
       items: createdOrders.expand((o) => o.items).map((m) => m.toEntity()).toList(),
       subtotal: params.subtotal,
       shippingCost: params.shippingTotal,
-      discount: params.discount,
+      // The cart has no discounts; keep the breakdown adding up to total.
+      discount: 0,
       total: params.total,
       notes: params.deliveryNote,
     );

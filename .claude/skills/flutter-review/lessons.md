@@ -479,8 +479,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `profile_menu_blocks.dart`, `profile_sliver_app_bar.dart`, `app_router.dart`, `app_routes.dart`.
 
 ### 2026-08-29 — There is no cart API
-- **Rule:** The hosted API has no `/cart` resource: the live cart is client-side, persisted per user in SharedPreferences (`cart_items_v1_<userId>`), and checkout posts `POST /api/orders` per line. Never call `/cart` or apply client-side coupon discounts (they aren't sent with the order). Screens show error/retry when `items.isEmpty && error != null`, never the empty state.
-- **Where it applies:** `cart_remote_datasource.dart`, `cart_consumer_body.dart`, `coupon_input_row.dart`, any list screen that maps empty+error to its empty state.
+- **Rule:** The hosted API has no `/cart` resource: the live cart is client-side, persisted per user in SharedPreferences (`cart_items_v1_<userId>`), and checkout posts `POST /api/orders` per line. Never call `/cart`. The cart has no discounts: total = subtotal + shipping (the client-only coupon stack was deleted; coupons need a backend contract first). Screens show error/retry when `items.isEmpty && error != null`, never the empty state.
+- **Where it applies:** `cart_remote_datasource.dart`, `cart_provider.dart`, `cart_consumer_body.dart`, any list screen that maps empty+error to its empty state.
 
 ### 2026-08-29 — Banners are tappable only with a real actionUrl
 - **Rule:** Wire `onTap` only when `actionUrl` is non-empty after trimming; live banners without one stay inert — no invented destination.

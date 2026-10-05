@@ -4112,12 +4112,6 @@ abstract class AppLocalizations {
   /// **'Subtotal ({n} items)'**
   String cartSubtotalLine(int n);
 
-  /// No description provided for @cartCouponLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Coupon ({code})'**
-  String cartCouponLine(String code);
-
   /// No description provided for @cartProceedCheckoutTotal.
   ///
   /// In en, this message translates to:

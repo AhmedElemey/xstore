@@ -123,7 +123,7 @@ class _FakeCartRepo implements CartRepository {
       deliveryAddress: params.deliveryAddress,
       subtotal: params.subtotal,
       shippingCost: params.shippingTotal,
-      discount: params.discount,
+      discount: 0,
       total: params.total,
       createdAt: now,
       updatedAt: now,
@@ -159,7 +159,7 @@ void main() {
   group('M02 — the REAL cart total includes shipping', () {
     // The previous cart_totals_test re-implemented the total formula inside
     // the test file, so breaking Cart._recomputeTotals could not fail it.
-    test('fetchCart totals = subtotal + shipping - discount', () async {
+    test('fetchCart totals = subtotal + shipping', () async {
       repo.next = [
         _item('a', listingId: '1', price: 100, qty: 2, shipping: 5),
         _item('b', listingId: '2', price: 50, shipping: 3),
@@ -265,7 +265,6 @@ void main() {
         paymentMethod: PaymentMethod.cashOnDelivery,
         subtotal: 200,
         shippingTotal: 0,
-        discount: 0,
         total: 200,
       ));
 

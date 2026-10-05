@@ -4,7 +4,6 @@ import 'package:xstore/core/error/exceptions.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/app_error_messages.dart';
 import 'package:xstore/features/cart/data/datasources/cart_remote_datasource.dart';
-import 'package:xstore/features/cart/domain/entities/cart_entity.dart';
 import 'package:xstore/features/cart/domain/entities/cart_item_entity.dart';
 import 'package:xstore/features/cart/domain/entities/place_order_params.dart';
 import 'package:xstore/features/orders/data/models/order_model.dart';
@@ -85,18 +84,9 @@ Map<String, dynamic> _fullCartJson() => {
       'addedAt': '2026-08-01T00:00:00.000',
     },
   ],
-  'couponCode': 'SAVE10',
-  'coupon': {
-    'code': 'SAVE10',
-    'discountType': 'percentage',
-    'discountValue': 10,
-    'isValid': true,
-    'message': '',
-  },
   'subtotal': 95000,
   'shippingTotal': 0,
-  'discount': 9500,
-  'total': 85500,
+  'total': 95000,
   'itemCount': 1,
 };
 
@@ -116,8 +106,7 @@ void main() {
     datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
   });
 
-  // Every group below (except removeCoupon, which behaves identically in
-  // both modes) exercises the LIVE, non-mock code paths — scripting Dio and
+  // Every group below exercises the LIVE, non-mock code paths — scripting Dio and
   // asserting no seeded mock data leaks in. Under MOCK=true,
   // `_ensureMockSeed()` populates the same static `_items` list with demo
   // rows on first `getCart`/`buildLineFromListing` call regardless of
@@ -215,45 +204,6 @@ void main() {
       expect(result.items, isEmpty);
     });
   }, skip: skipMock);
-
-  group('applyCoupon', () {
-    test('live mode rejects coupons without hitting the network', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return {
-          'code': 'SAVE10',
-          'discountType': 'percentage',
-          'discountValue': 10,
-          'isValid': true,
-          'message': '',
-        };
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
-      expect(
-        () => datasource.applyCoupon(code: 'SAVE10', eligibleSubtotal: 6000),
-        throwsA(
-          isA<CouponException>().having((e) => e.message, 'message', 'unavailable'),
-        ),
-      );
-      expect(captured, isNull);
-    });
-  }, skip: skipMock);
-
-  group('removeCoupon', () {
-    test('clears the local coupon without hitting the network', () async {
-      RequestOptions? captured;
-      dio = buildDio((options) {
-        captured = options;
-        return _fullCartJson();
-      });
-      datasource = CartRemoteDataSourceImpl(dio, StubOrdersRemoteDataSource());
-
-      await datasource.removeCoupon('consumer_1');
-      expect(captured, isNull);
-    });
-  });
 
   group('buildLineFromListing', () {
     test('GETs /api/listings/{id} and reads a flat payload', () async {
@@ -376,7 +326,6 @@ void main() {
             paymentMethod: PaymentMethod.cashOnDelivery,
             subtotal: 0,
             shippingTotal: 0,
-            discount: 0,
             total: 0,
           ),
         ),
@@ -446,7 +395,6 @@ void main() {
           deliveryNote: 'Ring the bell',
           subtotal: 190000,
           shippingTotal: 0,
-          discount: 0,
           total: 190000,
         ),
       );
@@ -518,7 +466,6 @@ void main() {
           paymentMethod: PaymentMethod.cashOnDelivery,
           subtotal: 95000,
           shippingTotal: 0,
-          discount: 0,
           total: 95000,
         ),
       );
@@ -542,7 +489,6 @@ void main() {
           paymentMethod: PaymentMethod.cashOnDelivery,
           subtotal: 0,
           shippingTotal: 0,
-          discount: 0,
           total: 0,
         );
     final line1 = _cartItem(id: 'cart_item_1', listingId: 'listing_1');

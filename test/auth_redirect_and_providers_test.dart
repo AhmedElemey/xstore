@@ -94,7 +94,6 @@ PlaceOrderParams _dummyCheckout(String consumerId) => PlaceOrderParams(
   paymentMethod: PaymentMethod.cashOnDelivery,
   subtotal: 0,
   shippingTotal: 0,
-  discount: 0,
   total: 0,
 );
 

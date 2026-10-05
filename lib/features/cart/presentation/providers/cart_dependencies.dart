@@ -7,11 +7,9 @@ import '../../data/repositories/cart_repository_impl.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../../domain/usecases/add_or_update_cart_item_usecase.dart';
 import '../../domain/usecases/add_to_cart_usecase.dart';
-import '../../domain/usecases/apply_coupon_usecase.dart';
 import '../../domain/usecases/clear_cart_usecase.dart';
 import '../../domain/usecases/get_cart_usecase.dart';
 import '../../domain/usecases/place_order_usecase.dart';
-import '../../domain/usecases/remove_coupon_usecase.dart';
 import '../../domain/usecases/remove_from_cart_usecase.dart';
 import '../../domain/usecases/update_quantity_usecase.dart';
 
@@ -63,16 +61,6 @@ UpdateQuantityUseCase updateQuantityUseCase(UpdateQuantityUseCaseRef ref) {
 @riverpod
 ClearCartUseCase clearCartUseCase(ClearCartUseCaseRef ref) {
   return ClearCartUseCase(ref.watch(cartRepositoryProvider));
-}
-
-@riverpod
-ApplyCouponUseCase applyCouponUseCase(ApplyCouponUseCaseRef ref) {
-  return ApplyCouponUseCase(ref.watch(cartRepositoryProvider));
-}
-
-@riverpod
-RemoveCouponUseCase removeCouponUseCase(RemoveCouponUseCaseRef ref) {
-  return RemoveCouponUseCase(ref.watch(cartRepositoryProvider));
 }
 
 @riverpod

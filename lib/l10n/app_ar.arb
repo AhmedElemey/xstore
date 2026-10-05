@@ -704,7 +704,6 @@
   "cartRemovedSnack": "تم حذف {name} من السلة",
   "cartShippingPaid": "🚚 +{amount} ج.م شحن",
   "cartSubtotalLine": "الإجمالي الفرعي ({n} عناصر)",
-  "cartCouponLine": "الكوبون ({code})",
   "cartProceedCheckoutTotal": "إتمام الشراء ({total})",
   "checkoutItemsFromSellers": "{items} عناصر من {sellers} بائعين",
   "checkoutPlaceOrderTotal": "🛒 تأكيد الطلب · {total}",
@@ -900,13 +899,6 @@
     "placeholders": {
       "n": {
         "type": "int"
-      }
-    }
-  },
-  "@cartCouponLine": {
-    "placeholders": {
-      "code": {
-        "type": "String"
       }
     }
   },

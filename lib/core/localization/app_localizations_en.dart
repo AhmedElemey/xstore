@@ -2117,11 +2117,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartCouponLine(String code) {
-    return 'Coupon ($code)';
-  }
-
-  @override
   String cartProceedCheckoutTotal(String total) {
     return 'Proceed to Checkout ($total)';
   }
