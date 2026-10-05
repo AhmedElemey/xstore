@@ -1053,3 +1053,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — Pump between enterText and tapping a validity-gated button
 - **Rule:** A button enabled by typed input (`setS`/`ValueListenableBuilder`) only rebuilds on the next frame, so a test doing `enterText` then `tap` hits the still-disabled button and silently does nothing. Add `await tester.pump()` before the tap. When making a button disabled-until-valid, grep tests that type then tap it and run them.
 - **Where it applies:** Review sheets, resubmit and any form with a disabled-until-valid submit; their widget tests.
+
+### 2026-10-05 — Glows under frosted Orbit surfaces tint the fill
+- **Rule:** A `BoxShadow` on a translucent fill (`glassColor`, a brand tint at 8%) paints under the fill and shows through it, roughly tripling the tint; `BlurStyle.outer` doesn't prevent it in our renderer. Put the glow on an opaque child (orb, node, button) and give the translucent card only its border/tint, or keep its shadow alpha ≤0.18. Check selected states in dark screenshots.
+- **Where it applies:** `role_selector_card.dart`, onboarding badge, any glass card or chip with a glow.

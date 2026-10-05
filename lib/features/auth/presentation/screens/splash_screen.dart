@@ -1,8 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -12,8 +14,10 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../providers/auth_provider.dart';
 import '../providers/guest_mode_provider.dart';
+import '../widgets/auth_header.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -107,79 +111,83 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
-  static const _deepIndigo = AppColors.primaryDark;
-
   @override
   Widget build(BuildContext context) {
+    final gradient = context.brandGradient;
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primary,
-              _deepIndigo,
-            ],
-          ),
-        ),
-        child: Column(
+      body: OrbitBackground(
+        child: Stack(
           children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ScaleTransition(
-                      scale: Tween<double>(begin: 0.85, end: 1).animate(_logoScale),
-                      child: Text(
-                        'xStore',
-                        style: AppTypography.displayLarge.copyWith(
-                          fontSize: AppTypography.rem(3),
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.white,
-                          letterSpacing: -1,
-                          shadows: [
-                            Shadow(
-                              color: AppColors.white.withValues(alpha: 0.4),
-                              blurRadius: 28,
-                            ),
-                          ],
-                        ),
-                      ),
+            // Planet with its orbit rings, centered in the upper sky.
+            Align(
+              alignment: const Alignment(0, -0.42),
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.85, end: 1).animate(_logoScale),
+                child: SizedBox(
+                  width: 390,
+                  height: 360,
+                  child: CustomPaint(
+                    foregroundPainter: _OrbitRingsPainter(
+                      isDark: context.isDark,
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    child: const Center(child: OrbitPlanet(size: 200)),
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(28, 0, 28, 44),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const AuthWordmark(size: 48),
+                    const Gap(AppSpacing.spacing10),
                     FadeTransition(
                       opacity: _taglineOpacity,
                       child: Text(
                         context.l10n.tagline,
                         style: AppTypography.bodyLarge.copyWith(
-                          color: AppColors.white.withValues(alpha: 0.92),
-                          fontWeight: FontWeight.w500,
+                          fontSize: AppTypography.rem(1.0625),
+                          height: 1.5,
+                          color: context.textSecondary,
+                        ),
+                      ),
+                    ),
+                    const Gap(AppSpacing.spacing28),
+                    // Thin gradient progress line, filled over the minimum
+                    // splash time; it holds full if auth takes longer.
+                    Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: context.isDark
+                            ? AppColors.white.withValues(alpha: 0.08)
+                            : AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 2400),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, child) => FractionallySizedBox(
+                          widthFactor: v,
+                          heightFactor: 1,
+                          child: child,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: gradient),
+                            borderRadius: BorderRadius.circular(2),
+                            boxShadow: [
+                              BoxShadow(color: gradient.first, blurRadius: 12),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.x4l),
-              child: SizedBox(
-                width: MediaQuery.sizeOf(context).width * 0.4,
-                child: Shimmer.fromColors(
-                  baseColor: AppColors.white.withValues(alpha: 0.25),
-                  highlightColor: AppColors.white.withValues(alpha: 0.65),
-                  period: const Duration(milliseconds: 1200),
-                  child: Container(
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
                 ),
               ),
             ),
@@ -188,4 +196,85 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
   }
+}
+
+/// The two orbit rings around the splash planet (a solid glowing ellipse and
+/// a dashed one) plus two small moons, drawn over a 390×360 box.
+class _OrbitRingsPainter extends CustomPainter {
+  const _OrbitRingsPainter({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final ring = isDark ? AppColors.primaryLight : AppColors.primary;
+
+    // Solid ring: 350×70, tilted -14°.
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(-14 * math.pi / 180);
+    final solid = Rect.fromCenter(center: Offset.zero, width: 350, height: 70);
+    canvas.drawOval(
+      solid,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4
+        ..color = ring.withValues(alpha: 0.25)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+    );
+    canvas.drawOval(
+      solid,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = ring.withValues(alpha: 0.6),
+    );
+    canvas.restore();
+
+    // Dashed ring: 390×150, tilted 8°.
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(8 * math.pi / 180);
+    final dashed = Rect.fromCenter(
+      center: Offset.zero,
+      width: 390,
+      height: 150,
+    );
+    final dashPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = AppColors.darkSecondary.withValues(alpha: 0.35);
+    const dashes = 90;
+    const step = 2 * math.pi / dashes;
+    for (var i = 0; i < dashes; i++) {
+      canvas.drawArc(dashed, i * step, step / 2, false, dashPaint);
+    }
+    canvas.restore();
+
+    // Moons: an amber one on the left, a small brand-colored one on the right.
+    _moon(
+      canvas,
+      Offset(center.dx - 144, center.dy + 23),
+      7,
+      AppColors.accentLight,
+      isDark ? AppColors.accentLight : AppColors.warning,
+    );
+    _moon(canvas, Offset(center.dx + 135, center.dy - 30), 4, ring, ring);
+  }
+
+  void _moon(Canvas canvas, Offset at, double r, Color color, Color glow) {
+    canvas.drawCircle(
+      at,
+      r * 1.8,
+      Paint()
+        ..color = glow.withValues(alpha: 0.6)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 1.3),
+    );
+    canvas.drawCircle(at, r, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_OrbitRingsPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }
