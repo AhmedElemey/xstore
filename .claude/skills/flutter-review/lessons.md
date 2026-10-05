@@ -667,7 +667,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `checkout_review_section.dart`, terms/privacy copy.
 
 ### 2026-09-07 — Checkout review shows everything that will be submitted
-- **Rule:** The confirm step displays address, payment and the delivery note (under estimated delivery, hidden when blank). The payment step's note controller is seeded from `checkoutProvider.deliveryNote` because the step widget is recreated on each visit. The review block uses the same raised `Material` as `CartSummaryCard` (`surfaceColor`, `AppSpacing.lg` radius, elevation 1, shadow 6% of `textPrimary`, `AppSpacing.lg` padding), with terms and the summary card outside it.
+- **Rule:** The confirm step displays address, payment and the delivery note (under estimated delivery, hidden when blank). The payment step's note controller is seeded from `checkoutProvider.deliveryNote` because the step widget is recreated on each visit. The review block and `CartSummaryCard` are the same glass card (`glassColor`, `borderColor`, radius 20-22); line-item prices and the total are amber mono. Cart and checkout headers sit in the body (`AuthBackButton` + Unbounded title) inside `OrbitBackground` + `SafeArea`, not an `AppBar`.
 - **Where it applies:** `checkout_review_section.dart`, `checkout_payment_section.dart`.
 
 ### 2026-09-07 — Full-height confirmation sheets center their message
@@ -715,7 +715,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `product_detail_screen.dart`.
 
 ### 2026-09-08 — Wishlist and cart card hierarchy
-- **Rule:** Wishlist list cards: title → price (+ strikethrough / `-N%`) → store name (+ verified) → `★ rating (count)` with shipping on the same row; actions below a divider; no `condition · category` line or redundant price-drop text. Cart item cards use only real cart fields (title, `vendorStoreName`, price + compare-at on one row, shipping, availability, condition/category, qty, remove, save for later) — no invented social proof or promo badges; checkbox on the image; `QuantityControl` is one bordered pill (trash/minus · qty · plus).
+- **Rule:** Wishlist list cards: title → price (+ strikethrough / `-N%`) → store name (+ verified) → `★ rating (count)` with shipping on the same row; actions below a divider; no `condition · category` line or redundant price-drop text. Cart (Orbit): one glass card per store with the store name as its header (dot + name), so item rows are flat inside it — checkbox, image, title, `condition · category`, amber mono price (+ compare-at) and shipping, then a Wrap of `QuantityControl` + remove + save for later. Only real cart fields; no invented social proof, counts or promo badges; `QuantityControl` stays one bordered pill.
 - **Where it applies:** `wishlist_item_card.dart`, `cart_item_card.dart`, `quantity_control.dart`.
 
 ### 2026-09-08 — Tall filter sheets from shell tabs

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../orders/presentation/providers/orders_provider.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -18,6 +19,8 @@ import '../widgets/checkout_review_section.dart';
 import '../widgets/order_confirmation_sheet.dart';
 import '../../../../shared/utils/require_phone_verified.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 
 class CheckoutScreen extends ConsumerWidget {
   const CheckoutScreen({super.key});
@@ -55,10 +58,8 @@ class CheckoutScreen extends ConsumerWidget {
           // Profile already marked verified but the backend still 400'd —
           // don't recurse requirePhoneVerified (it would return true
           // immediately and loop). Surface the error instead.
-          final alreadyVerified = ref
-                  .read(profileNotifierProvider)
-                  .profile
-                  ?.isPhoneVerified ??
+          final alreadyVerified =
+              ref.read(profileNotifierProvider).profile?.isPhoneVerified ??
               false;
           if (alreadyVerified) {
             AppSnackbar.error(
@@ -109,43 +110,64 @@ class CheckoutScreen extends ConsumerWidget {
           );
 
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.checkoutTitle),
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (st.currentStep > 1) {
-              notifier.previousStep();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.spacing18,
+                  AppSpacing.xl,
+                  AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    AuthBackButton(
+                      onPressed: () {
+                        if (st.currentStep > 1) {
+                          notifier.previousStep();
+                        } else {
+                          Navigator.of(context).maybePop();
+                        }
+                      },
+                    ),
+                    const Gap(AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        context.l10n.checkoutTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.headlineSmall.copyWith(
+                          fontSize: 20,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              CheckoutProgress(step: st.currentStep),
+              CheckoutErrorBanner(messageKey: st.error),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: switch (st.currentStep) {
+                    1 => const CheckoutAddressSection(),
+                    2 => const CheckoutPaymentSection(),
+                    _ => const CheckoutReviewSection(),
+                  },
+                ),
+              ),
+              CheckoutPrimaryFooter(
+                label: label,
+                busy: busy,
+                onPressed: busy ? null : onPrimary,
+              ),
+            ],
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          CheckoutProgress(step: st.currentStep),
-          CheckoutErrorBanner(messageKey: st.error),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: switch (st.currentStep) {
-                1 => const CheckoutAddressSection(),
-                2 => const CheckoutPaymentSection(),
-                _ => const CheckoutReviewSection(),
-              },
-            ),
-          ),
-          CheckoutPrimaryFooter(
-            label: label,
-            busy: busy,
-            onPressed: busy ? null : onPrimary,
-          ),
-        ],
       ),
     );
   }

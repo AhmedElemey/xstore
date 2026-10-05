@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../providers/cart_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -26,36 +27,63 @@ class CartCheckoutBar extends ConsumerWidget {
         ),
       ),
     );
-    final canCheckout = checkout.hasItems &&
+    final canCheckout =
+        checkout.hasItems &&
         checkout.selectedCount > 0 &&
         !checkout.allSelectedUnavailable;
     final disabled = !canCheckout || checkout.isUpdating;
-    final label = checkout.selectedCount == 0
-        ? context.l10n.cartProceedCheckout
-        : context.l10n.cartProceedCheckoutTotal(
-            context.formatCurrency(checkout.total),
-          );
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.md + MediaQuery.paddingOf(context).bottom,
-      ),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.08),
-            blurRadius: AppSpacing.md,
-            offset: const Offset(0, -AppSpacing.xs),
-          ),
-        ],
+        color: context.surfaceColor.withValues(alpha: 0.96),
+        border: Border(top: BorderSide(color: context.borderColor)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: XstoreButton(
-        label: label,
-        onPressed: disabled ? null : () => context.push(AppRoutes.checkout),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.lg + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: Row(
+          children: [
+            // The amount the customer pays is amber, in mono digits.
+            if (checkout.selectedCount > 0) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.l10n.cartTotalLine,
+                    style: AppTypography.labelSmall.copyWith(
+                      fontSize: 12,
+                      color: context.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    context.formatCurrency(checkout.total),
+                    style: AppTypography.mono.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: context.amberColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: AppSpacing.lg),
+            ],
+            Expanded(
+              child: XstoreButton(
+                label: context.l10n.cartProceedCheckout,
+                onPressed: disabled
+                    ? null
+                    : () => context.push(AppRoutes.checkout),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -14,58 +14,55 @@ class CartVendorBuyersOnly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: context.backgroundColor,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    LucideIcons.shoppingCart,
-                    size: AppSpacing.x4l * 2,
-                    color: context.textSecondary.withValues(alpha: 0.35),
-                  ),
-                  Positioned(
-                    right: AppSpacing.md,
-                    top: AppSpacing.sm,
-                    child: Icon(
-                      LucideIcons.xCircle,
-                      size: AppSpacing.x3l,
-                      color: AppColors.error,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.x2l),
-              Text(
-                context.l10n.cartForBuyersTitle,
-                textAlign: TextAlign.center,
-                style: AppTypography.titleLarge.copyWith(
-                  color: context.textPrimary,
-                  fontWeight: FontWeight.w700,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  LucideIcons.shoppingCart,
+                  size: AppSpacing.x4l * 2,
+                  color: context.textSecondary.withValues(alpha: 0.35),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                context.l10n.wishlistForBuyersSubtitle,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.textSecondary,
-                  height: 1.45,
+                Positioned(
+                  right: AppSpacing.md,
+                  top: AppSpacing.sm,
+                  child: Icon(
+                    LucideIcons.xCircle,
+                    size: AppSpacing.x3l,
+                    color: AppColors.error,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.x2l),
+            Text(
+              context.l10n.cartForBuyersTitle,
+              textAlign: TextAlign.center,
+              style: AppTypography.headlineSmall.copyWith(
+                fontSize: 20,
+                color: context.textPrimary,
               ),
-              const SizedBox(height: AppSpacing.x2l),
-              XstoreButton(
-                label: context.l10n.cartExploreAsBuyer,
-                onPressed: () => context.go(AppRoutes.explore),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              context.l10n.wishlistForBuyersSubtitle,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.textSecondary,
+                height: 1.45,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.x2l),
+            XstoreButton(
+              label: context.l10n.cartExploreAsBuyer,
+              onPressed: () => context.go(AppRoutes.explore),
+            ),
+          ],
         ),
       ),
     );
