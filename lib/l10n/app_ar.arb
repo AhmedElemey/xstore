@@ -62,9 +62,6 @@
   "freeShippingBadge": "🚚 شحن مجاني",
   "securePayBadge": "🔒 دفع آمن",
   "easyReturnsBadge": "↩️ إرجاع سهل",
-  "productTrustFastShipping": "شحن سريع",
-  "productTrustSecurePayment": "دفع آمن",
-  "productTrustEasyReturns": "إرجاع سهل",
   "shopNow": "تسوق دلوقتي",
   "notifications": "الإشعارات",
   "notificationsMarkAllRead": "تحديد الكل كمقروء",
@@ -173,8 +170,6 @@
   "listingBrandOptional": "الماركة (اختياري)",
   "listingBrandHint": "اسم الماركة",
   "listingSectionStockShipping": "المخزون والشحن",
-  "listingFormLocationLabel": "الموقع *",
-  "listingFormLocationHint": "المدينة، المنطقة",
   "listingShippingAvailable": "الشحن متاح؟",
   "listingShippingCostLabel": "تكلفة الشحن *",
   "listingSectionProductAttributes": "مواصفات المنتج",
@@ -484,13 +479,7 @@
   "cartUndo": "تراجع",
   "cartShippingFree": "🚚 شحن مجاني",
   "cartPickupOnly": "🚫 استلام فقط",
-  "cartPromoHeading": "🏷️ عندك كود خصم؟",
-  "cartCouponHint": "اكتب كود الخصم…",
   "cartApply": "تطبيق",
-  "cartCouponRemove": "إزالة",
-  "cartCouponInvalid": "كود الخصم غير صحيح",
-  "cartCouponUnavailable": "كوبونات الخصم غير متاحة حالياً",
-  "cartCouponMinOrder": "الحد الأدنى للطلب 5,000 ج.م",
   "cartOrderSummary": "ملخص الطلب",
   "cartShippingLine": "الشحن",
   "cartTotalLine": "الإجمالي",
@@ -523,11 +512,6 @@
   "checkoutErrorAddressName": "أدخل اسم المستلم",
   "checkoutErrorAddressStreet": "أدخل عنوان الشارع",
   "checkoutErrorAddressCity": "أدخل المدينة",
-  "checkoutPickOnMap": "تحديد على الخريطة",
-  "checkoutConfirmLocation": "تأكيد الموقع",
-  "checkoutMapPinDropped": "اسحب الخريطة لنقل الدبوس إلى موقع التوصيل",
-  "checkoutMapOutsideEgypt": "يجب أن يكون موقع التوصيل داخل مصر",
-  "checkoutLocationPinned": "تم تحديد الموقع",
   "checkoutPaymentTitle": "طريقة الدفع",
   "checkoutPayCodTitle": "💵 الدفع عند الاستلام",
   "checkoutPayCodSubtitle": "ادفع عند استلام الطلب",
@@ -556,9 +540,6 @@
   "orderPlacedTitle": "تم الطلب! 🎉",
   "orderTrackCta": "تابع طلبي",
   "orderContinueShopping": "كمّل التسوق",
-  "couponDetailSave10": "تم تطبيق خصم 10%!",
-  "couponDetailFree500": "تم تطبيق خصم 500 ج.م!",
-  "couponDetailWelcome": "تم تطبيق خصم 15%!",
   "youMayAlsoLike": "ممكن يعجبك كمان",
   "productNotFound": "المنتج غير موجود",
   "productScreenTitle": "المنتج",
@@ -722,7 +703,6 @@
   "cartSelectAllCount": "تحديد الكل ({n} عناصر)",
   "cartRemovedSnack": "تم حذف {name} من السلة",
   "cartShippingPaid": "🚚 +{amount} ج.م شحن",
-  "cartCouponApplied": "✅ \"{code}\" — {detail}",
   "cartSubtotalLine": "الإجمالي الفرعي ({n} عناصر)",
   "cartCouponLine": "الكوبون ({code})",
   "cartProceedCheckoutTotal": "إتمام الشراء ({total})",
@@ -913,16 +893,6 @@
     "placeholders": {
       "amount": {
         "type": "int"
-      }
-    }
-  },
-  "@cartCouponApplied": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      },
-      "detail": {
-        "type": "String"
       }
     }
   },

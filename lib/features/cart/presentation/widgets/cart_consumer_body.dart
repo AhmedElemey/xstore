@@ -12,7 +12,6 @@ import 'cart_recommended_strip.dart';
 // import 'cart_select_all_row.dart';
 import 'cart_summary_card.dart';
 import 'cart_vendor_group.dart';
-import 'coupon_input_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeletons/cart_skeleton.dart';
@@ -43,9 +42,9 @@ class CartConsumerBody extends ConsumerWidget {
     }
     // Select-all header stays in source (`cart_select_all_row.dart`) but is
     // hidden for now — uncomment the import + index-0 branch below to restore.
-    // When restoring, set childCount back to `groups.length + 7` and shift
+    // When restoring, set childCount back to `groups.length + 6` and shift
     // vendor indices to `index - 1` / `groups.length + 1` again.
-    final childCount = groups.length + 6;
+    final childCount = groups.length + 5;
 
     return ColoredBox(
       color: context.backgroundColor,
@@ -100,16 +99,14 @@ class CartConsumerBody extends ConsumerWidget {
                         final tail = index - groups.length;
                         switch (tail) {
                           case 0:
-                            return const CouponInputRow();
-                          case 1:
                             return const Gap(AppSpacing.lg);
-                          case 2:
+                          case 1:
                             return const CartSummaryCard();
-                          case 3:
+                          case 2:
                             return const Gap(AppSpacing.x2l);
-                          case 4:
+                          case 3:
                             return const CartRecommendedStrip();
-                          case 5:
+                          case 4:
                             return const Gap(AppSpacing.x4l);
                           default:
                             return const SizedBox.shrink();

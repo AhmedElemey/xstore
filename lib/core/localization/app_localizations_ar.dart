@@ -203,15 +203,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get easyReturnsBadge => '↩️ إرجاع سهل';
 
   @override
-  String get productTrustFastShipping => 'شحن سريع';
-
-  @override
-  String get productTrustSecurePayment => 'دفع آمن';
-
-  @override
-  String get productTrustEasyReturns => 'إرجاع سهل';
-
-  @override
   String get shopNow => 'تسوق دلوقتي';
 
   @override
@@ -501,12 +492,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listingSectionStockShipping => 'المخزون والشحن';
-
-  @override
-  String get listingFormLocationLabel => 'الموقع *';
-
-  @override
-  String get listingFormLocationHint => 'المدينة، المنطقة';
 
   @override
   String get listingShippingAvailable => 'الشحن متاح؟';
@@ -1409,25 +1394,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cartPickupOnly => '🚫 استلام فقط';
 
   @override
-  String get cartPromoHeading => '🏷️ عندك كود خصم؟';
-
-  @override
-  String get cartCouponHint => 'اكتب كود الخصم…';
-
-  @override
   String get cartApply => 'تطبيق';
-
-  @override
-  String get cartCouponRemove => 'إزالة';
-
-  @override
-  String get cartCouponInvalid => 'كود الخصم غير صحيح';
-
-  @override
-  String get cartCouponUnavailable => 'كوبونات الخصم غير متاحة حالياً';
-
-  @override
-  String get cartCouponMinOrder => 'الحد الأدنى للطلب 5,000 ج.م';
 
   @override
   String get cartOrderSummary => 'ملخص الطلب';
@@ -1528,22 +1495,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutErrorAddressCity => 'أدخل المدينة';
 
   @override
-  String get checkoutPickOnMap => 'تحديد على الخريطة';
-
-  @override
-  String get checkoutConfirmLocation => 'تأكيد الموقع';
-
-  @override
-  String get checkoutMapPinDropped =>
-      'اسحب الخريطة لنقل الدبوس إلى موقع التوصيل';
-
-  @override
-  String get checkoutMapOutsideEgypt => 'يجب أن يكون موقع التوصيل داخل مصر';
-
-  @override
-  String get checkoutLocationPinned => 'تم تحديد الموقع';
-
-  @override
   String get checkoutPaymentTitle => 'طريقة الدفع';
 
   @override
@@ -1617,15 +1568,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orderContinueShopping => 'كمّل التسوق';
-
-  @override
-  String get couponDetailSave10 => 'تم تطبيق خصم 10%!';
-
-  @override
-  String get couponDetailFree500 => 'تم تطبيق خصم 500 ج.م!';
-
-  @override
-  String get couponDetailWelcome => 'تم تطبيق خصم 15%!';
 
   @override
   String get youMayAlsoLike => 'ممكن يعجبك كمان';
@@ -2167,11 +2109,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String cartShippingPaid(int amount) {
     return '🚚 +$amount ج.م شحن';
-  }
-
-  @override
-  String cartCouponApplied(String code, String detail) {
-    return '✅ \"$code\" — $detail';
   }
 
   @override

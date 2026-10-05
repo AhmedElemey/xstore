@@ -470,24 +470,6 @@ abstract class AppLocalizations {
   /// **'↩️ Easy Returns'**
   String get easyReturnsBadge;
 
-  /// No description provided for @productTrustFastShipping.
-  ///
-  /// In en, this message translates to:
-  /// **'Fast Shipping'**
-  String get productTrustFastShipping;
-
-  /// No description provided for @productTrustSecurePayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Secure Payment'**
-  String get productTrustSecurePayment;
-
-  /// No description provided for @productTrustEasyReturns.
-  ///
-  /// In en, this message translates to:
-  /// **'Easy Returns'**
-  String get productTrustEasyReturns;
-
   /// No description provided for @shopNow.
   ///
   /// In en, this message translates to:
@@ -1051,18 +1033,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stock & Shipping'**
   String get listingSectionStockShipping;
-
-  /// No description provided for @listingFormLocationLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location *'**
-  String get listingFormLocationLabel;
-
-  /// No description provided for @listingFormLocationHint.
-  ///
-  /// In en, this message translates to:
-  /// **'City, Region'**
-  String get listingFormLocationHint;
 
   /// No description provided for @listingShippingAvailable.
   ///
@@ -2834,47 +2804,11 @@ abstract class AppLocalizations {
   /// **'🚫 Pickup Only'**
   String get cartPickupOnly;
 
-  /// No description provided for @cartPromoHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'🏷️ Have a promo code?'**
-  String get cartPromoHeading;
-
-  /// No description provided for @cartCouponHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter coupon code…'**
-  String get cartCouponHint;
-
   /// No description provided for @cartApply.
   ///
   /// In en, this message translates to:
   /// **'Apply'**
   String get cartApply;
-
-  /// No description provided for @cartCouponRemove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove'**
-  String get cartCouponRemove;
-
-  /// No description provided for @cartCouponInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid coupon code'**
-  String get cartCouponInvalid;
-
-  /// No description provided for @cartCouponUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Coupons aren\'t available yet'**
-  String get cartCouponUnavailable;
-
-  /// No description provided for @cartCouponMinOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Minimum order 5,000 EGP required'**
-  String get cartCouponMinOrder;
 
   /// No description provided for @cartOrderSummary.
   ///
@@ -3068,36 +3002,6 @@ abstract class AppLocalizations {
   /// **'Enter a city'**
   String get checkoutErrorAddressCity;
 
-  /// No description provided for @checkoutPickOnMap.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick on Map'**
-  String get checkoutPickOnMap;
-
-  /// No description provided for @checkoutConfirmLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Location'**
-  String get checkoutConfirmLocation;
-
-  /// No description provided for @checkoutMapPinDropped.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag the map to move the pin to your delivery spot'**
-  String get checkoutMapPinDropped;
-
-  /// No description provided for @checkoutMapOutsideEgypt.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery pin must be within Egypt'**
-  String get checkoutMapOutsideEgypt;
-
-  /// No description provided for @checkoutLocationPinned.
-  ///
-  /// In en, this message translates to:
-  /// **'Location pinned'**
-  String get checkoutLocationPinned;
-
   /// No description provided for @checkoutPaymentTitle.
   ///
   /// In en, this message translates to:
@@ -3223,24 +3127,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue Shopping'**
   String get orderContinueShopping;
-
-  /// No description provided for @couponDetailSave10.
-  ///
-  /// In en, this message translates to:
-  /// **'10% discount applied!'**
-  String get couponDetailSave10;
-
-  /// No description provided for @couponDetailFree500.
-  ///
-  /// In en, this message translates to:
-  /// **'500 EGP discount applied!'**
-  String get couponDetailFree500;
-
-  /// No description provided for @couponDetailWelcome.
-  ///
-  /// In en, this message translates to:
-  /// **'15% discount applied!'**
-  String get couponDetailWelcome;
 
   /// No description provided for @youMayAlsoLike.
   ///
@@ -4219,12 +4105,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'🚚 +{amount} EGP shipping'**
   String cartShippingPaid(int amount);
-
-  /// No description provided for @cartCouponApplied.
-  ///
-  /// In en, this message translates to:
-  /// **'✅ \"{code}\" — {detail}'**
-  String cartCouponApplied(String code, String detail);
 
   /// No description provided for @cartSubtotalLine.
   ///

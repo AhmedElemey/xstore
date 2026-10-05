@@ -143,11 +143,14 @@ class MyListingsNotifier extends _$MyListingsNotifier {
   }
 
   /// Sends a rejected listing back for admin review with a corrected
-  /// price. Returns `true` on success so the sheet can close/show a toast.
-  Future<bool> resubmitListing(String id, double newPrice) async {
+  /// price. Returns null on success, or the server's reason ('' when there
+  /// is none). The failure is returned instead of stored on `state.error`:
+  /// the resubmit sheet shows it inline, and the screen's error listener
+  /// would otherwise toast it a second time behind the sheet.
+  Future<String?> resubmitListing(String id, double newPrice) async {
     final listing = _listingById(id);
     if (listing == null || listing.status != ListingStatus.rejected) {
-      return false;
+      return '';
     }
 
     final beforeMutation = state;
@@ -167,14 +170,13 @@ class MyListingsNotifier extends _$MyListingsNotifier {
         .read(resubmitListingUseCaseProvider)
         .call(id: id, newPrice: newPrice);
 
-    if (_disposed) return false;
-    var success = false;
-    result.fold(
-      (f) => state = _withComputed(
-        beforeMutation.copyWith(error: f.toString()),
-      ),
+    if (_disposed) return '';
+    return result.fold(
+      (f) {
+        state = _withComputed(beforeMutation.copyWith(error: null));
+        return f.toString();
+      },
       (entity) {
-        success = true;
         final list = state.listings
             .map((e) => e.id == entity.id ? entity : e)
             .toList();
@@ -186,9 +188,9 @@ class MyListingsNotifier extends _$MyListingsNotifier {
             AnalyticsProps.priceEgp: newPrice,
           },
         );
+        return null;
       },
     );
-    return success;
   }
 
   ListingEntity? _listingById(String id) {
@@ -207,7 +209,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
   Future<void> _applyOptimisticStatusMutation({
     required ListingEntity listing,
     required ListingStatus nextStatus,
-    required Future<Either<Failure, ListingEntity>> Function() runMutation,
+    required Future<Either<Failure, Object>> Function() runMutation,
   }) async {
     final beforeMutation = state;
     final optimistic = listing.copyWith(status: nextStatus);

@@ -29,6 +29,7 @@ import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
+import '../../../../shared/widgets/expandable_text.dart';
 
 /// Radius of the storefront avatar in the profile card header.
 const double _kAvatarRadius = 38;
@@ -489,34 +490,28 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                             style: AppTypography.titleSmall,
                           ),
                           const Gap(AppSpacing.sm),
-                          Text(
-                            desc,
-                            maxLines: _descExpanded ? null : 3,
-                            overflow: _descExpanded
-                                ? TextOverflow.visible
-                                : TextOverflow.ellipsis,
+                          ExpandableText(
+                            text: desc,
+                            maxLines: 3,
+                            expanded: _descExpanded,
                             style: AppTypography.bodyMedium.copyWith(
                               color: context.textSecondary,
                             ),
-                          ),
-                          if (desc.length > 120)
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton(
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: const Size(0, 0),
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                onPressed: () =>
-                                    setState(() => _descExpanded = !_descExpanded),
-                                child: Text(
-                                  _descExpanded
-                                      ? context.l10n.readLess
-                                      : context.l10n.readMore,
-                                ),
+                            toggle: TextButton(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () =>
+                                  setState(() => _descExpanded = !_descExpanded),
+                              child: Text(
+                                _descExpanded
+                                    ? context.l10n.readLess
+                                    : context.l10n.readMore,
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -689,7 +684,9 @@ class _VendorStoreStatsRow extends StatelessWidget {
       ),
       (
         LucideIcons.messageCircle,
-        '${profile.responseRatePercent}%',
+        profile.responseRatePercent > 0
+            ? '${profile.responseRatePercent}%'
+            : context.l10n.newSellerEmDash,
         context.l10n.vendorStoreStatResponse,
       ),
       (

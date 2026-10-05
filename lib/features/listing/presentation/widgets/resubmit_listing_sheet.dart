@@ -18,10 +18,11 @@ class ResubmitListingSheet extends StatefulWidget {
 
   final ListingEntity listing;
 
-  /// Returns true on success. The sheet pops itself only on success (the
-  /// caller then shows a toast); on failure it stays open with an inline
-  /// error so the vendor doesn't lose the price they typed.
-  final Future<bool> Function(double newPrice) onSubmit;
+  /// Returns null on success, or the error to show inline. The sheet pops
+  /// itself only on success (the caller then shows a toast); on failure it
+  /// stays open with the server's reason so the vendor doesn't lose the
+  /// price they typed.
+  final Future<String?> Function(double newPrice) onSubmit;
 
   @override
   State<ResubmitListingSheet> createState() => _ResubmitListingSheetState();
@@ -56,15 +57,15 @@ class _ResubmitListingSheetState extends State<ResubmitListingSheet> {
       _error = null;
       _submitting = true;
     });
-    final ok = await widget.onSubmit(price);
+    final error = await widget.onSubmit(price);
     if (!mounted) return;
-    if (!ok) {
+    if (error != null) {
       // Stay open on failure — the vendor's typed price and the visible
       // rejection reason shouldn't be lost; let them retry inline instead
       // of reopening the sheet from scratch.
       setState(() {
         _submitting = false;
-        _error = context.l10n.errorGeneric;
+        _error = error.isNotEmpty ? error : context.l10n.errorGeneric;
       });
       return;
     }

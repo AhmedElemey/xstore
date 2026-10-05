@@ -580,7 +580,7 @@ class OrderCard extends ConsumerWidget {
                     ),
                   ),
                   TextField(
-                    onChanged: (v) => reviewText = v,
+                    onChanged: (v) => setS(() => reviewText = v),
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: sheetContext.l10n.ordersReviewHint,
@@ -588,44 +588,47 @@ class OrderCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   FilledButton(
-                    onPressed: () async {
-                      final comment = reviewText.trim();
-                      if (comment.isEmpty) return;
-                      final posted =
-                          await ref.read(createReviewUseCaseProvider).call(
-                        listingId: listingId,
-                        params: ReviewWriteParams(
-                          rating: stars.toDouble(),
-                          comment: comment,
-                        ),
-                      );
-                      if (!sheetContext.mounted) return;
-                      posted.fold(
-                        (failure) {
-                          if (isAlreadyReviewedFailure(failure)) {
-                            Navigator.pop(ctx, 'already');
-                            return;
-                          }
-                          AppSnackbar.error(
-                            sheetContext,
-                            failure.toString(),
-                          );
-                        },
-                        (_) {
-                          ref.read(analyticsServiceProvider).track(
-                            AnalyticsEvents.reviewSubmitted,
-                            properties: {
-                              AnalyticsProps.itemId: listingId,
-                              AnalyticsProps.rating: stars.toDouble(),
-                            },
-                          );
-                          stars = 5;
-                          reviewText = '';
-                          Navigator.pop(ctx, 'added');
-                          ref.invalidate(productDetailProvider(listingId));
-                        },
-                      );
-                    },
+                    // A comment is required, so the button stays disabled
+                    // until one is typed rather than ignoring taps.
+                    onPressed: reviewText.trim().isEmpty
+                        ? null
+                        : () async {
+                            final comment = reviewText.trim();
+                            final posted =
+                                await ref.read(createReviewUseCaseProvider).call(
+                              listingId: listingId,
+                              params: ReviewWriteParams(
+                                rating: stars.toDouble(),
+                                comment: comment,
+                              ),
+                            );
+                            if (!sheetContext.mounted) return;
+                            posted.fold(
+                              (failure) {
+                                if (isAlreadyReviewedFailure(failure)) {
+                                  Navigator.pop(ctx, 'already');
+                                  return;
+                                }
+                                AppSnackbar.error(
+                                  sheetContext,
+                                  failure.toString(),
+                                );
+                              },
+                              (_) {
+                                ref.read(analyticsServiceProvider).track(
+                                  AnalyticsEvents.reviewSubmitted,
+                                  properties: {
+                                    AnalyticsProps.itemId: listingId,
+                                    AnalyticsProps.rating: stars.toDouble(),
+                                  },
+                                );
+                                stars = 5;
+                                reviewText = '';
+                                Navigator.pop(ctx, 'added');
+                                ref.invalidate(productDetailProvider(listingId));
+                              },
+                            );
+                          },
                     child: Text(sheetContext.l10n.ordersSubmitReview),
                   ),
                 ],

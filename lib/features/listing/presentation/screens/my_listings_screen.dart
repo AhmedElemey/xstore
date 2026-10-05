@@ -118,12 +118,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         ),
       ),
     );
-    if (!mounted || ok != true) {
-      // Failure already surfaces via the screen's existing ref.listen on
-      // state.error (same pattern pause/resume relies on) — no need to
-      // toast it again here.
-      return;
-    }
+    // A failure stays in the sheet, shown inline — nothing to toast here.
+    if (!mounted || ok != true) return;
     AppSnackbar.success(context, context.l10n.resubmitSuccess);
   }
 

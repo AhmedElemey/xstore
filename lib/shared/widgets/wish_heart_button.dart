@@ -50,21 +50,29 @@ class WishHeartButton extends ConsumerWidget {
           : context.surfaceColor.withValues(alpha: 0.92),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
-      child: IconButton(
-        tooltip: isWishlisted
-            ? context.l10n.wishlistRemovedSnack
-            : context.l10n.buyerFeature4,
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(width: size + 8, height: size + 8),
-        iconSize: size,
-        onPressed: () => _onTap(context, ref, isWishlisted),
-        icon: HeartBurstAnimation(
-          isFavorite: isWishlisted,
-          child: Icon(
-            isWishlisted
-                ? Icons.favorite_rounded
-                : Icons.favorite_border_rounded,
-            color: isWishlisted ? AppColors.error : outlineColor,
+
+      child: SizedBox(
+        width: size + 12,
+        height: size + 12,
+        child: IconButton(
+          tooltip: isWishlisted
+              ? context.l10n.wishlistRemovedSnack
+              : context.l10n.buyerFeature4,
+          padding: EdgeInsets.zero,
+          constraints: BoxConstraints.tightFor(
+            width: size + 8,
+            height: size + 8,
+          ),
+          iconSize: size - 4,
+          onPressed: () => _onTap(context, ref, isWishlisted),
+          icon: HeartBurstAnimation(
+            isFavorite: isWishlisted,
+            child: Icon(
+              isWishlisted
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
+              color: isWishlisted ? AppColors.error : outlineColor,
+            ),
           ),
         ),
       ),
@@ -80,7 +88,9 @@ class WishHeartButton extends ConsumerWidget {
     HapticFeedback.lightImpact();
     await ref.read(wishlistProvider.notifier).toggleWishlist(listingId);
     if (!context.mounted) return;
-    final nowWishlisted = ref.read(wishlistProvider).wishlistedListingIds
+    final nowWishlisted = ref
+        .read(wishlistProvider)
+        .wishlistedListingIds
         .contains(listingId);
     ScaffoldMessenger.of(context).clearSnackBars();
     if (nowWishlisted && !wasWishlisted) {

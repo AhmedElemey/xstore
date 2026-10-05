@@ -62,7 +62,8 @@ class SellerCard extends ConsumerWidget {
                           Text(
                             seller.name,
                             style: AppTypography.titleSmall.copyWith(
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
                             ),
                           ),
                           const Gap(AppSpacing.xs),

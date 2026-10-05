@@ -780,6 +780,8 @@ void main() {
         find.byType(TextField),
         'Great product, fast delivery!',
       );
+      // Rebuild so the Submit button enables for the typed comment.
+      await tester.pump();
       await tester.tap(find.text('Submit Review'));
       await _settle(tester);
 
@@ -828,6 +830,8 @@ void main() {
         find.byType(TextField),
         'Great product, fast delivery!',
       );
+      // Rebuild so the Submit button enables for the typed comment.
+      await tester.pump();
       await tester.tap(find.text('Submit Review'));
       await _settle(tester);
 

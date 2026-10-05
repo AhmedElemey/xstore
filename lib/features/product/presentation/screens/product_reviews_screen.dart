@@ -382,10 +382,17 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
             decoration: InputDecoration(hintText: context.l10n.reviewCommentHint),
           ),
           const Gap(AppSpacing.lg),
-          XstoreButton(
-            label: context.l10n.submitReview,
-            isLoading: _isSubmitting,
-            onPressed: _isSubmitting ? null : _submit,
+          // A comment is required, so the button stays disabled until one is
+          // typed rather than ignoring taps.
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _comment,
+            builder: (context, value, _) => XstoreButton(
+              label: context.l10n.submitReview,
+              isLoading: _isSubmitting,
+              onPressed: _isSubmitting || value.text.trim().isEmpty
+                  ? null
+                  : _submit,
+            ),
           ),
         ],
       ),
