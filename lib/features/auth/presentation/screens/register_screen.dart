@@ -30,7 +30,7 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
 import '../widgets/role_selector_card.dart';
 import '../widgets/auth_divider.dart';
-import '../widgets/social_login_row.dart';
+import '../widgets/google_sign_in_button.dart';
 import '../widgets/phone_input_field.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -203,7 +203,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         AppSnackbar.error(context, next.error!);
       }
     });
-    // Already on the register screen (Google via the same SocialLoginRow
+    // Already on the register screen (Google via the same GoogleSignInButton
     // matched no account) — prefill in place, no navigation needed.
     ref.listen(socialAuthProvider.select((s) => s.googleRegistration), (prev, next) {
       if (next != null && mounted) {
@@ -430,7 +430,7 @@ class _StepRole extends StatelessWidget {
         const Gap(AppSpacing.xl),
         AuthDivider(label: context.l10n.socialLoginDivider),
         const Gap(AppSpacing.xl),
-        const SocialLoginRow(),
+        const GoogleSignInButton(),
       ],
     );
   }

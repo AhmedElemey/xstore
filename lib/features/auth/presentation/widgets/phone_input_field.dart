@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
@@ -48,121 +46,91 @@ class PhoneInputField extends StatelessWidget {
       });
     }
 
+    final codeColor = context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.phoneNumber,
-          style: AppTypography.bodyMedium.copyWith(
-            color: context.textSecondary,
+          context.l10n.phoneNumber.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
+        ),
+        SizedBox(height: context.scaledPx(8)),
+        TextFormField(
+          controller: controller,
+          readOnly: readOnly,
+          onTap: onTap,
+          onChanged: readOnly
+              ? null
+              : (value) {
+                  final national =
+                      AppValidators.egyptNationalSignificantNumber(value);
+                  if (controller.text != national) {
+                    controller.value = TextEditingValue(
+                      text: national,
+                      selection: TextSelection.collapsed(
+                        offset: national.length,
+                      ),
+                    );
+                  }
+                  onChanged(AppValidators.normalizeEgyptLocal(national));
+                },
+          enabled: enabled,
+          keyboardType: TextInputType.phone,
+          inputFormatters: const [_EgyptNationalPhoneFormatter()],
+          style: AppTypography.bodyLarge.copyWith(
+            color: context.textPrimary,
             fontWeight: FontWeight.w500,
           ),
-        ),
-        const Gap(AppSpacing.xs),
-        SizedBox(
-          height: 52,
-          child: Material(
-            color: AppColors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: errorText != null
-                      ? AppColors.error
-                      : context.borderColor,
-                  width: 1.5,
+          decoration: InputDecoration(
+            hintText: '1012345678',
+            hintStyle: AppTypography.bodyLarge.copyWith(
+              color: context.textHint,
+            ),
+            // "+20" in mono, split from the number by a hairline — the
+            // Orbit country-code prefix.
+            prefixIcon: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 16, end: 10),
+              child: Container(
+                padding: const EdgeInsetsDirectional.only(end: 10),
+                decoration: BoxDecoration(
+                  border: BorderDirectional(
+                    end: BorderSide(color: context.borderColor),
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: TextFormField(
-                controller: controller,
-                readOnly: readOnly,
-                onTap: onTap,
-                onChanged: readOnly
-                    ? null
-                    : (value) {
-                        final national =
-                            AppValidators.egyptNationalSignificantNumber(
-                          value,
-                        );
-                        if (controller.text != national) {
-                          controller.value = TextEditingValue(
-                            text: national,
-                            selection: TextSelection.collapsed(
-                              offset: national.length,
-                            ),
-                          );
-                        }
-                        onChanged(AppValidators.normalizeEgyptLocal(national));
-                      },
-                enabled: enabled,
-                keyboardType: TextInputType.phone,
-                inputFormatters: const [
-                  _EgyptNationalPhoneFormatter(),
-                ],
-                style: AppTypography.bodyLarge.copyWith(
-                  color: context.textPrimary,
-                ),
-                decoration: InputDecoration(
-                  fillColor: AppColors.transparent,
-                  hintText: '1012345678',
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Icon(LucideIcons.phone),
+                child: Text(
+                  '+20',
+                  textDirection: TextDirection.ltr,
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 15,
+                    color: codeColor,
                   ),
-                  prefixIconConstraints: const BoxConstraints(
-                    minWidth: 24,
-                    minHeight: 24,
-                  ),
-                  prefixText: '🇪🇬 +20 ',
-                  prefixStyle: AppTypography.bodyMedium.copyWith(
-                    color: context.textPrimary,
-
-                    fontWeight: FontWeight.w600,
-                  ),
-
-                  suffixIcon:
-                      suffix ??
-                      (!readOnly && controller.text.isNotEmpty
-                          ? IconButton(
-                              onPressed: () {
-                                controller.clear();
-                                onChanged('');
-                              },
-                              icon: Icon(
-                                LucideIcons.x,
-                                size: 18,
-                                color: context.iconSecondary,
-                              ),
-                            )
-                          : null),
-                  suffixIconConstraints: suffix != null
-                      ? const BoxConstraints(minWidth: 0, minHeight: 0)
-                      : null,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  errorBorder: InputBorder.none,
-                  focusedErrorBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.inputContentPaddingH,
-                  ),
-                  isDense: true,
                 ),
               ),
             ),
+            prefixIconConstraints: const BoxConstraints(minHeight: 24),
+            suffixIcon:
+                suffix ??
+                (!readOnly && controller.text.isNotEmpty
+                    ? IconButton(
+                        onPressed: () {
+                          controller.clear();
+                          onChanged('');
+                        },
+                        icon: Icon(
+                          LucideIcons.x,
+                          size: 18,
+                          color: context.iconSecondary,
+                        ),
+                      )
+                    : null),
+            suffixIconConstraints: suffix != null
+                ? const BoxConstraints(minWidth: 0, minHeight: 0)
+                : null,
+            errorText: errorText,
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            isDense: true,
           ),
         ),
-        if (errorText != null) ...[
-          const Gap(AppSpacing.xs),
-          Text(
-            errorText!,
-            style: AppTypography.labelSmall.copyWith(color: AppColors.error),
-          ),
-        ],
       ],
     );
   }

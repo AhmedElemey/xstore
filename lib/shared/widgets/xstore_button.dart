@@ -4,6 +4,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/animations/app_animations.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 class XstoreButton extends StatefulWidget {
   const XstoreButton({
@@ -49,6 +50,9 @@ class _XstoreButtonState extends State<XstoreButton>
 
   @override
   Widget build(BuildContext context) {
+    // Orbit primary: a 54px gradient pill with a soft glow.
+    final gradient = context.brandGradient;
+    final onBrand = context.onBrandColor;
     return Semantics(
       button: true,
       enabled: _enabled,
@@ -64,7 +68,7 @@ class _XstoreButtonState extends State<XstoreButton>
             child: Material(
               color: AppColors.transparent,
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(27),
                 onTap: _enabled
                     ? () {
                         _pressController.reverse();
@@ -76,25 +80,17 @@ class _XstoreButtonState extends State<XstoreButton>
                 child: AnimatedContainer(
                   duration: AppAnimations.normal,
                   curve: AppAnimations.smooth,
-                  height: 56,
+                  height: 54,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: widget.isLoading
-                        ? null
-                        : const LinearGradient(
-                            colors: [AppColors.primary, AppColors.accent],
-                          ),
-                    color: widget.isLoading
-                        ? Theme.of(context).colorScheme.surfaceContainerHighest
-                        : null,
-                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(colors: gradient),
+                    borderRadius: BorderRadius.circular(27),
                     boxShadow: widget.isLoading
                         ? null
                         : [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                              color: gradient.first.withValues(alpha: 0.35),
+                              blurRadius: 32,
                             ),
                           ],
                   ),
@@ -103,12 +99,12 @@ class _XstoreButtonState extends State<XstoreButton>
                     transitionBuilder: (child, anim) =>
                         FadeTransition(opacity: anim, child: child),
                     child: widget.isLoading
-                        ? const SizedBox(
-                            key: ValueKey<String>('loading'),
+                        ? SizedBox(
+                            key: const ValueKey<String>('loading'),
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
-                              color: AppColors.white,
+                              color: onBrand,
                               strokeWidth: 2.5,
                             ),
                           )
@@ -121,8 +117,9 @@ class _XstoreButtonState extends State<XstoreButton>
                               widget.label,
                               textAlign: TextAlign.center,
                               style: AppTypography.labelLarge.copyWith(
-                                color: AppColors.white,
-                                fontWeight: FontWeight.w700,
+                                color: onBrand,
+                                fontSize: AppTypography.rem(1),
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),

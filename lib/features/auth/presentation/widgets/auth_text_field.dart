@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -24,6 +22,7 @@ class AuthTextField extends StatelessWidget {
     this.inputFormatters,
     this.textInputAction,
     this.errorText,
+    this.labelTrailing,
   });
 
   final String label;
@@ -42,18 +41,28 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final String? errorText;
 
+  /// Shown at the end of the label row (e.g. "Forgot password?").
+  final Widget? labelTrailing;
+
   @override
   Widget build(BuildContext context) {
+    // Orbit field: uppercase tracked label over a frosted 16px-radius field;
+    // borders and fill come from the theme's InputDecorationTheme.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: AppTypography.rem(0.8125),
-            fontWeight: FontWeight.w600,
-            color: context.textPrimary,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label.toUpperCase(),
+                style: AppTypography.fieldLabel.copyWith(
+                  color: context.labelColor,
+                ),
+              ),
+            ),
+            ?labelTrailing,
+          ],
         ),
         SizedBox(height: context.scaledPx(8)),
         TextFormField(
@@ -67,14 +76,15 @@ class AuthTextField extends StatelessWidget {
           maxLines: maxLines,
           inputFormatters: inputFormatters,
           textInputAction: textInputAction,
-          style: AppTypography.bodyLarge.copyWith(color: context.textPrimary),
+          style: AppTypography.bodyLarge.copyWith(
+            color: context.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTypography.bodyLarge.copyWith(
-              color: context.textSecondary,
+              color: context.textHint,
             ),
-            filled: true,
-            fillColor: context.surfaceColor,
             isDense: true,
             floatingLabelBehavior: FloatingLabelBehavior.never,
             prefixIcon: prefixIcon,
@@ -89,27 +99,7 @@ class AuthTextField extends StatelessWidget {
             suffixIconColor: context.iconSecondary,
             contentPadding: EdgeInsets.symmetric(
               horizontal: context.scaledPx(16),
-              vertical: context.scaledPx(AppSpacing.inputContentPaddingV),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: context.borderColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: context.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
+              vertical: context.scaledPx(16),
             ),
             errorText: errorText,
           ),

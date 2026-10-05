@@ -14,13 +14,18 @@ abstract final class AppTypography {
   /// CSS-equivalent rem: `rem(1) == 16px`, `rem(0.875) == 14px`, etc.
   static double rem(double factor) => remPx * factor;
 
-  static const String fontFamily = 'Inter';
-  static const List<String> fontFamilyFallback = [
-    '.SF UI Text',
-    '.SF UI Display',
-    'Roboto',
-    'sans-serif',
+  /// Orbit type: Manrope for body text, Unbounded for display headings and
+  /// JetBrains Mono for digits (codes, prices, step counters). Arabic glyphs
+  /// fall back to IBM Plex Sans Arabic (body) and Noto Kufi Arabic
+  /// (display). All are bundled under `assets/fonts/`.
+  static const String fontFamily = 'Manrope';
+  static const List<String> fontFamilyFallback = ['IBMPlexSansArabic'];
+  static const String displayFontFamily = 'Unbounded';
+  static const List<String> displayFontFamilyFallback = [
+    'NotoKufiArabic',
+    'IBMPlexSansArabic',
   ];
+  static const String monoFontFamily = 'JetBrainsMono';
 
   /// Default “xStore” wordmark on auth headers (= `rem(2)`).
   static const double authWordmarkSize = remPx * 2;
@@ -30,16 +35,51 @@ abstract final class AppTypography {
     fontFamilyFallback: fontFamilyFallback,
   );
 
-  static TextStyle get displayLarge => _base.copyWith(
+  static TextStyle get _display => const TextStyle(
+    fontFamily: displayFontFamily,
+    fontFamilyFallback: displayFontFamilyFallback,
+    letterSpacing: -0.3,
+  );
+
+  static TextStyle get displayLarge => _display.copyWith(
     fontSize: rem(2),
+    fontWeight: FontWeight.w800,
+    height: 1.1,
+  );
+
+  static TextStyle get displayMedium => _display.copyWith(
+    fontSize: rem(1.75),
+    fontWeight: FontWeight.w800,
+    height: 1.1,
+  );
+
+  /// Screen headline on auth and hero screens (Unbounded 30).
+  static TextStyle get headline => _display.copyWith(
+    fontSize: rem(1.875),
+    fontWeight: FontWeight.w800,
+    height: 1.1,
+  );
+
+  /// Smaller display heading (Unbounded 22–26) for step titles.
+  static TextStyle get headlineSmall => _display.copyWith(
+    fontSize: rem(1.625),
+    fontWeight: FontWeight.w800,
+    height: 1.15,
+  );
+
+  /// Uppercase field and section labels (12, bold, tracked).
+  static TextStyle get fieldLabel => _base.copyWith(
+    fontSize: rem(0.75),
     fontWeight: FontWeight.w700,
+    letterSpacing: 0.96,
     height: 1.2,
   );
 
-  static TextStyle get displayMedium => _base.copyWith(
-    fontSize: rem(1.75),
-    fontWeight: FontWeight.w700,
-    height: 1.2,
+  /// Monospaced digits: country codes, OTP cells, step counters, amounts.
+  static TextStyle get mono => const TextStyle(
+    fontFamily: monoFontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontWeight: FontWeight.w500,
   );
 
   static TextStyle get titleLarge => _base.copyWith(

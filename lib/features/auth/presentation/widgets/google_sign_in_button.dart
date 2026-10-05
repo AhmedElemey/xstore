@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../../core/constants/app_colors.dart';
 
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/social_auth_provider.dart';
@@ -23,9 +22,6 @@ class GoogleSignInButton extends ConsumerWidget {
       isLoading: isLoading,
       icon: SvgPicture.asset('assets/icons/google_logo.svg'),
       label: context.l10n.continueWithGoogle,
-      borderColor: AppColors.googleOAuthOutlineGrey,
-      bgColor: context.surfaceColor,
-      textColor: context.textPrimary,
     );
   }
 }

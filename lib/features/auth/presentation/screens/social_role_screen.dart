@@ -45,10 +45,8 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
           Expanded(
             flex: 42,
             child: AuthHeader(
-              heightFraction: 1,
               title: context.l10n.chooseYourRole,
               subtitle: context.l10n.socialRoleSubtitle,
-              logoSize: 32,
             ),
           ),
           Expanded(

@@ -1,51 +1,64 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  // Brand
-  static const primary = Color(0xFF4F46E5);
-  static const primaryLight = Color(0xFF818CF8);
-  static const primaryDark = Color(0xFF3730A3);
-  static const accent = Color(0xFFF97316);
-  static const accentLight = Color(0xFFFB923C);
-  static const success = Color(0xFF22C55E);
-  static const successLight = Color(0xFF86EFAC);
-  static const warning = Color(0xFFF59E0B);
-  static const warningLight = Color(0xFFFCD34D);
-  static const error = Color(0xFFEF4444);
-  static const errorLight = Color(0xFFFCA5A5);
+  // Brand — "Orbit" design (xStore Orbit Redesign canvas). Light mode runs
+  // on violet; dark mode ("deep space") swaps the primary to cyan plasma.
+  static const primary = Color(0xFF7B5CFF);
+  static const primaryLight = Color(0xFF7CF0FF);
+  static const primaryDark = Color(0xFF6B4DE6);
+  static const accent = Color(0xFFB45309);
+  static const accentLight = Color(0xFFFFC069);
+  static const success = Color(0xFF0E9F6E);
+  static const successLight = Color(0xFF6CF2B4);
+  static const warning = Color(0xFFD97706);
+  static const warningLight = Color(0xFFFFC069);
+  static const error = Color(0xFFD92D4B);
+  static const errorLight = Color(0xFFFF9AA6);
 
-  // Light scheme
-  static const lightBackground = Color(0xFFFAFAFA);
+  /// Primary-button gradients and the text drawn on them.
+  static const lightBrandGradient = [Color(0xFF7B5CFF), Color(0xFF9B7BFF)];
+  static const darkBrandGradient = [Color(0xFF7CF0FF), Color(0xFFB69CFF)];
+  static const darkOnBrand = Color(0xFF06081A);
+
+  /// Second dark-mode accent (violet).
+  static const darkSecondary = Color(0xFFB69CFF);
+
+  // Light scheme ("daylight orbit")
+  static const lightBackground = Color(0xFFF6F5FF);
   static const lightSurface = Color(0xFFFFFFFF);
-  static const lightSurfaceVariant = Color(0xFFF3F4F6);
-  static const lightBorder = Color(0xFFE5E7EB);
-  static const lightDivider = Color(0xFFF3F4F6);
-  static const lightTextPrimary = Color(0xFF111827);
-  static const lightTextSecondary = Color(0xFF6B7280);
-  static const lightTextDisabled = Color(0xFFD1D5DB);
-  static const lightTextHint = Color(0xFF9CA3AF);
-  static const lightIconPrimary = Color(0xFF374151);
-  static const lightIconSecondary = Color(0xFF9CA3AF);
-  static const lightShadow = Color(0x1A000000);
-  static const lightOverlay = Color(0x0D000000);
-  static const lightCardShadow = Color(0x14000000);
+  static const lightSurfaceVariant = Color(0xFFFCFBFF);
+  static const lightBorder = Color(0xFFDCD4FF);
+  static const lightDivider = Color(0xFFE6E0FF);
+  static const lightTextPrimary = Color(0xFF0E1030);
+  static const lightTextSecondary = Color(0xFF3F4370);
+  static const lightTextDisabled = Color(0xFFB9BBD6);
+  static const lightTextHint = Color(0xFF6E7299);
+  static const lightTextLabel = Color(0xFF5B5F84);
+  static const lightIconPrimary = Color(0xFF0E1030);
+  static const lightIconSecondary = Color(0xFF5B5F84);
+  static const lightShadow = Color(0x1A2A1B6B);
+  static const lightOverlay = Color(0x0D0E1030);
+  static const lightCardShadow = Color(0x142A1B6B);
+  static const lightGlass = Color(0xCCFFFFFF);
 
-  // Dark scheme
-  static const darkBackground = Color(0xFF0F0F13);
-  static const darkSurface = Color(0xFF1A1A24);
-  static const darkSurfaceVariant = Color(0xFF252533);
-  static const darkSurfaceElevated = Color(0xFF2E2E3E);
-  static const darkBorder = Color(0xFF2E2E3E);
-  static const darkDivider = Color(0xFF252533);
-  static const darkTextPrimary = Color(0xFFF9FAFB);
-  static const darkTextSecondary = Color(0xFF9CA3AF);
-  static const darkTextDisabled = Color(0xFF4B5563);
-  static const darkTextHint = Color(0xFF6B7280);
-  static const darkIconPrimary = Color(0xFFE5E7EB);
-  static const darkIconSecondary = Color(0xFF6B7280);
-  static const darkShadow = Color(0x40000000);
-  static const darkOverlay = Color(0x1A000000);
+  // Dark scheme ("deep space")
+  static const darkBackground = Color(0xFF06081A);
+  static const darkSurface = Color(0xFF0E1230);
+  static const darkSurfaceVariant = Color(0xFF12163A);
+  static const darkSurfaceElevated = Color(0xFF171C46);
+  static const darkBorder = Color(0xFF262B52);
+  static const darkDivider = Color(0xFF1C2044);
+  static const darkTextPrimary = Color(0xFFEEF1FF);
+  static const darkTextSecondary = Color(0xFFC9D0F5);
+  static const darkTextDisabled = Color(0xFF4A5080);
+  static const darkTextHint = Color(0xFF8C94C2);
+  static const darkTextLabel = Color(0xFFA3ABD6);
+  static const darkIconPrimary = Color(0xFFEEF1FF);
+  static const darkIconSecondary = Color(0xFFA3ABD6);
+  static const darkShadow = Color(0x66000000);
+  static const darkOverlay = Color(0x1AFFFFFF);
   static const darkCardShadow = Color(0x66000000);
+  static const darkGlass = Color(0x0DFFFFFF);
 
   // Compatibility aliases used across feature UIs.
   static const background = lightBackground;
@@ -65,8 +78,6 @@ abstract final class AppColors {
   /// `Colors.green.shade600`.
   static const materialGreen600 = Color(0xFF43A047);
 
-  /// Google sign-in border color.
-  static const googleOAuthOutlineGrey = Color(0xFFDADCE0);
 
   /// Skeleton / shimmer neutral highlight (~gray-50).
   static const neutral50 = Color(0xFFF9FAFB);

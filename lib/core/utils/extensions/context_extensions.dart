@@ -69,6 +69,28 @@ extension BuildContextX on BuildContext {
   Color get overlayColor =>
       isDark ? AppColors.darkOverlay : AppColors.lightOverlay;
 
+  // Orbit design tokens that ThemeData has no slot for.
+
+  /// Primary-button gradient (violet in light, cyan→violet in dark).
+  List<Color> get brandGradient =>
+      isDark ? AppColors.darkBrandGradient : AppColors.lightBrandGradient;
+
+  /// Text and icons drawn on [brandGradient].
+  Color get onBrandColor => isDark ? AppColors.darkOnBrand : AppColors.white;
+
+  /// Frosted fill for fields, ghost buttons and segmented controls.
+  Color get glassColor => isDark ? AppColors.darkGlass : AppColors.lightGlass;
+
+  /// Uppercase field-label grey.
+  Color get labelColor =>
+      isDark ? AppColors.darkTextLabel : AppColors.lightTextLabel;
+
+  /// Inline links ("Forgot password?", "Create an account").
+  Color get linkColor => isDark ? AppColors.primaryLight : AppColors.primaryDark;
+
+  /// Amber: courier and cash accents.
+  Color get amberColor => isDark ? AppColors.accentLight : AppColors.accent;
+
   void showSnack(String message) {
     AppSnackbar.info(this, message);
   }

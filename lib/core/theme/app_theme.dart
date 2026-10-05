@@ -11,7 +11,7 @@ abstract final class AppTheme {
       brightness: Brightness.light,
       primary: AppColors.primary,
       onPrimary: AppColors.white,
-      secondary: AppColors.accent,
+      secondary: AppColors.primaryDark,
       onSecondary: AppColors.white,
       error: AppColors.error,
       onError: AppColors.white,
@@ -42,6 +42,7 @@ abstract final class AppTheme {
       shadowColor: AppColors.lightShadow,
       cardShadowColor: AppColors.lightCardShadow,
       overlayColor: AppColors.lightOverlay,
+      glassColor: AppColors.lightGlass,
       systemUiOverlayStyle: SystemUiOverlayStyle.dark,
     );
   }
@@ -51,7 +52,7 @@ abstract final class AppTheme {
       brightness: Brightness.dark,
       primary: AppColors.primaryLight,
       onPrimary: AppColors.darkBackground,
-      secondary: AppColors.accentLight,
+      secondary: AppColors.darkSecondary,
       onSecondary: AppColors.darkBackground,
       error: AppColors.errorLight,
       onError: AppColors.darkBackground,
@@ -82,6 +83,7 @@ abstract final class AppTheme {
       shadowColor: AppColors.darkShadow,
       cardShadowColor: AppColors.darkCardShadow,
       overlayColor: AppColors.darkOverlay,
+      glassColor: AppColors.darkGlass,
       systemUiOverlayStyle: SystemUiOverlayStyle.light,
     );
   }
@@ -102,6 +104,7 @@ abstract final class AppTheme {
     required Color shadowColor,
     required Color cardShadowColor,
     required Color overlayColor,
+    required Color glassColor,
     required SystemUiOverlayStyle systemUiOverlayStyle,
   }) {
     final textTheme = AppTypography.textTheme(scheme).copyWith(
@@ -120,8 +123,9 @@ abstract final class AppTheme {
     final inputTextStyle = textTheme.bodyLarge?.copyWith(color: textPrimary);
     final inputHintStyle = textTheme.bodyMedium?.copyWith(color: textHint);
 
+    // Orbit: frosted 16px-radius fields, pill buttons, 22px cards.
     final baseInputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: borderColor),
     );
 
@@ -169,7 +173,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceVariant,
+        fillColor: glassColor,
         hintStyle: inputHintStyle,
         labelStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
         floatingLabelStyle: textTheme.bodyMedium?.copyWith(
@@ -197,6 +201,49 @@ abstract final class AppTheme {
         ),
         disabledBorder: baseInputBorder.copyWith(
           borderSide: BorderSide(color: borderColor.withValues(alpha: 0.6)),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(64, 52),
+          shape: const StadiumBorder(),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(64, 52),
+          shape: const StadiumBorder(),
+          elevation: 0,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(64, 52),
+          shape: const StadiumBorder(),
+          foregroundColor: textPrimary,
+          backgroundColor: glassColor,
+          side: BorderSide(color: borderColor),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.brightness == Brightness.dark
+              ? scheme.primary
+              : AppColors.primaryDark,
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       textSelectionTheme: TextSelectionThemeData(
@@ -236,8 +283,8 @@ abstract final class AppTheme {
         elevation: 0,
         shadowColor: cardShadowColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: borderColor.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(22),
+          side: BorderSide(color: borderColor.withValues(alpha: 0.7)),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -270,13 +317,13 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         modalBackgroundColor: elevatedSurface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: elevatedSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         titleTextStyle: textTheme.titleSmall?.copyWith(color: textPrimary),
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
       ),
@@ -305,7 +352,7 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         backgroundColor: elevatedSurface,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: textPrimary),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actionTextColor: scheme.primary,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
