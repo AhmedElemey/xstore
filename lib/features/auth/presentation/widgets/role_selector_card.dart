@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Orbit role option: a glowing orb with the role icon, title and subtitle,
+/// a radio-style indicator at the end, and the feature checklist below.
+/// Selected cards get a brand border, tint and glow.
 class RoleSelectorCard extends StatelessWidget {
   const RoleSelectorCard({
     super.key,
@@ -14,8 +17,7 @@ class RoleSelectorCard extends StatelessWidget {
     required this.features,
     required this.isSelected,
     required this.onTap,
-    required this.accentColor,
-    required this.selectionBorderColor,
+    required this.orbColors,
   });
 
   final String title;
@@ -24,92 +26,113 @@ class RoleSelectorCard extends StatelessWidget {
   final List<String> features;
   final bool isSelected;
   final VoidCallback onTap;
-  final Color accentColor;
-  final Color selectionBorderColor;
+
+  /// Radial gradient of the icon orb, highlight first.
+  final List<Color> orbColors;
+
+  static const _radius = BorderRadius.all(Radius.circular(24));
 
   @override
   Widget build(BuildContext context) {
-    final bg = isSelected
-        ? accentColor.withValues(alpha: 0.08)
-        : context.surfaceColor;
+    final brand = context.isDark ? AppColors.primaryLight : AppColors.primary;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Material(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected ? selectionBorderColor : AppColors.lightBorder,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                if (isSelected)
-                  Positioned(
-                    top: -4,
-                    right: -4,
-                    child: Container(
-                      padding: const EdgeInsets.all(AppSpacing.xs),
-                      decoration: BoxDecoration(
-                        color: selectionBorderColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: selectionBorderColor.withValues(alpha: 0.35),
-                            blurRadius: 8,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? brand.withValues(alpha: 0.08)
+              : context.glassColor,
+          borderRadius: _radius,
+          border: Border.all(
+            color: isSelected ? brand : context.borderColor,
+            width: isSelected ? 2 : 1,
+          ),
+          // No outer glow: a shadow paints under the translucent fill and
+          // muddies it; the orb carries the glow instead.
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: _radius,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            center: const Alignment(-0.3, -0.4),
+                            colors: orbColors,
                           ),
-                        ],
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: brand.withValues(alpha: 0.5),
+                                    blurRadius: 24,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 26,
+                          color: AppColors.darkBackground,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.check,
-                        color: AppColors.white,
-                        size: 16,
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: AppTypography.titleSmall.copyWith(
+                                fontSize: AppTypography.rem(1.0625),
+                                fontWeight: FontWeight.w800,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              subtitle,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: context.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: AppSpacing.md),
+                      _RadioDot(selected: isSelected, color: brand),
+                    ],
                   ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(icon, size: 48, color: accentColor),
+                  if (features.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.md),
-                    Text(
-                      title,
-                      style: AppTypography.titleMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.spacing6),
-                    Text(
-                      subtitle,
-                      style: AppTypography.bodyMedium.copyWith(
-                        height: 1.35,
-                        color: context.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.inputContentPaddingH),
-                    ...features.map(
-                      (f) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.spacing6),
+                    for (final f in features)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: AppSpacing.spacing6,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.check_circle_rounded,
-                              size: 18,
-                              color: accentColor.withValues(alpha: 0.85),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 1),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 16,
+                                color: context.linkColor,
+                              ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Expanded(
@@ -123,14 +146,43 @@ class RoleSelectorCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Filled check when selected, an empty ring otherwise.
+class _RadioDot extends StatelessWidget {
+  const _RadioDot({required this.selected, required this.color});
+
+  final bool selected;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? color : null,
+        border: selected
+            ? null
+            : Border.all(
+                color: context.labelColor.withValues(alpha: 0.5),
+                width: 2,
+              ),
+      ),
+      child: selected
+          ? Icon(Icons.check_rounded, size: 16, color: context.onBrandColor)
+          : null,
     );
   }
 }
