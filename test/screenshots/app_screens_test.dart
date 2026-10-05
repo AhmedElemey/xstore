@@ -25,6 +25,9 @@ import 'package:xstore/core/router/app_routes.dart';
 import 'package:xstore/core/theme/app_theme.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/explore/data/datasources/explore_remote_datasource.dart';
+import 'package:xstore/features/explore/data/models/search_result_model.dart';
+import 'package:xstore/features/explore/presentation/explore_dependencies.dart';
 import 'package:xstore/features/notifications/presentation/providers/fcm_device_token_sync_provider.dart';
 import 'package:xstore/features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 
@@ -69,6 +72,36 @@ final _screens = <(String, UserRole, String)>[
   ('vendor_orders', UserRole.vendor, AppRoutes.vendorOrders),
   ('courier_deliveries', UserRole.courier, AppRoutes.deliveries),
 ];
+
+/// Explore always runs the live geo search (no MOCK branch), so give it a
+/// fixed page of sample results for the screenshots.
+class _SampleExplore implements ExploreRemoteDataSource {
+  static final _results = [
+    for (final (id, title, price, store) in [
+      ('s1', 'Cloud runner sneakers', 1890, 'Stride Store'),
+      ('s2', 'Suede court low', 1250, 'Maadi Kicks'),
+      ('s3', 'Trail hiker mid', 2300, 'Outdoor Base'),
+      ('s4', 'Canvas high top', 950, 'Stride Store'),
+    ])
+      SearchResultModel.fromListingLike({
+        'id': id,
+        'title': title,
+        'price': price,
+        'seller': {'storeName': store},
+      }),
+  ];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #searchListings) {
+      return Future.value(_results);
+    }
+    if (invocation.memberName == #getSuggestions) {
+      return Future.value(<String>[]);
+    }
+    return super.noSuchMethod(invocation);
+  }
+}
 
 Future<void> _loadFonts() async {
   final manifest = json.decode(
@@ -128,6 +161,9 @@ void main() {
                 authProvider.overrideWith(() => FakeAuth(_users[role])),
                 fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
                 fcmPushHandlingProvider.overrideWith((ref) {}),
+                exploreRemoteDataSourceProvider.overrideWithValue(
+                  _SampleExplore(),
+                ),
               ],
               child: Consumer(
                 builder: (context, ref, _) => MaterialApp.router(
