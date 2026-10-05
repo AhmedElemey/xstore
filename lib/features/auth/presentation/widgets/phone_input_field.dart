@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
@@ -17,6 +16,7 @@ class PhoneInputField extends StatelessWidget {
     this.readOnly = false,
     this.suffix,
     this.onTap,
+    this.accentColor,
   });
 
   final TextEditingController controller;
@@ -33,6 +33,9 @@ class PhoneInputField extends StatelessWidget {
   /// change" flows that must not accept inline typing.
   final VoidCallback? onTap;
 
+  /// Color of the "+20" code; defaults to the link color.
+  final Color? accentColor;
+
   @override
   Widget build(BuildContext context) {
     final national = AppValidators.egyptNationalSignificantNumber(controller.text);
@@ -46,7 +49,7 @@ class PhoneInputField extends StatelessWidget {
       });
     }
 
-    final codeColor = context.isDark ? AppColors.primaryLight : AppColors.primaryDark;
+    final codeColor = accentColor ?? context.linkColor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

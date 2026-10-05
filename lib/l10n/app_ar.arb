@@ -1371,5 +1371,13 @@
   "requestCustomDeliveryAction": "طلب توصيل مخصص",
   "packageRejectReasonHint": "السبب (اختياري)",
   "packageRequestAgainAction": "إعادة الطلب",
-  "packageOrderLinkedLabel": "مرتبط بطلب"
+  "packageOrderLinkedLabel": "مرتبط بطلب",
+  "passwordStrengthWeak": "ضعيفة",
+  "passwordStrengthFair": "مقبولة",
+  "passwordStrengthGood": "جيدة",
+  "passwordStrengthStrong": "قوية",
+  "passwordRuleMinLength": "٨ حروف على الأقل",
+  "passwordRuleUppercase": "حرف كابيتال واحد على الأقل",
+  "passwordRuleNumber": "رقم واحد على الأقل",
+  "passwordRuleSpecial": "رمز خاص واحد على الأقل (!@#$...)"
 }

@@ -20,6 +20,10 @@ abstract final class AppColors {
   static const darkBrandGradient = [Color(0xFF7CF0FF), Color(0xFFB69CFF)];
   static const darkOnBrand = Color(0xFF06081A);
 
+  /// Courier "solar" button (same in both modes) and its text.
+  static const courierGradient = [Color(0xFFFFC069), Color(0xFFFF8A5B)];
+  static const onCourier = Color(0xFF140A04);
+
   /// Second dark-mode accent (violet).
   static const darkSecondary = Color(0xFFB69CFF);
 

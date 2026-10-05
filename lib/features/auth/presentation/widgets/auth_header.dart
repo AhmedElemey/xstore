@@ -94,7 +94,8 @@ class AuthBackButton extends StatelessWidget {
         child: SizedBox.square(
           dimension: 44,
           child: Icon(
-            context.isArabic ? Icons.chevron_right : Icons.chevron_left,
+            // matchTextDirection: Flutter flips it for RTL on its own.
+            Icons.chevron_left,
             size: 26,
             color: context.textPrimary,
             semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,

@@ -1385,5 +1385,13 @@
   "requestCustomDeliveryAction": "Request custom delivery",
   "packageRejectReasonHint": "Reason (optional)",
   "packageRequestAgainAction": "Request again",
-  "packageOrderLinkedLabel": "Linked to an order"
+  "packageOrderLinkedLabel": "Linked to an order",
+  "passwordStrengthWeak": "Weak",
+  "passwordStrengthFair": "Fair",
+  "passwordStrengthGood": "Good",
+  "passwordStrengthStrong": "Strong",
+  "passwordRuleMinLength": "At least 8 characters",
+  "passwordRuleUppercase": "One uppercase letter",
+  "passwordRuleNumber": "One number",
+  "passwordRuleSpecial": "One special character (!@#$...)"
 }

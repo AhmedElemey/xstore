@@ -12,11 +12,18 @@ class XstoreButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.isLoading = false,
+    this.gradient,
+    this.foregroundColor,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+
+  /// Overrides the brand gradient (e.g. the courier's solar amber); pass
+  /// [foregroundColor] with it for the label.
+  final List<Color>? gradient;
+  final Color? foregroundColor;
 
   @override
   State<XstoreButton> createState() => _XstoreButtonState();
@@ -51,8 +58,8 @@ class _XstoreButtonState extends State<XstoreButton>
   @override
   Widget build(BuildContext context) {
     // Orbit primary: a 54px gradient pill with a soft glow.
-    final gradient = context.brandGradient;
-    final onBrand = context.onBrandColor;
+    final gradient = widget.gradient ?? context.brandGradient;
+    final onBrand = widget.foregroundColor ?? context.onBrandColor;
     return Semantics(
       button: true,
       enabled: _enabled,

@@ -48,18 +48,18 @@ class PasswordStrengthBar extends StatelessWidget {
     }
   }
 
-  static String _label(PasswordStrength s) {
+  static String _label(BuildContext context, PasswordStrength s) {
     switch (s) {
       case PasswordStrength.none:
         return '';
       case PasswordStrength.weak:
-        return 'Weak';
+        return context.l10n.passwordStrengthWeak;
       case PasswordStrength.fair:
-        return 'Fair';
+        return context.l10n.passwordStrengthFair;
       case PasswordStrength.good:
-        return 'Good';
+        return context.l10n.passwordStrengthGood;
       case PasswordStrength.strong:
-        return 'Strong';
+        return context.l10n.passwordStrengthStrong;
     }
   }
 
@@ -89,7 +89,7 @@ class PasswordStrengthBar extends StatelessWidget {
     final track = context.isDark
         ? AppColors.white.withValues(alpha: 0.12)
         : AppColors.primary.withValues(alpha: 0.14);
-    final label = _label(strength);
+    final label = _label(context, strength);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,20 +120,20 @@ class PasswordStrengthBar extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         _RequirementRow(
           met: password.length >= 8,
-          text: 'At least 8 characters',
+          text: context.l10n.passwordRuleMinLength,
         ),
         _RequirementRow(
           met: RegExp(r'[A-Z]').hasMatch(password),
-          text: 'One uppercase letter',
+          text: context.l10n.passwordRuleUppercase,
         ),
         _RequirementRow(
           met: RegExp(r'[0-9]').hasMatch(password),
-          text: 'One number',
+          text: context.l10n.passwordRuleNumber,
         ),
         _RequirementRow(
           met: RegExp(r'''[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;`~']''')
               .hasMatch(password),
-          text: 'One special character (!@#\$...)',
+          text: context.l10n.passwordRuleSpecial,
         ),
       ],
     );

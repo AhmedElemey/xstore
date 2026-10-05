@@ -3184,4 +3184,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'مرتبط بطلب';
+
+  @override
+  String get passwordStrengthWeak => 'ضعيفة';
+
+  @override
+  String get passwordStrengthFair => 'مقبولة';
+
+  @override
+  String get passwordStrengthGood => 'جيدة';
+
+  @override
+  String get passwordStrengthStrong => 'قوية';
+
+  @override
+  String get passwordRuleMinLength => '٨ حروف على الأقل';
+
+  @override
+  String get passwordRuleUppercase => 'حرف كابيتال واحد على الأقل';
+
+  @override
+  String get passwordRuleNumber => 'رقم واحد على الأقل';
+
+  @override
+  String get passwordRuleSpecial => 'رمز خاص واحد على الأقل (!@#\$...)';
 }

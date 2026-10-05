@@ -3198,4 +3198,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageOrderLinkedLabel => 'Linked to an order';
+
+  @override
+  String get passwordStrengthWeak => 'Weak';
+
+  @override
+  String get passwordStrengthFair => 'Fair';
+
+  @override
+  String get passwordStrengthGood => 'Good';
+
+  @override
+  String get passwordStrengthStrong => 'Strong';
+
+  @override
+  String get passwordRuleMinLength => 'At least 8 characters';
+
+  @override
+  String get passwordRuleUppercase => 'One uppercase letter';
+
+  @override
+  String get passwordRuleNumber => 'One number';
+
+  @override
+  String get passwordRuleSpecial => 'One special character (!@#\$...)';
 }

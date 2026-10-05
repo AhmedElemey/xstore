@@ -188,6 +188,7 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                         const Gap(AppSpacing.xl),
                         PhoneInputField(
                           controller: _phone,
+                          accentColor: context.amberColor,
                           enabled: !login.isLoading,
                           onChanged: (_) => setState(() => _localError = null),
                         ),
@@ -240,6 +241,8 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                         const Gap(AppSpacing.x2l),
                         if (_mode == _CourierLoginMode.password)
                           XstoreButton(
+                            gradient: AppColors.courierGradient,
+                            foregroundColor: AppColors.onCourier,
                             label: context.l10n.login,
                             isLoading: login.isLoading,
                             onPressed: login.isLoading ||
@@ -250,6 +253,8 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                           )
                         else if (_otpSent) ...[
                           XstoreButton(
+                            gradient: AppColors.courierGradient,
+                            foregroundColor: AppColors.onCourier,
                             label: context.l10n.courierVerifyAndLogin,
                             isLoading: login.isLoading,
                             onPressed: login.isLoading || !_otpComplete
@@ -269,6 +274,8 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
                           ),
                         ] else
                           XstoreButton(
+                            gradient: AppColors.courierGradient,
+                            foregroundColor: AppColors.onCourier,
                             label: context.l10n.courierSendCode,
                             isLoading: false,
                             onPressed:
