@@ -1502,18 +1502,6 @@ abstract class AppLocalizations {
   /// **'Response Rate'**
   String get vendorStoreStatResponse;
 
-  /// No description provided for @trustInfoPaymentMethodsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved payment methods aren\'t available yet. Checkout is cash on delivery only — pay when your order arrives.'**
-  String get trustInfoPaymentMethodsBody;
-
-  /// No description provided for @trustInfoAddressesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A saved address book is coming soon. For now, choose or add your delivery address during checkout before you place an order.'**
-  String get trustInfoAddressesBody;
-
   /// No description provided for @legalDraftNotice.
   ///
   /// In en, this message translates to:
@@ -1537,30 +1525,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These apply on this device only until preferences sync to your account.'**
   String get notificationSettingsDeviceOnly;
-
-  /// No description provided for @trustInfoHelpBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Help articles and live support aren\'t available in the app yet. For order questions, open My Orders. You can manage alerts under Notification settings.'**
-  String get trustInfoHelpBody;
-
-  /// No description provided for @trustInfoActionCheckout.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to checkout'**
-  String get trustInfoActionCheckout;
-
-  /// No description provided for @trustInfoHelpViewOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Go to My Orders'**
-  String get trustInfoHelpViewOrders;
-
-  /// No description provided for @trustInfoHelpNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Notification settings'**
-  String get trustInfoHelpNotifications;
 
   /// No description provided for @iosAppStoreUrl.
   ///

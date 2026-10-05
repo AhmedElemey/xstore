@@ -733,14 +733,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vendorStoreStatResponse => 'نسبة الرد';
 
   @override
-  String get trustInfoPaymentMethodsBody =>
-      'حفظ طرق الدفع مش متاح دلوقتي. الدفع كاش عند الاستلام بس — تدفع لما الأوردر يوصّل.';
-
-  @override
-  String get trustInfoAddressesBody =>
-      'دفتر العناوين المحفوظة جاي قريباً. دلوقتي اختار أو أضف عنوان التوصيل أثناء الدفع قبل تأكيد الطلب.';
-
-  @override
   String get legalDraftNotice =>
       'مسودة تشغيلية لطريقة شغل xStore دلوقتي. بيانات الشركة ومدة الإرجاع والنص القانوني العربي المعتمد هتتضاف قبل النشر على المتاجر. ده مش بديل لاستشارة قانونية.';
 
@@ -753,19 +745,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get notificationSettingsDeviceOnly =>
       'الإعدادات دي على الجهاز ده بس لحد ما تتتزامن مع حسابك.';
-
-  @override
-  String get trustInfoHelpBody =>
-      'مقالات المساعدة والدعم المباشر لسه مش متاحين. لأسئلة الطلبات، افتح طلباتي. تقدر تتحكم في التنبيهات من إعدادات الإشعارات.';
-
-  @override
-  String get trustInfoActionCheckout => 'روح للدفع';
-
-  @override
-  String get trustInfoHelpViewOrders => 'روح لطلباتي';
-
-  @override
-  String get trustInfoHelpNotifications => 'إعدادات الإشعارات';
 
   @override
   String get iosAppStoreUrl => 'https://apps.apple.com';

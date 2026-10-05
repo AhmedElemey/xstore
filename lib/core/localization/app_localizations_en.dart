@@ -730,14 +730,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vendorStoreStatResponse => 'Response Rate';
 
   @override
-  String get trustInfoPaymentMethodsBody =>
-      'Saved payment methods aren\'t available yet. Checkout is cash on delivery only — pay when your order arrives.';
-
-  @override
-  String get trustInfoAddressesBody =>
-      'A saved address book is coming soon. For now, choose or add your delivery address during checkout before you place an order.';
-
-  @override
   String get legalDraftNotice =>
       'Operational draft for how xStore works today. Company registration, return window, and a counsel-finalized Arabic legal text will replace this before store release. This is not a substitute for legal advice.';
 
@@ -750,19 +742,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationSettingsDeviceOnly =>
       'These apply on this device only until preferences sync to your account.';
-
-  @override
-  String get trustInfoHelpBody =>
-      'Help articles and live support aren\'t available in the app yet. For order questions, open My Orders. You can manage alerts under Notification settings.';
-
-  @override
-  String get trustInfoActionCheckout => 'Go to checkout';
-
-  @override
-  String get trustInfoHelpViewOrders => 'Go to My Orders';
-
-  @override
-  String get trustInfoHelpNotifications => 'Notification settings';
 
   @override
   String get iosAppStoreUrl => 'https://apps.apple.com';
