@@ -10,11 +10,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
 
 class OrderTimeline extends StatelessWidget {
-  const OrderTimeline({
-    super.key,
-    required this.order,
-    this.showTitle = true,
-  });
+  const OrderTimeline({super.key, required this.order, this.showTitle = true});
 
   final OrderEntity order;
   final bool showTitle;
@@ -48,18 +44,21 @@ class OrderTimeline extends StatelessWidget {
           return _TimelineRow(
             nodeFilled: isCancelNode ? true : filled,
             isCurrent: isCurrent,
-            dashedBelow:
-                !lineDone && !filled && !isCancelNode && i != activeIdx + 1,
+            // Solid trail up to the current node, dashed beyond it. A
+            // cancelled order's trail runs solid into the cancel node.
+            solidBelow: lineDone || (cancelled && i == activeIdx),
             isCancelNode: isCancelNode,
             isLast: i == steps.length - 1,
-            label: isCancelNode ? context.l10n.ordersFilterCancelled : s.label(context),
+            label: isCancelNode
+                ? context.l10n.ordersFilterCancelled
+                : s.label(context),
             // A reached step without a known time (older orders, or one
             // confirmed before this session) shows no subtitle, not "Pending".
             subtitle: isCancelNode
                 ? (o.cancelReason ?? context.l10n.statusSubtitleCancelled)
                 : date != null
-                    ? '${context.formatMediumDate(date)} · ${context.formatTime(date)}'
-                    : (filled ? null : context.l10n.ordersTimelinePending),
+                ? '${context.formatMediumDate(date)} · ${context.formatTime(date)}'
+                : (filled ? null : context.l10n.ordersTimelinePending),
             cancelReason: isCancelNode ? o.cancelReason : null,
           );
         }),
@@ -69,13 +68,13 @@ class OrderTimeline extends StatelessWidget {
 
   /// Last fully completed step index (0-based) for non-cancelled orders.
   int _progressIndex(OrderEntity o) => switch (o.status) {
-        OrderStatus.pending => 0,
-        OrderStatus.confirmed => 1,
-        OrderStatus.processing => 2,
-        OrderStatus.shipped => 3,
-        OrderStatus.delivered => 4,
-        OrderStatus.cancelled => 0,
-      };
+    OrderStatus.pending => 0,
+    OrderStatus.confirmed => 1,
+    OrderStatus.processing => 2,
+    OrderStatus.shipped => 3,
+    OrderStatus.delivered => 4,
+    OrderStatus.cancelled => 0,
+  };
 
   int _idxBeforeCancel(OrderEntity o) {
     if (o.shippedAt != null) return 3;
@@ -108,19 +107,19 @@ enum _Step {
   delivered;
 
   String label(BuildContext context) => switch (this) {
-        _Step.placed => context.l10n.ordersTimelinePlaced,
-        _Step.confirmed => context.l10n.ordersTimelineConfirmed,
-        _Step.processing => context.l10n.ordersTimelineProcessing,
-        _Step.shipped => context.l10n.ordersTimelineShipped,
-        _Step.delivered => context.l10n.ordersTimelineDelivered,
-      };
+    _Step.placed => context.l10n.ordersTimelinePlaced,
+    _Step.confirmed => context.l10n.ordersTimelineConfirmed,
+    _Step.processing => context.l10n.ordersTimelineProcessing,
+    _Step.shipped => context.l10n.ordersTimelineShipped,
+    _Step.delivered => context.l10n.ordersTimelineDelivered,
+  };
 }
 
 class _TimelineRow extends StatelessWidget {
   const _TimelineRow({
     required this.nodeFilled,
     required this.isCurrent,
-    required this.dashedBelow,
+    required this.solidBelow,
     required this.isCancelNode,
     required this.isLast,
     required this.label,
@@ -130,7 +129,7 @@ class _TimelineRow extends StatelessWidget {
 
   final bool nodeFilled;
   final bool isCurrent;
-  final bool dashedBelow;
+  final bool solidBelow;
   final bool isCancelNode;
   final bool isLast;
   final String label;
@@ -139,92 +138,110 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dotColor = isCancelNode
+    // Orbit node-and-trail: brand-filled nodes behind, a glowing light node
+    // for the current step, hollow rings ahead.
+    final brand = context.isDark ? AppColors.primaryLight : AppColors.primary;
+    final faint = (context.isDark ? AppColors.darkTextLabel : AppColors.primary)
+        .withValues(alpha: 0.45);
+    final trail = isCancelNode ? AppColors.error : brand;
+    final labelColor = isCancelNode
         ? AppColors.error
-        : (nodeFilled ? AppColors.success : context.textDisabled);
+        : isCurrent
+        ? context.linkColor
+        : nodeFilled
+        ? context.textPrimary
+        : context.labelColor;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            width: AppSpacing.x2l,
+            width: 18,
             child: Column(
               children: [
                 if (isCurrent && !isCancelNode)
                   PulsingAnimationBuilder(
                     duration: const Duration(milliseconds: 1100),
                     builder: (context, animation, child) {
-                      final scale = 1 + 0.22 * math.sin(animation.value * math.pi);
-                      return Transform.scale(
-                        scale: scale,
-                        child: child,
-                      );
+                      final scale =
+                          1 + 0.12 * math.sin(animation.value * math.pi);
+                      return Transform.scale(scale: scale, child: child);
                     },
                     child: Container(
-                      width: AppSpacing.md,
-                      height: AppSpacing.md,
+                      width: 18,
+                      height: 18,
                       decoration: BoxDecoration(
-                        color: dotColor,
+                        color: context.isDark
+                            ? context.textPrimary
+                            : AppColors.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: dotColor.withValues(alpha: 0.45),
-                            blurRadius: AppSpacing.sm,
-                            spreadRadius: AppSpacing.xs,
+                            color: brand.withValues(alpha: 0.28),
+                            spreadRadius: 5,
                           ),
+                          BoxShadow(color: brand, blurRadius: 18),
                         ],
                       ),
                     ),
                   )
                 else
                   Container(
-                    width: AppSpacing.md,
-                    height: AppSpacing.md,
+                    width: 14,
+                    height: 14,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color:
-                          nodeFilled || isCancelNode ? dotColor : AppColors.transparent,
+                      color: isCancelNode
+                          ? AppColors.error
+                          : nodeFilled
+                          ? brand
+                          : AppColors.transparent,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color:
-                            nodeFilled || isCancelNode ? dotColor : context.textDisabled,
-                        width: 2,
-                      ),
+                      border: nodeFilled || isCancelNode
+                          ? null
+                          : Border.all(color: faint, width: 2),
                     ),
                     child: isCancelNode
-                        ? const Icon(Icons.close, size: 10, color: AppColors.white)
+                        ? const Icon(
+                            Icons.close,
+                            size: 10,
+                            color: AppColors.white,
+                          )
                         : null,
                   ),
                 if (!isLast)
                   Expanded(
                     child: CustomPaint(
                       painter: _LinePainter(
-                        dashed: !nodeFilled && !isCancelNode,
-                        solid: nodeFilled || isCancelNode,
-                        pendingColor: context.textDisabled,
+                        solid: solidBelow,
+                        solidColor: trail,
+                        dashColor: faint,
                       ),
                     ),
                   ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: 14),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.lg),
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
                     style: AppTypography.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w800,
+                      color: labelColor,
                     ),
                   ),
                   if (subtitle case final subtitle?)
                     Text(
                       subtitle,
-                      style: AppTypography.bodySmall,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: context.labelColor,
+                      ),
                     ),
                   if (isCancelNode && cancelReason != null) ...[
                     const SizedBox(height: AppSpacing.xs),
@@ -247,24 +264,24 @@ class _TimelineRow extends StatelessWidget {
 }
 
 class _LinePainter extends CustomPainter {
-  _LinePainter({
-    required this.dashed,
+  const _LinePainter({
     required this.solid,
-    required this.pendingColor,
+    required this.solidColor,
+    required this.dashColor,
   });
 
-  final bool dashed;
   final bool solid;
-  final Color pendingColor;
+  final Color solidColor;
+  final Color dashColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = solid ? AppColors.success : pendingColor
+      ..color = solid ? solidColor : dashColor
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     final mid = size.width / 2;
-    if (dashed) {
+    if (!solid) {
       const dash = 4.0;
       double y = 0;
       while (y < size.height) {
@@ -279,5 +296,7 @@ class _LinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LinePainter oldDelegate) =>
-      oldDelegate.dashed != dashed || oldDelegate.solid != solid;
+      oldDelegate.solid != solid ||
+      oldDelegate.solidColor != solidColor ||
+      oldDelegate.dashColor != dashColor;
 }

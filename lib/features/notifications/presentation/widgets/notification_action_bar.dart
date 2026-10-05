@@ -19,10 +19,10 @@ class NotificationActionBar extends ConsumerWidget {
       notificationsProvider.select((s) => s.notifications.isNotEmpty),
     );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
         AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
+        AppSpacing.xl,
         AppSpacing.x3l,
       ),
       child: Column(
@@ -35,7 +35,9 @@ class NotificationActionBar extends ConsumerWidget {
           else if (!hasMore && hasNotifications)
             Text(
               context.l10n.notificationsNoMore,
-              style: AppTypography.bodySmall.copyWith(color: context.textSecondary),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.labelColor,
+              ),
             ),
         ],
       ),

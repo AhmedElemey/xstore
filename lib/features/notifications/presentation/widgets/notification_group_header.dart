@@ -38,20 +38,19 @@ class NotificationGroupHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: context.backgroundColor,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      alignment: AlignmentDirectional.centerStart,
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
         AppSpacing.sm,
-        AppSpacing.lg,
+        AppSpacing.xl,
         AppSpacing.xs,
       ),
       child: Text(
         label.toUpperCase(),
         style: AppTypography.labelSmall.copyWith(
-          color: context.textSecondary,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.1,
+          color: context.labelColor,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
         ),
       ),
     );

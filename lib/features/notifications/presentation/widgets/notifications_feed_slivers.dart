@@ -37,15 +37,18 @@ abstract final class NotificationsFeedSlivers {
     );
     final n = ref.read(notificationsProvider.notifier);
     if (isLoading) {
-      return const [
-        SliverFillRemaining(child: NotificationsSkeleton()),
-      ];
+      return const [SliverFillRemaining(child: NotificationsSkeleton())];
     }
     if (error != null) {
       return [
         SliverFillRemaining(
           child: Center(
-            child: Text(error, style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+            child: Text(
+              error,
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.isDark ? AppColors.errorLight : AppColors.error,
+              ),
+            ),
           ),
         ),
       ];
@@ -64,33 +67,30 @@ abstract final class NotificationsFeedSlivers {
         SliverMainAxisGroup(
           slivers: [
             SliverPersistentHeader(
-              pinned: true,
+              pinned: false,
               delegate: NotificationGroupHeaderDelegate(
                 _groupLabel(context, g.kind),
               ),
             ),
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  final e = g.notifications[i];
-                  return RepaintBoundary(
-                    child: NotificationTile(
-                      key: ValueKey<String>('notification-tile-${e.id}'),
-                      entity: e,
-                      markAllReadAnimating: markAllReadAnimating,
-                      onTap: () {
-                        n.markAsRead(e.id);
-                        final r = e.actionRoute;
-                        if (r != null && r.isNotEmpty) context.push(r);
-                      },
-                      onDeleteConfirmed: () => onDelete(context, e),
-                      onSwipeMarkRead: () => n.markAsRead(e.id),
-                      onMarkUnread: () => n.markAsUnread(e.id),
-                    ),
-                  );
-                },
-                childCount: g.notifications.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, i) {
+                final e = g.notifications[i];
+                return RepaintBoundary(
+                  child: NotificationTile(
+                    key: ValueKey<String>('notification-tile-${e.id}'),
+                    entity: e,
+                    markAllReadAnimating: markAllReadAnimating,
+                    onTap: () {
+                      n.markAsRead(e.id);
+                      final r = e.actionRoute;
+                      if (r != null && r.isNotEmpty) context.push(r);
+                    },
+                    onDeleteConfirmed: () => onDelete(context, e),
+                    onSwipeMarkRead: () => n.markAsRead(e.id),
+                    onMarkUnread: () => n.markAsUnread(e.id),
+                  ),
+                );
+              }, childCount: g.notifications.length),
             ),
           ],
         ),

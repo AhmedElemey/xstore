@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -21,23 +23,15 @@ class WishlistScreen extends ConsumerWidget {
       authProvider.select((a) => a.valueOrNull?.role ?? UserRole.consumer),
     );
 
-    ref.listen(
-      cartProvider.select((s) => s.items),
-      (prev, next) {
+    ref.listen(cartProvider.select((s) => s.items), (prev, next) {
       Future.microtask(
         () => ref.read(wishlistProvider.notifier).syncWithCart(next),
       );
     });
 
     if (role == UserRole.vendor) {
-      return Scaffold(
-        backgroundColor: context.backgroundColor,
-        appBar: AppBar(
-          backgroundColor: context.surfaceColor,
-          surfaceTintColor: AppColors.transparent,
-          elevation: 0,
-        ),
-        body: const WishlistVendorGuard(),
+      return const Scaffold(
+        body: OrbitBackground(child: WishlistVendorGuard()),
       );
     }
 
@@ -45,14 +39,32 @@ class WishlistScreen extends ConsumerWidget {
       isTarget: (location) => location == AppRoutes.wishlist,
       onReentry: (ref) => ref.read(wishlistProvider.notifier).fetchWishlist(),
       child: Scaffold(
-        backgroundColor: context.backgroundColor,
-        appBar: AppBar(
-          title: Text(context.l10n.navWishlist),
-          backgroundColor: context.backgroundColor,
-          surfaceTintColor: AppColors.transparent,
-          elevation: 0,
+        body: OrbitBackground(
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                    AppSpacing.md,
+                  ),
+                  child: Text(
+                    context.l10n.navWishlist,
+                    style: AppTypography.headlineSmall.copyWith(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const Expanded(child: WishlistConsumerBody()),
+              ],
+            ),
+          ),
         ),
-        body: const WishlistConsumerBody(),
       ),
     );
   }

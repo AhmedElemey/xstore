@@ -17,10 +17,7 @@ import 'price_drop_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class WishlistItemCard extends ConsumerWidget {
-  const WishlistItemCard({
-    super.key,
-    required this.item,
-  });
+  const WishlistItemCard({super.key, required this.item});
 
   final WishlistItemEntity item;
 
@@ -57,354 +54,332 @@ class WishlistItemCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final img = item.listingImages.isNotEmpty ? item.listingImages.first : null;
     final drop = item.effectiveDropPercent;
-    final strike = item.compareAtPrice != null && item.compareAtPrice! > item.price
+    final strike =
+        item.compareAtPrice != null && item.compareAtPrice! > item.price
         ? item.compareAtPrice
         : (item.previousPrice != null && item.previousPrice! > item.price
-            ? item.previousPrice
-            : null);
+              ? item.previousPrice
+              : null);
     final accent = _wishlistAccent(item);
-    final radius = BorderRadius.circular(AppSpacing.lg);
+    final radius = BorderRadius.circular(22);
 
     Widget card = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: context.glassColor,
+        border: Border.all(
+          color: accent == null
+              ? context.borderColor
+              : accent.withValues(alpha: 0.4),
+        ),
       ),
       child: Material(
-        color: context.surfaceColor,
+        type: MaterialType.transparency,
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => context.push('${AppRoutes.product}/${item.listingId}'),
-          child: Ink(
-            decoration: BoxDecoration(
-              border: Border.all(color: accent.withValues(alpha: 0.45)),
-              borderRadius: radius,
-            ),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.md,
-                                ),
-                                child: SizedBox(
-                                  width: 90,
-                                  height: 90,
-                                  child: img != null
-                                      ? AppCachedNetworkImage(
-                                          imageUrl: img,
-                                          fit: BoxFit.cover,
-                                          memCacheWidth: 270,
-                                          memCacheHeight: 270,
-                                          placeholder: (_, __) => ColoredBox(
-                                            color: context.textDisabled,
-                                          ),
-                                          errorWidget: (_, __, ___) =>
-                                              ColoredBox(
-                                            color: context.textDisabled,
-                                          ),
-                                        )
-                                      : ColoredBox(
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: SizedBox(
+                                width: 90,
+                                height: 90,
+                                child: img != null
+                                    ? AppCachedNetworkImage(
+                                        imageUrl: img,
+                                        fit: BoxFit.cover,
+                                        memCacheWidth: 270,
+                                        memCacheHeight: 270,
+                                        placeholder: (_, __) => ColoredBox(
                                           color: context.textDisabled,
                                         ),
-                                ),
-                              ),
-                              if (drop > 0)
-                                Positioned(
-                                  left: AppSpacing.xs,
-                                  top: AppSpacing.xs,
-                                  child: PriceDropBadge(percent: drop),
-                                ),
-                              if (!item.isAvailable)
-                                Positioned.fill(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSpacing.md,
-                                    ),
-                                    child: ColoredBox(
-                                      color: context.textPrimary.withValues(
-                                        alpha: 0.45,
-                                      ),
-                                      child: Center(
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.sm,
-                                            vertical: AppSpacing.xs,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: context.surfaceColor,
-                                            borderRadius: BorderRadius.circular(
-                                              AppSpacing.xs,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            context.l10n.wishlistOutOfStock,
-                                            style: AppTypography.labelSmall
-                                                .copyWith(
-                                              color: context.textSecondary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
+                                        errorWidget: (_, __, ___) => ColoredBox(
+                                          color: context.textDisabled,
                                         ),
-                                      ),
-                                    ),
+                                      )
+                                    : ColoredBox(color: context.textDisabled),
+                              ),
+                            ),
+                            if (drop > 0)
+                              Positioned(
+                                left: AppSpacing.xs,
+                                top: AppSpacing.xs,
+                                child: PriceDropBadge(percent: drop),
+                              ),
+                            if (!item.isAvailable)
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.md,
                                   ),
-                                ),
-                              if (item.isInCart && item.isAvailable)
-                                Positioned.fill(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSpacing.md,
+                                  child: ColoredBox(
+                                    color: context.textPrimary.withValues(
+                                      alpha: 0.45,
                                     ),
-                                    child: Align(
-                                      alignment: Alignment.bottomCenter,
+                                    child: Center(
                                       child: Container(
-                                        width: double.infinity,
                                         padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.sm,
                                           vertical: AppSpacing.xs,
                                         ),
-                                        color: AppColors.success.withValues(
-                                          alpha: 0.92,
+                                        decoration: BoxDecoration(
+                                          color: context.surfaceColor,
+                                          borderRadius: BorderRadius.circular(
+                                            AppSpacing.xs,
+                                          ),
                                         ),
                                         child: Text(
-                                          context.l10n.wishlistInCartBadge,
-                                          textAlign: TextAlign.center,
+                                          context.l10n.wishlistOutOfStock,
                                           style: AppTypography.labelSmall
                                               .copyWith(
-                                            color: AppColors.white,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                                color: context.textSecondary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const Gap(AppSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.listingName,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.titleSmall.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: context.textPrimary,
+                              ),
+                            if (item.isInCart && item.isAvailable)
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.md,
                                   ),
-                                ),
-                                const Gap(AppSpacing.sm),
-                                Row(
-                                  children: [
-                                    Flexible(
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: AppSpacing.xs,
+                                      ),
+                                      color: AppColors.success.withValues(
+                                        alpha: 0.92,
+                                      ),
                                       child: Text(
-                                        context.formatCurrency(item.price),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.titleSmall
-                                            .copyWith(
-                                          color: AppColors.primary,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ),
-                                    if (strike != null) ...[
-                                      const Gap(AppSpacing.sm),
-                                      Text(
-                                        context.formatCurrency(strike),
-                                        style: AppTypography.bodySmall.copyWith(
-                                          color: context.textSecondary,
-                                          decoration:
-                                              TextDecoration.lineThrough,
-                                        ),
-                                      ),
-                                    ],
-                                    if (drop > 0) ...[
-                                      const Gap(AppSpacing.sm),
-                                      Text(
-                                        '-$drop%',
+                                        context.l10n.wishlistInCartBadge,
+                                        textAlign: TextAlign.center,
                                         style: AppTypography.labelSmall
                                             .copyWith(
-                                          color: AppColors.success,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                              color: AppColors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
-                                    ],
-                                  ],
-                                ),
-                                const Gap(AppSpacing.xs),
-                                if (item.vendorStoreName.trim().isNotEmpty)
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          item.vendorStoreName.trim(),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: AppTypography.bodySmall
-                                              .copyWith(
-                                            color: context.textSecondary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      if (item.isVendorVerified) ...[
-                                        const Gap(AppSpacing.xs),
-                                        Icon(
-                                          LucideIcons.badgeCheck,
-                                          size: AppSpacing.lg,
-                                          color: AppColors.primary,
-                                        ),
-                                      ],
-                                    ],
+                                    ),
                                   ),
-                                const Gap(AppSpacing.xs),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const Gap(AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.listingName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.titleSmall.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: context.textPrimary,
+                                ),
+                              ),
+                              const Gap(AppSpacing.sm),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      context.formatCurrency(item.price),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTypography.mono.copyWith(
+                                        fontSize: 14,
+                                        color: context.amberColor,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  if (strike != null) ...[
+                                    const Gap(AppSpacing.sm),
+                                    Text(
+                                      context.formatCurrency(strike),
+                                      style: AppTypography.mono.copyWith(
+                                        fontSize: 11,
+                                        color: context.labelColor,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ],
+                                  if (drop > 0) ...[
+                                    const Gap(AppSpacing.sm),
+                                    Text(
+                                      '-$drop%',
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: AppColors.success,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const Gap(AppSpacing.xs),
+                              if (item.vendorStoreName.trim().isNotEmpty)
                                 Row(
                                   children: [
-                                    if (item.rating != null) ...[
-                                      Icon(
-                                        LucideIcons.star,
-                                        size: AppSpacing.md,
-                                        color: AppColors.warning,
-                                      ),
-                                      const Gap(AppSpacing.xs),
-                                      Text(
-                                        '${item.rating!.toStringAsFixed(1)} (${item.reviewCount})',
+                                    Expanded(
+                                      child: Text(
+                                        item.vendorStoreName.trim(),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppTypography.bodySmall.copyWith(
                                           color: context.textSecondary,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    ] else
-                                      Flexible(
-                                        child: Text(
-                                          context.l10n.noReviewsYet,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: AppTypography.bodySmall
-                                              .copyWith(
-                                            color: context.textSecondary,
-                                          ),
-                                        ),
+                                    ),
+                                    if (item.isVendorVerified) ...[
+                                      const Gap(AppSpacing.xs),
+                                      Icon(
+                                        LucideIcons.badgeCheck,
+                                        size: AppSpacing.lg,
+                                        color: context.linkColor,
                                       ),
-                                    const Gap(AppSpacing.sm),
-                                    Expanded(
+                                    ],
+                                  ],
+                                ),
+                              const Gap(AppSpacing.xs),
+                              Row(
+                                children: [
+                                  if (item.rating != null) ...[
+                                    Icon(
+                                      LucideIcons.star,
+                                      size: AppSpacing.md,
+                                      color: AppColors.warning,
+                                    ),
+                                    const Gap(AppSpacing.xs),
+                                    Text(
+                                      '${item.rating!.toStringAsFixed(1)} (${item.reviewCount})',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: context.textSecondary,
+                                      ),
+                                    ),
+                                  ] else
+                                    Flexible(
                                       child: Text(
-                                        _shippingLine(context, item),
+                                        context.l10n.noReviewsYet,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.end,
                                         style: AppTypography.bodySmall.copyWith(
                                           color: context.textSecondary,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ],
+                                  const Gap(AppSpacing.sm),
+                                  Expanded(
+                                    child: Text(
+                                      _shippingLine(context, item),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.end,
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: context.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Gap(AppSpacing.md),
+                    Divider(height: 1, color: context.borderColor),
+                    const Gap(AppSpacing.sm),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () async {
+                            await ref
+                                .read(wishlistProvider.notifier)
+                                .removeFromWishlistByListingId(
+                                  item.listingId,
+                                  showUndo: true,
+                                );
+                            if (context.mounted) {
+                              _undoSnack(context, ref);
+                            }
+                          },
+                          child: Text(
+                            context.l10n.wishlistRemove,
+                            style: AppTypography.labelLarge.copyWith(
+                              color: context.isDark
+                                  ? AppColors.errorLight
+                                  : AppColors.error,
                             ),
                           ),
-                        ],
-                      ),
-                      const Gap(AppSpacing.md),
-                      Divider(
-                        height: 1,
-                        color: context.textDisabled.withValues(alpha: 0.5),
-                      ),
-                      const Gap(AppSpacing.sm),
-                      Row(
-                        children: [
-                          TextButton(
-                            onPressed: () async {
-                              await ref
-                                  .read(wishlistProvider.notifier)
-                                  .removeFromWishlistByListingId(
-                                    item.listingId,
-                                    showUndo: true,
-                                  );
-                              if (context.mounted) {
-                                _undoSnack(context, ref);
-                              }
-                            },
-                            child: Text(
-                              context.l10n.wishlistRemove,
-                              style: AppTypography.labelLarge.copyWith(
-                                color: AppColors.error,
+                        ),
+                        const Spacer(),
+                        if (item.isInCart)
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.success,
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
                               ),
                             ),
-                          ),
-                          const Spacer(),
-                          if (item.isInCart)
-                            FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.success,
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.md,
-                                ),
+                            onPressed: () => context.push(AppRoutes.cart),
+                            child: Text(context.l10n.wishlistInCartCta),
+                          )
+                        else
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
                               ),
-                              onPressed: () => context.push(AppRoutes.cart),
-                              child: Text(context.l10n.wishlistInCartCta),
-                            )
-                          else
-                            FilledButton(
-                              style: FilledButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.md,
-                                ),
-                              ),
-                              onPressed: item.isAvailable
-                                  ? () async {
-                                      HapticFeedback.lightImpact();
-                                      await ref
-                                          .read(wishlistProvider.notifier)
-                                          .moveListingToCart(item.listingId);
-                                      if (context.mounted) {
-                                        _addedToCartSnack(context);
-                                      }
+                            ),
+                            onPressed: item.isAvailable
+                                ? () async {
+                                    HapticFeedback.lightImpact();
+                                    await ref
+                                        .read(wishlistProvider.notifier)
+                                        .moveListingToCart(item.listingId);
+                                    if (context.mounted) {
+                                      _addedToCartSnack(context);
                                     }
-                                  : null,
-                              child: Text(
-                                item.isAvailable
-                                    ? context.l10n.wishlistAddToCart
-                                    : context.l10n.wishlistOutOfStock,
-                              ),
+                                  }
+                                : null,
+                            child: Text(
+                              item.isAvailable
+                                  ? context.l10n.wishlistAddToCart
+                                  : context.l10n.wishlistOutOfStock,
                             ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -438,10 +413,9 @@ class WishlistItemCard extends ConsumerWidget {
           return false;
         }
         if (dir == DismissDirection.endToStart) {
-          await ref.read(wishlistProvider.notifier).removeFromWishlistByListingId(
-                item.listingId,
-                showUndo: true,
-              );
+          await ref
+              .read(wishlistProvider.notifier)
+              .removeFromWishlistByListingId(item.listingId, showUndo: true);
           if (context.mounted) _undoSnack(context, ref);
           return true;
         }
@@ -452,9 +426,10 @@ class WishlistItemCard extends ConsumerWidget {
   }
 }
 
-Color _wishlistAccent(WishlistItemEntity item) {
+/// Border tint for notable states; null keeps the plain glass border.
+Color? _wishlistAccent(WishlistItemEntity item) {
   if (!item.isAvailable) return AppColors.error;
   if (item.effectiveDropPercent > 0) return AppColors.success;
   if (item.isInCart) return AppColors.success;
-  return AppColors.primary;
+  return null;
 }

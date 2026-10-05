@@ -40,12 +40,16 @@ class OrderDetailScrollContent extends ConsumerWidget {
       delegate: SliverChildListDelegate([
         _StatusBanner(order: order),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _WhiteCard(child: OrderTimeline(order: order)),
         ),
         const SizedBox(height: AppSpacing.lg),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _WhiteCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,7 +66,9 @@ class OrderDetailScrollContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _AddressCard(address: order.deliveryAddress),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -74,7 +80,9 @@ class OrderDetailScrollContent extends ConsumerWidget {
             (order.trackingNumber != null || order.courierName != null)) ...[
           const SizedBox(height: AppSpacing.lg),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: Text(
               context.l10n.ordersTrackingSectionTitle,
               style: AppTypography.titleMedium,
@@ -82,13 +90,17 @@ class OrderDetailScrollContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: _TrackingCard(order: order),
           ),
         ],
         const SizedBox(height: AppSpacing.lg),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: Text(
             context.l10n.ordersPaymentSectionTitle,
             style: AppTypography.titleMedium,
@@ -96,13 +108,17 @@ class OrderDetailScrollContent extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: _WhiteCard(child: OrderPriceBreakdown(order: order)),
         ),
         if (order.notes != null && order.notes!.trim().isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: Text(
               context.l10n.ordersNotesSectionTitle,
               style: AppTypography.titleMedium,
@@ -110,13 +126,16 @@ class OrderDetailScrollContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl,
+            ),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: context.textDisabled.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSpacing.md),
+                color: context.glassColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: context.borderColor),
               ),
               child: Text(
                 order.notes!,
@@ -144,32 +163,29 @@ class _StatusBanner extends StatelessWidget {
     final sub = _subtitle(context, order.status);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.all(AppSpacing.lg),
-      padding: const EdgeInsets.all(AppSpacing.x2l),
+      margin: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.lg,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: c,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: c.withValues(alpha: 0.35),
-            blurRadius: AppSpacing.lg,
-            offset: const Offset(0, AppSpacing.sm),
-          ),
-        ],
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: c.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(_iconFor(order.status), color: AppColors.white, size: 28),
+              Icon(_iconFor(order.status), color: c, size: 28),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   orderStatusLabel(context, order.status),
                   style: AppTypography.titleCompact.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -179,7 +195,7 @@ class _StatusBanner extends StatelessWidget {
           Text(
             sub,
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.white.withValues(alpha: 0.95),
+              color: context.textSecondary,
             ),
           ),
           if (order.estimatedDelivery != null &&
@@ -189,8 +205,8 @@ class _StatusBanner extends StatelessWidget {
             Text(
               '${context.l10n.ordersExpectedPrefix} ${context.formatWeekdayDate(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.w600,
+                color: context.linkColor,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -229,15 +245,9 @@ class _WhiteCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.05),
-            blurRadius: AppSpacing.md,
-            offset: const Offset(0, AppSpacing.xs),
-          ),
-        ],
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.borderColor),
       ),
       child: child,
     );
@@ -276,8 +286,7 @@ class _AddressCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-          if (street.isNotEmpty)
-            Text(street, style: AppTypography.bodyMedium),
+          if (street.isNotEmpty) Text(street, style: AppTypography.bodyMedium),
           if (cityLine.isNotEmpty)
             Text(cityLine, style: AppTypography.bodyMedium),
           if (phone.isNotEmpty) ...[
@@ -323,13 +332,15 @@ class _SellerSection extends ConsumerWidget {
       ),
     );
     if (!context.mounted || result != true) return;
-    ref.read(analyticsServiceProvider).track(
-      AnalyticsEvents.vendorReportSubmitted,
-      properties: {
-        AnalyticsProps.sellerId: order.vendorId,
-        AnalyticsProps.orderId: order.id,
-      },
-    );
+    ref
+        .read(analyticsServiceProvider)
+        .track(
+          AnalyticsEvents.vendorReportSubmitted,
+          properties: {
+            AnalyticsProps.sellerId: order.vendorId,
+            AnalyticsProps.orderId: order.id,
+          },
+        );
     AppSnackbar.success(context, context.l10n.reportVendorSuccess);
   }
 
@@ -339,7 +350,7 @@ class _SellerSection extends ConsumerWidget {
         ? order.vendorStoreName
         : order.vendorName;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       child: _WhiteCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,7 +461,7 @@ class _BuyerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       child: _WhiteCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,7 +513,7 @@ class _BuyerSection extends StatelessWidget {
                         child: Text(
                           '📞 ${order.consumerPhone}',
                           style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.primary,
+                            color: context.linkColor,
                           ),
                         ),
                       ),
