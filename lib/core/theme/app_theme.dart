@@ -340,8 +340,9 @@ abstract final class AppTheme {
         }),
       ),
       checkboxTheme: CheckboxThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        side: BorderSide(color: borderColor),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        // The Orbit hairline border is too faint for an empty checkbox.
+        side: BorderSide(color: iconSecondary, width: 1.5),
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return scheme.primary;
           return Colors.transparent;
