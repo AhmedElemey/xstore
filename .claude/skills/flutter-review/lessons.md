@@ -555,8 +555,8 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** Screen-level `skip: MockConfig.useMock` widget tests.
 
 ### 2026-09-02 — Reuse another feature's use case instead of duplicating it
-- **Rule:** Order reviews call the product feature's `createReviewUseCaseProvider` with `ReviewWriteParams` for the order's listing (`POST /api/listings/{listingId}/reviews`); reviews belong to listings. Importing another feature's domain entity and dependency provider is fine; a parallel use case duplicates the wire contract. Order actions (confirm/reject/ship/review) exist in both `order_card.dart` and `order_action_buttons.dart` — fix both copies together.
-- **Where it applies:** `order_card.dart`, `order_action_buttons.dart`, cross-feature capabilities.
+- **Rule:** Order reviews call the product feature's `createReviewUseCaseProvider` with `ReviewWriteParams` for the order's listing (`POST /api/listings/{listingId}/reviews`); reviews belong to listings. Importing another feature's domain entity and dependency provider is fine; a parallel use case duplicates the wire contract. The reject, ship, cancel-reason and review flows live once in `order_flow_sheets.dart`; `order_card.dart` and `order_action_buttons.dart` only make their own notifier calls and snackbars, so don't re-inline a flow in either.
+- **Where it applies:** `order_flow_sheets.dart`, `order_card.dart`, `order_action_buttons.dart`, cross-feature capabilities.
 
 ### 2026-09-02 — Consumer order detail
 - **Rule:** On `/me`-scoped routes, reject only a present owner id that mismatches — never a missing one. If `GET /orders/me/{id}` 404s or throws, fall back to the order from `GET /orders/me`. Unwrap `{data|Data}` and read camelCase/PascalCase. Orders echo the create body (`listingId`, `quantity`, `latitude`, `longitude`) or `items: []` plus nested `listing`/`deliveryAddress`/`seller`: parse display fields from the nested objects with listing keys (`titleEn`, `imageUrls`, `userId`/`userName`/`userAvatar`, `storeName`), falling back to the flat `listingId` line; fetch `GET /api/listings/{id}` only for a line missing name, image or price, with `allowNotFound()` and a cached miss (sold listings 404). Never map listing `userId` onto `consumerId`. Disable Visit Store when `order.vendorId` is empty. A 202 from the analytics endpoint is success, not the error.
@@ -871,7 +871,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `lib/features/reports/`, `api_endpoints.dart`, `order_detail_scroll_content.dart`, `report_vendor_sheet.dart`.
 
 ### 2026-09-15 — Read use cases before opening a sheet
-- **Rule:** Read a use case (a plain callable) with `ref.read` before `showModalBottomSheet` and close over it in `onSubmit`, rather than reading `ref` inside the async callback. `order_card.dart`'s `_reviewSheet` still reads inside — hoist it next time that file is touched.
+- **Rule:** Read a use case (a plain callable) with `ref.read` before `showModalBottomSheet` and close over it in `onSubmit`, rather than reading `ref` inside the async callback.
 - **Where it applies:** Sheets with async submit callbacks.
 
 ### 2026-09-15 — Legal links open the website
@@ -1044,7 +1044,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 
 ### 2026-10-04 — Required-field submit buttons are disabled, never silent no-ops
 - **Rule:** When a form can't submit (e.g. the comment is required), pass `onPressed: null` until it can, instead of an enabled button that returns early. Rebuild only the button: `setS` in a `StatefulBuilder` sheet with no controller, or `ValueListenableBuilder` on an owned controller. Grep for `if (….isEmpty) return;` at the top of `onPressed` handlers.
-- **Where it applies:** Review sheets in `order_card.dart` and `order_action_buttons.dart`, `product_reviews_screen.dart`, any submit button.
+- **Where it applies:** `order_flow_sheets.dart` review sheet, `product_reviews_screen.dart`, any submit button.
 
 ### 2026-10-05 — Pump between enterText and tapping a validity-gated button
 - **Rule:** A button enabled by typed input (`setS`/`ValueListenableBuilder`) only rebuilds on the next frame, so a test doing `enterText` then `tap` hits the still-disabled button and silently does nothing. Add `await tester.pump()` before the tap. When making a button disabled-until-valid, grep tests that type then tap it and run them.
