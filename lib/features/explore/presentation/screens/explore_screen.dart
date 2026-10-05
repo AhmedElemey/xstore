@@ -6,7 +6,6 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -16,6 +15,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../shared/utils/require_login.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/skeletons/explore_skeleton.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
@@ -96,10 +96,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   Future<void> _addToCart(SearchResultEntity item) async {
     if (!requireLogin(context, ref)) return;
-    await ref.read(cartProvider.notifier).addFromListing(
-          listingId: item.id,
-          quantity: 1,
-        );
+    await ref
+        .read(cartProvider.notifier)
+        .addFromListing(listingId: item.id, quantity: 1);
     if (!mounted) return;
     final cartError = ref.read(cartProvider).error;
     if (cartError != null) {
@@ -146,7 +145,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       authProvider.select((a) => a.valueOrNull?.isVendor == true),
     );
     final recentAsync = ref.watch(sharedPreferencesProvider);
-    final categoryOptions = ref
+    final categoryOptions =
+        ref
             .watch(categoriesProvider)
             .valueOrNull
             ?.map((c) => c.name)
@@ -155,49 +155,73 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
         const <String>[];
 
     final filterCount = _filterCount(state.filters);
+    // The body paints behind the transparent app bar, so clear it by hand.
+    final topInset =
+        MediaQuery.paddingOf(context).top + kToolbarHeight + AppSpacing.sm;
 
     return Scaffold(
-      backgroundColor: context.backgroundColor,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(context.l10n.navExplore),
-        backgroundColor: context.backgroundColor,
+        title: Text(
+          context.l10n.navExplore,
+          style: AppTypography.headlineSmall.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: context.textPrimary,
+          ),
+        ),
+        forceMaterialTransparency: true,
         actions: [
-          IconButton(
-            tooltip: context.l10n.filters,
-            onPressed: () => _openFilters(
-              context,
-              state.filters,
-              categoryOptions,
-            ),
-            icon: Badge(
-              isLabelVisible: filterCount > 0,
-              label: Text('$filterCount'),
-              child: const Icon(LucideIcons.slidersHorizontal),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: context.glassColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: context.borderColor),
+              ),
+              child: IconButton(
+                tooltip: context.l10n.filters,
+                onPressed: () =>
+                    _openFilters(context, state.filters, categoryOptions),
+                icon: Badge(
+                  isLabelVisible: filterCount > 0,
+                  label: Text('$filterCount'),
+                  child: const Icon(LucideIcons.slidersHorizontal),
+                ),
+              ),
             ),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () async {
-          await notifier.search(state.query);
-        },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (n) {
-            if (n.metrics.pixels > n.metrics.maxScrollExtent - 200) {
-              notifier.loadMore();
-            }
-            return false;
+      body: OrbitBackground(
+        child: RefreshIndicator(
+          color: context.linkColor,
+          onRefresh: () async {
+            await notifier.search(state.query);
           },
-          child: CustomScrollView(
-            cacheExtent: 1000,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (n) {
+              if (n.metrics.pixels > n.metrics.maxScrollExtent - 200) {
+                notifier.loadMore();
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              cacheExtent: 1000,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    topInset,
+                    AppSpacing.xl,
+                    AppSpacing.lg,
+                  ),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
                       SearchBarWidget(
                         controller: _q,
                         focusNode: _focus,
@@ -223,8 +247,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       recentAsync.when(
                         data: (prefs) {
                           final recent =
-                              prefs.getStringList(PrefsKeys.exploreRecentSearches) ?? [];
-                          if (recent.isEmpty || _focus.hasFocus || state.query.isNotEmpty) {
+                              prefs.getStringList(
+                                PrefsKeys.exploreRecentSearches,
+                              ) ??
+                              [];
+                          if (recent.isEmpty ||
+                              _focus.hasFocus ||
+                              state.query.isNotEmpty) {
                             return const SizedBox.shrink();
                           }
                           return Column(
@@ -260,14 +289,20 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       ActiveFiltersRow(
                         filters: state.filters,
                         onRemoveCategory: (c) {
-                          final next = List<String>.from(state.filters.categories)
-                            ..remove(c);
-                          notifier.applyFilters(state.filters.copyWith(categories: next));
+                          final next = List<String>.from(
+                            state.filters.categories,
+                          )..remove(c);
+                          notifier.applyFilters(
+                            state.filters.copyWith(categories: next),
+                          );
                         },
                         onRemoveCondition: (c) {
-                          final next = List<String>.from(state.filters.conditions)
-                            ..remove(c);
-                          notifier.applyFilters(state.filters.copyWith(conditions: next));
+                          final next = List<String>.from(
+                            state.filters.conditions,
+                          )..remove(c);
+                          notifier.applyFilters(
+                            state.filters.copyWith(conditions: next),
+                          );
                         },
                         onClearAll: notifier.resetFilters,
                       ),
@@ -288,7 +323,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  TextSpan(text: ' · ${context.l10n.resultsFor} '),
+                                  TextSpan(
+                                    text: ' · ${context.l10n.resultsFor} ',
+                                  ),
                                   TextSpan(
                                     text: state.query.isEmpty
                                         ? context.l10n.allListingsLabel
@@ -306,6 +343,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           DropdownButton<ExploreSortOption>(
                             value: state.sortOption,
                             underline: const SizedBox.shrink(),
+                            borderRadius: BorderRadius.circular(AppSpacing.lg),
+                            icon: Icon(
+                              LucideIcons.chevronDown,
+                              size: AppSpacing.xl,
+                              color: context.linkColor,
+                            ),
+                            style: AppTypography.labelLarge.copyWith(
+                              color: context.textSecondary,
+                              fontWeight: FontWeight.w700,
+                            ),
                             items: [
                               DropdownMenuItem(
                                 value: ExploreSortOption.relevance,
@@ -337,46 +384,47 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                               state.viewMode == ExploreViewMode.grid
                                   ? LucideIcons.list
                                   : LucideIcons.layoutGrid,
-                              color: AppColors.primary,
+                              color: context.linkColor,
                             ),
                           ),
                         ],
                       ),
                       const Gap(AppSpacing.lg),
-                    ],
+                    ]),
                   ),
                 ),
-              ),
-              if (state.isSearching)
-                const SliverFillRemaining(child: ExploreSkeleton())
-              else if (state.results.isEmpty && state.error != null)
-                SliverFillRemaining(
-                  child: ExploreErrorState(
-                    error: state.error,
-                    onRetry: () => notifier.search(state.query),
-                  ),
-                )
-              else if (state.results.isEmpty)
-                SliverFillRemaining(
-                  child: ExploreEmptyState(
-                    onPickCategory: (slug) {
-                      notifier.bootstrapFromRouteCategory(slug);
-                      _q.text = ref.read(exploreProvider).query;
-                    },
-                  ),
-                )
-              else if (state.viewMode == ExploreViewMode.grid)
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: AppSpacing.md,
-                      crossAxisSpacing: AppSpacing.md,
-                      childAspectRatio: 0.58,
+                if (state.isSearching)
+                  const SliverFillRemaining(child: ExploreSkeleton())
+                else if (state.results.isEmpty && state.error != null)
+                  SliverFillRemaining(
+                    child: ExploreErrorState(
+                      error: state.error,
+                      onRetry: () => notifier.search(state.query),
                     ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) {
+                  )
+                else if (state.results.isEmpty)
+                  SliverFillRemaining(
+                    child: ExploreEmptyState(
+                      onPickCategory: (slug) {
+                        notifier.bootstrapFromRouteCategory(slug);
+                        _q.text = ref.read(exploreProvider).query;
+                      },
+                    ),
+                  )
+                else if (state.viewMode == ExploreViewMode.grid)
+                  SliverPadding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.xl,
+                    ),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: AppSpacing.md,
+                            crossAxisSpacing: AppSpacing.md,
+                            childAspectRatio: 0.58,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, i) {
                         final item = state.results[i];
                         return RepaintBoundary(
                           child: ProductGridCard(
@@ -388,17 +436,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                 context.push('${AppRoutes.product}/${item.id}'),
                           ),
                         );
-                      },
-                      childCount: state.results.length,
+                      }, childCount: state.results.length),
                     ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) {
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.xl,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, i) {
                         final item = state.results[i];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -414,34 +461,36 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             ),
                           ),
                         );
-                      },
-                      childCount: state.results.length,
+                      }, childCount: state.results.length),
                     ),
                   ),
-                ),
-              if (state.isLoadingMore)
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.x2l),
-                    child: Center(child: CircularProgressIndicator.adaptive()),
-                  ),
-                )
-              else if (state.results.isNotEmpty && state.error != null)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Center(
-                      child: TextButton(
-                        onPressed: () => notifier.loadMore(),
-                        child: Text(
-                          '${resolveAppError(context, state.error)} · ${context.l10n.retry}',
+                if (state.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.x2l),
+                      child: Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      ),
+                    ),
+                  )
+                else if (state.results.isNotEmpty && state.error != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Center(
+                        child: TextButton(
+                          onPressed: () => notifier.loadMore(),
+                          child: Text(
+                            '${resolveAppError(context, state.error)} · ${context.l10n.retry}',
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              SliverToBoxAdapter(child: SizedBox(height: AppSpacing.x3l)),
-            ],
+                // Clears the floating dock.
+                const SliverToBoxAdapter(child: SizedBox(height: 124)),
+              ],
+            ),
           ),
         ),
       ),

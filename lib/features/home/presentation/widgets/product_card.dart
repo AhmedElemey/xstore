@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
@@ -33,59 +32,46 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final image = ClipRRect(
+      borderRadius: BorderRadius.circular(AppSpacing.lg),
+      child: _ProductImage(
+        theme: theme,
+        imageUrl: imageUrl,
+        listingId: listingId,
+        isSoldOut: isSoldOut,
+      ),
+    );
+    final footer = _Footer(
+      theme: theme,
+      title: title,
+      price: price,
+      discountPercent: discountPercent,
+    );
     return Material(
-      color: context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.md),
+      color: context.glassColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: context.borderColor),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final boundedH = constraints.hasBoundedHeight;
-
-            if (boundedH) {
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.spacing10),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _ProductImage(
-                      theme: theme,
-                      imageUrl: imageUrl,
-                      listingId: listingId,
-                      isSoldOut: isSoldOut,
-                    ),
-                  ),
-                  _Footer(
-                    theme: theme,
-                    title: title,
-                    price: price,
-                    discountPercent: discountPercent,
-                  ),
+                  if (constraints.hasBoundedHeight)
+                    Expanded(child: image)
+                  else
+                    AspectRatio(aspectRatio: 1, child: image),
+                  footer,
                 ],
               );
-            }
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: _ProductImage(
-                    theme: theme,
-                    imageUrl: imageUrl,
-                    listingId: listingId,
-                    isSoldOut: isSoldOut,
-                  ),
-                ),
-                _Footer(
-                  theme: theme,
-                  title: title,
-                  price: price,
-                  discountPercent: discountPercent,
-                ),
-              ],
-            );
-          },
+            },
+          ),
         ),
       ),
     );
@@ -143,9 +129,9 @@ class _ProductImage extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         image,
-        Positioned(
-          top: AppSpacing.sm,
-          right: AppSpacing.sm,
+        PositionedDirectional(
+          top: AppSpacing.spacing6,
+          end: AppSpacing.spacing6,
           child: WishHeartButton(listingId: listingId!, size: AppSpacing.xl),
         ),
       ],
@@ -169,7 +155,12 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsetsDirectional.only(
+        top: AppSpacing.sm,
+        start: AppSpacing.xs,
+        end: AppSpacing.xs,
+        bottom: AppSpacing.xs,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -178,7 +169,10 @@ class _Footer extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary,
+            ),
           ),
           const Gap(AppSpacing.xs),
           Row(
@@ -188,9 +182,10 @@ class _Footer extends StatelessWidget {
                   textDirection: TextDirection.ltr,
                   child: Text(
                     context.formatCurrency(price),
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                    style: AppTypography.mono.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: context.amberColor,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -200,8 +195,10 @@ class _Footer extends StatelessWidget {
                 const Gap(AppSpacing.sm),
                 Text(
                   '-${discountPercent.toStringAsFixed(0)}%',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppColors.error,
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.error,
                   ),
                 ),
               ],

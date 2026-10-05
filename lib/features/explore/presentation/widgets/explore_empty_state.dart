@@ -31,7 +31,7 @@ class ExploreEmptyState extends StatelessWidget {
             const Gap(AppSpacing.lg),
             Text(
               context.l10n.noResultsTitle,
-              style: AppTypography.titleMedium,
+              style: AppTypography.headlineSmall.copyWith(fontSize: 18, fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             const Gap(AppSpacing.sm),
