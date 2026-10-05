@@ -32,7 +32,7 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/password_strength_bar.dart';
 import '../widgets/role_selector_card.dart';
 import '../widgets/auth_divider.dart';
-import '../widgets/auth_header.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/phone_input_field.dart';
 

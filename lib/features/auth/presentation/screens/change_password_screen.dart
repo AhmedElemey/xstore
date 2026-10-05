@@ -13,7 +13,7 @@ import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/auth_header.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../widgets/auth_text_field.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {

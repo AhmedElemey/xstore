@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/expandable_text.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/product_review_entity.dart';
 import '../../domain/entities/review_entity.dart';
+import 'review_avatar.dart';
+import 'review_stars.dart';
 
 class ReviewsSummary extends ConsumerStatefulWidget {
   const ReviewsSummary({
@@ -54,90 +55,127 @@ class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final counts = widget.summary.starCounts;
     final maxBar = counts.isEmpty
         ? 1
         : counts.reduce((a, b) => a > b ? a : b).clamp(1, 999999);
     final viewer = ref.watch(authProvider).valueOrNull;
     final viewerName = viewer?.displayName(context.isArabic);
+    final barGradient = LinearGradient(
+      colors: [context.amberColor, AppColors.courierGradient.last],
+    );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.l10n.customerReviews,
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: AppTypography.labelLarge.copyWith(
+              fontSize: 13,
               fontWeight: FontWeight.w700,
+              color: context.labelColor,
+            ),
+          ),
+          const Gap(AppSpacing.sm),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: context.glassColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: context.borderColor),
+            ),
+            child: Row(
+              children: [
+                // Amber ring filled to average / 5.
+                SizedBox.square(
+                  dimension: 110,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox.expand(
+                        child: CircularProgressIndicator(
+                          value: (widget.summary.average / 5).clamp(0.0, 1.0),
+                          strokeWidth: 8,
+                          color: context.amberColor,
+                          backgroundColor: context.borderColor,
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.summary.average.toStringAsFixed(1),
+                            style: AppTypography.headlineSmall.copyWith(
+                              fontSize: 30,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            '${widget.summary.totalCount} ${context.l10n.ratingsWord}',
+                            style: AppTypography.body12.copyWith(
+                              color: context.labelColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(18),
+                Expanded(
+                  child: Column(
+                    children: [
+                      for (var star = 5; star >= 1; star--)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: star == 5 ? 0 : AppSpacing.xs + 2,
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: AppSpacing.lg,
+                                child: Text(
+                                  '$star',
+                                  style: AppTypography.body12.copyWith(
+                                    color: context.labelColor,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(3),
+                                  child: Container(
+                                    height: 6,
+                                    color: context.borderColor,
+                                    alignment: AlignmentDirectional.centerStart,
+                                    child: FractionallySizedBox(
+                                      widthFactor: counts.isNotEmpty
+                                          ? (counts[5 - star] / maxBar)
+                                                .clamp(0.0, 1.0)
+                                                .toDouble()
+                                          : 0,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          gradient: barGradient,
+                                        ),
+                                        child: const SizedBox.expand(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           const Gap(AppSpacing.lg),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    widget.summary.average.toStringAsFixed(1),
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Icon(
-                    LucideIcons.star,
-                    color: AppColors.warning,
-                    size: AppSpacing.x3l - AppSpacing.xs,
-                  ),
-                  Text(
-                    '${widget.summary.totalCount} ${context.l10n.ratingsWord}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(AppSpacing.x2l),
-              Expanded(
-                child: Column(
-                  children: [
-                    for (var star = 5; star >= 1; star--)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: AppSpacing.x3l - AppSpacing.xs,
-                              child: Text(
-                                '$star★',
-                                style: theme.textTheme.labelSmall,
-                              ),
-                            ),
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: LinearProgressIndicator(
-                                  value: counts.isNotEmpty
-                                      ? counts[5 - star] / maxBar
-                                      : 0,
-                                  minHeight: 8,
-                                  backgroundColor: theme
-                                      .colorScheme.surfaceContainerHighest,
-                                  color: theme.colorScheme.primary
-                                      .withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Gap(AppSpacing.x2l),
           for (var i = 0; i < widget.reviews.length && i < 3; i++)
             _ReviewTile(
               review: widget.reviews[i],
@@ -151,11 +189,21 @@ class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
                 if (i < _expanded.length) _expanded[i] = !_expanded[i];
               }),
             ),
-          const Gap(AppSpacing.lg),
+          const Gap(AppSpacing.xs),
           SizedBox(
             width: double.infinity,
+            height: 54,
             child: OutlinedButton(
               onPressed: widget.onSeeAll,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.linkColor,
+                side: BorderSide(color: context.borderColor),
+                shape: const StadiumBorder(),
+                textStyle: AppTypography.labelLarge.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               child: Text(context.l10n.seeAllReviews),
             ),
           ),
@@ -180,60 +228,49 @@ class _ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+    final avatarUrl = review.userAvatarUrl;
+    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.borderColor),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundImage: review.userAvatarUrl != null &&
-                        review.userAvatarUrl!.isNotEmpty
-                    ? AppNetworkImage.cached(review.userAvatarUrl!)
-                    : null,
-                child: review.userAvatarUrl == null ||
-                        review.userAvatarUrl!.isEmpty
-                    ? Text(
-                        authorName.isNotEmpty
-                            ? authorName[0].toUpperCase()
-                            : '?',
-                      )
-                    : null,
+              ReviewAvatar(
+                name: authorName,
+                imageUrl: hasAvatar ? avatarUrl : null,
               ),
-              const Gap(AppSpacing.md),
+              const Gap(AppSpacing.md - 2),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       authorName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: context.textPrimary,
                       ),
                     ),
                     Text(
                       Formatters.shortDate(review.date),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      style: AppTypography.body12.copyWith(
+                        color: context.labelColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              Row(
-                children: List.generate(5, (i) {
-                  return Icon(
-                    i < review.stars.round()
-                        ? LucideIcons.star
-                        : LucideIcons.starOff,
-                    size: AppSpacing.xl,
-                    color: AppColors.warning,
-                  );
-                }),
-              ),
+              ReviewStars(rating: review.stars),
             ],
           ),
           const Gap(AppSpacing.sm),
@@ -241,20 +278,23 @@ class _ReviewTile extends StatelessWidget {
             text: review.text,
             maxLines: 2,
             expanded: expanded,
-            style: theme.textTheme.bodyMedium,
+            style: AppTypography.bodyMedium.copyWith(
+              height: 1.55,
+              color: context.textPrimary.withValues(alpha: 0.85),
+            ),
             toggle: TextButton(
               onPressed: onToggle,
-              child: Text(expanded ? context.l10n.readLess : context.l10n.readMore),
+              style: TextButton.styleFrom(foregroundColor: context.linkColor),
+              child: Text(
+                expanded ? context.l10n.readLess : context.l10n.readMore,
+              ),
             ),
           ),
           const Gap(AppSpacing.sm),
           Text(
             '${context.l10n.helpfulPrompt}${review.helpfulCount}',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: AppTypography.body12.copyWith(color: context.labelColor),
           ),
-          Divider(height: AppSpacing.x2l),
         ],
       ),
     );

@@ -13,7 +13,7 @@ import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/auth_header.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../widgets/auth_text_field.dart';
 
 /// In-memory extra for [ResetPasswordScreen]. GoRouter does not serialize

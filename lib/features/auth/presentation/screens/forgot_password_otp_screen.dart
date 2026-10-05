@@ -13,7 +13,7 @@ import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
 import '../providers/otp_resend_cooldown.dart';
-import '../widgets/auth_header.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../widgets/otp_input_field.dart';
 import '../widgets/otp_resend_row.dart';
 import 'reset_password_screen.dart';

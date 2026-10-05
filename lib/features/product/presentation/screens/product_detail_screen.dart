@@ -15,6 +15,9 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
+import '../../../../shared/widgets/wish_heart_button.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -43,6 +46,9 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  /// Rounded top of the Orbit content panel; the gallery's dots sit above it.
+  static const double _panelRadius = 30;
+
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _reviewsKey = GlobalKey();
   late final ValueNotifier<double> _appBarFill = ValueNotifier<double>(0);
@@ -55,8 +61,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   void _onScroll() {
     final threshold = AppSpacing.x4l * 2 + AppSpacing.x3l + AppSpacing.md;
-    final next =
-        (_scrollController.offset / threshold).clamp(0.0, 1.0).toDouble();
+    final next = (_scrollController.offset / threshold)
+        .clamp(0.0, 1.0)
+        .toDouble();
     if ((next - _appBarFill.value).abs() > 0.02) {
       _appBarFill.value = next;
     }
@@ -70,7 +77,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Future<void> _shareListing(String title, String id) async {
-    await Share.share('$title — ${context.l10n.appName} · ${AppRoutes.product}/$id');
+    await Share.share(
+      '$title — ${context.l10n.appName} · ${AppRoutes.product}/$id',
+    );
   }
 
   Future<void> _buyNow(String productId) async {
@@ -139,8 +148,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             body: Center(child: Text(context.l10n.productNotFound)),
           );
         }
-        final notifier =
-            ref.read(productDetailProvider(widget.productId).notifier);
+        final notifier = ref.read(
+          productDetailProvider(widget.productId).notifier,
+        );
         final sessionUser = ref.watch(
           authProvider.select((a) => a.valueOrNull),
         );
@@ -148,218 +158,249 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         final ownerId = listing.vendorId.isNotEmpty
             ? listing.vendorId
             : (data.seller?.id ?? '');
-        final isOwnListing = sessionUser != null &&
+        final isOwnListing =
+            sessionUser != null &&
             sessionUser.id.isNotEmpty &&
             ownerId.isNotEmpty &&
             sessionUser.id == ownerId;
         final reviewSummary = data.reviewSummary;
+        final panelColor = context.surfaceColor.withValues(alpha: 0.92);
 
         return Scaffold(
           extendBody: true,
           extendBodyBehindAppBar: true,
           resizeToAvoidBottomInset: true,
-          body: Stack(
-            children: [
-              CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  AnimatedBuilder(
-                    animation: _appBarFill,
-                    builder: (context, _) {
-                      final fill = _appBarFill.value;
-                      final blended = Color.lerp(
-                            context.surfaceColor,
-                            context.iconPrimary,
-                            fill,
-                          )!;
-                      return SliverAppBar(
-                        pinned: true,
-                        stretch: true,
-                        expandedHeight:
-                            AppSpacing.x4l * 8 - AppSpacing.x3l,
-                        elevation: fill > 0.9 ? 2 : 0,
-                        shadowColor: context.cardShadowColor,
-                        backgroundColor:
-                            context.surfaceColor.withValues(alpha: fill),
-                        surfaceTintColor: AppColors.transparent,
-                        systemOverlayStyle: fill > 0.55
-                            ? SystemUiOverlayStyle.dark
-                            : SystemUiOverlayStyle.light,
-                        iconTheme: IconThemeData(color: blended),
-                        actionsIconTheme: IconThemeData(color: blended),
-                        leading: IconButton(
-                          tooltip:
-                              MaterialLocalizations.of(context).backButtonTooltip,
-                          icon: Icon(LucideIcons.chevronLeft, color: blended),
-                          onPressed: () => context.pop(),
+          body: OrbitBackground(
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                AnimatedBuilder(
+                  animation: _appBarFill,
+                  builder: (context, _) {
+                    final fill = _appBarFill.value;
+                    return SliverAppBar(
+                      pinned: true,
+                      stretch: true,
+                      expandedHeight: AppSpacing.x4l * 8 - AppSpacing.x3l,
+                      elevation: 0,
+                      backgroundColor: panelColor.withValues(
+                        alpha: panelColor.a * fill,
+                      ),
+                      surfaceTintColor: AppColors.transparent,
+                      systemOverlayStyle: context.isDark
+                          ? SystemUiOverlayStyle.light
+                          : SystemUiOverlayStyle.dark,
+                      leadingWidth: AppSpacing.lg + 44,
+                      leading: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: AppSpacing.lg,
                         ),
-                        actions: [
-                          IconButton(
+                        child: Center(
+                          child: AuthBackButton(onPressed: () => context.pop()),
+                        ),
+                      ),
+                      actions: [
+                        Material(
+                          color: context.glassColor,
+                          shape: CircleBorder(
+                            side: BorderSide(color: context.borderColor),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: IconButton(
                             tooltip: context.l10n.share,
-                            icon:
-                                Icon(LucideIcons.share2, color: blended),
+                            constraints: const BoxConstraints.tightFor(
+                              width: 44,
+                              height: 44,
+                            ),
+                            icon: Icon(
+                              LucideIcons.share2,
+                              size: 20,
+                              color: context.textPrimary,
+                            ),
                             onPressed: () =>
                                 _shareListing(listing.title, listing.id),
                           ),
+                        ),
+                        const Gap(AppSpacing.sm),
+                        WishHeartButton(
+                          listingId: listing.id,
+                          size: 32,
+                          glass: true,
+                        ),
+                        const Gap(AppSpacing.lg),
+                      ],
+                      flexibleSpace: FlexibleSpaceBar(
+                        collapseMode: CollapseMode.parallax,
+                        stretchModes: const [
+                          StretchMode.zoomBackground,
+                          StretchMode.blurBackground,
                         ],
-                        flexibleSpace: FlexibleSpaceBar(
-                          collapseMode: CollapseMode.parallax,
-                          stretchModes: const [
-                            StretchMode.zoomBackground,
-                            StretchMode.blurBackground,
-                          ],
-                          background: ProductImageGallery(
-                            titleForSemantics: listing.title,
-                            imageUrls: listing.imageUrls,
-                            selectedIndex: data.selectedImageIndex,
-                            onPageChanged: notifier.selectImage,
-                            listingId: listing.id,
-                          )
-                              .animate()
-                              .fadeIn(duration: AppAnimations.medium),
-                        ),
-                      );
-                    },
-                  ),
-                  SliverToBoxAdapter(
-                    child: ProductHeader(
-                      listing: listing,
-                      compareAtPrice: data.compareAtPrice,
-                      locationLine: data.locationLine,
-                      onTapReviews: _scrollToReviews,
-                      ratingLabel: reviewSummary != null &&
-                              reviewSummary.totalCount > 0
-                          ? reviewSummary.average.toStringAsFixed(1)
-                          : null,
-                      reviewCountLabel: reviewSummary != null &&
-                              reviewSummary.totalCount > 0
-                          ? _formatCount(reviewSummary.totalCount)
-                          : null,
-                    ).fadeSlideIn(
-                      delay: const Duration(milliseconds: 150),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  if (data.seller != null)
-                    SliverToBoxAdapter(
-                      child: SellerCard(
-                        seller: data.seller!,
-                        onVisitStore: () => context.push(
-                          '${AppRoutes.sellerProfile}/${data.seller!.id}',
-                        ),
-                        onCardTap: () => context.push(
-                          '${AppRoutes.sellerProfile}/${data.seller!.id}',
-                        ),
-                      ).fadeSlideIn(
-                        delay: const Duration(milliseconds: 200),
+                        background: ProductImageGallery(
+                          titleForSemantics: listing.title,
+                          imageUrls: listing.imageUrls,
+                          selectedIndex: data.selectedImageIndex,
+                          onPageChanged: notifier.selectImage,
+                        ).animate().fadeIn(duration: AppAnimations.medium),
                       ),
+                    );
+                  },
+                ),
+                // Orbit content panel: one rounded sheet under the gallery
+                // holding every section.
+                DecoratedSliver(
+                  decoration: BoxDecoration(
+                    color: panelColor,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(_panelRadius),
                     ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  SliverToBoxAdapter(
-                    child: ProductDescription(
-                      text: listing.description,
-                      expanded: data.isDescriptionExpanded,
-                      onToggle: notifier.toggleDescription,
-                    ).fadeSlideIn(
-                      delay: const Duration(milliseconds: 250),
-                    ),
+                    border: Border(top: BorderSide(color: context.borderColor)),
                   ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  SliverToBoxAdapter(
-                    child: ProductSpecifications(
-                      specifications: data.specifications,
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  if (!isOwnListing) ...[
-                    SliverToBoxAdapter(
-                      child: QuantitySelector(
-                        quantity: data.quantity,
-                        maxQuantity: data.stockQuantity,
-                        onDecrement: notifier.decrementQuantity,
-                        onIncrement: notifier.incrementQuantity,
-                      ).fadeSlideIn(
-                        delay: const Duration(milliseconds: 280),
+                  sliver: SliverMainAxisGroup(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: ProductHeader(
+                          listing: listing,
+                          compareAtPrice: data.compareAtPrice,
+                          locationLine: data.locationLine,
+                          onTapReviews: _scrollToReviews,
+                          ratingLabel:
+                              reviewSummary != null &&
+                                  reviewSummary.totalCount > 0
+                              ? reviewSummary.average.toStringAsFixed(1)
+                              : null,
+                          reviewCountLabel:
+                              reviewSummary != null &&
+                                  reviewSummary.totalCount > 0
+                              ? _formatCount(reviewSummary.totalCount)
+                              : null,
+                        ).fadeSlideIn(delay: const Duration(milliseconds: 150)),
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  ],
-                  SliverToBoxAdapter(
-                    child: SimilarProductsSection(
-                      products: data.similarProducts,
-                      onOpenProduct: _openSimilar,
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
-                  if (reviewSummary != null &&
-                      (data.reviews.isNotEmpty || reviewSummary.totalCount > 0))
-                    SliverToBoxAdapter(
-                      child: KeyedSubtree(
-                        key: _reviewsKey,
-                        child: ReviewsSummary(
-                          summary: reviewSummary,
-                          reviews: data.reviews,
-                          onSeeAll: () => context.push(
-                            '${AppRoutes.product}/${listing.id}/reviews',
+                      if (data.seller != null)
+                        SliverToBoxAdapter(
+                          child: SellerCard(
+                            seller: data.seller!,
+                            onVisitStore: () => context.push(
+                              '${AppRoutes.sellerProfile}/${data.seller!.id}',
+                            ),
+                            onCardTap: () => context.push(
+                              '${AppRoutes.sellerProfile}/${data.seller!.id}',
+                            ),
+                          ).fadeSlideIn(delay: const Duration(milliseconds: 200)),
+                        ),
+                      const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                      SliverToBoxAdapter(
+                        child: ProductDescription(
+                          text: listing.description,
+                          expanded: data.isDescriptionExpanded,
+                          onToggle: notifier.toggleDescription,
+                        ).fadeSlideIn(delay: const Duration(milliseconds: 250)),
+                      ),
+                      const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                      if (data.specifications.isNotEmpty) ...[
+                        SliverToBoxAdapter(
+                          child: ProductSpecifications(
+                            specifications: data.specifications,
                           ),
                         ),
+                        const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                      ],
+                      if (!isOwnListing) ...[
+                        SliverToBoxAdapter(
+                          child:
+                              QuantitySelector(
+                                quantity: data.quantity,
+                                maxQuantity: data.stockQuantity,
+                                onDecrement: notifier.decrementQuantity,
+                                onIncrement: notifier.incrementQuantity,
+                              ).fadeSlideIn(
+                                delay: const Duration(milliseconds: 280),
+                              ),
+                        ),
+                        const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                      ],
+                      SliverToBoxAdapter(
+                        child: SimilarProductsSection(
+                          products: data.similarProducts,
+                          onOpenProduct: _openSimilar,
+                        ),
                       ),
-                    ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: isOwnListing
-                          ? AppSpacing.x3l +
-                              MediaQuery.paddingOf(context).bottom
-                          : AppSpacing.x4l * 2 +
-                              AppSpacing.x3l +
-                              MediaQuery.paddingOf(context).bottom +
-                              MediaQuery.viewInsetsOf(context).bottom,
-                    ),
+                      const SliverToBoxAdapter(child: Gap(AppSpacing.x2l)),
+                      if (reviewSummary != null &&
+                          (data.reviews.isNotEmpty ||
+                              reviewSummary.totalCount > 0))
+                        SliverToBoxAdapter(
+                          child: KeyedSubtree(
+                            key: _reviewsKey,
+                            child: ReviewsSummary(
+                              summary: reviewSummary,
+                              reviews: data.reviews,
+                              onSeeAll: () => context.push(
+                                '${AppRoutes.product}/${listing.id}/reviews',
+                              ),
+                            ),
+                          ),
+                        ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: isOwnListing
+                              ? AppSpacing.x3l +
+                                    MediaQuery.paddingOf(context).bottom
+                              : AppSpacing.x4l * 2 +
+                                    AppSpacing.x3l +
+                                    MediaQuery.paddingOf(context).bottom +
+                                    MediaQuery.viewInsetsOf(context).bottom,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+                // Carries the panel to the bottom edge on short listings.
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: ColoredBox(color: panelColor),
+                ),
+              ],
+            ),
           ),
           bottomNavigationBar: isOwnListing
               ? null
               : AnimatedPadding(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: ProductStickyBar(
-              showAddToCart: !isVendor,
-              isSoldOut: data.stockQuantity < 1,
-              isAddingToCart: data.isAddingToCart,
-              onAddToCart: () async {
-                if (!requireLogin(context, ref)) return;
-                await notifier.addToCart();
-                if (!context.mounted) return;
-                final cartError = ref.read(cartProvider).error;
-                if (cartError != null) {
-                  AppSnackbar.error(
-                    context,
-                    resolveAppError(context, cartError),
-                  );
-                  ref.read(cartProvider.notifier).clearError();
-                  return;
-                }
-                AppSnackbar.success(
-                  context,
-                  context.l10n.addedToCart,
-                );
-              },
-              onBuyNow: () => _buyNow(widget.productId),
-            )
-                .animate()
-                .slideY(
-                  begin: 1,
-                  end: 0,
-                  duration: AppAnimations.medium,
-                  curve: AppAnimations.enter,
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child:
+                      ProductStickyBar(
+                        showAddToCart: !isVendor,
+                        isSoldOut: data.stockQuantity < 1,
+                        isAddingToCart: data.isAddingToCart,
+                        onAddToCart: () async {
+                          if (!requireLogin(context, ref)) return;
+                          await notifier.addToCart();
+                          if (!context.mounted) return;
+                          final cartError = ref.read(cartProvider).error;
+                          if (cartError != null) {
+                            AppSnackbar.error(
+                              context,
+                              resolveAppError(context, cartError),
+                            );
+                            ref.read(cartProvider.notifier).clearError();
+                            return;
+                          }
+                          AppSnackbar.success(
+                            context,
+                            context.l10n.addedToCart,
+                          );
+                        },
+                        onBuyNow: () => _buyNow(widget.productId),
+                      ).animate().slideY(
+                        begin: 1,
+                        end: 0,
+                        duration: AppAnimations.medium,
+                        curve: AppAnimations.enter,
+                      ),
                 ),
-          ),
         );
       },
     );
@@ -367,9 +408,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   String _formatCount(int n) {
     final s = n.toString();
-    return s.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (_) => ',',
-    );
+    return s.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   }
 }

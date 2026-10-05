@@ -1069,3 +1069,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — Deleting an await shifts test timing
 - **Rule:** Removing an `await` (even a now-useless prefs read) from a notifier method moves every later step earlier, so tests asserting an intermediate state after `Future.delayed(Duration.zero)` start racing mock responses that also resolve after `Duration.zero`. Assert intermediate Loading states synchronously right after the trigger, and run the full suite in both modes after such deletions.
 - **Where it applies:** Notifier refactors and cleanups; `profile_prefetch_test.dart`-style plain `ProviderContainer` tests.
+
+### 2026-10-05 — Format only the files you changed
+- **Rule:** `dart format <feature dir>` rewrites generated (`*.g.dart`, `*.freezed.dart`) and untouched files too, burying the real diff. Pass explicit file paths, or `git checkout` the unrelated files afterwards.
+- **Where it applies:** Any feature directory with codegen (product, auth, orders).
