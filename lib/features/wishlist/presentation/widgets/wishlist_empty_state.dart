@@ -9,11 +9,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 
 class WishlistEmptyState extends StatelessWidget {
-  const WishlistEmptyState({
-    super.key,
-    this.filterEmptyTitle,
-    this.onShowAll,
-  });
+  const WishlistEmptyState({super.key, this.filterEmptyTitle, this.onShowAll});
 
   /// When non-null, list is empty due to filters; [onShowAll] resets filters.
   final String? filterEmptyTitle;
@@ -22,8 +18,9 @@ class WishlistEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filtered = filterEmptyTitle != null;
-    final titleText =
-        filtered ? filterEmptyTitle! : context.l10n.wishlistEmptyTitle;
+    final titleText = filtered
+        ? filterEmptyTitle!
+        : context.l10n.wishlistEmptyTitle;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -47,7 +44,7 @@ class WishlistEmptyState extends StatelessWidget {
                   child: Icon(
                     LucideIcons.heart,
                     size: AppSpacing.x4l * 2 + AppSpacing.md,
-                    color: context.textSecondary.withValues(alpha: 0.4),
+                    color: context.linkColor.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.x2l),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
@@ -12,7 +11,9 @@ class NotificationUnreadSummaryBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread = ref.watch(notificationsProvider.select((s) => s.unreadCount));
+    final unread = ref.watch(
+      notificationsProvider.select((s) => s.unreadCount),
+    );
     return AnimatedSlide(
       duration: const Duration(milliseconds: 320),
       curve: Curves.easeOutCubic,
@@ -23,29 +24,17 @@ class NotificationUnreadSummaryBanner extends ConsumerWidget {
         child: unread <= 0
             ? const SizedBox.shrink()
             : Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
                   0,
-                  AppSpacing.lg,
+                  AppSpacing.xl,
                   AppSpacing.sm,
                 ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppColors.notificationBannerBackground,
-                    borderRadius: BorderRadius.circular(AppSpacing.md),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.md,
-                    ),
-                    child: Text(
-                      context.l10n.notificationsUnreadBannerLine(unread),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                child: Text(
+                  context.l10n.notificationsUnreadBannerLine(unread),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.textSecondary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

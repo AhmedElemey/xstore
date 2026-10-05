@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -71,11 +72,12 @@ class OrderActionButtons extends ConsumerWidget {
                 onPressed: busy
                     ? null
                     : () async {
-                        final method = await showModalBottomSheet<DeliveryMethod>(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (_) => const DeliveryMethodSheet(),
-                        );
+                        final method =
+                            await showModalBottomSheet<DeliveryMethod>(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => const DeliveryMethodSheet(),
+                            );
                         if (method == null || !context.mounted) return;
                         await _run(
                           context,
@@ -135,8 +137,9 @@ class OrderActionButtons extends ConsumerWidget {
                   : () async {
                       await notifier.updateDeliveryLocation();
                       if (!context.mounted) return;
-                      final e =
-                          ref.read(orderDetailNotifierProvider(orderId)).error;
+                      final e = ref
+                          .read(orderDetailNotifierProvider(orderId))
+                          .error;
                       if (e == 'locationServiceDisabled') {
                         AppSnackbar.error(
                           context,
@@ -177,6 +180,11 @@ class OrderActionButtons extends ConsumerWidget {
                         _err(context, ref, orderId);
                       }
                     },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.isDark
+                    ? AppColors.errorLight
+                    : AppColors.error,
+              ),
               child: Text(context.l10n.ordersCancelOrder),
             ),
           ],
@@ -196,10 +204,11 @@ class OrderActionButtons extends ConsumerWidget {
             onPressed: busy
                 ? null
                 : () => AppSnackbar.show(
-                      context,
-                      message: order.trackingNumber ??
-                          context.l10n.ordersTrackOnCourier,
-                    ),
+                    context,
+                    message:
+                        order.trackingNumber ??
+                        context.l10n.ordersTrackOnCourier,
+                  ),
             child: Text(
               context.l10n.ordersTrackOrder,
               maxLines: 1,
@@ -213,8 +222,9 @@ class OrderActionButtons extends ConsumerWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed:
-                    busy ? null : () => showOrderReviewFlow(context, ref, order),
+                onPressed: busy
+                    ? null
+                    : () => showOrderReviewFlow(context, ref, order),
                 child: Text(context.l10n.ordersLeaveReview),
               ),
             ),

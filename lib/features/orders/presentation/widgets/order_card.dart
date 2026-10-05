@@ -15,10 +15,7 @@ import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 
 class OrderCard extends ConsumerWidget {
-  const OrderCard({
-    super.key,
-    required this.order,
-  });
+  const OrderCard({super.key, required this.order});
 
   final OrderEntity order;
 
@@ -28,139 +25,134 @@ class OrderCard extends ConsumerWidget {
     final first = order.items.isNotEmpty ? order.items.first : null;
     final more = order.items.length - 1;
     final accent = orderStatusColor(order.status);
-    final radius = BorderRadius.circular(AppSpacing.lg);
+    final radius = BorderRadius.circular(22);
+    // Active orders get a status-tinted outline like the Orbit mockup;
+    // finished ones keep the plain glass border.
+    final active =
+        order.status != OrderStatus.delivered &&
+        order.status != OrderStatus.cancelled;
 
-    // Same chrome as VendorOrderCard: soft shadow outside clip, status-tint
-    // outline, and a 4px left accent bar.
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.all(
+          color: active ? accent.withValues(alpha: 0.4) : context.borderColor,
+        ),
+        color: context.glassColor,
       ),
       child: Material(
-        color: context.surfaceColor,
+        type: MaterialType.transparency,
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => context.push(AppRoutes.orderPath(order.id)),
-          child: Ink(
-            decoration: BoxDecoration(
-              border: Border.all(color: accent.withValues(alpha: 0.45)),
-              borderRadius: radius,
-            ),
-            child: Stack(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                              style: AppTypography.bodyLarge.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          OrderStatusBadge(status: order.status, compact: true),
-                        ],
+                Row(
+                  children: [
+                    OrderStatusBadge(status: order.status, compact: true),
+                    const Spacer(),
+                    Text(
+                      '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
+                      style: AppTypography.mono.copyWith(
+                        fontSize: 12,
+                        color: context.labelColor,
                       ),
-                      Divider(height: AppSpacing.lg),
-                      if (first != null) ...[
-                        Row(
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                if (first != null)
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: first.listingImage.isNotEmpty
+                              ? AppCachedNetworkImage(
+                                  imageUrl: first.listingImage,
+                                  fit: BoxFit.cover,
+                                  memCacheWidth: 168,
+                                  memCacheHeight: 168,
+                                )
+                              : ColoredBox(
+                                  color: context.textDisabled.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.sm,
-                              ),
-                              child: SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: first.listingImage.isNotEmpty
-                                    ? AppCachedNetworkImage(
-                                        imageUrl: first.listingImage,
-                                        fit: BoxFit.cover,
-                                        memCacheWidth: 180,
-                                        memCacheHeight: 180,
-                                      )
-                                    : Container(
-                                        color: context.textDisabled.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                      ),
+                            Text(
+                              first.listingName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    first.listingName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodyLarge.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (more > 0)
-                                    Text(
-                                      context.l10n.ordersMoreItems(more),
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                  const SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity} · ${context.formatCurrency(first.total)}',
-                                    style: AppTypography.bodyLarge.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
+                            if (more > 0)
+                              Text(
+                                context.l10n.ordersMoreItems(more),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: context.labelColor,
+                                ),
+                              ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: context.labelColor,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                      Divider(height: AppSpacing.lg),
-                      Text(
-                        '📦 ${order.vendorStoreName} · ${context.formatMediumDate(order.createdAt)}',
-                        style: AppTypography.bodySmall,
                       ),
-                      if ((order.status == OrderStatus.shipped ||
-                              order.status == OrderStatus.confirmed) &&
-                          order.estimatedDelivery != null) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          '${context.l10n.ordersEstimatedDelivery}: ${context.formatWeekdayDate(order.estimatedDelivery!)}',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        context.formatCurrency(first.total),
+                        style: AppTypography.mono.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: context.amberColor,
                         ),
-                      ],
-                      const SizedBox(height: AppSpacing.md),
-                      _actions(context, ref, notifier),
+                      ),
                     ],
                   ),
+                if (order.status != OrderStatus.cancelled) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _ProgressTrack(status: order.status),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  '📦 ${order.vendorStoreName} · ${context.formatMediumDate(order.createdAt)}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: context.labelColor,
+                  ),
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
-                ),
+                if ((order.status == OrderStatus.shipped ||
+                        order.status == OrderStatus.confirmed) &&
+                    order.estimatedDelivery != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${context.l10n.ordersEstimatedDelivery}: ${context.formatWeekdayDate(order.estimatedDelivery!)}',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.linkColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                _actions(context, ref, notifier),
               ],
             ),
           ),
@@ -249,8 +241,7 @@ class OrderCard extends ConsumerWidget {
   void _trackingSnack(BuildContext context) {
     AppSnackbar.show(
       context,
-      message:
-          order.trackingNumber ?? context.l10n.ordersTrackOnCourier,
+      message: order.trackingNumber ?? context.l10n.ordersTrackOnCourier,
     );
   }
 
@@ -260,5 +251,49 @@ class OrderCard extends ConsumerWidget {
       AppSnackbar.error(context, err);
       ref.read(ordersNotifierProvider.notifier).clearError();
     }
+  }
+}
+
+/// Five-segment progress bar: one segment per step up to the current status.
+class _ProgressTrack extends StatelessWidget {
+  const _ProgressTrack({required this.status});
+
+  final OrderStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    // Cancelled orders never reach this widget.
+    final reached = switch (status) {
+      OrderStatus.pending => 1,
+      OrderStatus.confirmed => 2,
+      OrderStatus.processing => 3,
+      OrderStatus.shipped => 4,
+      OrderStatus.delivered || OrderStatus.cancelled => 5,
+    };
+    final on = context.isDark ? AppColors.primaryLight : AppColors.primary;
+    return Row(
+      children: [
+        for (var i = 1; i <= 5; i++) ...[
+          if (i > 1) const SizedBox(width: 4),
+          Expanded(
+            child: Container(
+              height: 4,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(2),
+                color: i <= reached ? on : context.borderColor,
+                boxShadow: i == reached && status != OrderStatus.delivered
+                    ? [
+                        BoxShadow(
+                          color: on.withValues(alpha: 0.6),
+                          blurRadius: 8,
+                        ),
+                      ]
+                    : null,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
   }
 }

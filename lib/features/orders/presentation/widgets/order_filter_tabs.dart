@@ -28,11 +28,18 @@ class OrderFilterTabs extends ConsumerWidget {
     );
     final notifier = ref.read(ordersNotifierProvider.notifier);
 
-    return SizedBox(
-      height: 44,
+    // Orbit segmented bar: a frosted capsule holding scrollable pills.
+    return Container(
+      height: 46,
+      margin: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(23),
+        border: Border.all(color: context.borderColor),
+      ),
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        padding: const EdgeInsets.all(4),
         children: [
           _chip(
             context,
@@ -43,7 +50,7 @@ class OrderFilterTabs extends ConsumerWidget {
           ),
           ...OrderStatus.values.map((f) {
             return Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.sm),
+              padding: const EdgeInsetsDirectional.only(start: 4),
               child: _chip(
                 context,
                 label: orderStatusLabel(context, f),
@@ -65,22 +72,23 @@ class OrderFilterTabs extends ConsumerWidget {
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final selectedBg = context.isDark ? context.textPrimary : AppColors.primary;
+    final selectedFg = context.isDark ? AppColors.darkOnBrand : AppColors.white;
     return Material(
-      color: selected ? AppColors.primary : context.surfaceColor,
-      borderRadius: BorderRadius.circular(AppSpacing.x4l),
+      color: selected ? selectedBg : AppColors.transparent,
+      borderRadius: BorderRadius.circular(19),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.x4l),
+        borderRadius: BorderRadius.circular(19),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Text(
-            '$label ($count)',
-            style: AppTypography.labelLarge.copyWith(
-              color: selected ? AppColors.white : context.textPrimary,
-              fontWeight: FontWeight.w600,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Center(
+            child: Text(
+              '$label ($count)',
+              style: AppTypography.labelLarge.copyWith(
+                color: selected ? selectedFg : context.textSecondary,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
+              ),
             ),
           ),
         ),

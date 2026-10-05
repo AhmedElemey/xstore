@@ -35,7 +35,8 @@ class NotificationTile extends StatelessWidget {
 
   Future<void> _menu(BuildContext context) async {
     final box = context.findRenderObject() as RenderBox?;
-    final overlay = Navigator.of(context).overlay?.context.findRenderObject() as RenderBox?;
+    final overlay =
+        Navigator.of(context).overlay?.context.findRenderObject() as RenderBox?;
     if (box == null || overlay == null) return;
     final o = box.localToGlobal(Offset.zero, ancestor: overlay);
     final v = await showMenu<String>(
@@ -44,10 +45,20 @@ class NotificationTile extends StatelessWidget {
       items: [
         PopupMenuItem(
           value: 't',
-          child: Text(entity.isRead ? context.l10n.notificationsMenuMarkUnread : context.l10n.notificationsMenuMarkRead),
+          child: Text(
+            entity.isRead
+                ? context.l10n.notificationsMenuMarkUnread
+                : context.l10n.notificationsMenuMarkRead,
+          ),
         ),
-        PopupMenuItem(value: 'd', child: Text(context.l10n.notificationsMenuDelete)),
-        PopupMenuItem(value: 'c', child: Text(context.l10n.notificationsMenuCopy)),
+        PopupMenuItem(
+          value: 'd',
+          child: Text(context.l10n.notificationsMenuDelete),
+        ),
+        PopupMenuItem(
+          value: 'c',
+          child: Text(context.l10n.notificationsMenuCopy),
+        ),
       ],
     );
     if (!context.mounted) return;
@@ -61,7 +72,9 @@ class NotificationTile extends StatelessWidget {
     if (v == 'd') onDeleteConfirmed();
     if (v == 'c') {
       final copiedMessage = context.l10n.notificationsCopied;
-      await Clipboard.setData(ClipboardData(text: '${entity.title}\n${entity.body}'));
+      await Clipboard.setData(
+        ClipboardData(text: '${entity.title}\n${entity.body}'),
+      );
       if (!context.mounted) return;
       AppSnackbar.success(context, copiedMessage);
     }
@@ -71,10 +84,13 @@ class NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final nv = notificationTypeVisual(entity.type);
     final u = !entity.isRead;
-    final dur = markAllReadAnimating ? const Duration(milliseconds: 320) : Duration.zero;
+    final dur = markAllReadAnimating
+        ? const Duration(milliseconds: 320)
+        : Duration.zero;
     final img = entity.imageUrl;
     final thumb = img != null && img.isNotEmpty;
-    return Dismissible(
+    final brand = context.isDark ? AppColors.primaryLight : AppColors.primary;
+    final dismissible = Dismissible(
       key: ValueKey<String>(entity.id),
       direction: u ? DismissDirection.horizontal : DismissDirection.endToStart,
       confirmDismiss: (d) async {
@@ -99,7 +115,9 @@ class NotificationTile extends StatelessWidget {
                   SizedBox(width: AppSpacing.sm),
                   Text(
                     context.l10n.notificationsSwipeMarkRead,
-                    style: AppTypography.labelLarge.copyWith(color: AppColors.white),
+                    style: AppTypography.labelLarge.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                 ],
               ),
@@ -119,7 +137,9 @@ class NotificationTile extends StatelessWidget {
                 children: [
                   Text(
                     context.l10n.notificationsSwipeDelete,
-                    style: AppTypography.labelLarge.copyWith(color: AppColors.white),
+                    style: AppTypography.labelLarge.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                   SizedBox(width: AppSpacing.sm),
                   const Icon(LucideIcons.trash2, color: AppColors.white),
@@ -134,96 +154,94 @@ class NotificationTile extends StatelessWidget {
           duration: dur,
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: u
-                ? AppColors.notificationUnreadBackground
-                : context.surfaceColor,
-            border: Border(
-              left: BorderSide(
-                color: u ? AppColors.primary : AppColors.transparent,
-                width: AppSpacing.xs - 1,
-              ),
+            borderRadius: BorderRadius.circular(20),
+            color: u ? brand.withValues(alpha: 0.07) : context.glassColor,
+            border: Border.all(
+              color: u ? brand.withValues(alpha: 0.3) : context.borderColor,
             ),
           ),
           child: Material(
-            color: AppColors.transparent,
+            type: MaterialType.transparency,
             child: InkWell(
               onTap: onTap,
               onLongPress: () => _menu(context),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+                padding: const EdgeInsets.all(14),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: AppSpacing.x4l,
-                      height: AppSpacing.x4l,
+                      width: 40,
+                      height: 40,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          CircleAvatar(
-                            radius: AppSpacing.x4l / 2,
-                            backgroundColor: nv.bg,
-                            child: Icon(nv.ic, color: nv.fg, size: AppSpacing.x2l - AppSpacing.xs),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                center: const Alignment(-0.3, -0.4),
+                                colors: [
+                                  Color.lerp(nv.fg, AppColors.white, 0.8)!,
+                                  nv.fg,
+                                  Color.lerp(nv.fg, AppColors.black, 0.5)!,
+                                ],
+                                stops: const [0, 0.45, 1],
+                              ),
+                            ),
+                            child: SizedBox.square(
+                              dimension: 40,
+                              child: Icon(
+                                nv.ic,
+                                color: context.isDark
+                                    ? AppColors.darkOnBrand
+                                    : AppColors.white,
+                                size: 20,
+                              ),
+                            ),
                           ),
                           if (u)
-                            const Positioned(
-                              right: 0,
+                            PositionedDirectional(
+                              end: 0,
                               bottom: 0,
                               child: PulsingDot(
                                 size: AppSpacing.sm,
-                                color: AppColors.primary,
+                                color: brand,
                               ),
                             ),
                         ],
                       ),
                     ),
-                    SizedBox(width: AppSpacing.md),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  entity.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    fontWeight:
-                                        u ? FontWeight.w700 : FontWeight.w500,
-                                    color: context.textPrimary,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: AppSpacing.sm),
-                              Text(
-                                Formatters.formatNotificationTime(
-                                  entity.createdAt,
-                                  context.l10n,
-                                ),
-                                style: AppTypography.labelSmall.copyWith(
-                                  color: context.textSecondary,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            entity.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: u ? FontWeight.w800 : FontWeight.w600,
+                              color: context.textPrimary,
+                            ),
                           ),
-                          SizedBox(height: AppSpacing.xs),
+                          const SizedBox(height: 3),
                           Text(
                             entity.body,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(
                               color: context.textSecondary,
+                              height: 1.45,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (thumb) SizedBox(width: AppSpacing.sm),
-                    if (thumb)
+                    if (thumb) ...[
+                      const SizedBox(width: AppSpacing.sm),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(AppSpacing.sm),
                         child: AppCachedNetworkImage(
@@ -239,13 +257,15 @@ class NotificationTile extends StatelessWidget {
                               ColoredBox(color: context.textDisabled),
                         ),
                       ),
-                    if (thumb) SizedBox(width: AppSpacing.xs),
-                    Padding(
-                      padding: const EdgeInsets.only(left: AppSpacing.xs),
-                      child: Icon(
-                        context.chevronForward,
-                        size: AppSpacing.x2l - AppSpacing.xs,
-                        color: context.iconSecondary,
+                    ],
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      Formatters.formatNotificationTime(
+                        entity.createdAt,
+                        context.l10n,
+                      ),
+                      style: AppTypography.labelMedium.copyWith(
+                        color: context.labelColor,
                       ),
                     ),
                   ],
@@ -254,6 +274,18 @@ class NotificationTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        0,
+        AppSpacing.xl,
+        AppSpacing.md,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: dismissible,
       ),
     );
   }

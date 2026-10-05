@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../../../../core/network/app_error_messages.dart';
@@ -68,9 +67,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       ),
     );
 
-    ref.listen<String?>(
-      wishlistProvider.select((s) => s.error),
-      (prev, next) {
+    ref.listen<String?>(wishlistProvider.select((s) => s.error), (prev, next) {
       final err = next;
       if (err != null && err != prev && context.mounted) {
         AppSnackbar.error(context, resolveAppError(context, err));
@@ -90,7 +87,7 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
           child: loading
               ? const WishlistSkeleton()
               : RefreshIndicator(
-                  color: AppColors.primary,
+                  color: context.linkColor,
                   onRefresh: () => notifier.fetchWishlist(),
                   child: _buildScrollable(context, state, notifier),
                 ),
@@ -108,7 +105,8 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
       bool isLoading,
       WishlistFilter selectedFilter,
       String? error,
-    }) state,
+    })
+    state,
     Wishlist notifier,
   ) {
     final items = state.items;
@@ -128,10 +126,10 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       cacheExtent: 1000,
-      padding: const EdgeInsets.fromLTRB(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
         AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
+        AppSpacing.xl,
         AppSpacing.x4l,
       ),
       itemCount: filtered.length,

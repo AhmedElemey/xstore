@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../providers/notifications_provider.dart';
@@ -52,7 +51,9 @@ class NotificationEmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filter = ref.watch(notificationsProvider.select((s) => s.selectedFilter));
+    final filter = ref.watch(
+      notificationsProvider.select((s) => s.selectedFilter),
+    );
     final n = ref.read(notificationsProvider.notifier);
     final all = isAllFilter;
     return Center(
@@ -70,17 +71,30 @@ class NotificationEmptyState extends ConsumerWidget {
                   ),
                   child: child,
                 ),
-                child: Icon(LucideIcons.bell, size: AppSpacing.x3l * 2, color: AppColors.primary.withValues(alpha: 0.35)),
+                child: Icon(
+                  LucideIcons.bell,
+                  size: AppSpacing.x3l * 2,
+                  color: context.linkColor.withValues(alpha: 0.5),
+                ),
               )
             else
-              Icon(LucideIcons.bellOff, size: AppSpacing.x3l * 2, color: context.textDisabled),
+              Icon(
+                LucideIcons.bellOff,
+                size: AppSpacing.x3l * 2,
+                color: context.textDisabled,
+              ),
             SizedBox(height: AppSpacing.x2l),
             Text(
               all
                   ? context.l10n.notificationsEmptyAllTitle
-                  : context.l10n.notificationsEmptyFilterTitle(_filterName(context, filter)),
+                  : context.l10n.notificationsEmptyFilterTitle(
+                      _filterName(context, filter),
+                    ),
               textAlign: TextAlign.center,
-              style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w700, color: context.textPrimary),
+              style: AppTypography.titleMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.textPrimary,
+              ),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
@@ -88,9 +102,13 @@ class NotificationEmptyState extends ConsumerWidget {
                   ? context.l10n.notificationsEmptyFilterSubtitle(
                       context.l10n.notificationsFilterAll.toLowerCase(),
                     )
-                  : context.l10n.notificationsEmptyFilterSubtitle(_scope(filter)),
+                  : context.l10n.notificationsEmptyFilterSubtitle(
+                      _scope(filter),
+                    ),
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium.copyWith(color: context.textSecondary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: context.textSecondary,
+              ),
             ),
             if (!all) ...[
               SizedBox(height: AppSpacing.x2l),

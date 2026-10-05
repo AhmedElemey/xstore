@@ -13,6 +13,8 @@ import '../widgets/order_detail_scroll_content.dart';
 import '../widgets/order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/skeletons/order_detail_skeleton.dart';
 
 class OrderDetailScreen extends ConsumerStatefulWidget {
@@ -29,7 +31,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(orderDetailNotifierProvider(widget.orderId).notifier).fetchOrder();
+      ref
+          .read(orderDetailNotifierProvider(widget.orderId).notifier)
+          .fetchOrder();
     });
   }
 
@@ -53,7 +57,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       final err = n.error;
       if (err != null && err != p?.error && context.mounted) {
         AppSnackbar.error(context, err);
-        ref.read(orderDetailNotifierProvider(widget.orderId).notifier).clearError();
+        ref
+            .read(orderDetailNotifierProvider(widget.orderId).notifier)
+            .clearError();
       }
     });
 
@@ -64,67 +70,125 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       },
       child: Scaffold(
         backgroundColor: context.backgroundColor,
-        appBar: order == null
-            ? AppBar(
-                leading: BackButton(onPressed: _onBack),
-                backgroundColor: context.surfaceColor,
-                elevation: 0,
-              )
-            : null,
-        body: order == null && state.isLoading
-            ? const OrderDetailSkeleton()
-            : order == null
-                ? Center(child: Text(state.error ?? context.l10n.errorGeneric))
-                : Column(
-                    children: [
-                      Expanded(
-                        child: CustomScrollView(
-                          slivers: [
-                            SliverAppBar(
-                              pinned: true,
-                              elevation: 0,
-                              backgroundColor: context.surfaceColor,
-                              leading: BackButton(onPressed: _onBack),
-                              title: Text(
-                                '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                                style: AppTypography.titleMedium,
-                              ),
-                              actions: [
-                                IconButton(
-                                  icon: const Icon(Icons.ios_share_rounded),
-                                  onPressed: () {
-                                    Share.share(
-                                      '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${order.formattedOrderId}\n${orderStatusLabel(context, order.status)}\n${context.formatCurrency(order.total)}',
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                            OrderDetailScrollContent(order: order),
-                          ],
+        body: OrbitBackground(
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                _Header(order: order, onBack: _onBack),
+                Expanded(
+                  child: order == null && state.isLoading
+                      ? const OrderDetailSkeleton()
+                      : order == null
+                      ? Center(
+                          child: Text(state.error ?? context.l10n.errorGeneric),
+                        )
+                      : CustomScrollView(
+                          slivers: [OrderDetailScrollContent(order: order)],
+                        ),
+                ),
+                if (order != null)
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.backgroundColor.withValues(alpha: 0.96),
+                      border: Border(
+                        top: BorderSide(color: context.borderColor),
+                      ),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          AppSpacing.xl,
+                          AppSpacing.md,
+                          AppSpacing.xl,
+                          AppSpacing.md,
+                        ),
+                        child: OrderActionButtons(
+                          orderId: widget.orderId,
+                          order: order,
                         ),
                       ),
-                      SafeArea(
-                        top: false,
-                        child: Material(
-                          elevation: 8,
-                          color: context.surfaceColor,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              AppSpacing.lg,
-                              AppSpacing.md,
-                              AppSpacing.lg,
-                              AppSpacing.md,
-                            ),
-                            child: OrderActionButtons(
-                              orderId: widget.orderId,
-                              order: order,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Orbit header: frosted back button, order number in mono, store and date
+/// underneath, and the share action on the end.
+class _Header extends StatelessWidget {
+  const _Header({required this.order, required this.onBack});
+
+  final OrderEntity? order;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final o = order;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          AuthBackButton(onPressed: onBack),
+          const SizedBox(width: AppSpacing.md),
+          if (o != null) ...[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${context.l10n.orderHashPrefix}${o.formattedOrderId}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.headlineSmall.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '${o.vendorStoreName} · ${context.formatMediumDate(o.createdAt)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: context.labelColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Material(
+              color: context.glassColor,
+              shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () {
+                  Share.share(
+                    '${context.l10n.ordersShareSummary}\n${context.l10n.orderHashPrefix}${o.formattedOrderId}\n${orderStatusLabel(context, o.status)}\n${context.formatCurrency(o.total)}',
+                  );
+                },
+                child: SizedBox.square(
+                  dimension: 44,
+                  child: Icon(
+                    Icons.ios_share_rounded,
+                    size: 20,
+                    color: context.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

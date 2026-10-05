@@ -13,8 +13,8 @@ class WishlistVendorGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: context.backgroundColor,
+    return Material(
+      type: MaterialType.transparency,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),

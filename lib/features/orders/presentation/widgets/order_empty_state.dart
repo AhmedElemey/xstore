@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
@@ -35,7 +34,7 @@ class OrderEmptyState extends StatelessWidget {
                 Icon(
                   LucideIcons.shoppingBag,
                   size: AppSpacing.x4l + AppSpacing.lg,
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: context.linkColor.withValues(alpha: 0.5),
                 ),
                 Positioned(
                   right: AppSpacing.md,
@@ -51,7 +50,9 @@ class OrderEmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.x2l),
             Text(
               title,
-              style: AppTypography.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                color: context.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),

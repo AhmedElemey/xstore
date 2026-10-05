@@ -19,11 +19,11 @@ String commissionStatusLabel(BuildContext context, CommissionStatus s) =>
     };
 
 String paymentMethodLabel(BuildContext context, PaymentMethod m) => switch (m) {
-      PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
-      PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
-      PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
-      PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
-    };
+  PaymentMethod.cashOnDelivery => context.l10n.ordersPaymentCashOnDelivery,
+  PaymentMethod.cibCard => context.l10n.ordersPaymentCib,
+  PaymentMethod.dahabiCard => context.l10n.ordersPaymentDahabi,
+  PaymentMethod.baridimob => context.l10n.ordersPaymentBaridimob,
+};
 
 class OrderPriceBreakdown extends ConsumerWidget {
   const OrderPriceBreakdown({
@@ -72,16 +72,19 @@ class OrderPriceBreakdown extends ConsumerWidget {
                 color: order.isPaid
                     ? AppColors.success.withValues(alpha: 0.12)
                     : AppColors.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSpacing.x4l),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                order.paymentMethod == PaymentMethod.cashOnDelivery && vendorMode
+                order.paymentMethod == PaymentMethod.cashOnDelivery &&
+                        vendorMode
                     ? context.l10n.vendorCollectOnDelivery
                     : (order.isPaid
-                        ? context.l10n.ordersPaidBadge
-                        : context.l10n.ordersPaymentPendingBadge),
+                          ? context.l10n.ordersPaidBadge
+                          : context.l10n.ordersPaymentPendingBadge),
                 style: AppTypography.labelLarge.copyWith(
-                  color: order.paymentMethod == PaymentMethod.cashOnDelivery && vendorMode
+                  color:
+                      order.paymentMethod == PaymentMethod.cashOnDelivery &&
+                          vendorMode
                       ? AppColors.warning
                       : (order.isPaid ? AppColors.success : AppColors.warning),
                 ),
@@ -89,29 +92,34 @@ class OrderPriceBreakdown extends ConsumerWidget {
             ),
           ],
         ),
-        Divider(height: AppSpacing.x2l),
+        const SizedBox(height: AppSpacing.lg),
         _row(context, context.l10n.ordersSubtotal, order.subtotal),
         _row(context, context.l10n.ordersShipping, order.shippingCost),
         _row(context, context.l10n.ordersDiscount, order.discount),
-        Divider(height: AppSpacing.lg),
+        Divider(height: AppSpacing.lg, color: context.borderColor),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               context.l10n.ordersTotal,
-              style: AppTypography.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
             Text(
               context.formatCurrency(order.total),
-              style: AppTypography.titleMedium.copyWith(
-                color: AppColors.primary,
+              style: AppTypography.mono.copyWith(
+                fontSize: 20,
+                color: context.amberColor,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
         if (commission != null) ...[
-          Divider(height: AppSpacing.x2l),
+          Divider(height: AppSpacing.x2l, color: context.borderColor),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -144,7 +152,8 @@ class OrderPriceBreakdown extends ConsumerWidget {
               ),
               Text(
                 context.formatCurrency(commission.vendorEarns),
-                style: AppTypography.bodyLarge.copyWith(
+                style: AppTypography.mono.copyWith(
+                  fontSize: 15,
                   color: context.isDark
                       ? AppColors.successLight
                       : AppColors.success,
@@ -164,27 +173,29 @@ class OrderPriceBreakdown extends ConsumerWidget {
   }
 
   IconData _payIcon(PaymentMethod m) => switch (m) {
-        PaymentMethod.cashOnDelivery => Icons.payments_outlined,
-        _ => Icons.credit_card_outlined,
-      };
+    PaymentMethod.cashOnDelivery => Icons.payments_outlined,
+    _ => Icons.credit_card_outlined,
+  };
 
   Widget _row(BuildContext context, String label, double value) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.textSecondary,
-              ),
-            ),
-            Text(
-              context.formatCurrency(value),
-              style: AppTypography.bodyLarge,
-            ),
-          ],
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.textSecondary,
+          ),
         ),
-      );
-
+        Text(
+          context.formatCurrency(value),
+          style: AppTypography.mono.copyWith(
+            fontSize: 14,
+            color: context.textSecondary,
+          ),
+        ),
+      ],
+    ),
+  );
 }
