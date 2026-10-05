@@ -69,6 +69,12 @@ final _screens = <(String, UserRole, String)>[
   ('explore', UserRole.consumer, AppRoutes.explore),
   ('product', UserRole.consumer, '${AppRoutes.product}/listing_001'),
   ('reviews', UserRole.consumer, '${AppRoutes.product}/listing_001/reviews'),
+  ('cart', UserRole.consumer, AppRoutes.cart),
+  ('checkout', UserRole.consumer, AppRoutes.checkout),
+  ('orders', UserRole.consumer, AppRoutes.orders),
+  ('order_detail', UserRole.consumer, AppRoutes.orderPath('order_001')),
+  ('wishlist', UserRole.consumer, AppRoutes.wishlist),
+  ('notifications', UserRole.consumer, AppRoutes.notifications),
   ('vendor_orders', UserRole.vendor, AppRoutes.vendorOrders),
   ('courier_deliveries', UserRole.courier, AppRoutes.deliveries),
 ];
