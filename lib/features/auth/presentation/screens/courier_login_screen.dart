@@ -1,3 +1,5 @@
+import 'dart:math' show pi;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,8 +16,10 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/phone_input_field.dart';
 
@@ -123,131 +127,159 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
     final login = ref.watch(loginNotifierProvider);
     final error = _localError ?? login.error;
 
+    // Couriers get the amber "solar" accent: focus ring, cursor, toggle.
+    final amber = context.amberColor;
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.courierLoginTitle),
-        leading: BackButton(onPressed: () => context.pop()),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: context.primaryColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  LucideIcons.truck,
-                  size: 34,
-                  color: context.primaryColor,
+      body: OrbitBackground(
+        child: SafeArea(
+          child: Theme(
+            data: theme.copyWith(
+              inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: amber, width: 1.4),
                 ),
               ),
-              const Gap(AppSpacing.md),
-              Text(
-                context.l10n.courierLoginSubtitle,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.textSecondary,
-                ),
+              textSelectionTheme: theme.textSelectionTheme.copyWith(
+                cursorColor: amber,
               ),
-              const Gap(AppSpacing.lg),
-              _ModeToggle(
-                mode: _mode,
-                onChanged: login.isLoading
-                    ? null
-                    : (m) => setState(() {
-                          _mode = m;
-                          _localError = null;
-                          _otpSent = false;
-                        }),
-              ),
-              const Gap(AppSpacing.lg),
-              PhoneInputField(
-                controller: _phone,
-                enabled: !login.isLoading,
-                onChanged: (_) => setState(() => _localError = null),
-              ),
-              const Gap(AppSpacing.md),
-              if (_mode == _CourierLoginMode.password) ...[
-                AuthTextField(
-                  label: context.l10n.courierModePassword,
-                  controller: _password,
-                  obscureText: !login.isPasswordVisible,
-                  prefixIcon: const Icon(LucideIcons.lock, size: 18),
-                  suffixIcon: IconButton(
-                    onPressed: () => ref
-                        .read(loginNotifierProvider.notifier)
-                        .togglePasswordVisibility(),
-                    icon: Icon(
-                      login.isPasswordVisible
-                          ? LucideIcons.eyeOff
-                          : LucideIcons.eye,
-                      color: context.iconSecondary,
+            ),
+            child: CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: AuthBackButton(onPressed: () => context.pop()),
+                        ),
+                        const _CourierPlanet(),
+                        Text(
+                          context.l10n.courierLoginTitle,
+                          style: AppTypography.headline.copyWith(
+                            fontSize: AppTypography.rem(1.75),
+                            color: context.textPrimary,
+                          ),
+                        ),
+                        const Gap(AppSpacing.sm),
+                        Text(
+                          context.l10n.courierLoginSubtitle,
+                          style: AppTypography.body15.copyWith(
+                            height: 1.45,
+                            color: context.textSecondary,
+                          ),
+                        ),
+                        const Gap(AppSpacing.xl),
+                        _ModeToggle(
+                          mode: _mode,
+                          onChanged: login.isLoading
+                              ? null
+                              : (m) => setState(() {
+                                    _mode = m;
+                                    _localError = null;
+                                    _otpSent = false;
+                                  }),
+                        ),
+                        const Gap(AppSpacing.xl),
+                        PhoneInputField(
+                          controller: _phone,
+                          enabled: !login.isLoading,
+                          onChanged: (_) => setState(() => _localError = null),
+                        ),
+                        if (_mode == _CourierLoginMode.password) ...[
+                          const Gap(AppSpacing.lg),
+                          AuthTextField(
+                            label: context.l10n.courierModePassword,
+                            controller: _password,
+                            obscureText: !login.isPasswordVisible,
+                            suffixIcon: IconButton(
+                              onPressed: () => ref
+                                  .read(loginNotifierProvider.notifier)
+                                  .togglePasswordVisibility(),
+                              icon: Icon(
+                                login.isPasswordVisible
+                                    ? LucideIcons.eyeOff
+                                    : LucideIcons.eye,
+                                color: context.iconSecondary,
+                              ),
+                            ),
+                            onChanged: (_) =>
+                                setState(() => _localError = null),
+                          ),
+                        ] else if (_otpSent) ...[
+                          const Gap(AppSpacing.lg),
+                          AuthTextField(
+                            label: context.l10n.courierOtpFieldLabel,
+                            hint: context.l10n.courierOtpHint,
+                            controller: _otp,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(6),
+                            ],
+                            onChanged: (_) =>
+                                setState(() => _localError = null),
+                          ),
+                        ],
+                        if (error != null) ...[
+                          const Gap(AppSpacing.md),
+                          Text(
+                            error,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: context.colorScheme.error,
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        const Gap(AppSpacing.x2l),
+                        if (_mode == _CourierLoginMode.password)
+                          XstoreButton(
+                            label: context.l10n.login,
+                            isLoading: login.isLoading,
+                            onPressed: login.isLoading ||
+                                    !_phoneValid ||
+                                    !_passwordValid
+                                ? null
+                                : _submitPassword,
+                          )
+                        else if (_otpSent) ...[
+                          XstoreButton(
+                            label: context.l10n.courierVerifyAndLogin,
+                            isLoading: login.isLoading,
+                            onPressed: login.isLoading || !_otpComplete
+                                ? null
+                                : _verifyOtp,
+                          ),
+                          const Gap(AppSpacing.sm),
+                          Center(
+                            child: TextButton(
+                              onPressed: login.isLoading ? null : _sendOtp,
+                              style: TextButton.styleFrom(
+                                foregroundColor: amber,
+                                minimumSize: const Size(0, 44),
+                              ),
+                              child: Text(context.l10n.courierResendCode),
+                            ),
+                          ),
+                        ] else
+                          XstoreButton(
+                            label: context.l10n.courierSendCode,
+                            isLoading: false,
+                            onPressed:
+                                login.isLoading || !_phoneValid ? null : _sendOtp,
+                          ),
+                      ],
                     ),
                   ),
-                  onChanged: (_) => setState(() => _localError = null),
-                ),
-                const Gap(AppSpacing.lg),
-                XstoreButton(
-                  label: context.l10n.login,
-                  isLoading: login.isLoading,
-                  onPressed: login.isLoading || !_phoneValid || !_passwordValid
-                      ? null
-                      : _submitPassword,
-                ),
-              ] else ...[
-                if (_otpSent) ...[
-                  AuthTextField(
-                    label: context.l10n.courierOtpFieldLabel,
-                    hint: context.l10n.courierOtpHint,
-                    controller: _otp,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(6),
-                    ],
-                    onChanged: (_) => setState(() => _localError = null),
-                  ),
-                  const Gap(AppSpacing.lg),
-                  XstoreButton(
-                    label: context.l10n.courierVerifyAndLogin,
-                    isLoading: login.isLoading,
-                    onPressed: login.isLoading || !_otpComplete
-                        ? null
-                        : _verifyOtp,
-                  ),
-                  const Gap(AppSpacing.sm),
-                  Center(
-                    child: TextButton(
-                      onPressed: login.isLoading ? null : _sendOtp,
-                      child: Text(context.l10n.courierResendCode),
-                    ),
-                  ),
-                ] else
-                  XstoreButton(
-                    label: context.l10n.courierSendCode,
-                    isLoading: false,
-                    onPressed: login.isLoading || !_phoneValid ? null : _sendOtp,
-                  ),
-              ],
-              if (error != null) ...[
-                const Gap(AppSpacing.md),
-                Text(
-                  error,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.error,
-                  ),
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -255,6 +287,66 @@ class _CourierLoginScreenState extends ConsumerState<CourierLoginScreen> {
   }
 }
 
+/// Amber "solar" planet with a delivery truck, on a tilted orbit ring.
+class _CourierPlanet extends StatelessWidget {
+  const _CourierPlanet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 170,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Transform.rotate(
+            angle: -10 * pi / 180,
+            child: Container(
+              width: 300,
+              height: 60,
+              decoration: ShapeDecoration(
+                shape: OvalBorder(
+                  side: BorderSide(
+                    color: context.amberColor.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: 110,
+            height: 110,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                center: Alignment(-0.3, -0.4),
+                colors: [
+                  AppColors.white,
+                  AppColors.accentLight,
+                  AppColors.accent,
+                ],
+                stops: [0, 0.4, 1],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentLight.withValues(alpha: 0.5),
+                  blurRadius: 50,
+                ),
+              ],
+            ),
+            child: const Icon(
+              LucideIcons.truck,
+              size: 44,
+              color: AppColors.darkOnBrand,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Password | OTP as a frosted segmented pill; the selected side is amber.
 class _ModeToggle extends StatelessWidget {
   const _ModeToggle({required this.mode, required this.onChanged});
 
@@ -263,32 +355,30 @@ class _ModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget chip(_CourierLoginMode m, String label, IconData icon) {
+    final selectedBg = context.amberColor;
+    final selectedFg =
+        context.isDark ? AppColors.darkOnBrand : AppColors.white;
+
+    Widget segment(_CourierLoginMode m, String label, IconData icon) {
       final selected = mode == m;
+      final fg = selected ? selectedFg : context.textSecondary;
       return Expanded(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-          onTap: onChanged == null ? null : () => onChanged!(m),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: selected ? context.primaryColor : AppColors.transparent,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
+        child: Material(
+          color: selected ? selectedBg : AppColors.transparent,
+          shape: const StadiumBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onChanged == null ? null : () => onChanged!(m),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  size: 16,
-                  color: selected ? Colors.white : context.textSecondary,
-                ),
-                const Gap(AppSpacing.xs),
+                Icon(icon, size: 16, color: fg),
+                const Gap(AppSpacing.spacing6),
                 Text(
                   label,
-                  style: AppTypography.labelMedium.copyWith(
-                    color: selected ? Colors.white : context.textSecondary,
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: fg,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
                   ),
                 ),
               ],
@@ -299,19 +389,21 @@ class _ModeToggle extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      decoration: BoxDecoration(
-        border: Border.all(color: context.borderColor),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+      height: 48,
+      padding: const EdgeInsets.all(4),
+      decoration: ShapeDecoration(
+        color: context.glassColor,
+        shape: StadiumBorder(side: BorderSide(color: context.borderColor)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          chip(
+          segment(
             _CourierLoginMode.password,
             context.l10n.courierModePassword,
             LucideIcons.lock,
           ),
-          chip(
+          segment(
             _CourierLoginMode.otp,
             context.l10n.courierModeOtp,
             LucideIcons.messageSquare,

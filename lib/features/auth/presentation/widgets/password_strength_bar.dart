@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -62,51 +63,32 @@ class PasswordStrengthBar extends StatelessWidget {
     }
   }
 
-  static List<Color> _segmentColors(PasswordStrength s) {
+  /// Orbit: every filled segment takes the level's color — red, amber,
+  /// then green.
+  static Color _levelColor(BuildContext context, PasswordStrength s) {
     switch (s) {
       case PasswordStrength.none:
-        return [
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-        ];
       case PasswordStrength.weak:
-        return [
-          AppColors.error,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-        ];
+        return context.colorScheme.error;
       case PasswordStrength.fair:
-        return [
-          AppColors.error,
-          AppColors.warning,
-          AppColors.lightBorder,
-          AppColors.lightBorder,
-        ];
+        return context.amberColor;
       case PasswordStrength.good:
-        return [
-          AppColors.error,
-          AppColors.warning,
-          const Color(0xFFEAB308),
-          AppColors.lightBorder,
-        ];
       case PasswordStrength.strong:
-        return [
-          AppColors.success,
-          AppColors.success,
-          AppColors.success,
-          AppColors.success,
-        ];
+        return _successColor(context);
     }
   }
+
+  static Color _successColor(BuildContext context) =>
+      context.isDark ? AppColors.successLight : AppColors.success;
 
   @override
   Widget build(BuildContext context) {
     final strength = _strengthFor(password);
     final filled = _filledSegments(strength);
-    final colors = _segmentColors(strength);
+    final color = _levelColor(context, strength);
+    final track = context.isDark
+        ? AppColors.white.withValues(alpha: 0.12)
+        : AppColors.primary.withValues(alpha: 0.14);
     final label = _label(strength);
 
     return Column(
@@ -114,16 +96,15 @@ class PasswordStrengthBar extends StatelessWidget {
       children: [
         Row(
           children: List.generate(4, (i) {
-            final active = i < filled;
             return Expanded(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOut,
-                margin: EdgeInsets.only(right: i < 3 ? 6 : 0),
-                height: 6,
+                margin: EdgeInsetsDirectional.only(end: i < 3 ? 6 : 0),
+                height: 4,
                 decoration: BoxDecoration(
-                  color: active ? colors[i] : AppColors.lightBorder,
-                  borderRadius: BorderRadius.circular(4),
+                  color: i < filled ? color : track,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             );
@@ -133,12 +114,7 @@ class PasswordStrengthBar extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             label,
-            style: AppTypography.body12.copyWith(
-              fontWeight: FontWeight.w600,
-              color: strength == PasswordStrength.strong
-                  ? AppColors.success
-                  : context.textSecondary,
-            ),
+            style: AppTypography.fieldLabel.copyWith(color: color),
           ),
         ],
         const SizedBox(height: AppSpacing.md),
@@ -175,22 +151,23 @@ class _RequirementRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = met
+        ? PasswordStrengthBar._successColor(context)
+        : context.textSecondary;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
           Icon(
-            met ? Icons.check_circle : Icons.circle_outlined,
-            size: 18,
-            color: met ? AppColors.success : context.textDisabled,
+            met ? LucideIcons.circleCheck : LucideIcons.circle,
+            size: 16,
+            color: color,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               text,
-              style: AppTypography.bodySmall.copyWith(
-                color: met ? AppColors.success : context.textSecondary,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: color),
             ),
           ),
         ],

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../providers/auth_provider.dart';
 import '../providers/otp_resend_cooldown.dart';
+import '../widgets/auth_header.dart';
 import '../widgets/otp_input_field.dart';
 import '../widgets/otp_resend_row.dart';
 import 'reset_password_screen.dart';
@@ -125,61 +125,65 @@ class _ForgotPasswordOtpScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(LucideIcons.arrowLeft, color: context.iconPrimary),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.x2l),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                context.l10n.resetPasswordTitle,
-                style: AppTypography.titleLarge.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: context.textPrimary,
+      body: OrbitBackground(
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: AuthBackButton(onPressed: () => context.pop()),
+                      ),
+                      const Gap(AppSpacing.xl),
+                      Text(
+                        context.l10n.resetPasswordTitle,
+                        style: AppTypography.headlineSmall.copyWith(
+                          color: context.textPrimary,
+                        ),
+                      ),
+                      const Gap(AppSpacing.md),
+                      Text(
+                        context.l10n.resetPasswordOtpSentTo(widget.email),
+                        style: AppTypography.body15.copyWith(
+                          height: 1.5,
+                          color: context.textSecondary,
+                        ),
+                      ),
+                      const Gap(AppSpacing.x2l),
+                      OtpInputField(
+                        controller: _otp,
+                        enabled: !_continuing,
+                        errorText: _otpError,
+                        onCompleted: (_) => _continue(),
+                      ),
+                      const Gap(AppSpacing.lg),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: OtpResendRow(
+                          canResend: _canResend,
+                          resendCooldown: _resendCooldown,
+                          isSending: _isResending,
+                          onResend: _resend,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Gap(AppSpacing.x2l),
+                      XstoreButton(
+                        label: context.l10n.continueLabel,
+                        isLoading: _continuing,
+                        onPressed: _otp.text.length == 6 && !_continuing
+                            ? _continue
+                            : null,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Gap(AppSpacing.md),
-              Text(
-                context.l10n.resetPasswordOtpSentTo(widget.email),
-                style: AppTypography.body15.copyWith(
-                  height: 1.4,
-                  color: context.textSecondary,
-                ),
-              ),
-              const Gap(AppSpacing.spacing28),
-              Center(
-                child: OtpInputField(
-                  controller: _otp,
-                  enabled: !_continuing,
-                  errorText: _otpError,
-                  onCompleted: (_) => _continue(),
-                ),
-              ),
-              const Gap(AppSpacing.md),
-              Center(
-                child: OtpResendRow(
-                  canResend: _canResend,
-                  resendCooldown: _resendCooldown,
-                  isSending: _isResending,
-                  onResend: _resend,
-                ),
-              ),
-              const Gap(AppSpacing.xl),
-              XstoreButton(
-                label: context.l10n.continueLabel,
-                isLoading: _continuing,
-                onPressed: _otp.text.length == 6 && !_continuing
-                    ? _continue
-                    : null,
               ),
             ],
           ),
