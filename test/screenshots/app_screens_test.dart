@@ -113,6 +113,7 @@ final _screens = <(String, UserRole, String)>[
   ),
   ('seller_store', UserRole.consumer, '${AppRoutes.sellerProfile}/vendor_001'),
   ('courier_deliveries', UserRole.courier, AppRoutes.deliveries),
+  ('courier_cash', UserRole.courier, AppRoutes.courierCash),
 ];
 
 /// Explore always runs the live geo search (no MOCK branch), so give it a
