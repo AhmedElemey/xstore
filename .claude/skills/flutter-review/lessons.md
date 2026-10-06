@@ -1109,3 +1109,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Orbit courier screens: solar amber actions, glass cards, label finders go uppercase
 - **Rule:** Courier primary actions are `XstoreButton(gradient: AppColors.courierGradient, foregroundColor: AppColors.onCourier)` (label only, no icon; destructive Failed stays a red `TextButton`, the fail sheet confirm is a flat-error `XstoreButton`). Cards share `CourierCardShell` (glass, radius 22); pickup/drop-off is a ring + filled amber node on an amber trail; cash and amounts are amber mono; cash-limit warning is `CourierHandoverBanner` (glass + warning border). Uppercased section labels (`ACTIVE`, `HISTORY`, `PACKAGES`, `CASH IN HAND`, `COLLECTED ORDERS`) change test finders. Package cards still show the raw `request.id` (no human reference exists on `DeliveryRequestEntity`).
 - **Where it applies:** `lib/features/delivery/presentation`, `courier_*_test.dart`.
+
+### 2026-10-06 — Never fall back to DioException.message in error mapping
+- **Rule:** `DioException.message` is developer text ("...validateStatus..."); mapping fallbacks must use a localized generic message, and `X.toString()` stored in state reaches the UI verbatim. Fix at `mapDioException`, not per screen. Also hide rating rows when `reviewCount == 0`, and use ICU plurals (Arabic needs `=2`/`few`) for counts in l10n.
+- **Where it applies:** `lib/core/network/dio_error_mapper.dart`, repositories/providers storing failure strings, l10n count strings, explore cards.

@@ -2714,6 +2714,12 @@ abstract class AppLocalizations {
   /// **'Track My Order'**
   String get orderTrackCta;
 
+  /// No description provided for @orderPlacedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your order! We\'ll let you know as soon as it ships.'**
+  String get orderPlacedSubtitle;
+
   /// No description provided for @orderContinueShopping.
   ///
   /// In en, this message translates to:
@@ -3611,7 +3617,7 @@ abstract class AppLocalizations {
   /// No description provided for @wishlistPriceDropBanner.
   ///
   /// In en, this message translates to:
-  /// **'🎉 Price drop on {n} items in your wishlist!'**
+  /// **'🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {n} items}} in your wishlist!'**
   String wishlistPriceDropBanner(int n);
 
   /// No description provided for @wishlistPriceDropPercent.
@@ -4009,12 +4015,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Analytics & sales insights'**
   String get sellerFeature3;
-
-  /// No description provided for @sellerFeature4.
-  ///
-  /// In en, this message translates to:
-  /// **'Direct chat with buyers'**
-  String get sellerFeature4;
 
   /// No description provided for @dateOfBirthOptional.
   ///

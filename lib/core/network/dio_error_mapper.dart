@@ -55,7 +55,7 @@ AppException mapDioException(DioException e) {
             return const ServerException(accountNotVerifiedErrorCode);
           }
         }
-        return UnauthorizedException(displayMessage ?? e.message);
+        return UnauthorizedException(displayMessage ?? _genericMessage());
       }
       if (code == 429) {
         return const ServerException(rateLimitErrorCode);
@@ -79,15 +79,15 @@ AppException mapDioException(DioException e) {
             return const ServerException(emailRequiredBeforePhoneErrorCode);
           }
         }
-        final message =
-            _validationMessage(e.response?.data) ?? displayMessage;
+        final message = _validationMessage(e.response?.data) ?? displayMessage;
         if (message != null) return ServerException(message);
       }
       return ServerException(
-        _friendlyServerMessage(serverMessage, displayMessage) ?? e.message,
+        _friendlyServerMessage(serverMessage, displayMessage) ??
+            _genericMessage(),
       );
     default:
-      return ServerException(e.message);
+      return ServerException(_genericMessage());
   }
 }
 
@@ -153,3 +153,9 @@ String? _friendlyServerMessage(String? serverMessage, String? displayMessage) {
   }
   return displayMessage;
 }
+
+/// Fallback when the backend sent no usable message. Never `DioException.message`:
+/// that is developer text ("...validateStatus...") which must not reach users.
+String _genericMessage() => errorMessagesInArabic
+    ? lookupAppLocalizations(const Locale('ar')).genericError
+    : 'Something went wrong. Please try again.';

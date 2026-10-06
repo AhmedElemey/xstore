@@ -140,7 +140,7 @@ class _OrderConfirmationBodyState extends State<OrderConfirmationBody> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      context.l10n.orderTrackCta,
+                      context.l10n.orderPlacedSubtitle,
                       textAlign: TextAlign.center,
                       style: AppTypography.bodyMedium.copyWith(
                         color: context.textSecondary,

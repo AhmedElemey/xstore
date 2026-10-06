@@ -1353,6 +1353,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderTrackCta => 'تابع طلبي';
 
   @override
+  String get orderPlacedSubtitle => 'شكراً على طلبك! هنبلغك أول ما يتشحن.';
+
+  @override
   String get orderContinueShopping => 'كمّل التسوق';
 
   @override
@@ -1828,7 +1831,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String wishlistPriceDropBanner(int n) {
-    return '🎉 السعر نزل على $n منتجات في مفضلتك!';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'السعر نزل على $n منتج',
+      few: 'السعر نزل على $n منتجات',
+      two: 'السعر نزل على منتجين',
+      one: 'السعر نزل على منتج واحد',
+    );
+    return '🎉 $_temp0 في مفضلتك!';
   }
 
   @override
@@ -2060,9 +2071,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sellerFeature3 => 'إحصائيات وتحليلات المبيعات';
-
-  @override
-  String get sellerFeature4 => 'تواصل مباشر مع المشترين';
 
   @override
   String get dateOfBirthOptional => 'تاريخ الميلاد (اختياري)';
