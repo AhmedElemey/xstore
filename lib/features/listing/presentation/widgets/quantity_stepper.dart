@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class QuantityStepper extends StatelessWidget {
@@ -26,10 +27,10 @@ class QuantityStepper extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.stockQuantityRequired,
-          style: Theme.of(context).textTheme.labelLarge,
+          context.l10n.stockQuantityRequired.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
         ),
-        const Gap(AppSpacing.md),
+        const Gap(AppSpacing.sm),
         Row(
           children: [
             _StepperIcon(
@@ -42,7 +43,11 @@ class QuantityStepper extends StatelessWidget {
               child: Text(
                 '$quantity',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: AppTypography.mono.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: context.textPrimary,
+                ),
               ),
             ),
             const Gap(AppSpacing.md),
@@ -54,12 +59,15 @@ class QuantityStepper extends StatelessWidget {
         ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.md, left: AppSpacing.xs),
+            padding: const EdgeInsetsDirectional.only(
+              top: AppSpacing.md,
+              start: AppSpacing.xs,
+            ),
             child: Text(
               errorText!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
       ],
@@ -77,19 +85,17 @@ class _StepperIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onTap != null;
     return Material(
-      color: enabled
-          ? AppColors.primary.withValues(alpha: 0.1)
-          : context.textDisabled.withValues(alpha: 0.25),
-      borderRadius: BorderRadius.circular(AppSpacing.md),
+      color: context.glassColor,
+      shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
-        child: SizedBox(
-          width: AppSpacing.x3l + AppSpacing.md,
-          height: AppSpacing.x3l + AppSpacing.md,
+        child: SizedBox.square(
+          dimension: 44,
           child: Icon(
             icon,
-            color: enabled ? AppColors.primary : context.textDisabled,
+            size: 20,
+            color: enabled ? context.textPrimary : context.textDisabled,
           ),
         ),
       ),

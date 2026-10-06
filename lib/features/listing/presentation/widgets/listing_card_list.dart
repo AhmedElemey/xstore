@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -41,100 +40,73 @@ class ListingCardList extends StatelessWidget {
     final theme = Theme.of(context);
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
     final accent = listingStatusAccent(context, listing.status);
-    final radius = BorderRadius.circular(16);
+    final radius = BorderRadius.circular(22);
+    // Active is the normal state; only the others get an accent border.
+    final borderColor = listing.status == ListingStatus.active
+        ? context.borderColor
+        : accent.withValues(alpha: 0.4);
     return DecoratedBox(
       decoration: BoxDecoration(
+        color: context.glassColor,
         borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.all(color: borderColor),
       ),
-      child: Material(
-        color: context.surfaceColor,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: Ink(
-          decoration: BoxDecoration(
-            border: Border.all(color: accent.withValues(alpha: 0.45)),
-            borderRadius: radius,
-          ),
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListingThumbnail(
-                      imageUrl: thumb,
-                      size: 80,
-                      borderRadius: 10,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListingThumbnail(imageUrl: thumb, size: 80),
+            const Gap(AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    listing.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.body15.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
-                    const Gap(AppSpacing.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            listing.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.body15.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const Gap(AppSpacing.sm),
-                          Text(
-                            context.formatCurrency(listing.price),
-                            style: AppTypography.body15.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Gap(AppSpacing.xs),
-                          Text(
-                            _metaLine,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const Gap(AppSpacing.sm),
-                          StatusBadge(status: listing.status),
-                          if (listing.postedAt != null) ...[
-                            const Gap(AppSpacing.xs),
-                            Text(
-                              'Posted ${Formatters.shortDate(listing.postedAt!)}',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant
-                                    .withValues(alpha: 0.75),
-                              ),
-                            ),
-                          ],
-                        ],
+                  ),
+                  const Gap(AppSpacing.xs),
+                  Text(
+                    context.formatCurrency(listing.price),
+                    style: AppTypography.mono.copyWith(
+                      color: context.amberColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const Gap(AppSpacing.xs),
+                  Text(
+                    _metaLine,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: context.textSecondary,
+                    ),
+                  ),
+                  const Gap(AppSpacing.sm),
+                  StatusBadge(status: listing.status),
+                  if (listing.postedAt != null) ...[
+                    const Gap(AppSpacing.xs),
+                    Text(
+                      'Posted ${Formatters.shortDate(listing.postedAt!)}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: context.textHint,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(LucideIcons.moreVertical, size: 18),
-                      onPressed: onOpenMenu,
-                    ),
                   ],
-                ),
+                ],
               ),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 4,
-                child: ColoredBox(color: accent),
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: const Icon(LucideIcons.moreVertical, size: 18),
+              onPressed: onOpenMenu,
+            ),
+          ],
         ),
       ),
     );

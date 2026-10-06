@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
 
 /// Key/value attribute rows; [keyControllers] / [valueControllers] must match
 /// length (managed by the screen / notifier sync).
@@ -40,21 +41,15 @@ class AttributesSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: TextField(
+                  child: AuthTextField(
                     controller: keyControllers[i],
                     onChanged: (v) => onKeyChanged(i, v),
-                    decoration: InputDecoration(
-                      labelText: context.l10n.listingAttributeNameLabel,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      isDense: true,
-                    ),
+                    label: context.l10n.listingAttributeNameLabel,
                   ),
                 ),
                 const Gap(AppSpacing.md),
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: 34),
                   child: Text(
                     ':',
                     style: Theme.of(context).textTheme.titleLarge,
@@ -62,19 +57,14 @@ class AttributesSection extends StatelessWidget {
                 ),
                 const Gap(AppSpacing.md),
                 Expanded(
-                  child: TextField(
+                  child: AuthTextField(
                     controller: valueControllers[i],
                     onChanged: (v) => onValueChanged(i, v),
-                    decoration: InputDecoration(
-                      labelText: context.l10n.listingAttributeValueLabel,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      isDense: true,
-                    ),
+                    label: context.l10n.listingAttributeValueLabel,
                   ),
                 ),
                 IconButton(
+                  padding: const EdgeInsets.only(top: 22),
                   onPressed: () => onRemove(i),
                   icon: const Icon(LucideIcons.trash2),
                   color: AppColors.error,
@@ -83,6 +73,7 @@ class AttributesSection extends StatelessWidget {
             ),
           ),
         TextButton.icon(
+          style: TextButton.styleFrom(foregroundColor: context.linkColor),
           onPressed: onAdd,
           icon: const Icon(LucideIcons.plus),
           label: Text(context.l10n.listingAddAttributeButton),

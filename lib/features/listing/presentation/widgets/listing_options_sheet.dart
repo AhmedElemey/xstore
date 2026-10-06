@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/listing_entity.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
@@ -14,10 +14,7 @@ enum ListingOptionsAction { edit, pause, resume, stats, delete, resubmit }
 
 /// Bottom sheet: listing actions (edit, pause/resume, stats, delete).
 class ListingOptionsSheet extends StatelessWidget {
-  const ListingOptionsSheet({
-    super.key,
-    required this.listing,
-  });
+  const ListingOptionsSheet({super.key, required this.listing});
 
   final ListingEntity listing;
 
@@ -39,7 +36,7 @@ class ListingOptionsSheet extends StatelessWidget {
                 width: AppSpacing.x3l + AppSpacing.sm,
                 height: AppSpacing.xs,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+                  color: context.borderColor,
                   borderRadius: BorderRadius.circular(AppSpacing.xs),
                 ),
               ),
@@ -47,11 +44,11 @@ class ListingOptionsSheet extends StatelessWidget {
             const Gap(AppSpacing.lg),
             if (showResubmit)
               ListTile(
-                leading: Icon(LucideIcons.refreshCw, color: AppColors.primary),
+                leading: Icon(LucideIcons.refreshCw, color: context.linkColor),
                 title: Text(
                   context.l10n.resubmitListing,
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: context.linkColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -80,10 +77,14 @@ class ListingOptionsSheet extends StatelessWidget {
             ListTile(
               leading: const Icon(LucideIcons.barChart2),
               title: Text(context.l10n.viewStatsMenu),
-              onTap: () => Navigator.of(context).pop(ListingOptionsAction.stats),
+              onTap: () =>
+                  Navigator.of(context).pop(ListingOptionsAction.stats),
             ),
             ListTile(
-              leading: Icon(LucideIcons.trash2, color: Theme.of(context).colorScheme.error),
+              leading: Icon(
+                LucideIcons.trash2,
+                color: Theme.of(context).colorScheme.error,
+              ),
               title: Text(
                 context.l10n.deleteListing,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -107,7 +108,6 @@ class ListingStatsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.x2l),
@@ -117,7 +117,10 @@ class ListingStatsSheet extends StatelessWidget {
           children: [
             Text(
               context.l10n.listingStatsHeading,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              style: AppTypography.headlineSmall.copyWith(
+                fontSize: 20,
+                color: context.textPrimary,
+              ),
             ),
             const Gap(AppSpacing.x2l),
             _StatRow(
@@ -160,19 +163,18 @@ class _StatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 22, color: AppColors.primary),
+        Icon(icon, size: 22, color: context.linkColor),
         const Gap(AppSpacing.lg),
         Expanded(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: AppTypography.mono.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: context.textPrimary,
+          ),
         ),
       ],
     );

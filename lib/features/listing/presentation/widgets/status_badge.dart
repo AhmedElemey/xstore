@@ -41,11 +41,13 @@ class StatusBadge extends StatelessWidget {
             vertical: AppSpacing.sm,
           );
     final fontSize = compact ? 11.0 : 12.0;
+    // Opaque over the surface so it stays legible on top of a photo.
     return Container(
       padding: pad,
       decoration: BoxDecoration(
-        color: bg,
+        color: Color.alphaBlend(bg, context.surfaceColor),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: fg.withValues(alpha: 0.35)),
       ),
       child: Text(
         label,

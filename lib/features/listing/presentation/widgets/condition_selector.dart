@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 /// Chip row for product condition (segmented-style).
@@ -20,21 +21,24 @@ class ConditionSelector extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onChanged;
   final String? errorText;
+
   /// Maps stored option value (e.g. English key) to display text.
   final String Function(String option)? optionLabel;
 
   @override
   Widget build(BuildContext context) {
     final hasError = errorText != null && errorText!.isNotEmpty;
+    final selectedBg = context.isDark ? context.textPrimary : AppColors.primary;
+    final selectedFg = context.isDark ? AppColors.darkOnBrand : AppColors.white;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.listingConditionFieldLabel,
-          style: Theme.of(context).textTheme.labelLarge,
+          context.l10n.listingConditionFieldLabel.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
         ),
-        const Gap(AppSpacing.md),
+        const Gap(AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
@@ -44,17 +48,20 @@ class ConditionSelector extends StatelessWidget {
             return ChoiceChip(
               label: Text(
                 display,
-                style: TextStyle(
-                  color: isSel ? AppColors.white : AppColors.materialGrey600,
-                  fontWeight: FontWeight.w500,
+                style: AppTypography.labelLarge.copyWith(
+                  color: isSel ? selectedFg : context.textSecondary,
+                  fontWeight: isSel ? FontWeight.w800 : FontWeight.w700,
                 ),
               ),
               selected: isSel,
               onSelected: (_) => onChanged(o),
-              selectedColor: AppColors.primary,
-              backgroundColor: AppColors.transparent,
+              selectedColor: selectedBg,
+              backgroundColor: context.glassColor,
+              shape: const StadiumBorder(),
               side: BorderSide(
-                color: hasError && !isSel ? AppColors.error : context.textDisabled,
+                color: isSel
+                    ? selectedBg
+                    : (hasError ? AppColors.error : context.borderColor),
               ),
               showCheckmark: false,
             );
@@ -62,12 +69,12 @@ class ConditionSelector extends StatelessWidget {
         ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
+            padding: const EdgeInsetsDirectional.only(top: 6, start: 4),
             child: Text(
               errorText!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.error),
             ),
           ),
       ],

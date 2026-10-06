@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 
@@ -15,7 +14,7 @@ class ListingThumbnail extends StatelessWidget {
     this.size = 80,
     this.width,
     this.height,
-    this.borderRadius = AppSpacing.md,
+    this.borderRadius = 16,
   });
 
   final String imageUrl;
@@ -26,7 +25,7 @@ class ListingThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = Theme.of(context).colorScheme.surfaceContainerHighest;
+    final bg = context.textDisabled;
     final w = width ?? size;
     final h = height ?? size;
     return ClipRRect(
@@ -48,7 +47,7 @@ class ListingThumbnail extends StatelessWidget {
     if (imageUrl.isEmpty) {
       return ColoredBox(
         color: placeholderBg,
-        child: Icon(LucideIcons.imageOff, color: context.textDisabled),
+        child: Icon(LucideIcons.imageOff, color: context.textSecondary),
       );
     }
     final isRemote =
@@ -62,7 +61,7 @@ class ListingThumbnail extends StatelessWidget {
         placeholder: (_, __) => ColoredBox(color: placeholderBg),
         errorWidget: (_, __, ___) => ColoredBox(
           color: placeholderBg,
-          child: const Icon(LucideIcons.imageOff),
+          child: Icon(LucideIcons.imageOff, color: context.textSecondary),
         ),
       );
     }
@@ -71,7 +70,7 @@ class ListingThumbnail extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => ColoredBox(
         color: placeholderBg,
-        child: const Icon(LucideIcons.imageOff),
+        child: Icon(LucideIcons.imageOff, color: context.textSecondary),
       ),
     );
   }

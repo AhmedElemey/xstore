@@ -1097,3 +1097,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Screenshot harness skips the login prefetch
 - **Rule:** `FakeAuth` bypasses `Auth.build()`, so `prefetchProfileData` never runs and `profileNotifierProvider` stays empty (Edit Profile shows blank fields and a "?" avatar). The harness calls `refreshProfileData()` for that route, like `fetchCart()` for the cart; seed any provider fed only by a login prefetch the same way.
 - **Where it applies:** `test/screenshots/app_screens_test.dart`.
+
+### 2026-10-06 — Orbit listing screens: keep the Scaffold, theme does the fields
+- **Rule:** Restyled screens that show snackbars (Add Listing) keep a `Scaffold(backgroundColor: transparent)` as snackbar host with `OrbitBackground` inside; a bare `Material` breaks widget tests that mount the screen alone. Fields inherit the glass look from the theme's `InputDecorationTheme` — drop per-field borders/fills and put an uppercase `fieldLabel` above (`ListingFormField`, `_PickerField`). Keep the "Product Photos *" text un-uppercased (a test pins it). Status badges over photos are opaque (`alphaBlend` on the surface) with `PositionedDirectional` start+end and `FittedBox`.
+- **Where it applies:** `add_listing_screen.dart`, `my_listings_screen.dart`, listing widgets, `vendor_store_screen.dart`.

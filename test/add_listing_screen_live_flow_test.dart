@@ -45,7 +45,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
@@ -66,6 +65,7 @@ import 'package:xstore/features/governments/presentation/providers/government_de
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
+import 'package:xstore/shared/widgets/auth_back_button.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
 
@@ -263,7 +263,9 @@ void main() {
         authProvider.overrideWith(() => FakeAuth(_vendor())),
         dioProvider.overrideWithValue(dio),
         allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
-        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionWalletProvider.overrideWith(
+          (ref) async => _emptyWallet,
+        ),
         // Never let the real (mock-datasource) order-stats path run under
         // flutter_test — see the 2026-07-19 lesson in flutter-review/SKILL.md.
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
@@ -310,7 +312,9 @@ void main() {
         authProvider.overrideWith(() => FakeAuth(_vendor())),
         dioProvider.overrideWithValue(dio),
         allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
-        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionWalletProvider.overrideWith(
+          (ref) async => _emptyWallet,
+        ),
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
         // The Location picker watches these; keep them off the scripted Dio.
         allGovernmentsProvider.overrideWith((ref) async => const []),
@@ -356,13 +360,17 @@ void main() {
     'the edit form has a back button that returns to My Listings',
     skip: MockConfig.useMock,
     (tester) async {
-      final dio = _fakeDio({'GET ${ApiEndpoints.getProfile}': (_) => _profileJson()});
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
 
       await _pumpReady(tester, [
         authProvider.overrideWith(() => FakeAuth(_vendor())),
         dioProvider.overrideWithValue(dio),
         allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
-        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionWalletProvider.overrideWith(
+          (ref) async => _emptyWallet,
+        ),
         vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
         // The Location picker watches these; keep them off the scripted Dio.
         allGovernmentsProvider.overrideWith((ref) async => const []),
@@ -370,7 +378,7 @@ void main() {
       ]);
       await _settle(tester);
 
-      final backButton = find.byIcon(LucideIcons.arrowLeft);
+      final backButton = find.byType(AuthBackButton);
       expect(backButton, findsOneWidget);
 
       await tester.tap(backButton);

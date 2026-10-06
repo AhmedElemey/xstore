@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class ListingStatsBanner extends StatelessWidget {
@@ -20,24 +21,11 @@ class ListingStatsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.isDark
-        ? <Color>[
-            AppColors.darkSurfaceVariant,
-            AppColors.darkSurfaceElevated,
-          ]
-        : <Color>[
-            AppColors.notificationUnreadBackground,
-            AppColors.lightSurface,
-          ];
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: colors,
-        ),
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -51,7 +39,7 @@ class ListingStatsBanner extends StatelessWidget {
                 icon: LucideIcons.boxes,
                 value: totalCount,
                 label: context.l10n.listingTotalListings,
-                valueColor: Theme.of(context).colorScheme.onSurface,
+                valueColor: context.textPrimary,
               ),
             ),
             Expanded(
@@ -67,7 +55,7 @@ class ListingStatsBanner extends StatelessWidget {
                 icon: LucideIcons.truck,
                 value: soldCount,
                 label: context.l10n.listingSoldStat,
-                valueColor: AppColors.primary,
+                valueColor: context.linkColor,
               ),
             ),
           ],
@@ -92,26 +80,26 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final grey = Theme.of(context).colorScheme.onSurfaceVariant;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 22, color: grey.withValues(alpha: 0.85)),
+        Icon(icon, size: 20, color: context.textSecondary),
         const Gap(AppSpacing.sm),
         Text(
           '$value',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: valueColor,
-              ),
+          style: AppTypography.mono.copyWith(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: valueColor,
+          ),
         ),
         Text(
-          label,
+          label.toUpperCase(),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: grey,
-                fontWeight: FontWeight.w500,
-              ),
+          style: AppTypography.fieldLabel.copyWith(
+            fontSize: 10,
+            color: context.labelColor,
+          ),
         ),
       ],
     );
