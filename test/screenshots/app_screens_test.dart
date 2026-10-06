@@ -114,6 +114,10 @@ final _screens = <(String, UserRole, String)>[
   ('seller_store', UserRole.consumer, '${AppRoutes.sellerProfile}/vendor_001'),
   ('courier_deliveries', UserRole.courier, AppRoutes.deliveries),
   ('courier_cash', UserRole.courier, AppRoutes.courierCash),
+  ('server_error', UserRole.consumer, AppRoutes.serverError),
+  ('not_found', UserRole.consumer, '/no-such-page'),
+  ('terms', UserRole.consumer, AppRoutes.terms),
+  ('privacy', UserRole.consumer, AppRoutes.privacy),
 ];
 
 /// Explore always runs the live geo search (no MOCK branch), so give it a
