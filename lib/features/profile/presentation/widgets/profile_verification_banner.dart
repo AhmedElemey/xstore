@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
@@ -58,7 +59,7 @@ class ProfileVerificationBanner extends ConsumerWidget {
             },
           ),
         if (showPhonePrompt) ...[
-          if (showEmailPrompt) const SizedBox(height: 8),
+          if (showEmailPrompt) const SizedBox(height: AppSpacing.sm),
           _VerificationRow(
             message: phoneMissing
                 ? context.l10n.profilePhoneMissing
@@ -95,28 +96,37 @@ class _VerificationRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.amberColor.withValues(alpha: 0.45)),
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.alertTriangle, color: AppColors.warning, size: 20),
-          const SizedBox(width: 10),
+          Icon(LucideIcons.alertTriangle, color: context.amberColor, size: 20),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.warning,
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           TextButton(
             onPressed: onVerify,
-            child: Text(actionLabel),
+            style: TextButton.styleFrom(foregroundColor: context.linkColor),
+            child: Text(
+              actionLabel,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),

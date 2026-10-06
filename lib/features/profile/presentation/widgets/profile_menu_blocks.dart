@@ -59,20 +59,18 @@ class ProfileMenuBlocks extends ConsumerWidget {
       context: context,
       child: DeleteAccountDialog(
         onConfirm: (password, confirmationText) async {
-          final result =
-              await ref.read(profileNotifierProvider.notifier).deleteAccount(
-                    password: password,
-                    confirmationText: confirmationText,
-                  );
+          final result = await ref
+              .read(profileNotifierProvider.notifier)
+              .deleteAccount(
+                password: password,
+                confirmationText: confirmationText,
+              );
           if (result.deleted) {
             await ref.read(authProvider.notifier).logout();
             return;
           }
           if (!context.mounted || result.error == null) return;
-          AppSnackbar.error(
-            context,
-            resolveAppError(context, result.error),
-          );
+          AppSnackbar.error(context, resolveAppError(context, result.error));
         },
       ),
     );
@@ -108,23 +106,23 @@ class ProfileMenuBlocks extends ConsumerWidget {
                   ),
                 ]
               : isCourier
-                  ? [
-                      // Shell-branch tabs — switch with go, never push
-                      // (see StatefulShellRoute lesson).
-                      ProfileMenuTile(
-                        icon: LucideIcons.truck,
-                        iconBackground: AppColors.primary,
-                        label: context.l10n.navDeliveries,
-                        onTap: () => context.go(AppRoutes.deliveries),
-                      ),
-                      ProfileMenuTile(
-                        icon: LucideIcons.wallet,
-                        iconBackground: AppColors.success,
-                        label: context.l10n.navCash,
-                        onTap: () => context.go(AppRoutes.courierCash),
-                      ),
-                    ]
-                  : [
+              ? [
+                  // Shell-branch tabs — switch with go, never push
+                  // (see StatefulShellRoute lesson).
+                  ProfileMenuTile(
+                    icon: LucideIcons.truck,
+                    iconBackground: AppColors.primary,
+                    label: context.l10n.navDeliveries,
+                    onTap: () => context.go(AppRoutes.deliveries),
+                  ),
+                  ProfileMenuTile(
+                    icon: LucideIcons.wallet,
+                    iconBackground: AppColors.success,
+                    label: context.l10n.navCash,
+                    onTap: () => context.go(AppRoutes.courierCash),
+                  ),
+                ]
+              : [
                   ProfileMenuTile(
                     icon: LucideIcons.shoppingBag,
                     iconBackground: AppColors.primary,
@@ -172,10 +170,7 @@ class ProfileMenuBlocks extends ConsumerWidget {
         const SizedBox(height: AppSpacing.x2l),
         ProfileMenuSection(
           title: context.l10n.sectionPreferences,
-          children: [
-            const ThemeToggleTile(),
-            const LanguageToggleTile(),
-          ],
+          children: [const ThemeToggleTile(), const LanguageToggleTile()],
         ),
         const SizedBox(height: AppSpacing.x2l),
         ProfileMenuSection(
@@ -203,26 +198,31 @@ class ProfileMenuBlocks extends ConsumerWidget {
               icon: LucideIcons.share2,
               iconBackground: AppColors.accent,
               label: context.l10n.menuShareApp,
-                    onTap: () => _shareApp(context),
+              onTap: () => _shareApp(context),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.x2l),
-        Text(
-          context.l10n.sectionDangerZone,
-          style: AppTypography.labelSmall.copyWith(
-            color: context.textSecondary,
-            letterSpacing: 1.1,
-            fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: AppSpacing.xs),
+          child: Text(
+            context.l10n.sectionDangerZone.toUpperCase(),
+            style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton(
           onPressed: onLogout,
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.error,
-            side: const BorderSide(color: AppColors.error),
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            foregroundColor: context.colorScheme.error,
+            backgroundColor: context.glassColor,
+            side: BorderSide(
+              color: context.colorScheme.error.withValues(alpha: 0.6),
+            ),
+            minimumSize: const Size.fromHeight(48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
           ),
           child: Text(context.l10n.logOut),
         ),
@@ -232,7 +232,9 @@ class ProfileMenuBlocks extends ConsumerWidget {
             onPressed: () => _deleteAccount(context, ref),
             child: Text(
               context.l10n.deleteAccount,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.colorScheme.error,
+              ),
             ),
           ),
         ),
@@ -240,10 +242,9 @@ class ProfileMenuBlocks extends ConsumerWidget {
         Center(
           child: Text(
             context.l10n.profileFooterLine,
-            style: AppTypography.labelSmall.copyWith(color: context.textDisabled),
+            style: AppTypography.labelSmall.copyWith(color: context.labelColor),
           ),
         ),
-        const SizedBox(height: AppSpacing.x3l),
       ],
     );
   }

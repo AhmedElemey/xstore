@@ -19,7 +19,10 @@ Future<void> showProfileLogoutSheet({
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(context.l10n.logoutConfirmTitle, style: AppTypography.titleMedium),
+          Text(
+            context.l10n.logoutConfirmTitle,
+            style: AppTypography.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.x2l),
           Row(
             children: [
@@ -32,6 +35,10 @@ Future<void> showProfileLogoutSheet({
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: context.colorScheme.error,
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: () async {
                     Navigator.pop(ctx);
                     await ref.read(authProvider.notifier).logout();

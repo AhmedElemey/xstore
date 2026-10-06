@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -101,6 +100,7 @@ class ProfileStatsRow extends StatelessWidget {
             child: _StatCell(
               value: context.formatCurrency((savedDzd ?? 0) / 100.0),
               label: context.l10n.statTotalSaved,
+              isMoney: true,
               onTap: onSavedTap,
             ),
           ),
@@ -120,16 +120,11 @@ class _Card extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
+      clipBehavior: Clip.antiAlias,
       child: child,
     );
   }
@@ -140,11 +135,7 @@ class _VertDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 40,
-      color: context.textDisabled.withValues(alpha: 0.5),
-    );
+    return Container(width: 1, height: 40, color: context.borderColor);
   }
 }
 
@@ -153,11 +144,15 @@ class _StatCell extends StatelessWidget {
     required this.value,
     required this.label,
     this.onTap,
+    this.isMoney = false,
   });
 
   final String value;
   final String label;
   final VoidCallback? onTap;
+  final bool isMoney;
+
+  static const _star = ' ★';
 
   @override
   Widget build(BuildContext context) {
@@ -167,17 +162,37 @@ class _StatCell extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         child: Column(
           children: [
-            Text(
-              value,
-              style: AppTypography.titleMedium.copyWith(
-                color: AppColors.primary,
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: value.replaceFirst(_star, '')),
+                  // The mono face has no star glyph; draw it in the body font.
+                  if (value.endsWith(_star))
+                    TextSpan(
+                      text: _star,
+                      style: AppTypography.bodySmall.copyWith(
+                        fontSize: 16,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                ],
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.mono.copyWith(
+                fontSize: 18,
+                color: isMoney ? context.amberColor : context.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const Gap(AppSpacing.xs),
             Text(
-              label,
-              style: AppTypography.bodySmall,
+              label.toUpperCase(),
+              style: AppTypography.fieldLabel.copyWith(
+                color: context.labelColor,
+                fontSize: 10,
+                letterSpacing: 0.6,
+              ),
               textAlign: TextAlign.center,
               maxLines: 2,
             ),

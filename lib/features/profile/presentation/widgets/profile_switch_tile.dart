@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions/context_extensions.dart';
 import 'profile_menu_tile.dart';
 
 class ProfileSwitchTile extends StatelessWidget {
@@ -28,7 +29,7 @@ class ProfileSwitchTile extends StatelessWidget {
       showChevron: false,
       trailing: Switch.adaptive(
         value: value,
-        activeTrackColor: AppColors.primary.withValues(alpha: 0.45),
+        activeTrackColor: context.linkColor.withValues(alpha: 0.45),
         activeThumbColor: AppColors.white,
         onChanged: onChanged,
       ),
