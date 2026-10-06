@@ -597,8 +597,11 @@ class _StoreHeader extends StatelessWidget {
         height: 44,
         child: Row(
           children: [
-            const AuthBackButton(),
-            const Gap(AppSpacing.md),
+            // A shared store link opens with nothing to pop back to.
+            if (Navigator.of(context).canPop()) ...[
+              const AuthBackButton(),
+              const Gap(AppSpacing.md),
+            ],
             Expanded(
               child: Text(
                 context.l10n.stepStore,
