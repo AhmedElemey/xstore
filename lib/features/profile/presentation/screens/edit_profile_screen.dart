@@ -15,6 +15,7 @@ import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../store_categories/presentation/providers/store_category_dependencies.dart';
 import '../providers/profile_provider.dart';
@@ -23,9 +24,12 @@ import '../providers/profile_verification_provider.dart';
 import '../widgets/profile_avatar_picker.dart';
 import '../widgets/vendor_location_section.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/skeletons/edit_profile_skeleton.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -149,7 +153,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           final height = MediaQuery.sizeOf(context).height * 0.55;
           return Material(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             clipBehavior: Clip.antiAlias,
             child: SafeArea(
               child: SizedBox(
@@ -252,7 +256,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       context: context,
       builder: (ctx) => Material(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
         child: SafeArea(
           child: Column(
@@ -301,7 +305,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       context: context,
       builder: (ctx) => Material(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
         child: SafeArea(
           child: Column(
@@ -495,13 +499,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       builder: (_) => EditProfileContactValueSheet(
         title: context.l10n.verifyYourEmail,
         initialText: _email.text.trim(),
-        fieldBuilder: (ctx, controller) => TextField(
+        fieldBuilder: (ctx, controller) => AuthTextField(
+          label: ctx.l10n.email,
           controller: controller,
           keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(
-            labelText: ctx.l10n.email,
-            border: const OutlineInputBorder(),
-          ),
         ),
         normalize: (raw) => raw.trim(),
         validate: (value) => Validators.registerEmail(context.l10n, value),
@@ -678,258 +679,286 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       return const Scaffold(body: EditProfileSkeleton());
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.editProfile),
-        actions: [
-          if (s.isUpdating)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.only(right: AppSpacing.lg),
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
                 ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: canSave ? _save : null,
-              child: Text(context.l10n.save),
-            ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          Center(
-            child: ProfileAvatarPicker(
-              name: u?.name ?? '',
-              imageUrl: s.avatarRemoved ? null : u?.avatarUrl,
-              imageFile: s.editAvatarFile,
-              diameter: 100,
-              onTap: _avatarSheet,
-            ),
-          ),
-          const Gap(AppSpacing.x2l),
-          Text(context.l10n.menuPersonalInfo, style: AppTypography.titleMedium),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _name,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.user),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) => ref
-                .read(profileNotifierProvider.notifier)
-                .updateField('name', v),
-          ),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _email,
-            readOnly: true,
-            keyboardType: TextInputType.emailAddress,
-            onTap: isVendor ? null : _changeEmail,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.mail),
-              suffixIcon: _VerificationStatus(
-                verified: _typedEmailIsVerified(s),
-                onVerify: _email.text.trim().isEmpty
-                    ? null
-                    : () {
-                        _verifyEmail();
-                      },
-              ),
-              suffixIconConstraints: const BoxConstraints(
-                minWidth: 0,
-                minHeight: 0,
-              ),
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          PhoneInputField(
-            controller: _phone,
-            readOnly: true,
-            onTap: isVendor ? null : _changePhone,
-            suffix: _VerificationStatus(
-              verified: _typedPhoneIsVerified(s),
-              onVerify: AppValidators.isMissingPhoneNumber(_phone.text)
-                  ? null
-                  : () {
-                      _verifyPhone();
-                    },
-            ),
-            onChanged: (_) {},
-          ),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _dobText,
-            readOnly: true,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(LucideIcons.calendar),
-              suffixIcon: const Icon(LucideIcons.chevronDown),
-              border: const OutlineInputBorder(),
-            ),
-            onTap: _pickDob,
-          ),
-          const Gap(AppSpacing.md),
-          // Single user location (governorate + city) for all roles; vendors
-          // reuse this same pair as the store location.
-          LocationCascadeField(
-            cityId: s.editStoreCityId,
-            governorateId: s.editStoreGovernmentId,
-            hint: _registeredLocationHint(s),
-            onChanged: (cityId, governorateId) => ref
-                .read(profileNotifierProvider.notifier)
-                .updateStoreLocation(cityId, governorateId),
-          ),
-          if (isVendor) ...[
-            const Gap(AppSpacing.x2l),
-            Text(
-              context.l10n.storeInformation,
-              style: AppTypography.titleMedium,
-            ),
-            const Gap(AppSpacing.md),
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    context.l10n.storeLogoRequired,
-                    style: AppTypography.labelLarge,
-                  ),
-                  const Gap(AppSpacing.sm),
-                  ProfileAvatarPicker(
-                    name: _storeName.text.isNotEmpty
-                        ? _storeName.text
-                        : (u?.name ?? ''),
-                    imageUrl: s.storeLogoRemoved ? null : u?.storeLogoUrl,
-                    imageFile: s.editStoreLogoFile,
-                    diameter: 100,
-                    onTap: _storeLogoSheet,
-                  ),
-                ],
-              ),
-            ),
-            const Gap(AppSpacing.lg),
-            TextField(
-              controller: _storeName,
-              decoration: InputDecoration(
-                labelText: context.l10n.storeNameRequired,
-                prefixIcon: const Icon(LucideIcons.store),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (v) => ref
-                  .read(profileNotifierProvider.notifier)
-                  .updateField('storeName', v),
-            ),
-            const Gap(AppSpacing.md),
-            TextField(
-              readOnly: true,
-              controller: _storeCategory,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(LucideIcons.tags),
-                suffixIcon: const Icon(LucideIcons.chevronDown),
-                border: const OutlineInputBorder(),
-              ),
-              onTap: _pickCategory,
-            ),
-            const Gap(AppSpacing.md),
-            TextField(
-              controller: _storeDescription,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: context.l10n.storeDescriptionRequired,
-                prefixIcon: const Icon(LucideIcons.fileText),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (v) => ref
-                  .read(profileNotifierProvider.notifier)
-                  .updateField('storeDescription', v),
-            ),
-            const Gap(AppSpacing.md),
-            PhoneInputField(
-              controller: _whatsapp,
-              onChanged: (v) => ref
-                  .read(profileNotifierProvider.notifier)
-                  .updateField('whatsapp', v.replaceAll(RegExp(r'\D'), '')),
-            ),
-            const Gap(AppSpacing.xl),
-            VendorLocationSection(
-              latController: _lat,
-              lngController: _lng,
-              governorateController: _governorate,
-              townController: _town,
-              detailAddressController: _detailAddress,
-            ),
-          ],
-          const Gap(AppSpacing.x2l),
-          Text(context.l10n.socialLinks, style: AppTypography.titleMedium),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _instagram,
-            decoration: InputDecoration(
-              labelText: context.l10n.instagramLabel,
-              prefixIcon: const FaIcon(FontAwesomeIcons.instagram),
-              prefixText: '@',
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) => ref
-                .read(profileNotifierProvider.notifier)
-                .updateField('instagram', v),
-          ),
-          const Gap(AppSpacing.md),
-          TextField(
-            controller: _facebook,
-            decoration: InputDecoration(
-              labelText: context.l10n.facebookLabel,
-              prefixIcon: const FaIcon(FontAwesomeIcons.facebook),
-              prefixText: 'fb.com/',
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (v) => ref
-                .read(profileNotifierProvider.notifier)
-                .updateField('facebook', v),
-          ),
-          const Gap(AppSpacing.x3l),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppSpacing.md),
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, AppColors.profileHeaderGradientEnd],
-              ),
-            ),
-            child: Material(
-              color: AppColors.primary.withValues(alpha: 0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(AppSpacing.md),
-                onTap: canSave ? _save : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  child: Center(
-                    child: s.isUpdating
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator.adaptive(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.white,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            context.l10n.saveChanges,
-                            style: AppTypography.labelLarge.copyWith(
-                              color: AppColors.white,
-                            ),
+                child: Row(
+                  children: [
+                    const AuthBackButton(),
+                    const Gap(AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        context.l10n.editProfile,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.headlineSmall.copyWith(
+                          fontSize: 20,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                    ),
+                    if (s.isUpdating)
+                      const SizedBox.square(
+                        dimension: 22,
+                        child: CircularProgressIndicator.adaptive(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    else
+                      TextButton(
+                        onPressed: canSave ? _save : null,
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.linkColor,
+                          textStyle: AppTypography.labelLarge.copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
-                  ),
+                        ),
+                        child: Text(context.l10n.save),
+                      ),
+                  ],
                 ),
               ),
+              Expanded(child: _buildForm(s, isVendor, canSave)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(ProfileState s, bool isVendor, bool canSave) {
+    final u = s.user;
+    return ListView(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        0,
+        AppSpacing.xl,
+        AppSpacing.x3l,
+      ),
+      children: [
+        Center(
+          child: ProfileAvatarPicker(
+            name: u?.name ?? '',
+            imageUrl: s.avatarRemoved ? null : u?.avatarUrl,
+            imageFile: s.editAvatarFile,
+            diameter: 100,
+            onTap: _avatarSheet,
+          ),
+        ),
+        const Gap(AppSpacing.x2l),
+        _SectionTitle(context.l10n.menuPersonalInfo),
+        AuthTextField(
+          label: context.l10n.checkoutFullName,
+          controller: _name,
+          prefixIcon: const Icon(LucideIcons.user),
+          onChanged: (v) =>
+              ref.read(profileNotifierProvider.notifier).updateField('name', v),
+        ),
+        const Gap(AppSpacing.lg),
+        AuthTextField(
+          label: context.l10n.email,
+          controller: _email,
+          readOnly: true,
+          keyboardType: TextInputType.emailAddress,
+          onTap: isVendor ? null : _changeEmail,
+          prefixIcon: const Icon(LucideIcons.mail),
+          suffixIcon: _VerificationStatus(
+            verified: _typedEmailIsVerified(s),
+            onVerify: _email.text.trim().isEmpty
+                ? null
+                : () {
+                    _verifyEmail();
+                  },
+          ),
+        ),
+        const Gap(AppSpacing.lg),
+        PhoneInputField(
+          controller: _phone,
+          readOnly: true,
+          onTap: isVendor ? null : _changePhone,
+          suffix: _VerificationStatus(
+            verified: _typedPhoneIsVerified(s),
+            onVerify: AppValidators.isMissingPhoneNumber(_phone.text)
+                ? null
+                : () {
+                    _verifyPhone();
+                  },
+          ),
+          onChanged: (_) {},
+        ),
+        const Gap(AppSpacing.lg),
+        AuthTextField(
+          label: context.l10n.dateOfBirthOptional,
+          controller: _dobText,
+          readOnly: true,
+          prefixIcon: const Icon(LucideIcons.calendar),
+          suffixIcon: const Icon(LucideIcons.chevronDown),
+          onTap: _pickDob,
+        ),
+        const Gap(AppSpacing.lg),
+        // Single user location (governorate + city) for all roles; vendors
+        // reuse this same pair as the store location.
+        LocationCascadeField(
+          cityId: s.editStoreCityId,
+          governorateId: s.editStoreGovernmentId,
+          hint: _registeredLocationHint(s),
+          onChanged: (cityId, governorateId) => ref
+              .read(profileNotifierProvider.notifier)
+              .updateStoreLocation(cityId, governorateId),
+        ),
+        if (isVendor) ...[
+          const Gap(AppSpacing.x2l),
+          _SectionTitle(context.l10n.storeInformation),
+          Center(
+            child: Column(
+              children: [
+                Text(
+                  context.l10n.storeLogoRequired.toUpperCase(),
+                  style: AppTypography.fieldLabel.copyWith(
+                    color: context.labelColor,
+                  ),
+                ),
+                const Gap(AppSpacing.md),
+                ProfileAvatarPicker(
+                  name: _storeName.text.isNotEmpty
+                      ? _storeName.text
+                      : (u?.name ?? ''),
+                  imageUrl: s.storeLogoRemoved ? null : u?.storeLogoUrl,
+                  imageFile: s.editStoreLogoFile,
+                  diameter: 100,
+                  onTap: _storeLogoSheet,
+                ),
+              ],
             ),
           ),
-          const Gap(AppSpacing.x3l),
+          const Gap(AppSpacing.lg),
+          AuthTextField(
+            label: context.l10n.storeNameRequired,
+            controller: _storeName,
+            prefixIcon: const Icon(LucideIcons.store),
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('storeName', v),
+          ),
+          const Gap(AppSpacing.lg),
+          AuthTextField(
+            label: context.l10n.storeCategoryLabel,
+            readOnly: true,
+            controller: _storeCategory,
+            prefixIcon: const Icon(LucideIcons.tags),
+            suffixIcon: const Icon(LucideIcons.chevronDown),
+            onTap: _pickCategory,
+          ),
+          const Gap(AppSpacing.lg),
+          AuthTextField(
+            label: context.l10n.storeDescriptionRequired,
+            controller: _storeDescription,
+            maxLines: 4,
+            prefixIcon: const Icon(LucideIcons.fileText),
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('storeDescription', v),
+          ),
+          const Gap(AppSpacing.lg),
+          PhoneInputField(
+            controller: _whatsapp,
+            onChanged: (v) => ref
+                .read(profileNotifierProvider.notifier)
+                .updateField('whatsapp', v.replaceAll(RegExp(r'\D'), '')),
+          ),
+          const Gap(AppSpacing.x2l),
+          VendorLocationSection(
+            latController: _lat,
+            lngController: _lng,
+            governorateController: _governorate,
+            townController: _town,
+            detailAddressController: _detailAddress,
+          ),
+        ],
+        const Gap(AppSpacing.x2l),
+        _SectionTitle(context.l10n.socialLinks),
+        AuthTextField(
+          label: context.l10n.instagramLabel,
+          controller: _instagram,
+          prefixIcon: const _SocialPrefix(FontAwesomeIcons.instagram, '@'),
+          onChanged: (v) => ref
+              .read(profileNotifierProvider.notifier)
+              .updateField('instagram', v),
+        ),
+        const Gap(AppSpacing.lg),
+        AuthTextField(
+          label: context.l10n.facebookLabel,
+          controller: _facebook,
+          prefixIcon: const _SocialPrefix(FontAwesomeIcons.facebook, 'fb.com/'),
+          onChanged: (v) => ref
+              .read(profileNotifierProvider.notifier)
+              .updateField('facebook', v),
+        ),
+        const Gap(AppSpacing.x3l),
+        XstoreButton(
+          label: context.l10n.saveChanges,
+          isLoading: s.isUpdating,
+          onPressed: canSave ? _save : null,
+        ),
+      ],
+    );
+  }
+}
+
+/// Orbit section heading with the standard gap below it.
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Text(
+        title,
+        style: AppTypography.headlineSmall.copyWith(
+          fontSize: 18,
+          color: context.textPrimary,
+        ),
+      ),
+    );
+  }
+}
+
+/// Brand icon plus the fixed handle prefix ("@", "fb.com/") inside a field.
+class _SocialPrefix extends StatelessWidget {
+  const _SocialPrefix(this.icon, this.prefix);
+
+  final FaIconData icon;
+  final String prefix;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 14, end: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FaIcon(icon, size: 18),
+          const Gap(AppSpacing.sm),
+          Text(
+            prefix,
+            textDirection: TextDirection.ltr,
+            style: AppTypography.mono.copyWith(
+              fontSize: 14,
+              color: context.textSecondary,
+            ),
+          ),
         ],
       ),
     );
@@ -953,7 +982,7 @@ class EditProfileContactValueSheet extends StatefulWidget {
   final String title;
   final String initialText;
   final Widget Function(BuildContext context, TextEditingController controller)
-      fieldBuilder;
+  fieldBuilder;
   final String Function(String raw) normalize;
   final String? Function(String value) validate;
 
@@ -998,7 +1027,7 @@ class _EditProfileContactValueSheetState
   Widget build(BuildContext context) {
     return Material(
       color: Theme.of(context).colorScheme.surface,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       clipBehavior: Clip.antiAlias,
       child: SafeArea(
         child: Padding(
@@ -1117,10 +1146,7 @@ bool editProfileContactNeedsOtp({
   return true;
 }
 
-StoreCategoryEntity? _storeCategoryById(
-  List<StoreCategoryEntity> all,
-  int id,
-) {
+StoreCategoryEntity? _storeCategoryById(List<StoreCategoryEntity> all, int id) {
   for (final c in all) {
     if (c.id == id) return c;
   }

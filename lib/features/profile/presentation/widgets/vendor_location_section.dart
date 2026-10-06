@@ -38,7 +38,7 @@ class VendorLocationSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(children: [const Icon(LucideIcons.mapPin, color: AppColors.primary, size: 18), const Gap(AppSpacing.xs), Text(context.l10n.storeLocation, style: AppTypography.titleMedium)]),
+        Row(children: [Icon(LucideIcons.mapPin, color: context.linkColor, size: 18), const Gap(AppSpacing.sm), Text(context.l10n.storeLocation, style: AppTypography.headlineSmall.copyWith(fontSize: 18, color: context.textPrimary))]),
         const Gap(AppSpacing.xs),
         Text(context.l10n.storeLocationSubtitle, style: AppTypography.bodySmall.copyWith(color: context.textSecondary)),
         const Gap(AppSpacing.md),
@@ -67,12 +67,25 @@ class VendorLocationSection extends ConsumerWidget {
 }
 
 Widget _field(BuildContext context, String label, String hint, IconData icon, TextEditingController controller, ValueChanged<String> onChanged, {int maxLines = 1}) {
-  return TextField(
-    controller: controller,
-    onChanged: onChanged,
-    maxLines: maxLines,
-    textCapitalization: maxLines > 1 ? TextCapitalization.sentences : TextCapitalization.words,
-    decoration: InputDecoration(labelText: label, hintText: hint, prefixIcon: Icon(icon), border: const OutlineInputBorder()),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label.toUpperCase(), style: AppTypography.fieldLabel.copyWith(color: context.labelColor)),
+      SizedBox(height: context.scaledPx(8)),
+      TextField(
+        controller: controller,
+        onChanged: onChanged,
+        maxLines: maxLines,
+        textCapitalization: maxLines > 1 ? TextCapitalization.sentences : TextCapitalization.words,
+        style: AppTypography.bodyLarge.copyWith(color: context.textPrimary, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: AppTypography.bodyLarge.copyWith(color: context.textHint),
+          prefixIcon: Icon(icon),
+          prefixIconColor: context.iconSecondary,
+        ),
+      ),
+    ],
   );
 }
 
@@ -99,8 +112,8 @@ class _LocationPreviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: context.isDark ? AppColors.darkSurfaceVariant : const Color(0xFFF0FDF4),
-        borderRadius: BorderRadius.circular(12),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
       ),
       child: Row(children: [

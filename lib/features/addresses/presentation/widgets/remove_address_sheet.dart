@@ -15,14 +15,8 @@ Future<void> showRemoveAddressSheet(
 }) async {
   await showModalBottomSheet<void>(
     context: context,
-    backgroundColor: context.surfaceColor,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.lg),
-      ),
-    ),
     builder: (ctx) => Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.x2l),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

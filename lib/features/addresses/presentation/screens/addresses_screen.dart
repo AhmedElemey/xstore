@@ -6,6 +6,8 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/address_location_display.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../providers/address_book_provider.dart';
 import '../widgets/address_form_sheet.dart';
@@ -25,73 +27,119 @@ class AddressesScreen extends ConsumerWidget {
     final notifier = ref.read(addressBookProvider.notifier);
 
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        title: Text(context.l10n.menuAddresses),
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (addresses.isEmpty)
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.x3l),
-                child: Text(
-                  context.l10n.addressesEmptyState,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: context.textSecondary,
-                  ),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
                 ),
-              )
-            else
-              for (var i = 0; i < addresses.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: _AddressCard(
-                    address: addresses[i],
-                    onEdit: () => showAddressFormSheet(
-                      context,
-                      ref,
-                      existing: addresses[i],
-                      editIndex: i,
-                      noSavedAddressesYet: addresses.isEmpty,
-                      onSave: (a) => notifier.updateAddress(i, a),
+                child: Row(
+                  children: [
+                    const AuthBackButton(),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        context.l10n.menuAddresses,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.headlineSmall.copyWith(
+                          fontSize: 20,
+                          color: context.textPrimary,
+                        ),
+                      ),
                     ),
-                    onRemove: () => showRemoveAddressSheet(
-                      context,
-                      onConfirm: () => notifier.removeAddress(i),
-                    ),
-                    onSetMain: addresses[i].isDefault
-                        ? null
-                        : () => notifier.setMainAddress(i),
-                  ),
-                ),
-            const SizedBox(height: AppSpacing.sm),
-            if (addresses.length < AddressBook.maxAddresses)
-              OutlinedButton.icon(
-                onPressed: () => showAddressFormSheet(
-                  context,
-                  ref,
-                  noSavedAddressesYet: addresses.isEmpty,
-                  onSave: notifier.addAddress,
-                ),
-                icon: const Icon(Icons.add),
-                label: Text(context.l10n.checkoutAddAddress),
-              )
-            else
-              Text(
-                context.l10n.addressesMaxReached,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall.copyWith(
-                  color: context.textSecondary,
+                  ],
                 ),
               ),
-          ],
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    0,
+                    AppSpacing.xl,
+                    AppSpacing.x3l,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (addresses.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.x3l,
+                          ),
+                          child: Text(
+                            context.l10n.addressesEmptyState,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: context.textSecondary,
+                            ),
+                          ),
+                        )
+                      else
+                        for (var i = 0; i < addresses.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
+                            child: _AddressCard(
+                              address: addresses[i],
+                              onEdit: () => showAddressFormSheet(
+                                context,
+                                ref,
+                                existing: addresses[i],
+                                editIndex: i,
+                                noSavedAddressesYet: addresses.isEmpty,
+                                onSave: (a) => notifier.updateAddress(i, a),
+                              ),
+                              onRemove: () => showRemoveAddressSheet(
+                                context,
+                                onConfirm: () => notifier.removeAddress(i),
+                              ),
+                              onSetMain: addresses[i].isDefault
+                                  ? null
+                                  : () => notifier.setMainAddress(i),
+                            ),
+                          ),
+                      const SizedBox(height: AppSpacing.xs),
+                      if (addresses.length < AddressBook.maxAddresses)
+                        OutlinedButton(
+                          onPressed: () => showAddressFormSheet(
+                            context,
+                            ref,
+                            noSavedAddressesYet: addresses.isEmpty,
+                            onSave: notifier.addAddress,
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.linkColor,
+                            side: BorderSide(color: context.borderColor),
+                            shape: const StadiumBorder(),
+                            minimumSize: const Size.fromHeight(48),
+                            textStyle: AppTypography.labelLarge.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          child: Text(context.l10n.checkoutAddAddress),
+                        )
+                      else
+                        Text(
+                          context.l10n.addressesMaxReached,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: context.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -114,13 +162,16 @@ class _AddressCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final location = resolveAddressLocation(ref, address);
+    final accent = context.brandGradient.first;
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        color: address.isDefault
+            ? accent.withValues(alpha: 0.08)
+            : context.glassColor,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: address.isDefault ? AppColors.primary : context.textDisabled,
+          color: address.isDefault ? accent : context.borderColor,
           width: address.isDefault ? 2 : 1,
         ),
       ),
@@ -131,29 +182,33 @@ class _AddressCard extends ConsumerWidget {
             children: [
               Flexible(
                 child: Text(
-                  '🏠 ${address.fullName}',
+                  address.fullName,
                   style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (address.isDefault) ...[
                 const SizedBox(width: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: 2,
-                  ),
+                DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppSpacing.x4l),
+                    color: accent,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    context.l10n.addressesMainBadge,
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 2,
+                    ),
+                    child: Text(
+                      context.l10n.addressesMainBadge,
+                      style: AppTypography.labelSmall.copyWith(
+                        fontSize: 11,
+                        color: context.onBrandColor,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -162,34 +217,55 @@ class _AddressCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${address.phone}\n${address.street}\n'
+            '${address.street}\n'
             '${location.city}, ${location.wilaya} '
             '${address.postalCode ?? ''}',
-            style: AppTypography.bodySmall.copyWith(
+            style: AppTypography.bodyMedium.copyWith(
               color: context.textSecondary,
-              height: 1.4,
+              height: 1.45,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            address.phone,
+            style: AppTypography.mono.copyWith(
+              fontSize: 13,
+              color: context.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
-              if (onSetMain != null)
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onSetMain,
-                    child: Text(context.l10n.addressesSetAsMain),
-                  ),
-                ),
-              if (onSetMain != null) const SizedBox(width: AppSpacing.sm),
               TextButton(
                 onPressed: onEdit,
+                style: TextButton.styleFrom(
+                  foregroundColor: context.linkColor,
+                  padding: const EdgeInsetsDirectional.only(end: AppSpacing.xl),
+                  minimumSize: const Size(0, 44),
+                ),
                 child: Text(context.l10n.checkoutEdit),
               ),
               TextButton(
                 onPressed: onRemove,
-                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 44),
+                ),
                 child: Text(context.l10n.checkoutRemoveAddress),
               ),
+              if (onSetMain != null) ...[
+                const Spacer(),
+                TextButton(
+                  onPressed: onSetMain,
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.linkColor,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 44),
+                  ),
+                  child: Text(context.l10n.addressesSetAsMain),
+                ),
+              ],
             ],
           ),
         ],

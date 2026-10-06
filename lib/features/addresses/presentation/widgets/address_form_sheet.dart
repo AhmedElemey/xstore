@@ -7,12 +7,14 @@ import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../cities/presentation/providers/city_dependencies.dart';
 import '../../../governments/presentation/providers/government_dependencies.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/address_location_display.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 /// Opens the add/edit address sheet, shared by checkout's address step and
 /// the Profile "My Addresses" screen — the two only places a saved address
@@ -39,12 +41,6 @@ Future<void> showAddressFormSheet(
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: context.surfaceColor,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.lg),
-      ),
-    ),
     builder: (ctx) => _AddressFormSheet(
       existing: existing,
       editIndex: editIndex,
@@ -260,30 +256,24 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            TextField(
+            AuthTextField(
+              label: l10n.checkoutFullName,
               controller: _nameCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutFullName,
-                border: const OutlineInputBorder(),
-                errorText: _fieldErrors['fullName'],
-              ),
+              errorText: _fieldErrors['fullName'],
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             PhoneInputField(
               controller: _phoneCtrl,
               onChanged: (_) {},
               errorText: _fieldErrors['phone'],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
+            const SizedBox(height: AppSpacing.md),
+            AuthTextField(
+              label: l10n.checkoutStreet,
               controller: _streetCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutStreet,
-                border: const OutlineInputBorder(),
-                errorText: _fieldErrors['street'],
-              ),
+              errorText: _fieldErrors['street'],
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             LocationCascadeField(
               cityId: _cityId,
               governorateId: _governorateId,
@@ -296,17 +286,20 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
                 });
               },
             ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
+            const SizedBox(height: AppSpacing.md),
+            AuthTextField(
+              label: l10n.checkoutPostalCode,
               controller: _postalCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.checkoutPostalCode,
-                border: const OutlineInputBorder(),
-              ),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(l10n.checkoutSetDefault),
+              title: Text(
+                l10n.checkoutSetDefault,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               value: _isDefault,
               onChanged: (v) => setState(() => _isDefault = v),
             ),
@@ -319,9 +312,9 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
             const SizedBox(height: AppSpacing.sm),
             ListenableBuilder(
               listenable: _fields,
-              builder: (context, _) => FilledButton(
+              builder: (context, _) => XstoreButton(
+                label: l10n.checkoutSaveAddress,
                 onPressed: _canSave ? _save : null,
-                child: Text(l10n.checkoutSaveAddress),
               ),
             ),
           ],

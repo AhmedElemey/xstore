@@ -1089,3 +1089,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Orbit Profile tab: glass groups, orb avatar, mono stats
 - **Rule:** The Profile tab is `OrbitBackground` + a transparent in-body header (`ProfileSliverAppBar` is a plain `SliverSafeArea` title + bell, not a collapsing app bar), then glass cards (`glassColor`, radius 22, `borderColor`), `fieldLabel` uppercase section labels, a brand-gradient avatar orb (photo when present) and a 124px dock spacer. Stats are mono (money amber); the mono face has no `★`, so draw it in the body font. Keep the shown fields as they are: mock `savedAmountDzd` is a hardcoded 23000 and live is always 0, so "Total Saved" is not real data. Mock `ProfileModel` never sets `isEmailVerified`, so the email banner always shows in mock.
 - **Where it applies:** `profile_screen.dart` and its widgets, `profile_stats_row.dart`, `profile_remote_datasource.dart` mock branch.
+
+### 2026-10-06 — Orbit forms: AuthTextField moves the label out of the field
+- **Rule:** Swapping a `TextField(labelText:)` for `AuthTextField` puts an uppercase label `Text` above the input, so tests using `widgetWithText(TextField, 'Street')` or a lone `byType(TextFormField)` break (the latter turns ambiguous once other fields are `TextFormField`). Find via `descendant(of: widgetWithText(AuthTextField, 'STREET'), matching: byType(TextField))` and scope the phone to `PhoneInputField`. `AuthTextField` has no `textCapitalization`/`prefixText`: style a plain `TextField` when those matter. Disabled-until-valid saves are `XstoreButton` (`onPressed` null), not `FilledButton`.
+- **Where it applies:** `address_form_sheet.dart`, edit profile, `checkout_add_address_sheet_test.dart`.
+
+### 2026-10-06 — Screenshot harness skips the login prefetch
+- **Rule:** `FakeAuth` bypasses `Auth.build()`, so `prefetchProfileData` never runs and `profileNotifierProvider` stays empty (Edit Profile shows blank fields and a "?" avatar). The harness calls `refreshProfileData()` for that route, like `fetchCart()` for the cart; seed any provider fed only by a login prefetch the same way.
+- **Where it applies:** `test/screenshots/app_screens_test.dart`.
