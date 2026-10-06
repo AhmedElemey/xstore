@@ -4,7 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../domain/delivery_request_flow.dart';
 import '../../domain/entities/delivery_request.dart';
 import 'courier_card_sections.dart';
@@ -33,19 +35,9 @@ class PackageDeliveryCard extends StatelessWidget {
     final atPickupStage = action == CourierPackageAction.collectAndPickUp;
     // Heading to the sender first; once the parcel is on board, to the
     // recipient.
-    final navigationTarget =
-        atPickupStage ? request.pickup : request.dropoff;
+    final navigationTarget = atPickupStage ? request.pickup : request.dropoff;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
-        boxShadow: [
-          BoxShadow(color: context.cardShadowColor, blurRadius: 12),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return CourierCardShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -57,18 +49,17 @@ class PackageDeliveryCard extends StatelessWidget {
                   children: [
                     Text(
                       request.id,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       context.formatShortDate(request.createdAt),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: context.textSecondary),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.labelColor,
+                      ),
                     ),
                   ],
                 ),
@@ -78,11 +69,8 @@ class PackageDeliveryCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           CourierRouteStops(
-            pickupIcon: LucideIcons.package,
-            pickupValue:
-                '${request.pickup.street}, ${request.pickup.city}',
-            dropoffValue:
-                '${request.dropoff.street}, ${request.dropoff.city}',
+            pickupValue: '${request.pickup.street}, ${request.pickup.city}',
+            dropoffValue: '${request.dropoff.street}, ${request.dropoff.city}',
             onNavigate: () => launchUrl(
               courierMapsDirectionsUri(navigationTarget),
               mode: LaunchMode.externalApplication,
@@ -103,16 +91,15 @@ class PackageDeliveryCard extends StatelessWidget {
                 Icon(
                   LucideIcons.stickyNote,
                   size: 15,
-                  color: context.textSecondary,
+                  color: context.labelColor,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     request.packageNote,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: context.textSecondary),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.textSecondary,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -130,22 +117,13 @@ class PackageDeliveryCard extends StatelessWidget {
           ],
           if (action != CourierPackageAction.none) ...[
             const SizedBox(height: AppSpacing.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (atPickupStage)
-                  FilledButton.icon(
-                    onPressed: onPickedUp,
-                    icon: const Icon(LucideIcons.banknote, size: 16),
-                    label: Text(context.l10n.courierPackagePickUpAction),
-                  )
-                else
-                  FilledButton.icon(
-                    onPressed: onDelivered,
-                    icon: const Icon(LucideIcons.checkCircle2, size: 16),
-                    label: Text(context.l10n.courierDeliverAction),
-                  ),
-              ],
+            XstoreButton(
+              gradient: AppColors.courierGradient,
+              foregroundColor: AppColors.onCourier,
+              label: atPickupStage
+                  ? context.l10n.courierPackagePickUpAction
+                  : context.l10n.courierDeliverAction,
+              onPressed: atPickupStage ? onPickedUp : onDelivered,
             ),
           ],
         ],
@@ -164,29 +142,29 @@ class _PackageStatusChip extends StatelessWidget {
     final l10n = context.l10n;
     final (label, color) = switch (status) {
       DeliveryRequestStatus.submitted => (
-          l10n.courierPkgStatusSubmitted,
-          context.textSecondary,
-        ),
+        l10n.courierPkgStatusSubmitted,
+        context.labelColor,
+      ),
       DeliveryRequestStatus.priced => (
-          l10n.courierPkgStatusPriced,
-          context.textSecondary,
-        ),
+        l10n.courierPkgStatusPriced,
+        context.labelColor,
+      ),
       DeliveryRequestStatus.confirmed => (
-          l10n.courierPkgStatusConfirmed,
-          AppColors.warning,
-        ),
+        l10n.courierPkgStatusConfirmed,
+        AppColors.warning,
+      ),
       DeliveryRequestStatus.pickedUp => (
-          l10n.courierPkgStatusPickedUp,
-          context.primaryColor,
-        ),
+        l10n.courierPkgStatusPickedUp,
+        context.primaryColor,
+      ),
       DeliveryRequestStatus.delivered => (
-          l10n.courierPkgStatusDelivered,
-          AppColors.success,
-        ),
+        l10n.courierPkgStatusDelivered,
+        AppColors.success,
+      ),
       DeliveryRequestStatus.cancelled => (
-          l10n.courierPkgStatusCancelled,
-          AppColors.error,
-        ),
+        l10n.courierPkgStatusCancelled,
+        AppColors.error,
+      ),
     };
 
     return Container(
@@ -195,15 +173,18 @@ class _PackageStatusChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
+        style: AppTypography.labelSmall.copyWith(
+          color: context.isDark
+              ? color
+              : Color.lerp(color, AppColors.black, 0.35),
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }

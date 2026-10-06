@@ -4,7 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/widgets/order_status_badge.dart';
 import '../../domain/courier_order_flow.dart';
@@ -33,16 +35,7 @@ class DeliveryOrderCard extends StatelessWidget {
     final codAmount = codAmountToCollect(order);
     final address = order.deliveryAddress;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        border: Border.all(color: context.borderColor.withValues(alpha: 0.45)),
-        boxShadow: [
-          BoxShadow(color: context.cardShadowColor, blurRadius: 12),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return CourierCardShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,18 +47,17 @@ class DeliveryOrderCard extends StatelessWidget {
                   children: [
                     Text(
                       order.formattedOrderId,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: AppTypography.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       context.formatShortDate(order.createdAt),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: context.textSecondary),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.labelColor,
+                      ),
                     ),
                   ],
                 ),
@@ -92,11 +84,7 @@ class DeliveryOrderCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
-                Icon(
-                  LucideIcons.package,
-                  size: 15,
-                  color: context.textSecondary,
-                ),
+                Icon(LucideIcons.package, size: 15, color: context.labelColor),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
@@ -104,10 +92,9 @@ class DeliveryOrderCard extends StatelessWidget {
                       order.items.length,
                       context.formatCurrency(order.total),
                     ),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: context.textSecondary),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: context.textSecondary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -127,7 +114,7 @@ class DeliveryOrderCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                if (onFailed != null)
+                if (onFailed != null) ...[
                   TextButton(
                     onPressed: onFailed,
                     style: TextButton.styleFrom(
@@ -135,19 +122,20 @@ class DeliveryOrderCard extends StatelessWidget {
                     ),
                     child: Text(context.l10n.courierFailAction),
                   ),
-                const Spacer(),
-                if (action == CourierOrderAction.pickUp)
-                  FilledButton.icon(
-                    onPressed: onPickedUp,
-                    icon: const Icon(LucideIcons.packageCheck, size: 16),
-                    label: Text(context.l10n.courierPickUpAction),
-                  )
-                else
-                  FilledButton.icon(
-                    onPressed: onDelivered,
-                    icon: const Icon(LucideIcons.checkCircle2, size: 16),
-                    label: Text(context.l10n.courierDeliverAction),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Expanded(
+                  child: XstoreButton(
+                    gradient: AppColors.courierGradient,
+                    foregroundColor: AppColors.onCourier,
+                    label: action == CourierOrderAction.pickUp
+                        ? context.l10n.courierPickUpAction
+                        : context.l10n.courierDeliverAction,
+                    onPressed: action == CourierOrderAction.pickUp
+                        ? onPickedUp
+                        : onDelivered,
                   ),
+                ),
               ],
             ),
           ],
@@ -171,7 +159,7 @@ class _PrepaidChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -183,10 +171,10 @@ class _PrepaidChip extends StatelessWidget {
               context.l10n.courierPrepaidChip,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: AppTypography.labelMedium.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
