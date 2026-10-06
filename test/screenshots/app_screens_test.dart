@@ -37,6 +37,7 @@ import 'package:xstore/core/network/paginated_result.dart';
 import 'package:xstore/features/notifications/data/datasources/notifications_remote_datasource.dart';
 import 'package:xstore/features/notifications/domain/entities/notification_entity.dart';
 import 'package:xstore/features/notifications/presentation/providers/notifications_dependencies.dart';
+import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_verification_provider.dart';
 import 'package:xstore/features/wishlist/data/datasources/wishlist_remote_datasource.dart';
 import 'package:xstore/features/wishlist/domain/entities/wishlist_item_entity.dart';
@@ -369,6 +370,15 @@ void main() {
         if (location == AppRoutes.cart || location == AppRoutes.checkout) {
           await tester.runAsync(
             () => container.read(cartProvider.notifier).fetchCart(),
+          );
+        }
+        // Same for the profile: the prefetch lives in Auth.build(), which
+        // the fake skips, so Edit Profile would render an empty form.
+        if (location == AppRoutes.profileEdit) {
+          await tester.runAsync(
+            () => container
+                .read(profileNotifierProvider.notifier)
+                .refreshProfileData(),
           );
         }
         container

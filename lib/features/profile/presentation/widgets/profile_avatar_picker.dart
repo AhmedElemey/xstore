@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
 
@@ -41,25 +41,25 @@ class ProfileAvatarPicker extends StatelessWidget {
             diameter: diameter,
           ),
           if (showCameraBadge)
-            Positioned(
-              right: 0,
+            PositionedDirectional(
+              end: 0,
               bottom: 0,
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color: context.surfaceColor,
+                  color: context.backgroundColor,
                   shape: BoxShape.circle,
                 ),
                 child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
+                  padding: EdgeInsets.all(diameter * 0.1),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
                     shape: BoxShape.circle,
+                    gradient: LinearGradient(colors: context.brandGradient),
                   ),
                   child: Icon(
                     LucideIcons.camera,
                     size: diameter * 0.16,
-                    color: AppColors.white,
+                    color: context.onBrandColor,
                   ),
                 ),
               ),
@@ -104,7 +104,8 @@ class _AvatarBody extends StatelessWidget {
           fit: BoxFit.cover,
           memCacheWidth: (diameter * 3).round(),
           memCacheHeight: (diameter * 3).round(),
-          placeholder: (_, __) => _InitialsAvatar(name: name, diameter: diameter),
+          placeholder: (_, __) =>
+              _InitialsAvatar(name: name, diameter: diameter),
           errorWidget: (_, __, ___) =>
               _InitialsAvatar(name: name, diameter: diameter),
         ),
@@ -129,26 +130,30 @@ class _InitialsAvatar extends StatelessWidget {
         .join();
     final label = initials.isEmpty ? '?' : initials;
 
+    // The glow sits on the opaque orb itself, so it never tints a glass fill.
     return Container(
       width: diameter,
       height: diameter,
       decoration: BoxDecoration(
+        shape: BoxShape.circle,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.profileHeaderGradientEnd,
-          ],
+          colors: context.brandGradient,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: context.brandGradient.first.withValues(alpha: 0.35),
+            blurRadius: 28,
+          ),
+        ],
       ),
       alignment: Alignment.center,
       child: Text(
         label,
-        style: TextStyle(
-          color: AppColors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: diameter * 0.28,
+        style: AppTypography.headlineSmall.copyWith(
+          color: context.onBrandColor,
+          fontSize: diameter * 0.24,
         ),
       ),
     );

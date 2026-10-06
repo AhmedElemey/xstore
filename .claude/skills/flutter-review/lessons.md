@@ -1085,3 +1085,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-05 — Badges over fixed-size thumbnails must fit the thumbnail
 - **Rule:** A badge `Positioned` over a fixed-width image (e.g. the 90px wishlist thumbnail) gets both `start` and `end` plus `FittedBox(fit: BoxFit.scaleDown)`, so a long localized label shrinks instead of spilling over the title. Use `PositionedDirectional`, not `left:`, so it mirrors in Arabic. Render the screen with sample data to see it — an empty/errored screenshot hides it.
 - **Where it applies:** `wishlist_item_card.dart`, any card with an overlay badge.
+
+### 2026-10-06 — Orbit forms: AuthTextField moves the label out of the field
+- **Rule:** Swapping a `TextField(labelText:)` for `AuthTextField` puts an uppercase label `Text` above the input, so tests using `widgetWithText(TextField, 'Street')` or a lone `byType(TextFormField)` break (the latter turns ambiguous once other fields are `TextFormField`). Find via `descendant(of: widgetWithText(AuthTextField, 'STREET'), matching: byType(TextField))` and scope the phone to `PhoneInputField`. `AuthTextField` has no `textCapitalization`/`prefixText`: style a plain `TextField` when those matter. Disabled-until-valid saves are `XstoreButton` (`onPressed` null), not `FilledButton`.
+- **Where it applies:** `address_form_sheet.dart`, edit profile, `checkout_add_address_sheet_test.dart`.
+
+### 2026-10-06 — Screenshot harness skips the login prefetch
+- **Rule:** `FakeAuth` bypasses `Auth.build()`, so `prefetchProfileData` never runs and `profileNotifierProvider` stays empty (Edit Profile shows blank fields and a "?" avatar). The harness calls `refreshProfileData()` for that route, like `fetchCart()` for the cart; seed any provider fed only by a login prefetch the same way.
+- **Where it applies:** `test/screenshots/app_screens_test.dart`.

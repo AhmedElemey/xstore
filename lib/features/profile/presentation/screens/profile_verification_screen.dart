@@ -7,6 +7,8 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/widgets/otp_input_field.dart';
 import '../../../auth/presentation/widgets/otp_resend_row.dart';
@@ -109,54 +111,108 @@ class _ProfileVerificationScreenState
       }
     });
 
+    final accent = context.brandGradient.first;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isEmail
-              ? context.l10n.verifyYourEmail
-              : context.l10n.verifyYourNumber,
-        ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                isEmail
-                    ? '${context.l10n.codeSentTo} ${args.contactValue}'
-                    : context.l10n.phoneOtpSentToAssociatedEmail,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: context.textSecondary,
-                ),
-              ),
-              const Gap(AppSpacing.xl),
-              Center(
-                child: OtpInputField(
-                  controller: _otp,
-                  enabled: !state.isVerifying,
-                  errorText: _errorText(state.error),
-                  onCompleted: (_) => _verify(),
-                ),
-              ),
-              const Gap(AppSpacing.lg),
-              XstoreButton(
-                label: context.l10n.verifyAndContinue,
-                isLoading: state.isVerifying,
-                onPressed: _otp.text.length == 6 && !state.isVerifying
-                    ? _verify
-                    : null,
-              ),
-              const Gap(AppSpacing.md),
-              Center(
-                child: OtpResendRow(
-                  canResend: state.canResend,
-                  resendCooldown: state.resendCooldown,
-                  isSending: state.isSending,
-                  onResend: () => ref
-                      .read(profileVerificationProvider(args).notifier)
-                      .resend(),
+      body: OrbitBackground(
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl,
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                    AppSpacing.x2l,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          const AuthBackButton(),
+                          const Gap(AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              isEmail
+                                  ? context.l10n.verifyYourEmail
+                                  : context.l10n.verifyYourNumber,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.headlineSmall.copyWith(
+                                fontSize: 20,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(AppSpacing.xl),
+                      // The active step: brand-outlined glass card holding
+                      // the code hint, the cells and the resend row.
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: accent, width: 2),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                isEmail
+                                    ? '${context.l10n.codeSentTo} ${args.contactValue}'
+                                    : context
+                                          .l10n
+                                          .phoneOtpSentToAssociatedEmail,
+                                style: AppTypography.body15.copyWith(
+                                  height: 1.5,
+                                  color: context.textSecondary,
+                                ),
+                              ),
+                              const Gap(AppSpacing.lg),
+                              Center(
+                                child: OtpInputField(
+                                  controller: _otp,
+                                  enabled: !state.isVerifying,
+                                  errorText: _errorText(state.error),
+                                  onCompleted: (_) => _verify(),
+                                ),
+                              ),
+                              const Gap(AppSpacing.lg),
+                              Center(
+                                child: OtpResendRow(
+                                  canResend: state.canResend,
+                                  resendCooldown: state.resendCooldown,
+                                  isSending: state.isSending,
+                                  onResend: () => ref
+                                      .read(
+                                        profileVerificationProvider(
+                                          args,
+                                        ).notifier,
+                                      )
+                                      .resend(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      const Gap(AppSpacing.x2l),
+                      XstoreButton(
+                        label: context.l10n.verifyAndContinue,
+                        isLoading: state.isVerifying,
+                        onPressed: _otp.text.length == 6 && !state.isVerifying
+                            ? _verify
+                            : null,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
