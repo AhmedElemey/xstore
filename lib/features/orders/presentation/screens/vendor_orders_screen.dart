@@ -171,23 +171,6 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                                 }
                               },
                             ),
-                            const SizedBox(width: AppSpacing.sm),
-                            PopupMenuButton<String>(
-                              onSelected: (v) => context.showSnack(v),
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: context.l10n.vendorExportOrders,
-                                  child: Text(context.l10n.vendorExportOrders),
-                                ),
-                                PopupMenuItem(
-                                  value: context.l10n.vendorOrderSettings,
-                                  child: Text(context.l10n.vendorOrderSettings),
-                                ),
-                              ],
-                              child: const _GlassIconButton(
-                                icon: Icons.more_vert,
-                              ),
-                            ),
                           ],
                         ),
                       ),

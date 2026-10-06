@@ -86,7 +86,8 @@ extension BuildContextX on BuildContext {
       isDark ? AppColors.darkTextLabel : AppColors.lightTextLabel;
 
   /// Inline links ("Forgot password?", "Create an account").
-  Color get linkColor => isDark ? AppColors.primaryLight : AppColors.primaryDark;
+  Color get linkColor =>
+      isDark ? AppColors.primaryLight : AppColors.primaryDark;
 
   /// Amber: courier and cash accents.
   Color get amberColor => isDark ? AppColors.accentLight : AppColors.accent;
@@ -135,18 +136,11 @@ extension LocalizationContext on BuildContext {
   }
 
   String formatDate(DateTime date) {
-    return DateFormat(
-      'd MMM yyyy',
-      isArabic ? 'ar' : 'en',
-    ).format(date);
+    return DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en').format(date);
   }
 
-  String formatShortDate(DateTime date) {
-    return DateFormat(
-      'd/M/yyyy',
-      isArabic ? 'ar' : 'en',
-    ).format(date);
-  }
+  /// Day-first with a month name ("6 Oct 2026"), never "6/10/2026".
+  String formatShortDate(DateTime date) => formatDate(date);
 
   /// "Mar 5, 2026" in both locales (fixed field order).
   String formatMediumDate(DateTime date) =>

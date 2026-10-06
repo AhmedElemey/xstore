@@ -946,12 +946,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ordersTrackOnCourier => 'Track on Courier Website';
 
   @override
-  String get ordersCourierWebsiteSoon => 'Courier tracking — coming soon';
-
-  @override
-  String get ordersCurrentLocationMock => 'In transit — Cairo hub';
-
-  @override
   String get ordersExpectedPrefix => '📅 Expected by';
 
   @override
@@ -1700,12 +1694,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorConfirmShipment => 'Confirm Shipment';
-
-  @override
-  String get vendorExportOrders => 'Export Orders';
-
-  @override
-  String get vendorOrderSettings => 'Order Settings';
 
   @override
   String get vendorReasonItemUnavailable => 'Item no longer available';

@@ -949,12 +949,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ordersTrackOnCourier => 'تتبع على موقع شركة الشحن';
 
   @override
-  String get ordersCourierWebsiteSoon => 'تتبع الشحن — جاي قريباً';
-
-  @override
-  String get ordersCurrentLocationMock => 'في الطريق — مركز القاهرة';
-
-  @override
   String get ordersExpectedPrefix => '📅 متوقع قبل';
 
   @override
@@ -1700,12 +1694,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorConfirmShipment => 'تأكيد الشحن';
-
-  @override
-  String get vendorExportOrders => 'تصدير الطلبات';
-
-  @override
-  String get vendorOrderSettings => 'إعدادات الطلبات';
 
   @override
   String get vendorReasonItemUnavailable => 'المنتج لم يعد متاحاً';
