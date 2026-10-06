@@ -121,12 +121,12 @@ void main() {
     expect(find.byIcon(LucideIcons.navigation), findsNWidgets(2));
 
     // Cash header sums the delivered COD order.
-    expect(find.text('Cash in hand'), findsOneWidget);
+    expect(find.text('CASH IN HAND'), findsOneWidget);
     expect(find.textContaining('1,500'), findsWidgets);
 
     // The finished task is reachable under the History section.
     await tester.scrollUntilVisible(find.text('task_done'), 200);
-    expect(find.text('History'), findsOneWidget);
+    expect(find.text('HISTORY'), findsOneWidget);
   });
 
   testWidgets('tapping Delivered asks for confirmation with the COD amount',
@@ -203,7 +203,7 @@ void main() {
 
     // Packages section renders the task with the admin-set price to collect
     // from the sender at pickup; identity is visible (status >= confirmed).
-    expect(find.text('Packages'), findsOneWidget);
+    expect(find.text('PACKAGES'), findsOneWidget);
     expect(find.byType(PackageDeliveryCard), findsOneWidget);
     expect(find.text('Collect from sender at pickup'), findsOneWidget);
     expect(find.textContaining('80'), findsWidgets);

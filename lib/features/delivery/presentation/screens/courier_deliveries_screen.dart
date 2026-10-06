@@ -4,9 +4,11 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/courier_order_flow.dart';
@@ -15,6 +17,7 @@ import '../../domain/entities/delivery_request.dart';
 import '../providers/courier_cash_wallet_provider.dart';
 import '../providers/courier_deliveries_provider.dart';
 import '../providers/courier_packages_provider.dart';
+import '../widgets/courier_card_sections.dart';
 import '../widgets/delivery_fail_sheet.dart';
 import '../widgets/delivery_order_card.dart';
 import '../widgets/package_delivery_card.dart';
@@ -31,6 +34,9 @@ class CourierDeliveriesScreen extends ConsumerStatefulWidget {
 
 class _CourierDeliveriesScreenState
     extends ConsumerState<CourierDeliveriesScreen> {
+  // Clears the floating dock on this shell tab.
+  static const double _dockClearance = 124;
+
   final _scroll = ScrollController();
 
   @override
@@ -81,9 +87,7 @@ class _CourierDeliveriesScreenState
       ),
     );
     if (confirmed != true || !mounted) return;
-    await ref
-        .read(courierDeliveriesProvider.notifier)
-        .markDelivered(order.id);
+    await ref.read(courierDeliveriesProvider.notifier).markDelivered(order.id);
   }
 
   /// Cash changes hands here: confirm the exact amount to collect from the
@@ -112,9 +116,7 @@ class _CourierDeliveriesScreenState
       ),
     );
     if (confirmed != true || !mounted) return;
-    await ref
-        .read(courierPackagesProvider.notifier)
-        .markPickedUp(request.id);
+    await ref.read(courierPackagesProvider.notifier).markPickedUp(request.id);
   }
 
   void _showFailSheet(OrderEntity order) {
@@ -137,7 +139,8 @@ class _CourierDeliveriesScreenState
     final finished = state.finishedOrders;
     final activePackages = packagesState.activePackages;
     final finishedPackages = packagesState.finishedPackages;
-    final isEmpty = state.orders.isEmpty &&
+    final isEmpty =
+        state.orders.isEmpty &&
         packagesState.packages.isEmpty &&
         state.error == null &&
         packagesState.error == null;
@@ -149,124 +152,170 @@ class _CourierDeliveriesScreenState
         ref.read(courierPackagesProvider.notifier).fetchPackages();
       },
       child: Scaffold(
-      appBar: AppBar(title: Text(context.l10n.courierDeliveriesTitle)),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(courierCashWalletProvider);
-          await Future.wait([
-            ref.read(courierDeliveriesProvider.notifier).refreshOrders(),
-            ref.read(courierPackagesProvider.notifier).refreshPackages(),
-          ]);
-        },
-        child: state.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                controller: _scroll,
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  const SliverToBoxAdapter(child: _CashSummaryHeader()),
-                  if (state.error != null)
-                    SliverToBoxAdapter(
-                      child: _InlineError(
-                        message: state.error!,
-                        onRetry: () => ref
-                            .read(courierDeliveriesProvider.notifier)
-                            .fetchOrders(),
-                      ),
-                    ),
-                  if (packagesState.error != null)
-                    SliverToBoxAdapter(
-                      child: _InlineError(
-                        message: packagesState.error!,
-                        onRetry: () => ref
-                            .read(courierPackagesProvider.notifier)
-                            .fetchPackages(),
-                      ),
-                    ),
-                  if (isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: EmptyStateWidget(
-                        title: context.l10n.courierEmptyTitle,
-                        subtitle: context.l10n.courierEmptyBody,
-                      ),
-                    ),
-                  if (activePackages.isNotEmpty) ...[
-                    _sectionHeader(
-                      context,
-                      context.l10n.courierPackagesSection,
-                      trailing: context.l10n
-                          .courierPackagesCount(activePackages.length),
-                    ),
-                    _packageList(activePackages, withActions: true),
-                  ],
-                  if (active.isNotEmpty) ...[
-                    _sectionHeader(
-                      context,
-                      context.l10n.courierActiveSection,
-                    ),
-                    _orderList(active, withActions: true),
-                  ],
-                  if (finished.isNotEmpty ||
-                      finishedPackages.isNotEmpty) ...[
-                    _sectionHeader(
-                      context,
-                      context.l10n.courierHistorySection,
-                    ),
-                    if (finished.isNotEmpty)
-                      _orderList(finished, withActions: false),
-                    if (finished.isNotEmpty && finishedPackages.isNotEmpty)
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: AppSpacing.sm),
-                      ),
-                    if (finishedPackages.isNotEmpty)
-                      _packageList(finishedPackages, withActions: false),
-                  ],
-                  if (state.isLoadingMore)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.md),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    ),
-                  const SliverPadding(
-                    padding: EdgeInsets.only(bottom: AppSpacing.xl),
+        backgroundColor: AppColors.transparent,
+        body: OrbitBackground(
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                    AppSpacing.lg,
                   ),
-                ],
-              ),
-      ),
+                  child: Text(
+                    context.l10n.courierDeliveriesTitle,
+                    style: AppTypography.headlineSmall.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: RefreshIndicator(
+                    color: context.amberColor,
+                    onRefresh: () async {
+                      ref.invalidate(courierCashWalletProvider);
+                      await Future.wait([
+                        ref
+                            .read(courierDeliveriesProvider.notifier)
+                            .refreshOrders(),
+                        ref
+                            .read(courierPackagesProvider.notifier)
+                            .refreshPackages(),
+                      ]);
+                    },
+                    child: state.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomScrollView(
+                            controller: _scroll,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              const SliverToBoxAdapter(
+                                child: _CashSummaryHeader(),
+                              ),
+                              if (state.error != null)
+                                SliverToBoxAdapter(
+                                  child: _InlineError(
+                                    message: state.error!,
+                                    onRetry: () => ref
+                                        .read(
+                                          courierDeliveriesProvider.notifier,
+                                        )
+                                        .fetchOrders(),
+                                  ),
+                                ),
+                              if (packagesState.error != null)
+                                SliverToBoxAdapter(
+                                  child: _InlineError(
+                                    message: packagesState.error!,
+                                    onRetry: () => ref
+                                        .read(courierPackagesProvider.notifier)
+                                        .fetchPackages(),
+                                  ),
+                                ),
+                              if (isEmpty)
+                                SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: EmptyStateWidget(
+                                    title: context.l10n.courierEmptyTitle,
+                                    subtitle: context.l10n.courierEmptyBody,
+                                  ),
+                                ),
+                              if (activePackages.isNotEmpty) ...[
+                                _sectionHeader(
+                                  context,
+                                  context.l10n.courierPackagesSection,
+                                  trailing: context.l10n.courierPackagesCount(
+                                    activePackages.length,
+                                  ),
+                                ),
+                                _packageList(activePackages, withActions: true),
+                              ],
+                              if (active.isNotEmpty) ...[
+                                _sectionHeader(
+                                  context,
+                                  context.l10n.courierActiveSection,
+                                ),
+                                _orderList(active, withActions: true),
+                              ],
+                              if (finished.isNotEmpty ||
+                                  finishedPackages.isNotEmpty) ...[
+                                _sectionHeader(
+                                  context,
+                                  context.l10n.courierHistorySection,
+                                ),
+                                if (finished.isNotEmpty)
+                                  _orderList(finished, withActions: false),
+                                if (finished.isNotEmpty &&
+                                    finishedPackages.isNotEmpty)
+                                  const SliverToBoxAdapter(
+                                    child: SizedBox(height: AppSpacing.sm),
+                                  ),
+                                if (finishedPackages.isNotEmpty)
+                                  _packageList(
+                                    finishedPackages,
+                                    withActions: false,
+                                  ),
+                              ],
+                              if (state.isLoadingMore)
+                                const SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(AppSpacing.md),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                ),
+                              const SliverPadding(
+                                padding: EdgeInsets.only(
+                                  bottom: _dockClearance,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _sectionHeader(BuildContext context, String title,
-      {String? trailing}) {
+  Widget _sectionHeader(
+    BuildContext context,
+    String title, {
+    String? trailing,
+  }) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.sm,
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.xl,
+          AppSpacing.xl,
+          AppSpacing.xl,
+          AppSpacing.md,
         ),
         child: Row(
           children: [
             Expanded(
               child: Text(
-                title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                title.toUpperCase(),
+                style: AppTypography.fieldLabel.copyWith(
+                  color: context.labelColor,
+                ),
               ),
             ),
             if (trailing != null)
               Text(
                 trailing,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: context.textSecondary),
+                style: AppTypography.bodySmall.copyWith(
+                  color: context.labelColor,
+                ),
               ),
           ],
         ),
@@ -279,7 +328,7 @@ class _CourierDeliveriesScreenState
     required bool withActions,
   }) {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       sliver: SliverList.separated(
         itemCount: packages.length,
         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
@@ -287,12 +336,13 @@ class _CourierDeliveriesScreenState
           final request = packages[index];
           return PackageDeliveryCard(
             request: request,
-            onPickedUp:
-                withActions ? () => _confirmPackagePickedUp(request) : null,
+            onPickedUp: withActions
+                ? () => _confirmPackagePickedUp(request)
+                : null,
             onDelivered: withActions
                 ? () => ref
-                    .read(courierPackagesProvider.notifier)
-                    .markDelivered(request.id)
+                      .read(courierPackagesProvider.notifier)
+                      .markDelivered(request.id)
                 : null,
           );
         },
@@ -302,7 +352,7 @@ class _CourierDeliveriesScreenState
 
   Widget _orderList(List<OrderEntity> orders, {required bool withActions}) {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       sliver: SliverList.separated(
         itemCount: orders.length,
         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
@@ -312,8 +362,8 @@ class _CourierDeliveriesScreenState
             order: order,
             onPickedUp: withActions
                 ? () => ref
-                    .read(courierDeliveriesProvider.notifier)
-                    .markPickedUp(order.id)
+                      .read(courierDeliveriesProvider.notifier)
+                      .markPickedUp(order.id)
                 : null,
             onDelivered: withActions ? () => _confirmDelivered(order) : null,
             onFailed: withActions ? () => _showFailSheet(order) : null,
@@ -334,66 +384,43 @@ class _CashSummaryHeader extends ConsumerWidget {
     if (wallet == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: context.primaryColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppSpacing.md),
+              color: context.glassColor,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: context.borderColor),
             ),
             child: Row(
               children: [
-                Icon(LucideIcons.wallet, color: context.primaryColor),
+                Icon(LucideIcons.wallet, color: context.amberColor, size: 20),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    context.l10n.courierCashInHand,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    context.l10n.courierCashInHand.toUpperCase(),
+                    style: AppTypography.fieldLabel.copyWith(
+                      color: context.labelColor,
+                    ),
                   ),
                 ),
                 Text(
                   context.formatCurrency(wallet.cashInHandEgp),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: context.primaryColor,
-                      ),
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: context.amberColor,
+                  ),
                 ),
               ],
             ),
           ),
           if (wallet.handoverDue) ...[
             const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSpacing.md),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    LucideIcons.alertTriangle,
-                    color: AppColors.warning,
-                    size: 18,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.l10n.courierHandoverDueBanner,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const CourierHandoverBanner(),
           ],
         ],
       ),
@@ -410,7 +437,7 @@ class _InlineError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Row(
         children: [
           const Icon(LucideIcons.alertCircle, color: AppColors.error, size: 18),
@@ -418,7 +445,9 @@ class _InlineError extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: AppTypography.bodySmall.copyWith(
+                color: context.textPrimary,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

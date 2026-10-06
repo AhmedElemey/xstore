@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 /// Bottom sheet asking the courier why a drop-off failed. The reason is
 /// required — it feeds the order's cancel reason, which the vendor and the
@@ -43,7 +45,9 @@ class _DeliveryFailSheetState extends State<DeliveryFailSheet> {
           children: [
             Text(
               context.l10n.courierFailReasonTitle,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             TextField(
@@ -53,8 +57,9 @@ class _DeliveryFailSheetState extends State<DeliveryFailSheet> {
               maxLines: 2,
               decoration: InputDecoration(
                 hintText: context.l10n.courierFailReasonHint,
-                helperText:
-                    canSubmit ? null : context.l10n.courierFailReasonRequired,
+                helperText: canSubmit
+                    ? null
+                    : context.l10n.courierFailReasonRequired,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -63,12 +68,21 @@ class _DeliveryFailSheetState extends State<DeliveryFailSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _loading ? null : () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(54),
+                      shape: const StadiumBorder(),
+                      side: BorderSide(color: context.borderColor),
+                    ),
                     child: Text(context.l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: FilledButton(
+                  child: XstoreButton(
+                    gradient: const [AppColors.error, AppColors.error],
+                    foregroundColor: AppColors.white,
+                    label: context.l10n.courierFailAction,
+                    isLoading: _loading,
                     onPressed: !canSubmit || _loading
                         ? null
                         : () async {
@@ -78,18 +92,6 @@ class _DeliveryFailSheetState extends State<DeliveryFailSheet> {
                             if (!mounted) return;
                             navigator.pop();
                           },
-                    style:
-                        FilledButton.styleFrom(backgroundColor: AppColors.error),
-                    child: _loading
-                        ? SizedBox(
-                            width: AppSpacing.lg,
-                            height: AppSpacing.lg,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: context.surfaceColor,
-                            ),
-                          )
-                        : Text(context.l10n.courierFailAction),
                   ),
                 ),
               ],
