@@ -128,12 +128,10 @@ class VendorOrderCard extends StatelessWidget {
                                   fit: BoxFit.cover,
                                   memCacheWidth: 168,
                                   memCacheHeight: 168,
+                                  errorWidget: (context, _, _) =>
+                                      _thumbPlaceholder(context),
                                 )
-                              : ColoredBox(
-                                  color: context.textDisabled.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                ),
+                              : _thumbPlaceholder(context),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
@@ -282,3 +280,6 @@ class VendorOrderCard extends StatelessWidget {
     return null;
   }
 }
+
+Widget _thumbPlaceholder(BuildContext context) =>
+    ColoredBox(color: context.textDisabled.withValues(alpha: 0.2));
