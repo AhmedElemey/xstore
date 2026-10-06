@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../domain/entities/order_entity.dart';
 
 class VendorOrderActionSheet extends StatelessWidget {
@@ -29,16 +30,23 @@ class VendorOrderActionSheet extends StatelessWidget {
         order.status == OrderStatus.cancelled) {
       return const SizedBox.shrink();
     }
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.md,
+    // Same sticky footer chrome as the consumer order detail.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.backgroundColor.withValues(alpha: 0.96),
+        border: Border(top: BorderSide(color: context.borderColor)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.xl,
+            AppSpacing.md,
+            AppSpacing.xl,
+            AppSpacing.md,
+          ),
+          child: _buildByStatus(context),
         ),
-        child: _buildByStatus(context),
       ),
     );
   }
@@ -84,23 +92,20 @@ class VendorOrderActionSheet extends StatelessWidget {
       );
     }
     if (order.status == OrderStatus.confirmed) {
-      return FilledButton(
+      return XstoreButton(
+        label: context.l10n.vendorMarkProcessing,
         onPressed: onProcessing,
-        style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-        child: Text(context.l10n.vendorMarkProcessing),
       );
     }
     if (order.status == OrderStatus.shipped) {
-      return FilledButton(
+      return XstoreButton(
+        label: context.l10n.vendorMarkDelivered,
         onPressed: onDelivered,
-        style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-        child: Text(context.l10n.vendorMarkDelivered),
       );
     }
-    return FilledButton(
+    return XstoreButton(
+      label: context.l10n.vendorMarkShipped,
       onPressed: onShipped,
-      style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-      child: Text(context.l10n.vendorMarkShipped),
     );
   }
 }

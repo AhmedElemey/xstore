@@ -40,158 +40,153 @@ class VendorOrderCard extends StatelessWidget {
     ].join(', ');
     final item = order.items.isEmpty ? null : order.items.first;
     final accent = orderStatusColor(order.status);
-    final radius = BorderRadius.circular(AppSpacing.lg);
+    final radius = BorderRadius.circular(22);
     final actions = _actions(context);
+    // Active orders get a status-tinted outline, like the consumer card;
+    // finished ones keep the plain glass border.
+    final active =
+        order.status != OrderStatus.delivered &&
+        order.status != OrderStatus.cancelled;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: context.glassColor,
+        border: Border.all(
+          color: active ? accent.withValues(alpha: 0.4) : context.borderColor,
+        ),
       ),
       child: Material(
-        color: context.surfaceColor,
+        type: MaterialType.transparency,
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => context.push('${AppRoutes.vendorOrders}/${order.id}'),
-          child: Ink(
-            decoration: BoxDecoration(
-              border: Border.all(color: accent.withValues(alpha: 0.45)),
-              borderRadius: radius,
-            ),
-            child: Stack(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
-                                  style: AppTypography.titleSmall.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  context.formatTime(order.createdAt.toLocal()),
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: context.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          OrderStatusBadge(status: order.status, compact: true),
-                        ],
+                Row(
+                  children: [
+                    OrderStatusBadge(status: order.status, compact: true),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        context.formatTime(order.createdAt.toLocal()),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: context.labelColor,
+                        ),
                       ),
-                      if (name.isNotEmpty ||
-                          phone.isNotEmpty ||
-                          cityLine.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        if (name.isNotEmpty)
-                          Text(
-                            name,
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        if (phone.isNotEmpty)
-                          Text(
-                            phone,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: context.textSecondary,
-                            ),
-                          ),
-                        if (cityLine.isNotEmpty)
-                          Text(
-                            cityLine,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: context.textSecondary,
-                            ),
-                          ),
-                      ],
-                      if (item != null) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        Row(
+                    ),
+                    Text(
+                      '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
+                      style: AppTypography.mono.copyWith(
+                        fontSize: 12,
+                        color: context.labelColor,
+                      ),
+                    ),
+                  ],
+                ),
+                if (name.isNotEmpty ||
+                    phone.isNotEmpty ||
+                    cityLine.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  if (name.isNotEmpty)
+                    Text(
+                      name,
+                      style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  if (phone.isNotEmpty)
+                    Text(
+                      phone,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.labelColor,
+                      ),
+                    ),
+                  if (cityLine.isNotEmpty)
+                    Text(
+                      cityLine,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: context.labelColor,
+                      ),
+                    ),
+                ],
+                if (item != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: item.listingImage.trim().isNotEmpty
+                              ? AppCachedNetworkImage(
+                                  imageUrl: item.listingImage,
+                                  fit: BoxFit.cover,
+                                  memCacheWidth: 168,
+                                  memCacheHeight: 168,
+                                )
+                              : ColoredBox(
+                                  color: context.textDisabled.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.xs,
-                              ),
-                              child: SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: item.listingImage.trim().isNotEmpty
-                                    ? AppCachedNetworkImage(
-                                        imageUrl: item.listingImage,
-                                        fit: BoxFit.cover,
-                                        memCacheWidth: 96,
-                                        memCacheHeight: 96,
-                                      )
-                                    : ColoredBox(
-                                        color: context.textDisabled.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                      ),
+                            Text(
+                              item.listingName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.listingName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${context.formatCurrency(item.price)} · ${context.l10n.ordersQtyTotalLinePrefix} ${item.quantity}',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: context.textSecondary,
-                                    ),
-                                  ),
-                                ],
+                            const SizedBox(height: 2),
+                            Text(
+                              '${context.formatCurrency(item.price)} · ${context.l10n.ordersQtyTotalLinePrefix} ${item.quantity}',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: context.labelColor,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        '${paymentMethodLabel(context, order.paymentMethod)} · ${context.formatCurrency(order.total)}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: context.textSecondary,
-                        ),
                       ),
-                      if (actions != null) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        actions,
-                      ],
                     ],
                   ),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        paymentMethodLabel(context, order.paymentMethod),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: context.labelColor,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      context.formatCurrency(order.total),
+                      style: AppTypography.mono.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: context.amberColor,
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
-                ),
+                if (actions != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  actions,
+                ],
               ],
             ),
           ),

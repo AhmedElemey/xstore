@@ -16,9 +16,12 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/utils/compress_picked_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../../shared/widgets/xstore_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../domain/entities/commission_payment_method.dart';
 import '../providers/commission_payment_providers.dart';
+import '../widgets/commission_page_header.dart';
 import '../widgets/commission_payment_method_avatar.dart';
 
 /// Step 2 of paying platform fees: shows where to send the money, then
@@ -80,7 +83,10 @@ class _CommissionPaymentReceiptScreenState
       (failure) {
         // Stay on the form so the amount and receipt aren't lost.
         setState(() => _submitting = false);
-        AppSnackbar.error(context, failure.message ?? context.l10n.errorGeneric);
+        AppSnackbar.error(
+          context,
+          failure.message ?? context.l10n.errorGeneric,
+        );
       },
       (_) {
         AppSnackbar.success(context, context.l10n.commissionPaymentSubmitted);
@@ -97,59 +103,81 @@ class _CommissionPaymentReceiptScreenState
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.surfaceColor,
-        elevation: 0,
-        title: Text(context.l10n.commissionPaymentReceiptTitle),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          _PayToCard(method: widget.method),
-          const Gap(AppSpacing.x2l),
-          TextField(
-            enabled: !_submitting,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.done,
-            onChanged: (value) => setState(() => _amountInput = value),
-            decoration: InputDecoration(
-              labelText: context.l10n.commissionPaymentAmountLabel,
-              errorText: showAmountError
-                  ? context.l10n.commissionPaymentAmountInvalid
-                  : null,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const Gap(AppSpacing.x2l),
-          Text(
-            context.l10n.commissionPaymentReceiptLabel,
-            style: AppTypography.titleSmall.copyWith(
-              color: context.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const Gap(AppSpacing.sm),
-          if (_receiptPath == null)
-            _ReceiptPicker(
-              enabled: !_submitting,
-              onPick: _pickReceipt,
-            )
-          else
-            _ReceiptPreview(
-              path: _receiptPath!,
-              onRemove: _submitting
-                  ? null
-                  : () => setState(() => _receiptPath = null),
-            ),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: XstoreButton(
-            label: context.l10n.commissionPaymentSubmit,
-            isLoading: _submitting,
-            onPressed: _canSubmit ? _submit : null,
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CommissionPageHeader(
+                title: context.l10n.commissionPaymentReceiptTitle,
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    0,
+                    AppSpacing.xl,
+                    AppSpacing.x2l,
+                  ),
+                  children: [
+                    _PayToCard(method: widget.method),
+                    const Gap(AppSpacing.x2l),
+                    AuthTextField(
+                      label: context.l10n.commissionPaymentAmountLabel,
+                      readOnly: _submitting,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onChanged: (value) =>
+                          setState(() => _amountInput = value),
+                      errorText: showAmountError
+                          ? context.l10n.commissionPaymentAmountInvalid
+                          : null,
+                    ),
+                    const Gap(AppSpacing.x2l),
+                    Text(
+                      context.l10n.commissionPaymentReceiptLabel.toUpperCase(),
+                      style: AppTypography.fieldLabel.copyWith(
+                        color: context.labelColor,
+                      ),
+                    ),
+                    const Gap(AppSpacing.sm),
+                    if (_receiptPath == null)
+                      _ReceiptPicker(
+                        enabled: !_submitting,
+                        onPick: _pickReceipt,
+                      )
+                    else
+                      _ReceiptPreview(
+                        path: _receiptPath!,
+                        onRemove: _submitting
+                            ? null
+                            : () => setState(() => _receiptPath = null),
+                      ),
+                  ],
+                ),
+              ),
+              // Sticky footer, same chrome as the cart's checkout bar.
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.backgroundColor.withValues(alpha: 0.96),
+                  border: Border(top: BorderSide(color: context.borderColor)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: XstoreButton(
+                      label: context.l10n.commissionPaymentSubmit,
+                      isLoading: _submitting,
+                      onPressed: _canSubmit ? _submit : null,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -178,8 +206,8 @@ class _PayToCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: context.borderColor),
       ),
       child: Row(
@@ -199,15 +227,16 @@ class _PayToCard extends ConsumerWidget {
                     Text(
                       context.l10n.commissionPaymentSendTo,
                       style: AppTypography.bodySmall.copyWith(
-                        color: context.textSecondary,
+                        color: context.labelColor,
                       ),
                     ),
                     const Gap(2),
                     SelectableText(
                       account,
-                      style: AppTypography.titleMedium.copyWith(
+                      style: AppTypography.mono.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                         color: context.textPrimary,
-                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -255,8 +284,8 @@ class _ReceiptPicker extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: context.borderColor),
       ),
       child: Column(
@@ -312,7 +341,7 @@ class _ReceiptPreview extends StatelessWidget {
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(AppSpacing.lg),
+          borderRadius: BorderRadius.circular(22),
           child: Container(
             height: 280,
             width: double.infinity,

@@ -31,7 +31,7 @@ class VendorCommissionAlertBanner extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -52,9 +52,9 @@ class VendorCommissionAlertBanner extends StatelessWidget {
                       ? context.l10n.commissionWalletPausedTitle
                       : context.l10n.commissionWalletWarnTitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -62,9 +62,9 @@ class VendorCommissionAlertBanner extends StatelessWidget {
                       ? context.l10n.commissionWalletPausedBody(limit)
                       : context.l10n.commissionWalletWarnBody(limit),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: context.textSecondary,
-                        height: 1.35,
-                      ),
+                    color: context.textSecondary,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),

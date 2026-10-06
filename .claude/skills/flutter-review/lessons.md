@@ -1097,3 +1097,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Screenshot harness skips the login prefetch
 - **Rule:** `FakeAuth` bypasses `Auth.build()`, so `prefetchProfileData` never runs and `profileNotifierProvider` stays empty (Edit Profile shows blank fields and a "?" avatar). The harness calls `refreshProfileData()` for that route, like `fetchCart()` for the cart; seed any provider fed only by a login prefetch the same way.
 - **Where it applies:** `test/screenshots/app_screens_test.dart`.
+
+### 2026-10-06 — Orbit seller screens: a screen that shows snackbars keeps its own Scaffold
+- **Rule:** Seller tabs and detail screens use `OrbitBackground` like the consumer ones, but `VendorOrdersScreen` keeps a `Scaffold` (a transparent `Material` is only fine when nothing shows a snackbar): its live-flow tests mount it bare and `AppSnackbar` needs a Scaffold. Seller Confirm stays success-green and Reject error-red; totals/revenue are amber mono; single-action footers are `XstoreButton`. Pushed commission screens share `CommissionPageHeader`.
+- **Where it applies:** `vendor_orders_screen.dart`, `vendor_wallet_screen.dart`, `vendor_order_detail_screen.dart`, `vendor_order_action_sheet.dart`, `commission/presentation`.
