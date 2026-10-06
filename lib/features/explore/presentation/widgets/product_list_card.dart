@@ -154,16 +154,18 @@ class ProductListCard extends StatelessWidget {
                               color: context.linkColor,
                             ),
                           ],
-                          const Gap(AppSpacing.sm),
-                          Icon(
-                            LucideIcons.star,
-                            size: AppSpacing.md,
-                            color: AppColors.warning,
-                          ),
-                          Text(
-                            ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
-                            style: AppTypography.bodySmall,
-                          ),
+                          if (item.reviewCount > 0) ...[
+                            const Gap(AppSpacing.sm),
+                            Icon(
+                              LucideIcons.star,
+                              size: AppSpacing.md,
+                              color: AppColors.warning,
+                            ),
+                            Text(
+                              ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
+                              style: AppTypography.bodySmall,
+                            ),
+                          ],
                         ],
                       ),
                       const Gap(AppSpacing.md),

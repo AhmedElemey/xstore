@@ -415,7 +415,6 @@ class _StepRole extends StatelessWidget {
             context.l10n.sellerFeature1,
             context.l10n.sellerFeature2,
             context.l10n.sellerFeature3,
-            context.l10n.sellerFeature4,
           ],
         ),
         const Gap(AppSpacing.xl),

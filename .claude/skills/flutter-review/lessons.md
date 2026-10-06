@@ -1113,3 +1113,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Remove controls that only show a snackbar; hide actions with nothing to act on
 - **Rule:** A button or menu item whose handler is only a snackbar ("coming soon", its own label, the tracking number) is dead UI — remove it, or route to the existing screen that already shows the data (order detail timeline). Bulk actions ("Confirm all pending") render only when the count is > 0. Never ship placeholder status text (e.g. a hardcoded "In transit — Cairo hub"). Dates use day-first month-name formats (`formatDate`), never `d/M/yyyy`.
 - **Where it applies:** orders/vendor-orders screens, `order_card.dart`, `vendor_order_stats_banner.dart`, `formatShortDate`.
+
+### 2026-10-06 — Never fall back to DioException.message in error mapping
+- **Rule:** `DioException.message` is developer text ("...validateStatus..."); mapping fallbacks must use a localized generic message, and `X.toString()` stored in state reaches the UI verbatim. Fix at `mapDioException`, not per screen. Also hide rating rows when `reviewCount == 0`, and use ICU plurals (Arabic needs `=2`/`few`) for counts in l10n.
+- **Where it applies:** `lib/core/network/dio_error_mapper.dart`, repositories/providers storing failure strings, l10n count strings, explore cards.

@@ -1343,6 +1343,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderTrackCta => 'Track My Order';
 
   @override
+  String get orderPlacedSubtitle =>
+      'Thanks for your order! We\'ll let you know as soon as it ships.';
+
+  @override
   String get orderContinueShopping => 'Continue Shopping';
 
   @override
@@ -1816,7 +1820,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String wishlistPriceDropBanner(int n) {
-    return '🎉 Price drop on $n items in your wishlist!';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Price drop on $n items',
+      one: 'Price drop on 1 item',
+    );
+    return '🎉 $_temp0 in your wishlist!';
   }
 
   @override
@@ -2052,9 +2062,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sellerFeature3 => 'Analytics & sales insights';
-
-  @override
-  String get sellerFeature4 => 'Direct chat with buyers';
 
   @override
   String get dateOfBirthOptional => 'Date of Birth (optional)';
