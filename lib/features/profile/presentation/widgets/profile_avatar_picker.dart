@@ -41,9 +41,10 @@ class ProfileAvatarPicker extends StatelessWidget {
             diameter: diameter,
           ),
           if (showCameraBadge)
+            // Sits on the rim so it never covers the initials.
             PositionedDirectional(
-              end: 0,
-              bottom: 0,
+              end: -diameter * 0.04,
+              bottom: -diameter * 0.04,
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.xs),
                 decoration: BoxDecoration(
@@ -51,14 +52,14 @@ class ProfileAvatarPicker extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Container(
-                  padding: EdgeInsets.all(diameter * 0.1),
+                  padding: EdgeInsets.all(diameter * 0.05),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(colors: context.brandGradient),
                   ),
                   child: Icon(
                     LucideIcons.camera,
-                    size: diameter * 0.16,
+                    size: diameter * 0.14,
                     color: context.onBrandColor,
                   ),
                 ),
