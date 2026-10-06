@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../domain/entities/profile_entity.dart';
@@ -12,10 +11,7 @@ import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
 class VendorStoreCard extends ConsumerWidget {
-  const VendorStoreCard({
-    super.key,
-    required this.profile,
-  });
+  const VendorStoreCard({super.key, required this.profile});
 
   final ProfileEntity profile;
 
@@ -26,22 +22,15 @@ class VendorStoreCard extends ConsumerWidget {
     final category = u.storeCategory ?? '';
     final joined = u.joinedAt;
 
-    final joinedLine =
-        joined != null ? context.formatMonthYear(joined) : '';
+    final joinedLine = joined != null ? context.formatMonthYear(joined) : '';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSpacing.lg),
-        boxShadow: [
-          BoxShadow(
-            color: context.textPrimary.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,10 +51,7 @@ class VendorStoreCard extends ConsumerWidget {
                       ),
                     ),
                     if (category.isNotEmpty)
-                      Text(
-                        category,
-                        style: AppTypography.bodySmall,
-                      ),
+                      Text(category, style: AppTypography.bodySmall),
                     const Gap(AppSpacing.xs),
                     Text(
                       '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
@@ -84,18 +70,18 @@ class VendorStoreCard extends ConsumerWidget {
             children: [
               _StatChip(
                 icon: LucideIcons.eye,
-                label:
-                    '${_compactCount(profile.storeViewCount)} ${context.l10n.statStoreViews}',
+                count: _compactCount(profile.storeViewCount),
+                label: context.l10n.statStoreViews,
               ),
               _StatChip(
                 icon: LucideIcons.heart,
-                label:
-                    '${profile.storeSaveCount} ${context.l10n.statStoreSaves}',
+                count: '${profile.storeSaveCount}',
+                label: context.l10n.statStoreSaves,
               ),
               _StatChip(
                 icon: LucideIcons.package,
-                label:
-                    '${profile.storeActiveListings} ${context.l10n.statStoreActive}',
+                count: '${profile.storeActiveListings}',
+                label: context.l10n.statStoreActive,
               ),
             ],
           ),
@@ -113,9 +99,14 @@ String _compactCount(int n) {
 }
 
 class _StatChip extends StatelessWidget {
-  const _StatChip({required this.icon, required this.label});
+  const _StatChip({
+    required this.icon,
+    required this.count,
+    required this.label,
+  });
 
   final IconData icon;
+  final String count;
   final String label;
 
   @override
@@ -126,15 +117,30 @@ class _StatChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: context.backgroundColor,
         borderRadius: BorderRadius.circular(AppSpacing.x3l),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: context.textSecondary),
           const SizedBox(width: AppSpacing.xs),
-          Text(label, style: AppTypography.labelSmall),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: count,
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 12,
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                TextSpan(text: ' $label'),
+              ],
+            ),
+            style: AppTypography.labelSmall,
+          ),
         ],
       ),
     );
@@ -160,27 +166,28 @@ class _StoreLogo extends StatelessWidget {
           fit: BoxFit.cover,
           memCacheWidth: 150,
           memCacheHeight: 150,
-          errorWidget: (_, __, ___) => _gradientBox(initials),
+          errorWidget: (ctx, __, ___) => _gradientBox(ctx, initials),
         ),
       );
     }
-    return _gradientBox(initials);
+    return _gradientBox(context, initials);
   }
 
-  Widget _gradientBox(String letter) {
+  Widget _gradientBox(BuildContext context, String letter) {
     return Container(
       width: 50,
       height: 50,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSpacing.sm + AppSpacing.xs),
-        gradient: const LinearGradient(
-          colors: [AppColors.accent, AppColors.warning],
-        ),
+        gradient: LinearGradient(colors: context.brandGradient),
       ),
       child: Text(
         letter,
-        style: AppTypography.titleMedium.copyWith(color: AppColors.white),
+        style: AppTypography.headlineSmall.copyWith(
+          fontSize: 20,
+          color: context.onBrandColor,
+        ),
       ),
     );
   }

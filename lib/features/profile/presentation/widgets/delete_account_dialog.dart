@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -13,7 +12,7 @@ class DeleteAccountDialog extends StatefulWidget {
   /// keyword (`DELETE /api/auth/delete-account` body: `{password,
   /// confirmationText}`).
   final Future<void> Function(String password, String confirmationText)
-      onConfirm;
+  onConfirm;
 
   @override
   State<DeleteAccountDialog> createState() => _DeleteAccountDialogState();
@@ -33,16 +32,28 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final ok = _confirmController.text.trim() == context.l10n.deleteConfirmKeyword &&
+    final ok =
+        _confirmController.text.trim() == context.l10n.deleteConfirmKeyword &&
         _passwordController.text.isNotEmpty;
     return AlertDialog(
-      icon: const Icon(LucideIcons.alertTriangle, color: AppColors.error, size: 40),
+      icon: Icon(
+        LucideIcons.alertTriangle,
+        color: context.colorScheme.error,
+        size: 40,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: context.borderColor),
+      ),
       title: Text(context.l10n.deleteAccountPermanentWarning),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(context.l10n.deleteAccountDialogTitle, style: AppTypography.bodySmall),
+          Text(
+            context.l10n.deleteAccountDialogTitle,
+            style: AppTypography.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.lg),
           TextField(
             controller: _passwordController,
@@ -77,7 +88,9 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
           child: Text(context.l10n.cancel),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+          style: FilledButton.styleFrom(
+            backgroundColor: context.colorScheme.error,
+          ),
           onPressed: ok
               ? () async {
                   final password = _passwordController.text;
