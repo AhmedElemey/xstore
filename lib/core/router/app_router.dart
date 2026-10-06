@@ -24,8 +24,6 @@ import '../../features/commission/presentation/screens/vendor_wallet_screen.dart
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/delivery/presentation/screens/courier_cash_screen.dart';
 import '../../features/delivery/presentation/screens/courier_deliveries_screen.dart';
-import '../../features/delivery/presentation/screens/my_package_requests_screen.dart';
-import '../../features/delivery/presentation/screens/send_package_screen.dart';
 import '../../features/explore/presentation/screens/explore_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/listing/domain/entities/listing_entity.dart';
@@ -294,23 +292,21 @@ GoRouter goRouter(GoRouterRef ref) {
           const CheckoutScreen(),
         ),
       ),
-      // Consumer package delivery — plain stack routes (not shell tabs),
-      // so `context.push` from profile/my-packages is safe.
+      // TODO(phase-2): "Send a package" / "My packages" (package delivery
+      // requests) are deferred to the next phase — nothing in the app links
+      // to them yet. The screens stay in lib/features/delivery; to restore,
+      // swap these redirects back to their screens:
+      //   sendPackage → slideUpTransition(SendPackageScreen(
+      //       args: state.extra as SendPackageArgs?))
+      //   myPackages  → slideRightTransition(const MyPackageRequestsScreen())
+      // and add an entry point (e.g. a Profile menu item).
       GoRoute(
         path: AppRoutes.sendPackage,
-        pageBuilder: (context, state) => slideUpTransition(
-          context,
-          state,
-          SendPackageScreen(args: state.extra as SendPackageArgs?),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: AppRoutes.myPackages,
-        pageBuilder: (context, state) => slideRightTransition(
-          context,
-          state,
-          const MyPackageRequestsScreen(),
-        ),
+        redirect: (_, __) => AppRoutes.profile,
       ),
       GoRoute(
         path: '${AppRoutes.vendorOrders}/:orderId',
