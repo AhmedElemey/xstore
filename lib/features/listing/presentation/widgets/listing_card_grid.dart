@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -28,120 +27,107 @@ class ListingCardGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final thumb = listing.imageUrls.isNotEmpty ? listing.imageUrls.first : '';
     final accent = listingStatusAccent(context, listing.status);
-    final radius = BorderRadius.circular(16);
-    // Inset so the drop shadow sits inside the grid cell and isn't
-    // covered by the neighboring tile.
+    final radius = BorderRadius.circular(22);
+    // Active is the normal state; only the others get an accent border.
+    final borderColor = listing.status == ListingStatus.active
+        ? context.borderColor
+        : accent.withValues(alpha: 0.4);
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.xs),
       child: DecoratedBox(
         decoration: BoxDecoration(
+          color: context.glassColor,
           borderRadius: radius,
-          boxShadow: [
-            BoxShadow(
-              color: context.cardShadowColor,
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          border: Border.all(color: borderColor),
         ),
         child: Material(
-          color: context.surfaceColor,
+          type: MaterialType.transparency,
           borderRadius: radius,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
-            child: Ink(
-              decoration: BoxDecoration(
-                border: Border.all(color: accent.withValues(alpha: 0.45)),
-                borderRadius: radius,
-              ),
-              child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: imageHeight,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ListingThumbnail(
-                            imageUrl: thumb,
-                            width: double.infinity,
-                            height: imageHeight,
-                            borderRadius: 0,
-                          ),
-                          Positioned(
-                            top: AppSpacing.md,
-                            right: AppSpacing.md,
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  child: SizedBox(
+                    height: imageHeight,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ListingThumbnail(
+                          imageUrl: thumb,
+                          width: double.infinity,
+                          height: imageHeight,
+                        ),
+                        // Both edges + FittedBox keep a long localized label
+                        // inside the thumbnail, and mirror in Arabic.
+                        PositionedDirectional(
+                          top: AppSpacing.sm,
+                          start: AppSpacing.sm,
+                          end: AppSpacing.sm,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
                             child: StatusBadge(
                               status: listing.status,
                               compact: true,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.md,
-                        AppSpacing.md,
-                        AppSpacing.xs,
-                        AppSpacing.md,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  listing.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.body15.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const Gap(AppSpacing.sm),
-                                Text(
-                                  context.formatCurrency(listing.price),
-                                  style: AppTypography.body15.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (onOpenMenu != null)
-                            IconButton(
-                              icon: const Icon(
-                                LucideIcons.moreVertical,
-                                size: 18,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 20,
-                                minHeight: 20,
-                              ),
-                              onPressed: onOpenMenu,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 4,
-                  child: ColoredBox(color: accent),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.md,
+                    AppSpacing.xs,
+                    AppSpacing.xs,
+                    AppSpacing.md,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              listing.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.body15.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Gap(AppSpacing.sm),
+                            Text(
+                              context.formatCurrency(listing.price),
+                              style: AppTypography.mono.copyWith(
+                                color: context.amberColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (onOpenMenu != null)
+                        IconButton(
+                          icon: const Icon(LucideIcons.moreVertical, size: 18),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 20,
+                            minHeight: 20,
+                          ),
+                          onPressed: onOpenMenu,
+                        ),
+                    ],
+                  ),
                 ),
               ],
-            ),
             ),
           ),
         ),

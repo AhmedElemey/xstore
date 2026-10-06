@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/my_listings_state.dart';
 
@@ -33,10 +34,10 @@ class ListingSortBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
         AppSpacing.md,
-        AppSpacing.lg,
+        AppSpacing.xl,
         AppSpacing.sm,
       ),
       child: Row(
@@ -60,7 +61,7 @@ class ListingSortBar extends StatelessWidget {
               children: [
                 Text(
                   context.l10n.sortBy,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  style: AppTypography.labelMedium.copyWith(
                     color: context.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -68,7 +69,7 @@ class ListingSortBar extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   labelFor(context, sort),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  style: AppTypography.labelMedium.copyWith(
                     color: context.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
@@ -112,19 +113,26 @@ class _ViewToggleIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Material(
-      color: selected ? AppColors.primary.withValues(alpha: 0.12) : scheme.surface,
-      borderRadius: BorderRadius.circular(AppSpacing.sm),
+      color: selected
+          ? AppColors.primary.withValues(alpha: 0.18)
+          : context.glassColor,
+      shape: CircleBorder(
+        side: BorderSide(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.5)
+              : context.borderColor,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xs),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           child: Icon(
             icon,
             size: 18,
-            color: selected ? AppColors.primary : scheme.onSurfaceVariant,
+            color: selected ? context.linkColor : context.textSecondary,
           ),
         ),
       ),

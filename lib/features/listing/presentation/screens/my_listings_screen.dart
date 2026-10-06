@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../../../../core/constants/app_colors.dart';
 
 import '../../../../core/animations/app_dialogs.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../commission/presentation/providers/vendor_commission_wallet_provider.dart';
@@ -25,6 +25,8 @@ import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
 import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/orbit_background.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
@@ -36,6 +38,9 @@ class MyListingsScreen extends ConsumerStatefulWidget {
 }
 
 class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
+  // Bottom padding so the last card scrolls clear of the New Listing pill.
+  static const double _fabClearance = 88;
+
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
 
   void _onScrollNotification(ScrollNotification n) {
@@ -107,8 +112,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     final ok = await showAnimatedBottomSheet<bool>(
       context: context,
       builder: (ctx) => Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: context.elevatedSurfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
         child: ResubmitListingSheet(
           listing: listing,
@@ -144,8 +149,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       context: context,
       isScrollControlled: true,
       builder: (ctx) => Material(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        color: context.elevatedSurfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         clipBehavior: Clip.antiAlias,
         child: ListingOptionsSheet(listing: listing),
       ),
@@ -166,10 +171,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         await showAnimatedBottomSheet<void>(
           context: context,
           builder: (_) => Material(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(16),
-            ),
+            color: context.elevatedSurfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             clipBehavior: Clip.antiAlias,
             child: ListingStatsSheet(listing: listing),
           ),
@@ -226,105 +229,127 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       isTarget: (location) => location == AppRoutes.listingMy,
       onReentry: (ref) =>
           ref.read(myListingsNotifierProvider.notifier).fetchListings(),
-      child: Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        backgroundColor: context.surfaceColor,
-        surfaceTintColor: AppColors.transparent,
-        title: Text(context.l10n.myListings),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.search),
-            onPressed: _openSearch,
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: _fabVisible,
-        builder: (context, fabVisible, _) {
-          return AnimatedSlide(
-            duration: const Duration(milliseconds: 220),
-            offset: fabVisible ? Offset.zero : const Offset(0, 2),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: fabVisible ? 1 : 0,
-              child: FloatingActionButton.extended(
-                onPressed: () => context.go(AppRoutes.listingAdd),
-                icon: const Icon(LucideIcons.plus),
-                label: Text(context.l10n.newListing),
-              ),
-            ),
-          );
-        },
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Consumer(
-                  builder: (context, ref, _) {
-                    final wallet = ref
-                        .watch(vendorCommissionWalletProvider)
-                        .valueOrNull;
-                    if (wallet == null) return const SizedBox.shrink();
-                    return VendorCommissionAlertBanner(wallet: wallet);
-                  },
-                ),
-                ListingStatsBanner(
-                  totalCount: stats.totalCount,
-                  activeCount: stats.activeCount,
-                  soldCount: stats.soldCount,
-                ),
-              ],
-            ),
-          ),
-          ListingFilterTabs(
-            selected: selectedFilter,
-            onFilterSelected: ref
-                .read(myListingsNotifierProvider.notifier)
-                .applyFilter,
-          ),
-          const Gap(AppSpacing.md),
-          ListingSortBar(
-            sort: selectedSort,
-            viewMode: viewMode,
-            onSortChanged: ref
-                .read(myListingsNotifierProvider.notifier)
-                .applySort,
-            onViewModeChanged: ref
-                .read(myListingsNotifierProvider.notifier)
-                .setViewMode,
-          ),
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (n) {
-                _onScrollNotification(n);
-                return false;
+      child: Material(
+        type: MaterialType.transparency,
+        child: OrbitBackground(
+          child: Scaffold(
+            // The sky paints behind; the Scaffold only hosts the FAB.
+            backgroundColor: Colors.transparent,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            floatingActionButton: ValueListenableBuilder<bool>(
+              valueListenable: _fabVisible,
+              builder: (context, fabVisible, _) {
+                return AnimatedSlide(
+                  duration: const Duration(milliseconds: 220),
+                  offset: fabVisible ? Offset.zero : const Offset(0, 2),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: fabVisible ? 1 : 0,
+                    child: _NewListingPill(
+                      label: context.l10n.newListing,
+                      onPressed: () => context.go(AppRoutes.listingAdd),
+                    ),
+                  ),
+                );
               },
-              child: _buildBody(
-                isLoading: isLoading,
-                listings: listings,
-                filtered: filtered,
-                selectedFilter: selectedFilter,
-                viewMode: viewMode,
-                error: error,
+            ),
+            body: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                    ),
+                    child: SizedBox(
+                      height: 44,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              context.l10n.myListings,
+                              style: AppTypography.headlineSmall.copyWith(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          _GlassIconButton(
+                            icon: LucideIcons.search,
+                            onPressed: _openSearch,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
+                      0,
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final wallet = ref
+                                .watch(vendorCommissionWalletProvider)
+                                .valueOrNull;
+                            if (wallet == null) return const SizedBox.shrink();
+                            return VendorCommissionAlertBanner(wallet: wallet);
+                          },
+                        ),
+                        ListingStatsBanner(
+                          totalCount: stats.totalCount,
+                          activeCount: stats.activeCount,
+                          soldCount: stats.soldCount,
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListingFilterTabs(
+                    selected: selectedFilter,
+                    onFilterSelected: ref
+                        .read(myListingsNotifierProvider.notifier)
+                        .applyFilter,
+                  ),
+                  ListingSortBar(
+                    sort: selectedSort,
+                    viewMode: viewMode,
+                    onSortChanged: ref
+                        .read(myListingsNotifierProvider.notifier)
+                        .applySort,
+                    onViewModeChanged: ref
+                        .read(myListingsNotifierProvider.notifier)
+                        .setViewMode,
+                  ),
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        _onScrollNotification(n);
+                        return false;
+                      },
+                      child: _buildBody(
+                        isLoading: isLoading,
+                        listings: listings,
+                        filtered: filtered,
+                        selectedFilter: selectedFilter,
+                        viewMode: viewMode,
+                        error: error,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -339,6 +364,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   }) {
     if (isLoading && listings.isEmpty) {
       return RefreshIndicator(
+        color: context.linkColor,
         onRefresh: () =>
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
@@ -357,11 +383,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
             children: [
               Text(error, textAlign: TextAlign.center),
               const Gap(AppSpacing.lg),
-              FilledButton(
+              XstoreButton(
+                label: context.l10n.retry,
                 onPressed: () => ref
                     .read(myListingsNotifierProvider.notifier)
                     .fetchListings(),
-                child: Text(context.l10n.retry),
               ),
             ],
           ),
@@ -371,6 +397,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
 
     if (filtered.isEmpty) {
       return RefreshIndicator(
+        color: context.linkColor,
         onRefresh: () =>
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView(
@@ -390,16 +417,17 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
 
     if (viewMode == ViewMode.list) {
       return RefreshIndicator(
+        color: context.linkColor,
         onRefresh: () =>
             ref.read(myListingsNotifierProvider.notifier).refreshListings(),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
           cacheExtent: 700,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.xl,
             AppSpacing.md,
-            AppSpacing.lg,
-            88,
+            AppSpacing.xl,
+            _fabClearance,
           ),
           itemCount: filtered.length,
           separatorBuilder: (_, __) => const Gap(AppSpacing.md),
@@ -418,16 +446,17 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
 
     return RefreshIndicator(
+      color: context.linkColor,
       onRefresh: () =>
           ref.read(myListingsNotifierProvider.notifier).refreshListings(),
       child: GridView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         cacheExtent: 700,
-        padding: const EdgeInsets.fromLTRB(
+        padding: const EdgeInsetsDirectional.fromSTEB(
           AppSpacing.lg,
           AppSpacing.md,
           AppSpacing.lg,
-          88,
+          _fabClearance,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -507,6 +536,87 @@ class _ListingSearchDialogState extends State<_ListingSearchDialog> {
           child: Text(context.l10n.myListingsSearchSubmit),
         ),
       ],
+    );
+  }
+}
+
+/// Frosted circular header action (same look as the orders screen).
+class _GlassIconButton extends StatelessWidget {
+  const _GlassIconButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.glassColor,
+      shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(icon, size: 22, color: context.textPrimary),
+        ),
+      ),
+    );
+  }
+}
+
+/// "New Listing" action: the brand-gradient pill, with a plus.
+class _NewListingPill extends StatelessWidget {
+  const _NewListingPill({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final gradient = context.brandGradient;
+    final onBrand = context.onBrandColor;
+    return Semantics(
+      button: true,
+      label: label,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradient),
+          borderRadius: BorderRadius.circular(27),
+          boxShadow: [
+            BoxShadow(
+              color: gradient.first.withValues(alpha: 0.35),
+              blurRadius: 24,
+            ),
+          ],
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(27),
+            onTap: onPressed,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.lg,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.plus, size: 20, color: onBrand),
+                  const Gap(AppSpacing.sm),
+                  Text(
+                    label,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: onBrand,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

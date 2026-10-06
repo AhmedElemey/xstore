@@ -23,6 +23,8 @@ import '../providers/profile_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/utils/public_seller_stats.dart';
 import '../../../../shared/widgets/app_cached_network_image.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/expandable_text.dart';
 
@@ -254,15 +256,30 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading && _profile == null && _error == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return _OrbitPage(
+        child: Column(
+          children: [
+            const _StoreHeader(),
+            const Expanded(
+              child: Center(child: CircularProgressIndicator.adaptive()),
+            ),
+          ],
+        ),
+      );
     }
     if (_error != null && _profile == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: ErrorStateWidget(
-          message: context.l10n.storeUnavailableNow,
-          retryLabel: context.l10n.retry,
-          onRetry: _refresh,
+      return _OrbitPage(
+        child: Column(
+          children: [
+            const _StoreHeader(),
+            Expanded(
+              child: ErrorStateWidget(
+                message: context.l10n.storeUnavailableNow,
+                retryLabel: context.l10n.retry,
+                onRetry: _refresh,
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -274,52 +291,35 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
 
-    return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: NotificationListener<ScrollNotification>(
+    return _OrbitPage(
+      child: NotificationListener<ScrollNotification>(
         onNotification: (n) {
           _handleScroll(n);
           return false;
         },
         child: RefreshIndicator(
+          color: context.linkColor,
           onRefresh: _refresh,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverAppBar(
-                pinned: true,
-                backgroundColor: context.surfaceColor,
-                surfaceTintColor: AppColors.transparent,
-                foregroundColor: context.textPrimary,
-                title: Text(context.l10n.stepStore),
-                actions: [
-                  IconButton(
-                    onPressed: () => Share.share(name),
-                    icon: const Icon(LucideIcons.share2, size: 20),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                ],
+              SliverToBoxAdapter(
+                child: _StoreHeader(onShare: () => Share.share(name)),
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
                     AppSpacing.md,
-                    AppSpacing.lg,
+                    AppSpacing.xl,
                     AppSpacing.lg,
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     decoration: BoxDecoration(
-                      color: context.surfaceColor,
-                      borderRadius: BorderRadius.circular(AppSpacing.xl),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.cardShadowColor,
-                          blurRadius: 20,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
+                      color: context.glassColor,
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: context.borderColor),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,18 +332,13 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                               height: _kAvatarRadius * 2,
                               padding: const EdgeInsets.all(3),
                               decoration: BoxDecoration(
-                                color: context.surfaceColor,
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: context.cardShadowColor,
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
+                                gradient: LinearGradient(
+                                  colors: context.brandGradient,
+                                ),
                               ),
                               child: CircleAvatar(
-                                backgroundColor: AppColors.primary,
+                                backgroundColor: Colors.transparent,
                                 backgroundImage: storePhoto != null
                                     ? AppNetworkImage.cached(storePhoto)
                                     : null,
@@ -358,11 +353,11 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                             name.isNotEmpty
                                                 ? name[0].toUpperCase()
                                                 : '?',
-                                            style: AppTypography.titleLarge
+                                            style: AppTypography.headlineSmall
                                                 .copyWith(
-                                              color: AppColors.white,
-                                              height: 1,
-                                            ),
+                                                  color: context.onBrandColor,
+                                                  height: 1,
+                                                ),
                                           ),
                                         ),
                                       )
@@ -378,7 +373,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                     name,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.titleMedium,
+                                    style: AppTypography.headlineSmall.copyWith(
+                                      fontSize: 20,
+                                      color: context.textPrimary,
+                                    ),
                                   ),
                                   const Gap(AppSpacing.xs),
                                   Text(
@@ -394,7 +392,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                           ],
                         ),
                         const Gap(AppSpacing.lg),
-                        Divider(height: 1, color: context.dividerColor),
+                        Divider(height: 1, color: context.borderColor),
                         const Gap(AppSpacing.lg),
                         _VendorStoreStatsRow(profile: profile),
                       ],
@@ -405,24 +403,27 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
               if (desc.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
                       0,
-                      AppSpacing.lg,
+                      AppSpacing.xl,
                       AppSpacing.lg,
                     ),
                     child: Container(
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       decoration: BoxDecoration(
-                        color: context.surfaceColor,
-                        borderRadius: BorderRadius.circular(AppSpacing.lg),
+                        color: context.glassColor,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: context.borderColor),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            context.l10n.storeDescriptionHeading,
-                            style: AppTypography.titleSmall,
+                            context.l10n.storeDescriptionHeading.toUpperCase(),
+                            style: AppTypography.fieldLabel.copyWith(
+                              color: context.labelColor,
+                            ),
                           ),
                           const Gap(AppSpacing.sm),
                           ExpandableText(
@@ -437,9 +438,11 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                 padding: EdgeInsets.zero,
                                 minimumSize: const Size(0, 0),
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                foregroundColor: context.linkColor,
                               ),
-                              onPressed: () =>
-                                  setState(() => _descExpanded = !_descExpanded),
+                              onPressed: () => setState(
+                                () => _descExpanded = !_descExpanded,
+                              ),
                               child: Text(
                                 _descExpanded
                                     ? context.l10n.readLess
@@ -457,7 +460,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                   height: 40,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.xl,
+                    ),
                     children: [
                       _CategoryChip(
                         label: context.l10n.allCategoriesChip,
@@ -466,7 +471,9 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                       ),
                       ..._categories.map(
                         (c) => Padding(
-                          padding: const EdgeInsets.only(left: AppSpacing.sm),
+                          padding: const EdgeInsetsDirectional.only(
+                            start: AppSpacing.sm,
+                          ),
                           child: _CategoryChip(
                             label: c,
                             selected: _category == c,
@@ -491,13 +498,15 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                       children: [
                         Icon(
                           LucideIcons.packageSearch,
-                          size: AppSpacing.x3l * 2,
-                          color: context.textDisabled,
+                          size: AppSpacing.x4l + AppSpacing.lg,
+                          color: context.linkColor.withValues(alpha: 0.5),
                         ),
                         const Gap(AppSpacing.lg),
                         Text(
                           context.l10n.noResultsTitle,
-                          style: AppTypography.titleSmall,
+                          style: AppTypography.titleMedium.copyWith(
+                            color: context.textPrimary,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         const Gap(AppSpacing.xs),
@@ -514,25 +523,26 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 0,
-                      crossAxisSpacing: 0,
-                      childAspectRatio: 0.82,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) {
-                        final item = _listings[i];
-                        return ListingCardGrid(
-                          listing: item,
-                          imageHeight: 110,
-                          onTap: () => context.push('${AppRoutes.product}/${item.id}'),
-                        );
-                      },
-                      childCount: _listings.length,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 0,
+                          crossAxisSpacing: 0,
+                          childAspectRatio: 0.78,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, i) {
+                      final item = _listings[i];
+                      return ListingCardGrid(
+                        listing: item,
+                        imageHeight: 110,
+                        onTap: () =>
+                            context.push('${AppRoutes.product}/${item.id}'),
+                      );
+                    }, childCount: _listings.length),
                   ),
                 ),
               SliverToBoxAdapter(
@@ -553,6 +563,77 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
   }
 }
 
+/// Orbit sky behind the store page (a pushed route, so no dock to clear).
+class _OrbitPage extends StatelessWidget {
+  const _OrbitPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: OrbitBackground(child: SafeArea(child: child)),
+    );
+  }
+}
+
+/// Back button, title and (once the store has loaded) a share action.
+class _StoreHeader extends StatelessWidget {
+  const _StoreHeader({this.onShare});
+
+  final VoidCallback? onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.xl,
+        0,
+      ),
+      child: SizedBox(
+        height: 44,
+        child: Row(
+          children: [
+            const AuthBackButton(),
+            const Gap(AppSpacing.md),
+            Expanded(
+              child: Text(
+                context.l10n.stepStore,
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: 20,
+                  color: context.textPrimary,
+                ),
+              ),
+            ),
+            if (onShare != null)
+              Material(
+                color: context.glassColor,
+                shape: CircleBorder(
+                  side: BorderSide(color: context.borderColor),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: onShare,
+                  child: SizedBox.square(
+                    dimension: 44,
+                    child: Icon(
+                      LucideIcons.share2,
+                      size: 20,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CategoryChip extends StatelessWidget {
   const _CategoryChip({
     required this.label,
@@ -566,28 +647,25 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedBg = context.isDark ? context.textPrimary : AppColors.primary;
+    final selectedFg = context.isDark ? AppColors.darkOnBrand : AppColors.white;
     return Material(
-      color: selected ? AppColors.primary : context.surfaceColor,
-      borderRadius: BorderRadius.circular(999),
+      color: selected ? selectedBg : context.glassColor,
+      shape: StadiumBorder(
+        side: BorderSide(color: selected ? selectedBg : context.borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(999),
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: selected ? AppColors.primary : context.borderColor,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: AppTypography.labelLarge.copyWith(
-              color: selected ? AppColors.white : context.textSecondary,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Center(
+            child: Text(
+              label,
+              style: AppTypography.labelLarge.copyWith(
+                color: selected ? selectedFg : context.textSecondary,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -640,20 +718,26 @@ class _VendorStoreStatsRow extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                Icon(cells[i].$1, size: 18, color: AppColors.primary),
+                Icon(cells[i].$1, size: 18, color: context.linkColor),
                 const Gap(AppSpacing.xs),
                 Text(
                   cells[i].$2,
                   textAlign: TextAlign.center,
-                  style: AppTypography.body15.copyWith(
+                  style: AppTypography.mono.copyWith(
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
+                    color: context.textPrimary,
                   ),
                 ),
                 const Gap(2),
                 Text(
-                  cells[i].$3,
+                  cells[i].$3.toUpperCase(),
                   textAlign: TextAlign.center,
-                  style: AppTypography.labelSmall,
+                  style: AppTypography.fieldLabel.copyWith(
+                    fontSize: 9,
+                    letterSpacing: 0.6,
+                    color: context.labelColor,
+                  ),
                   maxLines: 2,
                 ),
               ],

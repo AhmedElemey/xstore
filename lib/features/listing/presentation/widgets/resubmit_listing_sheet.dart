@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../domain/entities/listing_entity.dart';
+import '../../../../shared/widgets/xstore_button.dart';
 
 /// Bottom sheet: shows why a listing was rejected and lets the vendor
 /// resubmit it with a corrected price.
@@ -76,15 +77,13 @@ class _ResubmitListingSheetState extends State<ResubmitListingSheet> {
   Widget build(BuildContext context) {
     final reason = widget.listing.rejectionReason;
     final hasReason = reason != null && reason.trim().isNotEmpty;
-    final theme = Theme.of(context);
-
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.x2l,
           right: AppSpacing.x2l,
           top: AppSpacing.x2l,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.x2l,
+          bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.x2l,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -93,53 +92,50 @@ class _ResubmitListingSheetState extends State<ResubmitListingSheet> {
             children: [
               Text(
                 context.l10n.resubmitListingTitle,
-                style: theme.textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: AppTypography.headlineSmall.copyWith(
+                  fontSize: 20,
+                  color: context.textPrimary,
+                ),
               ),
               const Gap(AppSpacing.lg),
               Text(
-                context.l10n.rejectionReasonLabel,
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                context.l10n.rejectionReasonLabel.toUpperCase(),
+                style: AppTypography.fieldLabel.copyWith(
+                  color: context.labelColor,
+                ),
               ),
               const Gap(AppSpacing.xs),
               Text(
                 hasReason ? reason : context.l10n.rejectionReasonUnavailable,
-                style: theme.textTheme.bodyMedium,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: context.textPrimary,
+                ),
               ),
               const Gap(AppSpacing.x2l),
               Text(
-                context.l10n.resubmitPriceLabel,
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                context.l10n.resubmitPriceLabel.toUpperCase(),
+                style: AppTypography.fieldLabel.copyWith(
+                  color: context.labelColor,
+                ),
               ),
-              const Gap(AppSpacing.xs),
+              const Gap(AppSpacing.sm),
               TextField(
                 controller: _price,
                 enabled: !_submitting,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  errorText: _error,
-                  border: const OutlineInputBorder(),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
+                style: AppTypography.mono.copyWith(
+                  fontSize: 16,
+                  color: context.amberColor,
+                ),
+                decoration: InputDecoration(errorText: _error),
               ),
               const Gap(AppSpacing.x2l),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _submitting ? null : _submit,
-                  child: _submitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.white,
-                          ),
-                        )
-                      : Text(context.l10n.resubmitSubmit),
-                ),
+              XstoreButton(
+                label: context.l10n.resubmitSubmit,
+                isLoading: _submitting,
+                onPressed: _submit,
               ),
               const Gap(AppSpacing.sm),
               SizedBox(

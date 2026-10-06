@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../catalog_categories/presentation/providers/catalog_category_dependencies.dart';
@@ -51,10 +52,7 @@ Future<int?> _showCatalogPickerSheet({
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
-    ),
+    // Background and 28px top radius come from the Orbit bottom-sheet theme.
     builder: (sheetContext) {
       return _CatalogPickerBody(
         title: title,
@@ -97,7 +95,10 @@ class _CatalogPickerBody extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: AppTypography.headlineSmall.copyWith(
+                        fontSize: 20,
+                        color: context.textPrimary,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -139,17 +140,19 @@ class _CatalogPickerBody extends ConsumerWidget {
                       final sel = c.id == selectedId;
                       return ListTile(
                         leading: showLeadingIcon
-                            ? const Icon(
-                                LucideIcons.tag,
-                                color: AppColors.primary,
-                              )
+                            ? Icon(LucideIcons.tag, color: context.linkColor)
                             : null,
-                        title: Text(c.name.resolve(isArabic)),
+                        title: Text(
+                          c.name.resolve(isArabic),
+                          style: sel
+                              ? TextStyle(
+                                  color: context.linkColor,
+                                  fontWeight: FontWeight.w700,
+                                )
+                              : null,
+                        ),
                         trailing: sel
-                            ? const Icon(
-                                LucideIcons.check,
-                                color: AppColors.primary,
-                              )
+                            ? Icon(LucideIcons.check, color: context.linkColor)
                             : null,
                         onTap: () => Navigator.pop(context, c.id),
                       );
@@ -187,9 +190,9 @@ class _PickerError extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.error,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.error),
             ),
             const SizedBox(height: AppSpacing.md),
             TextButton(onPressed: onRetry, child: Text(retryLabel)),
