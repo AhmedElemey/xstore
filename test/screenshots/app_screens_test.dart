@@ -34,6 +34,9 @@ import 'package:xstore/features/explore/data/datasources/explore_remote_datasour
 import 'package:xstore/features/explore/data/models/search_result_model.dart';
 import 'package:xstore/features/explore/presentation/explore_dependencies.dart';
 import 'package:xstore/core/network/paginated_result.dart';
+import 'package:xstore/core/mock/mock_listings.dart';
+import 'package:xstore/features/listing/data/datasources/listing_remote_datasource.dart';
+import 'package:xstore/features/listing/presentation/providers/listing_dependencies.dart';
 import 'package:xstore/features/notifications/data/datasources/notifications_remote_datasource.dart';
 import 'package:xstore/features/notifications/domain/entities/notification_entity.dart';
 import 'package:xstore/features/notifications/presentation/providers/notifications_dependencies.dart';
@@ -94,6 +97,21 @@ final _screens = <(String, UserRole, String)>[
   ('verification', UserRole.consumer, AppRoutes.profileVerification),
   ('addresses', UserRole.consumer, AppRoutes.addresses),
   ('vendor_orders', UserRole.vendor, AppRoutes.vendorOrders),
+  (
+    'vendor_order_detail',
+    UserRole.vendor,
+    '${AppRoutes.vendorOrders}/XS-2024-V001',
+  ),
+  ('my_listings', UserRole.vendor, AppRoutes.listingMy),
+  ('add_listing', UserRole.vendor, AppRoutes.listingAdd),
+  ('vendor_wallet', UserRole.vendor, AppRoutes.vendorWallet),
+  ('commission_payment', UserRole.vendor, AppRoutes.commissionPayment),
+  (
+    'commission_receipt',
+    UserRole.vendor,
+    '${AppRoutes.commissionPayment}/InstaPay',
+  ),
+  ('seller_store', UserRole.consumer, '${AppRoutes.sellerProfile}/vendor_001'),
   ('courier_deliveries', UserRole.courier, AppRoutes.deliveries),
 ];
 
@@ -241,6 +259,17 @@ class _SentOtpRepository implements AuthRepository {
   }
 }
 
+/// My Listings always calls the live API; serve mock listings instead.
+class _SampleMyListings implements ListingRemoteDataSource {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #fetchMyListings) {
+      return Future.value(mockListingModels.take(6).toList());
+    }
+    return super.noSuchMethod(invocation);
+  }
+}
+
 Future<void> _loadFonts() async {
   final manifest =
       json.decode(await rootBundle.loadString('FontManifest.json'))
@@ -331,6 +360,9 @@ void main() {
                 ),
                 sendEmailOtpUseCaseProvider.overrideWithValue(
                   SendEmailOtpUseCase(_SentOtpRepository()),
+                ),
+                listingRemoteDataSourceProvider.overrideWithValue(
+                  _SampleMyListings(),
                 ),
                 wishlistRemoteDataSourceProvider.overrideWithValue(
                   _SampleWishlist(),
