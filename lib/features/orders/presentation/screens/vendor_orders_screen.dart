@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../domain/entities/order_entity.dart';
@@ -18,6 +19,7 @@ import '../widgets/vendor_order_card.dart';
 import '../widgets/vendor_order_filter_tabs.dart';
 import '../widgets/vendor_order_sort_row.dart';
 import '../widgets/vendor_order_stats_banner.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/vendor_orders_skeleton.dart';
@@ -29,6 +31,9 @@ class VendorOrdersScreen extends ConsumerStatefulWidget {
 }
 
 class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
+  // Clears the floating dock on this shell tab.
+  static const double _dockClearance = 124;
+
   Future<DeliveryMethod?> _pickDeliveryMethod() =>
       showModalBottomSheet<DeliveryMethod>(
         context: context,
@@ -119,288 +124,425 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
     return RouteReentryRefresh(
       isTarget: (location) => location == AppRoutes.vendorOrders,
       onReentry: (ref) => ref.read(vendorOrdersProvider.notifier).fetchOrders(),
+      // Own Scaffold: the confirm/reject snackbars need one beneath them.
       child: Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.surfaceColor,
-        elevation: 0,
-        title: _searching
-            ? TextField(
-                controller: _search,
-                autofocus: true,
-                onChanged: ref.read(vendorOrdersProvider.notifier).updateSearch,
-                decoration: InputDecoration(
-                  hintText: context.l10n.vendorSearchHint,
-                  border: InputBorder.none,
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      _search.clear();
-                      ref.read(vendorOrdersProvider.notifier).updateSearch('');
-                    },
-                  ),
-                ),
-              )
-            : Row(
-                children: [
-                  Text(context.l10n.ordersIncomingTitle),
-                  if (pendingCount > 0) ...[
-                    const SizedBox(width: AppSpacing.xs),
-                    PulsingAnimationBuilder(
-                      duration: const Duration(milliseconds: 1000),
-                      builder: (_, animation, child) => Transform.scale(
-                        scale: 1 + 0.16 * math.sin(animation.value * math.pi),
-                        child: child,
+        backgroundColor: context.backgroundColor,
+        body: OrbitBackground(
+          child: Column(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        AppSpacing.xl,
+                        AppSpacing.lg,
+                        AppSpacing.xl,
+                        AppSpacing.lg,
                       ),
-                      child: const Icon(
-                        Icons.circle,
-                        size: 10,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-        actions: [
-          IconButton(
-            icon: Icon(_searching ? Icons.arrow_back : Icons.search),
-            onPressed: () {
-              setState(() => _searching = !_searching);
-              if (!_searching) {
-                _search.clear();
-                ref.read(vendorOrdersProvider.notifier).updateSearch('');
-              }
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (v) => context.showSnack(v),
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: context.l10n.vendorExportOrders,
-                child: Text(context.l10n.vendorExportOrders),
-              ),
-              PopupMenuItem(
-                value: context.l10n.vendorOrderSettings,
-                child: Text(context.l10n.vendorOrderSettings),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: AppSpacing.md),
-          VendorOrderStatsBanner(
-            pendingCount: pendingCount,
-            activeCount: activeCount,
-            totalCount: totalCount,
-            totalRevenue: totalRevenue,
-            onConfirmAllPending: () async {
-              final ok = await showDialog<bool>(
-                context: context,
-                builder: (dialogContext) => AlertDialog(
-                  title: Text(context.l10n.vendorConfirmAllPendingTitle),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext, false),
-                      child: Text(context.l10n.cancel),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(dialogContext, true),
-                      child: Text(context.l10n.ordersConfirm),
-                    ),
-                  ],
-                ),
-              );
-              if (ok != true) return;
-              final method = await _pickDeliveryMethod();
-              if (method == null || !context.mounted) return;
-              final count = await ref
-                  .read(vendorOrdersProvider.notifier)
-                  .confirmAllPending(method);
-              if (!context.mounted) return;
-              context.showSnack(context.l10n.vendorOrdersConfirmed(count));
-            },
-          ),
-          const SizedBox(height: AppSpacing.md),
-          VendorOrderFilterTabs(
-            selected: selectedFilter,
-            totalCount: totalCount,
-            pendingCount: pendingCount,
-            confirmedCount: statusCounts.confirmed,
-            processingCount: statusCounts.processing,
-            shippedCount: statusCounts.shipped,
-            deliveredCount: statusCounts.delivered,
-            cancelledCount: statusCounts.cancelled,
-            onTap: ref.read(vendorOrdersProvider.notifier).applyFilter,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          VendorOrderSortRow(
-            sort: sortOption,
-            count: filteredOrders.length,
-            onChanged: ref.read(vendorOrdersProvider.notifier).applySort,
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: ref.read(vendorOrdersProvider.notifier).refreshOrders,
-              child: isLoading && !hasOrders
-                  ? const VendorOrdersSkeleton()
-                  : filteredOrders.isEmpty
-                  ? ListView(
-                      cacheExtent: 300,
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.6,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final content = selectedFilter == null
-                                  ? Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        OrderEmptyState(
-                                          title: context
-                                              .l10n
-                                              .vendorOrdersEmptyTitle,
-                                          subtitle: context
-                                              .l10n
-                                              .vendorOrdersEmptySubtitle,
-                                        ),
-                                        const SizedBox(height: AppSpacing.md),
-                                        OutlinedButton(
-                                          onPressed: () =>
-                                              context.go(AppRoutes.listingMy),
-                                          child: Text(
-                                            context.l10n.menuMyListings,
-                                          ),
-                                        ),
-                                      ],
+                      child: SizedBox(
+                        height: 44,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _searching
+                                  ? _SearchField(
+                                      controller: _search,
+                                      onChanged: ref
+                                          .read(vendorOrdersProvider.notifier)
+                                          .updateSearch,
                                     )
-                                  : OrderEmptyState(
-                                      title: context.l10n.vendorNoStatusOrders,
-                                      subtitle: context
-                                          .l10n
-                                          .vendorNoStatusOrdersSubtitle,
-                                      filterActive: true,
-                                    );
-                              // A fixed-fraction height can be shorter than
-                              // this content's natural height on a short
-                              // viewport or with larger accessibility text
-                              // scaling — SingleChildScrollView plus a
-                              // minHeight-constrained Center keeps that from
-                              // turning into a RenderFlex overflow while
-                              // still centering the content when it fits.
-                              return SingleChildScrollView(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: constraints.maxHeight,
-                                  ),
-                                  child: Center(child: content),
+                                  : _Title(showPendingDot: pendingCount > 0),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            _GlassIconButton(
+                              icon: _searching
+                                  ? Icons.arrow_back
+                                  : Icons.search_rounded,
+                              onPressed: () {
+                                setState(() => _searching = !_searching);
+                                if (!_searching) {
+                                  _search.clear();
+                                  ref
+                                      .read(vendorOrdersProvider.notifier)
+                                      .updateSearch('');
+                                }
+                              },
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            PopupMenuButton<String>(
+                              onSelected: (v) => context.showSnack(v),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: context.l10n.vendorExportOrders,
+                                  child: Text(context.l10n.vendorExportOrders),
                                 ),
-                              );
-                            },
-                          ),
+                                PopupMenuItem(
+                                  value: context.l10n.vendorOrderSettings,
+                                  child: Text(context.l10n.vendorOrderSettings),
+                                ),
+                              ],
+                              child: const _GlassIconButton(
+                                icon: Icons.more_vert,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    )
-                  : ListView.separated(
-                      controller: _scroll,
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      cacheExtent: 700,
-                      itemCount:
-                          filteredOrders.length + (isLoadingMore ? 1 : 0),
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: AppSpacing.md),
-                      itemBuilder: (context, i) {
-                        if (i >= filteredOrders.length) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.lg),
-                              child: CircularProgressIndicator.adaptive(),
+                      ),
+                    ),
+                    VendorOrderStatsBanner(
+                      pendingCount: pendingCount,
+                      activeCount: activeCount,
+                      totalCount: totalCount,
+                      totalRevenue: totalRevenue,
+                      onConfirmAllPending: () async {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            title: Text(
+                              context.l10n.vendorConfirmAllPendingTitle,
                             ),
-                          );
-                        }
-                        final order = filteredOrders[i];
-                        return RepaintBoundary(
-                          child: VendorOrderCard(
-                            key: ValueKey(order.id),
-                            order: order,
-                            onConfirm: () async {
-                              final method = await _pickDeliveryMethod();
-                              if (method == null || !context.mounted) return;
-                              final ok = await ref
-                                  .read(vendorOrdersProvider.notifier)
-                                  .confirmOrder(order.id, method);
-                              if (!context.mounted) return;
-                              if (ok) {
-                                context.showSnack(
-                                  context.l10n.vendorOrderConfirmedSnack,
-                                );
-                              }
-                            },
-                            onReject: () => showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (_) => RejectOrderSheet(
-                                onConfirm: (reason) async {
-                                  final ok = await ref
-                                      .read(vendorOrdersProvider.notifier)
-                                      .rejectOrder(order.id, reason);
-                                  if (!context.mounted) return;
-                                  if (ok) {
-                                    context.showSnack(
-                                      context.l10n.vendorOrderRejectedSnack,
-                                    );
-                                  }
-                                },
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(dialogContext, false),
+                                child: Text(context.l10n.cancel),
                               ),
-                            ),
-                            onProcessing: () async {
-                              final ok = await ref
-                                  .read(vendorOrdersProvider.notifier)
-                                  .markProcessing(order.id);
-                              if (!context.mounted) return;
-                              if (ok) {
-                                context.showSnack(
-                                  context.l10n.vendorOrderProcessingSnack,
-                                );
-                              }
-                            },
-                            onShipped: () => showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (_) => ShippingInfoSheet(
-                                onConfirm: (info) async {
-                                  final ok = await ref
-                                      .read(vendorOrdersProvider.notifier)
-                                      .markShipped(order.id, info);
-                                  if (!context.mounted) return;
-                                  if (ok) {
-                                    context.showSnack(
-                                      context.l10n.vendorOrderShippedSnack,
-                                    );
-                                  }
-                                },
+                              FilledButton(
+                                onPressed: () =>
+                                    Navigator.pop(dialogContext, true),
+                                child: Text(context.l10n.ordersConfirm),
                               ),
-                            ),
-                            onDelivered: () async {
-                              final ok = await ref
-                                  .read(vendorOrdersProvider.notifier)
-                                  .markDelivered(order.id);
-                              if (!context.mounted) return;
-                              if (ok) {
-                                context.showSnack(
-                                  context.l10n.vendorOrderDeliveredSnack,
-                                );
-                              }
-                            },
+                            ],
                           ),
+                        );
+                        if (ok != true) return;
+                        final method = await _pickDeliveryMethod();
+                        if (method == null || !context.mounted) return;
+                        final count = await ref
+                            .read(vendorOrdersProvider.notifier)
+                            .confirmAllPending(method);
+                        if (!context.mounted) return;
+                        context.showSnack(
+                          context.l10n.vendorOrdersConfirmed(count),
                         );
                       },
                     ),
+                    const SizedBox(height: AppSpacing.md),
+                    VendorOrderFilterTabs(
+                      selected: selectedFilter,
+                      totalCount: totalCount,
+                      pendingCount: pendingCount,
+                      confirmedCount: statusCounts.confirmed,
+                      processingCount: statusCounts.processing,
+                      shippedCount: statusCounts.shipped,
+                      deliveredCount: statusCounts.delivered,
+                      cancelledCount: statusCounts.cancelled,
+                      onTap: ref
+                          .read(vendorOrdersProvider.notifier)
+                          .applyFilter,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    VendorOrderSortRow(
+                      sort: sortOption,
+                      count: filteredOrders.length,
+                      onChanged: ref
+                          .read(vendorOrdersProvider.notifier)
+                          .applySort,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: ref
+                      .read(vendorOrdersProvider.notifier)
+                      .refreshOrders,
+                  child: isLoading && !hasOrders
+                      ? const VendorOrdersSkeleton()
+                      : filteredOrders.isEmpty
+                      ? ListView(
+                          cacheExtent: 300,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(
+                            bottom: _dockClearance,
+                          ),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.sizeOf(context).height * 0.6,
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final content = selectedFilter == null
+                                      ? Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            OrderEmptyState(
+                                              title: context
+                                                  .l10n
+                                                  .vendorOrdersEmptyTitle,
+                                              subtitle: context
+                                                  .l10n
+                                                  .vendorOrdersEmptySubtitle,
+                                            ),
+                                            const SizedBox(
+                                              height: AppSpacing.md,
+                                            ),
+                                            OutlinedButton(
+                                              onPressed: () => context.go(
+                                                AppRoutes.listingMy,
+                                              ),
+                                              child: Text(
+                                                context.l10n.menuMyListings,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : OrderEmptyState(
+                                          title:
+                                              context.l10n.vendorNoStatusOrders,
+                                          subtitle: context
+                                              .l10n
+                                              .vendorNoStatusOrdersSubtitle,
+                                          filterActive: true,
+                                        );
+                                  // A fixed-fraction height can be shorter than
+                                  // this content's natural height on a short
+                                  // viewport or with larger accessibility text
+                                  // scaling — SingleChildScrollView plus a
+                                  // minHeight-constrained Center keeps that from
+                                  // turning into a RenderFlex overflow while
+                                  // still centering the content when it fits.
+                                  return SingleChildScrollView(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight: constraints.maxHeight,
+                                      ),
+                                      child: Center(child: content),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          controller: _scroll,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                            AppSpacing.xl,
+                            0,
+                            AppSpacing.xl,
+                            _dockClearance,
+                          ),
+                          cacheExtent: 700,
+                          itemCount:
+                              filteredOrders.length + (isLoadingMore ? 1 : 0),
+                          itemBuilder: (context, i) {
+                            if (i >= filteredOrders.length) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(AppSpacing.lg),
+                                  child: CircularProgressIndicator.adaptive(),
+                                ),
+                              );
+                            }
+                            final order = filteredOrders[i];
+                            return RepaintBoundary(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.lg,
+                                ),
+                                child: VendorOrderCard(
+                                  key: ValueKey(order.id),
+                                  order: order,
+                                  onConfirm: () async {
+                                    final method = await _pickDeliveryMethod();
+                                    if (method == null || !context.mounted) {
+                                      return;
+                                    }
+                                    final ok = await ref
+                                        .read(vendorOrdersProvider.notifier)
+                                        .confirmOrder(order.id, method);
+                                    if (!context.mounted) return;
+                                    if (ok) {
+                                      context.showSnack(
+                                        context.l10n.vendorOrderConfirmedSnack,
+                                      );
+                                    }
+                                  },
+                                  onReject: () => showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (_) => RejectOrderSheet(
+                                      onConfirm: (reason) async {
+                                        final ok = await ref
+                                            .read(vendorOrdersProvider.notifier)
+                                            .rejectOrder(order.id, reason);
+                                        if (!context.mounted) return;
+                                        if (ok) {
+                                          context.showSnack(
+                                            context
+                                                .l10n
+                                                .vendorOrderRejectedSnack,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  onProcessing: () async {
+                                    final ok = await ref
+                                        .read(vendorOrdersProvider.notifier)
+                                        .markProcessing(order.id);
+                                    if (!context.mounted) return;
+                                    if (ok) {
+                                      context.showSnack(
+                                        context.l10n.vendorOrderProcessingSnack,
+                                      );
+                                    }
+                                  },
+                                  onShipped: () => showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (_) => ShippingInfoSheet(
+                                      onConfirm: (info) async {
+                                        final ok = await ref
+                                            .read(vendorOrdersProvider.notifier)
+                                            .markShipped(order.id, info);
+                                        if (!context.mounted) return;
+                                        if (ok) {
+                                          context.showSnack(
+                                            context
+                                                .l10n
+                                                .vendorOrderShippedSnack,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  onDelivered: () async {
+                                    final ok = await ref
+                                        .read(vendorOrdersProvider.notifier)
+                                        .markDelivered(order.id);
+                                    if (!context.mounted) return;
+                                    if (ok) {
+                                      context.showSnack(
+                                        context.l10n.vendorOrderDeliveredSnack,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Title extends StatelessWidget {
+  const _Title({required this.showPendingDot});
+
+  final bool showPendingDot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(
+          child: Text(
+            context.l10n.ordersIncomingTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.headlineSmall.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
             ),
           ),
+        ),
+        if (showPendingDot) ...[
+          const SizedBox(width: AppSpacing.sm),
+          PulsingAnimationBuilder(
+            duration: const Duration(milliseconds: 1000),
+            builder: (_, animation, child) => Transform.scale(
+              scale: 1 + 0.16 * math.sin(animation.value * math.pi),
+              child: child,
+            ),
+            child: const Icon(Icons.circle, size: 10, color: AppColors.warning),
+          ),
         ],
+      ],
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.controller, required this.onChanged});
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
+      child: TextField(
+        controller: controller,
+        autofocus: true,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          hintText: context.l10n.vendorSearchHint,
+          filled: false,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsetsDirectional.only(
+            start: AppSpacing.lg,
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              controller.clear();
+              onChanged('');
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 44px frosted circle. With no [onPressed] it is a passive child for a
+/// parent that handles the tap (the popup menu).
+class _GlassIconButton extends StatelessWidget {
+  const _GlassIconButton({required this.icon, this.onPressed});
+
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.glassColor,
+      shape: CircleBorder(side: BorderSide(color: context.borderColor)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(icon, size: 22, color: context.textPrimary),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../providers/vendor_orders_provider.dart';
 
@@ -30,12 +31,16 @@ class VendorOrderSortRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final needsAction = sort == VendorOrderSortOption.needsAction;
-    final accent = needsAction ? AppColors.warning : context.textPrimary;
+    final accent = needsAction
+        ? (context.isDark
+              ? AppColors.warning
+              : Color.lerp(AppColors.warning, AppColors.black, 0.35)!)
+        : context.textPrimary;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
         0,
-        AppSpacing.lg,
+        AppSpacing.xl,
         AppSpacing.sm,
       ),
       child: Row(
@@ -48,10 +53,8 @@ class VendorOrderSortRow extends StatelessWidget {
             onSelected: onChanged,
             itemBuilder: (context) => VendorOrderSortOption.values
                 .map(
-                  (e) => PopupMenuItem(
-                    value: e,
-                    child: Text(label(context, e)),
-                  ),
+                  (e) =>
+                      PopupMenuItem(value: e, child: Text(label(context, e))),
                 )
                 .toList(),
             child: Row(
@@ -59,15 +62,15 @@ class VendorOrderSortRow extends StatelessWidget {
               children: [
                 Text(
                   context.l10n.sortBy,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: context.textSecondary,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: context.labelColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   label(context, sort),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  style: AppTypography.labelMedium.copyWith(
                     color: accent,
                     fontWeight: FontWeight.w700,
                   ),
@@ -83,9 +86,7 @@ class VendorOrderSortRow extends StatelessWidget {
           const Spacer(),
           Text(
             context.l10n.ordersCountLine(count),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: context.textSecondary,
-            ),
+            style: AppTypography.bodySmall.copyWith(color: context.labelColor),
           ),
         ],
       ),

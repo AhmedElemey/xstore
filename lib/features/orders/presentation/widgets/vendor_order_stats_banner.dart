@@ -5,6 +5,8 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 
+/// Orbit glass summary: mono counts (revenue in amber) over a Confirm-all
+/// action that keeps the success treatment.
 class VendorOrderStatsBanner extends StatelessWidget {
   const VendorOrderStatsBanner({
     super.key,
@@ -23,15 +25,14 @@ class VendorOrderStatsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = Color.lerp(context.surfaceColor, AppColors.primary, 0.9)!;
-    const onFill = Colors.white;
-    final muted = Colors.white.withValues(alpha: 0.75);
+    final success = context.isDark ? AppColors.successLight : AppColors.success;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      margin: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(AppSpacing.xl),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         children: [
@@ -41,46 +42,43 @@ class VendorOrderStatsBanner extends StatelessWidget {
                 context,
                 '$pendingCount',
                 context.l10n.vendorStatPendingOrders,
-                valueColor: AppColors.warning,
-                labelColor: AppColors.warning,
+                valueColor: context.isDark
+                    ? AppColors.warning
+                    : Color.lerp(AppColors.warning, AppColors.black, 0.35),
               ),
-              _divider(muted),
+              _divider(context),
               _item(
                 context,
                 '$activeCount',
                 context.l10n.vendorStatActiveOrders,
-                valueColor: onFill,
-                labelColor: muted,
               ),
-              _divider(muted),
-              _item(
-                context,
-                '$totalCount',
-                context.l10n.vendorStatTotalOrders,
-                valueColor: onFill,
-                labelColor: muted,
-              ),
-              _divider(muted),
+              _divider(context),
+              _item(context, '$totalCount', context.l10n.vendorStatTotalOrders),
+              _divider(context),
               _item(
                 context,
                 context.formatCurrency(totalRevenue),
                 context.l10n.vendorStatRevenue,
-                valueColor: onFill,
-                labelColor: muted,
+                valueColor: context.amberColor,
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Divider(color: muted.withValues(alpha: 0.35), height: 1),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              _chip(
-                context,
-                label: context.l10n.vendorConfirmAllPending,
-                onTap: onConfirmAllPending,
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: onConfirmAllPending,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: success,
+                side: BorderSide(color: success.withValues(alpha: 0.6)),
               ),
-            ],
+              child: Text(
+                context.l10n.vendorConfirmAllPending,
+                style: AppTypography.bodySmall.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -91,66 +89,34 @@ class VendorOrderStatsBanner extends StatelessWidget {
     BuildContext context,
     String value,
     String label, {
-    String? suffix,
     Color? valueColor,
-    Color? labelColor,
   }) {
-    final valueFg = valueColor ?? context.textPrimary;
-    final labelFg = labelColor ?? context.textSecondary;
     return Expanded(
       child: Column(
         children: [
-          RichText(
-            text: TextSpan(
-              text: value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: valueFg,
-                fontWeight: FontWeight.w800,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: AppTypography.mono.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? context.textPrimary,
               ),
-              children: [
-                if (suffix != null)
-                  TextSpan(
-                    text: ' $suffix',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: valueFg.withValues(alpha: 0.9),
-                    ),
-                  ),
-              ],
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: labelFg),
+            style: AppTypography.labelSmall.copyWith(color: context.labelColor),
           ),
         ],
       ),
     );
   }
 
-  Widget _divider(Color color) => Container(
-    width: 1,
-    height: AppSpacing.x3l,
-    color: color.withValues(alpha: 0.35),
-  );
-
-  Widget _chip(
-    BuildContext context, {
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white),
-        foregroundColor: Colors.white,
-      ),
-      child: Text(
-        label,
-        style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
-      ),
-    );
-  }
+  Widget _divider(BuildContext context) =>
+      Container(width: 1, height: AppSpacing.x3l, color: context.borderColor);
 }
