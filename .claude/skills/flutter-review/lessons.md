@@ -1087,7 +1087,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Where it applies:** `wishlist_item_card.dart`, any card with an overlay badge.
 
 ### 2026-10-06 — Orbit Profile tab: glass groups, orb avatar, mono stats
-- **Rule:** The Profile tab is `OrbitBackground` + a transparent in-body header (`ProfileSliverAppBar` is a plain `SliverSafeArea` title + bell, not a collapsing app bar), then glass cards (`glassColor`, radius 22, `borderColor`), `fieldLabel` uppercase section labels, a brand-gradient avatar orb (photo when present) and a 124px dock spacer. Stats are mono (money amber); the mono face has no `★`, so draw it in the body font. Keep the shown fields as they are: mock `savedAmountDzd` is a hardcoded 23000 and live is always 0, so "Total Saved" is not real data. Mock `ProfileModel` never sets `isEmailVerified`, so the email banner always shows in mock.
+- **Rule:** The Profile tab is `OrbitBackground` + a transparent in-body header (`ProfileSliverAppBar` is a plain `SliverSafeArea` title + bell, not a collapsing app bar), then glass cards (`glassColor`, radius 22, `borderColor`), `fieldLabel` uppercase section labels, a brand-gradient avatar orb (photo when present) and a 124px dock spacer. Stats are mono (money amber); the mono face has no `★`, so draw it in the body font. Only stats with a real source render: Orders = the loaded `ordersNotifierProvider` list (only once `!hasMore`, no error), Wishlist = wishlist provider, Total Saved = `savedAmountDzd` when non-null (live never sends it). Mock `getProfile` derives verification flags from the user's `isVerified`.
 - **Where it applies:** `profile_screen.dart` and its widgets, `profile_stats_row.dart`, `profile_remote_datasource.dart` mock branch.
 
 ### 2026-10-06 — Orbit forms: AuthTextField moves the label out of the field
@@ -1117,3 +1117,15 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Never fall back to DioException.message in error mapping
 - **Rule:** `DioException.message` is developer text ("...validateStatus..."); mapping fallbacks must use a localized generic message, and `X.toString()` stored in state reaches the UI verbatim. Fix at `mapDioException`, not per screen. Also hide rating rows when `reviewCount == 0`, and use ICU plurals (Arabic needs `=2`/`few`) for counts in l10n.
 - **Where it applies:** `lib/core/network/dio_error_mapper.dart`, repositories/providers storing failure strings, l10n count strings, explore cards.
+
+### 2026-10-06 — A keepAlive provider's auth listener needs fireImmediately
+- **Rule:** `ref.listen(authProvider, ...)` only fires on changes after the provider is built. A provider first read lazily (cart, built by the dock after the splash) misses an already-resolved session, so use `fireImmediately: true` (keep the `isLoading` guard so it doesn't double-fetch). Test by resolving auth first, then reading the provider.
+- **Where it applies:** `cart_provider.dart` and any keepAlive notifier that loads data from an auth listener.
+
+### 2026-10-06 — Hide absent stats instead of rendering placeholders
+- **Rule:** When the backend omits a stat, make the entity field nullable (no `@Default(0)`) and drop the cell, rather than showing 0 or "—"; build the cell list with collection-`if` and add dividers by index. Don't keep mock-only fields that no real source feeds.
+- **Where it applies:** `profile_stats_row.dart`, `vendor_store_screen.dart` stats row, `ProfileEntity`/`ProfileModel`.
+
+### 2026-10-06 — Screens that edit loaded data show the error state when the load failed
+- **Rule:** An edit form bound to a loaded entity must render `ErrorStateWidget` + retry (`refreshProfileData(force: true)`) when the entity is null, never an empty editable form that could save blanks. Reuse `Validators.personFullName` for names.
+- **Where it applies:** `edit_profile_screen.dart`.

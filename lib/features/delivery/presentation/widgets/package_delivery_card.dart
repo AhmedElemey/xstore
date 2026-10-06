@@ -48,7 +48,11 @@ class PackageDeliveryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      request.id,
+                      // No human-readable package reference exists: use the
+                      // linked order when there is one, never the raw id.
+                      request.orderId != null
+                          ? context.l10n.orderPlacedNumber(request.orderId!)
+                          : context.l10n.courierPackageTitle,
                       style: AppTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.w800,
                       ),

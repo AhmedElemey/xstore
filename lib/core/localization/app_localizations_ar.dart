@@ -2807,4 +2807,26 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passwordRuleSpecial => 'رمز خاص واحد على الأقل (!@#\$...)';
+
+  @override
+  String get listingsEmptyNone => 'لسه مفيش إعلانات';
+
+  @override
+  String listingsEmptyFiltered(String status) {
+    return 'مفيش إعلانات $status';
+  }
+
+  @override
+  String get listingsEmptySubtitle => 'ابدأ البيع بإضافة أول إعلان ليك';
+
+  @override
+  String get listingsEmptyCta => 'أضف أول إعلان';
+
+  @override
+  String listingPostedOn(String date) {
+    return 'اتنشر $date';
+  }
+
+  @override
+  String get courierPackageTitle => 'طرد';
 }

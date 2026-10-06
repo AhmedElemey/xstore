@@ -17,9 +17,10 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$ProfileEntity {
   UserEntity get user => throw _privateConstructorUsedError;
-  int get ordersCount => throw _privateConstructorUsedError;
   int get wishlistCount => throw _privateConstructorUsedError;
-  int get savedAmountDzd => throw _privateConstructorUsedError;
+
+  /// Null when the backend doesn't provide it (live get-profile never does).
+  int? get savedAmountDzd => throw _privateConstructorUsedError;
   int get storeViewCount => throw _privateConstructorUsedError;
   int get storeSaveCount => throw _privateConstructorUsedError;
   int get storeActiveListings => throw _privateConstructorUsedError;
@@ -28,6 +29,8 @@ mixin _$ProfileEntity {
   bool get isPhoneVerificationRequired => throw _privateConstructorUsedError;
   bool get isEmailVerified => throw _privateConstructorUsedError;
   bool get isPhoneVerified => throw _privateConstructorUsedError;
+
+  /// Social-only accounts send `hasPassword: "No"` and skip current-password.
   bool get hasPassword => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -43,9 +46,8 @@ abstract class $ProfileEntityCopyWith<$Res> {
   @useResult
   $Res call(
       {UserEntity user,
-      int ordersCount,
       int wishlistCount,
-      int savedAmountDzd,
+      int? savedAmountDzd,
       int storeViewCount,
       int storeSaveCount,
       int storeActiveListings,
@@ -73,9 +75,8 @@ class _$ProfileEntityCopyWithImpl<$Res, $Val extends ProfileEntity>
   @override
   $Res call({
     Object? user = null,
-    Object? ordersCount = null,
     Object? wishlistCount = null,
-    Object? savedAmountDzd = null,
+    Object? savedAmountDzd = freezed,
     Object? storeViewCount = null,
     Object? storeSaveCount = null,
     Object? storeActiveListings = null,
@@ -91,18 +92,14 @@ class _$ProfileEntityCopyWithImpl<$Res, $Val extends ProfileEntity>
           ? _value.user
           : user // ignore: cast_nullable_to_non_nullable
               as UserEntity,
-      ordersCount: null == ordersCount
-          ? _value.ordersCount
-          : ordersCount // ignore: cast_nullable_to_non_nullable
-              as int,
       wishlistCount: null == wishlistCount
           ? _value.wishlistCount
           : wishlistCount // ignore: cast_nullable_to_non_nullable
               as int,
-      savedAmountDzd: null == savedAmountDzd
+      savedAmountDzd: freezed == savedAmountDzd
           ? _value.savedAmountDzd
           : savedAmountDzd // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       storeViewCount: null == storeViewCount
           ? _value.storeViewCount
           : storeViewCount // ignore: cast_nullable_to_non_nullable
@@ -161,9 +158,8 @@ abstract class _$$ProfileEntityImplCopyWith<$Res>
   @useResult
   $Res call(
       {UserEntity user,
-      int ordersCount,
       int wishlistCount,
-      int savedAmountDzd,
+      int? savedAmountDzd,
       int storeViewCount,
       int storeSaveCount,
       int storeActiveListings,
@@ -190,9 +186,8 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? user = null,
-    Object? ordersCount = null,
     Object? wishlistCount = null,
-    Object? savedAmountDzd = null,
+    Object? savedAmountDzd = freezed,
     Object? storeViewCount = null,
     Object? storeSaveCount = null,
     Object? storeActiveListings = null,
@@ -208,18 +203,14 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
           ? _value.user
           : user // ignore: cast_nullable_to_non_nullable
               as UserEntity,
-      ordersCount: null == ordersCount
-          ? _value.ordersCount
-          : ordersCount // ignore: cast_nullable_to_non_nullable
-              as int,
       wishlistCount: null == wishlistCount
           ? _value.wishlistCount
           : wishlistCount // ignore: cast_nullable_to_non_nullable
               as int,
-      savedAmountDzd: null == savedAmountDzd
+      savedAmountDzd: freezed == savedAmountDzd
           ? _value.savedAmountDzd
           : savedAmountDzd // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       storeViewCount: null == storeViewCount
           ? _value.storeViewCount
           : storeViewCount // ignore: cast_nullable_to_non_nullable
@@ -265,9 +256,8 @@ class __$$ProfileEntityImplCopyWithImpl<$Res>
 class _$ProfileEntityImpl implements _ProfileEntity {
   const _$ProfileEntityImpl(
       {required this.user,
-      this.ordersCount = 0,
       this.wishlistCount = 0,
-      this.savedAmountDzd = 0,
+      this.savedAmountDzd,
       this.storeViewCount = 0,
       this.storeSaveCount = 0,
       this.storeActiveListings = 0,
@@ -282,13 +272,11 @@ class _$ProfileEntityImpl implements _ProfileEntity {
   final UserEntity user;
   @override
   @JsonKey()
-  final int ordersCount;
-  @override
-  @JsonKey()
   final int wishlistCount;
+
+  /// Null when the backend doesn't provide it (live get-profile never does).
   @override
-  @JsonKey()
-  final int savedAmountDzd;
+  final int? savedAmountDzd;
   @override
   @JsonKey()
   final int storeViewCount;
@@ -313,13 +301,15 @@ class _$ProfileEntityImpl implements _ProfileEntity {
   @override
   @JsonKey()
   final bool isPhoneVerified;
+
+  /// Social-only accounts send `hasPassword: "No"` and skip current-password.
   @override
   @JsonKey()
   final bool hasPassword;
 
   @override
   String toString() {
-    return 'ProfileEntity(user: $user, ordersCount: $ordersCount, wishlistCount: $wishlistCount, savedAmountDzd: $savedAmountDzd, storeViewCount: $storeViewCount, storeSaveCount: $storeSaveCount, storeActiveListings: $storeActiveListings, responseRatePercent: $responseRatePercent, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired, isEmailVerified: $isEmailVerified, isPhoneVerified: $isPhoneVerified, hasPassword: $hasPassword)';
+    return 'ProfileEntity(user: $user, wishlistCount: $wishlistCount, savedAmountDzd: $savedAmountDzd, storeViewCount: $storeViewCount, storeSaveCount: $storeSaveCount, storeActiveListings: $storeActiveListings, responseRatePercent: $responseRatePercent, isEmailVerificationRequired: $isEmailVerificationRequired, isPhoneVerificationRequired: $isPhoneVerificationRequired, isEmailVerified: $isEmailVerified, isPhoneVerified: $isPhoneVerified, hasPassword: $hasPassword)';
   }
 
   @override
@@ -328,8 +318,6 @@ class _$ProfileEntityImpl implements _ProfileEntity {
         (other.runtimeType == runtimeType &&
             other is _$ProfileEntityImpl &&
             (identical(other.user, user) || other.user == user) &&
-            (identical(other.ordersCount, ordersCount) ||
-                other.ordersCount == ordersCount) &&
             (identical(other.wishlistCount, wishlistCount) ||
                 other.wishlistCount == wishlistCount) &&
             (identical(other.savedAmountDzd, savedAmountDzd) ||
@@ -362,7 +350,6 @@ class _$ProfileEntityImpl implements _ProfileEntity {
   int get hashCode => Object.hash(
       runtimeType,
       user,
-      ordersCount,
       wishlistCount,
       savedAmountDzd,
       storeViewCount,
@@ -385,9 +372,8 @@ class _$ProfileEntityImpl implements _ProfileEntity {
 abstract class _ProfileEntity implements ProfileEntity {
   const factory _ProfileEntity(
       {required final UserEntity user,
-      final int ordersCount,
       final int wishlistCount,
-      final int savedAmountDzd,
+      final int? savedAmountDzd,
       final int storeViewCount,
       final int storeSaveCount,
       final int storeActiveListings,
@@ -401,11 +387,11 @@ abstract class _ProfileEntity implements ProfileEntity {
   @override
   UserEntity get user;
   @override
-  int get ordersCount;
-  @override
   int get wishlistCount;
   @override
-  int get savedAmountDzd;
+
+  /// Null when the backend doesn't provide it (live get-profile never does).
+  int? get savedAmountDzd;
   @override
   int get storeViewCount;
   @override
@@ -423,6 +409,8 @@ abstract class _ProfileEntity implements ProfileEntity {
   @override
   bool get isPhoneVerified;
   @override
+
+  /// Social-only accounts send `hasPassword: "No"` and skip current-password.
   bool get hasPassword;
   @override
   @JsonKey(ignore: true)

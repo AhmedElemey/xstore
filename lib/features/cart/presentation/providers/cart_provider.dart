@@ -23,9 +23,8 @@ extension CartStateX on CartState {
 
   int get selectedCount => selectedItemIds.length;
 
-  Iterable<CartItemEntity> get selectedAvailableItems => items.where(
-        (e) => selectedItemIds.contains(e.id) && e.isAvailable,
-      );
+  Iterable<CartItemEntity> get selectedAvailableItems =>
+      items.where((e) => selectedItemIds.contains(e.id) && e.isAvailable);
 
   List<CartVendorGroup> get vendorGroups {
     final order = <String>[];
@@ -40,10 +39,7 @@ extension CartStateX on CartState {
     return order.map((vid) {
       final list = byVendor[vid]!;
       final f = list.first;
-      final sub = list.fold<double>(
-        0,
-        (a, b) => a + b.price * b.quantity,
-      );
+      final sub = list.fold<double>(0, (a, b) => a + b.price * b.quantity);
       return CartVendorGroup(
         vendorId: f.vendorId,
         vendorName: f.vendorName,
@@ -85,7 +81,10 @@ class Cart extends _$Cart {
       } else if (!user.isVendor) {
         Future.microtask(() => fetchCart());
       }
-    });
+      // fireImmediately: this provider is first built lazily (the dock mounts
+      // after the splash), by which point auth has usually already resolved,
+      // so a plain listener would never see a change and never fetch.
+    }, fireImmediately: true);
     return const CartState();
   }
 
@@ -98,10 +97,7 @@ class Cart extends _$Cart {
     } else {
       sel = sel.intersection(e.items.map((x) => x.id).toSet());
     }
-    state = state.copyWith(
-      items: e.items,
-      selectedItemIds: sel,
-    );
+    state = state.copyWith(items: e.items, selectedItemIds: sel);
     _recomputeTotals();
   }
 
@@ -149,31 +145,30 @@ class Cart extends _$Cart {
     final prevIds = state.items.map((x) => x.id).toSet();
     final epoch = _epoch;
     state = state.copyWith(isUpdating: true, error: null);
-    final result = await ref.read(addToCartUseCaseProvider).call(
-          consumerId: id,
-          listingId: listingId,
-          quantity: quantity,
-        );
+    final result = await ref
+        .read(addToCartUseCaseProvider)
+        .call(consumerId: id, listingId: listingId, quantity: quantity);
     if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
         state = state.copyWith(isUpdating: false);
         _setFromEntity(e);
-        final newOnes =
-            e.items.map((x) => x.id).toSet().difference(prevIds);
+        final newOnes = e.items.map((x) => x.id).toSet().difference(prevIds);
         state = state.copyWith(
           selectedItemIds: {...state.selectedItemIds, ...newOnes},
         );
         _recomputeTotals();
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.addToCart,
-          properties: {
-            AnalyticsProps.itemId: listingId,
-            AnalyticsProps.quantity: quantity,
-            AnalyticsProps.cartValueEgp: state.total,
-          },
-        );
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.addToCart,
+              properties: {
+                AnalyticsProps.itemId: listingId,
+                AnalyticsProps.quantity: quantity,
+                AnalyticsProps.cartValueEgp: state.total,
+              },
+            );
       },
     );
   }
@@ -208,10 +203,9 @@ class Cart extends _$Cart {
     );
     _recomputeTotals();
     final epoch = _epoch;
-    final result = await ref.read(removeFromCartUseCaseProvider).call(
-          consumerId: id,
-          itemId: itemId,
-        );
+    final result = await ref
+        .read(removeFromCartUseCaseProvider)
+        .call(consumerId: id, itemId: itemId);
     if (_epoch != epoch) return;
     result.fold(
       (f) {
@@ -232,14 +226,16 @@ class Cart extends _$Cart {
           lastRemovedIndex: skipUndo ? null : idx,
         );
         _setFromEntity(e);
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.removeFromCart,
-          properties: {
-            AnalyticsProps.itemId: prev.listingId,
-            AnalyticsProps.quantity: prev.quantity,
-            AnalyticsProps.cartValueEgp: state.total,
-          },
-        );
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.removeFromCart,
+              properties: {
+                AnalyticsProps.itemId: prev.listingId,
+                AnalyticsProps.quantity: prev.quantity,
+                AnalyticsProps.cartValueEgp: state.total,
+              },
+            );
       },
     );
   }
@@ -250,10 +246,9 @@ class Cart extends _$Cart {
     if (line == null || id == null) return;
     final epoch = _epoch;
     state = state.copyWith(isUpdating: true);
-    final result = await ref.read(addOrUpdateCartItemUseCaseProvider).call(
-          consumerId: id,
-          item: line,
-        );
+    final result = await ref
+        .read(addOrUpdateCartItemUseCaseProvider)
+        .call(consumerId: id, item: line);
     if (_epoch != epoch) return;
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
@@ -283,11 +278,9 @@ class Cart extends _$Cart {
     state = state.copyWith(items: optimistic);
     _recomputeTotals();
     final epoch = _epoch;
-    final result = await ref.read(updateQuantityUseCaseProvider).call(
-          consumerId: id,
-          itemId: itemId,
-          quantity: quantity,
-        );
+    final result = await ref
+        .read(updateQuantityUseCaseProvider)
+        .call(consumerId: id, itemId: itemId, quantity: quantity);
     if (_epoch != epoch) return;
     result.fold(
       (f) {
@@ -315,10 +308,7 @@ class Cart extends _$Cart {
     result.fold(
       (f) => state = state.copyWith(isUpdating: false, error: f.toString()),
       (e) {
-        state = state.copyWith(
-          isUpdating: false,
-          selectedItemIds: {},
-        );
+        state = state.copyWith(isUpdating: false, selectedItemIds: {});
         _setFromEntity(e, resetSelection: true);
       },
     );
@@ -365,20 +355,22 @@ class Cart extends _$Cart {
           lastRemovedIndex: null,
         );
         Future.microtask(fetchCart);
-        ref.read(analyticsServiceProvider).track(
-          AnalyticsEvents.purchase,
-          properties: {
-            AnalyticsProps.orderId: order.id,
-            AnalyticsProps.valueEgp: params.total,
-            AnalyticsProps.currency: 'EGP',
-            // Spec value is `cod`, not the enum name `cashOnDelivery`.
-            AnalyticsProps.paymentType:
-                params.paymentMethod == PaymentMethod.cashOnDelivery
+        ref
+            .read(analyticsServiceProvider)
+            .track(
+              AnalyticsEvents.purchase,
+              properties: {
+                AnalyticsProps.orderId: order.id,
+                AnalyticsProps.valueEgp: params.total,
+                AnalyticsProps.currency: 'EGP',
+                // Spec value is `cod`, not the enum name `cashOnDelivery`.
+                AnalyticsProps.paymentType:
+                    params.paymentMethod == PaymentMethod.cashOnDelivery
                     ? 'cod'
                     : params.paymentMethod.name,
-            AnalyticsProps.itemCount: params.items.length,
-          },
-        );
+                AnalyticsProps.itemCount: params.items.length,
+              },
+            );
         return order;
       },
     );

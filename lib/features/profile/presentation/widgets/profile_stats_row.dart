@@ -77,33 +77,38 @@ class ProfileStatsRow extends StatelessWidget {
       );
     }
 
+    // Only stats with a real source are shown: orders comes from the loaded
+    // orders list, wishlist from the wishlist provider, and total saved only
+    // when the backend sends it (live get-profile does not).
+    final o = orders;
+    final saved = savedDzd;
+    final cells = [
+      if (o != null)
+        _StatCell(
+          value: '$o',
+          label: context.l10n.statOrders,
+          onTap: onOrdersTap,
+        ),
+      _StatCell(
+        value: '${wishlistCount ?? 0}',
+        label: context.l10n.statWishlist,
+        onTap: onWishlistTap,
+      ),
+      if (saved != null)
+        _StatCell(
+          value: context.formatCurrency(saved / 100.0),
+          label: context.l10n.statTotalSaved,
+          isMoney: true,
+          onTap: onSavedTap,
+        ),
+    ];
     return _Card(
       child: Row(
         children: [
-          Expanded(
-            child: _StatCell(
-              value: '${orders ?? 0}',
-              label: context.l10n.statOrders,
-              onTap: onOrdersTap,
-            ),
-          ),
-          const _VertDivider(),
-          Expanded(
-            child: _StatCell(
-              value: '${wishlistCount ?? 0}',
-              label: context.l10n.statWishlist,
-              onTap: onWishlistTap,
-            ),
-          ),
-          const _VertDivider(),
-          Expanded(
-            child: _StatCell(
-              value: context.formatCurrency((savedDzd ?? 0) / 100.0),
-              label: context.l10n.statTotalSaved,
-              isMoney: true,
-              onTap: onSavedTap,
-            ),
-          ),
+          for (var i = 0; i < cells.length; i++) ...[
+            if (i > 0) const _VertDivider(),
+            Expanded(child: cells[i]),
+          ],
         ],
       ),
     );

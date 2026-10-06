@@ -93,7 +93,9 @@ class ListingCardList extends StatelessWidget {
                   if (listing.postedAt != null) ...[
                     const Gap(AppSpacing.xs),
                     Text(
-                      'Posted ${Formatters.shortDate(listing.postedAt!)}',
+                      context.l10n.listingPostedOn(
+                        Formatters.shortDate(listing.postedAt!),
+                      ),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: context.textHint,
                       ),

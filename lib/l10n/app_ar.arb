@@ -1181,5 +1181,11 @@
   "passwordRuleMinLength": "٨ حروف على الأقل",
   "passwordRuleUppercase": "حرف كابيتال واحد على الأقل",
   "passwordRuleNumber": "رقم واحد على الأقل",
-  "passwordRuleSpecial": "رمز خاص واحد على الأقل (!@#$...)"
+  "passwordRuleSpecial": "رمز خاص واحد على الأقل (!@#$...)",
+  "listingsEmptyNone": "لسه مفيش إعلانات",
+  "listingsEmptyFiltered": "مفيش إعلانات {status}",
+  "listingsEmptySubtitle": "ابدأ البيع بإضافة أول إعلان ليك",
+  "listingsEmptyCta": "أضف أول إعلان",
+  "listingPostedOn": "اتنشر {date}",
+  "courierPackageTitle": "طرد"
 }

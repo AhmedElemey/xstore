@@ -1195,5 +1195,25 @@
   "passwordRuleMinLength": "At least 8 characters",
   "passwordRuleUppercase": "One uppercase letter",
   "passwordRuleNumber": "One number",
-  "passwordRuleSpecial": "One special character (!@#$...)"
+  "passwordRuleSpecial": "One special character (!@#$...)",
+  "listingsEmptyNone": "No listings yet",
+  "listingsEmptyFiltered": "No {status} listings",
+  "@listingsEmptyFiltered": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "listingsEmptySubtitle": "Start selling by adding your first listing",
+  "listingsEmptyCta": "Add Your First Listing",
+  "listingPostedOn": "Posted {date}",
+  "@listingPostedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "courierPackageTitle": "Package"
 }

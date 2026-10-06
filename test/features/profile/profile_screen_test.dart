@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
+import 'package:xstore/features/cart/presentation/providers/cart_dependencies.dart';
 import 'package:xstore/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
 import 'package:xstore/features/notifications/presentation/providers/notifications_state.dart';
 import 'package:xstore/features/profile/domain/entities/profile_entity.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
@@ -15,6 +17,7 @@ import 'package:xstore/features/wishlist/presentation/providers/wishlist_depende
 import 'package:xstore/shared/widgets/error_state_widget.dart';
 
 import '../../helpers/fake_async_auth_notifier.dart';
+import '../../helpers/stub_cart_repository.dart';
 import '../../helpers/stub_wishlist_remote_datasource.dart';
 
 const _sessionUser = UserEntity(
@@ -26,19 +29,20 @@ const _sessionUser = UserEntity(
 
 class _ErrorProfileNotifier extends ProfileNotifier {
   @override
-  ProfileState build() =>
-      const ProfileState(error: 'Network unavailable. Please check your connection and try again.');
+  ProfileState build() => const ProfileState(
+    error: 'Network unavailable. Please check your connection and try again.',
+  );
 }
 
 class _UnverifiedProfileNotifier extends ProfileNotifier {
   @override
   ProfileState build() => ProfileState(
-        profile: ProfileEntity(
-          user: _sessionUser,
-          isEmailVerified: false,
-          isPhoneVerified: false,
-        ),
-      );
+    profile: ProfileEntity(
+      user: _sessionUser,
+      isEmailVerified: false,
+      isPhoneVerified: false,
+    ),
+  );
 }
 
 class _UnverifiedMissingPhoneNotifier extends ProfileNotifier {
@@ -48,38 +52,56 @@ class _UnverifiedMissingPhoneNotifier extends ProfileNotifier {
 
   @override
   ProfileState build() => ProfileState(
-        profile: ProfileEntity(
-          user: UserEntity(
-            id: _sessionUser.id,
-            name: _sessionUser.name,
-            email: _sessionUser.email,
-            phoneNumber: _phone,
-          ),
-          isEmailVerified: true,
-          isPhoneVerified: false,
-        ),
-      );
+    profile: ProfileEntity(
+      user: UserEntity(
+        id: _sessionUser.id,
+        name: _sessionUser.name,
+        email: _sessionUser.email,
+        phoneNumber: _phone,
+      ),
+      isEmailVerified: true,
+      isPhoneVerified: false,
+    ),
+  );
 }
 
 class _VerifiedProfileNotifier extends ProfileNotifier {
   @override
   ProfileState build() => ProfileState(
-        profile: ProfileEntity(
-          user: _sessionUser,
-          isEmailVerified: true,
-          isPhoneVerified: true,
-        ),
-      );
+    profile: ProfileEntity(
+      user: _sessionUser,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+    ),
+  );
+}
+
+class _SavedProfileNotifier extends ProfileNotifier {
+  @override
+  ProfileState build() => ProfileState(
+    profile: ProfileEntity(
+      user: _sessionUser,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      savedAmountDzd: 5000,
+    ),
+  );
+}
+
+/// A fully loaded (single page, no more) orders list.
+class _LoadedOrders extends OrdersNotifier {
+  @override
+  OrdersState build() => const OrdersState(hasMore: false);
 }
 
 class _EmptyIdentityAuth extends Auth {
   @override
   Future<UserEntity?> build() async => const UserEntity(
-        id: '',
-        name: '',
-        email: 'stub@test.com',
-        phoneNumber: '',
-      );
+    id: '',
+    name: '',
+    email: 'stub@test.com',
+    phoneNumber: '',
+  );
 }
 
 /// The app bar's bell reads this keepAlive notifier, which fetches on first
@@ -92,6 +114,7 @@ class _NoOpNotifications extends Notifications {
 Widget _harness({
   required Auth authOverride,
   ProfileNotifier Function()? profileOverride,
+  List<Override> extraOverrides = const [],
 }) {
   return ProviderScope(
     overrides: [
@@ -99,6 +122,10 @@ Widget _harness({
       if (profileOverride != null)
         profileNotifierProvider.overrideWith(profileOverride),
       notificationsProvider.overrideWith(_NoOpNotifications.new),
+      // The cart now fetches as soon as it is built for a signed-in user;
+      // keep that off the mock datasource's simulated-latency timer.
+      cartRepositoryProvider.overrideWithValue(StubCartRepository()),
+      ...extraOverrides,
       // The wishlist-count tile's first read fetches for a signed-in
       // consumer; keep that off the real Dio (its token-read timeout Timer
       // outlives the test).
@@ -152,22 +179,21 @@ void main() {
     },
   );
 
-  testWidgets(
-    'shows verification banner when email and phone are unverified',
-    (tester) async {
-      await tester.pumpWidget(
-        _harness(
-          authOverride: FakeAuth(_sessionUser),
-          profileOverride: _UnverifiedProfileNotifier.new,
-        ),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('shows verification banner when email and phone are unverified', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _harness(
+        authOverride: FakeAuth(_sessionUser),
+        profileOverride: _UnverifiedProfileNotifier.new,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('Your email is not verified'), findsOneWidget);
-      expect(find.text('Your phone number is not verified'), findsOneWidget);
-      expect(find.text('Verify Now'), findsNWidgets(2));
-    },
-  );
+    expect(find.text('Your email is not verified'), findsOneWidget);
+    expect(find.text('Your phone number is not verified'), findsOneWidget);
+    expect(find.text('Verify Now'), findsNWidgets(2));
+  });
 
   testWidgets(
     'hides verification banner when email and phone are already verified',
@@ -186,28 +212,27 @@ void main() {
     },
   );
 
-  testWidgets(
-    'shows add-phone banner when stored phone is empty',
-    (tester) async {
-      const user = UserEntity(
-        id: '9',
-        name: 'Test User',
-        email: 'user@test.com',
-        phoneNumber: '',
-      );
-      await tester.pumpWidget(
-        _harness(
-          authOverride: FakeAuth(user),
-          profileOverride: () => _UnverifiedMissingPhoneNotifier(''),
-        ),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('shows add-phone banner when stored phone is empty', (
+    tester,
+  ) async {
+    const user = UserEntity(
+      id: '9',
+      name: 'Test User',
+      email: 'user@test.com',
+      phoneNumber: '',
+    );
+    await tester.pumpWidget(
+      _harness(
+        authOverride: FakeAuth(user),
+        profileOverride: () => _UnverifiedMissingPhoneNotifier(''),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('Your phone number is not set'), findsOneWidget);
-      expect(find.text('Your phone number is not verified'), findsNothing);
-      expect(find.text('Add Now'), findsOneWidget);
-    },
-  );
+    expect(find.text('Your phone number is not set'), findsOneWidget);
+    expect(find.text('Your phone number is not verified'), findsNothing);
+    expect(find.text('Add Now'), findsOneWidget);
+  });
 
   testWidgets(
     'shows add-phone banner when stored phone is a zero placeholder',
@@ -229,6 +254,42 @@ void main() {
       expect(find.text('Your phone number is not set'), findsOneWidget);
       expect(find.text('Your phone number is not verified'), findsNothing);
       expect(find.text('Add Now'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'hides Total Saved and Orders when the backend/orders list give no value',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          authOverride: FakeAuth(_sessionUser),
+          profileOverride: _VerifiedProfileNotifier.new,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('TOTAL SAVED'), findsNothing);
+      expect(find.text('ORDERS'), findsNothing);
+      expect(find.text('WISHLIST'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'shows Orders from the loaded orders list and Total Saved when provided',
+    (tester) async {
+      await tester.pumpWidget(
+        _harness(
+          authOverride: FakeAuth(_sessionUser),
+          profileOverride: _SavedProfileNotifier.new,
+          extraOverrides: [
+            ordersNotifierProvider.overrideWith(_LoadedOrders.new),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('TOTAL SAVED'), findsOneWidget);
+      expect(find.text('ORDERS'), findsOneWidget);
     },
   );
 }

@@ -2820,4 +2820,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordRuleSpecial => 'One special character (!@#\$...)';
+
+  @override
+  String get listingsEmptyNone => 'No listings yet';
+
+  @override
+  String listingsEmptyFiltered(String status) {
+    return 'No $status listings';
+  }
+
+  @override
+  String get listingsEmptySubtitle =>
+      'Start selling by adding your first listing';
+
+  @override
+  String get listingsEmptyCta => 'Add Your First Listing';
+
+  @override
+  String listingPostedOn(String date) {
+    return 'Posted $date';
+  }
+
+  @override
+  String get courierPackageTitle => 'Package';
 }

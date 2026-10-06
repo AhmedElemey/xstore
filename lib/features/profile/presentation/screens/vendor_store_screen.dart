@@ -685,33 +685,26 @@ class _VendorStoreStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final u = profile.user;
+    final sales = u.totalSales;
+    final rating = u.rating;
+    // Only stats the store actually reports are shown; the active-listings
+    // count is always real.
     final cells = [
       (
         LucideIcons.package,
         '${profile.storeActiveListings}',
         context.l10n.vendorStoreStatListings,
       ),
-      (
-        LucideIcons.shoppingBag,
-        u.totalSales != null && u.totalSales! > 0
-            ? '${u.totalSales}'
-            : context.l10n.newSellerEmDash,
-        context.l10n.vendorStoreStatSales,
-      ),
-      (
-        LucideIcons.messageCircle,
-        profile.responseRatePercent > 0
-            ? '${profile.responseRatePercent}%'
-            : context.l10n.newSellerEmDash,
-        context.l10n.vendorStoreStatResponse,
-      ),
-      (
-        LucideIcons.star,
-        u.rating != null && u.rating! > 0
-            ? u.rating!.toStringAsFixed(1)
-            : context.l10n.newSellerEmDash,
-        context.l10n.statRating,
-      ),
+      if (sales != null && sales > 0)
+        (LucideIcons.shoppingBag, '$sales', context.l10n.vendorStoreStatSales),
+      if (profile.responseRatePercent > 0)
+        (
+          LucideIcons.messageCircle,
+          '${profile.responseRatePercent}%',
+          context.l10n.vendorStoreStatResponse,
+        ),
+      if (rating != null && rating > 0)
+        (LucideIcons.star, rating.toStringAsFixed(1), context.l10n.statRating),
     ];
 
     return Row(

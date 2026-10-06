@@ -18,19 +18,19 @@ class ListingEmptyState extends StatelessWidget {
   final ListingStatus? selectedFilter;
   final VoidCallback onAddListing;
 
-  String get _title {
-    if (selectedFilter == null) {
-      return 'No listings yet';
-    }
-    final label = switch (selectedFilter!) {
-      ListingStatus.draft => 'Draft',
-      ListingStatus.pending => 'Pending',
-      ListingStatus.active => 'Active',
-      ListingStatus.paused => 'Paused',
-      ListingStatus.sold => 'Sold',
-      ListingStatus.rejected => 'Rejected',
+  String _title(BuildContext context) {
+    final l10n = context.l10n;
+    final filter = selectedFilter;
+    if (filter == null) return l10n.listingsEmptyNone;
+    final label = switch (filter) {
+      ListingStatus.draft => l10n.draft,
+      ListingStatus.pending => l10n.pending,
+      ListingStatus.active => l10n.active,
+      ListingStatus.paused => l10n.paused,
+      ListingStatus.sold => l10n.sold,
+      ListingStatus.rejected => l10n.rejected,
     };
-    return 'No $label listings';
+    return l10n.listingsEmptyFiltered(label);
   }
 
   @override
@@ -49,7 +49,7 @@ class ListingEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.x2l),
               Text(
-                _title,
+                _title(context),
                 textAlign: TextAlign.center,
                 style: AppTypography.titleMedium.copyWith(
                   color: context.textPrimary,
@@ -57,7 +57,7 @@ class ListingEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Start selling by adding your first listing',
+                context.l10n.listingsEmptySubtitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(
                   color: context.textSecondary,
@@ -65,7 +65,7 @@ class ListingEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.x2l),
               XstoreButton(
-                label: 'Add Your First Listing',
+                label: context.l10n.listingsEmptyCta,
                 onPressed: onAddListing,
               ),
             ],
