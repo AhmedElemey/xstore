@@ -434,14 +434,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           storeSaveCount: 89,
           storeActiveListings: 18,
           responseRatePercent: 89,
+          isEmailVerified: user.isVerified || user.isEmailVerified,
+          isPhoneVerified: user.isVerified || user.isPhoneVerified,
         );
       }
       final user = _mergeConsumerMock(sessionUser);
       return ProfileModel(
         user: _mockUserModelFromEntity(user),
-        ordersCount: 12,
         wishlistCount: 5,
-        savedAmountDzd: 23000,
+        isEmailVerified: user.isVerified || user.isEmailVerified,
+        isPhoneVerified: user.isVerified || user.isPhoneVerified,
       );
     }
     try {
@@ -514,10 +516,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final data = response.data;
       if (data == null) throw const ServerException('Empty response');
       final parsed = _applyClearedProfileImages(
-        userModelFromProfileResponse(
-          data,
-          fallbackUserId: sessionUser.id,
-        ),
+        userModelFromProfileResponse(data, fallbackUserId: sessionUser.id),
         request,
       );
       _debugLogProfileFields(

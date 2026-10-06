@@ -26,6 +26,7 @@ import '../widgets/vendor_location_section.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
 import '../../../../shared/widgets/birth_date_picker.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/skeletons/edit_profile_skeleton.dart';
@@ -60,6 +61,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   DateTime? _dob;
   var _synced = false;
+  String? _nameError;
 
   /// Contact values that completed OTP on this screen (the typed new
   /// email/phone, not necessarily what get-profile currently stores).
@@ -352,6 +354,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _save() async {
+    final nameErr = Validators.personFullName(context.l10n, _name.text);
+    setState(() => _nameError = nameErr);
+    if (nameErr != null) return;
     _pushFieldsToNotifier();
     final dobErr = Validators.dateOfBirth(context.l10n, _dob);
     if (dobErr != null) {
@@ -727,7 +732,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ],
                 ),
               ),
-              Expanded(child: _buildForm(s, isVendor, canSave)),
+              Expanded(
+                child: u == null
+                    // get-profile failed: an empty editable form would let the
+                    // user save blanks over their real profile.
+                    ? ErrorStateWidget(
+                        message: s.error != null
+                            ? resolveAppError(context, s.error)
+                            : context.l10n.genericError,
+                        onRetry: () => ref
+                            .read(profileNotifierProvider.notifier)
+                            .refreshProfileData(force: true),
+                      )
+                    : _buildForm(s, isVendor, canSave),
+              ),
             ],
           ),
         ),
@@ -760,8 +778,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           label: context.l10n.checkoutFullName,
           controller: _name,
           prefixIcon: const Icon(LucideIcons.user),
-          onChanged: (v) =>
-              ref.read(profileNotifierProvider.notifier).updateField('name', v),
+          errorText: _nameError,
+          onChanged: (v) {
+            if (_nameError != null) setState(() => _nameError = null);
+            ref.read(profileNotifierProvider.notifier).updateField('name', v);
+          },
         ),
         const Gap(AppSpacing.lg),
         AuthTextField(

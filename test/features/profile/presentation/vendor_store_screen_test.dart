@@ -59,7 +59,7 @@ class _MissingStoreRepo implements ProfileRepository {
   }) => throw UnimplementedError();
 }
 
-Widget _harness(_MissingStoreRepo repo) {
+Widget _harness(ProfileRepository repo) {
   return ProviderScope(
     overrides: [
       authProvider.overrideWith(
@@ -165,6 +165,60 @@ void main() {
       expect(repo.listingCalls, 1);
     },
   );
+
+  testWidgets(
+    'store stats the backend does not provide are hidden, not dashes',
+    (tester) async {
+      const seller = UserEntity(
+        id: 'other-vendor',
+        name: 'Tech Hub',
+        email: '',
+        phoneNumber: '',
+        role: UserRole.vendor,
+        storeName: 'Tech Hub',
+      );
+      final repo = _PublicStoreRepo(
+        profile: const ProfileEntity(user: seller, storeActiveListings: 3),
+        listings: const [],
+      );
+      await tester.pumpWidget(_harness(repo));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ACTIVE LISTINGS'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('TOTAL SALES'), findsNothing);
+      expect(find.text('RESPONSE RATE'), findsNothing);
+      expect(find.text('RATING'), findsNothing);
+      expect(find.text('—'), findsNothing);
+    },
+  );
+
+  testWidgets('store stats the backend provides are shown', (tester) async {
+    const seller = UserEntity(
+      id: 'other-vendor',
+      name: 'Tech Hub',
+      email: '',
+      phoneNumber: '',
+      role: UserRole.vendor,
+      storeName: 'Tech Hub',
+      rating: 4.5,
+      totalSales: 20,
+    );
+    final repo = _PublicStoreRepo(
+      profile: const ProfileEntity(
+        user: seller,
+        storeActiveListings: 3,
+        responseRatePercent: 90,
+      ),
+      listings: const [],
+    );
+    await tester.pumpWidget(_harness(repo));
+    await tester.pumpAndSettle();
+
+    expect(find.text('20'), findsOneWidget);
+    expect(find.text('90%'), findsOneWidget);
+    expect(find.text('4.5'), findsOneWidget);
+  });
 
   testWidgets(
     'own store uses get-profile + my-listings, not the missing public store routes',

@@ -40,7 +40,11 @@ part 'profile_provider.g.dart';
 /// `_refreshProfileDataImpl`. Never pass this from a cold-start session
 /// restore (`Auth.build()`): that `user` came from local storage, which can
 /// be stale, so it still needs the real network refresh.
-void prefetchProfileData(Ref ref, {UserEntity? user, bool alreadyFresh = false}) {
+void prefetchProfileData(
+  Ref ref, {
+  UserEntity? user,
+  bool alreadyFresh = false,
+}) {
   if (kDebugMode) {
     debugPrint('[ProfileNotifier] prefetchProfileData scheduled');
   }
@@ -233,7 +237,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       // register/social auth), which already parsed the exact same wire
       // response this use case would re-fetch — skip the redundant round
       // trip and seed ProfileEntity from it directly. Mock mode is excluded:
-      // its ordersCount/wishlistCount/etc. only exist in getProfile's mock
+      // its wishlistCount/etc. only exist in getProfile's mock
       // branch, not on sessionUser.
       final result = alreadyFresh && !MockConfig.useMock
           ? Right<Failure, ProfileEntity>(
@@ -262,7 +266,6 @@ class ProfileNotifier extends _$ProfileNotifier {
           if (kDebugMode) {
             debugPrint(
               '[ProfileNotifier] refreshProfileData OK — '
-              'orders=${profile.ordersCount} '
               'wishlist=${profile.wishlistCount} '
               'role=${profile.user.role.name}',
             );
@@ -281,10 +284,7 @@ class ProfileNotifier extends _$ProfileNotifier {
             return;
           }
           state = state
-              .applyFromProfile(
-                profile,
-                isDarkMode: _isDarkTheme(themeMode),
-              )
+              .applyFromProfile(profile, isDarkMode: _isDarkTheme(themeMode))
               .copyWith(isLoading: false);
         },
       );
@@ -676,7 +676,8 @@ class ProfileNotifier extends _$ProfileNotifier {
     var changed = false;
     final userPath = request.userImagePath?.trim();
     final storePath = request.storeImagePath?.trim();
-    if ((request.userImageUrl == null || request.userImageUrl!.trim().isEmpty) &&
+    if ((request.userImageUrl == null ||
+            request.userImageUrl!.trim().isEmpty) &&
         (userPath == null || userPath.isEmpty) &&
         user.avatarUrl != null) {
       user = user.copyWith(avatarUrl: null);

@@ -11,6 +11,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../orders/presentation/providers/orders_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/profile_state.dart';
 import '../../../wishlist/presentation/providers/wishlist_provider.dart';
@@ -195,7 +196,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           sales: profile?.user.totalSales,
                           rating: profile?.user.rating,
                           responsePercent: profile?.responseRatePercent,
-                          orders: profile?.ordersCount,
+                          // The profile endpoint has no orders count; use the orders
+                          // list when it has fully loaded (one page = not a count).
+                          orders: isVendor
+                              ? null
+                              : ref.watch(
+                                  ordersNotifierProvider.select(
+                                    (s) =>
+                                        s.hasMore ||
+                                            s.isLoading ||
+                                            s.error != null
+                                        ? null
+                                        : s.orders.length,
+                                  ),
+                                ),
                           // getProfile has no confirmed backend source for this
                           // yet (defaults to 0), but the wishlist endpoint is
                           // live and wishlistProvider already keeps itself in

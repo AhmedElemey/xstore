@@ -5377,6 +5377,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One special character (!@#\$...)'**
   String get passwordRuleSpecial;
+
+  /// No description provided for @listingsEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No listings yet'**
+  String get listingsEmptyNone;
+
+  /// No description provided for @listingsEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No {status} listings'**
+  String listingsEmptyFiltered(String status);
+
+  /// No description provided for @listingsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start selling by adding your first listing'**
+  String get listingsEmptySubtitle;
+
+  /// No description provided for @listingsEmptyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Your First Listing'**
+  String get listingsEmptyCta;
+
+  /// No description provided for @listingPostedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted {date}'**
+  String listingPostedOn(String date);
+
+  /// No description provided for @courierPackageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get courierPackageTitle;
 }
 
 class _AppLocalizationsDelegate
