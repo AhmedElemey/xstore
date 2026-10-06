@@ -572,23 +572,11 @@ class _TrackingCard extends StatelessWidget {
           ),
           if (order.courierName != null)
             Text(order.courierName!, style: AppTypography.bodyMedium),
-          Text(
-            context.l10n.ordersCurrentLocationMock,
-            style: AppTypography.bodySmall,
-          ),
           if (order.estimatedDelivery != null)
             Text(
               '${context.l10n.ordersExpectedPrefix} ${context.formatWeekdayDate(order.estimatedDelivery!.toLocal())}',
               style: AppTypography.bodySmall,
             ),
-          const SizedBox(height: AppSpacing.md),
-          OutlinedButton(
-            onPressed: () => AppSnackbar.info(
-              context,
-              context.l10n.ordersCourierWebsiteSoon,
-            ),
-            child: Text(context.l10n.ordersTrackOnCourier),
-          ),
         ],
       ),
     );

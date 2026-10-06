@@ -1934,18 +1934,6 @@ abstract class AppLocalizations {
   /// **'Track on Courier Website'**
   String get ordersTrackOnCourier;
 
-  /// No description provided for @ordersCourierWebsiteSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Courier tracking — coming soon'**
-  String get ordersCourierWebsiteSoon;
-
-  /// No description provided for @ordersCurrentLocationMock.
-  ///
-  /// In en, this message translates to:
-  /// **'In transit — Cairo hub'**
-  String get ordersCurrentLocationMock;
-
   /// No description provided for @ordersExpectedPrefix.
   ///
   /// In en, this message translates to:
@@ -3397,18 +3385,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm Shipment'**
   String get vendorConfirmShipment;
-
-  /// No description provided for @vendorExportOrders.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Orders'**
-  String get vendorExportOrders;
-
-  /// No description provided for @vendorOrderSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Order Settings'**
-  String get vendorOrderSettings;
 
   /// No description provided for @vendorReasonItemUnavailable.
   ///

@@ -178,7 +178,7 @@ class OrderCard extends ConsumerWidget {
         return SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => _trackingSnack(context),
+            onPressed: () => context.push(AppRoutes.orderPath(order.id)),
             child: Text(context.l10n.ordersTrackOrder),
           ),
         );
@@ -234,13 +234,6 @@ class OrderCard extends ConsumerWidget {
     await notifier.cancelOrder(order.id, reason);
     if (!context.mounted) return;
     _errSnack(context, ref);
-  }
-
-  void _trackingSnack(BuildContext context) {
-    AppSnackbar.show(
-      context,
-      message: order.trackingNumber ?? context.l10n.ordersTrackOnCourier,
-    );
   }
 
   void _errSnack(BuildContext context, WidgetRef ref) {

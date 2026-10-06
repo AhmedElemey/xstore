@@ -63,23 +63,25 @@ class VendorOrderStatsBanner extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: onConfirmAllPending,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: success,
-                side: BorderSide(color: success.withValues(alpha: 0.6)),
-              ),
-              child: Text(
-                context.l10n.vendorConfirmAllPending,
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.w700,
+          if (pendingCount > 0) ...[
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onConfirmAllPending,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: success,
+                  side: BorderSide(color: success.withValues(alpha: 0.6)),
+                ),
+                child: Text(
+                  context.l10n.vendorConfirmAllPending,
+                  style: AppTypography.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
