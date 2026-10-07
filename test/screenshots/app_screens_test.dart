@@ -314,6 +314,8 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({
       PrefsKeys.locationPermissionRationaleShown: true,
+      // The app's own language setting (drives server/error text too).
+      if (locale.languageCode == 'ar') 'app_language': 'arabic',
       // Saved checkout addresses (AddressBook's local store).
       'checkout_addresses_v1_consumer_001': jsonEncode([
         {

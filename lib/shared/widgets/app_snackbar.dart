@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/utils/extensions/context_extensions.dart';
 
 /// Styled floating snackbars used app-wide.
 abstract final class AppSnackbar {
@@ -26,7 +27,7 @@ abstract final class AppSnackbar {
             ],
             Expanded(
               child: Text(
-                message,
+                context.localizedError(message),
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.white,
                 ),
@@ -36,9 +37,7 @@ abstract final class AppSnackbar {
         ),
         backgroundColor: backgroundColor ?? AppColors.lightTextPrimary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(AppSpacing.lg),
         duration: duration,
         action: action,
@@ -47,22 +46,19 @@ abstract final class AppSnackbar {
   }
 
   static void success(BuildContext context, String message) => show(
-        context,
-        message: message,
-        backgroundColor: AppColors.success,
-        icon: LucideIcons.checkCircle,
-      );
+    context,
+    message: message,
+    backgroundColor: AppColors.success,
+    icon: LucideIcons.checkCircle,
+  );
 
   static void error(BuildContext context, String message) => show(
-        context,
-        message: message,
-        backgroundColor: AppColors.error,
-        icon: LucideIcons.alertCircle,
-      );
+    context,
+    message: message,
+    backgroundColor: AppColors.error,
+    icon: LucideIcons.alertCircle,
+  );
 
-  static void info(BuildContext context, String message) => show(
-        context,
-        message: message,
-        icon: LucideIcons.info,
-      );
+  static void info(BuildContext context, String message) =>
+      show(context, message: message, icon: LucideIcons.info);
 }

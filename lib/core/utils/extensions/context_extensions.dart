@@ -100,6 +100,16 @@ extension BuildContextX on BuildContext {
 extension LocalizationContext on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 
+  /// [message] in the current language. Errors are worded when they happen
+  /// (repositories have no context), so the generic fallback is re-resolved
+  /// here — it follows a language switch made after the error.
+  String localizedError(String message) {
+    final isGeneric = AppLocalizations.supportedLocales.any(
+      (l) => lookupAppLocalizations(l).genericError == message,
+    );
+    return isGeneric ? l10n.genericError : message;
+  }
+
   bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';
   bool get isEnglish => Localizations.localeOf(this).languageCode == 'en';
 

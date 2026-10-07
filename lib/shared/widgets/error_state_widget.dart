@@ -37,7 +37,7 @@ class ErrorStateWidget extends StatelessWidget {
             ),
             const Gap(AppSpacing.lg),
             Text(
-              message,
+              context.localizedError(message),
               style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),

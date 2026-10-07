@@ -158,9 +158,9 @@ String? _friendlyServerMessage(String? serverMessage, String? displayMessage) {
 /// Fallback when there is no user-facing message. Never `DioException.message`
 /// or an arbitrary `e.toString()`: that is developer text ("...validateStatus...",
 /// "Bad state: No element") which must not reach users.
-String genericErrorMessage() => errorMessagesInArabic
-    ? lookupAppLocalizations(const Locale('ar')).genericError
-    : 'Something went wrong. Please try again later.';
+String genericErrorMessage() => lookupAppLocalizations(
+  Locale(errorMessagesInArabic ? 'ar' : 'en'),
+).genericError;
 
 /// What a catch-all or error state may show: a [Failure]'s or the app's own
 /// exception message (already user-facing, e.g. mapped server text), otherwise
