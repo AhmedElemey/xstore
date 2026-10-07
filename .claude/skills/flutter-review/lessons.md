@@ -1114,10 +1114,9 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** A button or menu item whose handler is only a snackbar ("coming soon", its own label, the tracking number) is dead UI — remove it, or route to the existing screen that already shows the data (order detail timeline). Bulk actions ("Confirm all pending") render only when the count is > 0. Never ship placeholder status text (e.g. a hardcoded "In transit — Cairo hub"). Dates use day-first month-name formats (`formatDate`), never `d/M/yyyy`.
 - **Where it applies:** orders/vendor-orders screens, `order_card.dart`, `vendor_order_stats_banner.dart`, `formatShortDate`.
 
-### 2026-10-06 — Never fall back to DioException.message in error mapping
-- **Rule:** `DioException.message` is developer text ("...validateStatus..."); mapping fallbacks must use a localized generic message, and `X.toString()` stored in state reaches the UI verbatim. Fix at `mapDioException`, not per screen. Also hide rating rows when `reviewCount == 0`, and use ICU plurals (Arabic needs `=2`/`few`) for counts in l10n.
-- **Where it applies:** `lib/core/network/dio_error_mapper.dart`, repositories/providers storing failure strings, l10n count strings, explore cards.
-
+### 2026-10-06 — Never show raw error text; use userErrorMessage(e)
+- **Rule:** Never put `e.toString()` or `DioException.message` in a `Failure`, error state or widget — it leaks developer text ("...validateStatus...", "Bad state: No element"). Repository catch-alls use `Failure.x(userErrorMessage(e))` and `.when(error:)` UIs use `userErrorMessage(e)` (lib/core/network/dio_error_mapper.dart): a `Failure`/`AppException` message passes through, anything else becomes `genericErrorMessage()` ("Something went wrong. Please try again later.", l10n `genericError` in Arabic).
+- **Where it applies:** every `*_repository_impl.dart` catch block, providers storing `error:`, `ErrorStateWidget(message:)`, `async_value_extensions.dart`, `dio_error_mapper.dart`.
 ### 2026-10-06 — A keepAlive provider's auth listener needs fireImmediately
 - **Rule:** `ref.listen(authProvider, ...)` only fires on changes after the provider is built. A provider first read lazily (cart, built by the dock after the splash) misses an already-resolved session, so use `fireImmediately: true` (keep the `isLoading` guard so it doesn't double-fetch). Test by resolving auth first, then reading the provider.
 - **Where it applies:** `cart_provider.dart` and any keepAlive notifier that loads data from an auth listener.
