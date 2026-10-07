@@ -80,7 +80,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = profileState.profile;
 
     if (user == null) {
-      return const Scaffold(body: ProfileSkeleton());
+      return const Scaffold(body: OrbitBackground(child: ProfileSkeleton()));
     }
 
     final u = profile?.user ?? user;

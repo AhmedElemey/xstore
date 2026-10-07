@@ -681,7 +681,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     final canSave = s.hasChanges && !s.isUpdating;
     if (u == null && s.isLoading) {
-      return const Scaffold(body: EditProfileSkeleton());
+      return const Scaffold(
+        body: OrbitBackground(child: EditProfileSkeleton()),
+      );
     }
     return Scaffold(
       body: OrbitBackground(

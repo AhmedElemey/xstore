@@ -67,7 +67,7 @@ class HomeScreen extends ConsumerWidget {
         (!newArrivals.hasValue && newArrivals.isLoading);
 
     if (initialLoading) {
-      return const Scaffold(body: HomeSkeleton());
+      return const Scaffold(body: OrbitBackground(child: HomeSkeleton()));
     }
 
     return RouteReentryRefresh(

@@ -11,14 +11,15 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/animations/app_animations.dart';
 import '../../../../core/animations/animation_extensions.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/wish_heart_button.dart';
-import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -117,35 +118,31 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final asyncState = ref.watch(productDetailProvider(widget.productId));
 
     return asyncState.when(
-      loading: () => const Scaffold(body: ProductDetailSkeleton()),
+      loading: () =>
+          const Scaffold(body: OrbitBackground(child: ProductDetailSkeleton())),
       skipLoadingOnRefresh: true,
       skipLoadingOnReload: true,
-      error: (e, _) => Scaffold(
-        appBar: AppBar(title: Text(context.l10n.productScreenTitle)),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.x2l),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(e.toString(), textAlign: TextAlign.center),
-                const Gap(AppSpacing.lg),
-                XstoreButton(
-                  label: context.l10n.retry,
-                  onPressed: () => ref
-                      .read(productDetailProvider(widget.productId).notifier)
-                      .fetchProduct(widget.productId),
-                ),
-              ],
-            ),
-          ),
+      error: (e, _) => _StatusScaffold(
+        child: ErrorStateWidget(
+          message: e.toString(),
+          retryLabel: context.l10n.retry,
+          onRetry: () => ref
+              .read(productDetailProvider(widget.productId).notifier)
+              .fetchProduct(widget.productId),
         ),
       ),
       data: (data) {
         final listing = data.listing;
         if (listing == null) {
-          return Scaffold(
-            body: Center(child: Text(context.l10n.productNotFound)),
+          return _StatusScaffold(
+            child: Center(
+              child: Text(
+                context.l10n.productNotFound,
+                style: AppTypography.bodyLarge.copyWith(
+                  color: context.textSecondary,
+                ),
+              ),
+            ),
           );
         }
         final notifier = ref.read(
@@ -409,5 +406,40 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   String _formatCount(int n) {
     final s = n.toString();
     return s.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+  }
+}
+
+/// Error / not-found state: Orbit sky with the frosted back button.
+class _StatusScaffold extends StatelessWidget {
+  const _StatusScaffold({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: OrbitBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              if (Navigator.of(context).canPop())
+                const Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                      0,
+                    ),
+                    child: AuthBackButton(),
+                  ),
+                ),
+              Expanded(child: child),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
