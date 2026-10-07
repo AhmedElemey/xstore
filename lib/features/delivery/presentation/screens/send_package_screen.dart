@@ -1,9 +1,9 @@
+// TODO(phase-2): parked, not routed yet (see app_router.dart); already in the Orbit design.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/localization/localization_provider.dart';
@@ -11,9 +11,12 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/auth_back_button.dart';
 import '../../../../shared/widgets/location_cascade_field.dart';
+import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../auth/presentation/widgets/phone_input_field.dart';
 import '../../../cities/presentation/providers/city_dependencies.dart';
 import '../../../governments/presentation/providers/government_dependencies.dart';
@@ -210,7 +213,10 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
       context.pushReplacement(AppRoutes.myPackages);
     } else {
       final error = ref.read(deliveryRequestsProvider).error;
-      AppSnackbar.error(context, error ?? context.l10n.errorGeneric);
+      AppSnackbar.error(
+        context,
+        context.localizedError(error ?? context.l10n.errorGeneric),
+      );
     }
   }
 
@@ -241,146 +247,309 @@ class _SendPackageScreenState extends ConsumerState<SendPackageScreen> {
     return true;
   }
 
-  InputDecoration _decoration(String label) => InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      );
-
   @override
   Widget build(BuildContext context) {
     final isSubmitting =
         ref.watch(deliveryRequestsProvider.select((s) => s.isSubmitting));
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.sendPackageTitle)),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const _CashAtPickupNote(),
-                const SizedBox(height: AppSpacing.lg),
-                _sectionTitle(context, context.l10n.sendPackagePickupSection),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _senderNameCtrl,
-                  textCapitalization: TextCapitalization.words,
-                  decoration:
-                      _decoration(context.l10n.sendPackageSenderName),
-                  validator: _requiredLine,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                PhoneInputField(
-                  controller: _senderPhoneCtrl,
-                  errorText: _senderPhoneError,
-                  onChanged: (_) {
-                    if (_senderPhoneError != null) {
-                      setState(() => _senderPhoneError = null);
-                    }
-                  },
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _pickupStreetCtrl,
-                  decoration: _decoration(context.l10n.checkoutStreet),
-                  validator: _requiredLine,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                LocationCascadeField(
-                  cityId: _pickupCityId,
-                  governorateId: _pickupGovernorateId,
-                  hint: _pickupLocationHint,
-                  errorText: _pickupLocationError,
-                  onChanged: (cityId, governorateId) {
-                    setState(() {
-                      _pickupCityId = cityId;
-                      _pickupGovernorateId = governorateId;
-                      _pickupLocationError = null;
-                    });
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                _sectionTitle(context, context.l10n.sendPackageDropoffSection),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _recipientNameCtrl,
-                  textCapitalization: TextCapitalization.words,
-                  decoration:
-                      _decoration(context.l10n.sendPackageRecipientName),
-                  validator: _requiredLine,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                PhoneInputField(
-                  controller: _recipientPhoneCtrl,
-                  errorText: _recipientPhoneError,
-                  onChanged: (_) {
-                    if (_recipientPhoneError != null) {
-                      setState(() => _recipientPhoneError = null);
-                    }
-                  },
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _dropoffStreetCtrl,
-                  decoration: _decoration(context.l10n.checkoutStreet),
-                  validator: _requiredLine,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                LocationCascadeField(
-                  cityId: _dropoffCityId,
-                  governorateId: _dropoffGovernorateId,
-                  hint: _dropoffLocationHint,
-                  errorText: _dropoffLocationError,
-                  onChanged: (cityId, governorateId) {
-                    setState(() {
-                      _dropoffCityId = cityId;
-                      _dropoffGovernorateId = governorateId;
-                      _dropoffLocationError = null;
-                    });
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                _sectionTitle(context, context.l10n.sendPackageNoteLabel),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _noteCtrl,
-                  maxLines: 3,
-                  maxLength: 300,
-                  decoration: InputDecoration(
-                    hintText: context.l10n.sendPackageNoteHint,
-                    border: const OutlineInputBorder(),
+      body: OrbitBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _Header(title: context.l10n.sendPackageTitle),
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
+                      0,
+                      AppSpacing.xl,
+                      AppSpacing.x3l,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const _CashAtPickupNote(),
+                        const SizedBox(height: AppSpacing.lg),
+                        _SectionCard(
+                          label: context.l10n.sendPackagePickupSection,
+                          filledNode: false,
+                          children: [
+                            _LabeledField(
+                              controller: _senderNameCtrl,
+                              label: context.l10n.sendPackageSenderName,
+                              textCapitalization: TextCapitalization.words,
+                              validator: _requiredLine,
+                            ),
+                            PhoneInputField(
+                              controller: _senderPhoneCtrl,
+                              errorText: _senderPhoneError,
+                              onChanged: (_) {
+                                if (_senderPhoneError != null) {
+                                  setState(() => _senderPhoneError = null);
+                                }
+                              },
+                            ),
+                            AuthTextField(
+                              controller: _pickupStreetCtrl,
+                              label: context.l10n.checkoutStreet,
+                              validator: _requiredLine,
+                            ),
+                            LocationCascadeField(
+                              cityId: _pickupCityId,
+                              governorateId: _pickupGovernorateId,
+                              hint: _pickupLocationHint,
+                              errorText: _pickupLocationError,
+                              onChanged: (cityId, governorateId) {
+                                setState(() {
+                                  _pickupCityId = cityId;
+                                  _pickupGovernorateId = governorateId;
+                                  _pickupLocationError = null;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _SectionCard(
+                          label: context.l10n.sendPackageDropoffSection,
+                          filledNode: true,
+                          children: [
+                            _LabeledField(
+                              controller: _recipientNameCtrl,
+                              label: context.l10n.sendPackageRecipientName,
+                              textCapitalization: TextCapitalization.words,
+                              validator: _requiredLine,
+                            ),
+                            PhoneInputField(
+                              controller: _recipientPhoneCtrl,
+                              errorText: _recipientPhoneError,
+                              onChanged: (_) {
+                                if (_recipientPhoneError != null) {
+                                  setState(() => _recipientPhoneError = null);
+                                }
+                              },
+                            ),
+                            AuthTextField(
+                              controller: _dropoffStreetCtrl,
+                              label: context.l10n.checkoutStreet,
+                              validator: _requiredLine,
+                            ),
+                            LocationCascadeField(
+                              cityId: _dropoffCityId,
+                              governorateId: _dropoffGovernorateId,
+                              hint: _dropoffLocationHint,
+                              errorText: _dropoffLocationError,
+                              onChanged: (cityId, governorateId) {
+                                setState(() {
+                                  _dropoffCityId = cityId;
+                                  _dropoffGovernorateId = governorateId;
+                                  _dropoffLocationError = null;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _SectionCard(
+                          label: context.l10n.sendPackageNoteLabel,
+                          children: [
+                            TextFormField(
+                              controller: _noteCtrl,
+                              maxLines: 3,
+                              maxLength: 300,
+                              style: AppTypography.bodyLarge.copyWith(
+                                color: context.textPrimary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: context.l10n.sendPackageNoteHint,
+                                hintStyle: AppTypography.bodyLarge.copyWith(
+                                  color: context.textHint,
+                                ),
+                              ),
+                              validator: _requiredLine,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        ListenableBuilder(
+                          listenable: _fields,
+                          builder: (context, _) => XstoreButton(
+                            label: context.l10n.sendPackageSubmit,
+                            isLoading: isSubmitting,
+                            onPressed:
+                                isSubmitting || !_canSubmit ? null : _submit,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  validator: _requiredLine,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                ListenableBuilder(
-                  listenable: _fields,
-                  builder: (context, _) => XstoreButton(
-                    label: context.l10n.sendPackageSubmit,
-                    isLoading: isSubmitting,
-                    onPressed: isSubmitting || !_canSubmit ? null : _submit,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _sectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: AppTypography.titleMedium.copyWith(
-        color: context.textPrimary,
-        fontWeight: FontWeight.w700,
+/// Orbit screen header: frosted back button (only when there is a route to
+/// pop) and an Unbounded title.
+class _Header extends StatelessWidget {
+  const _Header({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        AppSpacing.spacing18,
+        AppSpacing.xl,
+        AppSpacing.lg,
       ),
+      child: Row(
+        children: [
+          if (Navigator.canPop(context)) ...[
+            const AuthBackButton(),
+            const SizedBox(width: AppSpacing.md),
+          ],
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.headlineSmall.copyWith(
+                fontSize: 20,
+                color: context.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Glass card with an uppercase section label. [filledNode] (null = none)
+/// adds the pickup (ring) / drop-off (filled) route node beside the label,
+/// matching the courier cards' trail. Children are spaced evenly.
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.label,
+    required this.children,
+    this.filledNode,
+  });
+
+  final String label;
+  final bool? filledNode;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final amber = context.amberColor;
+    final filled = filledNode;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: context.borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              if (filled != null) ...[
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: filled ? amber : null,
+                    shape: BoxShape.circle,
+                    border: filled ? null : Border.all(color: amber, width: 2),
+                    boxShadow: filled
+                        ? [
+                            BoxShadow(
+                              color: amber.withValues(alpha: 0.35),
+                              blurRadius: 8,
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: AppTypography.fieldLabel.copyWith(
+                    color: context.labelColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          for (final child in children) ...[
+            const SizedBox(height: AppSpacing.md),
+            child,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Orbit labelled field for the cases [AuthTextField] can't cover
+/// (`textCapitalization`): uppercase label over a theme-styled field.
+class _LabeledField extends StatelessWidget {
+  const _LabeledField({
+    required this.controller,
+    required this.label,
+    required this.validator,
+    required this.textCapitalization,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String? Function(String?) validator;
+  final TextCapitalization textCapitalization;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppTypography.fieldLabel.copyWith(color: context.labelColor),
+        ),
+        SizedBox(height: context.scaledPx(8)),
+        TextFormField(
+          controller: controller,
+          validator: validator,
+          textCapitalization: textCapitalization,
+          style: AppTypography.bodyLarge.copyWith(
+            color: context.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: context.scaledPx(16),
+              vertical: context.scaledPx(16),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -392,21 +561,19 @@ class _CashAtPickupNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final amber = context.amberColor;
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSpacing.md),
+        color: context.glassColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: amber.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            LucideIcons.banknote,
-            color: AppColors.primary,
-            size: 20,
-          ),
-          const SizedBox(width: AppSpacing.sm),
+          Icon(LucideIcons.banknote, color: amber, size: 20),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               context.l10n.sendPackagePricingNote,
