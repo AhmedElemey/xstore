@@ -1117,6 +1117,10 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Never show raw error text; use userErrorMessage(e)
 - **Rule:** Never put `e.toString()` or `DioException.message` in a `Failure`, error state or widget — it leaks developer text ("...validateStatus...", "Bad state: No element"). Repository catch-alls use `Failure.x(userErrorMessage(e))` and `.when(error:)` UIs use `userErrorMessage(e)` (lib/core/network/dio_error_mapper.dart): a `Failure`/`AppException` message passes through, anything else becomes `genericErrorMessage()` ("Something went wrong. Please try again later.", l10n `genericError` in Arabic).
 - **Where it applies:** every `*_repository_impl.dart` catch block, providers storing `error:`, `ErrorStateWidget(message:)`, `async_value_extensions.dart`, `dio_error_mapper.dart`.
+
+### 2026-10-06 — Hide empty ratings; use ICU plurals for counts
+- **Rule:** Hide a rating row when `reviewCount == 0` (a "0.0 (0)" reads as a real bad rating). Counts in l10n strings use ICU plurals — Arabic needs `=1`, `=2`, `few` and `other`.
+- **Where it applies:** explore/product cards, l10n count strings (e.g. `wishlistPriceDropBanner`).
 ### 2026-10-06 — A keepAlive provider's auth listener needs fireImmediately
 - **Rule:** `ref.listen(authProvider, ...)` only fires on changes after the provider is built. A provider first read lazily (cart, built by the dock after the splash) misses an already-resolved session, so use `fireImmediately: true` (keep the `isLoading` guard so it doesn't double-fetch). Test by resolving auth first, then reading the provider.
 - **Where it applies:** `cart_provider.dart` and any keepAlive notifier that loads data from an auth listener.
