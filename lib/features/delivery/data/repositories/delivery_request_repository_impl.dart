@@ -5,6 +5,7 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/entities/delivery_request.dart';
 import '../../domain/repositories/delivery_request_repository.dart';
 import '../datasources/delivery_request_datasource.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
   DeliveryRequestRepositoryImpl(this._dataSource);
@@ -19,15 +20,14 @@ class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
     } on StateError catch (e) {
       return Left(Failure.validation(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
   @override
   Future<Either<Failure, List<DeliveryRequestEntity>>> getMyRequests(
     String requesterId,
-  ) =>
-      _guard(() => _dataSource.getMyRequests(requesterId));
+  ) => _guard(() => _dataSource.getMyRequests(requesterId));
 
   @override
   Future<Either<Failure, DeliveryRequestEntity>> createRequest({
@@ -38,18 +38,17 @@ class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
     required OrderAddress dropoff,
     required String packageNote,
     String? orderId,
-  }) =>
-      _guard(
-        () => _dataSource.createRequest(
-          requesterId: requesterId,
-          requesterName: requesterName,
-          requesterPhone: requesterPhone,
-          pickup: pickup,
-          dropoff: dropoff,
-          packageNote: packageNote,
-          orderId: orderId,
-        ),
-      );
+  }) => _guard(
+    () => _dataSource.createRequest(
+      requesterId: requesterId,
+      requesterName: requesterName,
+      requesterPhone: requesterPhone,
+      pickup: pickup,
+      dropoff: dropoff,
+      packageNote: packageNote,
+      orderId: orderId,
+    ),
+  );
 
   @override
   Future<Either<Failure, DeliveryRequestEntity>> confirmRequest(String id) =>
@@ -59,14 +58,12 @@ class DeliveryRequestRepositoryImpl implements DeliveryRequestRepository {
   Future<Either<Failure, DeliveryRequestEntity>> cancelRequest(
     String id,
     String reason,
-  ) =>
-      _guard(() => _dataSource.cancelRequest(id, reason));
+  ) => _guard(() => _dataSource.cancelRequest(id, reason));
 
   @override
   Future<Either<Failure, List<DeliveryRequestEntity>>> getCourierPackages(
     String courierId,
-  ) =>
-      _guard(() => _dataSource.getCourierPackages(courierId));
+  ) => _guard(() => _dataSource.getCourierPackages(courierId));
 
   @override
   Future<Either<Failure, DeliveryRequestEntity>> markPickedUp(String id) =>

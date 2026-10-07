@@ -5,6 +5,7 @@ import '../../../cart/domain/repositories/cart_repository.dart';
 import '../../domain/entities/wishlist_item_entity.dart';
 import '../../domain/repositories/wishlist_repository.dart';
 import '../datasources/wishlist_remote_datasource.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class WishlistRepositoryImpl implements WishlistRepository {
   WishlistRepositoryImpl(this._remote, this._cartRepository);
@@ -19,7 +20,7 @@ class WishlistRepositoryImpl implements WishlistRepository {
     try {
       return Right(await _remote.getWishlist(consumerId));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -36,7 +37,7 @@ class WishlistRepositoryImpl implements WishlistRepository {
         ),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -54,7 +55,7 @@ class WishlistRepositoryImpl implements WishlistRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -72,7 +73,7 @@ class WishlistRepositoryImpl implements WishlistRepository {
       );
       return r.fold(Left.new, (_) => const Right(unit));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 

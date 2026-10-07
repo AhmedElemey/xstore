@@ -7,6 +7,7 @@ import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/notifications_repository.dart';
 import '../datasources/notifications_remote_datasource.dart';
 import '../models/register_device_token_request.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class NotificationsRepositoryImpl implements NotificationsRepository {
   NotificationsRepositoryImpl(this._remote);
@@ -14,7 +15,8 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   final NotificationsRemoteDataSource _remote;
 
   @override
-  Future<Either<Failure, PaginatedResult<NotificationEntity>>> getNotifications({
+  Future<Either<Failure, PaginatedResult<NotificationEntity>>>
+  getNotifications({
     required UserRole role,
     required int page,
     required int pageSize,
@@ -24,7 +26,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
         await _remote.fetchPage(role: role, page: page, pageSize: pageSize),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -33,7 +35,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     try {
       return Right(await _remote.unreadCount(role));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -43,7 +45,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       await _remote.markRead(notificationId);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -53,7 +55,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       await _remote.markAllRead(role);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -63,7 +65,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       await _remote.markUnread(notificationId);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -75,7 +77,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       await _remote.deleteNotification(notificationId);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -87,7 +89,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -99,7 +101,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

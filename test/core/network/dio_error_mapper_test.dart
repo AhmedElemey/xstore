@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xstore/core/error/exceptions.dart';
+import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/core/network/dio_error_mapper.dart';
 
 DioException _badResponse(int code, Object? data) {
@@ -25,7 +27,10 @@ void main() {
       final mapped = mapDioException(e);
       expect(mapped.toString(), isNot(contains('validateStatus')));
       expect(mapped.toString(), isNot(contains('RequestOptions')));
-      expect(mapped.toString(), 'Something went wrong. Please try again.');
+      expect(
+        mapped.toString(),
+        'Something went wrong. Please try again later.',
+      );
     }
   });
 
@@ -46,7 +51,7 @@ void main() {
     errorMessagesInArabic = true;
     final text = mapDioException(_badResponse(400, null)).toString();
     expect(text, isNot(contains('validateStatus')));
-    expect(text, isNot('Something went wrong. Please try again.'));
+    expect(text, isNot('Something went wrong. Please try again later.'));
   });
 
   test('server-provided message still wins', () {
@@ -54,5 +59,32 @@ void main() {
       mapDioException(_badResponse(500, {'message': 'Boom'})).toString(),
       'Boom',
     );
+  });
+
+  group('userErrorMessage', () {
+    const generic = 'Something went wrong. Please try again later.';
+
+    test('raw errors become the generic message', () {
+      expect(userErrorMessage(StateError('No element')), generic);
+      expect(userErrorMessage(const FormatException('bad json')), generic);
+      expect(userErrorMessage(Exception('boom')), generic);
+    });
+
+    test("the app's own messages pass through", () {
+      expect(
+        userErrorMessage(const ServerException('Invalid code')),
+        'Invalid code',
+      );
+      expect(
+        userErrorMessage(const Failure.server('Out of stock')),
+        'Out of stock',
+      );
+      expect(userErrorMessage(const ServerException()), generic);
+    });
+
+    test('Arabic generic message', () {
+      errorMessagesInArabic = true;
+      expect(userErrorMessage(StateError('x')), 'حصلت مشكلة. حاول تاني بعدين.');
+    });
   });
 }

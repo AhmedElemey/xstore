@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @genericError.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong. Please try again.'**
+  /// **'Something went wrong. Please try again later.'**
   String get genericError;
 
   /// No description provided for @continueWithGoogle.

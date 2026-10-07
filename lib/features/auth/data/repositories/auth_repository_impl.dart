@@ -19,6 +19,7 @@ import '../datasources/auth_remote_datasource.dart';
 import '../datasources/social_auth_datasource.dart';
 import '../../../../core/utils/jwt_payload.dart';
 import '../models/user_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
@@ -26,10 +27,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required SocialAuthDatasource social,
     required FlutterSecureStorage secureStorage,
     FirebaseAuth? firebaseAuth,
-  })  : _remote = remote,
-        _social = social,
-        _secureStorage = secureStorage,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+  }) : _remote = remote,
+       _social = social,
+       _secureStorage = secureStorage,
+       _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final AuthRemoteDataSource _remote;
   final SocialAuthDatasource _social;
@@ -66,7 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       return Right(model.toEntity());
     } catch (e) {
-      return Left(Failure.cache(e.toString()));
+      return Left(Failure.cache(userErrorMessage(e)));
     }
   }
 
@@ -85,7 +86,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -101,7 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -131,7 +132,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -154,7 +155,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -174,7 +175,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -183,7 +184,9 @@ class AuthRepositoryImpl implements AuthRepository {
     ConsumerRegisterParams params,
   ) async {
     try {
-      final model = await _resolveFullUser(await _remote.registerConsumer(params));
+      final model = await _resolveFullUser(
+        await _remote.registerConsumer(params),
+      );
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -193,7 +196,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -202,7 +205,9 @@ class AuthRepositoryImpl implements AuthRepository {
     VendorRegisterParams params,
   ) async {
     try {
-      final model = await _resolveFullUser(await _remote.registerVendor(params));
+      final model = await _resolveFullUser(
+        await _remote.registerVendor(params),
+      );
       await _persistUser(model);
       return Right(model.toEntity());
     } on NetworkException catch (e) {
@@ -212,7 +217,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -236,7 +241,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -250,7 +255,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -274,7 +279,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -288,7 +293,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -305,7 +310,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -321,7 +326,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -341,7 +346,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -367,7 +372,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _secureStorage.delete(key: PrefsKeys.socialAuthCredentials);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.cache(e.toString()));
+      return Left(Failure.cache(userErrorMessage(e)));
     }
   }
 
@@ -393,7 +398,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
+      return Left(Failure.socialAuth(userErrorMessage(e)));
     }
   }
 
@@ -405,7 +410,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on SocialAuthException catch (e) {
       return Left(Failure.socialAuth(e.message));
     } catch (e) {
-      return Left(Failure.socialAuth(e.toString()));
+      return Left(Failure.socialAuth(userErrorMessage(e)));
     }
   }
 
@@ -463,7 +468,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _persistUser(model);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.cache(e.toString()));
+      return Left(Failure.cache(userErrorMessage(e)));
     }
   }
 

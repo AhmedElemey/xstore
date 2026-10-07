@@ -35,6 +35,7 @@ import '../widgets/quantity_selector.dart';
 import '../widgets/reviews_summary.dart';
 import '../widgets/seller_card.dart';
 import '../widgets/similar_products_section.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key, required this.productId});
@@ -124,7 +125,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       skipLoadingOnReload: true,
       error: (e, _) => _StatusScaffold(
         child: ErrorStateWidget(
-          message: e.toString(),
+          message: userErrorMessage(e),
           retryLabel: context.l10n.retry,
           onRetry: () => ref
               .read(productDetailProvider(widget.productId).notifier)

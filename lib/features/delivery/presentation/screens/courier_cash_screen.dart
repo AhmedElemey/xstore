@@ -14,6 +14,7 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../../domain/courier_order_flow.dart';
 import '../providers/courier_cash_wallet_provider.dart';
 import '../widgets/courier_card_sections.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 /// Cash tab: what the courier is holding from COD collections and which
 /// delivered orders make up that amount, until it's handed over to xStore.
@@ -58,7 +59,7 @@ class CourierCashScreen extends ConsumerWidget {
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
                     error: (e, _) => ErrorStateWidget(
-                      message: e.toString(),
+                      message: userErrorMessage(e),
                       onRetry: () => ref.invalidate(courierCashWalletProvider),
                     ),
                     data: (wallet) => RefreshIndicator(

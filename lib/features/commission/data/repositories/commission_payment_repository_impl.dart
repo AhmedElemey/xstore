@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/commission_payment_method.dart';
 import '../../domain/repositories/commission_payment_repository.dart';
 import '../datasources/commission_payment_remote_datasource.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class CommissionPaymentRepositoryImpl implements CommissionPaymentRepository {
   CommissionPaymentRepositoryImpl(this._remote);
@@ -16,7 +17,7 @@ class CommissionPaymentRepositoryImpl implements CommissionPaymentRepository {
     try {
       return Right(await _remote.getPayToAccounts());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -34,7 +35,7 @@ class CommissionPaymentRepositoryImpl implements CommissionPaymentRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

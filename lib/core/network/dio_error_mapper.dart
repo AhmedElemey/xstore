@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 
 import '../error/exceptions.dart';
+import '../error/failures.dart';
 import '../localization/app_localizations.dart';
 import 'app_error_messages.dart';
 
@@ -55,7 +56,7 @@ AppException mapDioException(DioException e) {
             return const ServerException(accountNotVerifiedErrorCode);
           }
         }
-        return UnauthorizedException(displayMessage ?? _genericMessage());
+        return UnauthorizedException(displayMessage ?? genericErrorMessage());
       }
       if (code == 429) {
         return const ServerException(rateLimitErrorCode);
@@ -84,10 +85,10 @@ AppException mapDioException(DioException e) {
       }
       return ServerException(
         _friendlyServerMessage(serverMessage, displayMessage) ??
-            _genericMessage(),
+            genericErrorMessage(),
       );
     default:
-      return ServerException(_genericMessage());
+      return ServerException(genericErrorMessage());
   }
 }
 
@@ -154,8 +155,22 @@ String? _friendlyServerMessage(String? serverMessage, String? displayMessage) {
   return displayMessage;
 }
 
-/// Fallback when the backend sent no usable message. Never `DioException.message`:
-/// that is developer text ("...validateStatus...") which must not reach users.
-String _genericMessage() => errorMessagesInArabic
+/// Fallback when there is no user-facing message. Never `DioException.message`
+/// or an arbitrary `e.toString()`: that is developer text ("...validateStatus...",
+/// "Bad state: No element") which must not reach users.
+String genericErrorMessage() => errorMessagesInArabic
     ? lookupAppLocalizations(const Locale('ar')).genericError
-    : 'Something went wrong. Please try again.';
+    : 'Something went wrong. Please try again later.';
+
+/// What a catch-all or error state may show: a [Failure]'s or the app's own
+/// exception message (already user-facing, e.g. mapped server text), otherwise
+/// [genericErrorMessage].
+String userErrorMessage(Object e) {
+  final message = switch (e) {
+    Failure() => e.toString(),
+    AppException(:final message) => message,
+    SocialAuthException(:final message) => message,
+    _ => null,
+  };
+  return (message == null || message.isEmpty) ? genericErrorMessage() : message;
+}

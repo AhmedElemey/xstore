@@ -5,6 +5,7 @@ import '../../domain/entities/search_result_entity.dart';
 import '../../domain/repositories/explore_repository.dart';
 import '../datasources/explore_remote_datasource.dart';
 import '../models/search_result_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class ExploreRepositoryImpl implements ExploreRepository {
   ExploreRepositoryImpl(this._remote);
@@ -31,7 +32,7 @@ class ExploreRepositoryImpl implements ExploreRepository {
       );
       return Right(models.map((m) => m.toEntity()).toList());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -41,7 +42,7 @@ class ExploreRepositoryImpl implements ExploreRepository {
       final list = await _remote.getSuggestions(query);
       return Right(list);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

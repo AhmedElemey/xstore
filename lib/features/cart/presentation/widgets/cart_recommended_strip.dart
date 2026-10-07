@@ -13,6 +13,7 @@ import '../../../home/presentation/providers/home_dependencies.dart';
 import '../../../home/presentation/providers/recommended_provider.dart';
 import '../../../home/presentation/widgets/product_card.dart';
 import '../../../listing/domain/entities/listing_entity.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class CartRecommendedStrip extends ConsumerWidget {
   const CartRecommendedStrip({super.key});
@@ -54,9 +55,8 @@ class CartRecommendedStrip extends ConsumerWidget {
                       discountPercent: 0,
                       listingId: listing.id,
                       isSoldOut: listing.status == ListingStatus.sold,
-                      onTap: () => context.push(
-                        '${AppRoutes.product}/${listing.id}',
-                      ),
+                      onTap: () =>
+                          context.push('${AppRoutes.product}/${listing.id}'),
                     ),
                   );
                 },
@@ -76,7 +76,7 @@ class CartRecommendedStrip extends ConsumerWidget {
             ),
           ),
           error: (e, _) => ErrorStateWidget(
-            message: e.toString(),
+            message: userErrorMessage(e),
             onRetry: () => ref.invalidate(homeFeedProvider),
           ),
         ),

@@ -22,6 +22,7 @@ import 'profile_state.dart';
 import '../../../../shared/providers/shared_providers.dart';
 import '../../../../core/utils/location_service.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 part 'profile_provider.g.dart';
 
@@ -290,7 +291,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       );
     } catch (e) {
       if (epoch != _sessionEpoch || requestId != _refreshRequestId) return;
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: userErrorMessage(e));
     }
   }
 

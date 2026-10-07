@@ -7,6 +7,7 @@ import '../../domain/entities/store_category_entity.dart';
 import '../../domain/repositories/store_category_repository.dart';
 import '../datasources/store_category_remote_datasource.dart';
 import '../models/store_category_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
   const StoreCategoryRepositoryImpl(this._remote);
@@ -15,13 +16,12 @@ class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
 
   @override
   Future<Either<Failure, PaginatedResult<StoreCategoryEntity>>>
-      getStoreCategories({
-    required int page,
-    required int pageSize,
-  }) async {
+  getStoreCategories({required int page, required int pageSize}) async {
     try {
-      final result =
-          await _remote.getStoreCategories(page: page, pageSize: pageSize);
+      final result = await _remote.getStoreCategories(
+        page: page,
+        pageSize: pageSize,
+      );
       return Right(
         PaginatedResult(
           items: result.items.map((e) => e.toEntity()).toList(),
@@ -35,7 +35,7 @@ class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

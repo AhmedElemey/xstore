@@ -38,7 +38,7 @@
   "phoneVerifiedSuccess": "تم التحقق من رقم الهاتف",
   "smsRatesNote": "قد يتم تطبيق رسوم SMS عادية",
   "noInternet": "مفيش اتصال بالإنترنت. حاول تاني.",
-  "genericError": "حصلت مشكلة. حاول تاني.",
+  "genericError": "حصلت مشكلة. حاول تاني بعدين.",
   "continueWithGoogle": "كمل بـ Google",
   "continueWithApple": "كمل بـ Apple",
   "continueWithFacebook": "كمل بـ Facebook",

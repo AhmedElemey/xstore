@@ -38,7 +38,7 @@
   "phoneVerifiedSuccess": "Phone number verified",
   "smsRatesNote": "Standard SMS rates may apply",
   "noInternet": "No internet connection. Please try again.",
-  "genericError": "Something went wrong. Please try again.",
+  "genericError": "Something went wrong. Please try again later.",
   "continueWithGoogle": "Continue with Google",
   "continueWithApple": "Continue with Apple",
   "continueWithFacebook": "Continue with Facebook",

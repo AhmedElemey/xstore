@@ -7,19 +7,22 @@ import '../../domain/entities/product_detail_entity.dart';
 import '../../domain/entities/review_entity.dart';
 import '../../domain/entities/review_write_params.dart';
 import '../../domain/repositories/product_repository.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   ProductRepositoryImpl({required ProductRemoteDataSource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   final ProductRemoteDataSource _remote;
 
   @override
-  Future<Either<Failure, ProductDetailEntity>> getProductDetail(String id) async {
+  Future<Either<Failure, ProductDetailEntity>> getProductDetail(
+    String id,
+  ) async {
     try {
       return Right(await _remote.fetchProductDetail(id));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -36,7 +39,7 @@ class ProductRepositoryImpl implements ProductRepository {
         ),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -55,7 +58,7 @@ class ProductRepositoryImpl implements ProductRepository {
         ),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -69,7 +72,7 @@ class ProductRepositoryImpl implements ProductRepository {
         await _remote.createReview(listingId: listingId, params: params),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -88,7 +91,7 @@ class ProductRepositoryImpl implements ProductRepository {
         ),
       );
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -101,7 +104,7 @@ class ProductRepositoryImpl implements ProductRepository {
       await _remote.deleteReview(listingId: listingId, reviewId: reviewId);
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

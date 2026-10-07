@@ -19,8 +19,9 @@ class _FailedProfile extends ProfileNotifier {
   static var forced = false;
 
   @override
-  ProfileState build() =>
-      const ProfileState(error: 'Something went wrong. Please try again.');
+  ProfileState build() => const ProfileState(
+    error: 'Something went wrong. Please try again later.',
+  );
 
   @override
   Future<void> refreshProfileData({

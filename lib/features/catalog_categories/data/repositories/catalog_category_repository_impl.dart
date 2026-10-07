@@ -6,6 +6,7 @@ import '../../domain/entities/catalog_category_entity.dart';
 import '../../domain/repositories/catalog_category_repository.dart';
 import '../datasources/catalog_category_remote_datasource.dart';
 import '../models/catalog_category_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class CatalogCategoryRepositoryImpl implements CatalogCategoryRepository {
   const CatalogCategoryRepositoryImpl(this._remote);
@@ -22,7 +23,7 @@ class CatalogCategoryRepositoryImpl implements CatalogCategoryRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

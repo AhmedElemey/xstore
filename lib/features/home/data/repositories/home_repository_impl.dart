@@ -11,6 +11,7 @@ import '../datasources/home_remote_datasource.dart';
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/deal_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   HomeRepositoryImpl(this._remote);
@@ -27,7 +28,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -41,7 +42,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -72,11 +73,12 @@ class HomeRepositoryImpl implements HomeRepository {
       // two to the hot-deals list.
       final aggregate = await _remote.fetchHomeAggregate();
       final aggregateDeals = aggregate?.hotDeals ?? const <DealModel>[];
-      final hotDeals = (aggregateDeals.isNotEmpty
-              ? aggregateDeals
-              : await _remote.fetchHotDeals())
-          .map((m) => m.toEntity())
-          .toList();
+      final hotDeals =
+          (aggregateDeals.isNotEmpty
+                  ? aggregateDeals
+                  : await _remote.fetchHotDeals())
+              .map((m) => m.toEntity())
+              .toList();
       final now = DateTime.now();
 
       final aggregateArrivals = aggregate?.newArrivals ?? const <DealModel>[];
@@ -109,11 +111,12 @@ class HomeRepositoryImpl implements HomeRepository {
             .toList();
       }
 
-      final aggregatePicks = aggregate?.recommendedForYou ?? const <DealModel>[];
+      final aggregatePicks =
+          aggregate?.recommendedForYou ?? const <DealModel>[];
       final recommended = aggregatePicks.isNotEmpty
           ? aggregatePicks
-              .map((d) => _listingFromDeal(d.toEntity(), now))
-              .toList()
+                .map((d) => _listingFromDeal(d.toEntity(), now))
+                .toList()
           : hotDeals.map((d) => _listingFromDeal(d, now)).toList();
 
       return Right((
@@ -126,7 +129,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

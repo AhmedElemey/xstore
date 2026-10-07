@@ -6,6 +6,7 @@ import '../../domain/entities/listing_entity.dart';
 import '../../domain/repositories/listing_repository.dart';
 import '../datasources/listing_remote_datasource.dart';
 import '../models/listing_model.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class ListingRepositoryImpl implements ListingRepository {
   ListingRepositoryImpl(this._remote);
@@ -56,7 +57,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -70,7 +71,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -84,7 +85,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -138,7 +139,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -152,7 +153,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -169,7 +170,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 
@@ -183,7 +184,7 @@ class ListingRepositoryImpl implements ListingRepository {
     } on ServerException catch (e) {
       return Left(Failure.server(e.message));
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(Failure.server(userErrorMessage(e)));
     }
   }
 }

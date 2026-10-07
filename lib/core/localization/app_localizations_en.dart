@@ -127,7 +127,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noInternet => 'No internet connection. Please try again.';
 
   @override
-  String get genericError => 'Something went wrong. Please try again.';
+  String get genericError => 'Something went wrong. Please try again later.';
 
   @override
   String get continueWithGoogle => 'Continue with Google';

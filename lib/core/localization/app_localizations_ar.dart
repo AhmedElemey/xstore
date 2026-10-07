@@ -128,7 +128,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noInternet => 'مفيش اتصال بالإنترنت. حاول تاني.';
 
   @override
-  String get genericError => 'حصلت مشكلة. حاول تاني.';
+  String get genericError => 'حصلت مشكلة. حاول تاني بعدين.';
 
   @override
   String get continueWithGoogle => 'كمل بـ Google';

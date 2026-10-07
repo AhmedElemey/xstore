@@ -15,6 +15,7 @@ import '../providers/home_dependencies.dart';
 import '../providers/recommended_provider.dart';
 import 'product_card.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class RecommendedSection extends ConsumerWidget {
   const RecommendedSection({super.key});
@@ -69,7 +70,7 @@ class RecommendedSection extends ConsumerWidget {
             ),
           ),
           error: (e, _) => ErrorStateWidget(
-            message: e.toString(),
+            message: userErrorMessage(e),
             onRetry: () => ref.invalidate(homeFeedProvider),
           ),
         ),

@@ -33,6 +33,7 @@ import '../widgets/home_header.dart';
 import '../widgets/hot_deals_section.dart';
 import '../widgets/new_arrivals_grid.dart';
 import '../widgets/recommended_section.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -121,7 +122,7 @@ class HomeScreen extends ConsumerWidget {
                         ).scaleIn(delay: const Duration(milliseconds: 100)),
                         loading: () => const _BannerShimmer(),
                         errorBuilder: (e) => ErrorStateWidget(
-                          message: e.toString(),
+                          message: userErrorMessage(e),
                           onRetry: () => ref.invalidate(bannersProvider),
                         ),
                       ),
@@ -149,7 +150,7 @@ class HomeScreen extends ConsumerWidget {
                           child: _BannerShimmer(),
                         ),
                         errorBuilder: (e) => ErrorStateWidget(
-                          message: e.toString(),
+                          message: userErrorMessage(e),
                           onRetry: () => ref.invalidate(categoriesProvider),
                         ),
                       ),
@@ -161,7 +162,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         loading: () => const _DealsSkeleton(),
                         errorBuilder: (e) => ErrorStateWidget(
-                          message: e.toString(),
+                          message: userErrorMessage(e),
                           onRetry: () => ref.invalidate(homeFeedProvider),
                         ),
                       ),
@@ -184,7 +185,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         loading: () => const _DealsSkeleton(),
                         errorBuilder: (e) => ErrorStateWidget(
-                          message: e.toString(),
+                          message: userErrorMessage(e),
                           onRetry: () => ref.invalidate(homeFeedProvider),
                         ),
                       ),
