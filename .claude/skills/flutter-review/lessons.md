@@ -1129,3 +1129,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-06 — Screens that edit loaded data show the error state when the load failed
 - **Rule:** An edit form bound to a loaded entity must render `ErrorStateWidget` + retry (`refreshProfileData(force: true)`) when the entity is null, never an empty editable form that could save blanks. Reuse `Validators.personFullName` for names.
 - **Where it applies:** `edit_profile_screen.dart`.
+
+### 2026-10-07 — Every state of an Orbit screen needs the sky, not just the data state
+- **Rule:** When a screen returns early for loading/error/not-found (`Scaffold(body: XSkeleton())`, an error `Scaffold` with a plain `AppBar`), wrap that branch in `OrbitBackground` too and use the frosted `AuthBackButton` header — otherwise every load flashes the old flat look. Audit with: files whose `Scaffold(` count exceeds their `OrbitBackground(` count. Native launch backgrounds (Android `launch_background` colour + values-night, iOS `LaunchBackground` colour asset) must match the sky.
+- **Where it applies:** any restyled screen with `.when(loading:, error:)` or early returns; skeletons in `lib/shared/widgets/skeletons`; `android/app/src/main/res`, `ios/Runner/Base.lproj/LaunchScreen.storyboard`.
