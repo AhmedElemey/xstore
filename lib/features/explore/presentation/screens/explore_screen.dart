@@ -72,7 +72,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final n = ref.read(exploreProvider.notifier);
     if (cat != null) {
       n.bootstrapFromRouteCategory(cat);
-    } else if (firstLoad) {
+    } else {
       unawaited(n.search(''));
     }
     _q.text = ref.read(exploreProvider).query;
