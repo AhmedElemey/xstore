@@ -23,10 +23,18 @@ const kCommissionPaymentAccountsSettingKey = 'commission_payment_accounts';
 ///     receipt      file
 ///   → 201 { id, status: "Pending", ... }
 ///
-/// Live: the pay-to accounts are a General Setting, read from
+/// The pay-to accounts are a General Setting, read from
+///
+///   GET /api/general-settings/by-key/commission_payment_accounts
+///
+/// (in collection v10), falling back to the live-confirmed list search
 ///
 ///   GET /api/general-settings?search=commission_payment_accounts
 ///   → { items: [{ key, value: "<JSON keyed by method wire name>", ... }] }
+///
+/// TODO(backend): the by-key response shape is unconfirmed (no example in
+/// the collection); [parsePayToAccounts] accepts a bare row or a `{data}`
+/// envelope. Drop the search fallback once by-key is confirmed live.
 class CommissionPaymentRemoteDataSource {
   CommissionPaymentRemoteDataSource(this._dio);
 
@@ -34,6 +42,17 @@ class CommissionPaymentRemoteDataSource {
 
   Future<Map<CommissionPaymentMethod, String>> getPayToAccounts() async {
     if (MockConfig.useMock) return MockConfig.simulate(const {});
+    try {
+      final response = await _dio.get<dynamic>(
+        ApiEndpoints.generalSettingByKey(kCommissionPaymentAccountsSettingKey),
+      );
+      final accounts = parsePayToAccounts(response.data);
+      if (accounts.isNotEmpty) return accounts;
+    } on DioException catch (e) {
+      // Only a missing route falls back; offline/401/5xx surface as errors.
+      final code = e.response?.statusCode;
+      if (code != 404 && code != 405) throw mapDioException(e);
+    }
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.generalSettings,

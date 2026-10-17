@@ -1748,6 +1748,18 @@ abstract class AppLocalizations {
   /// **'Add the transfer receipt'**
   String get commissionPaymentReceiptRequired;
 
+  /// No description provided for @commissionPaymentReceiptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt image is no longer available. Please add it again.'**
+  String get commissionPaymentReceiptUnavailable;
+
+  /// No description provided for @commissionPaymentReceiptInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a JPG, PNG or WebP image under 5 MB.'**
+  String get commissionPaymentReceiptInvalid;
+
   /// No description provided for @commissionPaymentRemoveReceipt.
   ///
   /// In en, this message translates to:

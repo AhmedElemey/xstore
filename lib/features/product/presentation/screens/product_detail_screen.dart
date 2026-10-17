@@ -15,6 +15,7 @@ import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../../listing/domain/entities/listing_entity.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/utils/whatsapp.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
@@ -356,7 +357,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
             child: ProductStickyBar(
               showAddToCart: !isVendor,
-              isSoldOut: data.stockQuantity < 1,
+              isSoldOut: isSoldOutListing(
+                status: listing.status,
+                stock: data.stockQuantity,
+              ),
               isAddingToCart: data.isAddingToCart,
               onChat: () => _messageSeller(
                 listingId: listing.id,

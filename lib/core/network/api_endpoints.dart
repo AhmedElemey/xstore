@@ -211,8 +211,13 @@ abstract final class ApiEndpoints {
   static const String vendorCommissionPayments =
       '$_api/vendor/commission-payments';
 
-  /// General Settings (the admin dashboard's remote app config). The list is
-  /// public (no login) and filters with `?search=`; there is no read-by-key
-  /// route, so callers pick the row whose `key` matches exactly.
+  /// General Settings (the admin dashboard's remote app config). Reads are
+  /// public (no login). The list filters with `?search=` (substring match, so
+  /// callers pick the row whose `key` matches exactly); collection v10 also
+  /// has a read-by-key route.
+  /// TODO(backend): confirm the by-key response shape; no example in the
+  /// collection and it hasn't been probed live.
   static const String generalSettings = '$_api/general-settings';
+  static String generalSettingByKey(String key) =>
+      '$_api/general-settings/by-key/$key';
 }

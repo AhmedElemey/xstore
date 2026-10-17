@@ -103,7 +103,7 @@ class _RecommendedList extends StatelessWidget {
                     : null,
                 discountPercent: 0,
                 listingId: listing.id,
-                isSoldOut: listing.status == ListingStatus.sold,
+                isSoldOut: isSoldOutListing(status: listing.status),
                 onTap: () => context.push('${AppRoutes.product}/${listing.id}'),
               )
                   .fadeSlideIn(delay: delay, offsetY: 0)

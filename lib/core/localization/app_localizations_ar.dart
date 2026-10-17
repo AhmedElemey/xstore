@@ -865,6 +865,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commissionPaymentReceiptRequired => 'أضف إيصال التحويل';
 
   @override
+  String get commissionPaymentReceiptUnavailable =>
+      'صورة الإيصال لم تعد متاحة. أضفها مرة أخرى.';
+
+  @override
+  String get commissionPaymentReceiptInvalid =>
+      'استخدم صورة بصيغة JPG أو PNG أو WebP لا يتجاوز حجمها 5 ميجابايت.';
+
+  @override
   String get commissionPaymentRemoveReceipt => 'إزالة الإيصال';
 
   @override

@@ -631,6 +631,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return _publicSellerMaps!;
     }
     List<Map<String, dynamic>> maps = const [];
+    // TODO(backend): GET /api/listings?storeId= would filter server-side, but
+    // the store screen only has the seller's user id, not the numeric store
+    // id. Until it is available here, this fetches one page and filters by
+    // userId client-side, so a seller whose listings aren't in the first 50
+    // rows is under-reported.
     try {
       maps = _listingMapsFromResponse(
         await _dio.get<dynamic>(

@@ -11,6 +11,13 @@ enum ListingStatus {
   rejected,
 }
 
+/// The one sold-out rule (cards, Explore, product detail): the backend keeps
+/// a listing Active at `stockQuantity: 0`, so sold out means status is sold
+/// OR the stock is known and <= 0. A missing [stock] is available — the cart
+/// add and checkout stock checks are the real gate.
+bool isSoldOutListing({ListingStatus? status, num? stock}) =>
+    status == ListingStatus.sold || (stock != null && stock <= 0);
+
 /// Mirrors the backend `ListingCondition` C# enum exactly
 /// (New=1, LikeNew=2, Good=3, UsedForParts=4) — wire codes live in
 /// `listing_model.dart`. Do not add app-only values: anything not in the

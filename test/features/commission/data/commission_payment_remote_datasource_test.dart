@@ -27,6 +27,36 @@ class _RecordingInterceptor extends Interceptor {
   }
 }
 
+/// Answers each request from [answer]: a non-2xx status rejects like Dio does.
+class _ScriptedInterceptor extends Interceptor {
+  _ScriptedInterceptor(this.answer);
+
+  final (int, dynamic) Function(RequestOptions options) answer;
+  final requests = <RequestOptions>[];
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    requests.add(options);
+    final (status, data) = answer(options);
+    final response = Response(
+      requestOptions: options,
+      statusCode: status,
+      data: data,
+    );
+    if (status >= 400) {
+      handler.reject(
+        DioException(
+          requestOptions: options,
+          response: response,
+          type: DioExceptionType.badResponse,
+        ),
+      );
+    } else {
+      handler.resolve(response);
+    }
+  }
+}
+
 void main() {
   // Field names are from the backend Postman collection (v10).
   group('CommissionPaymentRemoteDataSource', () {
@@ -115,27 +145,11 @@ void main() {
     );
 
     test(
-      'getPayToAccounts reads the commission_payment_accounts setting',
+      'getPayToAccounts reads the by-key route first',
       () async {
-        // Shape of the live GET /api/general-settings?search=… page.
         final interceptor = _RecordingInterceptor({
-          'items': [
-            {
-              'id': 4,
-              'key': 'commission_payment_accounts_old',
-              'value': '{"InstaPay":"old@instapay"}',
-            },
-            {
-              'id': 5,
-              'key': 'commission_payment_accounts',
-              'value': '{"InstaPay":"xstore@instapay"}',
-              'dataType': 'Json',
-            },
-          ],
-          'totalCount': 2,
-          'page': 1,
-          'pageSize': 20,
-          'totalPages': 1,
+          'key': 'commission_payment_accounts',
+          'value': '{"InstaPay":"xstore@instapay"}',
         });
         final dio = Dio()..interceptors.add(interceptor);
 
@@ -144,11 +158,111 @@ void main() {
         ).getPayToAccounts();
 
         final request = interceptor.requests.single;
-        expect(request.path, ApiEndpoints.generalSettings);
-        expect(request.queryParameters, {
-          'search': 'commission_payment_accounts',
-        });
+        expect(request.method, 'GET');
+        expect(
+          request.path,
+          ApiEndpoints.generalSettingByKey('commission_payment_accounts'),
+        );
+        expect(
+          request.path,
+          endsWith('/general-settings/by-key/commission_payment_accounts'),
+        );
         expect(accounts, {CommissionPaymentMethod.instaPay: 'xstore@instapay'});
+      },
+      skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
+    );
+
+    for (final status in [404, 405]) {
+      test(
+        'getPayToAccounts falls back to ?search= when by-key is $status',
+        () async {
+          // Shape of the live GET /api/general-settings?search=… page.
+          final interceptor = _ScriptedInterceptor(
+            (options) => options.path.contains('by-key')
+                ? (status, null)
+                : (
+                    200,
+                    {
+                      'items': [
+                        {
+                          'id': 4,
+                          'key': 'commission_payment_accounts_old',
+                          'value': '{"InstaPay":"old@instapay"}',
+                        },
+                        {
+                          'id': 5,
+                          'key': 'commission_payment_accounts',
+                          'value': '{"InstaPay":"xstore@instapay"}',
+                          'dataType': 'Json',
+                        },
+                      ],
+                      'totalCount': 2,
+                    },
+                  ),
+          );
+          final dio = Dio()..interceptors.add(interceptor);
+
+          final accounts = await CommissionPaymentRemoteDataSource(
+            dio,
+          ).getPayToAccounts();
+
+          expect(interceptor.requests, hasLength(2));
+          final fallback = interceptor.requests.last;
+          expect(fallback.path, ApiEndpoints.generalSettings);
+          expect(fallback.queryParameters, {
+            'search': 'commission_payment_accounts',
+          });
+          expect(accounts, {
+            CommissionPaymentMethod.instaPay: 'xstore@instapay',
+          });
+        },
+        skip: MockConfig.useMock
+            ? 'MOCK=true short-circuits the request'
+            : null,
+      );
+    }
+
+    test(
+      'getPayToAccounts falls back to ?search= when by-key is unparseable',
+      () async {
+        final interceptor = _ScriptedInterceptor(
+          (options) => options.path.contains('by-key')
+              ? (200, 'not a setting')
+              : (
+                  200,
+                  {
+                    'items': [
+                      {
+                        'key': 'commission_payment_accounts',
+                        'value': '{"VodafoneCash":"01000000000"}',
+                      },
+                    ],
+                  },
+                ),
+        );
+        final dio = Dio()..interceptors.add(interceptor);
+
+        final accounts = await CommissionPaymentRemoteDataSource(
+          dio,
+        ).getPayToAccounts();
+
+        expect(interceptor.requests, hasLength(2));
+        expect(accounts, {CommissionPaymentMethod.vodafoneCash: '01000000000'});
+      },
+      skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
+    );
+
+    test(
+      'getPayToAccounts does not fall back on a server error',
+      () async {
+        final interceptor = _ScriptedInterceptor((_) => (500, null));
+        final dio = Dio()..interceptors.add(interceptor);
+
+        await expectLater(
+          CommissionPaymentRemoteDataSource(dio).getPayToAccounts(),
+          throwsA(isA<AppException>()),
+        );
+        expect(interceptor.requests, hasLength(1));
       },
       skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
     );
@@ -222,10 +336,22 @@ void main() {
       CommissionPaymentMethod.fromWire(' INSTAPAY '),
       CommissionPaymentMethod.instaPay,
     );
-    expect(CommissionPaymentMethod.fromWire('1'), CommissionPaymentMethod.instaPay);
-    expect(CommissionPaymentMethod.fromWire('2'), CommissionPaymentMethod.vodafoneCash);
-    expect(CommissionPaymentMethod.fromWire('3'), CommissionPaymentMethod.orangeCash);
-    expect(CommissionPaymentMethod.fromWire('4'), CommissionPaymentMethod.etisalatCash);
+    expect(
+      CommissionPaymentMethod.fromWire('1'),
+      CommissionPaymentMethod.instaPay,
+    );
+    expect(
+      CommissionPaymentMethod.fromWire('2'),
+      CommissionPaymentMethod.vodafoneCash,
+    );
+    expect(
+      CommissionPaymentMethod.fromWire('3'),
+      CommissionPaymentMethod.orangeCash,
+    );
+    expect(
+      CommissionPaymentMethod.fromWire('4'),
+      CommissionPaymentMethod.etisalatCash,
+    );
     expect(CommissionPaymentMethod.fromWire('0'), isNull);
     expect(CommissionPaymentMethod.fromWire('5'), isNull);
     expect(CommissionPaymentMethod.fromWire(null), isNull);

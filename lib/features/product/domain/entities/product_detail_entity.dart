@@ -12,7 +12,8 @@ class ProductDetailEntity with _$ProductDetailEntity {
   const factory ProductDetailEntity({
     required ListingEntity listing,
     double? compareAtPrice,
-    @Default(0) int stockQuantity,
+    /// Null when the API sent no stock count (treated as available).
+    int? stockQuantity,
     @Default('') String locationLine,
     ProductSellerEntity? seller,
     @Default({}) Map<String, String> specifications,

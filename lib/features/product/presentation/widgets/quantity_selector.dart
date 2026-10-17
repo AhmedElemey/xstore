@@ -18,14 +18,16 @@ class QuantitySelector extends StatelessWidget {
   });
 
   final int quantity;
-  final int maxQuantity;
+  /// Null when the stock count is unknown (no upper bound shown).
+  final int? maxQuantity;
   final VoidCallback onDecrement;
   final VoidCallback onIncrement;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lowStock = maxQuantity <= 5 && maxQuantity > 0;
+    final max = maxQuantity;
+    final lowStock = max != null && max <= 5 && max > 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -59,7 +61,7 @@ class QuantitySelector extends StatelessWidget {
                   ),
                   _StepperIcon(
                     icon: LucideIcons.plus,
-                    onTap: quantity < maxQuantity ? onIncrement : null,
+                    onTap: max == null || quantity < max ? onIncrement : null,
                   ),
                 ],
               ),

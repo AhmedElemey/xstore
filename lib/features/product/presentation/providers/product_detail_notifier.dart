@@ -45,12 +45,15 @@ class ProductDetail extends _$ProductDetail {
   ) {
     final base = _fromEntity(e);
     if (previous == null) return base;
+    final stock = base.stockQuantity;
     final len = base.listing?.imageUrls.length ?? 0;
     final maxIdx = len > 0 ? len - 1 : 0;
     return base.copyWith(
-      quantity: base.stockQuantity < 1
-          ? 1
-          : previous.quantity.clamp(1, base.stockQuantity),
+      quantity: stock == null
+          ? previous.quantity
+          : stock < 1
+              ? 1
+              : previous.quantity.clamp(1, stock),
       selectedImageIndex: previous.selectedImageIndex.clamp(0, maxIdx),
       isDescriptionExpanded: previous.isDescriptionExpanded,
       isAddingToCart: false,
@@ -178,7 +181,8 @@ class ProductDetail extends _$ProductDetail {
     final v = state.valueOrNull;
     if (v?.listing == null) return;
     final maxQ = v!.stockQuantity;
-    if (v.quantity >= maxQ) return;
+    // Unknown stock: the cart add is the gate.
+    if (maxQ != null && v.quantity >= maxQ) return;
     state = AsyncData(v.copyWith(quantity: v.quantity + 1));
   }
 

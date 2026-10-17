@@ -303,6 +303,8 @@
   "commissionPaymentReceiptLabel": "إيصال التحويل",
   "commissionPaymentReceiptHint": "أضف لقطة شاشة أو صورة للتحويل الناجح",
   "commissionPaymentReceiptRequired": "أضف إيصال التحويل",
+  "commissionPaymentReceiptUnavailable": "صورة الإيصال لم تعد متاحة. أضفها مرة أخرى.",
+  "commissionPaymentReceiptInvalid": "استخدم صورة بصيغة JPG أو PNG أو WebP لا يتجاوز حجمها 5 ميجابايت.",
   "commissionPaymentRemoveReceipt": "إزالة الإيصال",
   "commissionPaymentSubmit": "إرسال للمراجعة",
   "commissionPaymentSubmitted": "تم إرسال الدفعة للمراجعة. يتحدّث رصيدك بعد الموافقة عليها.",

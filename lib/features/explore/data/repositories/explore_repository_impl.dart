@@ -19,6 +19,8 @@ class ExploreRepositoryImpl implements ExploreRepository {
     double? maxPrice,
     String? condition,
     int? categoryId,
+    bool? shippingAvailable,
+    double? minimumRating,
   }) async {
     try {
       final models = await _remote.searchListings(
@@ -28,6 +30,8 @@ class ExploreRepositoryImpl implements ExploreRepository {
         maxPrice: maxPrice,
         condition: condition,
         categoryId: categoryId,
+        shippingAvailable: shippingAvailable,
+        minimumRating: minimumRating,
       );
       return Right(models.map((m) => m.toEntity()).toList());
     } catch (e) {

@@ -862,6 +862,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commissionPaymentReceiptRequired => 'Add the transfer receipt';
 
   @override
+  String get commissionPaymentReceiptUnavailable =>
+      'The receipt image is no longer available. Please add it again.';
+
+  @override
+  String get commissionPaymentReceiptInvalid =>
+      'Use a JPG, PNG or WebP image under 5 MB.';
+
+  @override
   String get commissionPaymentRemoveReceipt => 'Remove receipt';
 
   @override

@@ -110,25 +110,45 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     if (aggregate != null && aggregate.hotDeals.isNotEmpty) {
       return aggregate.hotDeals.take(_hotDealsCount).toList();
     }
-    // Fallback: no dedicated hot-deals data from /api/home — derive from
-    // GET /api/listings instead (any listing with compareAtPrice > price
-    // is discounted; biggest discounts first).
+    // Fallback: /api/home carried no hot deals. Ask the server for flagged
+    // ones first, then derive from GET /api/listings (any listing with
+    // compareAtPrice > price is discounted; biggest discounts first).
+    // TODO(backend): confirm `isHotDeal` semantics — if nothing flags
+    // listings it returns empty and the derivation below still applies.
     try {
-      final response = await _dio.get<dynamic>(
-        ApiEndpoints.apiListings,
-        queryParameters: {'page': 1, 'pageSize': 40},
-        options: ApiAuthHeaders.public(),
-      );
-      final deals = unwrapJsonObjectList(response.data)
-          .map(_dealFromListing)
-          .whereType<DealModel>()
-          .toList()
-        ..sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
+      var deals = const <DealModel>[];
+      try {
+        deals = await _dealsFromListings({
+          'page': 1,
+          'pageSize': 40,
+          'isHotDeal': true,
+        });
+      } on DioException {
+        // Param unsupported or failed — derive from the plain listing below.
+      }
+      if (deals.isEmpty) {
+        deals = await _dealsFromListings({'page': 1, 'pageSize': 40});
+      }
       return deals.take(_hotDealsCount).toList();
     } on DioException catch (e) {
       if (_isOffline(e)) return _fallbackDeals();
       throw mapDioException(e);
     }
+  }
+
+  Future<List<DealModel>> _dealsFromListings(
+    Map<String, dynamic> query,
+  ) async {
+    final response = await _dio.get<dynamic>(
+      ApiEndpoints.apiListings,
+      queryParameters: query,
+      options: ApiAuthHeaders.public(),
+    );
+    return unwrapJsonObjectList(response.data)
+        .map(_dealFromListing)
+        .whereType<DealModel>()
+        .toList()
+      ..sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
   }
 
   @override

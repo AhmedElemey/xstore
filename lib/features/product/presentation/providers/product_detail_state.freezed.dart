@@ -22,7 +22,7 @@ mixin _$ProductDetailState {
   bool get isDescriptionExpanded => throw _privateConstructorUsedError;
   bool get isAddingToCart => throw _privateConstructorUsedError;
   double? get compareAtPrice => throw _privateConstructorUsedError;
-  int get stockQuantity => throw _privateConstructorUsedError;
+  int? get stockQuantity => throw _privateConstructorUsedError;
   String get locationLine => throw _privateConstructorUsedError;
   ProductSellerEntity? get seller => throw _privateConstructorUsedError;
   Map<String, String> get specifications => throw _privateConstructorUsedError;
@@ -48,7 +48,7 @@ abstract class $ProductDetailStateCopyWith<$Res> {
       bool isDescriptionExpanded,
       bool isAddingToCart,
       double? compareAtPrice,
-      int stockQuantity,
+      int? stockQuantity,
       String locationLine,
       ProductSellerEntity? seller,
       Map<String, String> specifications,
@@ -80,7 +80,7 @@ class _$ProductDetailStateCopyWithImpl<$Res, $Val extends ProductDetailState>
     Object? isDescriptionExpanded = null,
     Object? isAddingToCart = null,
     Object? compareAtPrice = freezed,
-    Object? stockQuantity = null,
+    Object? stockQuantity = freezed,
     Object? locationLine = null,
     Object? seller = freezed,
     Object? specifications = null,
@@ -113,10 +113,10 @@ class _$ProductDetailStateCopyWithImpl<$Res, $Val extends ProductDetailState>
           ? _value.compareAtPrice
           : compareAtPrice // ignore: cast_nullable_to_non_nullable
               as double?,
-      stockQuantity: null == stockQuantity
+      stockQuantity: freezed == stockQuantity
           ? _value.stockQuantity
           : stockQuantity // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       locationLine: null == locationLine
           ? _value.locationLine
           : locationLine // ignore: cast_nullable_to_non_nullable
@@ -196,7 +196,7 @@ abstract class _$$ProductDetailStateImplCopyWith<$Res>
       bool isDescriptionExpanded,
       bool isAddingToCart,
       double? compareAtPrice,
-      int stockQuantity,
+      int? stockQuantity,
       String locationLine,
       ProductSellerEntity? seller,
       Map<String, String> specifications,
@@ -229,7 +229,7 @@ class __$$ProductDetailStateImplCopyWithImpl<$Res>
     Object? isDescriptionExpanded = null,
     Object? isAddingToCart = null,
     Object? compareAtPrice = freezed,
-    Object? stockQuantity = null,
+    Object? stockQuantity = freezed,
     Object? locationLine = null,
     Object? seller = freezed,
     Object? specifications = null,
@@ -262,10 +262,10 @@ class __$$ProductDetailStateImplCopyWithImpl<$Res>
           ? _value.compareAtPrice
           : compareAtPrice // ignore: cast_nullable_to_non_nullable
               as double?,
-      stockQuantity: null == stockQuantity
+      stockQuantity: freezed == stockQuantity
           ? _value.stockQuantity
           : stockQuantity // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       locationLine: null == locationLine
           ? _value.locationLine
           : locationLine // ignore: cast_nullable_to_non_nullable
@@ -304,7 +304,7 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
       this.isDescriptionExpanded = false,
       this.isAddingToCart = false,
       this.compareAtPrice,
-      this.stockQuantity = 0,
+      this.stockQuantity,
       this.locationLine = '',
       this.seller,
       final Map<String, String> specifications = const {},
@@ -332,8 +332,7 @@ class _$ProductDetailStateImpl implements _ProductDetailState {
   @override
   final double? compareAtPrice;
   @override
-  @JsonKey()
-  final int stockQuantity;
+  final int? stockQuantity;
   @override
   @JsonKey()
   final String locationLine;
@@ -436,7 +435,7 @@ abstract class _ProductDetailState implements ProductDetailState {
       final bool isDescriptionExpanded,
       final bool isAddingToCart,
       final double? compareAtPrice,
-      final int stockQuantity,
+      final int? stockQuantity,
       final String locationLine,
       final ProductSellerEntity? seller,
       final Map<String, String> specifications,
@@ -457,7 +456,7 @@ abstract class _ProductDetailState implements ProductDetailState {
   @override
   double? get compareAtPrice;
   @override
-  int get stockQuantity;
+  int? get stockQuantity;
   @override
   String get locationLine;
   @override

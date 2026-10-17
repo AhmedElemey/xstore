@@ -17,6 +17,8 @@ abstract interface class ExploreRemoteDataSource {
     double? maxPrice,
     String? condition,
     int? categoryId,
+    bool? shippingAvailable,
+    double? minimumRating,
   });
 
   Future<List<String>> getSuggestions(String query);
@@ -38,16 +40,20 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
     double? maxPrice,
     String? condition,
     int? categoryId,
+    bool? shippingAvailable,
+    double? minimumRating,
   }) async {
     try {
       // GET /api/listings supports keyword/categoryId/minPrice/maxPrice/
-      // condition/sortBy/page/pageSize. minPrice/maxPrice/condition/
-      // categoryId are sent server-side (categoryId only when exactly one
-      // category is selected — the endpoint takes a single id, not a list;
-      // explore_provider.dart resolves the id and keeps a client-side
-      // narrowing pass for the multi-select case). Rating, location and
-      // shipping filters stay client-side, and sortBy stays client-side
-      // because its accepted tokens are unconfirmed.
+      // condition/sortBy/shippingAvailable/minimumRating/page/pageSize.
+      // minPrice/maxPrice/condition/categoryId are sent server-side
+      // (categoryId only when exactly one category is selected — the
+      // endpoint takes a single id, not a list; explore_provider.dart
+      // resolves the id and keeps a client-side narrowing pass for the
+      // multi-select case). shippingAvailable/minimumRating are sent too, but
+      // explore_provider.dart still applies them client-side as a safety net
+      // in case the server ignores them. Location stays client-side.
+      // TODO(backend): accepted `sortBy` values — sort stays client-side.
       final response = await _dio.get<dynamic>(
         ApiEndpoints.apiListings,
         queryParameters: {
@@ -57,6 +63,9 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
           if (condition != null && condition.isNotEmpty)
             'condition': condition,
           if (categoryId != null) 'categoryId': categoryId,
+          if (shippingAvailable ?? false) 'shippingAvailable': true,
+          if (minimumRating != null && minimumRating > 0)
+            'minimumRating': minimumRating,
           'page': page,
           'pageSize': pageSize,
         },

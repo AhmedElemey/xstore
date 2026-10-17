@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/commission_payment_method.dart';
 import '../../domain/repositories/commission_payment_repository.dart';
@@ -16,7 +17,7 @@ class CommissionPaymentRepositoryImpl implements CommissionPaymentRepository {
     try {
       return Right(await _remote.getPayToAccounts());
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(_failure(e));
     }
   }
 
@@ -34,7 +35,13 @@ class CommissionPaymentRepositoryImpl implements CommissionPaymentRepository {
       );
       return const Right(unit);
     } catch (e) {
-      return Left(Failure.server(e.toString()));
+      return Left(_failure(e));
     }
   }
+
+  /// Datasource errors carry user-facing text; anything else (a parse
+  /// error, a FileSystemException) gets no message so the screen falls back
+  /// to its localized generic error instead of showing `e.toString()`.
+  Failure _failure(Object e) =>
+      Failure.server(e is AppException ? e.message : null);
 }

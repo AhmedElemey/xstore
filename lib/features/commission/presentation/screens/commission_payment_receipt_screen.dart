@@ -18,8 +18,15 @@ import '../../../../shared/utils/compress_picked_image.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../domain/entities/commission_payment_method.dart';
+import '../providers/commission_config_provider.dart';
 import '../providers/commission_payment_providers.dart';
+import '../providers/vendor_commission_wallet_provider.dart';
 import '../widgets/commission_payment_method_avatar.dart';
+
+/// Receipt formats the backend accepts (Postman collection v10); the size
+/// cap is the one proposed in the commission payment handoff doc.
+const _kReceiptExtensions = {'jpg', 'jpeg', 'png', 'webp'};
+const _kReceiptMaxBytes = 5 * 1024 * 1024;
 
 /// Step 2 of paying platform fees: shows where to send the money, then
 /// collects the amount sent and the transfer receipt for admin review.
@@ -38,6 +45,10 @@ class _CommissionPaymentReceiptScreenState
   final _picker = ImagePicker();
   String _amountInput = '';
   String? _receiptPath;
+  // True when [_receiptPath] is the `-compressed.jpg` copy we created (safe
+  // to delete), false when compression fell back to the picker's original.
+  bool _receiptIsOurCopy = false;
+  bool _picking = false;
   bool _submitting = false;
 
   double? get _amount {
@@ -47,19 +58,70 @@ class _CommissionPaymentReceiptScreenState
 
   bool get _hasAmountAndReceipt => _amount != null && _receiptPath != null;
 
-  Future<void> _pickReceipt(ImageSource source) async {
-    final XFile? file;
+  /// Best-effort delete of the compressed copy; never touches the picker's
+  /// original file.
+  void _discardReceiptCopy() {
+    final path = _receiptPath;
+    if (path == null || !_receiptIsOurCopy) return;
     try {
-      file = await _picker.pickImage(source: source);
-    } on PlatformException {
-      // Camera/photos permission denied or no camera on this device.
-      if (mounted) AppSnackbar.error(context, context.l10n.errorGeneric);
-      return;
+      File(path).deleteSync();
+    } catch (_) {}
+  }
+
+  bool _isAcceptedReceipt(String path) {
+    final dot = path.lastIndexOf('.');
+    if (dot < 0 ||
+        !_kReceiptExtensions.contains(path.substring(dot + 1).toLowerCase())) {
+      return false;
     }
-    if (file == null) return;
-    final path = await compressPickedImage(file.path);
-    if (!mounted) return;
-    setState(() => _receiptPath = path);
+    try {
+      return File(path).lengthSync() <= _kReceiptMaxBytes;
+    } on FileSystemException {
+      return false;
+    }
+  }
+
+  Future<void> _pickReceipt(ImageSource source) async {
+    // A second tap while the picker/compression is still running.
+    if (_picking) return;
+    _picking = true;
+    try {
+      final XFile? file;
+      try {
+        file = await _picker.pickImage(source: source);
+      } on PlatformException {
+        // Camera/photos permission denied or no camera on this device.
+        if (mounted) AppSnackbar.error(context, context.l10n.errorGeneric);
+        return;
+      }
+      if (file == null) return;
+      final path = await compressPickedImage(file.path);
+      final isOurCopy = path != file.path;
+      if (!_isAcceptedReceipt(path)) {
+        // Compression fell back to e.g. a HEIC/GIF original, or the photo is
+        // over the size limit.
+        if (isOurCopy) {
+          try {
+            File(path).deleteSync();
+          } catch (_) {}
+        }
+        if (mounted) {
+          AppSnackbar.error(
+            context,
+            context.l10n.commissionPaymentReceiptInvalid,
+          );
+        }
+        return;
+      }
+      if (!mounted) return;
+      _discardReceiptCopy();
+      setState(() {
+        _receiptPath = path;
+        _receiptIsOurCopy = isOurCopy;
+      });
+    } finally {
+      _picking = false;
+    }
   }
 
   Future<void> _submit() async {
@@ -67,6 +129,16 @@ class _CommissionPaymentReceiptScreenState
     final receiptPath = _receiptPath;
     // Guard a second tap landing before the rebuild disables the button.
     if (_submitting || amount == null || receiptPath == null) return;
+
+    // The picker cache can be evicted between picking and submitting.
+    if (!File(receiptPath).existsSync()) {
+      setState(() => _receiptPath = null);
+      AppSnackbar.error(
+        context,
+        context.l10n.commissionPaymentReceiptUnavailable,
+      );
+      return;
+    }
 
     final repository = ref.read(commissionPaymentRepositoryProvider);
     setState(() => _submitting = true);
@@ -80,9 +152,17 @@ class _CommissionPaymentReceiptScreenState
       (failure) {
         // Stay on the form so the amount and receipt aren't lost.
         setState(() => _submitting = false);
-        AppSnackbar.error(context, failure.message ?? context.l10n.errorGeneric);
+        AppSnackbar.error(
+          context,
+          failure.message ?? context.l10n.errorGeneric,
+        );
       },
       (_) {
+        _discardReceiptCopy();
+        // The wallet banner reads these; refetch so the new payment shows.
+        ref
+          ..invalidate(vendorCommissionSnapshotProvider)
+          ..invalidate(vendorCommissionWalletProvider);
         AppSnackbar.success(context, context.l10n.commissionPaymentSubmitted);
         // The wallet is a shell tab: `go` (not pop) clears both payment
         // screens in one navigation.
@@ -101,61 +181,68 @@ class _CommissionPaymentReceiptScreenState
       ),
     );
 
-    return Scaffold(
-      backgroundColor: context.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: context.surfaceColor,
-        elevation: 0,
-        title: Text(context.l10n.commissionPaymentReceiptTitle),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          _PayToCard(method: widget.method),
-          const Gap(AppSpacing.x2l),
-          TextField(
-            enabled: !_submitting,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.done,
-            onChanged: (value) => setState(() => _amountInput = value),
-            decoration: InputDecoration(
-              labelText: context.l10n.commissionPaymentAmountLabel,
-              errorText: showAmountError
-                  ? context.l10n.commissionPaymentAmountInvalid
-                  : null,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const Gap(AppSpacing.x2l),
-          Text(
-            context.l10n.commissionPaymentReceiptLabel,
-            style: AppTypography.titleSmall.copyWith(
-              color: context.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const Gap(AppSpacing.sm),
-          if (_receiptPath == null)
-            _ReceiptPicker(
-              enabled: !_submitting,
-              onPick: _pickReceipt,
-            )
-          else
-            _ReceiptPreview(
-              path: _receiptPath!,
-              onRemove: _submitting
-                  ? null
-                  : () => setState(() => _receiptPath = null),
-            ),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
+    return PopScope(
+      canPop: !_submitting,
+      child: Scaffold(
+        backgroundColor: context.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: context.surfaceColor,
+          elevation: 0,
+          title: Text(context.l10n.commissionPaymentReceiptTitle),
+        ),
+        body: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: XstoreButton(
-            label: context.l10n.commissionPaymentSubmit,
-            isLoading: _submitting,
-            onPressed: _hasAmountAndReceipt && hasPayToAccount ? _submit : null,
+          children: [
+            _PayToCard(method: widget.method),
+            const Gap(AppSpacing.x2l),
+            TextField(
+              enabled: !_submitting,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              textInputAction: TextInputAction.done,
+              onChanged: (value) => setState(() => _amountInput = value),
+              decoration: InputDecoration(
+                labelText: context.l10n.commissionPaymentAmountLabel,
+                errorText: showAmountError
+                    ? context.l10n.commissionPaymentAmountInvalid
+                    : null,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const Gap(AppSpacing.x2l),
+            Text(
+              context.l10n.commissionPaymentReceiptLabel,
+              style: AppTypography.titleSmall.copyWith(
+                color: context.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Gap(AppSpacing.sm),
+            if (_receiptPath == null)
+              _ReceiptPicker(enabled: !_submitting, onPick: _pickReceipt)
+            else
+              _ReceiptPreview(
+                path: _receiptPath!,
+                onRemove: _submitting
+                    ? null
+                    : () {
+                        _discardReceiptCopy();
+                        setState(() => _receiptPath = null);
+                      },
+              ),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: XstoreButton(
+              label: context.l10n.commissionPaymentSubmit,
+              isLoading: _submitting,
+              onPressed: _hasAmountAndReceipt && hasPayToAccount
+                  ? _submit
+                  : null,
+            ),
           ),
         ),
       ),
@@ -343,6 +430,12 @@ class _ReceiptPreview extends StatelessWidget {
               File(path),
               fit: BoxFit.contain,
               cacheWidth: cacheWidth,
+              // The cache file can be evicted while the screen is open.
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.broken_image_outlined,
+                size: 48,
+                color: context.textSecondary,
+              ),
             ),
           ),
         ),
