@@ -16,6 +16,7 @@ class _FakeAdapter implements HttpClientAdapter {
   int protectedCallCount = 0;
   int refreshCallCount = 0;
   final List<Map<String, List<String>>> protectedHeadersSeen = [];
+  final List<FormData> formsSeen = [];
 
   @override
   Future<ResponseBody> fetch(
@@ -38,6 +39,8 @@ class _FakeAdapter implements HttpClientAdapter {
     protectedHeadersSeen.add(
       options.headers.map((k, v) => MapEntry(k, [v.toString()])),
     );
+    final body = options.data;
+    if (body is FormData) formsSeen.add(body);
     final authorized = options.headers['X-Auth-Token'] == 'new-token';
     if (!authorized) {
       return ResponseBody.fromString('{"message":"unauthorized"}', 401);
@@ -96,6 +99,28 @@ void main() {
     expect(refreshFailedCalls, 0);
     expect(await storage.read(key: PrefsKeys.authToken), 'new-token');
     expect(await storage.read(key: PrefsKeys.authRefreshToken), 'new-refresh-token');
+  });
+
+  test('retries a multipart POST with a fresh copy of the FormData', () async {
+    final form = FormData.fromMap({
+      'name': 'receipt',
+      'file': MultipartFile.fromBytes([1, 2, 3], filename: 'r.jpg'),
+    });
+
+    final response = await dio.post<Map<String, dynamic>>(
+      '/protected',
+      data: form,
+      options: Options(headers: {'X-Auth-Token': 'old-token'}),
+    );
+
+    expect(response.statusCode, 200);
+    expect(adapter.refreshCallCount, 1);
+    expect(adapter.formsSeen, hasLength(2));
+    final retried = adapter.formsSeen.last;
+    expect(retried, isNot(same(adapter.formsSeen.first)));
+    expect(Map.fromEntries(retried.fields), {'name': 'receipt'});
+    expect(retried.files.single.key, 'file');
+    expect(retried.files.single.value.filename, 'r.jpg');
   });
 
   test('concurrent 401s share a single refresh call', () async {

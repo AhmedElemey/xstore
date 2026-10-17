@@ -243,11 +243,12 @@ void main() {
         ],
       );
 
-      final fields = {
-        for (final f in interceptor.capturedFormData!.fields) f.key: f.value,
-      };
-      expect(fields['imageUrls[0]'], 'https://example.com/keep.jpg');
-      expect(fields['imageUrls[1]'], 'https://example.com/also.jpg');
+      final fields = interceptor.capturedFormData!.fields;
+      expect(
+        [for (final f in fields) if (f.key == 'savedImageUrls') f.value],
+        ['https://example.com/keep.jpg', 'https://example.com/also.jpg'],
+      );
+      expect(fields.any((f) => f.key.startsWith('imageUrls')), isFalse);
       expect(interceptor.capturedFormData!.files, isEmpty);
 
       interceptor.capturedFormData = null;
@@ -272,7 +273,7 @@ void main() {
 
       expect(
         interceptor.capturedFormData!.fields.any(
-          (f) => f.key.startsWith('imageUrls'),
+          (f) => f.key == 'savedImageUrls',
         ),
         isFalse,
       );

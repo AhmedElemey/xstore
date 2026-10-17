@@ -204,10 +204,9 @@ abstract final class ApiEndpoints {
   static const String vendorReports = '$_api/reports/vendor';
 
   // ---------------------------------------------------------------------
-  // PROPOSED, not yet built — vendor platform-fee payments. Contract:
+  // Vendor platform-fee payments — in the backend collection (v10):
+  // multipart fields `method`, `amountEgp`, `receipt`. Background:
   // docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
-  // Until the backend ships these, submitting a payment surfaces a real
-  // error and the pay-to accounts read as "not configured".
   // ---------------------------------------------------------------------
   static const String vendorCommissionPayments =
       '$_api/vendor/commission-payments';

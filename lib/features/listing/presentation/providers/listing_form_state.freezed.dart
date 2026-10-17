@@ -178,7 +178,7 @@ mixin _$ListingFormState {
 
   /// Remote photo URLs already on the listing being edited (empty when
   /// creating). Removable in the photo strip; remaining URLs are sent on
-  /// update as keepers (`imageUrls[i]`).
+  /// update as keepers (`savedImageUrls`).
   List<String> get existingImageUrls => throw _privateConstructorUsedError;
 
   /// Non-empty when this form is editing an existing listing rather than
@@ -599,12 +599,12 @@ class _$ListingFormStateImpl implements _ListingFormState {
 
   /// Remote photo URLs already on the listing being edited (empty when
   /// creating). Removable in the photo strip; remaining URLs are sent on
-  /// update as keepers (`imageUrls[i]`).
+  /// update as keepers (`savedImageUrls`).
   final List<String> _existingImageUrls;
 
   /// Remote photo URLs already on the listing being edited (empty when
   /// creating). Removable in the photo strip; remaining URLs are sent on
-  /// update as keepers (`imageUrls[i]`).
+  /// update as keepers (`savedImageUrls`).
   @override
   @JsonKey()
   List<String> get existingImageUrls {
@@ -776,7 +776,7 @@ abstract class _ListingFormState implements ListingFormState {
 
   /// Remote photo URLs already on the listing being edited (empty when
   /// creating). Removable in the photo strip; remaining URLs are sent on
-  /// update as keepers (`imageUrls[i]`).
+  /// update as keepers (`savedImageUrls`).
   List<String> get existingImageUrls;
   @override
 

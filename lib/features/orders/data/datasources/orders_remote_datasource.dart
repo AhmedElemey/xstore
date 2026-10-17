@@ -793,6 +793,11 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
         data: {
           'orderIds': [int.tryParse(orderId) ?? orderId],
           'status': orderStatusToWireName(status),
+          // Required by the backend when status is Cancelled.
+          if (status == OrderStatus.cancelled &&
+              localReason != null &&
+              localReason.trim().isNotEmpty)
+            'reason': localReason.trim(),
         },
       );
       // Same Result-envelope risk as cancelOrder: unwrap a possible
@@ -882,11 +887,9 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
       _replace(next);
       return MockConfig.simulate(next);
     }
-    // UNCONFIRMED: no status value for "rejected" is documented — the
-    // collection only shows "confirmed". Using "cancelled" (a value we
-    // know the app itself sends) until the backend confirms a dedicated
-    // rejected status; the reason is applied locally regardless, since no
-    // rejection-reason field is documented on this endpoint either.
+    // No dedicated "rejected" status exists: a vendor rejection is sent as
+    // Cancelled, whose `reason` the backend requires (see
+    // _setVendorOrderStatus).
     return _setVendorOrderStatus(
       orderId: orderId,
       status: OrderStatus.cancelled,

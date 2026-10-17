@@ -554,7 +554,11 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Reject order'), findsOneWidget);
+      // The backend requires a reason, so Confirm is disabled until typed.
+      final confirm = find.widgetWithText(FilledButton, 'Confirm');
+      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
       await tester.enterText(find.byType(TextField), 'Out of stock');
+      await tester.pump();
       await tester.tap(find.text('Confirm'));
       await _settle(tester);
 
@@ -562,6 +566,7 @@ void main() {
       expect(putRequest!.data, {
         'orderIds': [902],
         'status': 'Cancelled',
+        'reason': 'Out of stock',
       });
 
       expect(
@@ -791,6 +796,55 @@ void main() {
         'comment': 'Great product, fast delivery!',
       });
       expect(find.text('Thanks for your review!'), findsOneWidget);
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'two quick taps on Submit Review post only one review',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var postCount = 0;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '508', status: 'delivered', listingId: '9005'),
+        ],
+        'GET ${ApiEndpoints.apiListingReviews('9005')}': (_) => {
+          'items': <dynamic>[],
+          'totalCount': 0,
+        },
+        'POST ${ApiEndpoints.apiListingReviews('9005')}': (_) {
+          postCount++;
+          return {
+            'id': 'review_2',
+            'userId': 'consumer_1',
+            'userName': 'Test Buyer',
+            'rating': 5,
+            'comment': 'Great',
+          };
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      await tester.tap(find.text('Leave Review'));
+      await _settle(tester);
+      await tester.enterText(find.byType(TextField), 'Great');
+      await tester.pump();
+
+      // No pump between the taps: the second lands before the rebuild
+      // could disable the button.
+      final submit = find.text('Submit Review');
+      await tester.tap(submit);
+      await tester.tap(submit);
+      await _settle(tester);
+
+      expect(postCount, 1);
 
       await _awaitAnalyticsReady(container);
     },

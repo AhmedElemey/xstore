@@ -82,9 +82,10 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   /// Google is a login-only shortcut, not a self-service account creator:
   /// ask the backend (read-only `checkGoogleUser`) whether this identity
   /// already has an account. If it does, log straight in via the single
-  /// `/api/auth/google/login` endpoint (any role). Otherwise — or if the
-  /// lookup failed — go to the register flow prefilled with the Google
-  /// profile.
+  /// `/api/auth/google/login` endpoint (any role). If it doesn't, go to the
+  /// register flow prefilled with the Google profile. If the lookup itself
+  /// fails, surface the error and stay on login — an existing user must not
+  /// be sent to register by a network blip.
   ///
   /// Firebase `isNewUser` plays no part: Firebase remembers every Google
   /// account that ever signed in to the project, so it says nothing about
@@ -105,12 +106,18 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         await ref.read(checkGoogleUserUseCaseProvider).call(idToken: idToken);
     if (!mounted) return;
 
-    var exists = false;
-    UserRole? existingRole;
-    checkResult.fold((_) {}, (r) {
-      exists = r.exists;
-      existingRole = r.role;
-    });
+    final lookup = checkResult.fold((failure) {
+      state = state.copyWith(
+        isGoogleLoading: false,
+        isAppleLoading: false,
+        isFacebookLoading: false,
+        error: failure.toString(),
+      );
+      return null;
+    }, (r) => r);
+    if (lookup == null) return;
+    final exists = lookup.exists;
+    final existingRole = lookup.role;
     if (kDebugMode) {
       debugPrint(
         'google check-user parsed: exists=$exists role=$existingRole',

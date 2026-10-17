@@ -161,16 +161,14 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       fields['Attributes[$i].Value'] = entry.value;
       i++;
     }
-    if (keepImageUrls != null) {
-      for (var u = 0; u < keepImageUrls.length && u < _maxImagesPerListing; u++) {
-        fields['imageUrls[$u]'] = keepImageUrls[u];
-      }
-    }
-
     final formData = FormData.fromMap(fields);
-    final keptCount = keepImageUrls == null
-        ? 0
-        : keepImageUrls.take(_maxImagesPerListing).length;
+    // `savedImageUrls` repeats once per kept URL; a Map can't hold
+    // repeated keys, so they're added to the form fields directly.
+    final keptUrls = keepImageUrls?.take(_maxImagesPerListing) ?? const [];
+    for (final url in keptUrls) {
+      formData.fields.add(MapEntry('savedImageUrls', url));
+    }
+    final keptCount = keptUrls.length;
     final newSlots = _maxImagesPerListing - keptCount;
     for (final path in imagePaths.take(newSlots)) {
       // photoPaths can be restored from a saved draft across app

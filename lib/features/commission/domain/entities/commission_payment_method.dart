@@ -7,8 +7,8 @@ enum CommissionPaymentMethod {
   orangeCash,
   etisalatCash;
 
-  /// PascalCase wire value (this backend's enum convention). PROPOSED —
-  /// see docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
+  /// PascalCase wire value (this backend's enum convention); in the backend
+  /// collection (v10) as `method`.
   /// Also the key of each pay-to account in the
   /// `commission_payment_accounts` app setting.
   String get wireName => switch (this) {
@@ -18,9 +18,16 @@ enum CommissionPaymentMethod {
     CommissionPaymentMethod.etisalatCash => 'EtisalatCash',
   };
 
+  /// Tolerant read: case-insensitive name or the C# enum code
+  /// (InstaPay=1, VodafoneCash=2, OrangeCash=3, EtisalatCash=4).
   static CommissionPaymentMethod? fromWire(String? value) {
+    final v = value?.trim().toLowerCase();
+    if (v == null || v.isEmpty) return null;
     for (final method in values) {
-      if (method.wireName == value) return method;
+      if (method.wireName.toLowerCase() == v ||
+          '${method.index + 1}' == v) {
+        return method;
+      }
     }
     return null;
   }

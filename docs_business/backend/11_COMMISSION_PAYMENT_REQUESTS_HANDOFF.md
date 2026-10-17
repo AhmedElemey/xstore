@@ -35,8 +35,8 @@ vendor report a payment from the app with proof, and lets an admin approve it in
 | Field | Type | Rules |
 |---|---|---|
 | `method` | string | `InstaPay` \| `VodafoneCash` \| `OrangeCash` \| `EtisalatCash` (PascalCase, like the other enums) |
-| `amountEgp` | decimal | `> 0` (sent as an invariant-culture string, e.g. `"250.5"`) |
-| `receiptImage` | file | required; JPEG/PNG/WebP; suggest max 5 MB. The app compresses to JPEG ≤ ~1600px before upload. |
+| `amountEgp` | decimal | `> 0` (sent as an invariant-culture string, e.g. `"250.50"`) |
+| `receipt` | file | required; JPEG/PNG/WebP; suggest max 5 MB. The app compresses to JPEG ≤ ~1600px before upload. |
 
 → `201` with the created row (shape below). `400` with `errorEn`/`errorAr` for validation
 failures; the app shows `errorEn`/`errorAr` as-is.

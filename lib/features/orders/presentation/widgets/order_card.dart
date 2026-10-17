@@ -397,30 +397,33 @@ class OrderCard extends ConsumerWidget {
     var reasonText = '';
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.ordersRejectDialogTitle),
-        content: TextField(
-          onChanged: (v) => reasonText = v,
-          decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
+      builder: (ctx) => StatefulBuilder(
+        // The backend requires a reason for a rejection (Cancelled), so
+        // Confirm stays disabled until one is typed.
+        builder: (ctx, setS) => AlertDialog(
+          title: Text(context.l10n.ordersRejectDialogTitle),
+          content: TextField(
+            onChanged: (v) => setS(() => reasonText = v),
+            decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(context.l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: reasonText.trim().isEmpty
+                  ? null
+                  : () => Navigator.pop(ctx, true),
+              child: Text(context.l10n.ordersConfirm),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.l10n.ordersConfirm),
-          ),
-        ],
       ),
     );
     final reason = reasonText.trim();
     if (ok == true && context.mounted) {
-      await notifier.rejectOrder(
-        order.id,
-        reason.isEmpty ? '—' : reason,
-      );
+      await notifier.rejectOrder(order.id, reason);
       if (!context.mounted) return;
       _errSnack(context, ref);
     }
@@ -545,6 +548,7 @@ class OrderCard extends ConsumerWidget {
 
     var stars = 5;
     var reviewText = '';
+    var submitting = false;
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -590,9 +594,13 @@ class OrderCard extends ConsumerWidget {
                   FilledButton(
                     // A comment is required, so the button stays disabled
                     // until one is typed rather than ignoring taps.
-                    onPressed: reviewText.trim().isEmpty
+                    onPressed: reviewText.trim().isEmpty || submitting
                         ? null
                         : () async {
+                            // A second tap can land before the rebuild
+                            // disables the button.
+                            if (submitting) return;
+                            setS(() => submitting = true);
                             final comment = reviewText.trim();
                             final posted =
                                 await ref.read(createReviewUseCaseProvider).call(
@@ -609,6 +617,7 @@ class OrderCard extends ConsumerWidget {
                                   Navigator.pop(ctx, 'already');
                                   return;
                                 }
+                                setS(() => submitting = false);
                                 AppSnackbar.error(
                                   sheetContext,
                                   failure.toString(),

@@ -28,8 +28,7 @@ class _RecordingInterceptor extends Interceptor {
 }
 
 void main() {
-  // PROPOSED contract — see
-  // docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
+  // Field names are from the backend Postman collection (v10).
   group('CommissionPaymentRemoteDataSource', () {
     late Directory tmpDir;
 
@@ -62,9 +61,10 @@ void main() {
         final form = request.data as FormData;
         expect(Map.fromEntries(form.fields), {
           'method': 'VodafoneCash',
-          'amountEgp': '250.5',
+          'amountEgp': '250.50',
         });
-        expect(form.files.single.key, 'receiptImage');
+        expect(form.files.single.key, 'receipt');
+        expect(form.files.where((f) => f.key == 'receiptImage'), isEmpty);
         expect(form.files.single.value.filename, 'receipt.jpg');
       },
       skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
@@ -85,6 +85,31 @@ void main() {
           throwsA(isA<AppException>()),
         );
         expect(interceptor.requests, isEmpty);
+      },
+      skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
+    );
+
+    test(
+      'submitPayment throws on a 2xx isSuccess:false envelope',
+      () async {
+        final receipt = File('${tmpDir.path}/receipt.jpg')
+          ..writeAsBytesSync(const [0, 1, 2, 3]);
+        final dio = Dio()
+          ..interceptors.add(
+            _RecordingInterceptor({
+              'isSuccess': false,
+              'errorEn': 'Amount exceeds balance',
+            }),
+          );
+
+        await expectLater(
+          CommissionPaymentRemoteDataSource(dio).submitPayment(
+            method: CommissionPaymentMethod.instaPay,
+            amountEgp: 100,
+            receiptImagePath: receipt.path,
+          ),
+          throwsA(isA<ServerException>()),
+        );
       },
       skip: MockConfig.useMock ? 'MOCK=true short-circuits the request' : null,
     );
@@ -186,6 +211,25 @@ void main() {
       expect(CommissionPaymentMethod.fromWire(method.wireName), method);
     }
     expect(CommissionPaymentMethod.fromWire('Fawry'), isNull);
+  });
+
+  test('fromWire accepts any casing and the C# enum codes', () {
+    expect(
+      CommissionPaymentMethod.fromWire('vodafonecash'),
+      CommissionPaymentMethod.vodafoneCash,
+    );
+    expect(
+      CommissionPaymentMethod.fromWire(' INSTAPAY '),
+      CommissionPaymentMethod.instaPay,
+    );
+    expect(CommissionPaymentMethod.fromWire('1'), CommissionPaymentMethod.instaPay);
+    expect(CommissionPaymentMethod.fromWire('2'), CommissionPaymentMethod.vodafoneCash);
+    expect(CommissionPaymentMethod.fromWire('3'), CommissionPaymentMethod.orangeCash);
+    expect(CommissionPaymentMethod.fromWire('4'), CommissionPaymentMethod.etisalatCash);
+    expect(CommissionPaymentMethod.fromWire('0'), isNull);
+    expect(CommissionPaymentMethod.fromWire('5'), isNull);
+    expect(CommissionPaymentMethod.fromWire(null), isNull);
+    expect(CommissionPaymentMethod.vodafoneCash.wireName, 'VodafoneCash');
   });
 
   test('payment routes are vendor-only', () {

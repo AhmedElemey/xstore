@@ -45,7 +45,7 @@ class _CommissionPaymentReceiptScreenState
     return value != null && value > 0 ? value : null;
   }
 
-  bool get _canSubmit => _amount != null && _receiptPath != null;
+  bool get _hasAmountAndReceipt => _amount != null && _receiptPath != null;
 
   Future<void> _pickReceipt(ImageSource source) async {
     final XFile? file;
@@ -94,6 +94,12 @@ class _CommissionPaymentReceiptScreenState
   @override
   Widget build(BuildContext context) {
     final showAmountError = _amountInput.trim().isNotEmpty && _amount == null;
+    // Never let a vendor submit a payment without knowing where to send it.
+    final hasPayToAccount = ref.watch(
+      commissionPayToAccountsProvider.select(
+        (accounts) => accounts.valueOrNull?[widget.method] != null,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: context.backgroundColor,
@@ -149,7 +155,7 @@ class _CommissionPaymentReceiptScreenState
           child: XstoreButton(
             label: context.l10n.commissionPaymentSubmit,
             isLoading: _submitting,
-            onPressed: _canSubmit ? _submit : null,
+            onPressed: _hasAmountAndReceipt && hasPayToAccount ? _submit : null,
           ),
         ),
       ),
@@ -189,7 +195,23 @@ class _PayToCard extends ConsumerWidget {
           Expanded(
             child: accounts.when(
               loading: () => const LinearProgressIndicator(),
-              error: (_, __) => _NoAccountText(label: label),
+              error: (_, __) => Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n.errorGeneric,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        ref.invalidate(commissionPayToAccountsProvider),
+                    child: Text(context.l10n.retry),
+                  ),
+                ],
+              ),
               data: (map) {
                 final account = map[method];
                 if (account == null) return _NoAccountText(label: label);

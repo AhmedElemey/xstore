@@ -282,26 +282,32 @@ class OrderActionButtons extends ConsumerWidget {
     var reasonText = '';
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.ordersRejectDialogTitle),
-        content: TextField(
-          onChanged: (v) => reasonText = v,
-          decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
+      builder: (ctx) => StatefulBuilder(
+        // The backend requires a reason for a rejection (Cancelled), so
+        // Confirm stays disabled until one is typed.
+        builder: (ctx, setS) => AlertDialog(
+          title: Text(context.l10n.ordersRejectDialogTitle),
+          content: TextField(
+            onChanged: (v) => setS(() => reasonText = v),
+            decoration: InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(context.l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: reasonText.trim().isEmpty
+                  ? null
+                  : () => Navigator.pop(ctx, true),
+              child: Text(context.l10n.ordersConfirm),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.l10n.ordersConfirm),
-          ),
-        ],
       ),
     );
     final reason = reasonText.trim();
-    if (ok == true) return reason.isEmpty ? '—' : reason;
+    if (ok == true) return reason;
     return null;
   }
 
@@ -447,6 +453,7 @@ class OrderActionButtons extends ConsumerWidget {
 
     var stars = 5;
     var reviewText = '';
+    var submitting = false;
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -489,9 +496,14 @@ class OrderActionButtons extends ConsumerWidget {
                   label: sheetContext.l10n.ordersSubmitReview,
                   // A comment is required, so the button stays disabled
                   // until one is typed rather than ignoring taps.
+                  isLoading: submitting,
                   onPressed: reviewText.trim().isEmpty
                       ? null
                       : () async {
+                          // A second tap can land before the rebuild disables
+                          // the button.
+                          if (submitting) return;
+                          setS(() => submitting = true);
                           final comment = reviewText.trim();
                           final posted =
                               await ref.read(createReviewUseCaseProvider).call(
@@ -508,6 +520,7 @@ class OrderActionButtons extends ConsumerWidget {
                                 Navigator.pop(ctx, 'already');
                                 return;
                               }
+                              setS(() => submitting = false);
                               AppSnackbar.error(sheetContext, failure.toString());
                             },
                             (_) {

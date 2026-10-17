@@ -1825,7 +1825,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resubmitSuccess => 'تمت إعادة إرسال الإعلان للمراجعة';
 
   @override
-  String get retry => '[AR] Retry';
+  String get retry => 'إعادة المحاولة';
 
   @override
   String get errorGeneric => 'حصل خطأ';
