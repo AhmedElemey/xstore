@@ -14,19 +14,27 @@ import '../../domain/entities/commission_payment_method.dart';
 /// `{"InstaPay": "xstore@instapay", "VodafoneCash": "01000000000"}`.
 const kCommissionPaymentAccountsSettingKey = 'commission_payment_accounts';
 
-/// PROPOSED contract (not yet built) — full spec in
-/// docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md:
+/// CONFIRMED (backend Postman collection v10; background in
+/// docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md):
 ///
 ///   POST /api/vendor/commission-payments   (multipart/form-data)
 ///     method       InstaPay | VodafoneCash | OrangeCash | EtisalatCash
 ///     amountEgp    decimal > 0
-///     receiptImage file
+///     receipt      file
 ///   → 201 { id, status: "Pending", ... }
 ///
-/// Live: the pay-to accounts are a General Setting, read from
+/// The pay-to accounts are a General Setting, read from
+///
+///   GET /api/general-settings/by-key/commission_payment_accounts
+///
+/// (in collection v10), falling back to the live-confirmed list search
 ///
 ///   GET /api/general-settings?search=commission_payment_accounts
 ///   → { items: [{ key, value: "<JSON keyed by method wire name>", ... }] }
+///
+/// TODO(backend): the by-key response shape is unconfirmed (no example in
+/// the collection); [parsePayToAccounts] accepts a bare row or a `{data}`
+/// envelope. Drop the search fallback once by-key is confirmed live.
 class CommissionPaymentRemoteDataSource {
   CommissionPaymentRemoteDataSource(this._dio);
 
@@ -34,6 +42,17 @@ class CommissionPaymentRemoteDataSource {
 
   Future<Map<CommissionPaymentMethod, String>> getPayToAccounts() async {
     if (MockConfig.useMock) return MockConfig.simulate(const {});
+    try {
+      final response = await _dio.get<dynamic>(
+        ApiEndpoints.generalSettingByKey(kCommissionPaymentAccountsSettingKey),
+      );
+      final accounts = parsePayToAccounts(response.data);
+      if (accounts.isNotEmpty) return accounts;
+    } on DioException catch (e) {
+      // Only a missing route falls back; offline/401/5xx surface as errors.
+      final code = e.response?.statusCode;
+      if (code != 404 && code != 405) throw mapDioException(e);
+    }
     try {
       final response = await _dio.get<dynamic>(
         ApiEndpoints.generalSettings,
@@ -57,18 +76,21 @@ class CommissionPaymentRemoteDataSource {
       throw const AppException('Receipt image is no longer available.');
     }
     try {
-      await _dio.post<dynamic>(
+      final response = await _dio.post<dynamic>(
         ApiEndpoints.vendorCommissionPayments,
         data: FormData.fromMap({
           'method': method.wireName,
-          'amountEgp': amountEgp.toString(),
-          'receiptImage': await MultipartFile.fromFile(
+          'amountEgp': amountEgp.toStringAsFixed(2),
+          'receipt': await MultipartFile.fromFile(
             receiptImagePath,
             filename: receiptImagePath.split('/').last,
           ),
         }),
         options: ApiAuthHeaders.authenticated(),
       );
+      // A 2xx `{isSuccess: false}` envelope is still a failure.
+      final failure = envelopeFailure(response.data);
+      if (failure != null) throw failure;
     } on DioException catch (e) {
       throw mapDioException(e);
     }

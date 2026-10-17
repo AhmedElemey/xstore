@@ -149,6 +149,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'No account yet for this Google account. Finish signing up, we\'ve filled in your details.';
 
   @override
+  String get googleSignInFailed => 'Google sign-in failed. Please try again.';
+
+  @override
+  String get socialAccountExists =>
+      'An account with this email already exists. Try a different sign-in method.';
+
+  @override
+  String get socialAccountDisabled =>
+      'This account has been disabled. Contact support.';
+
+  @override
   String get searchHint => 'Search products...';
 
   @override
@@ -712,6 +723,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get commissionPaymentReceiptHint =>
       'Add a screenshot or photo of the successful transfer';
+
+  @override
+  String get commissionPaymentReceiptUnavailable =>
+      'The receipt image is no longer available. Please add it again.';
+
+  @override
+  String get commissionPaymentReceiptInvalid =>
+      'Use a JPG, PNG or WebP image under 5 MB.';
 
   @override
   String get commissionPaymentRemoveReceipt => 'Remove receipt';
@@ -2843,4 +2862,156 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courierPackageTitle => 'Package';
+
+  @override
+  String whatsappProductPrefill(String title) {
+    return 'Hi, I\'m interested in $title';
+  }
+
+  @override
+  String whatsappStorePrefill(String name) {
+    return 'Hi, I saw your store $name on xStore';
+  }
+
+  @override
+  String get whatsappSellerUnavailable => 'Couldn\'t open WhatsApp.';
+
+  @override
+  String get ordersWhatsapp => '💬 WhatsApp';
+
+  @override
+  String get cartApply => 'Apply';
+
+  @override
+  String cartCouponLine(String code) {
+    return 'Coupon ($code)';
+  }
+
+  @override
+  String get storeStatusOpen => 'Your store is currently OPEN';
+
+  @override
+  String get storeStatusClosed => 'Your store is currently CLOSED';
+
+  @override
+  String get storeOpenDesc => 'Customers can place orders now';
+
+  @override
+  String get storeClosedDesc => 'Customers cannot place orders now';
+
+  @override
+  String get closeStoreNow => 'Close Store Now';
+
+  @override
+  String get openStoreNow => 'Open Store Now';
+
+  @override
+  String get closedMessage => 'Add a message for customers (optional)';
+
+  @override
+  String get closedMessageTitle => 'Closed message';
+
+  @override
+  String get closedMessageHint => 'e.g. Back in 1 hour, Closed for holiday';
+
+  @override
+  String get weeklySchedule => 'Weekly Schedule';
+
+  @override
+  String get weeklyScheduleSubtitle => 'Set your working hours for each day';
+
+  @override
+  String get copyHoursToAll => 'Copy hours to all days';
+
+  @override
+  String get quickPresets => 'Quick Presets';
+
+  @override
+  String get quickPresetsSubtitle => 'Apply a schedule template instantly';
+
+  @override
+  String get presetStandard => 'Standard (9AM–6PM)';
+
+  @override
+  String get presetExtended => 'Extended (9AM–11PM)';
+
+  @override
+  String get presetMorning => 'Morning Only (8AM–2PM)';
+
+  @override
+  String get presetFullWeek => 'Full Week';
+
+  @override
+  String get presetWeekdays => 'Weekdays Only (Sat–Thu)';
+
+  @override
+  String get presetWithoutFriday => 'Without Friday';
+
+  @override
+  String get saveWorkingHours => 'Save Working Hours';
+
+  @override
+  String get workingHoursSaved => 'Working hours saved! ✅';
+
+  @override
+  String get storeNowOpen => 'Store is now Open 🟢';
+
+  @override
+  String get storeNowClosed => 'Store is now Closed 🔴';
+
+  @override
+  String get open24Hours => 'Open 24 Hours';
+
+  @override
+  String get copyFrom => 'Copy from:';
+
+  @override
+  String get applyToSelectedDays => 'Apply to Selected Days';
+
+  @override
+  String get selectAllDays => 'Select All';
+
+  @override
+  String get deselectAllDays => 'Deselect All';
+
+  @override
+  String get openLabel => 'Open';
+
+  @override
+  String get closedLabel => 'Closed';
+
+  @override
+  String get storeHoursTitle => 'Store Hours';
+
+  @override
+  String get daySaturday => 'Saturday';
+
+  @override
+  String get daySunday => 'Sunday';
+
+  @override
+  String get dayMonday => 'Monday';
+
+  @override
+  String get dayTuesday => 'Tuesday';
+
+  @override
+  String get dayWednesday => 'Wednesday';
+
+  @override
+  String get dayThursday => 'Thursday';
+
+  @override
+  String get dayFriday => 'Friday';
+
+  @override
+  String get invalidHoursError => 'Closing time must be after opening time';
+
+  @override
+  String get discardChanges => 'Discard Changes';
+
+  @override
+  String applyPresetConfirm(String preset) {
+    return 'Apply $preset hours to all days?';
+  }
 }

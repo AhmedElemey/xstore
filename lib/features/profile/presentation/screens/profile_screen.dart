@@ -22,6 +22,9 @@ import '../widgets/profile_sliver_app_bar.dart';
 import '../widgets/profile_stats_row.dart';
 import '../widgets/profile_verification_banner.dart';
 import '../widgets/vendor_store_card.dart';
+// TODO(phase-2): Re-enable once store/active hours ships.
+// TODO(backend): store hours/status routes don't exist on the backend yet.
+// import '../../../store/presentation/providers/store_hours_provider.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
@@ -43,6 +46,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureProfileLoaded();
+      // TODO(phase-2): Store/active hours deferred to next phase.
+      // TODO(backend): store hours/status routes don't exist on the backend yet.
+      // ref.read(storeHoursNotifierProvider.notifier).fetchStoreHours();
     });
   }
 

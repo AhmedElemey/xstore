@@ -151,6 +151,52 @@ void main() {
   );
 
   test(
+    'a failed check-user lookup surfaces an error and stays on login '
+    'instead of sending the user to register',
+    skip: MockConfig.useMock,
+    () async {
+      final dio = _fakeDio({
+        'POST ${ApiEndpoints.googleCheckUser}': (options) => DioException(
+          requestOptions: options,
+          type: DioExceptionType.connectionError,
+        ),
+      });
+
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWith(
+            (ref) => AuthRepositoryImpl(
+              remote: ref.watch(authRemoteDataSourceProvider),
+              social: _FakeSocialAuth(
+                const SocialAuthResult(
+                  provider: SocialProvider.google,
+                  uid: 'google-uid-offline',
+                  email: 'existing@gmail.com',
+                  displayName: 'Existing User',
+                  idToken: 'google-id-token-offline',
+                  isNewUser: false,
+                ),
+              ),
+              secureStorage: ref.watch(secureStorageProvider),
+              firebaseAuth: _FakeFirebaseAuth(),
+            ),
+          ),
+          dioProvider.overrideWithValue(dio),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(socialAuthProvider.notifier).signInWithGoogle();
+
+      final social = container.read(socialAuthProvider);
+      expect(social.needsRegistration, isFalse);
+      expect(social.googleRegistration, isNull);
+      expect(social.error, isNotNull);
+      expect(social.isGoogleLoading, isFalse);
+    },
+  );
+
+  test(
     'a returning Firebase Google identity with no backend account goes to '
     'register instead of being logged in',
     skip: MockConfig.useMock,

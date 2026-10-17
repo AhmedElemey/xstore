@@ -158,9 +158,16 @@ abstract final class Validators {
   }
 
   static double? parseMoneyInput(String raw) {
-    // Fold Arabic-Indic digits (Arabic keyboard) and drop thousands commas.
-    final cleaned =
-        AppValidators.foldDigits(raw).replaceAll(RegExp(r','), '');
+    // Fold Arabic-Indic digits (Arabic keyboard) and the Arabic decimal
+    // separator (٫).
+    var cleaned = AppValidators.foldDigits(raw).replaceAll('\u066B', '.');
+    // A comma is only a thousands separator in proper 3-digit grouping
+    // ("1,250"); "12,5" is a mistyped decimal, not 125 — reject it.
+    final integerPart = cleaned.split('.').first;
+    if (integerPart.contains(',')) {
+      if (!RegExp(r'^\d{1,3}(,\d{3})+$').hasMatch(integerPart)) return null;
+      cleaned = cleaned.replaceAll(',', '');
+    }
     final value = double.tryParse(cleaned);
     // `double.tryParse('NaN'|'Infinity')` succeeds — reject non-finite so a
     // NaN price can't pass listing validation (NaN <= 0 is false).

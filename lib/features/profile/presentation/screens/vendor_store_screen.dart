@@ -245,6 +245,30 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return false;
   }
 
+  // TODO(phase-2): WhatsApp contact — kept for when the button returns (hidden in build).
+  // Restore with the whatsapp.dart / analytics imports.
+  // Future<void> _openStoreWhatsApp(String? phone, String storeName) async {
+  //   final text = context.l10n.whatsappStorePrefill(storeName);
+  //   final opened = await launchWhatsApp(
+  //     phone: phone ?? '',
+  //     prefilledText: text,
+  //   );
+  //   if (!mounted) return;
+  //   if (!opened) {
+  //     AppSnackbar.info(context, context.l10n.whatsappSellerUnavailable);
+  //     return;
+  //   }
+  //   ref
+  //       .read(analyticsServiceProvider)
+  //       .track(
+  //         AnalyticsEvents.whatsappSellerTap,
+  //         properties: {
+  //           AnalyticsProps.source: 'store',
+  //           AnalyticsProps.sellerId: widget.sellerId,
+  //         },
+  //       );
+  // }
+
   Set<String> get _categories {
     final set = <String>{};
     for (final e in _listings) {
@@ -290,6 +314,10 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joinedLine = joined != null ? context.formatMonthYear(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
+    // TODO(phase-2): WhatsApp contact — only fed the hidden button below.
+    // final authUser = ref.watch(authProvider).valueOrNull;
+    // final isOwnStore = _isOwnStore(authUser);
+    // final whatsapp = (u.whatsappNumber ?? '').trim(); // WhatsApp hidden
 
     return _OrbitPage(
       child: NotificationListener<ScrollNotification>(
@@ -391,6 +419,38 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                             ),
                           ],
                         ),
+                        // TODO(phase-2): WhatsApp contact — hidden by product request.
+                        // if (!isOwnStore && whatsapp.isNotEmpty) ...[
+                        //   const Gap(AppSpacing.lg),
+                        //   SizedBox(
+                        //     width: double.infinity,
+                        //     child: OutlinedButton.icon(
+                        //       onPressed: () =>
+                        //           _openStoreWhatsApp(u.whatsappNumber, name),
+                        //       style: OutlinedButton.styleFrom(
+                        //         foregroundColor: AppColors.success,
+                        //         side: BorderSide(
+                        //           color: AppColors.success.withValues(alpha: 0.5),
+                        //         ),
+                        //         padding: const EdgeInsets.symmetric(
+                        //           vertical: AppSpacing.md,
+                        //         ),
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius:
+                        //               BorderRadius.circular(AppSpacing.md),
+                        //         ),
+                        //       ),
+                        //       icon: const Icon(
+                        //         LucideIcons.messageCircle,
+                        //         size: 18,
+                        //       ),
+                        //       label: Text(
+                        //         context.l10n.ordersWhatsapp,
+                        //         style: AppTypography.labelLarge,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ],
                         const Gap(AppSpacing.lg),
                         Divider(height: 1, color: context.borderColor),
                         const Gap(AppSpacing.lg),

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -219,7 +220,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
       if (next != null && next != prev && mounted) {
-        AppSnackbar.error(context, next);
+        AppSnackbar.error(context, resolveAppError(context, next));
       }
     });
 

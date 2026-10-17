@@ -34,6 +34,11 @@ const accountNotVerifiedErrorCode = 'accountNotVerified';
 /// "Please add and verify your email address before requesting a phone OTP."
 const emailRequiredBeforePhoneErrorCode = 'emailRequiredBeforePhone';
 
+/// Social sign-in failures raised by `SocialAuthDataSource`.
+const googleSignInFailedErrorCode = 'googleSignInFailed';
+const socialAccountExistsErrorCode = 'socialAccountExists';
+const socialAccountDisabledErrorCode = 'socialAccountDisabled';
+
 /// Maps internal error codes (e.g. offline) to user-facing l10n strings.
 String resolveAppError(BuildContext context, String? error) {
   if (isOfflineError(error)) return context.l10n.noInternet;
@@ -44,6 +49,15 @@ String resolveAppError(BuildContext context, String? error) {
   if (error == soldOutErrorCode) return context.l10n.addToCartSoldOut;
   if (error == accountNotVerifiedErrorCode) {
     return context.l10n.listingErrorAccountNotVerified;
+  }
+  if (error == googleSignInFailedErrorCode) {
+    return context.l10n.googleSignInFailed;
+  }
+  if (error == socialAccountExistsErrorCode) {
+    return context.l10n.socialAccountExists;
+  }
+  if (error == socialAccountDisabledErrorCode) {
+    return context.l10n.socialAccountDisabled;
   }
   return error ?? context.l10n.errorGeneric;
 }

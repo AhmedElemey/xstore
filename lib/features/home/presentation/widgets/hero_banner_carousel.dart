@@ -21,6 +21,9 @@ class HeroBannerCarousel extends StatefulWidget {
 
   /// Called only for banners whose [BannerEntity.actionUrl] is non-empty.
   /// Live `/api/banners` currently omit that field — those stay inert.
+  /// TODO(phase-2): banner tap → `GET /api/listings?bannerId=` results.
+  /// Explore's route only takes `?category=`, so there is no existing path
+  /// to open listings filtered by banner yet.
   final void Function(String actionUrl)? onBannerTap;
 
   @override

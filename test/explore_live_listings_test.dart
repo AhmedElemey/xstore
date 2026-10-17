@@ -39,10 +39,12 @@ class _RoutingInterceptor extends Interceptor {
 
   final Map<String, dynamic> bodies;
   final paths = <String>[];
+  final queries = <Map<String, dynamic>>[];
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     paths.add(options.path);
+    queries.add(options.queryParameters);
     final data = bodies[options.path];
     if (data == null) {
       handler.reject(
@@ -184,6 +186,32 @@ void main() {
       expect(interceptor.paths, ['/api/listings']);
       expect(results, hasLength(1));
       expect(results.single.name, 'Nearby phone');
+    });
+
+    test('sends shippingAvailable and minimumRating only when set', () async {
+      await datasource.searchListings('', 1);
+      expect(interceptor.queries.first.containsKey('shippingAvailable'), isFalse);
+      expect(interceptor.queries.first.containsKey('minimumRating'), isFalse);
+
+      interceptor.queries.clear();
+      await datasource.searchListings(
+        'phone',
+        1,
+        shippingAvailable: true,
+        minimumRating: 4,
+      );
+      expect(interceptor.queries.first, {
+        'keyword': 'phone',
+        'shippingAvailable': true,
+        'minimumRating': 4.0,
+        'page': 1,
+        'pageSize': 20,
+      });
+
+      // `shippingOnly == false` means "no preference", not shippingAvailable=false.
+      interceptor.queries.clear();
+      await datasource.searchListings('', 1, shippingAvailable: false);
+      expect(interceptor.queries.first.containsKey('shippingAvailable'), isFalse);
     });
   });
 }

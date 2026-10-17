@@ -61,6 +61,10 @@ class TokenRefreshInterceptor extends Interceptor {
     try {
       options.extra[_retriedKey] = true;
       options.headers['X-Auth-Token'] = outcome.token;
+      // Dio finalizes a FormData when sending it and throws if it's sent
+      // again, so the retry needs a fresh copy.
+      final body = options.data;
+      if (body is FormData) options.data = body.clone();
       final retried = await _dio.fetch(options);
       return handler.resolve(retried);
     } on DioException catch (e) {
@@ -94,6 +98,7 @@ class TokenRefreshInterceptor extends Interceptor {
     }
 
     try {
+      // TODO(backend): confirm whether the `token` body field is the refresh token or the expired access token.
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.refreshToken,
         data: {'token': refreshToken},

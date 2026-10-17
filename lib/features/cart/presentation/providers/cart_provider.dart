@@ -325,6 +325,68 @@ class Cart extends _$Cart {
     _recomputeTotals();
   }
 
+  // TODO(phase-2): coupons — parked. The coupon stack (state fields, use cases,
+  // repository methods, CouponEntity) was removed in 4239e8e; restore it from
+  // there together with the cart's coupon row. Kept for reference only:
+  // void setCouponInput(String v) {
+  //   state = state.copyWith(couponInput: v, couponErrorKey: null);
+  // }
+  // Future<void> applyCoupon() async {
+  //   final id = _consumerId;
+  //   if (id == null) return;
+  //   final code = state.couponInput.trim();
+  //   if (code.isEmpty) return;
+  //   var sub = 0.0;
+  //   for (final it in state.selectedAvailableItems) {
+  //     sub += it.price * it.quantity;
+  //   }
+  //   final epoch = _epoch;
+  //   state = state.copyWith(isCouponLoading: true, couponErrorKey: null);
+  //   final result = await ref.read(applyCouponUseCaseProvider).call(
+  //         consumerId: id,
+  //         code: code,
+  //         eligibleSubtotal: sub,
+  //       );
+  //   if (_epoch != epoch) return;
+  //   var applied = false;
+  //   result.fold(
+  //     (f) {
+  //       final key = switch (f) {
+  //         ValidationFailure(:final message) when message == 'minOrder' =>
+  //           'minOrder',
+  //         ValidationFailure(:final message) when message == 'unavailable' =>
+  //           'unavailable',
+  //         ValidationFailure() => 'invalid',
+  //         _ => 'invalid',
+  //       };
+  //       state = state.copyWith(isCouponLoading: false, couponErrorKey: key);
+  //     },
+  //     (_) => applied = true,
+  //   );
+  //   if (applied) {
+  //     await fetchCart();
+  //     if (_epoch != epoch) return;
+  //     state = state.copyWith(isCouponLoading: false);
+  //   }
+  // }
+  // Future<void> removeCoupon() async {
+  //   final id = _consumerId;
+  //   if (id == null) return;
+  //   final epoch = _epoch;
+  //   state = state.copyWith(isCouponLoading: true);
+  //   final result = await ref.read(removeCouponUseCaseProvider).call(id);
+  //   if (_epoch != epoch) return;
+  //   var ok = false;
+  //   result.fold(
+  //     (f) => state = state.copyWith(isCouponLoading: false, error: f.toString()),
+  //     (_) => ok = true,
+  //   );
+  //   if (ok) {
+  //     state = state.copyWith(isCouponLoading: false, couponInput: '');
+  //     await fetchCart();
+  //   }
+  // }
+
   Future<void> saveForLater(String itemId) async {
     final idx = state.items.indexWhere((e) => e.id == itemId);
     if (idx < 0) return;

@@ -260,6 +260,7 @@ void main() {
       expect(putRequest!.data, {
         'orderIds': [911],
         'status': 'Cancelled',
+        'reason': 'Item no longer available',
       });
       expect(find.text('Order rejected. Buyer notified.'), findsOneWidget);
     },

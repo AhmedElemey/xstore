@@ -432,7 +432,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ProductDetailEntity(
       listing: listing,
       compareAtPrice: compare,
-      stockQuantity: stock?.toInt() ?? 0,
+      stockQuantity: stock?.toInt(),
       locationLine: loc,
       seller: seller,
       specifications: specs,
@@ -572,10 +572,12 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final listingJson = _listingMap(m);
     final listing = ListingModel.fromJson(listingJson).toEntity();
     final compare = jsonDouble(m['compareAtPrice'] ?? m['compare_at_price']);
+    final stock = m['stockQuantity'] ?? m['stock'];
     return ProductDetailEntity(
       listing: listing,
       compareAtPrice: compare == 0 ? null : compare,
-      stockQuantity: _int(m['stockQuantity'] ?? m['stock'], fallback: 0),
+      stockQuantity:
+          stock is num ? stock.toInt() : int.tryParse(stock?.toString() ?? ''),
       locationLine: '',
       specifications: const {},
       similarProducts: const [],

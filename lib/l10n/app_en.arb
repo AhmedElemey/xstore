@@ -45,6 +45,9 @@
   "socialLoginDivider": "or continue with",
   "welcomeBack": "Welcome back",
   "googleAccountNotFound": "No account yet for this Google account. Finish signing up, we've filled in your details.",
+  "googleSignInFailed": "Google sign-in failed. Please try again.",
+  "socialAccountExists": "An account with this email already exists. Try a different sign-in method.",
+  "socialAccountDisabled": "This account has been disabled. Contact support.",
   "searchHint": "Search products...",
   "hotDeals": "🔥 Hot Deals",
   "newArrivals": "✨ New Arrivals",
@@ -250,6 +253,8 @@
   "commissionPaymentAmountInvalid": "Enter the amount you sent",
   "commissionPaymentReceiptLabel": "Transfer receipt",
   "commissionPaymentReceiptHint": "Add a screenshot or photo of the successful transfer",
+  "commissionPaymentReceiptUnavailable": "The receipt image is no longer available. Please add it again.",
+  "commissionPaymentReceiptInvalid": "Use a JPG, PNG or WebP image under 5 MB.",
   "commissionPaymentRemoveReceipt": "Remove receipt",
   "commissionPaymentSubmit": "Submit for review",
   "commissionPaymentSubmitted": "Payment sent for review. Your balance updates once it's approved.",
@@ -1215,5 +1220,81 @@
       }
     }
   },
-  "courierPackageTitle": "Package"
+  "courierPackageTitle": "Package",
+  "whatsappProductPrefill": "Hi, I'm interested in {title}",
+  "@whatsappProductPrefill": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappStorePrefill": "Hi, I saw your store {name} on xStore",
+  "@whatsappStorePrefill": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappSellerUnavailable": "Couldn't open WhatsApp.",
+  "ordersWhatsapp": "💬 WhatsApp",
+  "cartApply": "Apply",
+  "cartCouponLine": "Coupon ({code})",
+  "@cartCouponLine": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "storeStatusOpen": "Your store is currently OPEN",
+  "storeStatusClosed": "Your store is currently CLOSED",
+  "storeOpenDesc": "Customers can place orders now",
+  "storeClosedDesc": "Customers cannot place orders now",
+  "closeStoreNow": "Close Store Now",
+  "openStoreNow": "Open Store Now",
+  "closedMessage": "Add a message for customers (optional)",
+  "closedMessageTitle": "Closed message",
+  "closedMessageHint": "e.g. Back in 1 hour, Closed for holiday",
+  "weeklySchedule": "Weekly Schedule",
+  "weeklyScheduleSubtitle": "Set your working hours for each day",
+  "copyHoursToAll": "Copy hours to all days",
+  "quickPresets": "Quick Presets",
+  "quickPresetsSubtitle": "Apply a schedule template instantly",
+  "presetStandard": "Standard (9AM–6PM)",
+  "presetExtended": "Extended (9AM–11PM)",
+  "presetMorning": "Morning Only (8AM–2PM)",
+  "presetFullWeek": "Full Week",
+  "presetWeekdays": "Weekdays Only (Sat–Thu)",
+  "presetWithoutFriday": "Without Friday",
+  "saveWorkingHours": "Save Working Hours",
+  "workingHoursSaved": "Working hours saved! ✅",
+  "storeNowOpen": "Store is now Open 🟢",
+  "storeNowClosed": "Store is now Closed 🔴",
+  "open24Hours": "Open 24 Hours",
+  "copyFrom": "Copy from:",
+  "applyToSelectedDays": "Apply to Selected Days",
+  "selectAllDays": "Select All",
+  "deselectAllDays": "Deselect All",
+  "openLabel": "Open",
+  "closedLabel": "Closed",
+  "storeHoursTitle": "Store Hours",
+  "daySaturday": "Saturday",
+  "daySunday": "Sunday",
+  "dayMonday": "Monday",
+  "dayTuesday": "Tuesday",
+  "dayWednesday": "Wednesday",
+  "dayThursday": "Thursday",
+  "dayFriday": "Friday",
+  "invalidHoursError": "Closing time must be after opening time",
+  "discardChanges": "Discard Changes",
+  "applyPresetConfirm": "Apply {preset} hours to all days?",
+  "@applyPresetConfirm": {
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -20,9 +20,16 @@ import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../domain/entities/commission_payment_method.dart';
+import '../providers/commission_config_provider.dart';
 import '../providers/commission_payment_providers.dart';
 import '../widgets/commission_page_header.dart';
+import '../providers/vendor_commission_wallet_provider.dart';
 import '../widgets/commission_payment_method_avatar.dart';
+
+/// Receipt formats the backend accepts (Postman collection v10); the size
+/// cap is the one proposed in the commission payment handoff doc.
+const _kReceiptExtensions = {'jpg', 'jpeg', 'png', 'webp'};
+const _kReceiptMaxBytes = 5 * 1024 * 1024;
 
 /// Step 2 of paying platform fees: shows where to send the money, then
 /// collects the amount sent and the transfer receipt for admin review.
@@ -41,6 +48,10 @@ class _CommissionPaymentReceiptScreenState
   final _picker = ImagePicker();
   String _amountInput = '';
   String? _receiptPath;
+  // True when [_receiptPath] is the `-compressed.jpg` copy we created (safe
+  // to delete), false when compression fell back to the picker's original.
+  bool _receiptIsOurCopy = false;
+  bool _picking = false;
   bool _submitting = false;
 
   double? get _amount {
@@ -48,21 +59,72 @@ class _CommissionPaymentReceiptScreenState
     return value != null && value > 0 ? value : null;
   }
 
-  bool get _canSubmit => _amount != null && _receiptPath != null;
+  bool get _hasAmountAndReceipt => _amount != null && _receiptPath != null;
+
+  /// Best-effort delete of the compressed copy; never touches the picker's
+  /// original file.
+  void _discardReceiptCopy() {
+    final path = _receiptPath;
+    if (path == null || !_receiptIsOurCopy) return;
+    try {
+      File(path).deleteSync();
+    } catch (_) {}
+  }
+
+  bool _isAcceptedReceipt(String path) {
+    final dot = path.lastIndexOf('.');
+    if (dot < 0 ||
+        !_kReceiptExtensions.contains(path.substring(dot + 1).toLowerCase())) {
+      return false;
+    }
+    try {
+      return File(path).lengthSync() <= _kReceiptMaxBytes;
+    } on FileSystemException {
+      return false;
+    }
+  }
 
   Future<void> _pickReceipt(ImageSource source) async {
-    final XFile? file;
+    // A second tap while the picker/compression is still running.
+    if (_picking) return;
+    _picking = true;
     try {
-      file = await _picker.pickImage(source: source);
-    } on PlatformException {
-      // Camera/photos permission denied or no camera on this device.
-      if (mounted) AppSnackbar.error(context, context.l10n.errorGeneric);
-      return;
+      final XFile? file;
+      try {
+        file = await _picker.pickImage(source: source);
+      } on PlatformException {
+        // Camera/photos permission denied or no camera on this device.
+        if (mounted) AppSnackbar.error(context, context.l10n.errorGeneric);
+        return;
+      }
+      if (file == null) return;
+      final path = await compressPickedImage(file.path);
+      final isOurCopy = path != file.path;
+      if (!_isAcceptedReceipt(path)) {
+        // Compression fell back to e.g. a HEIC/GIF original, or the photo is
+        // over the size limit.
+        if (isOurCopy) {
+          try {
+            File(path).deleteSync();
+          } catch (_) {}
+        }
+        if (mounted) {
+          AppSnackbar.error(
+            context,
+            context.l10n.commissionPaymentReceiptInvalid,
+          );
+        }
+        return;
+      }
+      if (!mounted) return;
+      _discardReceiptCopy();
+      setState(() {
+        _receiptPath = path;
+        _receiptIsOurCopy = isOurCopy;
+      });
+    } finally {
+      _picking = false;
     }
-    if (file == null) return;
-    final path = await compressPickedImage(file.path);
-    if (!mounted) return;
-    setState(() => _receiptPath = path);
   }
 
   Future<void> _submit() async {
@@ -70,6 +132,16 @@ class _CommissionPaymentReceiptScreenState
     final receiptPath = _receiptPath;
     // Guard a second tap landing before the rebuild disables the button.
     if (_submitting || amount == null || receiptPath == null) return;
+
+    // The picker cache can be evicted between picking and submitting.
+    if (!File(receiptPath).existsSync()) {
+      setState(() => _receiptPath = null);
+      AppSnackbar.error(
+        context,
+        context.l10n.commissionPaymentReceiptUnavailable,
+      );
+      return;
+    }
 
     final repository = ref.read(commissionPaymentRepositoryProvider);
     setState(() => _submitting = true);
@@ -89,6 +161,11 @@ class _CommissionPaymentReceiptScreenState
         );
       },
       (_) {
+        _discardReceiptCopy();
+        // The wallet banner reads these; refetch so the new payment shows.
+        ref
+          ..invalidate(vendorCommissionSnapshotProvider)
+          ..invalidate(vendorCommissionWalletProvider);
         AppSnackbar.success(context, context.l10n.commissionPaymentSubmitted);
         // The wallet is a shell tab: `go` (not pop) clears both payment
         // screens in one navigation.
@@ -100,84 +177,99 @@ class _CommissionPaymentReceiptScreenState
   @override
   Widget build(BuildContext context) {
     final showAmountError = _amountInput.trim().isNotEmpty && _amount == null;
+    // Never let a vendor submit a payment without knowing where to send it.
+    final hasPayToAccount = ref.watch(
+      commissionPayToAccountsProvider.select(
+        (accounts) => accounts.valueOrNull?[widget.method] != null,
+      ),
+    );
 
-    return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: OrbitBackground(
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CommissionPageHeader(
-                title: context.l10n.commissionPaymentReceiptTitle,
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.xl,
-                    0,
-                    AppSpacing.xl,
-                    AppSpacing.x2l,
-                  ),
-                  children: [
-                    _PayToCard(method: widget.method),
-                    const Gap(AppSpacing.x2l),
-                    AuthTextField(
-                      label: context.l10n.commissionPaymentAmountLabel,
-                      readOnly: _submitting,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      textInputAction: TextInputAction.done,
-                      onChanged: (value) =>
-                          setState(() => _amountInput = value),
-                      errorText: showAmountError
-                          ? context.l10n.commissionPaymentAmountInvalid
-                          : null,
-                    ),
-                    const Gap(AppSpacing.x2l),
-                    Text(
-                      context.l10n.commissionPaymentReceiptLabel.toUpperCase(),
-                      style: AppTypography.fieldLabel.copyWith(
-                        color: context.labelColor,
-                      ),
-                    ),
-                    const Gap(AppSpacing.sm),
-                    if (_receiptPath == null)
-                      _ReceiptPicker(
-                        enabled: !_submitting,
-                        onPick: _pickReceipt,
-                      )
-                    else
-                      _ReceiptPreview(
-                        path: _receiptPath!,
-                        onRemove: _submitting
-                            ? null
-                            : () => setState(() => _receiptPath = null),
-                      ),
-                  ],
+    return PopScope(
+      canPop: !_submitting,
+      child: Scaffold(
+        backgroundColor: context.backgroundColor,
+        body: OrbitBackground(
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CommissionPageHeader(
+                  title: context.l10n.commissionPaymentReceiptTitle,
                 ),
-              ),
-              // Sticky footer, same chrome as the cart's checkout bar.
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: context.backgroundColor.withValues(alpha: 0.96),
-                  border: Border(top: BorderSide(color: context.borderColor)),
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: XstoreButton(
-                      label: context.l10n.commissionPaymentSubmit,
-                      isLoading: _submitting,
-                      onPressed: _canSubmit ? _submit : null,
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.xl,
+                      0,
+                      AppSpacing.xl,
+                      AppSpacing.x2l,
                     ),
+                    children: [
+                      _PayToCard(method: widget.method),
+                      const Gap(AppSpacing.x2l),
+                      AuthTextField(
+                        label: context.l10n.commissionPaymentAmountLabel,
+                        readOnly: _submitting,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textInputAction: TextInputAction.done,
+                        onChanged: (value) =>
+                            setState(() => _amountInput = value),
+                        errorText: showAmountError
+                            ? context.l10n.commissionPaymentAmountInvalid
+                            : null,
+                      ),
+                      const Gap(AppSpacing.x2l),
+                      Text(
+                        context.l10n.commissionPaymentReceiptLabel
+                            .toUpperCase(),
+                        style: AppTypography.fieldLabel.copyWith(
+                          color: context.labelColor,
+                        ),
+                      ),
+                      const Gap(AppSpacing.sm),
+                      if (_receiptPath == null)
+                        _ReceiptPicker(
+                          enabled: !_submitting,
+                          onPick: _pickReceipt,
+                        )
+                      else
+                        _ReceiptPreview(
+                          path: _receiptPath!,
+                          onRemove: _submitting
+                              ? null
+                              : () {
+                                  _discardReceiptCopy();
+                                  setState(() => _receiptPath = null);
+                                },
+                        ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                // Sticky footer, same chrome as the cart's checkout bar.
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.backgroundColor.withValues(alpha: 0.96),
+                    border: Border(top: BorderSide(color: context.borderColor)),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: XstoreButton(
+                        label: context.l10n.commissionPaymentSubmit,
+                        isLoading: _submitting,
+                        onPressed: _hasAmountAndReceipt && hasPayToAccount
+                            ? _submit
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -217,7 +309,23 @@ class _PayToCard extends ConsumerWidget {
           Expanded(
             child: accounts.when(
               loading: () => const LinearProgressIndicator(),
-              error: (_, __) => _NoAccountText(label: label),
+              error: (_, __) => Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n.errorGeneric,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        ref.invalidate(commissionPayToAccountsProvider),
+                    child: Text(context.l10n.retry),
+                  ),
+                ],
+              ),
               data: (map) {
                 final account = map[method];
                 if (account == null) return _NoAccountText(label: label);
@@ -350,6 +458,12 @@ class _ReceiptPreview extends StatelessWidget {
               File(path),
               fit: BoxFit.contain,
               cacheWidth: cacheWidth,
+              // The cache file can be evicted while the screen is open.
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.broken_image_outlined,
+                size: 48,
+                color: context.textSecondary,
+              ),
             ),
           ),
         ),

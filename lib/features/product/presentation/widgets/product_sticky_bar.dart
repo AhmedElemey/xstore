@@ -18,6 +18,8 @@ class ProductStickyBar extends StatelessWidget {
     this.isSoldOut = false,
   });
 
+  // TODO(phase-2): WhatsApp contact — restore `required this.onChat` and
+  // `final VoidCallback onChat;` together with the chat button in build.
   final VoidCallback onAddToCart;
   final VoidCallback onBuyNow;
   final bool isAddingToCart;
@@ -44,6 +46,20 @@ class ProductStickyBar extends StatelessWidget {
           ),
           child: Row(
             children: [
+              // TODO(phase-2): WhatsApp contact — hidden by product request.
+              // OutlinedButton(
+              //   onPressed: onChat,
+              //   style: OutlinedButton.styleFrom(
+              //     padding:
+              //         const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              //     minimumSize: const Size(
+              //       AppSpacing.x3l + AppSpacing.md,
+              //       AppSpacing.x3l + AppSpacing.md,
+              //     ),
+              //   ),
+              //   child: const Icon(LucideIcons.messageCircle, size: 22),
+              // ),
+              // const Gap(AppSpacing.md),
               // The primary action is the gradient pill; "Buy now" steps back
               // to a bordered pill when it shares the bar with "Add to cart".
               if (showAddToCart) ...[

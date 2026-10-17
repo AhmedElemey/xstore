@@ -523,6 +523,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return false;
   }
 
+  // TODO(backend): need the C# role enum — ADMIN roles currently parse as consumer.
   UserRole? _parseRole(dynamic value) {
     if (value is num) {
       // 1-based C# UserRole until the declaration is confirmed: 0 unset.

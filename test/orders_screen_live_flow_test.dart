@@ -474,6 +474,55 @@ void main() {
   );
 
   testWidgets(
+    'two quick taps on Submit Review post only one review',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var postCount = 0;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.ordersMe}': (_) => [
+          _consumerOrderJson(id: '508', status: 'delivered', listingId: '9005'),
+        ],
+        'GET ${ApiEndpoints.apiListingReviews('9005')}': (_) => {
+          'items': <dynamic>[],
+          'totalCount': 0,
+        },
+        'POST ${ApiEndpoints.apiListingReviews('9005')}': (_) {
+          postCount++;
+          return {
+            'id': 'review_2',
+            'userId': 'consumer_1',
+            'userName': 'Test Buyer',
+            'rating': 5,
+            'comment': 'Great',
+          };
+        },
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ]);
+      await _settle(tester);
+
+      await tester.tap(find.text('Leave Review'));
+      await _settle(tester);
+      await tester.enterText(find.byType(TextField), 'Great');
+      await tester.pump();
+
+      // No pump between the taps: the second lands before the rebuild
+      // could disable the button.
+      final submit = find.text('Submit Review');
+      await tester.tap(submit);
+      await tester.tap(submit);
+      await _settle(tester);
+
+      expect(postCount, 1);
+
+      await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
     'consumer sees the server error when submitting a review fails',
     skip: MockConfig.useMock,
     (tester) async {

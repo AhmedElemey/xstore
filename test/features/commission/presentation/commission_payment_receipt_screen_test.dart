@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/features/commission/domain/entities/commission_payment_method.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_payment_providers.dart';
@@ -11,13 +12,16 @@ import 'package:xstore/shared/widgets/xstore_button.dart';
 
 Future<void> _pumpScreen(
   WidgetTester tester, {
-  required Map<CommissionPaymentMethod, String> accounts,
+  Map<CommissionPaymentMethod, String> accounts = const {},
   CommissionPaymentMethod method = CommissionPaymentMethod.vodafoneCash,
+  Future<Map<CommissionPaymentMethod, String>> Function()? load,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        commissionPayToAccountsProvider.overrideWith((ref) async => accounts),
+        commissionPayToAccountsProvider.overrideWith(
+          (ref) => load != null ? load() : Future.value(accounts),
+        ),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
@@ -68,6 +72,32 @@ void main() {
       findsOneWidget,
     );
     expect(find.byTooltip('Copied'), findsNothing);
+  });
+
+  testWidgets('a failed load shows Retry, not "contact support"', (
+    tester,
+  ) async {
+    var calls = 0;
+    await _pumpScreen(
+      tester,
+      load: () async {
+        calls++;
+        if (calls == 1) throw const Failure.network('offline');
+        return {CommissionPaymentMethod.vodafoneCash: '01000000000'};
+      },
+    );
+
+    expect(calls, 1);
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.textContaining("isn't set up yet"), findsNothing);
+    expect(_submitOnPressed(tester), isNull);
+
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    expect(calls, 2);
+    expect(find.text('Retry'), findsNothing);
+    expect(find.text('01000000000'), findsOneWidget);
   });
 
   testWidgets('submit stays disabled until a valid amount and a receipt', (

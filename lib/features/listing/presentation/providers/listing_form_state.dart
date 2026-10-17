@@ -38,7 +38,7 @@ class ListingFormState with _$ListingFormState {
     @Default(0) int draftRevision,
     /// Remote photo URLs already on the listing being edited (empty when
     /// creating). Removable in the photo strip; remaining URLs are sent on
-    /// update as keepers (`imageUrls[i]`).
+    /// update as keepers (`savedImageUrls`).
     @Default(<String>[]) List<String> existingImageUrls,
     /// Non-empty when this form is editing an existing listing rather than
     /// creating a new one; drives `submit()`'s create-vs-update branch.

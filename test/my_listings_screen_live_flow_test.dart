@@ -194,17 +194,14 @@ void main() {
     },
   );
 
+  // TODO(backend): no endpoint to resume a paused listing (backend Q3) —
+  // restore the old resume wire-call test when the Resume entry returns.
   testWidgets(
-    'vendor resumes a paused listing via the live update wire call',
+    'a paused listing offers no Resume entry',
     (tester) async {
-      RequestOptions? putRequest;
       final dio = _fakeDio({
         'GET ${ApiEndpoints.apiMyListings}': (_) =>
             [_listingJson(status: 3)],
-        'PUT ${ApiEndpoints.apiListings}': (options) {
-          putRequest = options;
-          return _listingJson(status: 3);
-        },
       });
 
       await tester.pumpWidget(
@@ -222,16 +219,8 @@ void main() {
       await tester.tap(find.byIcon(LucideIcons.moreVertical));
       await _settle(tester);
 
-      expect(find.text('Resume'), findsOneWidget);
-      await tester.tap(find.text('Resume'));
-      await _settle(tester);
-
-      expect(putRequest, isNotNull);
-      expect(putRequest!.path, '/api/listings');
-      expect(
-        tester.widget<StatusBadge>(find.byType(StatusBadge)).status,
-        ListingStatus.active,
-      );
+      expect(find.text('Edit Listing'), findsOneWidget);
+      expect(find.text('Resume'), findsNothing);
     },
   );
 
@@ -307,22 +296,13 @@ void main() {
     },
   );
 
+  // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) —
+  // restore the old failed-resubmit sheet test when the Resubmit entry returns.
   testWidgets(
-    'a failed resubmit shows the server reason once, inline in the sheet',
+    'a rejected listing offers no Resubmit entry',
     (tester) async {
-      const reason = 'Only cancelled listings can be resubmitted.';
       final dio = _fakeDio({
         'GET ${ApiEndpoints.apiMyListings}': (_) => [_listingJson(status: 5)],
-        'PUT ${ApiEndpoints.apiListingResubmit('9001')}': (options) =>
-            DioException(
-              requestOptions: options,
-              type: DioExceptionType.badResponse,
-              response: Response(
-                requestOptions: options,
-                statusCode: 400,
-                data: {'isSuccess': false, 'errorEn': reason},
-              ),
-            ),
       });
 
       await tester.pumpWidget(
@@ -335,16 +315,9 @@ void main() {
 
       await tester.tap(find.byIcon(LucideIcons.moreVertical));
       await _settle(tester);
-      await tester.tap(find.text('Resubmit'));
-      await _settle(tester);
-      await tester.tap(find.text('Resubmit for review'));
-      await _settle(tester);
 
-      // The sheet stays open with the reason; the screen's error listener
-      // must not toast the same reason again behind it.
-      expect(find.text('Resubmit for review'), findsOneWidget);
-      expect(find.text(reason), findsOneWidget);
-      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('Resubmit'), findsNothing);
+      expect(find.text('Edit Listing'), findsOneWidget);
     },
   );
 }

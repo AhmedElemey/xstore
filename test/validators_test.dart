@@ -185,6 +185,24 @@ void main() {
     test('invalid', () {
       expect(Validators.parseMoneyInput('abc'), isNull);
     });
+
+    test('comma is a thousands separator only in 3-digit groups', () {
+      expect(Validators.parseMoneyInput('1,250'), 1250);
+      expect(Validators.parseMoneyInput('1,250,000.5'), 1250000.5);
+      expect(Validators.parseMoneyInput('12,5'), isNull);
+      expect(Validators.parseMoneyInput('1,25'), isNull);
+      expect(Validators.parseMoneyInput('1,2345'), isNull);
+      expect(Validators.parseMoneyInput('1.2,5'), isNull);
+    });
+
+    test('Arabic digits and decimal separator', () {
+      expect(Validators.parseMoneyInput('٢٠٠'), 200);
+      expect(Validators.parseMoneyInput('٢٠٠٫٥'), 200.5);
+    });
+
+    test('plain decimal', () {
+      expect(Validators.parseMoneyInput('12.5'), 12.5);
+    });
   });
 
   group('listingForm', () {

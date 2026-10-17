@@ -21,8 +21,12 @@ class ListingOptionsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showPause = listing.status == ListingStatus.active;
-    final showResume = listing.status == ListingStatus.paused;
-    final showResubmit = listing.status == ListingStatus.rejected;
+    // TODO(backend): no endpoint to resume a paused listing (backend Q3) —
+    // restore with `listing.status == ListingStatus.paused` and the Resume tile.
+    // final showResume = listing.status == ListingStatus.paused;
+    // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) —
+    // restore with `listing.status == ListingStatus.rejected` and the Resubmit tile.
+    // final showResubmit = listing.status == ListingStatus.rejected;
 
     return SafeArea(
       child: Padding(
@@ -42,19 +46,20 @@ class ListingOptionsSheet extends StatelessWidget {
               ),
             ),
             const Gap(AppSpacing.lg),
-            if (showResubmit)
-              ListTile(
-                leading: Icon(LucideIcons.refreshCw, color: context.linkColor),
-                title: Text(
-                  context.l10n.resubmitListing,
-                  style: TextStyle(
-                    color: context.linkColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onTap: () =>
-                    Navigator.of(context).pop(ListingOptionsAction.resubmit),
-              ),
+            // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3)
+            // if (showResubmit)
+            //   ListTile(
+            //     leading: Icon(LucideIcons.refreshCw, color: context.linkColor),
+            //     title: Text(
+            //       context.l10n.resubmitListing,
+            //       style: TextStyle(
+            //         color: context.linkColor,
+            //         fontWeight: FontWeight.w600,
+            //       ),
+            //     ),
+            //     onTap: () =>
+            //         Navigator.of(context).pop(ListingOptionsAction.resubmit),
+            //   ),
             ListTile(
               leading: const Icon(LucideIcons.pencil),
               title: Text(context.l10n.editListingMenu),
@@ -67,13 +72,14 @@ class ListingOptionsSheet extends StatelessWidget {
                 onTap: () =>
                     Navigator.of(context).pop(ListingOptionsAction.pause),
               ),
-            if (showResume)
-              ListTile(
-                leading: const Icon(LucideIcons.playCircle),
-                title: Text(context.l10n.resumeListing),
-                onTap: () =>
-                    Navigator.of(context).pop(ListingOptionsAction.resume),
-              ),
+            // TODO(backend): no endpoint to resume a paused listing (backend Q3)
+            // if (showResume)
+            //   ListTile(
+            //     leading: const Icon(LucideIcons.playCircle),
+            //     title: Text(context.l10n.resumeListing),
+            //     onTap: () =>
+            //         Navigator.of(context).pop(ListingOptionsAction.resume),
+            //   ),
             ListTile(
               leading: const Icon(LucideIcons.barChart2),
               title: Text(context.l10n.viewStatsMenu),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import 'auth_provider.dart';
@@ -63,9 +64,10 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
   /// Google is a login-only shortcut, not a self-service account creator:
   /// ask the backend (read-only `checkGoogleUser`) whether this identity
   /// already has an account. If it does, log straight in via the single
-  /// `/api/auth/google/login` endpoint (any role). Otherwise — or if the
-  /// lookup failed — go to the register flow prefilled with the Google
-  /// profile.
+  /// `/api/auth/google/login` endpoint (any role). If it doesn't, go to the
+  /// register flow prefilled with the Google profile. If the lookup itself
+  /// fails, surface the error and stay on login — an existing user must not
+  /// be sent to register by a network blip.
   ///
   /// Firebase `isNewUser` plays no part: Firebase remembers every Google
   /// account that ever signed in to the project, so it says nothing about
@@ -75,7 +77,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
     if (idToken == null || idToken.isEmpty) {
       state = state.copyWith(
         isGoogleLoading: false,
-        error: 'Google sign-in failed — no identity token. Please try again.',
+        error: googleSignInFailedErrorCode,
       );
       return;
     }
@@ -84,12 +86,16 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         await ref.read(checkGoogleUserUseCaseProvider).call(idToken: idToken);
     if (!mounted) return;
 
-    var exists = false;
-    UserRole? existingRole;
-    checkResult.fold((_) {}, (r) {
-      exists = r.exists;
-      existingRole = r.role;
-    });
+    final lookup = checkResult.fold((failure) {
+      state = state.copyWith(
+        isGoogleLoading: false,
+        error: failure.toString(),
+      );
+      return null;
+    }, (r) => r);
+    if (lookup == null) return;
+    final exists = lookup.exists;
+    final existingRole = lookup.role;
     if (kDebugMode) {
       debugPrint(
         'google check-user parsed: exists=$exists role=$existingRole',

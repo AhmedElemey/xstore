@@ -18,7 +18,9 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$ProductDetailEntity {
   ListingEntity get listing => throw _privateConstructorUsedError;
   double? get compareAtPrice => throw _privateConstructorUsedError;
-  int get stockQuantity => throw _privateConstructorUsedError;
+
+  /// Null when the API sent no stock count (treated as available).
+  int? get stockQuantity => throw _privateConstructorUsedError;
   String get locationLine => throw _privateConstructorUsedError;
   ProductSellerEntity? get seller => throw _privateConstructorUsedError;
   Map<String, String> get specifications => throw _privateConstructorUsedError;
@@ -40,7 +42,7 @@ abstract class $ProductDetailEntityCopyWith<$Res> {
   $Res call(
       {ListingEntity listing,
       double? compareAtPrice,
-      int stockQuantity,
+      int? stockQuantity,
       String locationLine,
       ProductSellerEntity? seller,
       Map<String, String> specifications,
@@ -68,7 +70,7 @@ class _$ProductDetailEntityCopyWithImpl<$Res, $Val extends ProductDetailEntity>
   $Res call({
     Object? listing = null,
     Object? compareAtPrice = freezed,
-    Object? stockQuantity = null,
+    Object? stockQuantity = freezed,
     Object? locationLine = null,
     Object? seller = freezed,
     Object? specifications = null,
@@ -85,10 +87,10 @@ class _$ProductDetailEntityCopyWithImpl<$Res, $Val extends ProductDetailEntity>
           ? _value.compareAtPrice
           : compareAtPrice // ignore: cast_nullable_to_non_nullable
               as double?,
-      stockQuantity: null == stockQuantity
+      stockQuantity: freezed == stockQuantity
           ? _value.stockQuantity
           : stockQuantity // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       locationLine: null == locationLine
           ? _value.locationLine
           : locationLine // ignore: cast_nullable_to_non_nullable
@@ -160,7 +162,7 @@ abstract class _$$ProductDetailEntityImplCopyWith<$Res>
   $Res call(
       {ListingEntity listing,
       double? compareAtPrice,
-      int stockQuantity,
+      int? stockQuantity,
       String locationLine,
       ProductSellerEntity? seller,
       Map<String, String> specifications,
@@ -189,7 +191,7 @@ class __$$ProductDetailEntityImplCopyWithImpl<$Res>
   $Res call({
     Object? listing = null,
     Object? compareAtPrice = freezed,
-    Object? stockQuantity = null,
+    Object? stockQuantity = freezed,
     Object? locationLine = null,
     Object? seller = freezed,
     Object? specifications = null,
@@ -206,10 +208,10 @@ class __$$ProductDetailEntityImplCopyWithImpl<$Res>
           ? _value.compareAtPrice
           : compareAtPrice // ignore: cast_nullable_to_non_nullable
               as double?,
-      stockQuantity: null == stockQuantity
+      stockQuantity: freezed == stockQuantity
           ? _value.stockQuantity
           : stockQuantity // ignore: cast_nullable_to_non_nullable
-              as int,
+              as int?,
       locationLine: null == locationLine
           ? _value.locationLine
           : locationLine // ignore: cast_nullable_to_non_nullable
@@ -244,7 +246,7 @@ class _$ProductDetailEntityImpl implements _ProductDetailEntity {
   const _$ProductDetailEntityImpl(
       {required this.listing,
       this.compareAtPrice,
-      this.stockQuantity = 0,
+      this.stockQuantity,
       this.locationLine = '',
       this.seller,
       final Map<String, String> specifications = const {},
@@ -259,9 +261,10 @@ class _$ProductDetailEntityImpl implements _ProductDetailEntity {
   final ListingEntity listing;
   @override
   final double? compareAtPrice;
+
+  /// Null when the API sent no stock count (treated as available).
   @override
-  @JsonKey()
-  final int stockQuantity;
+  final int? stockQuantity;
   @override
   @JsonKey()
   final String locationLine;
@@ -348,7 +351,7 @@ abstract class _ProductDetailEntity implements ProductDetailEntity {
   const factory _ProductDetailEntity(
       {required final ListingEntity listing,
       final double? compareAtPrice,
-      final int stockQuantity,
+      final int? stockQuantity,
       final String locationLine,
       final ProductSellerEntity? seller,
       final Map<String, String> specifications,
@@ -361,7 +364,9 @@ abstract class _ProductDetailEntity implements ProductDetailEntity {
   @override
   double? get compareAtPrice;
   @override
-  int get stockQuantity;
+
+  /// Null when the API sent no stock count (treated as available).
+  int? get stockQuantity;
   @override
   String get locationLine;
   @override

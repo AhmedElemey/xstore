@@ -17,9 +17,9 @@ CommissionPaymentRepository commissionPaymentRepository(
   );
 }
 
-/// Pay-to accounts for the payment screens. A failed or missing setting
-/// reads as "none configured" — the screen then tells the vendor to contact
-/// support rather than blocking on an error state.
+/// Pay-to accounts for the payment screens. A failed load throws so the
+/// screen can show an error with Retry; only a successful empty map means
+/// "none configured".
 @riverpod
 Future<Map<CommissionPaymentMethod, String>> commissionPayToAccounts(
   CommissionPayToAccountsRef ref,
@@ -27,5 +27,5 @@ Future<Map<CommissionPaymentMethod, String>> commissionPayToAccounts(
   final result = await ref
       .watch(commissionPaymentRepositoryProvider)
       .getPayToAccounts();
-  return result.getOrElse((_) => const {});
+  return result.fold((failure) => throw failure, (accounts) => accounts);
 }

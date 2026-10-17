@@ -303,6 +303,7 @@ class UserModel with _$UserModel {
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // TODO(backend): need the C# role enum — ADMIN roles currently parse as consumer.
     UserRole parseRole() {
       // CONFIRMED: real get-profile response sends `roleName` (capitalized,
       // e.g. "Consumer"/"Vendor"), not `role`. Checked case-insensitively

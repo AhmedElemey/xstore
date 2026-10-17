@@ -71,35 +71,39 @@ Future<String?> showCancelReasonDialog(BuildContext context) {
   );
 }
 
-/// The vendor's reject reason ('—' when left blank), or null when the
-/// dialog is cancelled or dismissed.
+/// The vendor's reject reason, or null when the dialog is cancelled or
+/// dismissed. The backend requires a reason for a rejection (Cancelled), so
+/// Confirm stays disabled until one is typed.
 Future<String?> showRejectReasonDialog(BuildContext context) async {
   // No TextEditingController, for the same reason as showShipOrderSheet.
   var reasonText = '';
   final ok = await showDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(context.l10n.ordersRejectDialogTitle),
-      content: TextField(
-        onChanged: (v) => reasonText = v,
-        decoration:
-            InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setS) => AlertDialog(
+        title: Text(context.l10n.ordersRejectDialogTitle),
+        content: TextField(
+          onChanged: (v) => setS(() => reasonText = v),
+          decoration:
+              InputDecoration(hintText: context.l10n.ordersRejectReasonHint),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: reasonText.trim().isEmpty
+                ? null
+                : () => Navigator.pop(ctx, true),
+            child: Text(context.l10n.ordersConfirm),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: Text(context.l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: Text(context.l10n.ordersConfirm),
-        ),
-      ],
     ),
   );
   if (ok != true) return null;
-  final reason = reasonText.trim();
-  return reason.isEmpty ? '—' : reason;
+  return reasonText.trim();
 }
 
 /// The tracking details the vendor entered, or null when the sheet is
@@ -216,6 +220,7 @@ Future<void> showOrderReviewFlow(
   final analytics = ref.read(analyticsServiceProvider);
   var stars = 5;
   var reviewText = '';
+  var submitting = false;
   final result = await showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
@@ -262,10 +267,15 @@ Future<void> showOrderReviewFlow(
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton(
                   // A comment is required, so the button stays disabled
-                  // until one is typed rather than ignoring taps.
-                  onPressed: reviewText.trim().isEmpty
+                  // until one is typed rather than ignoring taps. It also
+                  // stays disabled while the review is being posted.
+                  onPressed: reviewText.trim().isEmpty || submitting
                       ? null
                       : () async {
+                          // A second tap can land before the rebuild disables
+                          // the button.
+                          if (submitting) return;
+                          setS(() => submitting = true);
                           final posted = await createReview(
                             listingId: listingId,
                             params: ReviewWriteParams(
@@ -280,6 +290,7 @@ Future<void> showOrderReviewFlow(
                                 Navigator.pop(ctx, 'already');
                                 return;
                               }
+                              setS(() => submitting = false);
                               AppSnackbar.error(
                                 sheetContext,
                                 failure.toString(),

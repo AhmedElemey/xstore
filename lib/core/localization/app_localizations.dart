@@ -368,6 +368,24 @@ abstract class AppLocalizations {
   /// **'No account yet for this Google account. Finish signing up, we\'ve filled in your details.'**
   String get googleAccountNotFound;
 
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in failed. Please try again.'**
+  String get googleSignInFailed;
+
+  /// No description provided for @socialAccountExists.
+  ///
+  /// In en, this message translates to:
+  /// **'An account with this email already exists. Try a different sign-in method.'**
+  String get socialAccountExists;
+
+  /// No description provided for @socialAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Contact support.'**
+  String get socialAccountDisabled;
+
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
@@ -1471,6 +1489,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a screenshot or photo of the successful transfer'**
   String get commissionPaymentReceiptHint;
+
+  /// No description provided for @commissionPaymentReceiptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt image is no longer available. Please add it again.'**
+  String get commissionPaymentReceiptUnavailable;
+
+  /// No description provided for @commissionPaymentReceiptInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a JPG, PNG or WebP image under 5 MB.'**
+  String get commissionPaymentReceiptInvalid;
 
   /// No description provided for @commissionPaymentRemoveReceipt.
   ///
@@ -5389,6 +5419,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Package'**
   String get courierPackageTitle;
+
+  /// No description provided for @whatsappProductPrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I\'m interested in {title}'**
+  String whatsappProductPrefill(String title);
+
+  /// No description provided for @whatsappStorePrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, I saw your store {name} on xStore'**
+  String whatsappStorePrefill(String name);
+
+  /// No description provided for @whatsappSellerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open WhatsApp.'**
+  String get whatsappSellerUnavailable;
+
+  /// No description provided for @ordersWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'💬 WhatsApp'**
+  String get ordersWhatsapp;
+
+  /// No description provided for @cartApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get cartApply;
+
+  /// No description provided for @cartCouponLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon ({code})'**
+  String cartCouponLine(String code);
+
+  /// No description provided for @storeStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store is currently OPEN'**
+  String get storeStatusOpen;
+
+  /// No description provided for @storeStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store is currently CLOSED'**
+  String get storeStatusClosed;
+
+  /// No description provided for @storeOpenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can place orders now'**
+  String get storeOpenDesc;
+
+  /// No description provided for @storeClosedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers cannot place orders now'**
+  String get storeClosedDesc;
+
+  /// No description provided for @closeStoreNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Store Now'**
+  String get closeStoreNow;
+
+  /// No description provided for @openStoreNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Store Now'**
+  String get openStoreNow;
+
+  /// No description provided for @closedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a message for customers (optional)'**
+  String get closedMessage;
+
+  /// No description provided for @closedMessageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed message'**
+  String get closedMessageTitle;
+
+  /// No description provided for @closedMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Back in 1 hour, Closed for holiday'**
+  String get closedMessageHint;
+
+  /// No description provided for @weeklySchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Schedule'**
+  String get weeklySchedule;
+
+  /// No description provided for @weeklyScheduleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your working hours for each day'**
+  String get weeklyScheduleSubtitle;
+
+  /// No description provided for @copyHoursToAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy hours to all days'**
+  String get copyHoursToAll;
+
+  /// No description provided for @quickPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Presets'**
+  String get quickPresets;
+
+  /// No description provided for @quickPresetsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply a schedule template instantly'**
+  String get quickPresetsSubtitle;
+
+  /// No description provided for @presetStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard (9AM–6PM)'**
+  String get presetStandard;
+
+  /// No description provided for @presetExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'Extended (9AM–11PM)'**
+  String get presetExtended;
+
+  /// No description provided for @presetMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning Only (8AM–2PM)'**
+  String get presetMorning;
+
+  /// No description provided for @presetFullWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Week'**
+  String get presetFullWeek;
+
+  /// No description provided for @presetWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays Only (Sat–Thu)'**
+  String get presetWeekdays;
+
+  /// No description provided for @presetWithoutFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Without Friday'**
+  String get presetWithoutFriday;
+
+  /// No description provided for @saveWorkingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Working Hours'**
+  String get saveWorkingHours;
+
+  /// No description provided for @workingHoursSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Working hours saved! ✅'**
+  String get workingHoursSaved;
+
+  /// No description provided for @storeNowOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is now Open 🟢'**
+  String get storeNowOpen;
+
+  /// No description provided for @storeNowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is now Closed 🔴'**
+  String get storeNowClosed;
+
+  /// No description provided for @open24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 Hours'**
+  String get open24Hours;
+
+  /// No description provided for @copyFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from:'**
+  String get copyFrom;
+
+  /// No description provided for @applyToSelectedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to Selected Days'**
+  String get applyToSelectedDays;
+
+  /// No description provided for @selectAllDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAllDays;
+
+  /// No description provided for @deselectAllDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAllDays;
+
+  /// No description provided for @openLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get openLabel;
+
+  /// No description provided for @closedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closedLabel;
+
+  /// No description provided for @storeHoursTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Hours'**
+  String get storeHoursTitle;
+
+  /// No description provided for @daySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get daySaturday;
+
+  /// No description provided for @daySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get daySunday;
+
+  /// No description provided for @dayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get dayMonday;
+
+  /// No description provided for @dayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get dayTuesday;
+
+  /// No description provided for @dayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get dayWednesday;
+
+  /// No description provided for @dayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get dayThursday;
+
+  /// No description provided for @dayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get dayFriday;
+
+  /// No description provided for @invalidHoursError.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing time must be after opening time'**
+  String get invalidHoursError;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard Changes'**
+  String get discardChanges;
+
+  /// No description provided for @applyPresetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply {preset} hours to all days?'**
+  String applyPresetConfirm(String preset);
 }
 
 class _AppLocalizationsDelegate

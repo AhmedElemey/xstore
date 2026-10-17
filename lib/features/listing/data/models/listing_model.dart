@@ -224,6 +224,8 @@ class ListingModel with _$ListingModel {
 // samples with those codes were available — MODERATE confidence, not
 // confirmed. Adjust if a live draft/paused/sold/rejected listing surfaces
 // a different code.
+// TODO(backend): need the C# ListingStatus declaration — unknown codes (e.g. Cancelled)
+// currently fall back to Draft.
 ListingStatus _listingStatusFromDto(String value) {
   switch (value) {
     case '0':
@@ -266,14 +268,14 @@ bool isPublicLiveListingStatus(Object? raw) {
   return _listingStatusFromDto(s) == ListingStatus.active;
 }
 
-/// Catalog tiles (Home / Explore): the backend keeps a listing Active at
-/// `stockQuantity: 0`, so it must be flagged client-side. Only an explicit
-/// count of 0 or less is sold out — a missing key isn't, since the cart add
-/// and checkout stock checks are the real gate.
+/// [isSoldOutListing] for a raw listing DTO.
 bool isSoldOutListingJson(Map<String, dynamic> json) {
-  final raw = json['stockQuantity'] ?? json['stock'] ?? json['quantity'];
-  final n = raw is num ? raw : num.tryParse(raw?.toString() ?? '');
-  return n != null && n <= 0;
+  final rawStock = json['stockQuantity'] ?? json['stock'] ?? json['quantity'];
+  final rawStatus = json['status']?.toString().trim() ?? '';
+  return isSoldOutListing(
+    status: rawStatus.isEmpty ? null : _listingStatusFromDto(rawStatus),
+    stock: rawStock is num ? rawStock : num.tryParse(rawStock?.toString() ?? ''),
+  );
 }
 
 extension ListingModelX on ListingModel {

@@ -122,6 +122,8 @@ class Explore extends _$Explore {
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
           categoryId: categoryId,
+          shippingAvailable: state.filters.shippingOnly,
+          minimumRating: state.filters.minRating,
         );
     if (_disposed) return;
     result.fold(
@@ -176,6 +178,8 @@ class Explore extends _$Explore {
           maxPrice: state.filters.maxPrice,
           condition: _serverCondition,
           categoryId: categoryId,
+          shippingAvailable: state.filters.shippingOnly,
+          minimumRating: state.filters.minRating,
         );
     if (_disposed) return;
     result.fold(

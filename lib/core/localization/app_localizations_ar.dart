@@ -150,6 +150,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'مفيش حساب مرتبط بحساب جوجل ده لسه. كمّل التسجيل، ملينا بياناتك.';
 
   @override
+  String get googleSignInFailed => 'فشل تسجيل الدخول بجوجل. حاول تاني.';
+
+  @override
+  String get socialAccountExists =>
+      'فيه حساب بنفس الإيميل ده بالفعل. جرّب طريقة دخول تانية.';
+
+  @override
+  String get socialAccountDisabled => 'الحساب ده اتوقف. كلّم الدعم.';
+
+  @override
   String get searchHint => 'ابحث عن منتجات...';
 
   @override
@@ -715,6 +725,14 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get commissionPaymentReceiptHint =>
       'أضف لقطة شاشة أو صورة للتحويل الناجح';
+
+  @override
+  String get commissionPaymentReceiptUnavailable =>
+      'صورة الإيصال لم تعد متاحة. أضفها مرة أخرى.';
+
+  @override
+  String get commissionPaymentReceiptInvalid =>
+      'استخدم صورة بصيغة JPG أو PNG أو WebP لا يتجاوز حجمها 5 ميجابايت.';
 
   @override
   String get commissionPaymentRemoveReceipt => 'إزالة الإيصال';
@@ -2829,4 +2847,156 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courierPackageTitle => 'طرد';
+
+  @override
+  String whatsappProductPrefill(String title) {
+    return 'مرحباً، مهتم بالإعلان $title';
+  }
+
+  @override
+  String whatsappStorePrefill(String name) {
+    return 'مرحباً، شفت متجر $name على xStore';
+  }
+
+  @override
+  String get whatsappSellerUnavailable => 'مش قادرين نفتح واتساب.';
+
+  @override
+  String get ordersWhatsapp => '💬 واتساب';
+
+  @override
+  String get cartApply => 'تطبيق';
+
+  @override
+  String cartCouponLine(String code) {
+    return 'الكوبون ($code)';
+  }
+
+  @override
+  String get storeStatusOpen => 'المتجر مفتوح دلوقتي';
+
+  @override
+  String get storeStatusClosed => 'المتجر مغلق دلوقتي';
+
+  @override
+  String get storeOpenDesc => 'العملاء يقدروا يطلبوا دلوقتي';
+
+  @override
+  String get storeClosedDesc => 'العملاء مش قادرين يطلبوا دلوقتي';
+
+  @override
+  String get closeStoreNow => 'إغلاق المتجر دلوقتي';
+
+  @override
+  String get openStoreNow => 'فتح المتجر دلوقتي';
+
+  @override
+  String get closedMessage => 'أضف رسالة للعملاء (اختياري)';
+
+  @override
+  String get closedMessageTitle => 'رسالة الإغلاق';
+
+  @override
+  String get closedMessageHint => 'مثلاً: هرجع في ساعة، إجازة العيد';
+
+  @override
+  String get weeklySchedule => 'جدول الأسبوع';
+
+  @override
+  String get weeklyScheduleSubtitle => 'حدد ساعات عملك لكل يوم';
+
+  @override
+  String get copyHoursToAll => 'نسخ الأوقات لكل الأيام';
+
+  @override
+  String get quickPresets => 'قوالب جاهزة';
+
+  @override
+  String get quickPresetsSubtitle => 'طبق جدول جاهز فوراً';
+
+  @override
+  String get presetStandard => 'عادي (9ص–6م)';
+
+  @override
+  String get presetExtended => 'موسع (9ص–11م)';
+
+  @override
+  String get presetMorning => 'صباحي بس (8ص–2م)';
+
+  @override
+  String get presetFullWeek => 'طول الأسبوع';
+
+  @override
+  String get presetWeekdays => 'أيام العمل (سبت–خميس)';
+
+  @override
+  String get presetWithoutFriday => 'بدون جمعة';
+
+  @override
+  String get saveWorkingHours => 'حفظ ساعات العمل';
+
+  @override
+  String get workingHoursSaved => 'تم حفظ ساعات العمل! ✅';
+
+  @override
+  String get storeNowOpen => 'المتجر مفتوح دلوقتي 🟢';
+
+  @override
+  String get storeNowClosed => 'المتجر مغلق دلوقتي 🔴';
+
+  @override
+  String get open24Hours => 'مفتوح 24 ساعة';
+
+  @override
+  String get copyFrom => 'نسخ من:';
+
+  @override
+  String get applyToSelectedDays => 'تطبيق على الأيام المحددة';
+
+  @override
+  String get selectAllDays => 'تحديد الكل';
+
+  @override
+  String get deselectAllDays => 'إلغاء تحديد الكل';
+
+  @override
+  String get openLabel => 'مفتوح';
+
+  @override
+  String get closedLabel => 'مغلق';
+
+  @override
+  String get storeHoursTitle => 'ساعات العمل';
+
+  @override
+  String get daySaturday => 'السبت';
+
+  @override
+  String get daySunday => 'الأحد';
+
+  @override
+  String get dayMonday => 'الاثنين';
+
+  @override
+  String get dayTuesday => 'الثلاثاء';
+
+  @override
+  String get dayWednesday => 'الأربعاء';
+
+  @override
+  String get dayThursday => 'الخميس';
+
+  @override
+  String get dayFriday => 'الجمعة';
+
+  @override
+  String get invalidHoursError => 'وقت الإغلاق لازم يكون بعد وقت الفتح';
+
+  @override
+  String get discardChanges => 'تجاهل التغييرات';
+
+  @override
+  String applyPresetConfirm(String preset) {
+    return 'تطبيق أوقات $preset على كل الأيام؟';
+  }
 }

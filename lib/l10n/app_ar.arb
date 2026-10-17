@@ -45,6 +45,9 @@
   "socialLoginDivider": "أو كمل بـ",
   "welcomeBack": "أهلاً بيك",
   "googleAccountNotFound": "مفيش حساب مرتبط بحساب جوجل ده لسه. كمّل التسجيل، ملينا بياناتك.",
+  "googleSignInFailed": "فشل تسجيل الدخول بجوجل. حاول تاني.",
+  "socialAccountExists": "فيه حساب بنفس الإيميل ده بالفعل. جرّب طريقة دخول تانية.",
+  "socialAccountDisabled": "الحساب ده اتوقف. كلّم الدعم.",
   "searchHint": "ابحث عن منتجات...",
   "hotDeals": "🔥 أحسن العروض",
   "newArrivals": "✨ وصل حديثاً",
@@ -243,6 +246,8 @@
   "commissionPaymentAmountInvalid": "أدخل المبلغ الذي أرسلته",
   "commissionPaymentReceiptLabel": "إيصال التحويل",
   "commissionPaymentReceiptHint": "أضف لقطة شاشة أو صورة للتحويل الناجح",
+  "commissionPaymentReceiptUnavailable": "صورة الإيصال لم تعد متاحة. أضفها مرة أخرى.",
+  "commissionPaymentReceiptInvalid": "استخدم صورة بصيغة JPG أو PNG أو WebP لا يتجاوز حجمها 5 ميجابايت.",
   "commissionPaymentRemoveReceipt": "إزالة الإيصال",
   "commissionPaymentSubmit": "إرسال للمراجعة",
   "commissionPaymentSubmitted": "تم إرسال الدفعة للمراجعة. يتحدّث رصيدك بعد الموافقة عليها.",
@@ -1187,5 +1192,81 @@
   "listingsEmptySubtitle": "ابدأ البيع بإضافة أول إعلان ليك",
   "listingsEmptyCta": "أضف أول إعلان",
   "listingPostedOn": "اتنشر {date}",
-  "courierPackageTitle": "طرد"
+  "courierPackageTitle": "طرد",
+  "whatsappProductPrefill": "مرحباً، مهتم بالإعلان {title}",
+  "@whatsappProductPrefill": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappStorePrefill": "مرحباً، شفت متجر {name} على xStore",
+  "@whatsappStorePrefill": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsappSellerUnavailable": "مش قادرين نفتح واتساب.",
+  "ordersWhatsapp": "💬 واتساب",
+  "cartApply": "تطبيق",
+  "cartCouponLine": "الكوبون ({code})",
+  "@cartCouponLine": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "storeStatusOpen": "المتجر مفتوح دلوقتي",
+  "storeStatusClosed": "المتجر مغلق دلوقتي",
+  "storeOpenDesc": "العملاء يقدروا يطلبوا دلوقتي",
+  "storeClosedDesc": "العملاء مش قادرين يطلبوا دلوقتي",
+  "closeStoreNow": "إغلاق المتجر دلوقتي",
+  "openStoreNow": "فتح المتجر دلوقتي",
+  "closedMessage": "أضف رسالة للعملاء (اختياري)",
+  "closedMessageTitle": "رسالة الإغلاق",
+  "closedMessageHint": "مثلاً: هرجع في ساعة، إجازة العيد",
+  "weeklySchedule": "جدول الأسبوع",
+  "weeklyScheduleSubtitle": "حدد ساعات عملك لكل يوم",
+  "copyHoursToAll": "نسخ الأوقات لكل الأيام",
+  "quickPresets": "قوالب جاهزة",
+  "quickPresetsSubtitle": "طبق جدول جاهز فوراً",
+  "presetStandard": "عادي (9ص–6م)",
+  "presetExtended": "موسع (9ص–11م)",
+  "presetMorning": "صباحي بس (8ص–2م)",
+  "presetFullWeek": "طول الأسبوع",
+  "presetWeekdays": "أيام العمل (سبت–خميس)",
+  "presetWithoutFriday": "بدون جمعة",
+  "saveWorkingHours": "حفظ ساعات العمل",
+  "workingHoursSaved": "تم حفظ ساعات العمل! ✅",
+  "storeNowOpen": "المتجر مفتوح دلوقتي 🟢",
+  "storeNowClosed": "المتجر مغلق دلوقتي 🔴",
+  "open24Hours": "مفتوح 24 ساعة",
+  "copyFrom": "نسخ من:",
+  "applyToSelectedDays": "تطبيق على الأيام المحددة",
+  "selectAllDays": "تحديد الكل",
+  "deselectAllDays": "إلغاء تحديد الكل",
+  "openLabel": "مفتوح",
+  "closedLabel": "مغلق",
+  "storeHoursTitle": "ساعات العمل",
+  "daySaturday": "السبت",
+  "daySunday": "الأحد",
+  "dayMonday": "الاثنين",
+  "dayTuesday": "الثلاثاء",
+  "dayWednesday": "الأربعاء",
+  "dayThursday": "الخميس",
+  "dayFriday": "الجمعة",
+  "invalidHoursError": "وقت الإغلاق لازم يكون بعد وقت الفتح",
+  "discardChanges": "تجاهل التغييرات",
+  "applyPresetConfirm": "تطبيق أوقات {preset} على كل الأيام؟",
+  "@applyPresetConfirm": {
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  }
 }

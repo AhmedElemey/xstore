@@ -56,7 +56,7 @@ class NewArrivalsGrid extends StatelessWidget {
                           : null,
                       discountPercent: 0,
                       listingId: listing.id,
-                      isSoldOut: listing.status == ListingStatus.sold,
+                      isSoldOut: isSoldOutListing(status: listing.status),
                       onTap: () => onOpenProduct?.call(listing),
                     ).fadeSlideIn(delay: AppAnimations.staggerDelayCapped(i)),
                   ),

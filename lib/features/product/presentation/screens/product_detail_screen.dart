@@ -14,6 +14,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/network/app_error_messages.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
+import '../../../listing/domain/entities/listing_entity.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
@@ -83,6 +84,32 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       '$title — ${context.l10n.appName} · ${AppRoutes.product}/$id',
     );
   }
+
+  // TODO(phase-2): WhatsApp contact — kept for the sticky bar's chat button.
+  // Restore with the whatsapp.dart / analytics_service.dart / event_names.dart
+  // imports and ProductStickyBar.onChat.
+  // Future<void> _messageSeller({
+  //   required String listingId,
+  //   required String listingTitle,
+  //   String? sellerId,
+  //   String? whatsapp,
+  // }) async {
+  //   final text = context.l10n.whatsappProductPrefill(listingTitle);
+  //   final opened = await launchWhatsApp(phone: whatsapp ?? '', prefilledText: text);
+  //   if (!mounted) return;
+  //   if (!opened) {
+  //     AppSnackbar.info(context, context.l10n.whatsappSellerUnavailable);
+  //     return;
+  //   }
+  //   ref.read(analyticsServiceProvider).track(
+  //     AnalyticsEvents.whatsappSellerTap,
+  //     properties: {
+  //       AnalyticsProps.source: 'product',
+  //       AnalyticsProps.itemId: listingId,
+  //       if (sellerId != null) AnalyticsProps.sellerId: sellerId,
+  //     },
+  //   );
+  // }
 
   Future<void> _buyNow(String productId) async {
     if (!requireLogin(context, ref)) return;
@@ -371,8 +398,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   child:
                       ProductStickyBar(
                         showAddToCart: !isVendor,
-                        isSoldOut: data.stockQuantity < 1,
+                        isSoldOut: isSoldOutListing(
+                          status: listing.status,
+                          stock: data.stockQuantity,
+                        ),
                         isAddingToCart: data.isAddingToCart,
+                        // TODO(phase-2): WhatsApp contact — pass onChat again when the button returns.
+                        // onChat: () => _messageSeller(
+                        //   listingId: listing.id,
+                        //   listingTitle: listing.title,
+                        //   sellerId: data.seller?.id,
+                        //   whatsapp: data.seller?.whatsappNumber,
+                        // ),
                         onAddToCart: () async {
                           if (!requireLogin(context, ref)) return;
                           await notifier.addToCart();
