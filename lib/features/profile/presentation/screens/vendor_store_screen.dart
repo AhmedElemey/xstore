@@ -248,7 +248,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     return false;
   }
 
-  // Kept for when the WhatsApp button returns (hidden in build).
+  // TODO(phase-2): WhatsApp contact — kept for when the button returns (hidden in build).
   // ignore: unused_element
   Future<void> _openStoreWhatsApp(String? phone, String storeName) async {
     final text = context.l10n.whatsappStorePrefill(storeName);
@@ -302,7 +302,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
     final joinedLine = joined != null ? DateFormat('MMM y', context.l10n.localeName).format(joined) : '';
     final storePhoto = _nonEmptyUrl(u.storeLogoUrl);
     final desc = u.storeDescription ?? '';
-    // Only fed the hidden WhatsApp button below.
+    // TODO(phase-2): WhatsApp contact — only fed the hidden button below.
     // final authUser = ref.watch(authProvider).valueOrNull;
     // final isOwnStore = _isOwnStore(authUser);
     // final whatsapp = (u.whatsappNumber ?? '').trim(); // WhatsApp hidden
@@ -426,7 +426,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                             ),
                           ],
                         ),
-                        // Hidden by product request: no WhatsApp entry points for now.
+                        // TODO(phase-2): WhatsApp contact — hidden by product request.
                         // if (!isOwnStore && whatsapp.isNotEmpty) ...[
                         //   const Gap(AppSpacing.lg),
                         //   SizedBox(

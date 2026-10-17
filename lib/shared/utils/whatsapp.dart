@@ -1,3 +1,4 @@
+// TODO(phase-2): WhatsApp contact — helper kept; every entry point is hidden today.
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/utils/validators.dart';

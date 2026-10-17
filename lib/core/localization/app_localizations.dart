@@ -398,6 +398,24 @@ abstract class AppLocalizations {
   /// **'No account yet for this Google account. Finish signing up, we\'ve filled in your details.'**
   String get googleAccountNotFound;
 
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in failed. Please try again.'**
+  String get googleSignInFailed;
+
+  /// No description provided for @socialAccountExists.
+  ///
+  /// In en, this message translates to:
+  /// **'An account with this email already exists. Try a different sign-in method.'**
+  String get socialAccountExists;
+
+  /// No description provided for @socialAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Contact support.'**
+  String get socialAccountDisabled;
+
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
@@ -1184,12 +1202,6 @@ abstract class AppLocalizations {
   /// **'My Orders'**
   String get menuMyOrders;
 
-  /// No description provided for @menuEarnings.
-  ///
-  /// In en, this message translates to:
-  /// **'Earnings'**
-  String get menuEarnings;
-
   /// No description provided for @menuWishlist.
   ///
   /// In en, this message translates to:
@@ -1741,12 +1753,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a screenshot or photo of the successful transfer'**
   String get commissionPaymentReceiptHint;
-
-  /// No description provided for @commissionPaymentReceiptRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Add the transfer receipt'**
-  String get commissionPaymentReceiptRequired;
 
   /// No description provided for @commissionPaymentReceiptUnavailable.
   ///

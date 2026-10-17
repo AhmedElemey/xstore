@@ -12,7 +12,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/router/app_routes.dart';
-// import '../../../../shared/utils/whatsapp.dart'; // WhatsApp hidden
+// import '../../../../shared/utils/whatsapp.dart'; // TODO(phase-2): WhatsApp contact
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -517,7 +517,7 @@ class _BuyerSection extends StatelessWidget {
                 ),
               ],
             ),
-            // Hidden by product request: no WhatsApp entry points for now.
+            // TODO(phase-2): WhatsApp contact — hidden by product request; restore with the import above.
             // if (order.consumerPhone.trim().isNotEmpty) ...[
             //   const SizedBox(height: AppSpacing.md),
             //   OutlinedButton(

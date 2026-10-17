@@ -9,9 +9,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-// import '../../../../shared/utils/whatsapp.dart'; // WhatsApp hidden
+// import '../../../../shared/utils/whatsapp.dart'; // TODO(phase-2): WhatsApp contact
 import '../../../../shared/widgets/app_cached_network_image.dart';
-// import '../../../../shared/widgets/app_snackbar.dart'; // WhatsApp hidden
+// import '../../../../shared/widgets/app_snackbar.dart'; // TODO(phase-2): WhatsApp contact
 import '../../domain/entities/order_entity.dart';
 import '../providers/vendor_order_detail_provider.dart';
 import '../widgets/delivery_method_sheet.dart';
@@ -215,7 +215,7 @@ class _BuyerInfoCard extends StatelessWidget {
               ),
             ],
           ),
-          // Hidden by product request: no WhatsApp entry points for now.
+          // TODO(phase-2): WhatsApp contact — hidden by product request; restore with the imports above.
           // if (phone.isNotEmpty) ...[
           //   const SizedBox(height: AppSpacing.md),
           //   OutlinedButton(

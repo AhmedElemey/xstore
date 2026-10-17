@@ -167,6 +167,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'مفيش حساب مرتبط بحساب جوجل ده لسه. كمّل التسجيل، ملينا بياناتك.';
 
   @override
+  String get googleSignInFailed => 'فشل تسجيل الدخول بجوجل. حاول تاني.';
+
+  @override
+  String get socialAccountExists =>
+      'فيه حساب بنفس الإيميل ده بالفعل. جرّب طريقة دخول تانية.';
+
+  @override
+  String get socialAccountDisabled => 'الحساب ده اتوقف. كلّم الدعم.';
+
+  @override
   String get searchHint => 'ابحث عن منتجات...';
 
   @override
@@ -570,9 +580,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get menuMyOrders => 'طلباتي';
 
   @override
-  String get menuEarnings => 'الأرباح';
-
-  @override
   String get menuWishlist => 'المفضلة';
 
   @override
@@ -860,9 +867,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get commissionPaymentReceiptHint =>
       'أضف لقطة شاشة أو صورة للتحويل الناجح';
-
-  @override
-  String get commissionPaymentReceiptRequired => 'أضف إيصال التحويل';
 
   @override
   String get commissionPaymentReceiptUnavailable =>

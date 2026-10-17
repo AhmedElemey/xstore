@@ -98,6 +98,7 @@ class TokenRefreshInterceptor extends Interceptor {
     }
 
     try {
+      // TODO(backend): confirm whether the `token` body field is the refresh token or the expired access token.
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.refreshToken,
         data: {'token': refreshToken},

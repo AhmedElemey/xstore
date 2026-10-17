@@ -384,6 +384,7 @@ class Cart extends _$Cart {
     }
   }
 
+  // TODO(phase-2): coupons — UI removed in abc664e; restore the coupon row in the cart.
   void setCouponInput(String v) {
     state = state.copyWith(couponInput: v, couponErrorKey: null);
   }

@@ -49,6 +49,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/core/localization/localization_provider.dart';
 import 'package:xstore/core/localization/localized_text.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
@@ -58,12 +59,15 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/catalog_categories/domain/entities/catalog_category_entity.dart';
 import 'package:xstore/features/catalog_categories/presentation/providers/catalog_category_dependencies.dart';
+import 'package:xstore/features/cities/domain/entities/city_entity.dart';
 import 'package:xstore/features/cities/presentation/providers/city_dependencies.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
+import 'package:xstore/features/governments/domain/entities/government_entity.dart';
 import 'package:xstore/features/governments/presentation/providers/government_dependencies.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
+import 'package:xstore/features/listing/presentation/providers/listing_form_notifier.dart';
 import 'package:xstore/features/listing/presentation/screens/add_listing_screen.dart';
 import 'package:xstore/features/profile/presentation/providers/profile_provider.dart';
 
@@ -291,6 +295,60 @@ void main() {
       expect(find.text('Listing updated successfully'), findsOneWidget);
       // Navigated to My Listings after a successful update.
       expect(find.text('My Listings Screen'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'picking a location from an Arabic UI stores the English label',
+    skip: MockConfig.useMock,
+    (tester) async {
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.getProfile}': (_) => _profileJson(),
+      });
+
+      final container = await _pumpReady(tester, [
+        authProvider.overrideWith(() => FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+        appLocaleProvider.overrideWith(
+          (ref) => AppLocaleNotifier(ref)..state = AppLanguage.arabic,
+        ),
+        allCatalogCategoriesProvider.overrideWith((ref) async => [_automotive]),
+        vendorCommissionWalletProvider.overrideWith((ref) async => _emptyWallet),
+        vendorCommissionSnapshotProvider.overrideWith((ref) async => null),
+        allGovernmentsProvider.overrideWith(
+          (ref) async => const [
+            GovernmentEntity(
+              id: 16,
+              name: LocalizedText(en: 'Cairo', ar: 'القاهرة'),
+            ),
+          ],
+        ),
+        allCitiesProvider.overrideWith(
+          (ref) async => const [
+            CityEntity(
+              id: 1,
+              name: LocalizedText(en: 'Nasr City', ar: 'مدينة نصر'),
+              governorateId: 16,
+            ),
+          ],
+        ),
+      ]);
+      await _settle(tester);
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('locationCascadeField')),
+      );
+      await tester.tap(find.byKey(const ValueKey('locationCascadeField')));
+      await _settle(tester);
+      await tester.tap(find.text('القاهرة'));
+      await _settle(tester);
+      await tester.tap(find.text('مدينة نصر'));
+      await _settle(tester);
+
+      expect(
+        container.read(listingFormNotifierProvider).location,
+        'Cairo - Nasr City',
+      );
     },
   );
 

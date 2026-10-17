@@ -10,7 +10,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 class ProductStickyBar extends StatelessWidget {
   const ProductStickyBar({
     super.key,
-    required this.onChat,
+    this.onChat,
     required this.onAddToCart,
     required this.onBuyNow,
     required this.isAddingToCart,
@@ -18,8 +18,9 @@ class ProductStickyBar extends StatelessWidget {
     this.isSoldOut = false,
   });
 
-  // Unused while the WhatsApp chat button is hidden (see build).
-  final VoidCallback onChat;
+  // TODO(phase-2): WhatsApp contact — unused while the chat button is hidden
+  // (see build); make it required again when the button returns.
+  final VoidCallback? onChat;
   final VoidCallback onAddToCart;
   final VoidCallback onBuyNow;
   final bool isAddingToCart;
@@ -46,7 +47,7 @@ class ProductStickyBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Hidden by product request: no WhatsApp entry points for now.
+              // TODO(phase-2): WhatsApp contact — hidden by product request.
               // OutlinedButton(
               //   onPressed: onChat,
               //   style: OutlinedButton.styleFrom(

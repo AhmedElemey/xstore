@@ -1038,9 +1038,9 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** When a screen starts watching another data provider, directly or through a shared widget (e.g. `LocationCascadeField` watches `allGovernmentsProvider`/`allCitiesProvider`), grep every test that renders that screen and override the provider. An unoverridden watch hits the real Dio and fails a test that never touches the field with "A Timer is still pending". Run the full suite, not just the screen's own tests.
 - **Where it applies:** Any screen gaining a shared widget or provider watch; tests rendering `AddListingScreen`, register, edit profile, checkout.
 
-### 2026-10-04 — Remove hidden UI, don't comment it out
-- **Rule:** When a feature's UI is dropped, delete the code instead of commenting it out (this replaces the old "hidden UI stays commented out" rule). Also delete what it leaves orphaned: widgets with no callers, their tests, and l10n keys only they used (diff the unused-key list against the base). Tests driving the removed UI go too. Older hides still commented out (cart Select All row and vendor header, Wishlist header bar, Profile Manage Store, WhatsApp buttons) get deleted or restored when next touched.
-- **Where it applies:** Any screen where UI is hidden or removed; `lib/l10n/*.arb`.
+### 2026-10-17 — Parked features stay (commented + tagged); only dead code is deleted
+- **Rule:** Product-owner decision: features planned for a later phase are NOT deleted. Comment out the UI entry point with `TODO(phase-2): <feature>` (or `TODO(backend): <what is missing>` when blocked on the backend); keep the data layer, helpers, tests of those layers and l10n keys. Only code with no planned return gets deleted (with its orphaned widgets/keys). Keep the analyzer clean: comment the imports/variables the hidden block used, in the same block. This reverses the 2026-10-04 "delete hidden UI" rule.
+- **Where it applies:** Any hidden or removed UI (WhatsApp, guest mode, coupons, store hours, Resume/Resubmit); `lib/l10n/*.arb` unused-key cleanup.
 
 ### 2026-10-04 — "Read more" toggles only when the text actually overflows
 - **Rule:** Never show a Read more/less toggle unconditionally or behind a character-count guess (`length > 120`). Use `shared/widgets/expandable_text.dart` `ExpandableText`, which measures with `TextPainter.didExceedMaxLines` at the laid-out width and renders the toggle only on overflow.

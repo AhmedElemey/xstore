@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/analytics/event_names.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../domain/entities/social_auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import 'auth_provider.dart';
@@ -97,7 +98,7 @@ class SocialAuthNotifier extends StateNotifier<SocialAuthState> {
         isGoogleLoading: false,
         isAppleLoading: false,
         isFacebookLoading: false,
-        error: 'Google sign-in failed — no identity token. Please try again.',
+        error: googleSignInFailedErrorCode,
       );
       return;
     }

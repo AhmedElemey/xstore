@@ -166,6 +166,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'No account yet for this Google account. Finish signing up, we\'ve filled in your details.';
 
   @override
+  String get googleSignInFailed => 'Google sign-in failed. Please try again.';
+
+  @override
+  String get socialAccountExists =>
+      'An account with this email already exists. Try a different sign-in method.';
+
+  @override
+  String get socialAccountDisabled =>
+      'This account has been disabled. Contact support.';
+
+  @override
   String get searchHint => 'Search products...';
 
   @override
@@ -567,9 +578,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuMyOrders => 'My Orders';
 
   @override
-  String get menuEarnings => 'Earnings';
-
-  @override
   String get menuWishlist => 'Wishlist';
 
   @override
@@ -857,9 +865,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get commissionPaymentReceiptHint =>
       'Add a screenshot or photo of the successful transfer';
-
-  @override
-  String get commissionPaymentReceiptRequired => 'Add the transfer receipt';
 
   @override
   String get commissionPaymentReceiptUnavailable =>

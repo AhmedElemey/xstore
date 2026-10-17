@@ -100,6 +100,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
     );
   }
 
+  // TODO(backend): no endpoint to resume a paused listing (backend Q3) — the Resume entry is hidden.
   /// Resumes a paused listing via the generic multipart update
   /// (`PUT /api/listings`, status Active, existing image URLs kept).
   ///
@@ -142,6 +143,7 @@ class MyListingsNotifier extends _$MyListingsNotifier {
     );
   }
 
+  // TODO(backend): no endpoint to resubmit an admin-rejected listing (backend Q3) — the Resubmit entry is hidden.
   /// Sends a rejected listing back for admin review with a corrected
   /// price. Returns null on success, or the server's reason ('' when there
   /// is none). The failure is returned instead of stored on `state.error`:

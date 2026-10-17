@@ -77,6 +77,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     await Share.share('$title — ${context.l10n.appName} · ${AppRoutes.product}/$id');
   }
 
+  // TODO(phase-2): WhatsApp contact — kept for the sticky bar's chat button.
+  // ignore: unused_element
   Future<void> _messageSeller({
     required String listingId,
     required String listingTitle,
@@ -362,12 +364,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 stock: data.stockQuantity,
               ),
               isAddingToCart: data.isAddingToCart,
-              onChat: () => _messageSeller(
-                listingId: listing.id,
-                listingTitle: listing.title,
-                sellerId: data.seller?.id,
-                whatsapp: data.seller?.whatsappNumber,
-              ),
+              // TODO(phase-2): WhatsApp contact — pass onChat again when the button returns.
+              // onChat: () => _messageSeller(
+              //   listingId: listing.id,
+              //   listingTitle: listing.title,
+              //   sellerId: data.seller?.id,
+              //   whatsapp: data.seller?.whatsappNumber,
+              // ),
               onAddToCart: () async {
                 if (!requireLogin(context, ref)) return;
                 await notifier.addToCart();

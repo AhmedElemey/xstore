@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -33,7 +34,7 @@ class _SocialRoleScreenState extends ConsumerState<SocialRoleScreen> {
   Widget build(BuildContext context) {
     ref.listen(socialAuthProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error && mounted) {
-        AppSnackbar.error(context, next.error!);
+        AppSnackbar.error(context, resolveAppError(context, next.error));
       }
     });
     final social = ref.watch(socialAuthProvider);

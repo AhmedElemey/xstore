@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/network/app_error_messages.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,7 +214,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
     ref.listen(socialAuthProvider.select((s) => s.error), (prev, next) {
       if (next != null && next != prev && mounted) {
-        AppSnackbar.error(context, next);
+        AppSnackbar.error(context, resolveAppError(context, next));
       }
     });
 
@@ -427,6 +428,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             ),
                           ),
                         ),
+                        // TODO(phase-2): guest browsing — restore this button (and the guestModeProvider import).
                         // Center(
                         //   child: TextButton(
                         //     onPressed: () async {

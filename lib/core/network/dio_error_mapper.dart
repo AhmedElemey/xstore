@@ -35,6 +35,8 @@ AppException mapDioException(DioException e) {
       final serverMessage = _serverErrorMessage(e.response?.data);
       final displayMessage =
           _arabicServerMessage(e.response?.data) ?? serverMessage;
+      // TODO(backend): blocked users (POST /api/users/{id}/block, blockedUntil) — need the status code
+      // + errorEn to map here and log the user out.
       if (code == 401 || code == 403) {
         if (serverMessage != null) {
           final lower = serverMessage.toLowerCase();

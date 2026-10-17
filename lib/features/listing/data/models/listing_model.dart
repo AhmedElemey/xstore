@@ -224,6 +224,8 @@ class ListingModel with _$ListingModel {
 // samples with those codes were available — MODERATE confidence, not
 // confirmed. Adjust if a live draft/paused/sold/rejected listing surfaces
 // a different code.
+// TODO(backend): need the C# ListingStatus declaration — unknown codes (e.g. Cancelled)
+// currently fall back to Draft.
 ListingStatus _listingStatusFromDto(String value) {
   switch (value) {
     case '0':

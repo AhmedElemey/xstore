@@ -11,6 +11,8 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/firebase/firebase_options.dart';
 import '../../../../core/mock/mock_config.dart';
+import '../../../../core/network/app_error_messages.dart';
+import '../../../../core/network/connectivity_provider.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../domain/entities/social_auth_result.dart';
 
@@ -62,10 +64,8 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       final googleAuth = await googleUser.authentication;
       final googleIdToken = googleAuth.idToken;
       if (googleIdToken == null || googleIdToken.isEmpty) {
-        throw const SocialAuthException(
-          'Google sign-in failed — no identity token returned. '
-          'Ensure serverClientId is configured.',
-        );
+        // Usually means serverClientId isn't configured.
+        throw const SocialAuthException(googleSignInFailedErrorCode);
       }
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -73,11 +73,12 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
       );
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
       final user = userCredential.user;
-      if (user == null) throw const SocialAuthException('Google sign-in failed');
+      if (user == null) {
+        throw const SocialAuthException(googleSignInFailedErrorCode);
+      }
       if (kDebugMode) {
-        // `print` + 800-char chunks: debugPrint is cut at ~1024 chars (`<…>`).
-        // Google idToken is full; Firebase stays truncated. Payload dump
-        // is aud/email/sub without jwt.io.
+        // Tokens are never logged in full. Payload dump is aud/email/sub
+        // without jwt.io.
         final firebaseIdToken = await user.getIdToken();
         debugPrint('── Google sign-in credential ──');
         debugPrint('email: ${user.email}');
@@ -87,8 +88,8 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
         debugPrint('isNewUser: ${userCredential.additionalUserInfo?.isNewUser}');
         print('clientId:');
         print(DefaultFirebaseOptions.googleWebClientId);
-        print('google idToken:');
-        _printFullToken(googleIdToken);
+        // Never log the token itself; it is a live credential.
+        debugPrint('google idToken: present (${googleIdToken.length} chars)');
         _debugLogGoogleIdTokenPayload(googleIdToken);
         debugPrint('firebase idToken: ${_truncatedForLog(firebaseIdToken)}');
       }
@@ -258,18 +259,21 @@ class SocialAuthDatasourceImpl implements SocialAuthDatasource {
     return digest.toString();
   }
 
+  /// Returns a stable error code that screens map to l10n through
+  /// `resolveAppError` (cancelled stays a plain string: it is swallowed).
   String _mapFirebaseError(FirebaseAuthException e) {
     switch (e.code) {
       case 'account-exists-with-different-credential':
-        return 'An account with this email already exists. Try a different sign-in method.';
+        return socialAccountExistsErrorCode;
       case 'network-request-failed':
-        return 'No internet connection. Please try again.';
+        return kOfflineErrorCode;
       case 'popup-closed-by-user':
         return 'Sign-in cancelled';
       case 'user-disabled':
-        return 'This account has been disabled. Contact support.';
+        return socialAccountDisabledErrorCode;
       default:
-        return e.message ?? e.code;
+        if (kDebugMode) debugPrint('firebase sign-in error: ${e.code}');
+        return googleSignInFailedErrorCode;
     }
   }
 }
@@ -282,11 +286,6 @@ String _truncatedForLog(String? token) {
   const visible = 12;
   if (token.length <= visible) return token;
   return '${token.substring(0, visible)}…(${token.length} chars)';
-}
-
-void _printFullToken(String token) {
-  final pattern = RegExp('.{1,800}');
-  pattern.allMatches(token).forEach((match) => print(match.group(0))); // ignore: avoid_print
 }
 
 void _debugLogGoogleIdTokenPayload(String token) {

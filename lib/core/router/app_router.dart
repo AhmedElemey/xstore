@@ -485,6 +485,7 @@ GoRouter goRouter(GoRouterRef ref) {
         ),
       ),
       // TODO(phase-2): Store/active hours screen deferred to next phase.
+      // TODO(backend): store hours/status routes don't exist on the backend yet.
       // Route redirects to profile in the meantime instead of dead-ending.
       GoRoute(
         path: AppRoutes.storeHours,

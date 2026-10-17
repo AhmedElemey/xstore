@@ -37,6 +37,8 @@ abstract final class ApiEndpoints {
   // socialLogin matches the spec handed to backend: POST /api/auth/social.
   static const String socialLogin = '$_api/auth/social';
 
+  // TODO(phase-2): store hours/status — UI entry points are commented out.
+  // TODO(backend): store hours/status routes don't exist on the backend yet (always 404).
   /// Legacy store-hours module — not on the confirmed `/api` contract; hosted
   /// backend returns 404 until deployed. See `store_hours_datasource.dart`.
   static String vendorStoreHours(String vendorId) =>
@@ -79,6 +81,8 @@ abstract final class ApiEndpoints {
   static const String sendLoginOtp = '$_api/auth/send-login-otp';
   static const String loginWithOtp = '$_api/auth/login-with-otp';
 
+  // TODO(backend): the live host serves /api/auth/google/login, but the collection lists
+  // /google/consumer/login + /google/vendor/login — backend to confirm before either side changes.
   /// Google login for an existing account (any role). Body is
   /// `{"idToken", "clientId"}` — the Google ID token from google_sign_in,
   /// NOT a Firebase token.
@@ -176,6 +180,7 @@ abstract final class ApiEndpoints {
   static const String vendorOrders = '$_api/vendor/orders';
   static const String vendorOrdersStatus = '$vendorOrders/status';
 
+  // TODO(backend): no route for "orders assigned to a platform courier" exists yet; the call is 404-tolerant (empty list).
   // No confirmed route exists for "orders assigned to a platform courier"
   // on this backend — courier fulfillment lives entirely on the separate
   // delivery-backend microservice (see DeliveryRequestRemoteDataSource).
@@ -208,6 +213,8 @@ abstract final class ApiEndpoints {
   // multipart fields `method`, `amountEgp`, `receipt`. Background:
   // docs_business/backend/11_COMMISSION_PAYMENT_REQUESTS_HANDOFF.md.
   // ---------------------------------------------------------------------
+  // TODO(phase-2): payment history screen — GET /api/vendor/commission-payments?status&page&pageSize;
+  // parse method/status as name or int (fromWire already does).
   static const String vendorCommissionPayments =
       '$_api/vendor/commission-payments';
 

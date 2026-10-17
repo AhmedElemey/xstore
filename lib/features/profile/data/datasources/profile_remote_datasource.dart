@@ -65,6 +65,8 @@ String? _birthDateWire(DateTime? date) {
   return '$y-$m-$d';
 }
 
+// TODO(backend): `avatarUrl`, `storeLogoUrl` and the `*ByGoogleMaps` fields below are undocumented
+// in the collection — confirm them and how to clear an image.
 /// Wire map for PUT `/api/auth/update-profile` (camelCase JSON fields).
 /// Exposed for unit tests; live calls use [updateProfileFormData].
 Map<String, dynamic> updateProfileWireFields(UpdateProfileRequest request) {

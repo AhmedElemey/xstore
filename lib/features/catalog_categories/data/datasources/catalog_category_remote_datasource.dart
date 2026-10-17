@@ -37,6 +37,8 @@ class CatalogCategoryRemoteDataSourceImpl
       // row instead of failing the whole catalog.
       final parsed = <CatalogCategoryModel>[];
       for (final row in _unwrap(response.data)) {
+        // TODO(backend): confirm whether listings in hidden (`isActive: false`) categories are excluded server-side;
+        // the client only filters the category rows themselves.
         // Admin-hidden categories come back with `isActive: false`
         // (confirmed live); vendors must not list products under them.
         if (row['isActive'] == false) continue;

@@ -237,7 +237,6 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
       _governorateId = governorateId;
     });
     // Both lists are already loaded — the picker sheets just showed them.
-    final isArabic = ref.read(appIsArabicProvider);
     final city = cityId == null
         ? null
         : ref
@@ -251,13 +250,16 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
         ?.where((g) => g.id == governorateId)
         .firstOrNull;
     // A governorate without a city leaves the field empty, so validation
-    // still asks for a city.
+    // still asks for a city. The stored label is always English (Arabic only
+    // when the English name is empty) so it doesn't depend on the vendor's UI
+    // language.
+    // TODO(backend): add governorateId/cityId to the listing DTO so location isn't free text.
     ref.read(listingFormNotifierProvider.notifier).updateField(
           'location',
           city == null || governorate == null
               ? ''
-              : '${governorate.name.resolve(isArabic)} - '
-                  '${city.name.resolve(isArabic)}',
+              : '${governorate.name.resolve(false)} - '
+                  '${city.name.resolve(false)}',
         );
   }
 

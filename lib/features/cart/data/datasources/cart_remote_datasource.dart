@@ -514,6 +514,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     return _localCart(consumerId);
   }
 
+  // TODO(phase-2): coupons — UI removed in abc664e; restore the coupon row in the cart.
+  // TODO(backend): no coupon endpoints in the contract — applyCoupon throws
+  // 'unavailable' live; needs apply/remove routes before the UI returns.
   @override
   Future<CouponEntity> applyCoupon({
     required String code,

@@ -31,6 +31,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
     super.dispose();
   }
 
+  // TODO(backend): Google-only accounts may have no password — backend to confirm what delete-account expects.
   @override
   Widget build(BuildContext context) {
     final ok = _confirmController.text.trim() == context.l10n.deleteConfirmKeyword &&

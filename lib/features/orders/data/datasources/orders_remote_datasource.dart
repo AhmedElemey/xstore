@@ -524,6 +524,8 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
     return _asVendorOrdersEnvelope(response.data);
   }
 
+  // TODO(backend): the collection doesn't list page/pageSize for GET /api/vendor/orders;
+  // if the server ignores them, load-more duplicates rows — confirm paging support.
   @override
   Future<List<OrderModel>> getVendorOrders({
     required String vendorId,
@@ -562,7 +564,7 @@ class OrdersRemoteDataSourceImpl implements OrdersRemoteDataSource {
           .toList();
       return MockConfig.simulate(_page(mine, page, pageSize));
     }
-    // No confirmed backend route — see ApiEndpoints.ordersCourier doc.
+    // TODO(backend): no courier-orders route yet — see ApiEndpoints.ordersCourier.
     // Treated as "no data" (404-tolerant) rather than a hard error so the
     // courier tab shows an empty state instead of error spam.
     try {
