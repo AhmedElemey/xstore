@@ -24,7 +24,7 @@ class PriceDropBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.xl),
       ),
       child: Text(
-        context.l10n.wishlistPriceDropPercent(percent),
+        context.l10n.wishlistPriceDropPercent(context.formatPercent(percent)),
         style: AppTypography.labelSmall.copyWith(
           color: AppColors.white,
           fontWeight: FontWeight.w600,

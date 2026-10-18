@@ -219,7 +219,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                               .confirmAllPending(method);
                           if (!context.mounted) return;
                           context.showSnack(
-                            context.l10n.vendorOrdersConfirmed(count),
+                            context.l10n.vendorOrdersConfirmed(context.formatInt(count)),
                           );
                         },
                       ),

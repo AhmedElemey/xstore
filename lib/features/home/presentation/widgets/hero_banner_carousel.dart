@@ -145,6 +145,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                         bottom: AppSpacing.lg,
                         child: Text(
                           b.title,
+                          textDirection: context.textDirectionOf(b.title),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.headlineSmall.copyWith(

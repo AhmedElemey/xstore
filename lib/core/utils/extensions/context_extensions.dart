@@ -197,16 +197,30 @@ extension LocalizationContext on BuildContext {
       ? NumberFormat('0.0', 'ar_EG').format(value)
       : value.toStringAsFixed(1);
 
-  String formatDate(DateTime date) {
-    return DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en').format(date);
+  /// A whole percentage ("15%"; Arabic-Indic digits and the Arabic percent
+  /// sign in Arabic).
+  String formatPercent(num value) =>
+      isArabic ? '${formatInt(value.round())}\u066A' : '${value.round()}%';
+
+  /// A discount badge: "-15%" in both languages. In Arabic the whole badge is
+  /// isolated left-to-right so the minus sits before the number instead of
+  /// drifting to the end of the badge.
+  String formatDiscount(num percent) => ltr('-${formatPercent(percent)}');
+
+  /// [DateFormat] for [pattern] in the app language. Arabic uses the Arabic
+  /// comma (the pattern's Latin one is swapped), digits come from the locale.
+  String _formatDate(String pattern, DateTime date) {
+    final text = DateFormat(pattern, isArabic ? 'ar' : 'en').format(date);
+    return isArabic ? text.replaceAll(',', '\u060C') : text;
   }
+
+  String formatDate(DateTime date) => _formatDate('d MMM yyyy', date);
 
   /// Day-first with a month name ("6 Oct 2026"), never "6/10/2026".
   String formatShortDate(DateTime date) => formatDate(date);
 
   /// "Mar 5, 2026" in both locales (fixed field order).
-  String formatMediumDate(DateTime date) =>
-      DateFormat('MMM d, yyyy', isArabic ? 'ar' : 'en').format(date);
+  String formatMediumDate(DateTime date) => _formatDate('MMM d, yyyy', date);
 
   /// The locale's own medium date order (Arabic puts the day first).
   String formatLocaleMediumDate(DateTime date) =>
@@ -214,11 +228,11 @@ extension LocalizationContext on BuildContext {
 
   /// "Thursday, Mar 5".
   String formatWeekdayDate(DateTime date) =>
-      DateFormat('EEEE, MMM d', isArabic ? 'ar' : 'en').format(date);
+      _formatDate('EEEE, MMM d', date);
 
   /// "Thursday, Mar 5, 2026".
   String formatLongDate(DateTime date) =>
-      DateFormat('EEEE, MMM d, yyyy', isArabic ? 'ar' : 'en').format(date);
+      _formatDate('EEEE, MMM d, yyyy', date);
 
   /// "Mar 2026".
   String formatMonthYear(DateTime date) =>

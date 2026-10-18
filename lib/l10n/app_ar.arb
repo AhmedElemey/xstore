@@ -93,7 +93,7 @@
   "listingDraftSaved": "تم حفظ المسودة",
   "newListing": "إعلان جديد",
   "listingPhotoSectionTitle": "صور المنتج",
-  "listingPhotoSectionSubtitle": "أضف من 1 لـ 5 صور (الأولى = الغلاف)",
+  "listingPhotoSectionSubtitle": "أضف من ١ لـ ٥ صور (الأولى = الغلاف)",
   "listingAddPhotoTile": "إضافة صور",
   "listingPhotoCoverBadge": "غلاف",
   "listingTakePhoto": "📷 التقاط صورة",
@@ -278,9 +278,9 @@
   "minRating": "أقل تقييم",
   "location": "الموقع",
   "shippingOnly": "متاح شحن",
-  "ratingStars4Plus": "⭐ 4+",
-  "ratingStars3Plus": "⭐ 3+",
-  "ratingStars2Plus": "⭐ 2+",
+  "ratingStars4Plus": "⭐ ٤+",
+  "ratingStars3Plus": "⭐ ٣+",
+  "ratingStars2Plus": "⭐ ٢+",
   "ordersEmptyTitle": "مفيش طلبات لسه",
   "ordersIncomingTitle": "الطلبات الواردة",
   "ordersMyTitle": "طلباتي",
@@ -431,7 +431,7 @@
   "addressesEmptyState": "لم تقم بحفظ أي عناوين حتى الآن.",
   "addressesMainBadge": "الرئيسي",
   "addressesSetAsMain": "تعيين كرئيسي",
-  "addressesMaxReached": "لقد وصلت إلى الحد الأقصى (5 عناوين)",
+  "addressesMaxReached": "لقد وصلت إلى الحد الأقصى (٥ عناوين)",
   "checkoutErrorAddressName": "أدخل اسم المستلم",
   "checkoutErrorAddressStreet": "أدخل عنوان الشارع",
   "checkoutErrorAddressCity": "أدخل المدينة",
@@ -440,7 +440,7 @@
   "checkoutPayCodSubtitle": "ادفع عند استلام الطلب",
   "checkoutDeliveryNoteLabel": "ملاحظة التوصيل (اختياري)",
   "checkoutReviewTitle": "راجع طلبك",
-  "checkoutEstimatedDelivery": "🚚 المتوقع: 3–5 أيام عمل",
+  "checkoutEstimatedDelivery": "🚚 المتوقع: ٣–٥ أيام عمل",
   "checkoutTermsBefore": "بتأكيد الطلب إنت موافق على",
   "checkoutErrorNoAddress": "اختار أو أضف عنوان توصيل",
   "checkoutErrorNoPayment": "اختار طريقة الدفع",
@@ -449,11 +449,14 @@
   "checkoutErrorPhoneNotVerified": "من فضلك أكد رقم هاتفك عشان تقدر تكمل الطلب",
   "checkoutErrorOutOfStock": "في منتجات الكمية المتاحة منها مابقتش كفاية. حدّثنا سلتك — راجعها واطلب تاني. لسه ماتمش أي طلب.",
   "checkoutPartialOrderTitle": "جزء من طلبك ماتمش",
-  "checkoutPartialOrderWarning": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.",
+  "checkoutPartialOrderWarning": "{count, plural, =1{منتج واحد} =2{منتجان} few{{countText} منتجات} other{{countText} منتج}} ماتضافش للطلب وفضل في سلتك. جرّب تطلب تاني عشان تكمله.",
   "@checkoutPartialOrderWarning": {
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "countText": {
+        "type": "String"
       }
     }
   },
@@ -609,7 +612,7 @@
   "ordersMoreItems": "+ {n} عناصر إضافية",
   "ordersItemsSectionCount": "المنتجات المطلوبة ({n})",
   "wishlistPriceDropBanner": "🎉 {n, plural, =1{السعر نزل على منتج واحد} =2{السعر نزل على منتجين} few{السعر نزل على {nText} منتجات} other{السعر نزل على {nText} منتج}} في مفضلتك!",
-  "wishlistPriceDropPercent": "↓ {p}% انخفاض",
+  "wishlistPriceDropPercent": "↓ {p} انخفاض",
   "wishlistShareText": "شوف مفضلتي على xStore! 🛍️\n{link}",
   "wishlistItemsAvailableLine": "{total} عناصر · {avail} متاح",
   "wishlistAddedToCartCount": "تمت إضافة {n} عناصر للسلة",
@@ -706,7 +709,7 @@
   "@wishlistPriceDropPercent": {
     "placeholders": {
       "p": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -786,10 +789,10 @@
   "@checkoutItemsFromSellers": {
     "placeholders": {
       "items": {
-        "type": "int"
+        "type": "String"
       },
       "sellers": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -810,7 +813,7 @@
   "@vendorOrdersConfirmed": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -827,7 +830,7 @@
   "signInToContinueShopping": "سجل الدخول عشان تكمل التسوق",
   "enterEmailHint": "you@email.com",
   "passwordMask": "********",
-  "minSixChars": "6 أحرف على الأقل",
+  "minSixChars": "٦ أحرف على الأقل",
   "forgotPassword": "نسيت كلمة المرور؟",
   "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني وهنبعتلك كود للتحقق عشان تعيد ضبط كلمة المرور",
   "sendResetCode": "إرسال كود إعادة التعيين",
@@ -928,10 +931,10 @@
   "@stepOf": {
     "placeholders": {
       "current": {
-        "type": "int"
+        "type": "String"
       },
       "total": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -986,32 +989,32 @@
   "validationEmailOrPhoneRequired": "البريد الإلكتروني أو رقم الموبايل مطلوب",
   "validationLoginPasswordRequired": "كلمة السر مطلوبة",
   "validationRegisterRoleRequired": "اختر إزاي عايز تستخدم xStore",
-  "validationFullNameInvalid": "اكتب اسمك الكامل (حروف بس، 3 حروف على الأقل)",
+  "validationFullNameInvalid": "اكتب اسمك الكامل (حروف بس، ٣ حروف على الأقل)",
   "validationEmailInvalid": "اكتب بريد إلكتروني صحيح",
   "validationEmailRequired": "البريد الإلكتروني مطلوب",
   "validationStoreLogoRequired": "أضف صورة للمتجر للمتابعة",
   "validationRegisterPhoneInvalid": "اكتب رقم موبايل صحيح",
-  "validationAgeMinimum18": "لازم يكون عندك 18 سنة على الأقل",
+  "validationAgeMinimum18": "لازم يكون عندك ١٨ سنة على الأقل",
   "validationBirthDateBeforeToday": "تاريخ الميلاد ما ينفعش يكون بعد النهاردة",
-  "validationPasswordMinEight": "كلمة السر لازم تكون 8 أحرف على الأقل",
+  "validationPasswordMinEight": "كلمة السر لازم تكون ٨ أحرف على الأقل",
   "validationPasswordComplexity": "كلمة السر لازم تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص",
   "validationPasswordsMismatch": "كلمتا السر مش متطابقتين",
   "validationTermsRequired": "يوافق على الشروط عشان تكمل",
   "validationStoreNameRequired": "اسم المتجر مطلوب",
   "validationStoreCategoryRequired": "اختار تصنيف",
   "validationStoreDescriptionShort": "صف متجرك",
-  "validationStoreDescriptionMax": "أقصى 300 حرف",
+  "validationStoreDescriptionMax": "أقصى ٣٠٠ حرف",
   "validationStoreCityWilayaRequired": "المدينة والمحافظة مطلوبين",
   "listingValidationPhotosRequired": "ضيف صورة واحدة على الأقل",
   "listingValidationNameRequired": "اسم المنتج مطلوب",
-  "listingValidationNameMax": "أقصى 100 حرف",
+  "listingValidationNameMax": "أقصى ١٠٠ حرف",
   "listingValidationPriceInvalid": "اكتب سعر صحيح",
   "listingValidationDescriptionRequired": "الوصف مطلوب",
-  "listingValidationDescriptionMax": "أقصى 1000 حرف",
+  "listingValidationDescriptionMax": "أقصى ١٠٠٠ حرف",
   "listingValidationCategoryRequired": "اختار التصنيف",
   "listingValidationSubcategoryRequired": "اختار التصنيف الفرعي",
   "listingValidationConditionRequired": "اختار الحالة",
-  "listingValidationQuantityMin": "الحد الأدنى للكمية 1",
+  "listingValidationQuantityMin": "الحد الأدنى للكمية ١",
   "listingValidationLocationRequired": "الموقع مطلوب",
   "listingValidationShippingCost": "اكتب تكلفة الشحن",
   "listingValidationFixFields": "عدّل الحقول المظللة",
@@ -1099,11 +1102,14 @@
   "courierCollectFromSender": "حصّل من المُرسل عند الاستلام",
   "courierIdentityLocked": "تظهر بيانات العميل بعد تأكيد الطلب",
   "courierPackagesSection": "الطرود",
-  "courierPackagesCount": "{count, plural, =1{طرد واحد} =2{طردان} few{{count} طرود} other{{count} طرد}}",
+  "courierPackagesCount": "{count, plural, =1{طرد واحد} =2{طردان} few{{countText} طرود} other{{countText} طرد}}",
   "@courierPackagesCount": {
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "countText": {
+        "type": "String"
       }
     }
   },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
@@ -33,7 +34,7 @@ class CommissionBreakdownCard extends StatelessWidget {
             context,
             label: context.l10n.commissionYouEarn,
             value:
-                '$currencyCode ${breakdown.vendorEarns.toStringAsFixed(2)}',
+                _money(context, breakdown.vendorEarns),
             valueColor: earnColor,
             bold: true,
           ),
@@ -41,13 +42,19 @@ class CommissionBreakdownCard extends StatelessWidget {
           _row(
             context,
             label: context.l10n.commissionPlatformFee,
-            value: '$currencyCode ${breakdown.feeAmount.toStringAsFixed(2)}',
+            value: _money(context, breakdown.feeAmount),
             valueColor: context.textSecondary,
           ),
         ],
       ),
     );
   }
+
+  /// Fee amounts keep their piastres (unlike `formatCurrency`, which rounds
+  /// to whole pounds), in Arabic-Indic digits when the app is Arabic.
+  String _money(BuildContext context, double amount) => context.isArabic
+      ? '${NumberFormat('#,##0.00', 'ar_EG').format(amount)} ج.م'
+      : '$currencyCode ${amount.toStringAsFixed(2)}';
 
   Widget _row(
     BuildContext context, {

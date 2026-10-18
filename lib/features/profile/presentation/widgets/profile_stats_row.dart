@@ -51,7 +51,7 @@ class ProfileStatsRow extends StatelessWidget {
           children: [
             Expanded(
               child: _StatCell(
-                value: s != null && s > 0 ? '$s' : dash,
+                value: s != null && s > 0 ? context.formatInt(s) : dash,
                 label: context.l10n.statSales,
                 onTap: onSalesTap,
               ),
@@ -59,7 +59,7 @@ class ProfileStatsRow extends StatelessWidget {
             const _VertDivider(),
             Expanded(
               child: _StatCell(
-                value: r != null && r > 0 ? '${r.toStringAsFixed(1)} ★' : dash,
+                value: r != null && r > 0 ? '${context.formatDecimal(r)} ★' : dash,
                 label: context.l10n.statRating,
                 onTap: onRatingTap,
               ),
@@ -67,7 +67,7 @@ class ProfileStatsRow extends StatelessWidget {
             const _VertDivider(),
             Expanded(
               child: _StatCell(
-                value: pct != null && pct > 0 ? '$pct%' : dash,
+                value: pct != null && pct > 0 ? context.formatPercent(pct) : dash,
                 label: context.l10n.statResponse,
                 onTap: onResponseTap,
               ),
@@ -85,12 +85,12 @@ class ProfileStatsRow extends StatelessWidget {
     final cells = [
       if (o != null)
         _StatCell(
-          value: '$o',
+          value: context.formatInt(o),
           label: context.l10n.statOrders,
           onTap: onOrdersTap,
         ),
       _StatCell(
-        value: '${wishlistCount ?? 0}',
+        value: context.formatInt(wishlistCount ?? 0),
         label: context.l10n.statWishlist,
         onTap: onWishlistTap,
       ),

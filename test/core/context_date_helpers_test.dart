@@ -57,7 +57,11 @@ void main() {
           ),
         );
         final name = ctx.l10n.localeName;
-        String fmt(String pattern) => DateFormat(pattern, name).format(d);
+        // Arabic swaps the pattern's Latin comma for the Arabic one.
+        String fmt(String pattern) {
+          final text = DateFormat(pattern, name).format(d);
+          return name == 'ar' ? text.replaceAll(',', '\u060C') : text;
+        }
 
         // Day-first with a month name, never the ambiguous d/M/yyyy.
         expect(ctx.formatShortDate(d), fmt('d MMM yyyy'));

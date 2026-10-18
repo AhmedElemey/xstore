@@ -238,7 +238,7 @@ class WishlistItemCard extends ConsumerWidget {
                                   if (drop > 0) ...[
                                     const Gap(AppSpacing.sm),
                                     Text(
-                                      '-$drop%',
+                                      context.formatDiscount(drop),
                                       style: AppTypography.labelSmall.copyWith(
                                         color: AppColors.success,
                                         fontWeight: FontWeight.w700,

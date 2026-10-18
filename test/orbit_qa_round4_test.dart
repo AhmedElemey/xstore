@@ -192,6 +192,11 @@ void main() {
     expect(date.left, first.left);
     expect(date.width, first.width);
     expect(find.text(en.ordersEstimatedDeliveryLabel), findsOneWidget);
+    // The label sits inside the field like the text fields' labels instead
+    // of floating onto the top border.
+    final label = tester.getRect(find.text(en.ordersEstimatedDeliveryLabel));
+    expect(label.top, greaterThan(date.top));
+    expect(label.bottom, lessThan(date.bottom));
     expect(find.byIcon(Icons.calendar_today_outlined), findsOneWidget);
 
     // The date still opens the picker.

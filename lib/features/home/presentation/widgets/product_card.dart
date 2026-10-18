@@ -195,7 +195,7 @@ class _Footer extends StatelessWidget {
               if (discountPercent > 0) ...[
                 const Gap(AppSpacing.sm),
                 Text(
-                  '-${discountPercent.toStringAsFixed(0)}%',
+                  context.formatDiscount(discountPercent),
                   style: AppTypography.mono.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

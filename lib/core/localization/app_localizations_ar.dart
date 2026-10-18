@@ -296,7 +296,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get listingPhotoSectionSubtitle =>
-      'أضف من 1 لـ 5 صور (الأولى = الغلاف)';
+      'أضف من ١ لـ ٥ صور (الأولى = الغلاف)';
 
   @override
   String get listingAddPhotoTile => 'إضافة صور';
@@ -826,13 +826,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shippingOnly => 'متاح شحن';
 
   @override
-  String get ratingStars4Plus => '⭐ 4+';
+  String get ratingStars4Plus => '⭐ ٤+';
 
   @override
-  String get ratingStars3Plus => '⭐ 3+';
+  String get ratingStars3Plus => '⭐ ٣+';
 
   @override
-  String get ratingStars2Plus => '⭐ 2+';
+  String get ratingStars2Plus => '⭐ ٢+';
 
   @override
   String get ordersEmptyTitle => 'مفيش طلبات لسه';
@@ -1287,7 +1287,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addressesSetAsMain => 'تعيين كرئيسي';
 
   @override
-  String get addressesMaxReached => 'لقد وصلت إلى الحد الأقصى (5 عناوين)';
+  String get addressesMaxReached => 'لقد وصلت إلى الحد الأقصى (٥ عناوين)';
 
   @override
   String get checkoutErrorAddressName => 'أدخل اسم المستلم';
@@ -1314,7 +1314,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutReviewTitle => 'راجع طلبك';
 
   @override
-  String get checkoutEstimatedDelivery => '🚚 المتوقع: 3–5 أيام عمل';
+  String get checkoutEstimatedDelivery => '🚚 المتوقع: ٣–٥ أيام عمل';
 
   @override
   String get checkoutTermsBefore => 'بتأكيد الطلب إنت موافق على';
@@ -1343,12 +1343,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutPartialOrderTitle => 'جزء من طلبك ماتمش';
 
   @override
-  String checkoutPartialOrderWarning(int count) {
+  String checkoutPartialOrderWarning(int count, String countText) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count منتج',
-      few: '$count منتجات',
+      other: '$countText منتج',
+      few: '$countText منتجات',
       two: 'منتجان',
       one: 'منتج واحد',
     );
@@ -1849,8 +1849,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String wishlistPriceDropPercent(int p) {
-    return '↓ $p% انخفاض';
+  String wishlistPriceDropPercent(String p) {
+    return '↓ $p انخفاض';
   }
 
   @override
@@ -1894,7 +1894,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String checkoutItemsFromSellers(int items, int sellers) {
+  String checkoutItemsFromSellers(String items, String sellers) {
     return '$items عناصر من $sellers بائعين';
   }
 
@@ -1909,7 +1909,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String vendorOrdersConfirmed(int n) {
+  String vendorOrdersConfirmed(String n) {
     return 'تم تأكيد $n طلب بنجاح';
   }
 
@@ -1934,7 +1934,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordMask => '********';
 
   @override
-  String get minSixChars => '6 أحرف على الأقل';
+  String get minSixChars => '٦ أحرف على الأقل';
 
   @override
   String get forgotPassword => 'نسيت كلمة المرور؟';
@@ -2196,7 +2196,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get discoverProducts => 'اكتشف منتجات';
 
   @override
-  String stepOf(int current, int total) {
+  String stepOf(String current, String total) {
     return 'الخطوة $current من $total';
   }
 
@@ -2343,7 +2343,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationFullNameInvalid =>
-      'اكتب اسمك الكامل (حروف بس، 3 حروف على الأقل)';
+      'اكتب اسمك الكامل (حروف بس، ٣ حروف على الأقل)';
 
   @override
   String get validationEmailInvalid => 'اكتب بريد إلكتروني صحيح';
@@ -2358,7 +2358,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationRegisterPhoneInvalid => 'اكتب رقم موبايل صحيح';
 
   @override
-  String get validationAgeMinimum18 => 'لازم يكون عندك 18 سنة على الأقل';
+  String get validationAgeMinimum18 => 'لازم يكون عندك ١٨ سنة على الأقل';
 
   @override
   String get validationBirthDateBeforeToday =>
@@ -2366,7 +2366,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationPasswordMinEight =>
-      'كلمة السر لازم تكون 8 أحرف على الأقل';
+      'كلمة السر لازم تكون ٨ أحرف على الأقل';
 
   @override
   String get validationPasswordComplexity =>
@@ -2388,7 +2388,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationStoreDescriptionShort => 'صف متجرك';
 
   @override
-  String get validationStoreDescriptionMax => 'أقصى 300 حرف';
+  String get validationStoreDescriptionMax => 'أقصى ٣٠٠ حرف';
 
   @override
   String get validationStoreCityWilayaRequired => 'المدينة والمحافظة مطلوبين';
@@ -2400,7 +2400,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingValidationNameRequired => 'اسم المنتج مطلوب';
 
   @override
-  String get listingValidationNameMax => 'أقصى 100 حرف';
+  String get listingValidationNameMax => 'أقصى ١٠٠ حرف';
 
   @override
   String get listingValidationPriceInvalid => 'اكتب سعر صحيح';
@@ -2409,7 +2409,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingValidationDescriptionRequired => 'الوصف مطلوب';
 
   @override
-  String get listingValidationDescriptionMax => 'أقصى 1000 حرف';
+  String get listingValidationDescriptionMax => 'أقصى ١٠٠٠ حرف';
 
   @override
   String get listingValidationCategoryRequired => 'اختار التصنيف';
@@ -2421,7 +2421,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get listingValidationConditionRequired => 'اختار الحالة';
 
   @override
-  String get listingValidationQuantityMin => 'الحد الأدنى للكمية 1';
+  String get listingValidationQuantityMin => 'الحد الأدنى للكمية ١';
 
   @override
   String get listingValidationLocationRequired => 'الموقع مطلوب';
@@ -2628,12 +2628,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get courierPackagesSection => 'الطرود';
 
   @override
-  String courierPackagesCount(int count) {
+  String courierPackagesCount(int count, String countText) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count طرد',
-      few: '$count طرود',
+      other: '$countText طرد',
+      few: '$countText طرود',
       two: 'طردان',
       one: 'طرد واحد',
     );

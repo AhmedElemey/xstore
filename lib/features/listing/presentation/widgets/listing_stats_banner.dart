@@ -86,7 +86,7 @@ class _MiniStat extends StatelessWidget {
         Icon(icon, size: 20, color: context.textSecondary),
         const Gap(AppSpacing.sm),
         Text(
-          '$value',
+          context.formatInt(value),
           style: AppTypography.mono.copyWith(
             fontSize: 24,
             fontWeight: FontWeight.w700,

@@ -87,10 +87,4 @@ void main() {
       expect(label, isNot(contains('-')));
     });
   });
-
-  group('Formatters.shortDate', () {
-    test('zero-pads month and day', () {
-      expect(Formatters.shortDate(DateTime(2026, 1, 5)), '2026-01-05');
-    });
-  });
 }

@@ -55,7 +55,10 @@ class CheckoutReviewSection extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  context.l10n.checkoutItemsFromSellers(items.length, vendors),
+                  context.l10n.checkoutItemsFromSellers(
+                    context.formatInt(items.length),
+                    context.formatInt(vendors),
+                  ),
                   style: AppTypography.bodySmall.copyWith(
                     color: context.textSecondary,
                     fontWeight: FontWeight.w600,

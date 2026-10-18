@@ -120,7 +120,9 @@ class VendorWalletScreen extends ConsumerWidget {
                                       valueColor: context.amberColor,
                                     ),
                                     _Stat(
-                                      value: '${stats?.totalCount ?? 0}',
+                                      value: context.formatInt(
+                                        stats?.totalCount ?? 0,
+                                      ),
                                       label: context.l10n.vendorStatTotalOrders,
                                     ),
                                     _Stat(

@@ -1342,11 +1342,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Part of your order didn\'t go through';
 
   @override
-  String checkoutPartialOrderWarning(int count) {
+  String checkoutPartialOrderWarning(int count, String countText) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items',
+      other: '$countText items',
       one: '1 item',
     );
     return '$_temp0 could not be added to your order and stayed in your cart. Try placing the order again to complete it.';
@@ -1849,8 +1849,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String wishlistPriceDropPercent(int p) {
-    return '↓ $p% Price Drop';
+  String wishlistPriceDropPercent(String p) {
+    return '↓ $p Price Drop';
   }
 
   @override
@@ -1894,7 +1894,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String checkoutItemsFromSellers(int items, int sellers) {
+  String checkoutItemsFromSellers(String items, String sellers) {
     return '$items items from $sellers sellers';
   }
 
@@ -1909,7 +1909,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String vendorOrdersConfirmed(int n) {
+  String vendorOrdersConfirmed(String n) {
     return '$n orders confirmed successfully';
   }
 
@@ -2202,7 +2202,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverProducts => 'Discover products';
 
   @override
-  String stepOf(int current, int total) {
+  String stepOf(String current, String total) {
     return 'Step $current of $total';
   }
 
@@ -2638,11 +2638,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courierPackagesSection => 'Packages';
 
   @override
-  String courierPackagesCount(int count) {
+  String courierPackagesCount(int count, String countText) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count packages',
+      other: '$countText packages',
       one: '1 package',
     );
     return '$_temp0';

@@ -2711,8 +2711,8 @@ abstract class AppLocalizations {
   /// No description provided for @checkoutPartialOrderWarning.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
-  String checkoutPartialOrderWarning(int count);
+  /// **'{count, plural, =1{1 item} other{{countText} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.'**
+  String checkoutPartialOrderWarning(int count, String countText);
 
   /// No description provided for @checkoutPartialOrderAck.
   ///
@@ -3629,8 +3629,8 @@ abstract class AppLocalizations {
   /// No description provided for @wishlistPriceDropPercent.
   ///
   /// In en, this message translates to:
-  /// **'↓ {p}% Price Drop'**
-  String wishlistPriceDropPercent(int p);
+  /// **'↓ {p} Price Drop'**
+  String wishlistPriceDropPercent(String p);
 
   /// No description provided for @wishlistShareText.
   ///
@@ -3684,7 +3684,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{items} items from {sellers} sellers'**
-  String checkoutItemsFromSellers(int items, int sellers);
+  String checkoutItemsFromSellers(String items, String sellers);
 
   /// No description provided for @checkoutPlaceOrderTotal.
   ///
@@ -3702,7 +3702,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{n} orders confirmed successfully'**
-  String vendorOrdersConfirmed(int n);
+  String vendorOrdersConfirmed(String n);
 
   /// No description provided for @vendorLowStockHint.
   ///
@@ -4248,7 +4248,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Step {current} of {total}'**
-  String stepOf(int current, int total);
+  String stepOf(String current, String total);
 
   /// No description provided for @vendorWelcome.
   ///
@@ -5033,8 +5033,8 @@ abstract class AppLocalizations {
   /// No description provided for @courierPackagesCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 package} other{{count} packages}}'**
-  String courierPackagesCount(int count);
+  /// **'{count, plural, =1{1 package} other{{countText} packages}}'**
+  String courierPackagesCount(int count, String countText);
 
   /// No description provided for @courierPackagePickupConfirmTitle.
   ///

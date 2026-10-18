@@ -456,11 +456,14 @@
   "checkoutErrorPhoneNotVerified": "Please verify your phone number to place an order",
   "checkoutErrorOutOfStock": "Some items no longer have enough stock. We updated your cart — please review it and place the order again. Nothing was ordered yet.",
   "checkoutPartialOrderTitle": "Part of your order didn't go through",
-  "checkoutPartialOrderWarning": "{count, plural, =1{1 item} other{{count} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.",
+  "checkoutPartialOrderWarning": "{count, plural, =1{1 item} other{{countText} items}} could not be added to your order and stayed in your cart. Try placing the order again to complete it.",
   "@checkoutPartialOrderWarning": {
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "countText": {
+        "type": "String"
       }
     }
   },
@@ -616,7 +619,7 @@
   "ordersMoreItems": "+ {n} more items",
   "ordersItemsSectionCount": "Items Ordered ({n})",
   "wishlistPriceDropBanner": "🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {nText} items}} in your wishlist!",
-  "wishlistPriceDropPercent": "↓ {p}% Price Drop",
+  "wishlistPriceDropPercent": "↓ {p} Price Drop",
   "wishlistShareText": "Check out my wishlist on xStore! 🛍️\n{link}",
   "wishlistItemsAvailableLine": "{total} items · {avail} available",
   "wishlistAddedToCartCount": "{n} items added to cart",
@@ -720,7 +723,7 @@
   "@wishlistPriceDropPercent": {
     "placeholders": {
       "p": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -800,10 +803,10 @@
   "@checkoutItemsFromSellers": {
     "placeholders": {
       "items": {
-        "type": "int"
+        "type": "String"
       },
       "sellers": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -824,7 +827,7 @@
   "@vendorOrdersConfirmed": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -942,10 +945,10 @@
   "@stepOf": {
     "placeholders": {
       "current": {
-        "type": "int"
+        "type": "String"
       },
       "total": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -1113,11 +1116,14 @@
   "courierCollectFromSender": "Collect from sender at pickup",
   "courierIdentityLocked": "Customer details unlock after confirmation",
   "courierPackagesSection": "Packages",
-  "courierPackagesCount": "{count, plural, =1{1 package} other{{count} packages}}",
+  "courierPackagesCount": "{count, plural, =1{1 package} other{{countText} packages}}",
   "@courierPackagesCount": {
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "countText": {
+        "type": "String"
       }
     }
   },

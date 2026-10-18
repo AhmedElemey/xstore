@@ -377,7 +377,7 @@ class _SellerSection extends ConsumerWidget {
                       ),
                       Text(
                         order.vendorRating != null
-                            ? '⭐ ${order.vendorRating!.toStringAsFixed(1)}'
+                            ? '⭐ ${context.formatDecimal(order.vendorRating!)}'
                             : context.l10n.newSeller,
                         style: AppTypography.bodySmall,
                       ),

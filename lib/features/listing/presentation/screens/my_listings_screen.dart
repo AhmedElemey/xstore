@@ -205,6 +205,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       myListingsNotifierProvider.select((s) => s.isLoading),
     );
     final error = ref.watch(myListingsNotifierProvider.select((s) => s.error));
+    // Zero stats and tabs above a first-load failure would read as data; the
+    // error state below carries the message.
+    final firstLoadFailed = listings.isEmpty && error != null;
     final stats = ref.watch(
       myListingsNotifierProvider.select((s) {
         final all = s.listings;
@@ -309,6 +312,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                             return VendorCommissionAlertBanner(wallet: wallet);
                           },
                         ),
+                        if (!firstLoadFailed)
                         ListingStatsBanner(
                           totalCount: stats.totalCount,
                           activeCount: stats.activeCount,
@@ -317,12 +321,14 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                       ],
                     ),
                   ),
+                  if (!firstLoadFailed)
                   ListingFilterTabs(
                     selected: selectedFilter,
                     onFilterSelected: ref
                         .read(myListingsNotifierProvider.notifier)
                         .applyFilter,
                   ),
+                  if (!firstLoadFailed)
                   ListingSortBar(
                     sort: selectedSort,
                     viewMode: viewMode,

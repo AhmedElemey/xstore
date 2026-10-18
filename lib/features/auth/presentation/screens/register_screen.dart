@@ -253,7 +253,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         Expanded(
                           child: Text(
                             context.l10n
-                                .stepOf(s.currentStep, s.totalSteps)
+                                .stepOf(
+                                  context.formatInt(s.currentStep),
+                                  context.formatInt(s.totalSteps),
+                                )
                                 .toUpperCase(),
                             style: AppTypography.mono.copyWith(
                               fontSize: AppTypography.rem(0.75),

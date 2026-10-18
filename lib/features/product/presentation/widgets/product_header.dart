@@ -101,7 +101,7 @@ class ProductHeader extends StatelessWidget {
                             borderRadius: BorderRadius.circular(AppSpacing.md),
                           ),
                           child: Text(
-                            '-$discount%',
+                            context.formatDiscount(discount),
                             style: AppTypography.mono.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,

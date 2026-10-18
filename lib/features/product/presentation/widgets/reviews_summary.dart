@@ -5,7 +5,6 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/expandable_text.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -262,7 +261,7 @@ class _ReviewTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      Formatters.shortDate(review.date),
+                      context.formatShortDate(review.date.toLocal()),
                       style: AppTypography.body12.copyWith(
                         color: context.labelColor,
                       ),

@@ -70,17 +70,17 @@ class VendorStoreCard extends ConsumerWidget {
             children: [
               _StatChip(
                 icon: LucideIcons.eye,
-                count: _compactCount(profile.storeViewCount),
+                count: _compactCount(context, profile.storeViewCount),
                 label: context.l10n.statStoreViews,
               ),
               _StatChip(
                 icon: LucideIcons.heart,
-                count: '${profile.storeSaveCount}',
+                count: context.formatInt(profile.storeSaveCount),
                 label: context.l10n.statStoreSaves,
               ),
               _StatChip(
                 icon: LucideIcons.package,
-                count: '${profile.storeActiveListings}',
+                count: context.formatInt(profile.storeActiveListings),
                 label: context.l10n.statStoreActive,
               ),
             ],
@@ -91,11 +91,11 @@ class VendorStoreCard extends ConsumerWidget {
   }
 }
 
-String _compactCount(int n) {
+String _compactCount(BuildContext context, int n) {
   if (n >= 1000) {
-    return '${(n / 1000).toStringAsFixed(1)}k';
+    return '${context.formatDecimal(n / 1000)}k';
   }
-  return '$n';
+  return context.formatInt(n);
 }
 
 class _StatChip extends StatelessWidget {

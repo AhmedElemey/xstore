@@ -7,7 +7,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../../../shared/utils/require_login.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
@@ -315,7 +314,7 @@ class _ReviewCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      Formatters.shortDate(review.createdAt),
+                      context.formatShortDate(review.createdAt.toLocal()),
                       style: AppTypography.body12.copyWith(
                         color: context.labelColor,
                       ),

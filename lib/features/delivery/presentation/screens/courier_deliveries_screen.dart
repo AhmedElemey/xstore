@@ -232,6 +232,7 @@ class _CourierDeliveriesScreenState
                                   context.l10n.courierPackagesSection,
                                   trailing: context.l10n.courierPackagesCount(
                                     activePackages.length,
+                                    context.formatInt(activePackages.length),
                                   ),
                                 ),
                                 _packageList(activePackages, withActions: true),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/extensions/context_extensions.dart';
+
 /// Text clamped to [maxLines] when collapsed, with a [toggle] (e.g. Read
 /// more / Read less) shown only when the text actually overflows [maxLines]
-/// at the current width.
+/// at the current width. The paragraph takes the direction of its first
+/// letter, so a Latin description in the Arabic UI ends with its period instead
+/// of starting the line with it.
 class ExpandableText extends StatelessWidget {
   const ExpandableText({
     super.key,
@@ -23,7 +27,7 @@ class ExpandableText extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveStyle = DefaultTextStyle.of(context).style.merge(style);
     final textScaler = MediaQuery.textScalerOf(context);
-    final textDirection = Directionality.of(context);
+    final textDirection = context.textDirectionOf(text);
     return LayoutBuilder(
       builder: (context, constraints) {
         final painter = TextPainter(
@@ -49,6 +53,7 @@ class ExpandableText extends StatelessWidget {
                 overflow:
                     expanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 style: style,
+                textDirection: textDirection,
               ),
             ),
             if (overflows) toggle,

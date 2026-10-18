@@ -5,7 +5,6 @@ import 'package:gap/gap.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
-import '../../../../core/utils/formatters.dart';
 import '../../domain/entities/listing_entity.dart';
 import 'listing_thumbnail.dart';
 import 'status_badge.dart';
@@ -94,7 +93,7 @@ class ListingCardList extends StatelessWidget {
                     const Gap(AppSpacing.xs),
                     Text(
                       context.l10n.listingPostedOn(
-                        Formatters.shortDate(listing.postedAt!),
+                        context.formatShortDate(listing.postedAt!.toLocal()),
                       ),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: context.textHint,

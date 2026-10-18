@@ -88,7 +88,10 @@ class CheckoutScreen extends ConsumerWidget {
           context: context,
           builder: (dialogContext) => AlertDialog(
             title: Text(context.l10n.checkoutPartialOrderTitle),
-            content: Text(context.l10n.checkoutPartialOrderWarning(missing)),
+            content: Text(context.l10n.checkoutPartialOrderWarning(
+                missing,
+                context.formatInt(missing),
+              )),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),

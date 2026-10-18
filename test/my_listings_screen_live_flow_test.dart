@@ -32,6 +32,9 @@ import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/my_listings_screen.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_filter_tabs.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_sort_bar.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_stats_banner.dart';
 import 'package:xstore/features/listing/presentation/widgets/status_badge.dart';
 import 'package:xstore/features/listing/presentation/widgets/listing_empty_state.dart';
 import 'package:xstore/shared/widgets/error_state_widget.dart';
@@ -95,11 +98,20 @@ Map<String, dynamic> _listingJson({
   String title = 'Wireless Earbuds',
   num price = 50000,
   int status = 2,
-}) => {'id': id, 'title': title, 'description': 'A listing', 'price': price, 'status': status};
+  String? postedAt,
+}) => {
+  'id': id,
+  'title': title,
+  'description': 'A listing',
+  'price': price,
+  'status': status,
+  'postedAt': ?postedAt,
+};
 
-Widget _harness(List<Override> overrides) => ProviderScope(
+Widget _harness(List<Override> overrides, {Locale? locale}) => ProviderScope(
   overrides: overrides,
   child: MaterialApp(
+    locale: locale,
     localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
@@ -346,12 +358,18 @@ void main() {
       expect(find.byType(ErrorStateWidget), findsOneWidget);
       expect(find.byType(ListingEmptyState), findsNothing);
       expect(find.byType(SnackBar), findsNothing);
+      // Zero stats and tabs above the error would read as data.
+      expect(find.byType(ListingStatsBanner), findsNothing);
+      expect(find.byType(ListingFilterTabs), findsNothing);
+      expect(find.byType(ListingSortBar), findsNothing);
 
       fail = false;
       await tester.tap(find.text('Retry'));
       await _settle(tester);
 
       expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.byType(ListingStatsBanner), findsOneWidget);
+      expect(find.byType(ListingFilterTabs), findsOneWidget);
       expect(find.text('Wireless Earbuds'), findsOneWidget);
     },
   );
@@ -369,5 +387,30 @@ void main() {
 
     expect(find.byType(ListingEmptyState), findsOneWidget);
     expect(find.byType(ErrorStateWidget), findsNothing);
+    expect(find.byType(ListingStatsBanner), findsOneWidget);
+  });
+
+  testWidgets('Arabic: stats and posted date use Arabic-Indic digits', (
+    tester,
+  ) async {
+    final dio = _fakeDio({
+      'GET ${ApiEndpoints.apiMyListings}': (_) => [
+        _listingJson(postedAt: '2026-10-15T12:00:00Z'),
+      ],
+    });
+
+    await tester.pumpWidget(
+      _harness([
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], locale: const Locale('ar')),
+    );
+    await _settle(tester);
+
+    expect(find.textContaining('15'), findsNothing);
+    expect(find.textContaining('2026'), findsNothing);
+    expect(find.textContaining('١٥'), findsOneWidget);
+    expect(find.textContaining('٢٠٢٦'), findsOneWidget);
+    expect(find.text('١'), findsWidgets); // total listings
   });
 }

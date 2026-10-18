@@ -50,6 +50,7 @@ class CategoryChipRow extends StatelessWidget {
                       const Gap(AppSpacing.sm),
                       Text(
                         c.name,
+                        textDirection: context.textDirectionOf(c.name),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,

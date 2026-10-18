@@ -38,8 +38,8 @@ class PriceRangeSlider extends StatelessWidget {
           divisions: 20,
           activeColor: AppColors.primary,
           labels: RangeLabels(
-            values.start.round().toString(),
-            values.end.round().toString(),
+            context.formatInt(values.start.round()),
+            context.formatInt(values.end.round()),
           ),
           onChanged: onChanged,
         ),

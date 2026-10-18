@@ -15,6 +15,7 @@ import '../../../product/presentation/providers/product_dependencies.dart';
 import '../../../product/presentation/providers/product_detail_notifier.dart';
 import '../../../product/presentation/widgets/already_reviewed_sheet.dart';
 import '../../domain/entities/order_entity.dart' show OrderEntity, ShippingInfo;
+import 'shipping_info_sheet.dart' show DateFieldSuffix;
 
 // Order action flows shared by OrderCard (orders list) and
 // OrderActionButtons (order detail). Each returns what the user entered;
@@ -166,14 +167,17 @@ Future<ShippingInfo?> showShipOrderSheet(BuildContext context) {
                     if (d != null) setS(() => eta = d);
                   },
                   child: InputDecorator(
-                    isEmpty: eta == null,
+                    // Inline label like the text fields (see ShippingInfoSheet).
+                    isEmpty: true,
                     decoration: InputDecoration(
                       labelText: context.l10n.ordersEstimatedDeliveryLabel,
-                      suffixIcon: const Icon(Icons.calendar_today_outlined),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      suffixIcon: DateFieldSuffix(
+                        text: eta == null
+                            ? null
+                            : context.formatMediumDate(eta!),
+                      ),
                     ),
-                    child: eta == null
-                        ? null
-                        : Text(context.formatMediumDate(eta!)),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),

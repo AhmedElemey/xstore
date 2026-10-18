@@ -590,6 +590,10 @@ class _AddListingScreenState extends ConsumerState<AddListingScreen> {
   }
 }
 
+/// "0.00" placeholder in the app's digits and decimal mark.
+String _moneyHint(BuildContext context) =>
+    context.isArabic ? '\u0660\u066B\u0660\u0660' : '0.00';
+
 class _ListingPhotosBasicsSection extends ConsumerWidget {
   const _ListingPhotosBasicsSection({
     required this.form,
@@ -645,7 +649,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
         ListingFormField(
           label: context.l10n.listingPriceLabel,
           controller: priceController,
-          hint: '0.00',
+          hint: _moneyHint(context),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: _moneyInputFormatters,
           prefixText: '${notifier.currencyCode} ',
@@ -663,7 +667,7 @@ class _ListingPhotosBasicsSection extends ConsumerWidget {
         ListingFormField(
           label: context.l10n.listingCompareAtTitle,
           controller: compareController,
-          hint: '0.00',
+          hint: _moneyHint(context),
           prefixText: '${notifier.currencyCode} ',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: _moneyInputFormatters,
@@ -851,7 +855,7 @@ class _ListingShippingAttributesSection extends StatelessWidget {
           ListingFormField(
             label: context.l10n.listingShippingCostLabel,
             controller: shippingCostController,
-            hint: '0.00',
+            hint: _moneyHint(context),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: _moneyInputFormatters,
             prefixText: '${notifier.currencyCode} ',

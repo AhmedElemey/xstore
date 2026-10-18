@@ -752,19 +752,27 @@ class _VendorStoreStatsRow extends StatelessWidget {
     final cells = [
       (
         LucideIcons.package,
-        '${profile.storeActiveListings}',
+        context.formatInt(profile.storeActiveListings),
         context.l10n.vendorStoreStatListings,
       ),
       if (sales != null && sales > 0)
-        (LucideIcons.shoppingBag, '$sales', context.l10n.vendorStoreStatSales),
+        (
+          LucideIcons.shoppingBag,
+          context.formatInt(sales),
+          context.l10n.vendorStoreStatSales,
+        ),
       if (profile.responseRatePercent > 0)
         (
           LucideIcons.messageCircle,
-          '${profile.responseRatePercent}%',
+          context.formatPercent(profile.responseRatePercent),
           context.l10n.vendorStoreStatResponse,
         ),
       if (rating != null && rating > 0)
-        (LucideIcons.star, rating.toStringAsFixed(1), context.l10n.statRating),
+        (
+          LucideIcons.star,
+          context.formatDecimal(rating),
+          context.l10n.statRating,
+        ),
     ];
 
     return Row(
