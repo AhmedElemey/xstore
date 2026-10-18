@@ -80,7 +80,8 @@ Dio dio(DioRef ref) {
         } catch (_) {
           token = null;
         }
-        if (token != null && token.isNotEmpty) {
+        final standalone = options.extra[ApiAuthHeaders.standaloneKey] == true;
+        if (!standalone && token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
         }
         _debugLogAuthToken(token);
@@ -119,7 +120,10 @@ Dio dio(DioRef ref) {
     InterceptorsWrapper(
       onError: (error, handler) async {
         final code = error.response?.statusCode;
-        if (code != null && code >= 500) {
+        // Standalone requests (General Settings) handle their own failures.
+        final standalone =
+            error.requestOptions.extra[ApiAuthHeaders.standaloneKey] == true;
+        if (!standalone && code != null && code >= 500) {
           ref.read(serverErrorProvider.notifier).trigger();
         }
         if (code == 404 &&

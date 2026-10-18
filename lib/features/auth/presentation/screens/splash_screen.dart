@@ -125,6 +125,35 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
+  // Thin gradient progress line, filled over the minimum
+  // splash time; it holds full if auth takes longer.
+  Widget _progressLine(BuildContext context, List<Color> gradient) {
+    return Container(
+      height: 4,
+      decoration: BoxDecoration(
+        color: context.isDark
+            ? AppColors.white.withValues(alpha: 0.08)
+            : AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      alignment: AlignmentDirectional.centerStart,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 2400),
+        curve: Curves.easeOutCubic,
+        builder: (context, v, child) =>
+            FractionallySizedBox(widthFactor: v, heightFactor: 1, child: child),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: gradient),
+            borderRadius: BorderRadius.circular(2),
+            boxShadow: [BoxShadow(color: gradient.first, blurRadius: 12)],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final gradient = context.brandGradient;
@@ -172,49 +201,33 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       ),
                     ),
                     const Gap(AppSpacing.spacing28),
-                    if (settingsFailed) ...[
-                      Text(
-                        context.l10n.splashSettingsError,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: context.textSecondary,
-                        ),
-                      ),
-                      const Gap(AppSpacing.md),
-                      XstoreButton(
-                        label: context.l10n.retry,
-                        onPressed: () => ref.invalidate(generalSettingsProvider),
-                      ),
-                    ] else
-                    // Thin gradient progress line, filled over the minimum
-                    // splash time; it holds full if auth takes longer.
-                    Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: context.isDark
-                            ? AppColors.white.withValues(alpha: 0.08)
-                            : AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration: const Duration(milliseconds: 2400),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, v, child) => FractionallySizedBox(
-                          widthFactor: v,
-                          heightFactor: 1,
-                          child: child,
-                        ),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: gradient),
-                            borderRadius: BorderRadius.circular(2),
-                            boxShadow: [
-                              BoxShadow(color: gradient.first, blurRadius: 12),
-                            ],
-                          ),
-                        ),
-                      ),
+                    // One fixed-height slot for the progress line and the
+                    // settings error, so the wordmark and tagline above
+                    // don't move when the error replaces the line.
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 120),
+                      child: settingsFailed
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.l10n.splashSettingsError,
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: context.textSecondary,
+                                  ),
+                                ),
+                                const Gap(AppSpacing.md),
+                                XstoreButton(
+                                  label: context.l10n.retry,
+                                  onPressed: () =>
+                                      ref.invalidate(generalSettingsProvider),
+                                ),
+                              ],
+                            )
+                          : Align(
+                              alignment: Alignment.topCenter,
+                              child: _progressLine(context, gradient),
+                            ),
                     ),
                   ],
                 ),

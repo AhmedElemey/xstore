@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/mock/mock_config.dart';
@@ -17,8 +19,15 @@ class GeneralSettingsRemoteDataSource {
 
   static const pageSize = 20;
 
+  /// Upper bound on pages (20 x 20 = 400 keys) so a bad `totalPages` can't
+  /// trigger hundreds of sequential requests.
+  static const maxPages = 20;
+
   /// Fetches every page and merges them, so no key silently goes missing.
-  Future<AppSettings> fetchAll() async {
+  /// A non-empty `items` of which no row parses is malformed (throws); an
+  /// empty `items` is a legitimate empty set. [cancelToken] aborts the
+  /// in-flight request (timeout / superseded fetch).
+  Future<AppSettings> fetchAll({CancelToken? cancelToken}) async {
     if (MockConfig.useMock) return mockAppSettings;
     try {
       final items = <dynamic>[];
@@ -28,17 +37,22 @@ class GeneralSettingsRemoteDataSource {
         final response = await _dio.get<dynamic>(
           ApiEndpoints.generalSettings,
           queryParameters: {'page': page, 'pageSize': pageSize},
-          options: ApiAuthHeaders.public(),
+          options: ApiAuthHeaders.standalone(),
+          cancelToken: cancelToken,
         );
         final body = response.data;
         if (body is! Map || body['items'] is! List) {
           throw const FormatException('Unexpected general settings body');
         }
         items.addAll(body['items'] as List);
-        totalPages = (body['totalPages'] as num?)?.toInt() ?? 1;
+        totalPages = min((body['totalPages'] as num?)?.toInt() ?? 1, maxPages);
         page++;
       } while (page <= totalPages);
-      return AppSettings.fromItems(items);
+      final settings = AppSettings.fromItems(items);
+      if (items.isNotEmpty && settings.isEmpty) {
+        throw const FormatException('No valid general settings rows');
+      }
+      return settings;
     } on DioException catch (e) {
       throw mapDioException(e);
     }

@@ -83,11 +83,15 @@ class AppSettings {
       {'key': e.key, 'value': e.value.value, 'dataType': e.value.dataType},
   ]);
 
+  /// The cached set, or null when [source] is missing/corrupt. A stored `[]`
+  /// is a valid empty set; rows of which none parse are corrupt.
   static AppSettings? tryFromJson(String? source) {
     if (source == null) return null;
     try {
       final decoded = jsonDecode(source);
-      return decoded is List ? AppSettings.fromItems(decoded) : null;
+      if (decoded is! List) return null;
+      final settings = AppSettings.fromItems(decoded);
+      return decoded.isNotEmpty && settings.isEmpty ? null : settings;
     } on FormatException {
       return null;
     }

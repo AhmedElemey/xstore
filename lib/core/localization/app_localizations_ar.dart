@@ -1621,7 +1621,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get splashSettingsError =>
-      'مقدرناش نحمّل إعدادات التطبيق. اتأكد من الإنترنت وحاول تاني.';
+      'مقدرناش نحمّل الإعدادات. اتأكد من النت وحاول تاني.';
 
   @override
   String get retry => 'حاول تاني';

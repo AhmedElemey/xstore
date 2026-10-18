@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:xstore/core/mock/mock_config.dart';
+import 'package:xstore/core/network/api_auth_headers.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/features/general_settings/data/datasources/general_settings_remote_datasource.dart';
 import 'package:xstore/features/general_settings/domain/entities/app_settings.dart';
@@ -83,6 +84,19 @@ void main() {
       expect(AppSettings.tryFromJson('{not json'), isNull);
       expect(AppSettings.tryFromJson(null), isNull);
     });
+
+    test(
+      'a stored [] is a valid empty cache; unparseable rows are corrupt',
+      () {
+        expect(AppSettings.tryFromJson('[]'), AppSettings.empty);
+        expect(AppSettings.tryFromJson('[1,2,3]'), isNull);
+        expect(AppSettings.tryFromJson('[{"nokey":1}]'), isNull);
+        expect(
+          AppSettings.tryFromJson('[1,{"key":"a","value":"b"}]')!.raw('a'),
+          'b',
+        );
+      },
+    );
   });
 
   group('GeneralSettingsRemoteDataSource', () {
@@ -137,6 +151,66 @@ void main() {
         GeneralSettingsRemoteDataSource(dio).fetchAll(),
         throwsA(isA<FormatException>()),
       );
+    }, skip: skip);
+
+    test(
+      'an unusable non-empty items is an error; empty items is valid',
+      () async {
+        for (final items in [
+          [1, 'x', null],
+          [
+            {'nokey': 1},
+          ],
+        ]) {
+          final dio = Dio()
+            ..interceptors.add(
+              _Scripted((_) => {'items': items, 'totalPages': 1}),
+            );
+          await expectLater(
+            GeneralSettingsRemoteDataSource(dio).fetchAll(),
+            throwsA(isA<FormatException>()),
+            reason: '$items',
+          );
+        }
+        final dio = Dio()
+          ..interceptors.add(_Scripted((_) => {'items': [], 'totalPages': 1}));
+        expect(
+          await GeneralSettingsRemoteDataSource(dio).fetchAll(),
+          AppSettings.empty,
+        );
+      },
+      skip: skip,
+    );
+
+    test('caps a huge totalPages', () async {
+      final interceptor = _Scripted(
+        (o) => {
+          'items': [
+            {'key': 'k${o.queryParameters['page']}', 'value': 'v'},
+          ],
+          'totalPages': 300,
+        },
+      );
+      final dio = Dio()..interceptors.add(interceptor);
+
+      await GeneralSettingsRemoteDataSource(dio).fetchAll();
+
+      expect(
+        interceptor.requests,
+        hasLength(GeneralSettingsRemoteDataSource.maxPages),
+      );
+    }, skip: skip);
+
+    test('is a standalone request and forwards the cancel token', () async {
+      final interceptor = _Scripted((_) => generalSettingsSampleBody);
+      final dio = Dio()..interceptors.add(interceptor);
+      final token = CancelToken();
+
+      await GeneralSettingsRemoteDataSource(dio).fetchAll(cancelToken: token);
+
+      final request = interceptor.requests.single;
+      expect(request.extra[ApiAuthHeaders.standaloneKey], isTrue);
+      expect(request.cancelToken, same(token));
     }, skip: skip);
   });
 }
