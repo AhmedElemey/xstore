@@ -17,6 +17,7 @@ import 'package:xstore/core/network/server_error_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/providers/language_sync_provider.dart';
+import 'package:xstore/shared/providers/shared_providers.dart';
 
 const _user = UserEntity(
   id: 'u1',
@@ -76,15 +77,16 @@ Future<void> _settle([int ms = 700]) =>
 Future<ProviderContainer> _start(
   _Adapter adapter, {
   UserEntity? user = _user,
+  List<Override> overrides = const [],
 }) async {
   final c = ProviderContainer(
-    overrides: [authProvider.overrideWith(() => _Auth(user))],
+    overrides: [authProvider.overrideWith(() => _Auth(user)), ...overrides],
   );
   addTearDown(c.dispose);
   c.read(dioProvider).httpClientAdapter = adapter;
   await c.read(authProvider.future);
   c.read(languageSyncProvider);
-  await c.read(appLocaleProvider.notifier).loaded;
+  await c.read(appLocaleProvider.notifier).loaded.catchError((_) {});
   await _settle(50);
   return c;
 }
@@ -277,4 +279,88 @@ void main() {
     expect(c.read(appLocaleProvider), AppLanguage.arabic);
     expect(adapter.requests, isEmpty);
   }, skip: skip);
+
+  test(
+    'an older success does not clear the flag while a newer change debounces',
+    () async {
+      final first = Completer<ResponseBody>();
+      var puts = 0;
+      final adapter = _Adapter(
+        (_) => ++puts == 1 ? first.future : Future.value(_ok()),
+      );
+      final c = await _start(adapter);
+      final locale = c.read(appLocaleProvider.notifier);
+
+      await locale.toggleLanguage(); // A: ar
+      await _settle(600); // A is in flight
+      expect(adapter.puts, hasLength(1));
+      await locale.toggleLanguage(); // B: en, debouncing
+      await _settle(50);
+
+      first.complete(_ok()); // A succeeds inside B's debounce window
+      await _settle(50);
+      expect(adapter.puts, hasLength(1));
+      expect(await pending(), isTrue, reason: 'B has not been sent yet');
+
+      await _settle(700);
+      expect(adapter.puts, hasLength(2));
+      expect(adapter.puts.last.data, {'preferredLanguage': 'en'});
+      expect(await pending(), isFalse);
+    },
+    skip: skip,
+  );
+
+  group('storage failures never stop the request', () {
+    test('prefs always throwing: the change is still sent', () async {
+      final adapter = _Adapter((_) async => _ok());
+      final c = await _start(
+        adapter,
+        overrides: [
+          sharedPreferencesProvider.overrideWith(
+            (ref) async => throw StateError('storage down'),
+          ),
+        ],
+      );
+
+      // setLanguage still throws on its own prefs write (pre-existing), but
+      // the locale has already switched.
+      await c
+          .read(appLocaleProvider.notifier)
+          .toggleLanguage()
+          .catchError((_) {});
+      await _settle();
+
+      expect(adapter.puts, hasLength(1));
+      expect(adapter.puts.single.data, {'preferredLanguage': 'ar'});
+    }, skip: skip);
+
+    test('prefs failing at startup recovers for later changes', () async {
+      var calls = 0;
+      final adapter = _Adapter((_) async => _ok());
+      final c = await _start(
+        adapter,
+        overrides: [
+          sharedPreferencesProvider.overrideWith((ref) async {
+            if (++calls <= 3) throw StateError('storage down');
+            return SharedPreferences.getInstance();
+          }),
+        ],
+      );
+
+      await c
+          .read(appLocaleProvider.notifier)
+          .toggleLanguage()
+          .catchError((_) {});
+      await _settle();
+      await c
+          .read(appLocaleProvider.notifier)
+          .toggleLanguage()
+          .catchError((_) {});
+      await _settle();
+
+      expect(adapter.puts, isNotEmpty);
+      expect(adapter.puts.last.data, {'preferredLanguage': 'en'});
+      expect(await pending(), isFalse);
+    }, skip: skip);
+  });
 }

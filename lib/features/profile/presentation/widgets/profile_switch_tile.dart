@@ -22,16 +22,26 @@ class ProfileSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProfileMenuTile(
-      icon: icon,
-      iconBackground: iconBackground,
+    // One node for screen readers ("<label>, switch, on/off") and the whole
+    // row toggles, not only the Switch.
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
       label: label,
-      showChevron: false,
-      trailing: Switch.adaptive(
-        value: value,
-        activeTrackColor: context.linkColor.withValues(alpha: 0.45),
-        activeThumbColor: AppColors.white,
-        onChanged: onChanged,
+      toggled: value,
+      onTap: () => onChanged(!value),
+      child: ProfileMenuTile(
+        icon: icon,
+        iconBackground: iconBackground,
+        label: label,
+        showChevron: false,
+        onTap: () => onChanged(!value),
+        trailing: Switch.adaptive(
+          value: value,
+          activeTrackColor: context.linkColor.withValues(alpha: 0.45),
+          activeThumbColor: AppColors.white,
+          onChanged: onChanged,
+        ),
       ),
     );
   }

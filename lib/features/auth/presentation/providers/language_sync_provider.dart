@@ -27,12 +27,19 @@ const _debounce = Duration(milliseconds: 500);
 /// - [PrefsKeys.pendingLanguageSync] is set before sending (write-ahead) and
 ///   cleared only on success, so a failure, or the app being killed during
 ///   the debounce or the request, is retried once on the next launch when a
-///   session is restored. No retry loop within a session.
+///   session is restored. No retry loop within a session. The flag is only
+///   cleared by the latest change: an older request succeeding while a newer
+///   change is still debouncing or in flight leaves it set.
+/// - Storage is best-effort: a failing SharedPreferences read/write is
+///   swallowed (debug log) and never stops the request being sent.
 ///
 /// keepAlive: app-lifetime listener, started from `XstoreApp`.
 @Riverpod(keepAlive: true)
 void languageSync(LanguageSyncRef ref) {
   var disposed = false;
+  // Bumped on every locale change and every send; a send may touch the
+  // pending flag only while it is still the latest.
+  var generation = 0;
   Timer? timer;
   CancelToken? inFlight;
   ref.onDispose(() {
@@ -41,13 +48,42 @@ void languageSync(LanguageSyncRef ref) {
     inFlight?.cancel();
   });
 
-  Future<void> send(SharedPreferences prefs, AppLanguage language) async {
+  // Resolved lazily on each use (not once at startup) so a storage failure
+  // early in the session doesn't disable sync for the rest of it.
+  Future<SharedPreferences?> getPrefs() async {
+    try {
+      return await ref.read(sharedPreferencesProvider.future);
+    } catch (e) {
+      if (kDebugMode) debugPrint('Language sync: prefs unavailable: $e');
+      if (!disposed) ref.invalidate(sharedPreferencesProvider);
+      return null;
+    }
+  }
+
+  Future<void> setPending(bool value) async {
+    try {
+      final prefs = await getPrefs();
+      if (prefs == null || disposed) return;
+      if (value) {
+        await prefs.setBool(PrefsKeys.pendingLanguageSync, true);
+      } else {
+        await prefs.remove(PrefsKeys.pendingLanguageSync);
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('Language sync: flag write failed: $e');
+    }
+  }
+
+  Future<void> send(AppLanguage language) async {
     timer?.cancel();
     inFlight?.cancel();
     final token = inFlight = CancelToken();
+    final mine = ++generation;
+    // Superseded by a newer change/send (or disposed): that one owns the flag.
+    bool stale() => token.isCancelled || disposed || mine != generation;
     // Write-ahead: a kill mid-request still leaves the retry for next launch.
-    await prefs.setBool(PrefsKeys.pendingLanguageSync, true);
-    if (token.isCancelled || disposed) return;
+    await setPending(true);
+    if (stale()) return;
     var ok = false;
     try {
       await ref
@@ -62,23 +98,24 @@ void languageSync(LanguageSyncRef ref) {
         debugPrint('Language sync failed: $e');
       }
     }
-    // Superseded by a newer send (or disposed): that one owns the flag.
-    if (token.isCancelled || disposed) return;
-    if (ok) {
-      await prefs.remove(PrefsKeys.pendingLanguageSync);
-    } else {
-      await prefs.setBool(PrefsKeys.pendingLanguageSync, true);
+    if (stale()) return;
+    // On failure the write-ahead flag simply stays set.
+    if (ok) await setPending(false);
+  }
+
+  Future<void> sendIfPending() async {
+    final prefs = await getPrefs();
+    if (disposed || prefs?.getBool(PrefsKeys.pendingLanguageSync) != true) {
+      return;
     }
+    unawaited(send(ref.read(appLocaleProvider)));
   }
 
   Future<void> start() async {
-    final notifier = ref.read(appLocaleProvider.notifier);
-    final SharedPreferences prefs;
     try {
-      await notifier.loaded;
-      prefs = await ref.read(sharedPreferencesProvider.future);
+      await ref.read(appLocaleProvider.notifier).loaded;
     } catch (_) {
-      return;
+      // Saved language failed to load: user changes can still be synced.
     }
     if (disposed) return;
 
@@ -89,12 +126,10 @@ void languageSync(LanguageSyncRef ref) {
           previous is AsyncData<UserEntity?> && previous.value == null;
       if (explicitLogin) {
         startupHandled = true;
-        unawaited(send(prefs, ref.read(appLocaleProvider)));
+        unawaited(send(ref.read(appLocaleProvider)));
       } else if (!startupHandled) {
         startupHandled = true;
-        if (prefs.getBool(PrefsKeys.pendingLanguageSync) == true) {
-          unawaited(send(prefs, ref.read(appLocaleProvider)));
-        }
+        unawaited(sendIfPending());
       }
     }, fireImmediately: true);
 
@@ -103,12 +138,13 @@ void languageSync(LanguageSyncRef ref) {
         return;
       }
       timer?.cancel();
+      generation++;
       // Marked now so a kill during the debounce still retries next launch.
-      unawaited(prefs.setBool(PrefsKeys.pendingLanguageSync, true));
+      unawaited(setPending(true));
       timer = Timer(_debounce, () {
         // Signed out during the debounce: nothing to send.
         if (ref.read(authProvider).valueOrNull == null) return;
-        unawaited(send(prefs, ref.read(appLocaleProvider)));
+        unawaited(send(ref.read(appLocaleProvider)));
       });
     });
   }

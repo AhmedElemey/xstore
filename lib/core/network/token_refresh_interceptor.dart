@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../constants/prefs_keys.dart';
+import 'api_auth_headers.dart';
 import 'api_endpoints.dart';
 
 /// On a 401 from an authenticated request, refreshes the access token and
@@ -46,7 +47,19 @@ class TokenRefreshInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    final outcome = await _refreshToken();
+    // A background (silent/standalone) request must not surface errors via
+    // its refresh call either, so the refresh POST inherits those flags.
+    final outcome = await _refreshToken(
+      Options(
+        extra: {
+          for (final key in const [
+            ApiAuthHeaders.silentErrorsKey,
+            ApiAuthHeaders.standaloneKey,
+          ])
+            if (options.extra[key] == true) key: true,
+        },
+      ),
+    );
     if (outcome.token == null) {
       // Only clear the session when the refresh was AUTHORITATIVELY rejected
       // (no refresh token, or the endpoint said the token is bad). A
@@ -73,13 +86,13 @@ class TokenRefreshInterceptor extends Interceptor {
   }
 
   /// Coalesces concurrent refresh attempts into a single in-flight call.
-  Future<_RefreshOutcome> _refreshToken() {
-    return _refreshing ??= _performRefresh().whenComplete(() {
+  Future<_RefreshOutcome> _refreshToken(Options refreshOptions) {
+    return _refreshing ??= _performRefresh(refreshOptions).whenComplete(() {
       _refreshing = null;
     });
   }
 
-  Future<_RefreshOutcome> _performRefresh() async {
+  Future<_RefreshOutcome> _performRefresh(Options refreshOptions) async {
     String? refreshToken;
     try {
       // Same hung-native-read guard as dio_provider.dart's onRequest — a
@@ -102,6 +115,7 @@ class TokenRefreshInterceptor extends Interceptor {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.refreshToken,
         data: {'token': refreshToken},
+        options: refreshOptions,
       );
       final data = response.data;
       final newToken = data?['token'] as String?;

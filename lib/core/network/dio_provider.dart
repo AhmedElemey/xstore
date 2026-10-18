@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -24,17 +23,22 @@ part 'dio_provider.g.dart';
 /// forces the app back to a logged-out state — mirrors the manual logout
 /// cleanup in `Auth.logout()` minus the remote logout call, which is
 /// pointless for a session the backend already doesn't know about.
-Future<void> _clearInvalidSession(
-  Ref ref,
-  FlutterSecureStorage secureStorage,
-) async {
-  await secureStorage.delete(key: PrefsKeys.authToken);
-  await secureStorage.delete(key: PrefsKeys.authRefreshToken);
-  await secureStorage.delete(key: PrefsKeys.authUser);
-  resetProfileData(ref);
-  resetListingLocalCache(ref);
-  ref.invalidate(authProvider);
-}
+///
+/// A separate provider on purpose: `dioProvider` must not `ref.read` its own
+/// dependents (listing datasource, auth) — that is a `CircularDependencyError`
+/// in debug and aborted the logout. This provider has no dio ancestor, so its
+/// own `ref` may read them lazily when the callback runs.
+final clearInvalidSessionProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    const secureStorage = FlutterSecureStorage();
+    await secureStorage.delete(key: PrefsKeys.authToken);
+    await secureStorage.delete(key: PrefsKeys.authRefreshToken);
+    await secureStorage.delete(key: PrefsKeys.authUser);
+    resetProfileData(ref);
+    resetListingLocalCache(ref);
+    ref.invalidate(authProvider);
+  };
+});
 
 @Riverpod(keepAlive: true)
 Dio dio(DioRef ref) {
@@ -107,7 +111,7 @@ Dio dio(DioRef ref) {
     TokenRefreshInterceptor(
       dio: client,
       secureStorage: secureStorage,
-      onRefreshFailed: () => _clearInvalidSession(ref, secureStorage),
+      onRefreshFailed: () => ref.read(clearInvalidSessionProvider)(),
     ),
   );
 
@@ -137,7 +141,7 @@ Dio dio(DioRef ref) {
         if (code == 404 &&
             error.requestOptions.path == ApiEndpoints.getProfile &&
             error.requestOptions.headers.containsKey('X-Auth-Token')) {
-          await _clearInvalidSession(ref, secureStorage);
+          await ref.read(clearInvalidSessionProvider)();
         }
         handler.next(error);
       },
