@@ -3606,19 +3606,19 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{n} orders'**
-  String ordersCountLine(int n);
+  String ordersCountLine(String n);
 
   /// No description provided for @ordersMoreItems.
   ///
   /// In en, this message translates to:
   /// **'+ {n} more items'**
-  String ordersMoreItems(int n);
+  String ordersMoreItems(String n);
 
   /// No description provided for @ordersItemsSectionCount.
   ///
   /// In en, this message translates to:
   /// **'Items Ordered ({n})'**
-  String ordersItemsSectionCount(int n);
+  String ordersItemsSectionCount(String n);
 
   /// No description provided for @wishlistPriceDropBanner.
   ///
@@ -3654,7 +3654,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'My Cart ({n} items)'**
-  String cartAppBarTitle(int n);
+  String cartAppBarTitle(String n);
 
   /// No description provided for @cartClearBody.
   ///
@@ -3708,7 +3708,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{qty} units remaining after this order'**
-  String vendorLowStockHint(int qty);
+  String vendorLowStockHint(String qty);
 
   /// No description provided for @enterYourPhoneNumber.
   ///

@@ -35,6 +35,7 @@ bool requireLogin(BuildContext context, WidgetRef ref, {String? message}) {
   // sheet outcome only decides whether we navigate to login.
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     showDragHandle: true,
     builder: (_) => _LoginRequiredSheet(message: message),
   );

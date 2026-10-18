@@ -82,7 +82,7 @@ class QuantitySelector extends StatelessWidget {
           if (lowStock) ...[
             const Gap(AppSpacing.sm),
             Text(
-              '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
+              '${context.l10n.onlyLeftPrefix}${context.formatInt(max)}${context.l10n.onlyLeftSuffix}',
               style: AppTypography.bodyMedium.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

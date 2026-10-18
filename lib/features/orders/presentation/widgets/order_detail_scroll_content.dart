@@ -56,7 +56,9 @@ class OrderDetailScrollContent extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  context.l10n.ordersItemsSectionCount(order.items.length),
+                  context.l10n.ordersItemsSectionCount(
+                    context.formatInt(order.items.length),
+                  ),
                   style: AppTypography.titleMedium,
                 ),
                 const SizedBox(height: AppSpacing.lg),

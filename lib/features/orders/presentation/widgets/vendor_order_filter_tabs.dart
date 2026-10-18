@@ -125,7 +125,7 @@ class VendorOrderFilterTabs extends StatelessWidget {
                     ],
                     Text(
                       item.count > 0
-                          ? '${item.label} (${item.count})'
+                          ? '${item.label} (${context.formatInt(item.count)})'
                           : item.label,
                       style: AppTypography.labelLarge.copyWith(
                         color: fg,

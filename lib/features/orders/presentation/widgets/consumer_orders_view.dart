@@ -11,6 +11,7 @@ import 'order_card.dart';
 import 'order_empty_state.dart';
 import 'order_filter_tabs.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/skeletons/consumer_orders_skeleton.dart';
 
@@ -71,10 +72,15 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
     final isLoadingMore = ref.watch(
       ordersNotifierProvider.select((s) => s.isLoadingMore),
     );
+    final error = ref.watch(ordersNotifierProvider.select((s) => s.error));
     final notifier = ref.read(ordersNotifierProvider.notifier);
     ref.listen<String?>(ordersNotifierProvider.select((s) => s.error), (p, n) {
       final err = n;
-      if (err != null && err != p && context.mounted) {
+      // With nothing on screen the error state below shows it, with Retry.
+      if (err != null &&
+          err != p &&
+          ref.read(ordersNotifierProvider).orders.isNotEmpty &&
+          context.mounted) {
         AppSnackbar.error(context, err);
         notifier.clearError();
       }
@@ -131,6 +137,20 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                 onRefresh: () => notifier.refreshOrders(),
                 child: isLoading && emptyAll
                     ? const ConsumerOrdersSkeleton()
+                    : emptyAll && error != null
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: _dockClearance),
+                        children: [
+                          SizedBox(
+                            height: 360,
+                            child: ErrorStateWidget(
+                              message: error,
+                              onRetry: notifier.fetchOrders,
+                            ),
+                          ),
+                        ],
+                      )
                     : list.isEmpty
                     ? ListView(
                         cacheExtent: 300,

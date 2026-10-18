@@ -306,7 +306,7 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      authorName,
+                      context.isolate(authorName),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium.copyWith(
@@ -343,7 +343,7 @@ class _ReviewCard extends StatelessWidget {
           ),
           const Gap(AppSpacing.sm),
           Text(
-            review.comment,
+            context.isolate(review.comment),
             style: AppTypography.bodyMedium.copyWith(
               height: 1.55,
               color: context.textPrimary.withValues(alpha: 0.85),

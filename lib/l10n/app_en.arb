@@ -682,14 +682,14 @@
   "@ordersCountLine": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@ordersMoreItems": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -703,7 +703,7 @@
   "@ordersItemsSectionCount": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -748,7 +748,7 @@
   "@cartAppBarTitle": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -828,7 +828,7 @@
   "@vendorLowStockHint": {
     "placeholders": {
       "qty": {
-        "type": "int"
+        "type": "String"
       }
     }
   },

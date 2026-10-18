@@ -12,6 +12,7 @@ Future<void> showProfileLogoutSheet({
 }) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     showDragHandle: true,
     builder: (ctx) => Padding(
       padding: const EdgeInsets.all(AppSpacing.x2l),

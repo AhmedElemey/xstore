@@ -119,7 +119,7 @@ class ProductGridCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.name,
+                      context.isolate(item.name),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium.copyWith(

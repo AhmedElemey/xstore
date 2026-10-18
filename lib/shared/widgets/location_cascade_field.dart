@@ -169,6 +169,7 @@ class LocationCascadeField extends ConsumerWidget {
   }) {
     return showModalBottomSheet<Object>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(

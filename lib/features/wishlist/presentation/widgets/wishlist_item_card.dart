@@ -198,7 +198,7 @@ class WishlistItemCard extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.listingName,
+                                context.isolate(item.listingName),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.titleSmall.copyWith(

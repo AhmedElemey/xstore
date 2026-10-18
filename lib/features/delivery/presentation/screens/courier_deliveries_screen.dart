@@ -122,6 +122,7 @@ class _CourierDeliveriesScreenState
   void _showFailSheet(OrderEntity order) {
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (sheetContext) => DeliveryFailSheet(
         onConfirm: (reason) => ref

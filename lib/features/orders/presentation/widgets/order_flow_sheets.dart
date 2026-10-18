@@ -118,6 +118,7 @@ Future<ShippingInfo?> showShipOrderSheet(BuildContext context) {
   DateTime? eta = DateTime.now().add(const Duration(days: 2));
   return showModalBottomSheet<ShippingInfo>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (ctx) {
@@ -151,12 +152,9 @@ Future<ShippingInfo?> showShipOrderSheet(BuildContext context) {
                     labelText: context.l10n.ordersCourierNameLabel,
                   ),
                 ),
-                ListTile(
-                  title: Text(context.l10n.ordersEstimatedDeliveryLabel),
-                  subtitle: Text(
-                    eta != null ? context.formatMediumDate(eta!) : '—',
-                  ),
-                  trailing: const Icon(Icons.calendar_today_outlined),
+                // Read-only field with the same decoration as the two above.
+                InkWell(
+                  borderRadius: BorderRadius.circular(AppSpacing.lg),
                   onTap: () async {
                     final d = await showDatePicker(
                       context: context,
@@ -167,6 +165,16 @@ Future<ShippingInfo?> showShipOrderSheet(BuildContext context) {
                     if (!context.mounted) return;
                     if (d != null) setS(() => eta = d);
                   },
+                  child: InputDecorator(
+                    isEmpty: eta == null,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.ordersEstimatedDeliveryLabel,
+                      suffixIcon: const Icon(Icons.calendar_today_outlined),
+                    ),
+                    child: eta == null
+                        ? null
+                        : Text(context.formatMediumDate(eta!)),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 FilledButton(
@@ -223,6 +231,7 @@ Future<void> showOrderReviewFlow(
   var submitting = false;
   final result = await showModalBottomSheet<String>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (ctx) {

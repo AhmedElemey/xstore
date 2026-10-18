@@ -93,7 +93,7 @@ class VendorOrderCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.md),
                   if (name.isNotEmpty)
                     Text(
-                      name,
+                      context.isolate(name),
                       style: AppTypography.bodyMedium.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -140,7 +140,7 @@ class VendorOrderCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.listingName,
+                              context.isolate(item.listingName),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.bodyLarge.copyWith(
@@ -149,7 +149,7 @@ class VendorOrderCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${context.formatCurrency(item.price)} · ${context.l10n.ordersQtyTotalLinePrefix} ${item.quantity}',
+                              '${context.formatCurrency(item.price)} · ${context.l10n.ordersQtyTotalLinePrefix} ${context.formatInt(item.quantity)}',
                               style: AppTypography.bodySmall.copyWith(
                                 color: context.labelColor,
                               ),

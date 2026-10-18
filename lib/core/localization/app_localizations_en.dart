@@ -1823,17 +1823,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String ordersCountLine(int n) {
+  String ordersCountLine(String n) {
     return '$n orders';
   }
 
   @override
-  String ordersMoreItems(int n) {
+  String ordersMoreItems(String n) {
     return '+ $n more items';
   }
 
   @override
-  String ordersItemsSectionCount(int n) {
+  String ordersItemsSectionCount(String n) {
     return 'Items Ordered ($n)';
   }
 
@@ -1869,7 +1869,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartAppBarTitle(int n) {
+  String cartAppBarTitle(String n) {
     return 'My Cart ($n items)';
   }
 
@@ -1914,7 +1914,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String vendorLowStockHint(int qty) {
+  String vendorLowStockHint(String qty) {
     return '$qty units remaining after this order';
   }
 

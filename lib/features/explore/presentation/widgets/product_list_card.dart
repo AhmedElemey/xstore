@@ -84,7 +84,7 @@ class ProductListCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              item.name,
+                              context.isolate(item.name),
                               style: AppTypography.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),

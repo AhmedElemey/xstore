@@ -91,7 +91,7 @@ class OrderCard extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              first.listingName,
+                              context.isolate(first.listingName),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.bodyLarge.copyWith(
@@ -100,14 +100,14 @@ class OrderCard extends ConsumerWidget {
                             ),
                             if (more > 0)
                               Text(
-                                context.l10n.ordersMoreItems(more),
+                                context.l10n.ordersMoreItems(context.formatInt(more)),
                                 style: AppTypography.bodySmall.copyWith(
                                   color: context.labelColor,
                                 ),
                               ),
                             const SizedBox(height: 2),
                             Text(
-                              '${context.l10n.ordersQtyTotalLinePrefix}: ${first.quantity}',
+                              '${context.l10n.ordersQtyTotalLinePrefix}: ${context.formatInt(first.quantity)}',
                               style: AppTypography.bodySmall.copyWith(
                                 color: context.labelColor,
                               ),

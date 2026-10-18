@@ -16,6 +16,7 @@ import 'wishlist_price_drop_banner.dart';
 import 'wishlist_sort_row.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeletons/wishlist_skeleton.dart';
 
 String _filterEmptyTitle(BuildContext context, WishlistFilter f) {
@@ -69,7 +70,11 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
 
     ref.listen<String?>(wishlistProvider.select((s) => s.error), (prev, next) {
       final err = next;
-      if (err != null && err != prev && context.mounted) {
+      // With nothing on screen the error state shows it, with Retry.
+      if (err != null &&
+          err != prev &&
+          ref.read(wishlistProvider).items.isNotEmpty &&
+          context.mounted) {
         AppSnackbar.error(context, resolveAppError(context, err));
         notifier.clearError();
       }
@@ -113,6 +118,21 @@ class _WishlistConsumerBodyState extends ConsumerState<WishlistConsumerBody> {
     final filtered = state.filteredItems;
 
     if (items.isEmpty) {
+      final error = state.error;
+      if (error != null) {
+        return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: ErrorStateWidget(
+                message: resolveAppError(context, error),
+                onRetry: notifier.fetchWishlist,
+              ),
+            ),
+          ],
+        );
+      }
       return const WishlistEmptyState();
     }
 

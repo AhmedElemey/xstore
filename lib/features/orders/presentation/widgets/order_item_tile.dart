@@ -56,7 +56,7 @@ class OrderItemTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.listingName,
+                  context.isolate(item.listingName),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.titleSmall.copyWith(
@@ -81,7 +81,7 @@ class OrderItemTile extends StatelessWidget {
                 ],
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '${context.formatCurrency(item.price)} × ${item.quantity} = ${context.formatCurrency(item.total)}',
+                  '${context.formatCurrency(item.price)} × ${context.formatInt(item.quantity)} = ${context.formatCurrency(item.total)}',
                   style: AppTypography.mono.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -102,7 +102,7 @@ class OrderItemTile extends StatelessWidget {
                 ),
                 if (showStockHint)
                   Text(
-                    context.l10n.vendorLowStockHint(item.quantity),
+                    context.l10n.vendorLowStockHint(context.formatInt(item.quantity)),
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.warning,
                     ),

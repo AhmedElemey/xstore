@@ -216,7 +216,9 @@ class _Content extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.ordersItemsSectionCount(o.items.length),
+                context.l10n.ordersItemsSectionCount(
+                  context.formatInt(o.items.length),
+                ),
                 style: AppTypography.titleMedium,
               ),
               const SizedBox(height: AppSpacing.sm),

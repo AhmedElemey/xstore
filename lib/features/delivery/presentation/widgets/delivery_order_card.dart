@@ -68,7 +68,7 @@ class DeliveryOrderCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           CourierRouteStops(
             pickupValue: order.vendorStoreName,
-            dropoffValue: '${context.isolate(address.street)}, ${address.city}',
+            dropoffValue: context.addressLine([address.street, address.city]),
             onNavigate: () => launchUrl(
               courierMapsDirectionsUri(address),
               mode: LaunchMode.externalApplication,

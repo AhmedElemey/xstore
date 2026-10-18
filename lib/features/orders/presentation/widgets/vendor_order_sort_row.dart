@@ -85,7 +85,7 @@ class VendorOrderSortRow extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            context.l10n.ordersCountLine(count),
+            context.l10n.ordersCountLine(context.formatInt(count)),
             style: AppTypography.bodySmall.copyWith(color: context.labelColor),
           ),
         ],

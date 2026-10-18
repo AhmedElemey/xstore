@@ -19,6 +19,8 @@ import '../widgets/vendor_order_card.dart';
 import '../widgets/vendor_order_filter_tabs.dart';
 import '../widgets/vendor_order_sort_row.dart';
 import '../widgets/vendor_order_stats_banner.dart';
+import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/pulsing_animation_builder.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
@@ -37,6 +39,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
   Future<DeliveryMethod?> _pickDeliveryMethod() =>
       showModalBottomSheet<DeliveryMethod>(
         context: context,
+        useRootNavigator: true,
         isScrollControlled: true,
         builder: (_) => const DeliveryMethodSheet(),
       );
@@ -101,6 +104,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
     final hasOrders = ref.watch(
       vendorOrdersProvider.select((s) => s.orders.isNotEmpty),
     );
+    final error = ref.watch(vendorOrdersProvider.select((s) => s.error));
     final statusCounts = ref.watch(
       vendorOrdersProvider.select((s) {
         final orders = s.orders;
@@ -116,8 +120,11 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
       }),
     );
     ref.listen<String?>(vendorOrdersProvider.select((s) => s.error), (p, n) {
-      if (n != null && n != p) {
-        context.showSnack(n);
+      // With nothing on screen the error state below shows it, with Retry.
+      if (n != null &&
+          n != p &&
+          ref.read(vendorOrdersProvider).orders.isNotEmpty) {
+        AppSnackbar.error(context, n);
         ref.read(vendorOrdersProvider.notifier).clearError();
       }
     });
@@ -245,6 +252,24 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                       .refreshOrders,
                   child: isLoading && !hasOrders
                       ? const VendorOrdersSkeleton()
+                      : !hasOrders && error != null
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(
+                            bottom: _dockClearance,
+                          ),
+                          children: [
+                            SizedBox(
+                              height: 360,
+                              child: ErrorStateWidget(
+                                message: error,
+                                onRetry: ref
+                                    .read(vendorOrdersProvider.notifier)
+                                    .fetchOrders,
+                              ),
+                            ),
+                          ],
+                        )
                       : filteredOrders.isEmpty
                       ? ListView(
                           cacheExtent: 300,
@@ -357,6 +382,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                                   },
                                   onReject: () => showModalBottomSheet(
                                     context: context,
+                                    useRootNavigator: true,
                                     isScrollControlled: true,
                                     builder: (_) => RejectOrderSheet(
                                       onConfirm: (reason) async {
@@ -387,6 +413,7 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                                   },
                                   onShipped: () => showModalBottomSheet(
                                     context: context,
+                                    useRootNavigator: true,
                                     isScrollControlled: true,
                                     builder: (_) => ShippingInfoSheet(
                                       onConfirm: (info) async {

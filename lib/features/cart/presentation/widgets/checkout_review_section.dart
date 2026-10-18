@@ -96,7 +96,7 @@ class CheckoutReviewSection extends ConsumerWidget {
                               Text.rich(
                                 TextSpan(
                                   text:
-                                      '${context.l10n.quantity} ${it.quantity} · ',
+                                      '${context.l10n.quantity} ${context.formatInt(it.quantity)} · ',
                                   children: [
                                     TextSpan(
                                       text: context.formatCurrency(
@@ -125,7 +125,11 @@ class CheckoutReviewSection extends ConsumerWidget {
                   _iconLine(
                     context,
                     LucideIcons.mapPin,
-                    '${context.isolate(addr.street)}, ${addrLocation.city}, ${addrLocation.wilaya}',
+                    context.addressLine([
+                      addr.street,
+                      addrLocation.city,
+                      addrLocation.wilaya,
+                    ]),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],

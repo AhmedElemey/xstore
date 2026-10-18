@@ -219,7 +219,7 @@ class NotificationTile extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            entity.title,
+                            context.isolate(entity.title),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodyMedium.copyWith(
@@ -229,7 +229,7 @@ class NotificationTile extends StatelessWidget {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            entity.body,
+                            context.isolate(entity.body),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.bodySmall.copyWith(

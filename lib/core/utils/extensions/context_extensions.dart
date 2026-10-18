@@ -127,6 +127,13 @@ extension LocalizationContext on BuildContext {
   /// English.
   String isolate(String value) => isArabic ? '\u2068$value\u2069' : value;
 
+  /// A comma-separated address line ("15 Abbas St, Nasr City"), isolated as
+  /// one unit so the commas stay with the street instead of drifting to the
+  /// city's side, with the Arabic comma in Arabic. Empty parts are skipped.
+  String addressLine(List<String> parts) => isolate(
+    parts.where((p) => p.isNotEmpty).join(isArabic ? '\u060C ' : ', '),
+  );
+
   /// "Order #XS-1" / "طلب #XS-1" with `#id` kept together and left-to-right.
   String orderRef(String id) {
     final label = l10n.orderHashPrefix.replaceAll('#', '').trimRight();
@@ -167,6 +174,13 @@ extension LocalizationContext on BuildContext {
     final number = NumberFormat.decimalPattern('en_EG').format(amount.round());
     return '$number LE';
   }
+
+  /// A count or quantity in the same digit system as [formatCurrency]
+  /// (Arabic-Indic in Arabic) so a price and its quantity match on one card.
+  /// Leave phone numbers, order ids and OTP codes as plain strings.
+  String formatInt(int value) => isArabic
+      ? NumberFormat.decimalPattern('ar_EG').format(value)
+      : '$value';
 
   String formatDate(DateTime date) {
     return DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en').format(date);

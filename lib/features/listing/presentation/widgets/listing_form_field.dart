@@ -112,7 +112,7 @@ class ListingFormField extends StatelessWidget {
               alignment: AlignmentDirectional.centerEnd,
               child: AnimatedCounter(
                 value: len,
-                suffix: '/$maxLength',
+                suffix: '/${context.formatInt(maxLength!)}',
                 style: Theme.of(
                   context,
                 ).textTheme.labelSmall!.copyWith(color: context.textSecondary),

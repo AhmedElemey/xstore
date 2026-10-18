@@ -72,7 +72,7 @@ class QuantityControl extends StatelessWidget {
                       vertical: AppSpacing.xs,
                     ),
                     child: Text(
-                      '$quantity',
+                      context.formatInt(quantity),
                       style: AppTypography.mono.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -101,7 +101,7 @@ class QuantityControl extends StatelessWidget {
         if (lowStock) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${context.l10n.onlyLeftPrefix}$maxQuantity${context.l10n.onlyLeftSuffix}',
+            '${context.l10n.onlyLeftPrefix}${context.formatInt(maxQuantity)}${context.l10n.onlyLeftSuffix}',
             style: AppTypography.labelSmall.copyWith(color: context.amberColor),
           ),
         ],

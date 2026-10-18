@@ -49,7 +49,7 @@ class CartScreen extends ConsumerWidget {
           child: Column(
             children: [
               _Header(
-                title: context.l10n.cartAppBarTitle(itemCount),
+                title: context.l10n.cartAppBarTitle(context.formatInt(itemCount)),
                 action: hasItems
                     ? Material(
                         color: context.glassColor,

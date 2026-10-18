@@ -253,7 +253,7 @@ class _ReviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      authorName,
+                      context.isolate(authorName),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium.copyWith(
@@ -275,7 +275,7 @@ class _ReviewTile extends StatelessWidget {
           ),
           const Gap(AppSpacing.sm),
           ExpandableText(
-            text: review.text,
+            text: context.isolate(review.text),
             maxLines: 2,
             expanded: expanded,
             style: AppTypography.bodyMedium.copyWith(

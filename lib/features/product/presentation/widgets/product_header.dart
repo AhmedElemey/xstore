@@ -61,7 +61,7 @@ class ProductHeader extends StatelessWidget {
                       const Gap(6),
                     ],
                     Text(
-                      listing.title,
+                      context.isolate(listing.title),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.headlineSmall.copyWith(

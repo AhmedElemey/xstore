@@ -35,6 +35,7 @@ Future<T?> showAnimatedBottomSheet<T>({
 }) {
   return showModalBottomSheet<T>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: isScrollControlled,
     backgroundColor: Colors.transparent,
     builder: (ctx) {

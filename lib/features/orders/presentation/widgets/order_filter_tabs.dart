@@ -84,7 +84,7 @@ class OrderFilterTabs extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Center(
             child: Text(
-              '$label ($count)',
+              '$label (${context.formatInt(count)})',
               style: AppTypography.labelLarge.copyWith(
                 color: selected ? selectedFg : context.textSecondary,
                 fontWeight: selected ? FontWeight.w800 : FontWeight.w700,

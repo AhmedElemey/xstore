@@ -290,7 +290,8 @@ void main() {
       await _settle(tester);
 
       expect(find.byType(ErrorStateWidget), findsNothing);
-      expect(find.text('Order Shipped'), findsOneWidget);
+      // Arabic UI: backend text is wrapped in a first-strong isolate.
+      expect(find.text('\u2068Order Shipped\u2069'), findsOneWidget);
     },
   );
 }
