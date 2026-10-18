@@ -54,8 +54,13 @@ class GeneralSettings extends _$GeneralSettings {
   late GeneralSettingsRemoteDataSource _remote;
   late SharedPreferences _prefs;
 
+  /// Monotonic: a device clock change must not block (or force) the resume
+  /// throttle the way `DateTime.now()` would.
+  static final _uptime = Stopwatch()..start();
+
   @visibleForTesting
-  DateTime now() => DateTime.now();
+  DateTime now() =>
+      DateTime.fromMicrosecondsSinceEpoch(_uptime.elapsedMicroseconds);
 
   @override
   Future<AppSettings> build() async {

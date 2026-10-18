@@ -72,16 +72,21 @@ Dio dio(DioRef ref) {
         // unauthenticated on failure; an endpoint that actually needs the
         // token will 401 and the normal session-restore/refresh paths take
         // over from there.
-        String? token;
-        try {
-          token = await secureStorage
-              .read(key: PrefsKeys.authToken)
-              .timeout(const Duration(seconds: 5));
-        } catch (_) {
-          token = null;
-        }
+        // Standalone requests (General Settings) never carry the token, so
+        // they skip the read — a hung KeyStore must not eat the first-launch
+        // settings timeout.
         final standalone = options.extra[ApiAuthHeaders.standaloneKey] == true;
-        if (!standalone && token != null && token.isNotEmpty) {
+        String? token;
+        if (!standalone) {
+          try {
+            token = await secureStorage
+                .read(key: PrefsKeys.authToken)
+                .timeout(const Duration(seconds: 5));
+          } catch (_) {
+            token = null;
+          }
+        }
+        if (token != null && token.isNotEmpty) {
           options.headers['X-Auth-Token'] = token;
         }
         _debugLogAuthToken(token);
