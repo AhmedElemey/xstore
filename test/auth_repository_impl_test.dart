@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart';
@@ -42,6 +43,12 @@ class _FakeFirebaseAuth implements FirebaseAuth {
 }
 
 class _RecordingRemote implements AuthRemoteDataSource {
+  @override
+  Future<void> updatePreferredLanguage(
+    String language, {
+    CancelToken? cancelToken,
+  }) => throw UnimplementedError();
+
   String? lastGoogleIdToken;
 
   ConsumerRegisterParams? lastConsumerRegisterParams;

@@ -14,4 +14,5 @@ abstract final class PrefsKeys {
   static const analyticsDeviceId = 'xstore_analytics_device_id';
   static const analyticsQueue = 'xstore_analytics_queue';
   static const generalSettings = 'xstore_general_settings';
+  static const pendingLanguageSync = 'pending_language_sync';
 }

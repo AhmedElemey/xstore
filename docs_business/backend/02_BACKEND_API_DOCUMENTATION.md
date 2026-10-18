@@ -51,6 +51,7 @@
 | POST | `/auth/register` | ✅ Create account (buyer or vendor). Returns user + token. |
 | POST | `/auth/login` | ✅ Email/password. Returns user + token. |
 | POST | `/auth/logout` | ⚠️ Declared but the app never calls it — logout is client-side. Implement for token revocation if you add server sessions. |
+| PUT | `/auth/language` | ✅ Body `{ "preferredLanguage": "ar" \| "en" }`; needs `X-Auth-Token`. Sent in the background after a language change / login (see `language_sync_provider.dart`). A 2xx `{isSuccess:false}` is a failure. |
 
 **Request (register):** `{ name, email, phoneNumber, password, role }` (+ vendor fields when role=vendor).
 **Response:** `{ user: {…UserEntity}, token: "<jwt>" }`.

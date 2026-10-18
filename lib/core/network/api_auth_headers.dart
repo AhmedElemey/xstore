@@ -34,4 +34,12 @@ abstract final class ApiAuthHeaders {
   /// raise the global server-error page. Use for background config reads
   /// that handle their own failures (e.g. General Settings).
   static Options standalone() => Options(extra: {standaloneKey: true});
+
+  /// `extra` key that marks a request as silent (see [silentErrors]).
+  static const String silentErrorsKey = 'silent_errors_request';
+
+  /// An authenticated request whose 5xx must not raise the global
+  /// server-error page. Unlike [standalone] it keeps `X-Auth-Token`. Use for
+  /// background calls the user never waits on (e.g. language sync).
+  static Options silentErrors() => Options(extra: {silentErrorsKey: true});
 }

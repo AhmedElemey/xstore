@@ -125,10 +125,13 @@ Dio dio(DioRef ref) {
     InterceptorsWrapper(
       onError: (error, handler) async {
         final code = error.response?.statusCode;
-        // Standalone requests (General Settings) handle their own failures.
-        final standalone =
-            error.requestOptions.extra[ApiAuthHeaders.standaloneKey] == true;
-        if (!standalone && code != null && code >= 500) {
+        // Standalone (General Settings) and silent (language sync) requests
+        // handle their own failures.
+        final extra = error.requestOptions.extra;
+        final skipServerErrorPage =
+            extra[ApiAuthHeaders.standaloneKey] == true ||
+            extra[ApiAuthHeaders.silentErrorsKey] == true;
+        if (!skipServerErrorPage && code != null && code >= 500) {
           ref.read(serverErrorProvider.notifier).trigger();
         }
         if (code == 404 &&

@@ -74,6 +74,10 @@ abstract final class ApiEndpoints {
   /// old `DELETE /users/me` guess, which had no route on this backend.
   static const String deleteAccount = '$_api/auth/delete-account';
 
+  /// CONFIRMED (Postman collection): `PUT /api/auth/language`, JSON body
+  /// `{"preferredLanguage": "ar" | "en"}`; needs the user's X-Auth-Token.
+  static const String updateLanguage = '$_api/auth/language';
+
   /// Passwordless login: request an SMS OTP for an EXISTING account, then
   /// exchange it for a session. CONFIRMED live: [sendLoginOtp] returns
   /// `{message, otp}` (the OTP is echoed while no real SMS gateway is wired),

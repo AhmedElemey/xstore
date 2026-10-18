@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/auth/presentation/providers/language_sync_provider.dart';
 import 'features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 import 'core/deeplink/deep_link_handling_provider.dart';
 import 'core/localization/app_localizations.dart';
@@ -17,6 +18,7 @@ class XstoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(fcmPushHandlingProvider);
+    ref.watch(languageSyncProvider);
     ref.watch(deepLinkHandlingProvider);
     final router = ref.watch(goRouterProvider);
     final currentThemeMode = ref.watch(appThemeModeProvider);

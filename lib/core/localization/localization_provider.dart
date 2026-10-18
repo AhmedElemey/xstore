@@ -10,11 +10,16 @@ enum AppLanguage { english, arabic }
 class AppLocaleNotifier extends StateNotifier<AppLanguage> {
   AppLocaleNotifier(this.ref) : super(AppLanguage.english) {
     errorMessagesInArabic = false;
-    _loadSavedLanguage();
+    loaded = _loadSavedLanguage();
   }
 
   static const _key = 'app_language';
   final Ref ref;
+
+  /// Completes once the saved language has been applied. Anything reacting
+  /// to language changes awaits this so the startup load isn't mistaken for
+  /// a user-initiated change.
+  late final Future<void> loaded;
 
   // Every language change goes through here so server error text (mapped
   // in datasources, with no context) follows the app language.

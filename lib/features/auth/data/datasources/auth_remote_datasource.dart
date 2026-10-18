@@ -51,6 +51,13 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> logout();
 
+  /// `PUT /api/auth/language`. [language] is `ar` or `en`. Throws on any
+  /// failure, including a 2xx `{isSuccess: false}` envelope.
+  Future<void> updatePreferredLanguage(
+    String language, {
+    CancelToken? cancelToken,
+  });
+
   /// Passwordless login for an existing account. [sendLoginOtp] returns the
   /// debug OTP echoed by the backend (null once a real SMS gateway exists);
   /// [loginWithOtp] returns a token-only model (resolve via [fetchProfile]).
@@ -401,6 +408,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ApiEndpoints.apiLogout,
         options: ApiAuthHeaders.authenticated(),
       );
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  @override
+  Future<void> updatePreferredLanguage(
+    String language, {
+    CancelToken? cancelToken,
+  }) async {
+    if (MockConfig.useMock) return;
+    try {
+      final response = await _dio.put<dynamic>(
+        ApiEndpoints.updateLanguage,
+        data: {'preferredLanguage': language},
+        cancelToken: cancelToken,
+        options: ApiAuthHeaders.silentErrors(),
+      );
+      final failure = envelopeFailure(response.data);
+      if (failure != null) throw failure;
     } on DioException catch (e) {
       throw mapDioException(e);
     }
