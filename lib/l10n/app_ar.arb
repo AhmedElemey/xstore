@@ -546,6 +546,7 @@
   "resubmitInvalidPrice": "أدخل سعرًا صحيحًا",
   "resubmitSubmit": "إعادة الإرسال للمراجعة",
   "resubmitSuccess": "تمت إعادة إرسال الإعلان للمراجعة",
+  "splashSettingsError": "مقدرناش نحمّل إعدادات التطبيق. اتأكد من الإنترنت وحاول تاني.",
   "retry": "حاول تاني",
   "errorGeneric": "حصل خطأ",
   "routeErrorMessage": "معرفناش نفتح الصفحة دي. حاول تاني.",

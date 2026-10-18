@@ -13,38 +13,41 @@ String _$commissionPaymentRepositoryHash() =>
 @ProviderFor(commissionPaymentRepository)
 final commissionPaymentRepositoryProvider =
     Provider<CommissionPaymentRepository>.internal(
-  commissionPaymentRepository,
-  name: r'commissionPaymentRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$commissionPaymentRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      commissionPaymentRepository,
+      name: r'commissionPaymentRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$commissionPaymentRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-typedef CommissionPaymentRepositoryRef
-    = ProviderRef<CommissionPaymentRepository>;
+typedef CommissionPaymentRepositoryRef =
+    ProviderRef<CommissionPaymentRepository>;
 String _$commissionPayToAccountsHash() =>
-    r'465693058a372903195ff3e5de3dbe889430ffe0';
+    r'260ff4ec91e7fabc65efe25adc9b03b126d49f79';
 
-/// Pay-to accounts for the payment screens. A failed or missing setting
-/// reads as "none configured" — the screen then tells the vendor to contact
-/// support rather than blocking on an error state.
+/// Pay-to accounts for the payment screens, derived from the cached General
+/// Settings. Blank handles are left out ("not set up"). With a cache this is
+/// always data; the error state is a failed first-launch fetch (Retry
+/// re-runs [generalSettingsProvider]).
 ///
 /// Copied from [commissionPayToAccounts].
 @ProviderFor(commissionPayToAccounts)
 final commissionPayToAccountsProvider =
-    AutoDisposeFutureProvider<Map<CommissionPaymentMethod, String>>.internal(
-  commissionPayToAccounts,
-  name: r'commissionPayToAccountsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$commissionPayToAccountsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+    AutoDisposeProvider<
+      AsyncValue<Map<CommissionPaymentMethod, String>>
+    >.internal(
+      commissionPayToAccounts,
+      name: r'commissionPayToAccountsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$commissionPayToAccountsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-typedef CommissionPayToAccountsRef
-    = AutoDisposeFutureProviderRef<Map<CommissionPaymentMethod, String>>;
+typedef CommissionPayToAccountsRef =
+    AutoDisposeProviderRef<AsyncValue<Map<CommissionPaymentMethod, String>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

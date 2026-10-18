@@ -13,6 +13,8 @@ import '../../../../core/constants/prefs_keys.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/providers/shared_providers.dart';
+import '../../../../shared/widgets/xstore_button.dart';
+import '../../../general_settings/presentation/providers/general_settings_provider.dart';
 import '../../../../shared/utils/location_permission_prompt.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../providers/auth_provider.dart';
@@ -51,8 +53,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
     _logoController.forward();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+    // Leave the splash only once the General Settings are ready (cache
+    // present, or the first fetch done). On a failed first fetch the build
+    // shows Retry; a successful retry fires this listener and continues.
+    ref.listenManual(generalSettingsProvider, (_, next) {
+      if (next.hasValue && !_started) {
+        _started = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _bootstrap();
+        });
+      }
+    }, fireImmediately: true);
   }
+
+  bool _started = false;
 
   Future<void> _bootstrap() async {
     final minDelay = Future<void>.delayed(const Duration(milliseconds: 2500));
@@ -114,6 +128,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final gradient = context.brandGradient;
+    final settings = ref.watch(generalSettingsProvider);
+    final settingsFailed = settings.hasError && !settings.isLoading;
     return Scaffold(
       body: OrbitBackground(
         child: Stack(
@@ -156,6 +172,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       ),
                     ),
                     const Gap(AppSpacing.spacing28),
+                    if (settingsFailed) ...[
+                      Text(
+                        context.l10n.splashSettingsError,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: context.textSecondary,
+                        ),
+                      ),
+                      const Gap(AppSpacing.md),
+                      XstoreButton(
+                        label: context.l10n.retry,
+                        onPressed: () => ref.invalidate(generalSettingsProvider),
+                      ),
+                    ] else
                     // Thin gradient progress line, filled over the minimum
                     // splash time; it holds full if auth takes longer.
                     Container(

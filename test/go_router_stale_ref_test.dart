@@ -14,6 +14,7 @@ import 'package:xstore/features/notifications/presentation/providers/fcm_device_
 import 'package:xstore/features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 
 import 'helpers/fake_async_auth_notifier.dart';
+import 'helpers/fake_general_settings.dart';
 
 const _vendor = UserEntity(
   id: 'v1',
@@ -24,6 +25,7 @@ const _vendor = UserEntity(
 );
 
 /// Lets the test adopt a session without Auth's FCM/profile side effects.
+
 class _AuthThatCanAdopt extends FakeAuth {
   _AuthThatCanAdopt() : super(null);
 
@@ -48,6 +50,7 @@ void main() {
         ProviderScope(
           overrides: [
             authProvider.overrideWith(_AuthThatCanAdopt.new),
+            readyGeneralSettings(),
             fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
             fcmPushHandlingProvider.overrideWith((ref) {}),
           ],
@@ -97,6 +100,7 @@ void main() {
         authProvider.overrideWith(
           () => _AuthThatCanLogout(_vendor),
         ),
+        readyGeneralSettings(),
         fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
         fcmPushHandlingProvider.overrideWith((ref) {}),
       ],

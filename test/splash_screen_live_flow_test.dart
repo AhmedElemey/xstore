@@ -15,6 +15,7 @@
 // that requires more pumps than this session's usual 1.5s window.
 //
 // Run with: flutter test test/splash_screen_live_flow_test.dart
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -39,6 +40,10 @@ import 'package:xstore/features/auth/domain/entities/social_auth_result.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
 import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/auth/presentation/screens/splash_screen.dart';
+import 'package:xstore/features/general_settings/domain/entities/app_settings.dart';
+import 'package:xstore/features/general_settings/presentation/providers/general_settings_provider.dart';
+
+import 'helpers/fake_general_settings.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
 /// technique as login_screen_live_flow_test.dart's `_RoutedInterceptor`.
@@ -161,6 +166,7 @@ Future<void> _settle(
 }
 
 List<Override> _overrides() => [
+  readyGeneralSettings(),
   authRepositoryProvider.overrideWith(
     (ref) => AuthRepositoryImpl(
       remote: ref.watch(authRemoteDataSourceProvider),
@@ -169,6 +175,24 @@ List<Override> _overrides() => [
       firebaseAuth: _FakeFirebaseAuth(),
     ),
   ),
+];
+
+/// Settings whose load the test controls; [loads] counts (re)builds.
+class _ControlledSettings extends GeneralSettings {
+  _ControlledSettings(this.pending);
+  final List<Completer<AppSettings>> pending;
+
+  @override
+  Future<AppSettings> build() {
+    final c = Completer<AppSettings>();
+    pending.add(c);
+    return c.future;
+  }
+}
+
+List<Override> _gatedOverrides(List<Completer<AppSettings>> pending) => [
+  ..._overrides().skip(1),
+  generalSettingsProvider.overrideWith(() => _ControlledSettings(pending)),
 ];
 
 void main() {
@@ -209,12 +233,45 @@ void main() {
     },
   );
 
+  testWidgets('a brand-new device with no session goes to onboarding', (
+    tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({});
+
+    await tester.pumpWidget(_routedHarness(_overrides()));
+    await _settle(tester);
+
+    expect(find.text('Onboarding Screen'), findsOneWidget);
+  });
+
+  testWidgets('a device that already finished onboarding goes to login', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      PrefsKeys.locationPermissionRationaleShown: true,
+      PrefsKeys.onboardingComplete: true,
+    });
+    FlutterSecureStorage.setMockInitialValues({});
+
+    await tester.pumpWidget(_routedHarness(_overrides()));
+    await _settle(tester);
+
+    expect(find.text('Login Screen'), findsOneWidget);
+  });
+
   testWidgets(
-    'a brand-new device with no session goes to onboarding',
+    'first launch: splash does not move on until the settings are ready',
     (tester) async {
       FlutterSecureStorage.setMockInitialValues({});
+      final pending = <Completer<AppSettings>>[];
 
-      await tester.pumpWidget(_routedHarness(_overrides()));
+      await tester.pumpWidget(_routedHarness(_gatedOverrides(pending)));
+      await _settle(tester); // 4s: well past the 2.5s minimum splash time
+
+      expect(find.text('Onboarding Screen'), findsNothing);
+      expect(find.text('Retry'), findsNothing);
+
+      pending.single.complete(AppSettings.empty);
       await _settle(tester);
 
       expect(find.text('Onboarding Screen'), findsOneWidget);
@@ -222,18 +279,33 @@ void main() {
   );
 
   testWidgets(
-    'a device that already finished onboarding goes to login',
+    'first launch: a failed fetch shows Retry on the splash and Retry works',
     (tester) async {
-      SharedPreferences.setMockInitialValues({
-        PrefsKeys.locationPermissionRationaleShown: true,
-        PrefsKeys.onboardingComplete: true,
-      });
       FlutterSecureStorage.setMockInitialValues({});
+      final pending = <Completer<AppSettings>>[];
 
-      await tester.pumpWidget(_routedHarness(_overrides()));
+      await tester.pumpWidget(_routedHarness(_gatedOverrides(pending)));
+      await _settle(tester, times: 5);
+      pending.single.completeError('offline');
       await _settle(tester);
 
-      expect(find.text('Login Screen'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(
+        find.text(
+          "Couldn't load app settings. Check your connection and try again.",
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Onboarding Screen'), findsNothing);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      expect(pending, hasLength(2));
+      pending.last.complete(AppSettings.empty);
+      await _settle(tester);
+
+      expect(find.text('Retry'), findsNothing);
+      expect(find.text('Onboarding Screen'), findsOneWidget);
     },
   );
 }

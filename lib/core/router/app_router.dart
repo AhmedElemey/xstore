@@ -41,6 +41,7 @@ import '../../features/profile/presentation/screens/profile_verification_screen.
 import '../../features/profile/presentation/providers/profile_verification_provider.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/vendor_store_screen.dart';
+import '../../features/general_settings/presentation/providers/general_settings_provider.dart';
 import '../../shared/screens/app_error_screen.dart';
 import '../../shared/screens/server_error_screen.dart';
 import '../../shared/screens/trust_info_screens.dart';
@@ -122,7 +123,11 @@ List<StatefulShellBranch> _courierShellBranches() => [
       ),
     ];
 
-String _routerInitialLocation(AsyncValue<UserEntity?> auth) {
+String _routerInitialLocation(
+  AsyncValue<UserEntity?> auth, {
+  required bool settingsReady,
+}) {
+  if (!settingsReady) return AppRoutes.splash;
   return auth.when(
     data: (user) {
       if (user == null) return AppRoutes.login;
@@ -156,7 +161,10 @@ GoRouter goRouter(GoRouterRef ref) {
   };
 
   final router = GoRouter(
-    initialLocation: _routerInitialLocation(ref.read(authProvider)),
+    initialLocation: _routerInitialLocation(
+      ref.read(authProvider),
+      settingsReady: ref.read(generalSettingsProvider).hasValue,
+    ),
     refreshListenable: refresh,
     errorBuilder: (context, state) => AppErrorScreen(
       onRetry: () => context.go(AppRoutes.home),

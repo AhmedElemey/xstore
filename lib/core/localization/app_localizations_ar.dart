@@ -1620,6 +1620,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resubmitSuccess => 'تمت إعادة إرسال الإعلان للمراجعة';
 
   @override
+  String get splashSettingsError =>
+      'مقدرناش نحمّل إعدادات التطبيق. اتأكد من الإنترنت وحاول تاني.';
+
+  @override
   String get retry => 'حاول تاني';
 
   @override

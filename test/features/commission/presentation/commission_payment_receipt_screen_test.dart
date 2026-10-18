@@ -6,21 +6,43 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:xstore/core/error/failures.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
 import 'package:xstore/features/commission/domain/entities/commission_payment_method.dart';
-import 'package:xstore/features/commission/presentation/providers/commission_payment_providers.dart';
+import 'package:xstore/features/general_settings/domain/entities/app_settings.dart';
+import 'package:xstore/features/general_settings/presentation/providers/general_settings_provider.dart';
 import 'package:xstore/features/commission/presentation/screens/commission_payment_receipt_screen.dart';
 import 'package:xstore/shared/widgets/xstore_button.dart';
+
+const _handleKey = {
+  CommissionPaymentMethod.instaPay: 'instapay_handle',
+  CommissionPaymentMethod.vodafoneCash: 'vodafone_cash_handle',
+  CommissionPaymentMethod.orangeCash: 'orange_cash_handle',
+  CommissionPaymentMethod.etisalatCash: 'etisalat_cash_handle',
+};
+
+class _LoadedSettings extends GeneralSettings {
+  _LoadedSettings(this._load);
+  final Future<AppSettings> Function() _load;
+
+  @override
+  Future<AppSettings> build() => _load();
+}
 
 Future<void> _pumpScreen(
   WidgetTester tester, {
   Map<CommissionPaymentMethod, String> accounts = const {},
   CommissionPaymentMethod method = CommissionPaymentMethod.vodafoneCash,
-  Future<Map<CommissionPaymentMethod, String>> Function()? load,
+  Future<AppSettings> Function()? load,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        commissionPayToAccountsProvider.overrideWith(
-          (ref) => load != null ? load() : Future.value(accounts),
+        generalSettingsProvider.overrideWith(
+          () => _LoadedSettings(
+            load ??
+                () async => AppSettings.fromItems([
+                  for (final e in accounts.entries)
+                    {'key': _handleKey[e.key], 'value': e.value},
+                ]),
+          ),
         ),
       ],
       child: MaterialApp(
@@ -83,7 +105,9 @@ void main() {
       load: () async {
         calls++;
         if (calls == 1) throw const Failure.network('offline');
-        return {CommissionPaymentMethod.vodafoneCash: '01000000000'};
+        return AppSettings.fromItems(const [
+          {'key': 'vodafone_cash_handle', 'value': '01000000000'},
+        ]);
       },
     );
 

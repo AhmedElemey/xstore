@@ -9,8 +9,6 @@ enum CommissionPaymentMethod {
 
   /// PascalCase wire value (this backend's enum convention); in the backend
   /// collection (v10) as `method`.
-  /// Also the key of each pay-to account in the
-  /// `commission_payment_accounts` app setting.
   String get wireName => switch (this) {
     CommissionPaymentMethod.instaPay => 'InstaPay',
     CommissionPaymentMethod.vodafoneCash => 'VodafoneCash',
@@ -24,8 +22,7 @@ enum CommissionPaymentMethod {
     final v = value?.trim().toLowerCase();
     if (v == null || v.isEmpty) return null;
     for (final method in values) {
-      if (method.wireName.toLowerCase() == v ||
-          '${method.index + 1}' == v) {
+      if (method.wireName.toLowerCase() == v || '${method.index + 1}' == v) {
         return method;
       }
     }

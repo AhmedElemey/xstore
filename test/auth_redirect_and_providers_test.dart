@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -16,10 +17,20 @@ import 'package:xstore/features/orders/domain/entities/order_item_entity.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_dependencies.dart';
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
 import 'package:xstore/features/orders/presentation/providers/vendor_orders_provider.dart';
+import 'package:xstore/features/general_settings/domain/entities/app_settings.dart';
+import 'package:xstore/features/general_settings/presentation/providers/general_settings_provider.dart';
 import 'helpers/fake_async_auth_notifier.dart';
 import 'helpers/stub_auth_repository.dart';
 import 'helpers/stub_cart_repository.dart';
 import 'helpers/stub_orders_repository.dart';
+
+class _PendingSettings extends GeneralSettings {
+  _PendingSettings(this._pending);
+  final Completer<AppSettings> _pending;
+
+  @override
+  Future<AppSettings> build() => _pending.future;
+}
 
 UserEntity _consumer() => UserEntity(
   id: 'c1',
@@ -107,7 +118,11 @@ void main() {
 
   group('computeXStoreAuthRedirect', () {
     test('unauthenticated splash and onboarding stay put (cold start)', () {
-      for (final loc in [AppRoutes.splash, AppRoutes.onboarding, AppRoutes.login]) {
+      for (final loc in [
+        AppRoutes.splash,
+        AppRoutes.onboarding,
+        AppRoutes.login,
+      ]) {
         expect(
           computeXStoreAuthRedirect(
             auth: const AsyncValue.data(null),
@@ -350,6 +365,45 @@ void main() {
           reason: 'courier should be redirected from $loc to their run',
         );
       }
+    });
+  });
+
+  group('settings gate', () {
+    test('splash is held while settings are not ready, then released', () {
+      expect(
+        computeXStoreAuthRedirect(
+          auth: AsyncValue.data(_consumer()),
+          matchedLocation: AppRoutes.splash,
+          settingsReady: false,
+        ),
+        isNull,
+      );
+      expect(
+        computeXStoreAuthRedirect(
+          auth: AsyncValue.data(_consumer()),
+          matchedLocation: AppRoutes.splash,
+        ),
+        AppRoutes.home,
+      );
+    });
+
+    test('RouterNotifier reads readiness from the settings provider', () async {
+      final pending = Completer<AppSettings>();
+      final container = ProviderContainer(
+        overrides: [
+          authProvider.overrideWith(() => FakeAuth(_consumer())),
+          generalSettingsProvider.overrideWith(() => _PendingSettings(pending)),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+      final refresh = container.read(routerNotifierProvider);
+
+      expect(refresh.redirectFor(AppRoutes.splash), isNull);
+
+      pending.complete(AppSettings.empty);
+      await container.read(generalSettingsProvider.future);
+      expect(refresh.redirectFor(AppRoutes.splash), AppRoutes.home);
     });
   });
 

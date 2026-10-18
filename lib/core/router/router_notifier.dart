@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart';
+import '../../features/general_settings/presentation/providers/general_settings_provider.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/guest_mode_provider.dart';
 import '../../features/auth/presentation/providers/phone_auth_provider.dart';
@@ -39,9 +40,14 @@ String? computeXStoreAuthRedirect({
   required String matchedLocation,
   bool holdRegisterForVendorSuccess = false,
   bool isGuest = false,
+  bool settingsReady = true,
 }) {
   final loc = matchedLocation;
-  final isAuthRoute = loc == AppRoutes.splash ||
+  // Splash waits for the General Settings (cache present, or first fetch
+  // done) the same way it waits for auth; SplashScreen shows the Retry.
+  if (!settingsReady && loc == AppRoutes.splash) return null;
+  final isAuthRoute =
+      loc == AppRoutes.splash ||
       loc == AppRoutes.onboarding ||
       loc == AppRoutes.login ||
       loc == AppRoutes.register ||
@@ -67,8 +73,8 @@ String? computeXStoreAuthRedirect({
       final roleHome = user.isCourier
           ? AppRoutes.deliveries
           : user.isVendor
-              ? AppRoutes.vendorOrders
-              : AppRoutes.home;
+          ? AppRoutes.vendorOrders
+          : AppRoutes.home;
       if (isAuthRoute) {
         if (loc == AppRoutes.register && holdRegisterForVendorSuccess) {
           return null;
@@ -85,8 +91,7 @@ String? computeXStoreAuthRedirect({
       if (isVendorRestrictedRoute(loc) && !user.isVendor) {
         return roleHome;
       }
-      if (isConsumerRestrictedRoute(loc) &&
-          user.role != UserRole.consumer) {
+      if (isConsumerRestrictedRoute(loc) && user.role != UserRole.consumer) {
         return roleHome;
       }
       if (isPackageRequestRoute(loc) && user.isCourier) {
@@ -106,6 +111,7 @@ final class RouterNotifier extends Listenable {
       // AsyncData when redirect evaluates — fixes release timing
       WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
     });
+    _ref.listen(generalSettingsProvider, (_, __) => _notify());
     _ref.listen(guestModeProvider, (_, __) => _notify());
     _ref.listen(serverErrorProvider, (_, __) => _notify());
     _ref.listen(
@@ -130,9 +136,11 @@ final class RouterNotifier extends Listenable {
     return computeXStoreAuthRedirect(
       auth: _ref.read(authProvider),
       matchedLocation: matchedLocation,
-      holdRegisterForVendorSuccess:
-          _ref.read(registerNotifierProvider).showVendorSuccessOverlay,
+      holdRegisterForVendorSuccess: _ref
+          .read(registerNotifierProvider)
+          .showVendorSuccessOverlay,
       isGuest: _ref.read(guestModeProvider),
+      settingsReady: _ref.read(generalSettingsProvider).hasValue,
     );
   }
 

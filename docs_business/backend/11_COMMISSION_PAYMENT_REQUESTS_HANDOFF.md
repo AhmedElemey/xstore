@@ -99,28 +99,25 @@ is how the vendor learns the outcome.
 
 ## Pay-to accounts (where vendors send the money)
 
-Stored as a **General Setting** (the dashboard's System → General Settings page, see the
-dashboard's `BACKEND_HANDOFF.md` "General Settings"), so numbers change without an app release:
+Stored as **General Settings** (the dashboard's System → General Settings page, see the
+dashboard's `BACKEND_HANDOFF.md` "General Settings"), one row per method, so numbers change
+without an app release. All are `dataType: String`; the value is the InstaPay address or the
+wallet number:
 
-- key: `commission_payment_accounts`
-- dataType: `Json`
-- value:
+| Method | key |
+|---|---|
+| InstaPay | `instapay_handle` |
+| VodafoneCash | `vodafone_cash_handle` |
+| OrangeCash | `orange_cash_handle` |
+| EtisalatCash | `etisalat_cash_handle` |
 
-```json
-{
-  "InstaPay": "xstore@instapay",
-  "VodafoneCash": "01000000000",
-  "OrangeCash": "01200000000",
-  "EtisalatCash": "01100000000"
-}
-```
-
-The app reads it from the public, already-live `GET /api/general-settings?search=commission_payment_accounts`
-and uses only the row whose `key` matches exactly (`search` is a substring match). It also accepts
-the value bare, inside the `{data: ...}` envelope, inside a `{key, value}` row, and as either a
-JSON string or an object. (An earlier draft named `GET /api/app-settings/{key}`; that route was
-never built.) A method with no entry shows "account isn't set up yet — contact
-support" instead of a number.
+The app fetches the whole settings list at startup from the public, live
+`GET /api/general-settings?page=1&pageSize=20` (`{items: [{id, key, value, dataType, ...}],
+totalCount, page, pageSize, totalPages}`; further pages are fetched when `totalPages > 1`) and
+caches it locally, so the receipt screen reads the handles from the cache. A method whose key is
+missing or blank shows "account isn't set up yet — contact support" instead of a number.
+(Earlier drafts named a single JSON key `commission_payment_accounts` and
+`GET /api/app-settings/{key}`; neither is used.)
 
 ## Open questions for the backend
 

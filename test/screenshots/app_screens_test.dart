@@ -49,6 +49,7 @@ import 'package:xstore/features/notifications/presentation/providers/fcm_device_
 import 'package:xstore/features/notifications/presentation/providers/fcm_push_handling_provider.dart';
 
 import '../helpers/fake_async_auth_notifier.dart';
+import '../helpers/fake_general_settings.dart';
 
 const _size = Size(390, 844);
 const _pixelRatio = 2.0;
@@ -360,6 +361,7 @@ void main() {
             child: ProviderScope(
               overrides: [
                 authProvider.overrideWith(() => FakeAuth(_users[role])),
+                readyGeneralSettings(),
                 fcmDeviceTokenSyncProvider.overrideWith((ref) {}),
                 fcmPushHandlingProvider.overrideWith((ref) {}),
                 exploreRemoteDataSourceProvider.overrideWithValue(

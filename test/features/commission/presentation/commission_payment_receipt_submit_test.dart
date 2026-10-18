@@ -18,6 +18,9 @@ import 'package:xstore/features/commission/domain/entities/commission_payment_me
 import 'package:xstore/features/commission/domain/repositories/commission_payment_repository.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_config_provider.dart';
 import 'package:xstore/features/commission/presentation/providers/commission_payment_providers.dart';
+import 'package:xstore/features/general_settings/domain/entities/app_settings.dart';
+
+import '../../../helpers/fake_general_settings.dart';
 import 'package:xstore/features/commission/presentation/providers/vendor_commission_wallet_provider.dart';
 import 'package:xstore/features/commission/presentation/screens/commission_payment_receipt_screen.dart';
 import 'package:xstore/features/commission/domain/entities/vendor_commission_wallet.dart';
@@ -29,11 +32,6 @@ class _FakeRepository implements CommissionPaymentRepository {
   /// Completes the pending submit; null result answers immediately.
   final Completer<Either<Failure, Unit>> result;
   final submittedPaths = <String>[];
-
-  @override
-  Future<Either<Failure, Map<CommissionPaymentMethod, String>>>
-  getPayToAccounts() async =>
-      const Right({CommissionPaymentMethod.vodafoneCash: '01000000000'});
 
   @override
   Future<Either<Failure, Unit>> submitPayment({
@@ -118,6 +116,11 @@ void main() {
       ProviderScope(
         overrides: [
           commissionPaymentRepositoryProvider.overrideWithValue(repository),
+          readyGeneralSettings(
+            AppSettings.fromItems(const [
+              {'key': 'vodafone_cash_handle', 'value': '01000000000'},
+            ]),
+          ),
           vendorCommissionSnapshotProvider.overrideWith((ref) async {
             snapshotLoads++;
             return null;

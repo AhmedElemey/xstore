@@ -1620,6 +1620,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resubmitSuccess => 'Listing resubmitted for review';
 
   @override
+  String get splashSettingsError =>
+      'Couldn\'t load app settings. Check your connection and try again.';
+
+  @override
   String get retry => 'Retry';
 
   @override

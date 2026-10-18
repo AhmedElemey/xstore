@@ -20,6 +20,7 @@ import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../domain/entities/commission_payment_method.dart';
+import '../../../general_settings/presentation/providers/general_settings_provider.dart';
 import '../providers/commission_config_provider.dart';
 import '../providers/commission_payment_providers.dart';
 import '../widgets/commission_page_header.dart';
@@ -278,7 +279,7 @@ class _CommissionPaymentReceiptScreenState
 }
 
 /// Where to send the money for [method], read from the admin-managed
-/// `commission_payment_accounts` setting.
+/// per-method `*_handle` General Settings.
 class _PayToCard extends ConsumerWidget {
   const _PayToCard({required this.method});
 
@@ -320,8 +321,7 @@ class _PayToCard extends ConsumerWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () =>
-                        ref.invalidate(commissionPayToAccountsProvider),
+                    onPressed: () => ref.invalidate(generalSettingsProvider),
                     child: Text(context.l10n.retry),
                   ),
                 ],

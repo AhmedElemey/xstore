@@ -12,16 +12,6 @@ class CommissionPaymentRepositoryImpl implements CommissionPaymentRepository {
   final CommissionPaymentRemoteDataSource _remote;
 
   @override
-  Future<Either<Failure, Map<CommissionPaymentMethod, String>>>
-  getPayToAccounts() async {
-    try {
-      return Right(await _remote.getPayToAccounts());
-    } catch (e) {
-      return Left(Failure.server(userErrorMessage(e)));
-    }
-  }
-
-  @override
   Future<Either<Failure, Unit>> submitPayment({
     required CommissionPaymentMethod method,
     required double amountEgp,

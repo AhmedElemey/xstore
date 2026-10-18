@@ -553,6 +553,7 @@
   "resubmitInvalidPrice": "Enter a valid price",
   "resubmitSubmit": "Resubmit for review",
   "resubmitSuccess": "Listing resubmitted for review",
+  "splashSettingsError": "Couldn't load app settings. Check your connection and try again.",
   "retry": "Retry",
   "errorGeneric": "Something went wrong",
   "routeErrorMessage": "We couldn't load that page. Please try again.",

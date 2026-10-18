@@ -3230,6 +3230,12 @@ abstract class AppLocalizations {
   /// **'Listing resubmitted for review'**
   String get resubmitSuccess;
 
+  /// No description provided for @splashSettingsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load app settings. Check your connection and try again.'**
+  String get splashSettingsError;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
