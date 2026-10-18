@@ -1788,7 +1788,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsEmptyAllTitle => 'You\'re all caught up! 🎉';
 
   @override
-  String notificationsUnreadBannerLine(int n) {
+  String notificationsUnreadBannerLine(String n) {
     return '🔔 You have $n unread notifications';
   }
 
@@ -1808,17 +1808,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String notificationsTimeMinutesAgo(int m) {
+  String notificationsTimeMinutesAgo(String m) {
     return '${m}m ago';
   }
 
   @override
-  String notificationsTimeHoursAgo(int h) {
+  String notificationsTimeHoursAgo(String h) {
     return '${h}h ago';
   }
 
   @override
-  String applyFiltersCount(int n) {
+  String applyFiltersCount(String n) {
     return 'Apply Filters ($n)';
   }
 
@@ -1838,11 +1838,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String wishlistPriceDropBanner(int n) {
+  String wishlistPriceDropBanner(int n, String nText) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: 'Price drop on $n items',
+      other: 'Price drop on $nText items',
       one: 'Price drop on 1 item',
     );
     return '🎉 $_temp0 in your wishlist!';
@@ -1859,7 +1859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String wishlistItemsAvailableLine(int total, int avail) {
+  String wishlistItemsAvailableLine(String total, String avail) {
     return '$total items · $avail available';
   }
 
@@ -1874,7 +1874,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartClearBody(int n) {
+  String cartClearBody(String n) {
     return 'This will remove all $n items from your cart.';
   }
 
@@ -1884,12 +1884,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String cartShippingPaid(int amount) {
+  String cartShippingPaid(String amount) {
     return '🚚 +$amount EGP shipping';
   }
 
   @override
-  String cartSubtotalLine(int n) {
+  String cartSubtotalLine(String n) {
     return 'Subtotal ($n items)';
   }
 
@@ -2614,11 +2614,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courierDropoffLabel => 'Drop-off';
 
   @override
-  String courierItemsSummary(int count, String total) {
+  String courierItemsSummary(int count, String countText, String total) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items',
+      other: '$countText items',
       one: '1 item',
     );
     return '$_temp0 · $total';

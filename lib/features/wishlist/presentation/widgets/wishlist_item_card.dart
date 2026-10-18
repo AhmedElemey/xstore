@@ -47,7 +47,9 @@ class WishlistItemCard extends ConsumerWidget {
   String _shippingLine(BuildContext context, WishlistItemEntity e) {
     if (!e.shippingAvailable) return context.l10n.cartPickupOnly;
     if (e.shippingCost <= 0) return context.l10n.cartShippingFree;
-    return context.l10n.cartShippingPaid(e.shippingCost.round());
+    return context.l10n.cartShippingPaid(
+      context.formatInt(e.shippingCost.round()),
+    );
   }
 
   @override
@@ -199,6 +201,7 @@ class WishlistItemCard extends ConsumerWidget {
                             children: [
                               Text(
                                 context.isolate(item.listingName),
+                                textDirection: context.textDirectionOf(item.listingName),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.titleSmall.copyWith(
@@ -280,7 +283,7 @@ class WishlistItemCard extends ConsumerWidget {
                                     ),
                                     const Gap(AppSpacing.xs),
                                     Text(
-                                      '${item.rating!.toStringAsFixed(1)} (${item.reviewCount})',
+                                      '${context.formatDecimal(item.rating!)} (${context.formatInt(item.reviewCount)})',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: AppTypography.bodySmall.copyWith(

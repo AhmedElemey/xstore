@@ -92,7 +92,7 @@ class SellerCard extends StatelessWidget {
                       const Gap(2),
                       Text(
                         publicSellerStatsLabel(
-                          context.l10n,
+                          context,
                           rating: seller.rating,
                           sales: seller.salesCount,
                         ),

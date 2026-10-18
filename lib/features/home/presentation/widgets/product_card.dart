@@ -167,6 +167,7 @@ class _Footer extends StatelessWidget {
         children: [
           Text(
             context.isolate(title),
+            textDirection: context.textDirectionOf(title),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.bodyMedium.copyWith(

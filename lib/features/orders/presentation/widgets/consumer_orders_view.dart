@@ -126,8 +126,11 @@ class _ConsumerOrdersViewState extends ConsumerState<ConsumerOrdersView> {
                             ),
                     ),
                   ),
-                  const OrderFilterTabs(),
-                  const SizedBox(height: AppSpacing.lg),
+                  // Zero counts above a first-load failure would read as data.
+                  if (!(emptyAll && error != null)) ...[
+                    const OrderFilterTabs(),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
                 ],
               ),
             ),

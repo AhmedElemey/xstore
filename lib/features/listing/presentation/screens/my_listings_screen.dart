@@ -25,8 +25,8 @@ import '../widgets/listing_sort_bar.dart';
 import '../widgets/listing_stats_banner.dart';
 import '../widgets/resubmit_listing_sheet.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
-import '../../../../shared/widgets/xstore_button.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/skeletons/my_listings_skeleton.dart';
 
@@ -220,7 +220,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
       prev,
       next,
     ) {
-      if (next != null && next.isNotEmpty && next != prev) {
+      // With nothing on screen the error state shows it, with Retry.
+      if (next != null &&
+          next.isNotEmpty &&
+          next != prev &&
+          ref.read(myListingsNotifierProvider).listings.isNotEmpty) {
         AppSnackbar.error(context, next);
       }
     });
@@ -375,23 +379,10 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
 
     if (listings.isEmpty && error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.x2l),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(context.localizedError(error), textAlign: TextAlign.center),
-              const Gap(AppSpacing.lg),
-              XstoreButton(
-                label: context.l10n.retry,
-                onPressed: () => ref
-                    .read(myListingsNotifierProvider.notifier)
-                    .fetchListings(),
-              ),
-            ],
-          ),
-        ),
+      return ErrorStateWidget(
+        message: error,
+        onRetry: () =>
+            ref.read(myListingsNotifierProvider.notifier).fetchListings(),
       );
     }
 

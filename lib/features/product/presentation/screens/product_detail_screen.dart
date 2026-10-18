@@ -291,7 +291,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ratingLabel:
                               reviewSummary != null &&
                                   reviewSummary.totalCount > 0
-                              ? reviewSummary.average.toStringAsFixed(1)
+                              ? context.formatDecimal(reviewSummary.average)
                               : null,
                           reviewCountLabel:
                               reviewSummary != null &&
@@ -442,6 +442,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   String _formatCount(int n) {
+    if (context.isArabic) return context.formatInt(n);
     final s = n.toString();
     return s.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
   }

@@ -31,7 +31,9 @@ class NotificationUnreadSummaryBanner extends ConsumerWidget {
                   AppSpacing.sm,
                 ),
                 child: Text(
-                  context.l10n.notificationsUnreadBannerLine(unread),
+                  context.l10n.notificationsUnreadBannerLine(
+                    context.formatInt(unread),
+                  ),
                   style: AppTypography.bodySmall.copyWith(
                     color: context.textSecondary,
                     fontWeight: FontWeight.w600,

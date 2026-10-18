@@ -141,6 +141,7 @@ class VendorOrderCard extends StatelessWidget {
                           children: [
                             Text(
                               context.isolate(item.listingName),
+                              textDirection: context.textDirectionOf(item.listingName),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.bodyLarge.copyWith(

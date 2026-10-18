@@ -90,6 +90,7 @@ class DeliveryOrderCard extends StatelessWidget {
                   child: Text(
                     context.l10n.courierItemsSummary(
                       order.items.length,
+                      context.formatInt(order.items.length),
                       context.formatCurrency(order.total),
                     ),
                     style: AppTypography.bodySmall.copyWith(

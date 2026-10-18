@@ -49,7 +49,10 @@ class MoveAllToCartBar extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                context.l10n.wishlistItemsAvailableLine(total, avail),
+                context.l10n.wishlistItemsAvailableLine(
+                  context.formatInt(total),
+                  context.formatInt(avail),
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: context.textSecondary,
                 ),

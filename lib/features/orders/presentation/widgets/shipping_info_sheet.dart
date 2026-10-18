@@ -68,8 +68,10 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            OutlinedButton(
-              onPressed: () async {
+            // Read-only field with the same decoration as the two above.
+            InkWell(
+              borderRadius: BorderRadius.circular(AppSpacing.lg),
+              onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
                   firstDate: DateTime.now(),
@@ -78,9 +80,12 @@ class _ShippingInfoSheetState extends State<ShippingInfoSheet> {
                 );
                 if (picked != null) setState(() => _date = picked);
               },
-              child: Text(
-                '${context.l10n.ordersEstimatedDeliveryLabel}: '
-                '${context.formatLongDate(_date)}',
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: context.l10n.ordersEstimatedDeliveryLabel,
+                  suffixIcon: const Icon(Icons.calendar_today_outlined),
+                ),
+                child: Text(context.formatMediumDate(_date)),
               ),
             ),
             const SizedBox(height: AppSpacing.md),

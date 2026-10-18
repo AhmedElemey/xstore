@@ -40,7 +40,7 @@ class VendorOrderStatsBanner extends StatelessWidget {
             children: [
               _item(
                 context,
-                '$pendingCount',
+                context.formatInt(pendingCount),
                 context.l10n.vendorStatPendingOrders,
                 valueColor: context.isDark
                     ? AppColors.warning
@@ -49,11 +49,15 @@ class VendorOrderStatsBanner extends StatelessWidget {
               _divider(context),
               _item(
                 context,
-                '$activeCount',
+                context.formatInt(activeCount),
                 context.l10n.vendorStatActiveOrders,
               ),
               _divider(context),
-              _item(context, '$totalCount', context.l10n.vendorStatTotalOrders),
+              _item(
+                context,
+                context.formatInt(totalCount),
+                context.l10n.vendorStatTotalOrders,
+              ),
               _divider(context),
               _item(
                 context,

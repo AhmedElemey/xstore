@@ -127,6 +127,15 @@ extension LocalizationContext on BuildContext {
   /// English.
   String isolate(String value) => isArabic ? '\u2068$value\u2069' : value;
 
+  /// The direction of [text]'s first strong letter, for a single-line title
+  /// that truncates: an LTR title in an RTL card keeps its ellipsis at the end
+  /// (isolates alone don't move it). Falls back to the ambient direction.
+  ui.TextDirection textDirectionOf(String text) => Bidi.startsWithRtl(text)
+      ? ui.TextDirection.rtl
+      : Bidi.startsWithLtr(text)
+      ? ui.TextDirection.ltr
+      : Directionality.of(this);
+
   /// A comma-separated address line ("15 Abbas St, Nasr City"), isolated as
   /// one unit so the commas stay with the street instead of drifting to the
   /// city's side, with the Arabic comma in Arabic. Empty parts are skipped.
@@ -181,6 +190,12 @@ extension LocalizationContext on BuildContext {
   String formatInt(int value) => isArabic
       ? NumberFormat.decimalPattern('ar_EG').format(value)
       : '$value';
+
+  /// A rating like "4.5" in the same digit system as [formatCurrency]
+  /// (Arabic-Indic digits and decimal mark in Arabic), one decimal place.
+  String formatDecimal(num value) => isArabic
+      ? NumberFormat('0.0', 'ar_EG').format(value)
+      : value.toStringAsFixed(1);
 
   String formatDate(DateTime date) {
     return DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en').format(date);

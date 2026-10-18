@@ -292,7 +292,8 @@ class ListingRemoteDataSourceImpl implements ListingRemoteDataSource {
       }
       return List<ListingModel>.from(_localMine);
     } on DioException catch (e) {
-      if (_isOffline(e)) {
+      // Offline with nothing cached is a failure, not "no listings".
+      if (_isOffline(e) && _localMine.isNotEmpty) {
         return List<ListingModel>.from(_localMine);
       }
       throw mapDioException(e);

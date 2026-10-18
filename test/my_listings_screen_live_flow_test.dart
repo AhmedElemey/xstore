@@ -33,6 +33,8 @@ import 'package:xstore/features/auth/presentation/providers/auth_provider.dart';
 import 'package:xstore/features/listing/domain/entities/listing_entity.dart';
 import 'package:xstore/features/listing/presentation/screens/my_listings_screen.dart';
 import 'package:xstore/features/listing/presentation/widgets/status_badge.dart';
+import 'package:xstore/features/listing/presentation/widgets/listing_empty_state.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 import 'package:xstore/shared/widgets/offline_banner.dart';
 
 /// Routes each request by (method, path) to a scripted response — same
@@ -320,4 +322,52 @@ void main() {
       expect(find.text('Edit Listing'), findsOneWidget);
     },
   );
+  testWidgets(
+    'a failed first load shows the error state with Retry, not the empty state',
+    (tester) async {
+      var fail = true;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.apiMyListings}': (options) => fail
+            ? DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+              )
+            : [_listingJson()],
+      });
+
+      await tester.pumpWidget(
+        _harness([
+          authProvider.overrideWith(() => _FakeAuth(_vendor())),
+          dioProvider.overrideWithValue(dio),
+        ]),
+      );
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.byType(ListingEmptyState), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+
+      fail = false;
+      await tester.tap(find.text('Retry'));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.text('Wireless Earbuds'), findsOneWidget);
+    },
+  );
+
+  testWidgets('a genuinely empty list keeps the empty state', (tester) async {
+    final dio = _fakeDio({'GET ${ApiEndpoints.apiMyListings}': (_) => []});
+
+    await tester.pumpWidget(
+      _harness([
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ]),
+    );
+    await _settle(tester);
+
+    expect(find.byType(ListingEmptyState), findsOneWidget);
+    expect(find.byType(ErrorStateWidget), findsNothing);
+  });
 }

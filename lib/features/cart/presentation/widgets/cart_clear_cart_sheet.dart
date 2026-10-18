@@ -34,7 +34,7 @@ Future<void> showCartClearConfirmSheet(BuildContext context, WidgetRef ref) asyn
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            context.l10n.cartClearBody(n),
+            context.l10n.cartClearBody(context.formatInt(n)),
             style: AppTypography.bodyMedium.copyWith(
               color: context.textSecondary,
             ),

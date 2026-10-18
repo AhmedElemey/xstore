@@ -24,16 +24,20 @@ abstract final class Formatters {
     final n = (now ?? DateTime.now()).toLocal();
     final t = createdAt.toLocal();
     final diff = n.difference(t);
+    // Same digit system as prices (see BuildContext.formatInt).
+    String num(int v) => l10n.localeName == 'ar'
+        ? NumberFormat.decimalPattern('ar_EG').format(v)
+        : '$v';
     if (diff.inMinutes < 1) return l10n.notificationsTimeJustNow;
     if (diff.inHours < 1) {
-      return l10n.notificationsTimeMinutesAgo(diff.inMinutes);
+      return l10n.notificationsTimeMinutesAgo(num(diff.inMinutes));
     }
     final today = DateTime(n.year, n.month, n.day);
     final itemDay = DateTime(t.year, t.month, t.day);
     final yesterday = today.subtract(const Duration(days: 1));
     if (itemDay == yesterday) return l10n.notificationsTimeYesterday;
     if (itemDay == today) {
-      return l10n.notificationsTimeHoursAgo(diff.inHours.clamp(1, 23));
+      return l10n.notificationsTimeHoursAgo(num(diff.inHours.clamp(1, 23)));
     }
     final startOfWeek = today.subtract(Duration(days: today.weekday - DateTime.monday));
     // Locale date symbols are loaded by GlobalMaterialLocalizations before

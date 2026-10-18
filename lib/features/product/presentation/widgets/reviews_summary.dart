@@ -106,14 +106,14 @@ class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            widget.summary.average.toStringAsFixed(1),
+                            context.formatDecimal(widget.summary.average),
                             style: AppTypography.headlineSmall.copyWith(
                               fontSize: 30,
                               color: context.textPrimary,
                             ),
                           ),
                           Text(
-                            '${widget.summary.totalCount} ${context.l10n.ratingsWord}',
+                            '${context.formatInt(widget.summary.totalCount)} ${context.l10n.ratingsWord}',
                             style: AppTypography.body12.copyWith(
                               color: context.labelColor,
                             ),
@@ -137,7 +137,7 @@ class _ReviewsSummaryState extends ConsumerState<ReviewsSummary> {
                               SizedBox(
                                 width: AppSpacing.lg,
                                 child: Text(
-                                  '$star',
+                                  context.formatInt(star),
                                   style: AppTypography.body12.copyWith(
                                     color: context.labelColor,
                                   ),
@@ -292,7 +292,7 @@ class _ReviewTile extends StatelessWidget {
           ),
           const Gap(AppSpacing.sm),
           Text(
-            '${context.l10n.helpfulPrompt}${review.helpfulCount}',
+            '${context.l10n.helpfulPrompt}${context.formatInt(review.helpfulCount)}',
             style: AppTypography.body12.copyWith(color: context.labelColor),
           ),
         ],

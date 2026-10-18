@@ -6,8 +6,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/route_reentry_refresh.dart';
 import '../../../../shared/widgets/xstore_button.dart';
@@ -28,7 +30,8 @@ class VendorWalletScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(vendorCommissionSnapshotProvider).valueOrNull;
+    final snapshot = ref.watch(vendorCommissionSnapshotProvider);
+    final stats = snapshot.valueOrNull;
     final wallet = ref.watch(vendorCommissionWalletProvider).valueOrNull;
     final feePerOrder = ref.watch(commissionFeeEgpForCategoryProvider(null));
 
@@ -62,65 +65,83 @@ class VendorWalletScreen extends ConsumerWidget {
                   ),
                 ),
                 Expanded(
-                  child: RefreshIndicator(
-                    color: context.linkColor,
-                    onRefresh: () async {
-                      ref.invalidate(vendorCommissionSnapshotProvider);
-                      ref.invalidate(vendorCommissionWalletProvider);
-                      await ref.read(vendorCommissionSnapshotProvider.future);
-                    },
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        AppSpacing.xl,
-                        0,
-                        AppSpacing.xl,
-                        _dockClearance,
-                      ),
-                      children: [
-                        if (wallet != null)
-                          VendorCommissionAlertBanner(wallet: wallet),
-                        if (wallet != null &&
-                            wallet.alertLevel ==
-                                VendorCommissionAlertLevel.none)
-                          const _GoodStandingCard(),
-                        Container(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          decoration: BoxDecoration(
-                            color: context.glassColor,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: context.borderColor),
-                          ),
-                          child: Row(
+                  child: snapshot.hasError && !snapshot.hasValue
+                      // First load failed: zero totals and "fees up to date"
+                      // would read as a good state.
+                      ? ErrorStateWidget(
+                          message: userErrorMessage(snapshot.error!),
+                          onRetry: () {
+                            ref.invalidate(vendorCommissionSnapshotProvider);
+                            ref.invalidate(vendorCommissionWalletProvider);
+                          },
+                        )
+                      : RefreshIndicator(
+                          color: context.linkColor,
+                          onRefresh: () async {
+                            ref.invalidate(vendorCommissionSnapshotProvider);
+                            ref.invalidate(vendorCommissionWalletProvider);
+                            // A failed refresh shows via the error state / stale
+                            // data; don't let it escape the indicator.
+                            await ref
+                                .read(vendorCommissionSnapshotProvider.future)
+                                .then((_) {}, onError: (_) {});
+                          },
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                              AppSpacing.xl,
+                              0,
+                              AppSpacing.xl,
+                              _dockClearance,
+                            ),
                             children: [
-                              _Stat(
-                                value: context.formatCurrency(
-                                  stats?.totalRevenue ?? 0,
+                              if (wallet != null)
+                                VendorCommissionAlertBanner(wallet: wallet),
+                              if (wallet != null &&
+                                  wallet.alertLevel ==
+                                      VendorCommissionAlertLevel.none)
+                                const _GoodStandingCard(),
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.lg),
+                                decoration: BoxDecoration(
+                                  color: context.glassColor,
+                                  borderRadius: BorderRadius.circular(22),
+                                  border: Border.all(
+                                    color: context.borderColor,
+                                  ),
                                 ),
-                                label: context.l10n.vendorStatRevenue,
-                                valueColor: context.amberColor,
+                                child: Row(
+                                  children: [
+                                    _Stat(
+                                      value: context.formatCurrency(
+                                        stats?.totalRevenue ?? 0,
+                                      ),
+                                      label: context.l10n.vendorStatRevenue,
+                                      valueColor: context.amberColor,
+                                    ),
+                                    _Stat(
+                                      value: '${stats?.totalCount ?? 0}',
+                                      label: context.l10n.vendorStatTotalOrders,
+                                    ),
+                                    _Stat(
+                                      value: context.formatCurrency(
+                                        feePerOrder,
+                                      ),
+                                      label: context.l10n.commissionPlatformFee,
+                                      valueColor: context.amberColor,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              _Stat(
-                                value: '${stats?.totalCount ?? 0}',
-                                label: context.l10n.vendorStatTotalOrders,
-                              ),
-                              _Stat(
-                                value: context.formatCurrency(feePerOrder),
-                                label: context.l10n.commissionPlatformFee,
-                                valueColor: context.amberColor,
+                              const SizedBox(height: AppSpacing.lg),
+                              XstoreButton(
+                                label: context.l10n.walletPayFees,
+                                onPressed: () =>
+                                    context.push(AppRoutes.commissionPayment),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        XstoreButton(
-                          label: context.l10n.walletPayFees,
-                          onPressed: () =>
-                              context.push(AppRoutes.commissionPayment),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),

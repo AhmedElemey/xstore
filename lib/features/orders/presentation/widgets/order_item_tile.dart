@@ -57,6 +57,7 @@ class OrderItemTile extends StatelessWidget {
               children: [
                 Text(
                   context.isolate(item.listingName),
+                  textDirection: context.textDirectionOf(item.listingName),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.titleSmall.copyWith(

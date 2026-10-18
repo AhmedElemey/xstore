@@ -70,7 +70,7 @@ void main() {
       expect(snapshot, _stats);
     });
 
-    test('is null when the stats fetch fails', () async {
+    test('surfaces the failure when the stats fetch fails', () async {
       final container = _containerFor(
         mockVendorUser,
         repo: StubOrdersRepository(
@@ -78,8 +78,10 @@ void main() {
               Left(Failure.network('offline')),
         ),
       );
-      final snapshot = await container.read(vendorCommissionSnapshotProvider.future);
-      expect(snapshot, isNull);
+      await expectLater(
+        container.read(vendorCommissionSnapshotProvider.future),
+        throwsA(isA<Failure>()),
+      );
     });
   });
 

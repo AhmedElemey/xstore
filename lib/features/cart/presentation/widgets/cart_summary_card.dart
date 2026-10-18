@@ -44,7 +44,7 @@ class CartSummaryCard extends ConsumerWidget {
             Divider(height: AppSpacing.x2l, color: context.borderColor),
             _row(
               context,
-              context.l10n.cartSubtotalLine(n),
+              context.l10n.cartSubtotalLine(context.formatInt(n)),
               context.formatCurrency(summary.subtotal),
             ),
             const SizedBox(height: AppSpacing.sm),

@@ -42,7 +42,9 @@ class CartItemCard extends StatelessWidget {
     final shippingLabel = item.shippingAvailable
         ? (item.shippingCost <= 0
               ? context.l10n.cartShippingFree
-              : context.l10n.cartShippingPaid(item.shippingCost.round()))
+              : context.l10n.cartShippingPaid(
+                  context.formatInt(item.shippingCost.round()),
+                ))
         : context.l10n.cartPickupOnly;
     final shippingColor = item.shippingAvailable
         ? (item.shippingCost <= 0 ? AppColors.success : context.textSecondary)
@@ -134,6 +136,7 @@ class CartItemCard extends StatelessWidget {
                     children: [
                       Text(
                         context.isolate(item.listingName),
+                        textDirection: context.textDirectionOf(item.listingName),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.titleSmall.copyWith(

@@ -162,7 +162,7 @@ class ProductListCard extends StatelessWidget {
                               color: AppColors.warning,
                             ),
                             Text(
-                              ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
+                              ' ${context.formatDecimal(item.rating)} (${context.formatInt(item.reviewCount)})',
                               style: AppTypography.bodySmall,
                             ),
                           ],

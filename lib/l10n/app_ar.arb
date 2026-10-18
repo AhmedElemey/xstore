@@ -608,7 +608,7 @@
   "ordersCountLine": "{n} طلبات",
   "ordersMoreItems": "+ {n} عناصر إضافية",
   "ordersItemsSectionCount": "المنتجات المطلوبة ({n})",
-  "wishlistPriceDropBanner": "🎉 {n, plural, =1{السعر نزل على منتج واحد} =2{السعر نزل على منتجين} few{السعر نزل على {n} منتجات} other{السعر نزل على {n} منتج}} في مفضلتك!",
+  "wishlistPriceDropBanner": "🎉 {n, plural, =1{السعر نزل على منتج واحد} =2{السعر نزل على منتجين} few{السعر نزل على {nText} منتجات} other{السعر نزل على {nText} منتج}} في مفضلتك!",
   "wishlistPriceDropPercent": "↓ {p}% انخفاض",
   "wishlistShareText": "شوف مفضلتي على xStore! 🛍️\n{link}",
   "wishlistItemsAvailableLine": "{total} عناصر · {avail} متاح",
@@ -626,7 +626,7 @@
   "@notificationsUnreadBannerLine": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -654,21 +654,21 @@
   "@notificationsTimeMinutesAgo": {
     "placeholders": {
       "m": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@notificationsTimeHoursAgo": {
     "placeholders": {
       "h": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@applyFiltersCount": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -697,6 +697,9 @@
     "placeholders": {
       "n": {
         "type": "int"
+      },
+      "nText": {
+        "type": "String"
       }
     }
   },
@@ -717,10 +720,10 @@
   "@wishlistItemsAvailableLine": {
     "placeholders": {
       "total": {
-        "type": "int"
+        "type": "String"
       },
       "avail": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -741,7 +744,7 @@
   "@cartClearBody": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -769,14 +772,14 @@
   "@cartShippingPaid": {
     "placeholders": {
       "amount": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@cartSubtotalLine": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -1078,11 +1081,14 @@
   "courierResendCode": "إعادة إرسال الرمز",
   "courierPickupLabel": "الاستلام من",
   "courierDropoffLabel": "التسليم إلى",
-  "courierItemsSummary": "{count, plural, =1{منتج واحد} =2{منتجان} few{{count} منتجات} other{{count} منتج}} · {total}",
+  "courierItemsSummary": "{count, plural, =1{منتج واحد} =2{منتجان} few{{countText} منتجات} other{{countText} منتج}} · {total}",
   "@courierItemsSummary": {
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "countText": {
+        "type": "String"
       },
       "total": {
         "type": "String"

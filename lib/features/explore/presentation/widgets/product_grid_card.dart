@@ -120,6 +120,7 @@ class ProductGridCard extends StatelessWidget {
                   children: [
                     Text(
                       context.isolate(item.name),
+                      textDirection: context.textDirectionOf(item.name),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium.copyWith(
@@ -175,7 +176,7 @@ class ProductGridCard extends StatelessWidget {
                             color: AppColors.warning,
                           ),
                           Text(
-                            ' ${item.rating.toStringAsFixed(1)} (${item.reviewCount})',
+                            ' ${context.formatDecimal(item.rating)} (${context.formatInt(item.reviewCount)})',
                             style: AppTypography.bodySmall,
                           ),
                         ],

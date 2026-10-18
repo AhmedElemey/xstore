@@ -615,7 +615,7 @@
   "ordersCountLine": "{n} orders",
   "ordersMoreItems": "+ {n} more items",
   "ordersItemsSectionCount": "Items Ordered ({n})",
-  "wishlistPriceDropBanner": "🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {n} items}} in your wishlist!",
+  "wishlistPriceDropBanner": "🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {nText} items}} in your wishlist!",
   "wishlistPriceDropPercent": "↓ {p}% Price Drop",
   "wishlistShareText": "Check out my wishlist on xStore! 🛍️\n{link}",
   "wishlistItemsAvailableLine": "{total} items · {avail} available",
@@ -633,7 +633,7 @@
   "@notificationsUnreadBannerLine": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -661,21 +661,21 @@
   "@notificationsTimeMinutesAgo": {
     "placeholders": {
       "m": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@notificationsTimeHoursAgo": {
     "placeholders": {
       "h": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@applyFiltersCount": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -711,6 +711,9 @@
     "placeholders": {
       "n": {
         "type": "int"
+      },
+      "nText": {
+        "type": "String"
       }
     }
   },
@@ -731,10 +734,10 @@
   "@wishlistItemsAvailableLine": {
     "placeholders": {
       "total": {
-        "type": "int"
+        "type": "String"
       },
       "avail": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -755,7 +758,7 @@
   "@cartClearBody": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -783,14 +786,14 @@
   "@cartShippingPaid": {
     "placeholders": {
       "amount": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@cartSubtotalLine": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -1092,11 +1095,14 @@
   "courierResendCode": "Resend code",
   "courierPickupLabel": "Pickup",
   "courierDropoffLabel": "Drop-off",
-  "courierItemsSummary": "{count, plural, =1{1 item} other{{count} items}} · {total}",
+  "courierItemsSummary": "{count, plural, =1{1 item} other{{countText} items}} · {total}",
   "@courierItemsSummary": {
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "countText": {
+        "type": "String"
       },
       "total": {
         "type": "String"

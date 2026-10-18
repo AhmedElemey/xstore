@@ -54,7 +54,7 @@ class VendorStoreCard extends ConsumerWidget {
                       Text(category, style: AppTypography.bodySmall),
                     const Gap(AppSpacing.xs),
                     Text(
-                      '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
+                      '${publicSellerStatsLabel(context, rating: u.rating, sales: u.totalSales)}'
                       '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeMetaLinePrefix}$joinedLine' : ''}',
                       style: AppTypography.labelSmall,
                     ),

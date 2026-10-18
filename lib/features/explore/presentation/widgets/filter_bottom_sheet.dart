@@ -340,7 +340,9 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
                         Navigator.pop(context);
                       },
                       child: Text(
-                        context.l10n.applyFiltersCount(_countActive()),
+                        context.l10n.applyFiltersCount(
+                          context.formatInt(_countActive()),
+                        ),
                       ),
                     ),
                   ],

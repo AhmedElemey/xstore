@@ -92,6 +92,7 @@ class OrderCard extends ConsumerWidget {
                           children: [
                             Text(
                               context.isolate(first.listingName),
+                              textDirection: context.textDirectionOf(first.listingName),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.bodyLarge.copyWith(

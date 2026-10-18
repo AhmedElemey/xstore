@@ -54,7 +54,10 @@ class WishlistPriceDropBanner extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.l10n.wishlistPriceDropBanner(dropCount),
+                        context.l10n.wishlistPriceDropBanner(
+                          dropCount,
+                          context.formatInt(dropCount),
+                        ),
                         style: AppTypography.bodyLarge.copyWith(
                           color: context.textPrimary,
                           fontWeight: FontWeight.w800,

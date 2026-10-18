@@ -317,7 +317,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                                 ),
                                 children: [
                                   TextSpan(
-                                    text: '${state.results.length}',
+                                    text: context.formatInt(state.results.length),
                                     style: AppTypography.bodyMedium.copyWith(
                                       color: context.textPrimary,
                                       fontWeight: FontWeight.w600,

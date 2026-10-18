@@ -21,9 +21,9 @@ void main() {
       expect(f(now.subtract(const Duration(seconds: 30))),
           en.notificationsTimeJustNow);
       expect(f(now.subtract(const Duration(minutes: 5))),
-          en.notificationsTimeMinutesAgo(5));
+          en.notificationsTimeMinutesAgo('5'));
       expect(f(now.subtract(const Duration(hours: 3))),
-          en.notificationsTimeHoursAgo(3));
+          en.notificationsTimeHoursAgo('3'));
     });
 
     test('yesterday', () {
@@ -39,6 +39,26 @@ void main() {
         ar.notificationsTimeYesterday,
       );
       expect(ar.notificationsTimeYesterday, isNot(en.notificationsTimeYesterday));
+    });
+
+    test('relative counts use Arabic-Indic digits in Arabic', () {
+      final ar = lookupAppLocalizations(const Locale('ar'));
+      expect(
+        Formatters.formatNotificationTime(
+          now.subtract(const Duration(hours: 1)),
+          ar,
+          now: now,
+        ),
+        ar.notificationsTimeHoursAgo('١'),
+      );
+      expect(
+        Formatters.formatNotificationTime(
+          now.subtract(const Duration(minutes: 12)),
+          ar,
+          now: now,
+        ),
+        ar.notificationsTimeMinutesAgo('١٢'),
+      );
     });
 
     test('earlier this week shows the weekday', () {

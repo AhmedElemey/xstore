@@ -3564,7 +3564,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'🔔 You have {n} unread notifications'**
-  String notificationsUnreadBannerLine(int n);
+  String notificationsUnreadBannerLine(String n);
 
   /// No description provided for @notificationsEmptyFilterTitle.
   ///
@@ -3588,19 +3588,19 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{m}m ago'**
-  String notificationsTimeMinutesAgo(int m);
+  String notificationsTimeMinutesAgo(String m);
 
   /// No description provided for @notificationsTimeHoursAgo.
   ///
   /// In en, this message translates to:
   /// **'{h}h ago'**
-  String notificationsTimeHoursAgo(int h);
+  String notificationsTimeHoursAgo(String h);
 
   /// No description provided for @applyFiltersCount.
   ///
   /// In en, this message translates to:
   /// **'Apply Filters ({n})'**
-  String applyFiltersCount(int n);
+  String applyFiltersCount(String n);
 
   /// No description provided for @ordersCountLine.
   ///
@@ -3623,8 +3623,8 @@ abstract class AppLocalizations {
   /// No description provided for @wishlistPriceDropBanner.
   ///
   /// In en, this message translates to:
-  /// **'🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {n} items}} in your wishlist!'**
-  String wishlistPriceDropBanner(int n);
+  /// **'🎉 {n, plural, =1{Price drop on 1 item} other{Price drop on {nText} items}} in your wishlist!'**
+  String wishlistPriceDropBanner(int n, String nText);
 
   /// No description provided for @wishlistPriceDropPercent.
   ///
@@ -3642,7 +3642,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{total} items · {avail} available'**
-  String wishlistItemsAvailableLine(int total, int avail);
+  String wishlistItemsAvailableLine(String total, String avail);
 
   /// No description provided for @wishlistAddedToCartCount.
   ///
@@ -3660,7 +3660,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'This will remove all {n} items from your cart.'**
-  String cartClearBody(int n);
+  String cartClearBody(String n);
 
   /// No description provided for @cartRemovedSnack.
   ///
@@ -3672,13 +3672,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'🚚 +{amount} EGP shipping'**
-  String cartShippingPaid(int amount);
+  String cartShippingPaid(String amount);
 
   /// No description provided for @cartSubtotalLine.
   ///
   /// In en, this message translates to:
   /// **'Subtotal ({n} items)'**
-  String cartSubtotalLine(int n);
+  String cartSubtotalLine(String n);
 
   /// No description provided for @checkoutItemsFromSellers.
   ///
@@ -5003,8 +5003,8 @@ abstract class AppLocalizations {
   /// No description provided for @courierItemsSummary.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item} other{{count} items}} · {total}'**
-  String courierItemsSummary(int count, String total);
+  /// **'{count, plural, =1{1 item} other{{countText} items}} · {total}'**
+  String courierItemsSummary(int count, String countText, String total);
 
   /// No description provided for @courierCollectFromCustomer.
   ///

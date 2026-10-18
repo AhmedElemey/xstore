@@ -27,7 +27,10 @@ import 'package:xstore/features/orders/presentation/providers/orders_dependencie
 import 'package:xstore/features/orders/presentation/providers/orders_provider.dart';
 import 'package:xstore/features/orders/presentation/screens/vendor_orders_screen.dart';
 import 'package:xstore/features/orders/presentation/widgets/consumer_orders_view.dart';
+import 'package:xstore/features/orders/presentation/widgets/order_filter_tabs.dart';
 import 'package:xstore/features/orders/presentation/widgets/order_flow_sheets.dart';
+import 'package:xstore/features/orders/presentation/widgets/vendor_order_filter_tabs.dart';
+import 'package:xstore/features/orders/presentation/widgets/vendor_order_stats_banner.dart';
 import 'package:xstore/features/orders/presentation/widgets/vendor_order_card.dart';
 import 'package:xstore/features/product/presentation/screens/product_detail_screen.dart';
 import 'package:xstore/features/wishlist/presentation/providers/wishlist_dependencies.dart';
@@ -186,11 +189,15 @@ void main() {
       expect(find.byType(ErrorStateWidget), findsOneWidget);
       expect(find.text(en.ordersEmptyTitle), findsNothing);
       expect(find.byType(SnackBar), findsNothing);
+      // No zero-count tab strip above the error; the header stays.
+      expect(find.byType(OrderFilterTabs), findsNothing);
+      expect(find.text(en.ordersMyTitle), findsOneWidget);
 
       repo.healed = true;
       await tester.tap(find.text(en.retry));
       await _settle(tester);
       expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.byType(OrderFilterTabs), findsOneWidget);
       expect(find.textContaining('XS-'), findsWidgets);
     });
 
@@ -234,11 +241,16 @@ void main() {
 
       expect(find.byType(ErrorStateWidget), findsOneWidget);
       expect(find.text(en.vendorOrdersEmptyTitle), findsNothing);
+      // No zero stats tiles / tab strip above the error.
+      expect(find.byType(VendorOrderStatsBanner), findsNothing);
+      expect(find.byType(VendorOrderFilterTabs), findsNothing);
 
       repo.healed = true;
       await tester.tap(find.text(en.retry));
       await _settle(tester);
       expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.byType(VendorOrderStatsBanner), findsOneWidget);
+      expect(find.byType(VendorOrderFilterTabs), findsOneWidget);
     });
 
     testWidgets('wishlist', (tester) async {

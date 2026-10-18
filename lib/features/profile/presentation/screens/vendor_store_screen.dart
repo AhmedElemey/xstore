@@ -408,7 +408,7 @@ class _VendorStoreScreenState extends ConsumerState<VendorStoreScreen> {
                                   ),
                                   const Gap(AppSpacing.xs),
                                   Text(
-                                    '${publicSellerStatsLabel(context.l10n, rating: u.rating, sales: u.totalSales)}'
+                                    '${publicSellerStatsLabel(context, rating: u.rating, sales: u.totalSales)}'
                                     '${joinedLine.isNotEmpty ? ' · ${context.l10n.storeJoinedPrefix}$joinedLine' : ''}',
                                     style: AppTypography.bodySmall.copyWith(
                                       color: context.textSecondary,

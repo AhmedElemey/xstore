@@ -182,66 +182,70 @@ class _VendorOrdersScreenState extends ConsumerState<VendorOrdersScreen> {
                         ),
                       ),
                     ),
-                    VendorOrderStatsBanner(
-                      pendingCount: pendingCount,
-                      activeCount: activeCount,
-                      totalCount: totalCount,
-                      totalRevenue: totalRevenue,
-                      onConfirmAllPending: () async {
-                        final ok = await showDialog<bool>(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: Text(
-                              context.l10n.vendorConfirmAllPendingTitle,
+                    // Zero stats/counts above a first-load failure would read
+                    // as data; the error state below carries the message.
+                    if (hasOrders || error == null) ...[
+                      VendorOrderStatsBanner(
+                        pendingCount: pendingCount,
+                        activeCount: activeCount,
+                        totalCount: totalCount,
+                        totalRevenue: totalRevenue,
+                        onConfirmAllPending: () async {
+                          final ok = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: Text(
+                                context.l10n.vendorConfirmAllPendingTitle,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, false),
+                                  child: Text(context.l10n.cancel),
+                                ),
+                                FilledButton(
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, true),
+                                  child: Text(context.l10n.ordersConfirm),
+                                ),
+                              ],
                             ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.pop(dialogContext, false),
-                                child: Text(context.l10n.cancel),
-                              ),
-                              FilledButton(
-                                onPressed: () =>
-                                    Navigator.pop(dialogContext, true),
-                                child: Text(context.l10n.ordersConfirm),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (ok != true) return;
-                        final method = await _pickDeliveryMethod();
-                        if (method == null || !context.mounted) return;
-                        final count = await ref
+                          );
+                          if (ok != true) return;
+                          final method = await _pickDeliveryMethod();
+                          if (method == null || !context.mounted) return;
+                          final count = await ref
+                              .read(vendorOrdersProvider.notifier)
+                              .confirmAllPending(method);
+                          if (!context.mounted) return;
+                          context.showSnack(
+                            context.l10n.vendorOrdersConfirmed(count),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      VendorOrderFilterTabs(
+                        selected: selectedFilter,
+                        totalCount: totalCount,
+                        pendingCount: pendingCount,
+                        confirmedCount: statusCounts.confirmed,
+                        processingCount: statusCounts.processing,
+                        shippedCount: statusCounts.shipped,
+                        deliveredCount: statusCounts.delivered,
+                        cancelledCount: statusCounts.cancelled,
+                        onTap: ref
                             .read(vendorOrdersProvider.notifier)
-                            .confirmAllPending(method);
-                        if (!context.mounted) return;
-                        context.showSnack(
-                          context.l10n.vendorOrdersConfirmed(count),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    VendorOrderFilterTabs(
-                      selected: selectedFilter,
-                      totalCount: totalCount,
-                      pendingCount: pendingCount,
-                      confirmedCount: statusCounts.confirmed,
-                      processingCount: statusCounts.processing,
-                      shippedCount: statusCounts.shipped,
-                      deliveredCount: statusCounts.delivered,
-                      cancelledCount: statusCounts.cancelled,
-                      onTap: ref
-                          .read(vendorOrdersProvider.notifier)
-                          .applyFilter,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    VendorOrderSortRow(
-                      sort: sortOption,
-                      count: filteredOrders.length,
-                      onChanged: ref
-                          .read(vendorOrdersProvider.notifier)
-                          .applySort,
-                    ),
+                            .applyFilter,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      VendorOrderSortRow(
+                        sort: sortOption,
+                        count: filteredOrders.length,
+                        onChanged: ref
+                            .read(vendorOrdersProvider.notifier)
+                            .applySort,
+                      ),
+                    ],
                   ],
                 ),
               ),
