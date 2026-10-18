@@ -79,7 +79,7 @@ class VendorOrderCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
+                      context.orderRef(order.formattedOrderId),
                       style: AppTypography.mono.copyWith(
                         fontSize: 12,
                         color: context.labelColor,
@@ -100,7 +100,7 @@ class VendorOrderCard extends StatelessWidget {
                     ),
                   if (phone.isNotEmpty)
                     Text(
-                      phone,
+                      context.ltr(phone),
                       style: AppTypography.bodySmall.copyWith(
                         color: context.labelColor,
                       ),

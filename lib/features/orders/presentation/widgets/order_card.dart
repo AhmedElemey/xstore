@@ -56,7 +56,7 @@ class OrderCard extends ConsumerWidget {
                     OrderStatusBadge(status: order.status, compact: true),
                     const Spacer(),
                     Text(
-                      '${context.l10n.orderHashPrefix}${order.formattedOrderId}',
+                      context.orderRef(order.formattedOrderId),
                       style: AppTypography.mono.copyWith(
                         fontSize: 12,
                         color: context.labelColor,

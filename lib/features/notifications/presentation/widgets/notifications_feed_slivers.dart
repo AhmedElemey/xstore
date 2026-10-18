@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/notifications_provider.dart';
 import '../providers/notifications_state.dart';
@@ -42,13 +41,10 @@ abstract final class NotificationsFeedSlivers {
     if (error != null) {
       return [
         SliverFillRemaining(
-          child: Center(
-            child: Text(
-              error,
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.isDark ? AppColors.errorLight : AppColors.error,
-              ),
-            ),
+          hasScrollBody: false,
+          child: ErrorStateWidget(
+            message: error,
+            onRetry: n.fetchNotifications,
           ),
         ),
       ];

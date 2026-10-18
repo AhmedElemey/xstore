@@ -287,12 +287,13 @@ class _AddressCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-          if (street.isNotEmpty) Text(street, style: AppTypography.bodyMedium),
+          if (street.isNotEmpty)
+            Text(context.isolate(street), style: AppTypography.bodyMedium),
           if (cityLine.isNotEmpty)
             Text(cityLine, style: AppTypography.bodyMedium),
           if (phone.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Text(phone, style: AppTypography.bodyMedium),
+            Text(context.ltr(phone), style: AppTypography.bodyMedium),
           ],
         ],
       ),
@@ -512,7 +513,7 @@ class _BuyerSection extends StatelessWidget {
                           }
                         },
                         child: Text(
-                          '📞 ${order.consumerPhone}',
+                          '📞 ${context.ltr(order.consumerPhone)}',
                           style: AppTypography.bodyMedium.copyWith(
                             color: context.linkColor,
                           ),

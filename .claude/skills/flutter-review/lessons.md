@@ -1151,3 +1151,11 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-17 — Widget tests: create Completers inside the test body
 - **Rule:** A `Completer` created in `setUp` belongs to the real zone, so completing it from a `testWidgets` body never runs the awaiting code under `pump` (the UI looks stuck loading). Create it in the test or a helper the test calls. Plugins in widget tests: mock `MethodChannel('plugins.flutter.io/image_picker')` for the picker; for `FlutterImageCompress` set `FlutterImageCompressPlatform.instance` to a `Fake` and restore it in `tearDown`. A button with a spinner never settles — use bounded `pump(duration)` while it shows.
 - **Where it applies:** `commission_payment_receipt_submit_test.dart`, tests over image pickers or in-flight submits.
+
+### 2026-10-18 — Error text is stored worded; re-resolve it at display time, and keep first-load errors in state
+- **Rule:** Repositories/mapper word errors before any context exists (and before the saved language loads), so show every stored error through `context.localizedError` / `resolveAppError` (`AppSnackbar` and `ErrorStateWidget` already do) — never a bare `Text(state.error)`. A screen listener that snackbars-then-`clearError()` must skip the no-data case (`order == null`), or the body loses the error and shows a blank/"generic" text instead of `ErrorStateWidget` + Retry. Datasources map `DioException` with `mapDioException`, never `e.message`.
+- **Where it applies:** presentation error bodies/snackbars, detail screens, `*_remote_datasource.dart` catch blocks (incl. the delivery client).
+
+### 2026-10-18 — LTR values in Arabic: isolate them, don't flip the Text direction
+- **Rule:** Phone numbers and `#order-ids` go through `context.ltr(...)` (`context.orderRef(id)` for "Order #id"), user-typed street lines through `context.isolate(...)` (first-strong isolate). Unicode isolates keep the paragraph RTL (alignment right) while the value reads LTR; both are no-ops in English so `find.text` in English tests is unchanged.
+- **Where it applies:** any Text rendering a phone, order id, tracking number or address line (orders, vendor orders, checkout, addresses, courier cards).

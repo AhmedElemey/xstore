@@ -64,13 +64,6 @@ class _RejectOrderSheetState extends State<RejectOrderSheet> {
                 decoration: InputDecoration(hintText: context.l10n.vendorTypeReasonHint),
               ),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              context.l10n.vendorRejectTitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.warning,
-                  ),
-            ),
-            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(

@@ -26,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
@@ -410,6 +411,47 @@ void main() {
         findsOneWidget,
         reason: 'a shipped order moves on to Mark as Delivered',
       );
+    },
+  );
+
+  testWidgets(
+    'a failed load shows the styled error state, and Retry fetches again',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var healed = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.vendorOrders}': (options) {
+          if (!healed) {
+            return DioException(
+              requestOptions: options,
+              type: DioExceptionType.connectionError,
+            );
+          }
+          return {
+            'orders': [_vendorOrderJson()],
+            'totalCount': 1,
+            'pendingCount': 1,
+            'confirmedCount': 0,
+            'totalRevenue': 0,
+          };
+        },
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_vendor())),
+        dioProvider.overrideWithValue(dio),
+      ], '920');
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+
+      healed = true;
+      await tester.tap(find.text('Retry'));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.textContaining('Order #'), findsOneWidget);
     },
   );
 }

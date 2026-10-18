@@ -132,7 +132,7 @@ class CheckoutAddressSection extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          '${a.street}\n${loc.city}, ${loc.wilaya} ${a.postalCode ?? ''}',
+          '${context.isolate(a.street)}\n${loc.city}, ${loc.wilaya} ${a.postalCode ?? ''}',
           style: AppTypography.bodyMedium.copyWith(
             color: context.textSecondary,
             height: 1.45,
@@ -140,7 +140,7 @@ class CheckoutAddressSection extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          a.phone,
+          context.ltr(a.phone),
           style: AppTypography.mono.copyWith(
             fontSize: 13,
             color: context.textSecondary,

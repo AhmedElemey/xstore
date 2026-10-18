@@ -14,6 +14,7 @@ import '../widgets/order_status_badge.dart';
 import '../../../../core/utils/extensions/context_extensions.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 import '../../../../shared/widgets/skeletons/order_detail_skeleton.dart';
 
@@ -55,7 +56,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     ref.listen(orderDetailNotifierProvider(widget.orderId), (p, n) {
       final err = n.error;
-      if (err != null && err != p?.error && context.mounted) {
+      // A failed first load has no order to keep on screen: the body shows
+      // the error state with Retry, so the error must stay in state.
+      if (err != null &&
+          n.order != null &&
+          err != p?.error &&
+          context.mounted) {
         AppSnackbar.error(context, err);
         ref
             .read(orderDetailNotifierProvider(widget.orderId).notifier)
@@ -80,8 +86,14 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   child: order == null && state.isLoading
                       ? const OrderDetailSkeleton()
                       : order == null
-                      ? Center(
-                          child: Text(state.error ?? context.l10n.errorGeneric),
+                      ? ErrorStateWidget(
+                          message: state.error ?? context.l10n.errorGeneric,
+                          onRetry: () => ref
+                              .read(
+                                orderDetailNotifierProvider(widget.orderId)
+                                    .notifier,
+                              )
+                              .fetchOrder(),
                         )
                       : CustomScrollView(
                           slivers: [OrderDetailScrollContent(order: order)],
@@ -148,7 +160,7 @@ class _Header extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${context.l10n.orderHashPrefix}${o.formattedOrderId}',
+                    context.orderRef(o.formattedOrderId),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.headlineSmall.copyWith(

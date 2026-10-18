@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../constants/app_colors.dart';
 import '../../localization/app_localizations.dart';
 import '../../../shared/widgets/app_snackbar.dart';
+import '../../network/dio_error_mapper.dart';
 
 extension BuildContextX on BuildContext {
   ThemeData get theme => Theme.of(this);
@@ -102,12 +103,34 @@ extension LocalizationContext on BuildContext {
 
   /// [message] in the current language. Errors are worded when they happen
   /// (repositories have no context), so the generic fallback is re-resolved
-  /// here — it follows a language switch made after the error.
+  /// here — it follows a language switch made after the error. The same goes
+  /// for the offline message, which the Dio mapper words in English until the
+  /// language setting has loaded.
   String localizedError(String message) {
-    final isGeneric = AppLocalizations.supportedLocales.any(
-      (l) => lookupAppLocalizations(l).genericError == message,
-    );
-    return isGeneric ? l10n.genericError : message;
+    final locales = AppLocalizations.supportedLocales;
+    if (locales.any((l) => lookupAppLocalizations(l).genericError == message)) {
+      return l10n.genericError;
+    }
+    if (message == networkUnavailableMessageEn ||
+        locales.any((l) => lookupAppLocalizations(l).noInternet == message)) {
+      return l10n.noInternet;
+    }
+    return message;
+  }
+
+  /// Keeps [value] (phone number, order id) left-to-right inside Arabic text
+  /// while the paragraph, and so its alignment, stays RTL. No-op in English.
+  String ltr(String value) => isArabic ? '\u2066$value\u2069' : value;
+
+  /// Lets [value] (a street line, user typed) take the direction of its own
+  /// first letter: "14 Road 9" stays LTR, "١٤ شارع" stays RTL. No-op in
+  /// English.
+  String isolate(String value) => isArabic ? '\u2068$value\u2069' : value;
+
+  /// "Order #XS-1" / "طلب #XS-1" with `#id` kept together and left-to-right.
+  String orderRef(String id) {
+    final label = l10n.orderHashPrefix.replaceAll('#', '').trimRight();
+    return '$label ${ltr('#$id')}';
   }
 
   bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';

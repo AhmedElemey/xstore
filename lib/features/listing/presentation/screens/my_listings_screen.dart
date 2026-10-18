@@ -381,7 +381,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(error, textAlign: TextAlign.center),
+              Text(context.localizedError(error), textAlign: TextAlign.center),
               const Gap(AppSpacing.lg),
               XstoreButton(
                 label: context.l10n.retry,

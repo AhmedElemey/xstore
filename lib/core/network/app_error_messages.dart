@@ -59,5 +59,5 @@ String resolveAppError(BuildContext context, String? error) {
   if (error == socialAccountDisabledErrorCode) {
     return context.l10n.socialAccountDisabled;
   }
-  return error ?? context.l10n.errorGeneric;
+  return context.localizedError(error ?? context.l10n.errorGeneric);
 }

@@ -11,6 +11,7 @@ import '../../../../core/utils/extensions/context_extensions.dart';
 // import '../../../../shared/utils/whatsapp.dart'; // TODO(phase-2): WhatsApp contact
 import '../../../../shared/widgets/app_cached_network_image.dart';
 import '../../../../shared/widgets/auth_back_button.dart';
+import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/orbit_background.dart';
 // import '../../../../shared/widgets/app_snackbar.dart'; // TODO(phase-2): WhatsApp contact
 import '../../domain/entities/order_entity.dart';
@@ -64,7 +65,8 @@ class _VendorOrderDetailScreenState
     );
     final o = state.order;
     ref.listen(vendorOrderDetailProvider(widget.orderId), (p, n) {
-      if (n.error != null && n.error != p?.error) {
+      // A failed first load keeps its error: the body shows it with Retry.
+      if (n.error != null && n.order != null && n.error != p?.error) {
         context.showSnack(n.error!);
         notifier.clearError();
       }
@@ -79,11 +81,14 @@ class _VendorOrderDetailScreenState
               _Header(order: o),
               Expanded(
                 child: o == null
-                    ? Center(
-                        child: state.isLoading
-                            ? const CircularProgressIndicator.adaptive()
-                            : Text(state.error ?? context.l10n.errorGeneric),
-                      )
+                    ? state.isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          )
+                        : ErrorStateWidget(
+                            message: state.error ?? context.l10n.errorGeneric,
+                            onRetry: notifier.fetchOrder,
+                          )
                     : CustomScrollView(
                         slivers: [
                           SliverPadding(
@@ -152,7 +157,7 @@ class _Header extends StatelessWidget {
           if (o != null) ...[
             Expanded(
               child: Text(
-                '${context.l10n.orderHashPrefix}${o.formattedOrderId}',
+                context.orderRef(o.formattedOrderId),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.headlineSmall.copyWith(
@@ -317,7 +322,7 @@ class _BuyerInfoCard extends StatelessWidget {
                           if (await canLaunchUrl(uri)) await launchUrl(uri);
                         },
                         child: Text(
-                          phone,
+                          context.ltr(phone),
                           style: AppTypography.bodyMedium.copyWith(
                             color: context.linkColor,
                           ),

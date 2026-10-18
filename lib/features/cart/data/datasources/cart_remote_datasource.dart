@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/dio_error_mapper.dart';
 import '../../../../core/mock/mock_config.dart';
 import '../../../../core/mock/mock_images.dart';
 import '../../../../core/mock/mock_listings.dart';
@@ -714,7 +715,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (raw == null) throw const ServerException('Empty listing response');
       return _fromListingPayload(raw, quantity);
     } on DioException catch (e) {
-      throw ServerException(e.message ?? 'Failed to load listing');
+      throw mapDioException(e);
     }
   }
 }

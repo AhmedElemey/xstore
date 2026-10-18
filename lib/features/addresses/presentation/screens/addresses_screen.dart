@@ -217,7 +217,7 @@ class _AddressCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            '${address.street}\n'
+            '${context.isolate(address.street)}\n'
             '${location.city}, ${location.wilaya} '
             '${address.postalCode ?? ''}',
             style: AppTypography.bodyMedium.copyWith(
@@ -227,7 +227,7 @@ class _AddressCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            address.phone,
+            context.ltr(address.phone),
             style: AppTypography.mono.copyWith(
               fontSize: 13,
               color: context.textSecondary,

@@ -13,6 +13,10 @@ import 'app_error_messages.dart';
 /// carries both `errorEn` and `errorAr`.
 bool errorMessagesInArabic = false;
 
+/// English offline text; `BuildContext.localizedError` re-resolves it.
+const networkUnavailableMessageEn =
+    'Network unavailable. Please check your connection and try again.';
+
 /// Maps a [DioException] to an [AppException], shared across datasources.
 ///
 /// Mirrors the mapping originally inline in `auth_remote_datasource.dart`,
@@ -27,7 +31,7 @@ AppException mapDioException(DioException e) {
       return NetworkException(
         errorMessagesInArabic
             ? lookupAppLocalizations(const Locale('ar')).noInternet
-            : 'Network unavailable. Please check your connection and try again.',
+            : networkUnavailableMessageEn,
       );
     case DioExceptionType.badResponse:
       final code = e.response?.statusCode;

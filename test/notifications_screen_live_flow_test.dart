@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
 import 'package:xstore/features/auth/domain/entities/user_entity.dart';
@@ -95,10 +96,11 @@ Map<String, dynamic> _notificationJson({
   'createdAt': '2026-09-02T00:00:00.000Z',
 };
 
-Widget _harness(List<Override> overrides) => ProviderScope(
+Widget _harness(List<Override> overrides, {Locale? locale}) => ProviderScope(
   overrides: overrides,
-  child: const MaterialApp(
-    localizationsDelegates: [
+  child: MaterialApp(
+    locale: locale,
+    localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
@@ -107,7 +109,7 @@ Widget _harness(List<Override> overrides) => ProviderScope(
     supportedLocales: AppLocalizations.supportedLocales,
     // NotificationsScreen renders its own Scaffold, so no extra Material
     // wrapper is needed here.
-    home: NotificationsScreen(),
+    home: const NotificationsScreen(),
   ),
 );
 
@@ -116,9 +118,10 @@ Widget _harness(List<Override> overrides) => ProviderScope(
 /// with `fireImmediately` plus the post-frame fetch).
 Future<ProviderContainer> _pumpReady(
   WidgetTester tester,
-  List<Override> overrides,
-) async {
-  await tester.pumpWidget(_harness(overrides));
+  List<Override> overrides, {
+  Locale? locale,
+}) async {
+  await tester.pumpWidget(_harness(overrides, locale: locale));
   await tester.pump();
   final container = ProviderScope.containerOf(
     tester.element(find.byType(NotificationsScreen)),
@@ -240,6 +243,54 @@ void main() {
       await _settle(tester);
 
       expect(deleteRequest, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'a failed load shows the styled error state in Arabic, and Retry refetches',
+    (tester) async {
+      var healed = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.notifications}': (options) {
+          if (!healed) {
+            return DioException(
+              requestOptions: options,
+              type: DioExceptionType.connectionError,
+            );
+          }
+          return {
+            'items': [_notificationJson()],
+            'totalCount': 1,
+            'page': 1,
+            'pageSize': 20,
+            'totalPages': 1,
+          };
+        },
+        'GET ${ApiEndpoints.notificationsUnreadCount}': (_) => 1,
+      });
+
+      await _pumpReady(
+        tester,
+        [
+          authProvider.overrideWith(() => _FakeAuth(_consumer())),
+          dioProvider.overrideWithValue(dio),
+        ],
+        locale: const Locale('ar'),
+      );
+      await _settle(tester);
+
+      final ar = lookupAppLocalizations(const Locale('ar'));
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.text(ar.noInternet), findsOneWidget);
+      expect(find.text(ar.retry), findsOneWidget);
+      expect(find.textContaining('Network unavailable'), findsNothing);
+
+      healed = true;
+      await tester.tap(find.text(ar.retry));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.text('Order Shipped'), findsOneWidget);
     },
   );
 }

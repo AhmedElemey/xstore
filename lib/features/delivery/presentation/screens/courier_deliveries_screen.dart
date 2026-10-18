@@ -444,7 +444,7 @@ class _InlineError extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              message,
+              context.localizedError(message),
               style: AppTypography.bodySmall.copyWith(
                 color: context.textPrimary,
               ),

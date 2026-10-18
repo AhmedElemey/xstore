@@ -313,7 +313,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         if (login.error != null && notifierAuthError) ...[
                           const Gap(AppSpacing.sm),
                           Text(
-                            login.error!,
+                            context.localizedError(login.error!),
                             style: AppTypography.bodySmall.copyWith(
                               color: context.colorScheme.error,
                             ),

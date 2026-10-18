@@ -24,6 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:xstore/core/analytics/analytics_service.dart';
 import 'package:xstore/core/localization/app_localizations.dart';
+import 'package:xstore/shared/widgets/error_state_widget.dart';
 import 'package:xstore/core/mock/mock_config.dart';
 import 'package:xstore/core/network/api_endpoints.dart';
 import 'package:xstore/core/network/dio_provider.dart';
@@ -380,6 +381,42 @@ void main() {
       );
 
       await _awaitAnalyticsReady(container);
+    },
+  );
+
+  testWidgets(
+    'a failed load shows the styled error state, and Retry fetches again',
+    skip: MockConfig.useMock,
+    (tester) async {
+      var healed = false;
+      final dio = _fakeDio({
+        'GET ${ApiEndpoints.orderMeById('501')}': (options) {
+          if (!healed) {
+            return DioException(
+              requestOptions: options,
+              type: DioExceptionType.connectionError,
+            );
+          }
+          return _orderJson();
+        },
+      });
+
+      await _pumpReady(tester, [
+        authProvider.overrideWith(() => _FakeAuth(_consumer())),
+        dioProvider.overrideWithValue(dio),
+      ], '501');
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Wireless Earbuds', skipOffstage: false), findsNothing);
+
+      healed = true;
+      await tester.tap(find.text('Retry'));
+      await _settle(tester);
+
+      expect(find.byType(ErrorStateWidget), findsNothing);
+      expect(find.text('Wireless Earbuds', skipOffstage: false), findsOneWidget);
     },
   );
 }

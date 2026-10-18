@@ -125,7 +125,7 @@ class CheckoutReviewSection extends ConsumerWidget {
                   _iconLine(
                     context,
                     LucideIcons.mapPin,
-                    '${addr.street}, ${addrLocation.city}, ${addrLocation.wilaya}',
+                    '${context.isolate(addr.street)}, ${addrLocation.city}, ${addrLocation.wilaya}',
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
