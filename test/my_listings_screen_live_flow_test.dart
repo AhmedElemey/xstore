@@ -105,7 +105,7 @@ Map<String, dynamic> _listingJson({
   'description': 'A listing',
   'price': price,
   'status': status,
-  'postedAt': ?postedAt,
+  if (postedAt != null) 'postedAt': postedAt,
 };
 
 Widget _harness(List<Override> overrides, {Locale? locale}) => ProviderScope(

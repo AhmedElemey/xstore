@@ -1192,6 +1192,6 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** A settings row with a trailing `Switch` goes through `ProfileSwitchTile`: the row is tappable (`onTap` toggles) and wrapped in `Semantics(container, excludeSemantics, label: <visible title>, toggled, onTap)` so screen readers say "<title>, switch, on/off" instead of an unlabeled switch beside a separate text node.
 - **Where it applies:** `profile_switch_tile.dart`, `language_toggle_tile.dart`, `theme_toggle_tile.dart`, any new switch row.
 
-### 2026-10-19 — Write code against the pinned Flutter (3.35.6), not a local newer SDK
-- **Rule:** CI pins Flutter 3.35.6 (`FLUTTER_VERSION` in `.github/workflows/ci.yml`); code and tests must compile there. Newer-SDK-only APIs (e.g. `dart:ui` `Tristate`, `flagsCollection.isToggled`) break the build. For switch/toggle semantics assert with `containsSemantics(hasToggledState: true, isToggled: ...)`, which works on 3.35 and newer.
-- **Where it applies:** every change, especially widget tests asserting semantics (`getSemantics`, `flagsCollection`); bump the pin in the workflows first if a newer API is needed.
+### 2026-10-19 — Code must pass the pinned toolchain, including build_runner
+- **Rule:** CI pins Flutter 3.35.6 and runs `dart run build_runner build` before analyze/tests; the generators' analyzer is older than the compiler. No newer-SDK APIs (`dart:ui` `Tristate`, `flagsCollection.isToggled`; use `containsSemantics(hasToggledState: true)`), and no null-aware collection elements (`'k': ?v`; use `if (v != null) 'k': v`). Before pushing to dev/main, run build_runner too, then discard its regenerated `.g.dart` noise.
+- **Where it applies:** every change, especially tests and map/list literals; bump the CI pin first if a newer API or syntax is needed.

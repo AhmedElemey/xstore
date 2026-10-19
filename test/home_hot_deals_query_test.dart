@@ -8,8 +8,8 @@ Map<String, dynamic> _listing(int id, {double? compareAt, int? stock}) => {
   'id': id,
   'title': 'Item $id',
   'price': 100.0,
-  'compareAtPrice': ?compareAt,
-  'stockQuantity': ?stock,
+  if (compareAt != null) 'compareAtPrice': compareAt,
+  if (stock != null) 'stockQuantity': stock,
   'status': 2,
 };
 
