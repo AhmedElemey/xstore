@@ -1191,3 +1191,7 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 ### 2026-10-18 — Switch rows: whole row toggles, one labeled semantics node
 - **Rule:** A settings row with a trailing `Switch` goes through `ProfileSwitchTile`: the row is tappable (`onTap` toggles) and wrapped in `Semantics(container, excludeSemantics, label: <visible title>, toggled, onTap)` so screen readers say "<title>, switch, on/off" instead of an unlabeled switch beside a separate text node.
 - **Where it applies:** `profile_switch_tile.dart`, `language_toggle_tile.dart`, `theme_toggle_tile.dart`, any new switch row.
+
+### 2026-10-19 — SemanticsFlags: assert toggled via isToggled, not hasToggledState
+- **Rule:** On Flutter 3.47+, `SemanticsNode.flagsCollection` is a `SemanticsFlags` object — use `isToggled != Tristate.none` (has toggled state) / `== Tristate.isTrue` (on). There is no `hasToggledState` getter; that name only exists on the deprecated `matchesSemantics` matcher / the old `SemanticsFlag` enum.
+- **Where it applies:** widget tests asserting switch/toggle semantics (`getSemantics`, `flagsCollection`).

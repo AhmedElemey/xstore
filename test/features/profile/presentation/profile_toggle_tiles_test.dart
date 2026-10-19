@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,17 +66,20 @@ void main() {
         tester,
       ) async {
         final handle = tester.ensureSemantics();
-        await _pump(tester, locale);
-        final l10n = lookupAppLocalizations(locale);
+        try {
+          await _pump(tester, locale);
+          final l10n = lookupAppLocalizations(locale);
 
-        final theme = tester.getSemantics(find.byType(ThemeToggleTile));
-        expect(theme.label, l10n.lightMode);
-        expect(theme.flagsCollection.hasToggledState, isTrue);
+          final theme = tester.getSemantics(find.byType(ThemeToggleTile));
+          expect(theme.label, l10n.lightMode);
+          expect(theme.flagsCollection.isToggled, isNot(Tristate.none));
 
-        final lang = tester.getSemantics(find.byType(LanguageToggleTile));
-        expect(lang.label, contains(l10n.languageToggleTitle));
-        expect(lang.flagsCollection.hasToggledState, isTrue);
-        handle.dispose();
+          final lang = tester.getSemantics(find.byType(LanguageToggleTile));
+          expect(lang.label, contains(l10n.languageToggleTitle));
+          expect(lang.flagsCollection.isToggled, isNot(Tristate.none));
+        } finally {
+          handle.dispose();
+        }
       });
     });
   }
