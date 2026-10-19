@@ -1192,6 +1192,6 @@ Look up entries by searching this file for the feature, file, endpoint or widget
 - **Rule:** A settings row with a trailing `Switch` goes through `ProfileSwitchTile`: the row is tappable (`onTap` toggles) and wrapped in `Semantics(container, excludeSemantics, label: <visible title>, toggled, onTap)` so screen readers say "<title>, switch, on/off" instead of an unlabeled switch beside a separate text node.
 - **Where it applies:** `profile_switch_tile.dart`, `language_toggle_tile.dart`, `theme_toggle_tile.dart`, any new switch row.
 
-### 2026-10-19 — SemanticsFlags: assert toggled via isToggled, not hasToggledState
-- **Rule:** On Flutter 3.47+, `SemanticsNode.flagsCollection` is a `SemanticsFlags` object — use `isToggled != Tristate.none` (has toggled state) / `== Tristate.isTrue` (on). There is no `hasToggledState` getter; that name only exists on the deprecated `matchesSemantics` matcher / the old `SemanticsFlag` enum.
-- **Where it applies:** widget tests asserting switch/toggle semantics (`getSemantics`, `flagsCollection`).
+### 2026-10-19 — Write code against the pinned Flutter (3.35.6), not a local newer SDK
+- **Rule:** CI pins Flutter 3.35.6 (`FLUTTER_VERSION` in `.github/workflows/ci.yml`); code and tests must compile there. Newer-SDK-only APIs (e.g. `dart:ui` `Tristate`, `flagsCollection.isToggled`) break the build. For switch/toggle semantics assert with `containsSemantics(hasToggledState: true, isToggled: ...)`, which works on 3.35 and newer.
+- **Where it applies:** every change, especially widget tests asserting semantics (`getSemantics`, `flagsCollection`); bump the pin in the workflows first if a newer API is needed.

@@ -1,5 +1,3 @@
-import 'dart:ui' show Tristate;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,11 +70,11 @@ void main() {
 
           final theme = tester.getSemantics(find.byType(ThemeToggleTile));
           expect(theme.label, l10n.lightMode);
-          expect(theme.flagsCollection.isToggled, isNot(Tristate.none));
+          expect(theme, containsSemantics(hasToggledState: true));
 
           final lang = tester.getSemantics(find.byType(LanguageToggleTile));
           expect(lang.label, contains(l10n.languageToggleTitle));
-          expect(lang.flagsCollection.isToggled, isNot(Tristate.none));
+          expect(lang, containsSemantics(hasToggledState: true));
         } finally {
           handle.dispose();
         }
