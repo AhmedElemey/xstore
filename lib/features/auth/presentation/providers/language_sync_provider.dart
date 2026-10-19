@@ -105,9 +105,13 @@ void languageSync(LanguageSyncRef ref) {
 
   Future<void> sendIfPending() async {
     final prefs = await getPrefs();
-    if (disposed || prefs?.getBool(PrefsKeys.pendingLanguageSync) != true) {
-      return;
+    bool? pending;
+    try {
+      pending = prefs?.getBool(PrefsKeys.pendingLanguageSync);
+    } catch (e) {
+      if (kDebugMode) debugPrint('Language sync: flag read failed: $e');
     }
+    if (disposed || pending != true) return;
     unawaited(send(ref.read(appLocaleProvider)));
   }
 

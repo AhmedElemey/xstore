@@ -71,6 +71,26 @@ class _Auth extends Auth {
   void signIn(UserEntity user) => state = AsyncData(user);
 }
 
+/// Real prefs except the pending-flag read, which throws.
+class _ThrowingGetBoolPrefs implements SharedPreferences {
+  _ThrowingGetBoolPrefs(this._real);
+  final SharedPreferences _real;
+
+  @override
+  bool? getBool(String key) => throw StateError('read failed');
+  @override
+  String? getString(String key) => _real.getString(key);
+  @override
+  Future<bool> setString(String key, String value) =>
+      _real.setString(key, value);
+  @override
+  Future<bool> setBool(String key, bool value) => _real.setBool(key, value);
+  @override
+  Future<bool> remove(String key) => _real.remove(key);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 Future<void> _settle([int ms = 700]) =>
     Future<void>.delayed(Duration(milliseconds: ms));
 
@@ -362,5 +382,32 @@ void main() {
       expect(adapter.puts.last.data, {'preferredLanguage': 'en'});
       expect(await pending(), isFalse);
     }, skip: skip);
+
+    test(
+      'flag read throwing on restore: no crash, changes still sent',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          PrefsKeys.pendingLanguageSync: true,
+        });
+        final real = await SharedPreferences.getInstance();
+        final adapter = _Adapter((_) async => _ok());
+        final c = await _start(
+          adapter,
+          overrides: [
+            sharedPreferencesProvider.overrideWith(
+              (ref) async => _ThrowingGetBoolPrefs(real),
+            ),
+          ],
+        );
+        await _settle();
+        expect(adapter.puts, isEmpty, reason: 'unreadable flag: no retry');
+
+        await c.read(appLocaleProvider.notifier).toggleLanguage();
+        await _settle();
+        expect(adapter.puts, hasLength(1));
+        expect(adapter.puts.single.data, {'preferredLanguage': 'ar'});
+      },
+      skip: skip,
+    );
   });
 }
